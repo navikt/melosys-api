@@ -39,6 +39,6 @@ public class OppdaterSakOgBehandlingOpprettetTest {
 
         oppdaterSakOgBehandlingOpprettet.utfør(prosessinstans);
         verify(sakOgBehandlingFasade).sendBehandlingOpprettet(any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_FERDIGSTILL_JOURNALPOST);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 }

@@ -1,11 +1,18 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.sed.BucType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -13,6 +20,9 @@ import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
+import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
+import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
+import no.nav.melosys.service.kafka.model.Statsborgerskap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +32,7 @@ import org.springframework.stereotype.Component;
 public class OpprettSedDokument extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettSedDokument.class);
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final SaksopplysningRepository saksopplysningRepository;
     private final DokumentFactory dokumentFactory;
@@ -46,15 +57,9 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        SedDokument sedDokument = prosessinstans.getData(ProsessDataKey.SED_DOKUMENT, SedDokument.class);
-
-        if (sedDokument == null) {
-            throw new TekniskException("SedDokument finnes ikke!");
-        }
-
         Instant nå = Instant.now();
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(sedDokument);
+        saksopplysning.setDokument(opprettSedDokument(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class)));
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setBehandling(prosessinstans.getBehandling());
         saksopplysning.setKilde(SaksopplysningKilde.EESSI);
@@ -69,5 +74,32 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         log.info("Saksopplysning: SedDokument opprettet for behandling {}", prosessinstans.getBehandling().getId());
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_HENT_PERSON);
+    }
+
+    private SedDokument opprettSedDokument(MelosysEessiMelding melosysEessiMelding) {
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setLovvalgslandKode(Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()));
+        sedDokument.setLovvalgBestemmelse(
+            LovvalgTilBestemmelseDtoMapper.mapBestemmelseVerdiTilMelosysLovvalgBestemmelse(melosysEessiMelding.getArtikkel())
+        );
+        sedDokument.setRinaSaksnummer(melosysEessiMelding.getRinaSaksnummer());
+        sedDokument.setLovvalgsperiode(tilPeriode(melosysEessiMelding.getPeriode()));
+        sedDokument.setRinaDokumentID(melosysEessiMelding.getSedId());
+        sedDokument.setStatsborgerskapKoder(
+            melosysEessiMelding.getStatsborgerskap().stream().map(Statsborgerskap::getLandkode).collect(Collectors.toList())
+        );
+        sedDokument.setErEndring(melosysEessiMelding.getErEndring());
+        sedDokument.setSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
+        sedDokument.setBucType(BucType.valueOf(melosysEessiMelding.getBucType()));
+
+        return sedDokument;
+    }
+
+
+    private Periode tilPeriode(no.nav.melosys.service.kafka.model.Periode periode) {
+        return new Periode(
+            LocalDate.parse(periode.getFom(), dateTimeFormatter),
+            periode.getTom() != null ? LocalDate.parse(periode.getTom(), dateTimeFormatter) : null
+        );
     }
 }

@@ -16,6 +16,7 @@ public class MelosysEessiMelding {
     private String artikkel;
     private boolean erEndring;
     private boolean midlertidigBestemmelse;
+    private String ytterligereInformasjon;
     private String bucType;
     private String sedType;
 
@@ -113,6 +114,14 @@ public class MelosysEessiMelding {
 
     public void setMidlertidigBestemmelse(boolean midlertidigBestemmelse) {
         this.midlertidigBestemmelse = midlertidigBestemmelse;
+    }
+
+    public String getYtterligereInformasjon() {
+        return ytterligereInformasjon;
+    }
+
+    public void setYtterligereInformasjon(String ytterligereInformasjon) {
+        this.ytterligereInformasjon = ytterligereInformasjon;
     }
 
     public String getBucType() {

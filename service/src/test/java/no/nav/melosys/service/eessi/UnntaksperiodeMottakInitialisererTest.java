@@ -4,108 +4,97 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kafka.model.Periode;
 import no.nav.melosys.service.kafka.model.Statsborgerskap;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EessiMottakServiceTest {
+public class UnntaksperiodeMottakInitialisererTest {
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    @Captor
-    private ArgumentCaptor<Prosessinstans> captor;
-
     @Mock
-    private ProsessinstansService prosessinstansService;
-
-    private EessiMottakService eessiMottakService;
-
+    private FagsakService fagsakService;
+    @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
+    
+    private UnntaksperiodeMottakInitialiserer unntaksperiodeMottakInitialiserer;
+    
     @Before
-    public void setUp() {
-        eessiMottakService = new EessiMottakService(prosessinstansService);
+    public void setup() {
+        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, lovvalgsperiodeService);
     }
 
     @Test
-    public void behandleMottatMelding_ikkeEndring_sjekkAlleVerdierErSatt() {
-        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(false, LocalDate.now(), LocalDate.now().plusYears(1));
-        eessiMottakService.behandleMottattMelding(eessiMelding);
+    public void initialiserProsessinstans_ikkeEndring_skalBehandlesVidere() {
+        Prosessinstans prosessinstans = hentProsessinstans(false, LocalDate.now(), LocalDate.now().plusYears(1));
 
-        verify(prosessinstansService).lagre(captor.capture());
-
-        Prosessinstans prosessinstans = captor.getValue();
-        assertThat(prosessinstans).isNotNull();
-        assertThat(prosessinstans.getData()).isNotEmpty();
-
-        SedDokument sedDokument = prosessinstans.getData(ProsessDataKey.SED_DOKUMENT, SedDokument.class);
-        assertThat(sedDokument).isNotNull();
-        assertThat(sedDokument.getLovvalgBestemmelse()).isEqualTo(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        assertThat(sedDokument.getLovvalgsperiode()).isNotNull();
-        assertThat(sedDokument.getLovvalgsperiode().getFom()).isBeforeOrEqualTo(LocalDate.of(2020, 12, 12));
-        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isNotNull();
-        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotNull();
-        assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isNotNull();
+        unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SAK_OG_BEH);
     }
 
     @Test
-    public void behandleMottatMelding_erEndringIkkeEndretPeriode_skalIkkeBehandles() throws Exception {
+    public void initialiserProsessinstans_erEndringIkkeEndretPeriode_skalIkkeBehandles() throws Exception {
+        
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusYears(1);
-        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(true, fom, tom);
+        Prosessinstans prosessinstans = hentProsessinstans(true, fom, tom);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(fom);
         lovvalgsperiode.setTom(tom);
 
-        eessiMottakService.behandleMottattMelding(eessiMelding);
+        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
+        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans);
 
-        verify(prosessinstansService, never()).lagre(any(Prosessinstans.class));
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 
     @Test
-    public void behandleMottatMelding_erEndringFinnerIkkeTidligerBehandling_skalBehandles() throws Exception {
+    public void initialiserProsessinstans_erEndringFinnerIkkeFagsak_skalBehandles() throws Exception {
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusYears(1);
-        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(true, fom, tom);
+        Prosessinstans prosessinstans = hentProsessinstans(true, fom, tom);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(fom);
         lovvalgsperiode.setTom(tom);
 
-        eessiMottakService.behandleMottattMelding(eessiMelding);
+        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.empty());
+        unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans);
 
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SAK_OG_BEH);
     }
 
     @Test
-    public void behandleMottatMelding_erEndringTomErNull_skalBehandles() throws Exception {
+    public void initialiserProsessinstans_erEndringTomErNull_skalBehandles() throws Exception {
         LocalDate fom = LocalDate.now();
         LocalDate tom = null;
-        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(true, fom, tom);
+        Prosessinstans prosessinstans = hentProsessinstans(true, fom, tom);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(fom.plusMonths(1));
         lovvalgsperiode.setTom(tom);
 
-        eessiMottakService.behandleMottattMelding(eessiMelding);
+        unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans);
 
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SAK_OG_BEH);
     }
 
     private Fagsak hentFagsak() {
@@ -118,7 +107,13 @@ public class EessiMottakServiceTest {
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         return fagsak;
     }
-
+    
+    private Prosessinstans hentProsessinstans(boolean erEndring, LocalDate fom, LocalDate tom) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(erEndring, fom, tom));
+        return prosessinstans;
+    }
+    
     private MelosysEessiMelding hentMelosysEessiMelding(boolean erEndring, LocalDate fom, LocalDate tom) {
         MelosysEessiMelding melding = new MelosysEessiMelding();
         melding.setAktoerId("123");

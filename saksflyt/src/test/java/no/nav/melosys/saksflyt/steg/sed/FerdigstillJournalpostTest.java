@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.ufm;
+package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessDataKey;
