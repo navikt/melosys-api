@@ -47,7 +47,7 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void validerBehandlingsresultat() throws IOException {
-        BehandlingsresultatDto behandlingsresultat = defaultEnhancedRandom().nextObject(BehandlingsresultatDto.class);
+        BehandlingsresultatDto behandlingsresultat = defaultEasyRandom().nextObject(BehandlingsresultatDto.class);
         String jsonString = objectMapper().writeValueAsString(behandlingsresultat);
         assertThat(jsonString).isNotEmpty();
         valider(jsonString, log);

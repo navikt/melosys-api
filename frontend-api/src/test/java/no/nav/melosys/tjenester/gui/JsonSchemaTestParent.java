@@ -8,9 +8,6 @@ import java.util.Collection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.github.benas.randombeans.EnhancedRandomBuilder;
-import io.github.benas.randombeans.FieldDefinitionBuilder;
-import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
@@ -20,6 +17,8 @@ import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,8 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+
+import static org.jeasy.random.FieldPredicates.named;
+import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 public class JsonSchemaTestParent {
 
@@ -40,7 +43,7 @@ public class JsonSchemaTestParent {
 
     private static ObjectMapper objectMapperMedKodeverkServiceStub;
 
-    private static EnhancedRandom enhancedRandom;
+    private static EasyRandom easyRandom;
 
     private final String schemaNavn;
 
@@ -60,17 +63,16 @@ public class JsonSchemaTestParent {
         return schemaNavn;
     }
 
-    protected static EnhancedRandom defaultEnhancedRandom() {
-        if (enhancedRandom == null) {
-            enhancedRandom = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
+    protected static EasyRandom defaultEasyRandom() {
+        if (easyRandom == null) {
+            easyRandom = new EasyRandom(new EasyRandomParameters()
                 .collectionSizeRange(1, 4)
                 .overrideDefaultInitialization(true)
                 .stringLengthRange(2, 10)
-                .randomize(FieldDefinitionBuilder.field().named("fnr").ofType(String.class).get(), new NumericStringRandomizer(11))
-                .randomize(FieldDefinitionBuilder.field().named("orgnummer").ofType(String.class).get(), new NumericStringRandomizer(9))
-                .build();
+                .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
+                .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9)));
         }
-        return enhancedRandom;
+        return easyRandom;
     }
 
     protected Schema hentSchema() throws IOException, JSONException {

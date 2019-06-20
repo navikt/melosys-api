@@ -68,9 +68,9 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     public void hentMottakerInstitusjoner() throws IOException, MelosysException {
         when(eessiService.hentMottakerinstitusjoner(anyString()))
             .thenReturn(Arrays.asList(
-                defaultEnhancedRandom().nextObject(Institusjon.class),
-                defaultEnhancedRandom().nextObject(Institusjon.class),
-                defaultEnhancedRandom().nextObject(Institusjon.class)
+                defaultEasyRandom().nextObject(Institusjon.class),
+                defaultEasyRandom().nextObject(Institusjon.class),
+                defaultEasyRandom().nextObject(Institusjon.class)
             ));
 
         Response response = eessiTjeneste.hentMottakerinstitusjoner("LA_BUC_01");
@@ -118,12 +118,12 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     private SedInformasjon sedinformasjonMedGyldigUrl() {
         return new SedInformasjon(
-            defaultEnhancedRandom().nextObject(String.class),
-            defaultEnhancedRandom().nextObject(String.class),
-            defaultEnhancedRandom().nextObject(LocalDate.class),
-            defaultEnhancedRandom().nextObject(LocalDate.class),
-            defaultEnhancedRandom().nextObject(String.class),
-            defaultEnhancedRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(LocalDate.class),
+            defaultEasyRandom().nextObject(LocalDate.class),
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(String.class),
             MOCK_RINA_URL
         );
     }

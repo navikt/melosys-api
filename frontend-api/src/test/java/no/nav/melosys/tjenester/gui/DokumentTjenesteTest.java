@@ -3,10 +3,10 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Comparators;
-import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -57,7 +57,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void hentDokumenter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException, IOException {
-        List<Journalpost> journalposter = EnhancedRandom.randomListOf(3, Journalpost.class);
+        List<Journalpost> journalposter = defaultEasyRandom().objects(Journalpost.class, 3).collect(Collectors.toList());
         given(dokumentVisningService.hentDokumenter(anyString())).willReturn(journalposter);
 
         Response response = dokumentTjeneste.hentDokumenter("MEL-1873");

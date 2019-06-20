@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
@@ -48,7 +49,7 @@ public class VilkaarTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void hentVilkår() throws Exception {
-        List<VilkaarDto> mockListe = defaultEnhancedRandom().randomListOf(4, VilkaarDto.class);
+        List<VilkaarDto> mockListe = defaultEasyRandom().objects(VilkaarDto.class, 4).collect(Collectors.toList());
         when(vilkaarsresultatService.hentVilkaar(1L)).thenReturn(mockListe);
 
         List<VilkaarDto> vilkaarDtoListe = vilkaarTjeneste.hentVilkår(1L);

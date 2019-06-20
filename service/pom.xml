@@ -89,8 +89,8 @@
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.benas</groupId>
-            <artifactId>random-beans</artifactId>
+            <groupId>org.jeasy</groupId>
+            <artifactId>easy-random-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

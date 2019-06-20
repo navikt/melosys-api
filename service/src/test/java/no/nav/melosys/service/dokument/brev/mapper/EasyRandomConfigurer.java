@@ -1,15 +1,14 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import io.github.benas.randombeans.EnhancedRandomBuilder;
-import io.github.benas.randombeans.api.EnhancedRandom;
-import io.github.benas.randombeans.api.Randomizer;
+import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.EasyRandom;
 import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
 import no.nav.dok.brevdata.felles.v1.navfelles.NorskPostadresse;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 
-public enum EnhancedRandomConfigurer {
+public enum EasyRandomConfigurer {
     ;
 
     private static final Mottaker MOTTAKER = Person.builder()
@@ -26,13 +25,12 @@ public enum EnhancedRandomConfigurer {
             .build())
         .build();
 
-    static EnhancedRandomBuilder builderForDokProd() {
-        return EnhancedRandomBuilder
-            .aNewEnhancedRandomBuilder()
-            .randomize(Mottaker.class, (Randomizer<Mottaker>) () -> MOTTAKER);
+    static EasyRandomParameters paramForDokProd() {
+        return new EasyRandomParameters()
+            .randomize(Mottaker.class, () -> MOTTAKER);
     }
 
-    static EnhancedRandom randomForDokProd() {
-        return builderForDokProd().build();
+    static EasyRandom randomForDokProd() {
+        return new EasyRandom(paramForDokProd());
     }
 }

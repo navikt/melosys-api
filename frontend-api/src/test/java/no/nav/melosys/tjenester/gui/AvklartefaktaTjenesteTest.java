@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -44,7 +44,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void hentAvklartefakta() throws Exception {
-        Set<AvklartefaktaDto> mockliste = defaultEnhancedRandom().randomSetOf(4, AvklartefaktaDto.class);
+        Set<AvklartefaktaDto> mockliste = defaultEasyRandom().objects(AvklartefaktaDto.class, 4).collect(Collectors.toSet());
         when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(mockliste);
 
         Set<AvklartefaktaDto> avklartefaktaDtoSet = avklartefaktaTjeneste.hentAvklarteFakta(1L);
@@ -53,7 +53,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void lagreAvklartefaktaGirKopiAvInput() throws Exception {
-        Set<AvklartefaktaDto> avklartefaktaDtoer = EnhancedRandom.randomSetOf(4, AvklartefaktaDto.class);
+        Set<AvklartefaktaDto> avklartefaktaDtoer = defaultEasyRandom().objects(AvklartefaktaDto.class, 4).collect(Collectors.toSet());
         when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(avklartefaktaDtoer);
         Set<AvklartefaktaDto> resultat = avklartefaktaTjeneste.lagreAvklarteFakta(1, avklartefaktaDtoer);
         assertThat(resultat).isEqualTo(avklartefaktaDtoer);

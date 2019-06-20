@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.collect.Sets;
-import io.github.benas.randombeans.EnhancedRandomBuilder;
-import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -19,6 +17,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,6 +25,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -47,7 +47,7 @@ public class EessiServiceTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private EnhancedRandom enhancedRandom = new EnhancedRandomBuilder().build();
+    private EasyRandom easyRandom = new EasyRandom();
 
     @Before
     public void setup() throws Exception {
@@ -93,8 +93,8 @@ public class EessiServiceTest {
     @Test
     public void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenReturn(Arrays.asList(
-            enhancedRandom.nextObject(Institusjon.class),
-            enhancedRandom.nextObject(Institusjon.class)
+            easyRandom.nextObject(Institusjon.class),
+            easyRandom.nextObject(Institusjon.class)
         ));
 
         List<Institusjon> mottakerinstitusjoner = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
@@ -113,9 +113,9 @@ public class EessiServiceTest {
     @Test
     public void hentTilknyttedeSeder_forventListeMedRettType() throws MelosysException {
         when(eessiConsumer.hentTilknyttedeSeder(anyLong(), anyString())).thenReturn(Arrays.asList(
-            enhancedRandom.nextObject(SedInformasjon.class),
-            enhancedRandom.nextObject(SedInformasjon.class),
-            enhancedRandom.nextObject(SedInformasjon.class)
+            easyRandom.nextObject(SedInformasjon.class),
+            easyRandom.nextObject(SedInformasjon.class),
+            easyRandom.nextObject(SedInformasjon.class)
         ));
 
         List<SedInformasjon> tilknyttedeSeder = eessiService.hentTilknyttedeSeder(123L, "utkast");
