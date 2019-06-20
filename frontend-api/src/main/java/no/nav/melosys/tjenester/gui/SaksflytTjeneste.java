@@ -79,11 +79,10 @@ public class SaksflytTjeneste extends RestTjeneste {
 
     @POST
     @Path("/unntaksperioder/{behandlingID}/ikkegodkjenn")
-    public Response ikkeGodkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException {
+    public Response ikkeGodkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
         unntaksperiodeService.ikkeGodkjennPeriode(behandling, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
-
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
 
@@ -91,7 +90,7 @@ public class SaksflytTjeneste extends RestTjeneste {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/unntaksperioder/{behandlingID}/godkjenn")
-    public Response godkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws IkkeFunnetException {
+    public Response godkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
         unntaksperiodeService.godkjennPeriode(behandling);
         return Response.noContent().build();

@@ -4,8 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Rule;
@@ -27,19 +29,21 @@ public class UnntaksperiodeServiceTest {
 
     @Mock
     private ProsessinstansService prosessinstansService;
+    @Mock
+    private OppgaveService oppgaveService;
 
     private UnntaksperiodeService unntaksperiodeService;
 
     @Before
     public void setUp() throws Exception {
-        unntaksperiodeService = new UnntaksperiodeService(prosessinstansService);
+        unntaksperiodeService = new UnntaksperiodeService(prosessinstansService, oppgaveService);
     }
 
     @Test
     public void ikkeGodkjennPeriode_medBegrunnelser_ingenFeil() throws Exception {
         Set<String> begrunnelser = new HashSet<>();
         begrunnelser.add(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
-        unntaksperiodeService.ikkeGodkjennPeriode(new Behandling(), begrunnelser, null);
+        unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), begrunnelser, null);
         verify(prosessinstansService).opprettProsessinstansUnntaksperiodeAvvist(any(), anySet(), any());
     }
 
@@ -47,7 +51,7 @@ public class UnntaksperiodeServiceTest {
     public void ikkeGodkjennPeriode_ingenBegrunnelser_forventException() throws Exception {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Ingen begrunnelser for avlag av periode");
-        unntaksperiodeService.ikkeGodkjennPeriode(new Behandling(), new HashSet<>(), null);
+        unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), new HashSet<>(), null);
     }
 
     @Test
@@ -58,6 +62,12 @@ public class UnntaksperiodeServiceTest {
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Begrunnelse " + IkkeGodkjentBegrunnelser.ANNET + " krever fritekst!");
-        unntaksperiodeService.ikkeGodkjennPeriode(new Behandling(), begrunnelser, null);
+        unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), begrunnelser, null);
+    }
+
+    private Behandling hentBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+        return behandling;
     }
 }

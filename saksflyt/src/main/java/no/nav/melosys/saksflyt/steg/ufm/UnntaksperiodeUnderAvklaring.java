@@ -6,6 +6,7 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -13,11 +14,11 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
-import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
 import no.nav.melosys.service.BehandlingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,6 +58,7 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (lovvalgsperioder.isEmpty()) {
+            behandlingService.oppdaterStatus(behandlingId, Behandlingsstatus.AVVENT_DOK_UTL);
             Behandling behandling = behandlingService.hentBehandling(behandlingId);
             SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
             PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
