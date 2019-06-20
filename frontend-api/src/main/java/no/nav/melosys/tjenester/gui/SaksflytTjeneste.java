@@ -1,9 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
@@ -80,7 +78,7 @@ public class SaksflytTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("/unntaksperiode/{behandlingID}/ikkegodkjenn")
+    @Path("/unntaksperioder/{behandlingID}/ikkegodkjenn")
     public Response ikkeGodkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
         unntaksperiodeService.ikkeGodkjennPeriode(behandling, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
@@ -89,20 +87,24 @@ public class SaksflytTjeneste extends RestTjeneste {
     }
 
 
-    @POST
-    @Path("/unntaksperiode/{behandlingID}/godkjenn")
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/unntaksperioder/{behandlingID}/godkjenn")
     public Response godkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws IkkeFunnetException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
         unntaksperiodeService.godkjennPeriode(behandling);
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
-    @POST
-    @Path("/unntaksperiode/{behandlingID}/innhentinfo")
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/unntaksperioder/{behandlingID}/innhentinfo")
     public Response innhentInformasjonUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws IkkeFunnetException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
         unntaksperiodeService.behandlingUnderAvklaring(behandling);
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
     private Behandling hentOgValiderBehandlingsTypeUnntak(long behandlingId) throws IkkeFunnetException {

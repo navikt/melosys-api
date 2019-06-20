@@ -25,6 +25,7 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.PersonhistorikkDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
@@ -91,7 +92,7 @@ public final class SaksopplysningerTilDto {
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
                 case SEDOPPL:
-                    dto.setSed((SedDokument) dokument);
+                    dto.setSed(SedDokumentDto.fra((SedDokument)dokument));
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
