@@ -66,6 +66,7 @@
         <cxf.version>3.1.11</cxf.version>
         <commons-lang.version>3.2.1</commons-lang.version>
         <everit.jsonschema.validator.version>1.9.1</everit.jsonschema.validator.version>
+        <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>21.0</guava.version>
         <logback.version>1.2.3</logback.version>
         <logstash.version>4.10</logstash.version>
@@ -185,6 +186,11 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${findbugs.jsr305.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
