@@ -18,7 +18,7 @@ public class LovvalgsperiodeDtoTest {
             "{" +
             "  \"fomDato\": \"2019-01-01\"," +
             "  \"tomDato\": \"2020-01-01\"," +
-            "  \"lovvalgBestemmelse\": \"FO_883_2004_ART12_1\"," +
+            "  \"lovvalgsbestemmelse\": \"FO_883_2004_ART12_1\"," +
             "  \"tilleggBestemmelse\": \"FO_883_2004_ART11_2\"," +
             "  \"unntakFraBestemmelse\": %s," +
             "  \"innvilgelsesResultat\": \"INNVILGET\"," +
@@ -46,7 +46,7 @@ public class LovvalgsperiodeDtoTest {
         });
         json.remove("lovvalgsland");
         json.remove("medlemskapstype");
-        json.remove("lovvalgBestemmelse");
+        json.remove("lovvalgsbestemmelse");
 
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
@@ -56,7 +56,7 @@ public class LovvalgsperiodeDtoTest {
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {
         LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(
             new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
-            enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("lovvalgBestemmelse")),
+            enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("lovvalgsbestemmelse")),
             TilleggsBestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
             enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("unntakFraBestemmelse")),
