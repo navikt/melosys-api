@@ -203,7 +203,7 @@ public class A001Mapper {
         adresseBrev.setGatenavn(adresse.gatenavn);
         adresseBrev.setHusnummer(adresse.husnummer);
         adresseBrev.setPostnummer(adresse.postnummer);
-        adresseBrev.setPossted(adresse.poststed);
+        adresseBrev.setPoststed(adresse.poststed);
         adresseBrev.setRegion(adresse.region);
         adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
         arbeidsstedBrev.setAdresse(adresseBrev);
