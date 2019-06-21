@@ -55,7 +55,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     public void lagreAvklartefaktaGirKopiAvInput() throws Exception {
         Set<AvklartefaktaDto> avklartefaktaDtoer = EnhancedRandom.randomSetOf(4, AvklartefaktaDto.class);
         when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(avklartefaktaDtoer);
-        Set<AvklartefaktaDto> resultat = avklartefaktaTjeneste.lagraAvklarteFakta(1, avklartefaktaDtoer);
+        Set<AvklartefaktaDto> resultat = avklartefaktaTjeneste.lagreAvklarteFakta(1, avklartefaktaDtoer);
         assertThat(resultat).isEqualTo(avklartefaktaDtoer);
     }
 }

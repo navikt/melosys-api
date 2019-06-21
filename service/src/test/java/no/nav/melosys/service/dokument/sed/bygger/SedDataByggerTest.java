@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -80,6 +79,27 @@ public class SedDataByggerTest {
         assertNotNull(sedData.getUtenlandskeVirksomheter());
         assertNotNull(sedData.getUtenlandskIdent());
         assertEquals("SE", sedData.getMottakerLand());
+
+        assertFalse(sedData.getArbeidsgivendeVirksomheter().isEmpty());
+    }
+
+    @Test
+    public void lagUtkast_forventFelt()
+        throws FunksjonellException, TekniskException {
+        SedDataDto sedData = dataBygger.lagUtkast(behandling);
+
+        assertNotNull(sedData);
+        assertNotNull(sedData.getArbeidsgivendeVirksomheter());
+        assertNotNull(sedData.getArbeidssteder());
+        assertNotNull(sedData.getBruker());
+        assertNotNull(sedData.getBostedsadresse());
+        assertNotNull(sedData.getFamilieMedlem());
+        assertNotNull(sedData.getUtenlandskIdent());
+        assertNotNull(sedData.getSelvstendigeVirksomheter());
+        assertNotNull(sedData.getUtenlandskeVirksomheter());
+        assertNull(sedData.getLovvalgsperioder());
+        assertNull(sedData.getTidligereLovvalgsperioder());
+        assertNull(sedData.getMottakerLand());
 
         assertFalse(sedData.getArbeidsgivendeVirksomheter().isEmpty());
     }

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
@@ -53,6 +54,23 @@ public class SoeknadUtilsTest {
 
         Periode res = SoeknadUtils.hentPeriode(soeknad);
         assertThat(res).isEqualTo(periode_2);
+    }
+
+    @Test
+    public void hentOppgittBostedsland_landkodeSverige_girLandkode() {
+        SoeknadDokument soeknad = new SoeknadDokument();
+        soeknad.bosted.oppgittAdresse.landkode = "SE";
+
+        Optional<Landkoder> landkoder = SoeknadUtils.hentOppgittBostedsland(soeknad);
+        assertThat(landkoder.get()).isEqualTo(Landkoder.SE);
+    }
+
+    @Test
+    public void hentOppgittBostedsland_eksistererIkke_girEmpty() {
+        SoeknadDokument soeknad = new SoeknadDokument();
+
+        Optional<Landkoder> landkoder = SoeknadUtils.hentOppgittBostedsland(soeknad);
+        assertThat(landkoder.isPresent()).isFalse();
     }
 
     private void leggTilArbeidUtland(SoeknadDokument soeknad) {

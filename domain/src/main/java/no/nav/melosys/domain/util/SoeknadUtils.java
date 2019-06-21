@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.util;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
@@ -52,6 +53,7 @@ public final class SoeknadUtils {
         return søknad.soeknadsland.landkoder;
     }
 
+
     public static StrukturertAdresse hentBostedsadresse(SoeknadDokument søknad) {
         StrukturertAdresse oppgittAdresse = søknad.bosted.oppgittAdresse;
         if ((StringUtils.isNotEmpty(oppgittAdresse.gatenavn) ||
@@ -64,5 +66,9 @@ public final class SoeknadUtils {
         } else {
             return null;
         }
+    }
+
+    public static Optional<Landkoder> hentOppgittBostedsland(SoeknadDokument søknad) {
+        return Optional.ofNullable(søknad.bosted.oppgittAdresse.landkode).map(Landkoder::valueOf);
     }
 }

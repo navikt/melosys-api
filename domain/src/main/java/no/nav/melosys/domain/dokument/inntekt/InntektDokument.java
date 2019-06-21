@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class InntektDokument extends SaksopplysningDokument {
+public class InntektDokument implements SaksopplysningDokument {
 
     @XmlElementWrapper(name="arbeidsInntektMaanedListe")
     @XmlElement(name="arbeidsInntektMaaned")

@@ -12,7 +12,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SobSakDokument extends SaksopplysningDokument {
+public class SobSakDokument implements SaksopplysningDokument {
 
     // Blir utledet av saksopplysningene
     @JsonProperty("eosBarnetrygd")

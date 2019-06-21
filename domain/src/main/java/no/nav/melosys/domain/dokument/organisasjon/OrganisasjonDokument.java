@@ -12,7 +12,7 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OrganisasjonDokument extends SaksopplysningDokument {
+public class OrganisasjonDokument implements SaksopplysningDokument {
 
     private String orgnummer;
 

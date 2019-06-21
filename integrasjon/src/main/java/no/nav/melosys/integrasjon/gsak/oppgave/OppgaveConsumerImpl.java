@@ -113,12 +113,11 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "behandlingstema", oppgaveSearchRequest.getBehandlingstema());
 
         try {
-            OppgaveSvar oppgaveSvar = lokalTarget.request()
+            return lokalTarget.request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .header(CORRELATION_ID, getCallID())
                 .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(OppgaveSvar.class);
-            return oppgaveSvar;
         } catch (RuntimeException e) {
             ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
             return null; // Død kode
