@@ -8,8 +8,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -111,23 +111,23 @@ public class EessiServiceTest {
     }
 
     @Test
-    public void hentTilknyttedeSeder_forventListeMedRettType() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeSeder(anyLong(), anyString())).thenReturn(Arrays.asList(
-            easyRandom.nextObject(SedInformasjon.class),
-            easyRandom.nextObject(SedInformasjon.class),
-            easyRandom.nextObject(SedInformasjon.class)
+    public void hentTilknyttedeBucer_forventListeMedRettType() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyString())).thenReturn(Arrays.asList(
+            easyRandom.nextObject(BucInformasjon.class),
+            easyRandom.nextObject(BucInformasjon.class),
+            easyRandom.nextObject(BucInformasjon.class)
         ));
 
-        List<SedInformasjon> tilknyttedeSeder = eessiService.hentTilknyttedeSeder(123L, "utkast");
+        List<BucInformasjon> tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, "utkast");
 
-        verify(eessiConsumer).hentTilknyttedeSeder(anyLong(), anyString());
-        assertThat(tilknyttedeSeder).hasSize(3);
-        assertThat(tilknyttedeSeder).hasOnlyElementsOfType(SedInformasjon.class);
+        verify(eessiConsumer).hentTilknyttedeBucer(anyLong(), anyString());
+        assertThat(tilknyttedeBucer).hasSize(3);
+        assertThat(tilknyttedeBucer).hasOnlyElementsOfType(BucInformasjon.class);
     }
 
     @Test(expected = MelosysException.class)
-    public void hentTilknyttedeSeder_medFeilIConsumer_forventException() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeSeder(anyLong(), anyString())).thenThrow(new IntegrasjonException("Error!"));
-        eessiService.hentTilknyttedeSeder(123L, "utkast");
+    public void hentTilknyttedeBucer_medFeilIConsumer_forventException() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyString())).thenThrow(new IntegrasjonException("Error!"));
+        eessiService.hentTilknyttedeBucer(123L, "utkast");
     }
 }

@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -23,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -34,7 +36,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     private static final String MOTTAKERINSTITUSJONER_SCHEMA = "mottakerinstitusjoner-schema.json";
     private static final String OPPRETT_BUC_SCHEMA = "opprettbuc-post-schema.json";
-    private static final String SED_UNDER_ARBEID_SCHEMA = "sedunderarbeid-schema.json";
+    private static final String BUCER_UNDER_ARBEID_SCHEMA = "bucerunderarbeid-schema.json";
 
     private static final String MOCK_RINA_URL = "http://rina-url.local/";
 
@@ -98,25 +100,37 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentSederUnderArbeid() throws IOException, MelosysException {
-        when(eessiService.hentTilknyttedeSeder(anyLong(), anyString()))
+    public void hentBucerUnderArbeid() throws IOException, MelosysException {
+        when(eessiService.hentTilknyttedeBucer(anyLong(), anyString()))
             .thenReturn(Arrays.asList(
-                sedinformasjonMedGyldigUrl(),
-                sedinformasjonMedGyldigUrl(),
-                sedinformasjonMedGyldigUrl()
+                bucInformasjon(),
+                bucInformasjon(),
+                bucInformasjon()
             ));
 
-        Response response = eessiTjeneste.hentSeder(123L, "utkast");
+        Response response = eessiTjeneste.hentBucer(123L, "utkast");
         assertThat(response.getEntity()).isInstanceOf(List.class);
-        assertThat((List) response.getEntity()).hasOnlyElementsOfType(SedInformasjon.class);
+        assertThat((List) response.getEntity()).hasOnlyElementsOfType(BucInformasjon.class);
 
-        List<SedInformasjon> sederUnderArbeid = (List<SedInformasjon>) response.getEntity();
+        List<BucInformasjon> bucerUnderArbeid = (List<BucInformasjon>) response.getEntity();
 
-        schemaType = SED_UNDER_ARBEID_SCHEMA;
-        validerListe(sederUnderArbeid, log);
+        schemaType = BUCER_UNDER_ARBEID_SCHEMA;
+        validerListe(bucerUnderArbeid, log);
     }
 
-    private SedInformasjon sedinformasjonMedGyldigUrl() {
+    private BucInformasjon bucInformasjon() {
+        return new BucInformasjon(
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(LocalDate.class),
+            Arrays.asList(
+                sedInformasjonMedGyldigUrl(),
+                sedInformasjonMedGyldigUrl()
+            )
+        );
+    }
+
+    private SedInformasjon sedInformasjonMedGyldigUrl() {
         return new SedInformasjon(
             defaultEasyRandom().nextObject(String.class),
             defaultEasyRandom().nextObject(String.class),

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.MelosysException;
@@ -20,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -77,28 +79,39 @@ public class EessiConsumerTest {
     }
 
     @Test
-    public void hentTilknyttedeSeder_forventSeder() throws MelosysException, IOException, URISyntaxException {
-        URI uri = (getClass().getClassLoader().getResource("mock/eux/sederUtkast.json")).toURI();
+    public void hentTilknyttedeBucer_forventBucer() throws MelosysException, IOException, URISyntaxException {
+        URI uri = (getClass().getClassLoader().getResource("mock/eux/bucer.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(uri)));
 
-        server.expect(requestTo("/sak/1/sed/?status=utkast"))
+        server.expect(requestTo("/sak/1/bucer/?status=utkast"))
             .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-        List<SedInformasjon> sedInformasjonListe = eessiConsumer.hentTilknyttedeSeder(1L, "utkast");
-        assertThat(sedInformasjonListe)
+        List<BucInformasjon> bucInformasjonListe = eessiConsumer.hentTilknyttedeBucer(1L, "utkast");
+        assertThat(bucInformasjonListe)
+            .extracting(BucInformasjon::getId, BucInformasjon::getBucType)
+            .contains(
+                tuple("111111", "LA_BUC_03"),
+                tuple("222222", "LA_BUC_01")
+            );
+
+        assertThat(bucInformasjonListe.get(0).getSeder())
+            .extracting(SedInformasjon::getSedId, SedInformasjon::getSedType, SedInformasjon::getStatus)
+            .contains(tuple("22223333", "A008", "UTKAST"));
+
+        assertThat(bucInformasjonListe.get(1).getSeder())
             .extracting(SedInformasjon::getSedId, SedInformasjon::getSedType, SedInformasjon::getStatus)
             .contains(
-                tuple("22223333", "A008", "new"),
-                tuple("11221122", "A001", "new")
+                tuple("11221122", "A002", "UTKAST"),
+                tuple("11332233", "A001", "UTKAST")
             );
     }
 
     @Test(expected = MelosysException.class)
-    public void hentTilknyttedeSeder_forventException() throws MelosysException {
-        server.expect(requestTo("/sak/1/sed/?status=utkast"))
+    public void hentTilknyttedeBucer_forventException() throws MelosysException {
+        server.expect(requestTo("/sak/1/bucer/?status=utkast"))
             .andRespond(withBadRequest());
 
-        eessiConsumer.hentTilknyttedeSeder(1L, "utkast");
+        eessiConsumer.hentTilknyttedeBucer(1L, "utkast");
     }
 
     @Test

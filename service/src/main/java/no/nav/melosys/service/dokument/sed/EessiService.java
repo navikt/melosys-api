@@ -7,8 +7,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -81,7 +81,7 @@ public class EessiService {
         throw new IllegalStateException("Ikke mulig å sende sed");
     }
 
-    public List<SedInformasjon> hentTilknyttedeSeder(long gsakSaksnummer, String status) throws MelosysException {
-        return eessiConsumer.hentTilknyttedeSeder(gsakSaksnummer, status);
+    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException {
+        return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, status);
     }
 }
