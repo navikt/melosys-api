@@ -2,6 +2,9 @@ package no.nav.melosys.integrasjon.eessi.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import no.nav.melosys.domain.eessi.BucInformasjon;
 
 public class BucinfoDto {
 
@@ -18,6 +21,28 @@ public class BucinfoDto {
         this.bucType = bucType;
         this.opprettetDato = opprettetDato;
         this.seder = seder;
+    }
+
+    public BucInformasjon tilDomene() {
+        return new BucInformasjon(
+            id,
+            bucType,
+            opprettetDato,
+            seder.stream()
+                .map(SedinfoDto::tilDomene)
+                .collect(Collectors.toList())
+        );
+    }
+
+    public static BucinfoDto av(BucInformasjon bucInformasjon) {
+        return new BucinfoDto(
+            bucInformasjon.getId(),
+            bucInformasjon.getBucType(),
+            bucInformasjon.getOpprettetDato(),
+            bucInformasjon.getSeder().stream()
+                .map(SedinfoDto::av)
+                .collect(Collectors.toList())
+        );
     }
 
     public String getId() {

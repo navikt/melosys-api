@@ -8,9 +8,11 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.eessi.dto.*;
+import no.nav.melosys.integrasjon.eessi.dto.BucinfoDto;
+import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
+import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
+import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -63,7 +65,7 @@ public class EessiConsumerImpl implements EessiConsumer {
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucinfoDto>>() {
             });
 
-        return bucinfoDtoList.stream().map(EessiConsumerImpl::tilBucInformasjon).collect(Collectors.toList());
+        return bucinfoDtoList.stream().map(BucinfoDto::tilDomene).collect(Collectors.toList());
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {
@@ -79,28 +81,5 @@ public class EessiConsumerImpl implements EessiConsumer {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         return headers;
-    }
-
-    private static BucInformasjon tilBucInformasjon(BucinfoDto bucinfoDto) {
-        return new BucInformasjon(
-            bucinfoDto.getId(),
-            bucinfoDto.getBucType(),
-            bucinfoDto.getOpprettetDato(),
-            bucinfoDto.getSeder().stream()
-                .map(EessiConsumerImpl::tilSedInformasjon)
-                .collect(Collectors.toList())
-        );
-    }
-
-    private static SedInformasjon tilSedInformasjon(SedinfoDto sedinfoDto) {
-        return new SedInformasjon(
-            sedinfoDto.getBucId(),
-            sedinfoDto.getSedId(),
-            sedinfoDto.getOpprettetDato(),
-            sedinfoDto.getSistOppdatert(),
-            sedinfoDto.getSedType(),
-            sedinfoDto.getStatus(),
-            sedinfoDto.getRinaUrl()
-        );
     }
 }

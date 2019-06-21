@@ -2,6 +2,8 @@ package no.nav.melosys.integrasjon.eessi.dto;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.eessi.SedInformasjon;
+
 public class SedinfoDto {
 
     private String bucId;
@@ -23,6 +25,30 @@ public class SedinfoDto {
         this.sedType = sedType;
         this.status = status;
         this.rinaUrl = rinaUrl;
+    }
+
+    public SedInformasjon tilDomene() {
+        return new SedInformasjon(
+            bucId,
+            sedId,
+            opprettetDato,
+            sistOppdatert,
+            sedType,
+            status,
+            rinaUrl
+        );
+    }
+
+    public static SedinfoDto av(SedInformasjon sedInformasjon) {
+        return new SedinfoDto(
+            sedInformasjon.getBucId(),
+            sedInformasjon.getSedId(),
+            sedInformasjon.getOpprettetDato(),
+            sedInformasjon.getSistOppdatert(),
+            sedInformasjon.getSedType(),
+            sedInformasjon.getStatus(),
+            sedInformasjon.getRinaUrl()
+        );
     }
 
     public String getBucId() {
