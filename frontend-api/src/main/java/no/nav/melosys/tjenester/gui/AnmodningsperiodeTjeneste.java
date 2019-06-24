@@ -58,4 +58,17 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         anmodningsperiodeService.lagreAnmodningsperioder(behandlingID, anmodningsperiodeDtoer.stream().map(AnmodningsperiodeDto::til).collect(Collectors.toList()));
         return anmodningsperiodeDtoer;
     }
+
+    @POST
+    @Path("{behandlingID}/svar")
+    @ApiOperation("Lagrer en anmodningsperiode for en gitt behandling.")
+    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
+    public AnmodningsperiodeDto lagreSvar(@PathParam("behandlingID") long behandlingID,
+                                                                @ApiParam(value = "Svar") Collection<Object> objekt)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        tilgang.sjekk(behandlingID);
+        return null;
+    }
+
+
 }
