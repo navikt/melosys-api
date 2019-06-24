@@ -7,12 +7,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,9 +74,8 @@ public class EessiTjeneste extends RestTjeneste {
     @GET
     @Path("/bucer/{behandlingID}")
     @ApiOperation(
-        value = "Returnerer en liste av bucer for gjeldende sak.",
-        response = BucInformasjon.class,
-        responseContainer = "List"
+        value = "Returnerer en liste av bucer for gjeldende behandling.",
+        response = BucerTilknyttetBehandlingDto.class
     )
     public Response hentBucer(@PathParam("behandlingID") long behandlingID,
                               @QueryParam("status") String status) throws MelosysException {
@@ -85,6 +84,7 @@ public class EessiTjeneste extends RestTjeneste {
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
 
         log.info("Henter tilknyttede bucer for gsak {}", gsakSaksnummer);
-        return Response.ok(eessiService.hentTilknyttedeBucer(gsakSaksnummer, status)).build();
+        BucerTilknyttetBehandlingDto bucerDto = new BucerTilknyttetBehandlingDto(eessiService.hentTilknyttedeBucer(gsakSaksnummer, status));
+        return Response.ok(bucerDto).build();
     }
 }

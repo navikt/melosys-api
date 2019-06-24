@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 import no.nav.melosys.domain.eessi.SedInformasjon;
 
@@ -8,8 +10,8 @@ public class SedinfoDto {
 
     private String bucId;
     private String sedId;
-    private LocalDate opprettetDato;
-    private LocalDate sistOppdatert;
+    private Long opprettetDato;
+    private Long sistOppdatert;
     private String sedType;
     private String status;
     private String rinaUrl;
@@ -17,7 +19,7 @@ public class SedinfoDto {
     public SedinfoDto() {
     }
 
-    public SedinfoDto(String bucId, String sedId, LocalDate opprettetDato, LocalDate sistOppdatert, String sedType, String status, String rinaUrl) {
+    public SedinfoDto(String bucId, String sedId, Long opprettetDato, Long sistOppdatert, String sedType, String status, String rinaUrl) {
         this.bucId = bucId;
         this.sedId = sedId;
         this.opprettetDato = opprettetDato;
@@ -31,8 +33,8 @@ public class SedinfoDto {
         return new SedInformasjon(
             bucId,
             sedId,
-            opprettetDato,
-            sistOppdatert,
+            tilLocalDate(opprettetDato),
+            tilLocalDate(sistOppdatert),
             sedType,
             status,
             rinaUrl
@@ -43,12 +45,16 @@ public class SedinfoDto {
         return new SedinfoDto(
             sedInformasjon.getBucId(),
             sedInformasjon.getSedId(),
-            sedInformasjon.getOpprettetDato(),
-            sedInformasjon.getSistOppdatert(),
+            sedInformasjon.getOpprettetDato().toEpochDay(),
+            sedInformasjon.getSistOppdatert().toEpochDay(),
             sedInformasjon.getSedType(),
             sedInformasjon.getStatus(),
             sedInformasjon.getRinaUrl()
         );
+    }
+
+    private static LocalDate tilLocalDate(Long timestamp) {
+        return Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     public String getBucId() {
@@ -67,19 +73,19 @@ public class SedinfoDto {
         this.sedId = sedId;
     }
 
-    public LocalDate getOpprettetDato() {
+    public Long getOpprettetDato() {
         return opprettetDato;
     }
 
-    public void setOpprettetDato(LocalDate opprettetDato) {
+    public void setOpprettetDato(Long opprettetDato) {
         this.opprettetDato = opprettetDato;
     }
 
-    public LocalDate getSistOppdatert() {
+    public Long getSistOppdatert() {
         return sistOppdatert;
     }
 
-    public void setSistOppdatert(LocalDate sistOppdatert) {
+    public void setSistOppdatert(Long sistOppdatert) {
         this.sistOppdatert = sistOppdatert;
     }
 

@@ -16,6 +16,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -109,13 +110,13 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
             ));
 
         Response response = eessiTjeneste.hentBucer(123L, "utkast");
-        assertThat(response.getEntity()).isInstanceOf(List.class);
-        assertThat((List) response.getEntity()).hasOnlyElementsOfType(BucInformasjon.class);
+        assertThat(response.getEntity()).isInstanceOf(BucerTilknyttetBehandlingDto.class);
 
-        List<BucInformasjon> bucerUnderArbeid = (List<BucInformasjon>) response.getEntity();
+        BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto)  response.getEntity();
+        assertThat(dto.getBucer()).hasOnlyElementsOfType(BucInformasjon.class);
 
         schemaType = BUCER_UNDER_ARBEID_SCHEMA;
-        validerListe(bucerUnderArbeid, log);
+        valider(dto, log);
     }
 
     private BucInformasjon bucInformasjon() {

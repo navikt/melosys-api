@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
-import java.time.LocalDate;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,13 +11,13 @@ public class BucinfoDto {
 
     private String id;
     private String bucType;
-    private LocalDate opprettetDato;
+    private Long opprettetDato;
     private List<SedinfoDto> seder;
 
     public BucinfoDto() {
     }
 
-    public BucinfoDto(String id, String bucType, LocalDate opprettetDato, List<SedinfoDto> seder) {
+    public BucinfoDto(String id, String bucType, Long opprettetDato, List<SedinfoDto> seder) {
         this.id = id;
         this.bucType = bucType;
         this.opprettetDato = opprettetDato;
@@ -27,7 +28,7 @@ public class BucinfoDto {
         return new BucInformasjon(
             id,
             bucType,
-            opprettetDato,
+            Instant.ofEpochMilli(opprettetDato).atZone(ZoneId.systemDefault()).toLocalDate(),
             seder.stream()
                 .map(SedinfoDto::tilDomene)
                 .collect(Collectors.toList())
@@ -38,7 +39,7 @@ public class BucinfoDto {
         return new BucinfoDto(
             bucInformasjon.getId(),
             bucInformasjon.getBucType(),
-            bucInformasjon.getOpprettetDato(),
+            bucInformasjon.getOpprettetDato().toEpochDay(),
             bucInformasjon.getSeder().stream()
                 .map(SedinfoDto::av)
                 .collect(Collectors.toList())
@@ -61,11 +62,11 @@ public class BucinfoDto {
         this.bucType = bucType;
     }
 
-    public LocalDate getOpprettetDato() {
+    public Long getOpprettetDato() {
         return opprettetDato;
     }
 
-    public void setOpprettetDato(LocalDate opprettetDato) {
+    public void setOpprettetDato(Long opprettetDato) {
         this.opprettetDato = opprettetDato;
     }
 

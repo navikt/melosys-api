@@ -2,13 +2,13 @@
   {
     "id": "111111",
     "bucType": "LA_BUC_03",
-    "opprettetDato": "2019-06-06",
+    "opprettetDato": 1554400129480,
     "seder": [
       {
         "bucId": "111111",
         "sedId": "22223333",
-        "opprettetDato": "2019-06-06",
-        "sistOppdatert": "2019-06-06",
+        "opprettetDato": 1554400129480,
+        "sistOppdatert": 1554400129480,
         "sedType": "A008",
         "status": "UTKAST",
         "rinaUrl": "https://rina-url.local/111111"
@@ -18,13 +18,13 @@
   {
     "id": "222222",
     "bucType": "LA_BUC_01",
-    "opprettetDato": "2019-06-06",
+    "opprettetDato": 1554400129480,
     "seder": [
       {
         "bucId": "222222",
         "sedId": "11221122",
-        "opprettetDato": "2019-06-06",
-        "sistOppdatert": "2019-06-06",
+        "opprettetDato": 1554400129480,
+        "sistOppdatert": 1554400129480,
         "sedType": "A002",
         "status": "UTKAST",
         "rinaUrl": "https://rina-url.local/222222"
@@ -32,8 +32,8 @@
       {
         "bucId": "222222",
         "sedId": "11332233",
-        "opprettetDato": "2019-06-06",
-        "sistOppdatert": "2019-06-06",
+        "opprettetDato": 1554400129480,
+        "sistOppdatert": 1554400129480,
         "sedType": "A001",
         "status": "UTKAST",
         "rinaUrl": "https://rina-url.local/222222"
