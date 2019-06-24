@@ -8,6 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 import io.swagger.annotations.*;
+import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -55,7 +56,9 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
                                                                 @ApiParam(value = "En liste av anmodningsperioder å lagre.") Collection<AnmodningsperiodeDto> anmodningsperiodeDtoer)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgang.sjekk(behandlingID);
-        anmodningsperiodeService.lagreAnmodningsperioder(behandlingID, anmodningsperiodeDtoer.stream().map(AnmodningsperiodeDto::til).collect(Collectors.toList()));
-        return anmodningsperiodeDtoer;
+        Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
+            behandlingID, anmodningsperiodeDtoer.stream().map(AnmodningsperiodeDto::til).collect(Collectors.toList())
+        );
+        return anmodningsperioder.stream().map(AnmodningsperiodeDto::av).collect(Collectors.toList());
     }
 }
