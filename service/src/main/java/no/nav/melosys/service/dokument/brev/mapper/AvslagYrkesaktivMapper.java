@@ -3,9 +3,12 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import no.nav.dok.melosysbrev._000081.BrevdataType;
 import no.nav.dok.melosysbrev._000081.Fag;
+import no.nav.dok.melosysbrev._000081.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AvslagBegrunnelse;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
@@ -19,14 +22,19 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import org.xml.sax.SAXException;
 
-public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
+public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMapper {
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000081.xsd";
+
+    private static final String JA = "true";
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
                                 BrevData brevData) throws JAXBException, SAXException, TekniskException {
-        return mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData, XSD_LOCATION);
+        Fag fag = mapFag(behandling, resultat, (BrevDataAnmodningUnntakOgAvslag) brevData);
+        fag = mapArt161(fag, resultat);
+        JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
+        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     @Override
@@ -36,8 +44,7 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
         return fag;
     }
 
-    @Override
-    Fag mapArt161(Fag fag, Behandlingsresultat resultat, BrevData brevData) throws TekniskException {
+    private Fag mapArt161(Fag fag, Behandlingsresultat resultat) throws TekniskException {
         Optional<Vilkaarsresultat> vilkaarsresultat = hentFørsteGyldigeVilkaarsresultatForArt16(resultat);
         Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet());
         Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagArt161AvslagBegrunnelse();
@@ -73,5 +80,14 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
             .withOver5Aar("")
             .withSaerligAvslagsgrunn("")
             .withSoektForSent("").build();
+    }
+
+    private static JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
+        ObjectFactory factory = new ObjectFactory();
+        BrevdataType brevdataType = factory.createBrevdataType();
+        brevdataType.setFelles(fellesType);
+        brevdataType.setNAVFelles(navFelles);
+        brevdataType.setFag(fag);
+        return factory.createBrevdata(brevdataType);
     }
 }
