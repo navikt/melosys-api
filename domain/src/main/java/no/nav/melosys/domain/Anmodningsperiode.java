@@ -48,6 +48,10 @@ public class Anmodningsperiode implements ErPeriode {
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
+    @SuppressWarnings("unused") // Trengs av Hibernate
+    Anmodningsperiode() {
+    }
+
     public Anmodningsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse,
                              Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse) {
         this.fom = fom;
