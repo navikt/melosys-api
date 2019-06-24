@@ -23,6 +23,7 @@ import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.felles.FysiskArbeidssted;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -182,7 +183,7 @@ public class A001Mapper {
 
             ArbeidsstedType arbeidsstedBrev;
             if (arbeidssted.erFysisk()) {
-                arbeidsstedBrev = mapFysiskArbeidssted(arbeidssted);
+                arbeidsstedBrev = mapFysiskArbeidssted((FysiskArbeidssted)arbeidssted);
             }
             else {
                 arbeidsstedBrev = mapIkkeFysiskArbeidssted(arbeidssted);
@@ -192,9 +193,9 @@ public class A001Mapper {
         return arbeidsstedListe;
     }
 
-    private ArbeidsstedType mapFysiskArbeidssted(Arbeidssted arbeidssted) throws TekniskException {
+    private ArbeidsstedType mapFysiskArbeidssted(FysiskArbeidssted arbeidssted) throws TekniskException {
         ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
-        arbeidsstedBrev.setNavn(arbeidssted.navn);
+        arbeidsstedBrev.setNavn(arbeidssted.getNavn());
         arbeidsstedBrev.setIkkeFysiskArbeidssted("false");
         arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.ORDINAER);
 
@@ -213,12 +214,12 @@ public class A001Mapper {
 
     private ArbeidsstedType mapIkkeFysiskArbeidssted(Arbeidssted arbeidssted) throws TekniskException {
         ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
-        arbeidsstedBrev.setNavn(arbeidssted.navn);
+        arbeidsstedBrev.setNavn(arbeidssted.getNavn());
         arbeidsstedBrev.setIkkeFysiskArbeidssted("true");
-        arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.fromValue(arbeidssted.yrkesgruppe.getKode()));
+        arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.fromValue(arbeidssted.getYrkesgruppe().getKode()));
 
         AdresseType3 adresseBrev = new AdresseType3();
-        adresseBrev.setLand(hentIso3Landkode(arbeidssted.landkode));
+        adresseBrev.setLand(hentIso3Landkode(arbeidssted.getLandkode()));
         arbeidsstedBrev.setAdresse(adresseBrev);
         return arbeidsstedBrev;
     }

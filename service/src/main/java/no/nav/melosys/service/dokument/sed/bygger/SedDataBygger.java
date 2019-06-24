@@ -21,6 +21,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
+import no.nav.melosys.service.dokument.brev.mapper.felles.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -122,10 +123,11 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
 
     private Arbeidssted mapArbeidssted(no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted arb) {
         Arbeidssted arbeidssted = new Arbeidssted();
-        arbeidssted.setNavn(arb.navn);
+        arbeidssted.setNavn(arb.getNavn());
         arbeidssted.setFysisk(arb.erFysisk());
         if (arb.erFysisk()) {
-            arbeidssted.setAdresse(fraStrukturertAdresse(arb.adresse));
+            FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted)arb;
+            arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.adresse));
         } else {
             arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
         }

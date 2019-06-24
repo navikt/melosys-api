@@ -1,11 +1,9 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.avklartefakta;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import org.junit.Test;
 import org.junit.runner.RunWith;
