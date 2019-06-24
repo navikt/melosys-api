@@ -73,7 +73,7 @@ public abstract class AbstraktDokumentDataBygger {
     protected List<Arbeidssted> hentArbeidssteder() {
         List<Arbeidssted> arbeidssteder = hentFysiskearbeidssteder();
         arbeidssteder.addAll(hentIkkeFysiskeArbeidssteder());
-        return  arbeidssteder;
+        return arbeidssteder;
     }
 
     protected List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
