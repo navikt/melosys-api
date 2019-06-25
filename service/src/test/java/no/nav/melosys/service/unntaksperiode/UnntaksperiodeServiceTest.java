@@ -4,8 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,12 +29,16 @@ public class UnntaksperiodeServiceTest {
     public ExpectedException expectedException = ExpectedException.none();
     @Mock
     private ProsessinstansService prosessinstansService;
+    @Mock
+    private OppgaveService oppgaveService;
+    @Mock
+    private BehandlingRepository behandlingRepository;
 
     private UnntaksperiodeService unntaksperiodeService;
 
     @Before
     public void setUp() {
-        unntaksperiodeService = new UnntaksperiodeService(prosessinstansService);
+        unntaksperiodeService = new UnntaksperiodeService(behandlingRepository, oppgaveService, prosessinstansService);
     }
 
     @Test

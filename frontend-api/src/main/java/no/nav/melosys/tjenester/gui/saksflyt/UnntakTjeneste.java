@@ -5,20 +5,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.RestTjeneste;
-import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -34,7 +30,7 @@ public class UnntakTjeneste extends RestTjeneste {
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public UnntakTjeneste(UnntaksperiodeService unntaksperiodeService, BehandlingRepository behandlingRepository, Tilgang tilgang) {
+    public UnntakTjeneste(UnntaksperiodeService unntaksperiodeService, BehandlingRepository behandlingRepository) {
         this.unntaksperiodeService = unntaksperiodeService;
         this.behandlingRepository = behandlingRepository;
     }

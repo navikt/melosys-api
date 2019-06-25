@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +52,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         when(anmodningsperiodeService.hentAnmodningsperioder(1L)).thenReturn(mockliste);
 
         Collection<AnmodningsperiodeDto> anmodningsperioder = anmodningsperiodeTjeneste.hentAnmodningsperioder(1L);
+        assertThat(anmodningsperioder).isNotEmpty();
         //validerListe(anmodningsperioder); TODO schema
     }
 }

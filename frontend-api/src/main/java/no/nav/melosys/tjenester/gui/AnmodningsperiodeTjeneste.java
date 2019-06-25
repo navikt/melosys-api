@@ -25,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Path("/anmodningsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningsperiodeTjeneste extends RestTjeneste {
+
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final Tilgang tilgang;
 

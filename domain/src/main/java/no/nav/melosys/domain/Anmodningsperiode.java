@@ -5,7 +5,6 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeTyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 
@@ -49,16 +48,12 @@ public class Anmodningsperiode implements ErPeriode {
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
-    @Column(name = "anmodningsperiode_type", updatable = false)
-    @Enumerated(EnumType.STRING)
-    private AnmodningsperiodeTyper anmodningsperiodeType;
-
     @SuppressWarnings("unused") // Trengs av Hibernate
     Anmodningsperiode() {
     }
 
     public Anmodningsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse,
-                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse, AnmodningsperiodeTyper anmodningsperiodeType) {
+                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse) {
         this.fom = fom;
         this.tom = tom;
         this.lovvalgsland = lovvalgsland;
@@ -66,7 +61,6 @@ public class Anmodningsperiode implements ErPeriode {
         this.tilleggsbestemmelse = tilleggsbestemmelse;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland;
         this.unntakFraBestemmelse = unntakFraBestemmelse;
-        this.anmodningsperiodeType = anmodningsperiodeType;
     }
 
     public Long getId() {
@@ -117,10 +111,6 @@ public class Anmodningsperiode implements ErPeriode {
 
     public void setMedlPeriodeID(Long medlPeriodeID) {
         this.medlPeriodeID = medlPeriodeID;
-    }
-
-    public AnmodningsperiodeTyper getAnmodningsperiodeType() {
-        return anmodningsperiodeType;
     }
 
     @Override

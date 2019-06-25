@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeTyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 
@@ -23,7 +22,6 @@ public final class AnmodningsperiodeDto {
     public final String unntakFraBestemmelse;
     public final String unntakFraLovvalgsland;
     public final String medlemskapsperiodeID;
-    public final String anmodningsperiodeType;
 
     private AnmodningsperiodeDto(PeriodeDto periode,
                               LovvalgBestemmelse lovvalgBestemmelse,
@@ -31,8 +29,7 @@ public final class AnmodningsperiodeDto {
                               Landkoder lovvalgsland,
                               LovvalgBestemmelse unntakFraBestemmelse,
                               Landkoder unntakFraLovvalgsland,
-                              String medlemskapsperiodeID,
-                              AnmodningsperiodeTyper anmodningsperiodeType) {
+                              String medlemskapsperiodeID) {
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
@@ -40,7 +37,6 @@ public final class AnmodningsperiodeDto {
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
         this.medlemskapsperiodeID = medlemskapsperiodeID;
-        this.anmodningsperiodeType = anmodningsperiodeType != null ? anmodningsperiodeType.name() : null;
     }
 
     @JsonCreator
@@ -53,8 +49,7 @@ public final class AnmodningsperiodeDto {
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
             konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
-            json.get("medlemskapsperiodeID"),
-            enumVerdiEllerNull(AnmodningsperiodeTyper.class, json.get("anmodningsperiodeType")));
+            json.get("medlemskapsperiodeID"));
     }
 
     public static AnmodningsperiodeDto av(Anmodningsperiode anmodningsperiode) {
@@ -66,8 +61,7 @@ public final class AnmodningsperiodeDto {
             anmodningsperiode.getLovvalgsland(),
             anmodningsperiode.getUnntakFraBestemmelse(),
             anmodningsperiode.getUnntakFraLovvalgsland(),
-            anmodningsperiode.getMedlPeriodeID() != null ? anmodningsperiode.getMedlPeriodeID().toString() : null,
-            anmodningsperiode.getAnmodningsperiodeType());
+            anmodningsperiode.getMedlPeriodeID() != null ? anmodningsperiode.getMedlPeriodeID().toString() : null);
     }
 
     public final Anmodningsperiode til() {
@@ -76,8 +70,7 @@ public final class AnmodningsperiodeDto {
             konverterer.convertToEntityAttribute(lovvalgBestemmelse),
             konverterer.convertToEntityAttribute(tilleggBestemmelse),
             enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland),
-            konverterer.convertToEntityAttribute(unntakFraBestemmelse),
-            enumVerdiEllerNull(AnmodningsperiodeTyper.class, anmodningsperiodeType));
+            konverterer.convertToEntityAttribute(unntakFraBestemmelse));
         anmodningsperiode.setMedlPeriodeID(medlemskapsperiodeID != null ? Long.valueOf(medlemskapsperiodeID) : null);
         return anmodningsperiode;
     }
