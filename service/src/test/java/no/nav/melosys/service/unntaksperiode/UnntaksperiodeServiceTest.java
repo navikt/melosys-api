@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnntaksperiodeServiceTest {
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -65,7 +66,7 @@ public class UnntaksperiodeServiceTest {
     public void ikkeGodkjennPeriode_medBegrunnelser_ingenFeil() throws Exception {
         Set<String> begrunnelser = new HashSet<>();
         begrunnelser.add(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
-        unntaksperiodeService.ikkeGodkjennPeriode(new Behandling(), begrunnelser, null);
+        unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), begrunnelser, null);
         verify(prosessinstansService).opprettProsessinstansUnntaksperiodeAvvist(any(), anySet(), any());
     }
 
@@ -73,7 +74,7 @@ public class UnntaksperiodeServiceTest {
     public void ikkeGodkjennPeriode_ingenBegrunnelser_forventException() throws Exception {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Ingen begrunnelser for avlag av periode");
-        unntaksperiodeService.ikkeGodkjennPeriode(new Behandling(), new HashSet<>(), null);
+        unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), new HashSet<>(), null);
     }
 
     @Test
@@ -84,6 +85,12 @@ public class UnntaksperiodeServiceTest {
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Begrunnelse " + IkkeGodkjentBegrunnelser.ANNET + " krever fritekst!");
-        unntaksperiodeService.ikkeGodkjennPeriode(new Behandling(), begrunnelser, null);
+        unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), begrunnelser, null);
+    }
+
+    private Behandling hentBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+        return behandling;
     }
 }

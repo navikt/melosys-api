@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateTimeXmlAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -19,5 +20,6 @@ public class MidlertidigPostadresse {
     public LocalDateTime endringstidspunkt;
 
     public Land land;
+    public Periode postleveringsPeriode;
 
 }

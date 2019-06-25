@@ -1,5 +1,6 @@
 package no.nav.melosys.repository;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,6 +21,8 @@ public interface AvklarteFaktaRepository extends CrudRepository<Avklartefakta, L
     Optional<Avklartefakta> findByBehandlingsresultatIdAndType(long behandlingsid, Avklartefaktatype avklartefaktaType);
 
     Set<Avklartefakta> findAllByBehandlingsresultatIdAndType(long behandlingsid, Avklartefaktatype avklartefaktaType);
+
+    Set<Avklartefakta> findAllByBehandlingsresultatIdAndTypeIn(long behandlingsid, Collection<Avklartefaktatype> avklartefaktatyper);
 
     Set<Avklartefakta> findByBehandlingsresultatIdAndTypeAndFakta(long behandlingsid,
                                                                   Avklartefaktatype type,

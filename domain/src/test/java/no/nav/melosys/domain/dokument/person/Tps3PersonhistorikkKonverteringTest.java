@@ -60,21 +60,21 @@ public class Tps3PersonhistorikkKonverteringTest {
 
             for (BostedsadressePeriode bostedsadressePeriode : dokument.bostedsadressePeriodeListe) {
                 assertThat(bostedsadressePeriode.endringstidspunkt).isNotNull();
+                assertThat(bostedsadressePeriode.periode).isNotNull();
                 assertThat(bostedsadressePeriode.bostedsadresse.getLand()).isNotNull();
             }
 
             for (PostadressePeriode postadressePeriode : dokument.postadressePeriodeListe) {
                 assertThat(postadressePeriode.endringstidspunkt).isNotNull();
+                assertThat(postadressePeriode.periode).isNotNull();
                 assertThat(postadressePeriode.postadresse.land).isNotNull();
             }
 
             for (MidlertidigPostadresse midlertidigPostadresse : dokument.midlertidigAdressePeriodeListe) {
                 assertThat(midlertidigPostadresse.endringstidspunkt).isNotNull();
+                assertThat(midlertidigPostadresse.postleveringsPeriode).isNotNull();
                 assertThat(midlertidigPostadresse.land).isNotNull();
             }
-
         }
     }
-
-
 }
