@@ -56,7 +56,7 @@ public class Anmodningsperiode implements ErPeriode {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "svar_id", referencedColumnName = "id")
-    private AnmodningsperiodeSvar anmodningsperiodeSvar; //TODO: anmodningsperiodeSvar gjør Anmosningsperiode _endelig_ IMMUTABLE, eller status gjør det?
+    private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
     @SuppressWarnings("unused") // Trengs av Hibernate
     Anmodningsperiode() {
@@ -130,6 +130,10 @@ public class Anmodningsperiode implements ErPeriode {
 
     public AnmodningsperiodeSvar getAnmodningsperiodeSvar() {
         return anmodningsperiodeSvar;
+    }
+
+    public void setAnmodningsperiodeSvar(AnmodningsperiodeSvar anmodningsperiodeSvar) {
+        this.anmodningsperiodeSvar = anmodningsperiodeSvar;
     }
 
     @Override

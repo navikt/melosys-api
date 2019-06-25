@@ -15,6 +15,7 @@ public final class AnmodningsperiodeDto {
 
     private static final LovvalgBestemmelsekonverterer konverterer = new LovvalgBestemmelsekonverterer();
 
+    public final String id;
     @JsonUnwrapped(suffix = "Dato")
     public final PeriodeDto periode;
     public final String lovvalgBestemmelse;
@@ -25,7 +26,8 @@ public final class AnmodningsperiodeDto {
     public final String medlemskapsperiodeID;
     public final String anmodningsperiodeType;
 
-    private AnmodningsperiodeDto(PeriodeDto periode,
+    private AnmodningsperiodeDto(String id,
+                              PeriodeDto periode,
                               LovvalgBestemmelse lovvalgBestemmelse,
                               LovvalgBestemmelse tilleggBestemmelse,
                               Landkoder lovvalgsland,
@@ -33,6 +35,7 @@ public final class AnmodningsperiodeDto {
                               Landkoder unntakFraLovvalgsland,
                               String medlemskapsperiodeID,
                               AnmodningsperiodeTyper anmodningsperiodeType) {
+        this.id = id;
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
@@ -46,7 +49,8 @@ public final class AnmodningsperiodeDto {
     @JsonCreator
     @SuppressWarnings("unused")
     public AnmodningsperiodeDto(Map<String, String> json) {
-        this(new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
+        this(json.get("id"),
+            new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
             konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
             konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
@@ -57,7 +61,8 @@ public final class AnmodningsperiodeDto {
     }
 
     public static AnmodningsperiodeDto av(Anmodningsperiode anmodningsperiode) {
-        return new AnmodningsperiodeDto(new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
+        return new AnmodningsperiodeDto(anmodningsperiode.getId().toString(),
+            new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
             anmodningsperiode.getBestemmelse(),
             anmodningsperiode.getTilleggsbestemmelse(),
             anmodningsperiode.getLovvalgsland(),

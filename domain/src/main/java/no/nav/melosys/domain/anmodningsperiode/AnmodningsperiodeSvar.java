@@ -16,7 +16,7 @@ public class AnmodningsperiodeSvar {
     @MapsId
     @OneToOne(optional = false, mappedBy = "anmodningsperiode")
     @JoinColumn(name = "anmodningsperiode_id", nullable = false, updatable = false)
-    private Anmodningsperiode behandlingsresultat;
+    private Anmodningsperiode anmodningsperiode;
 
     @Column(name = "svar_type")
     private AnmodningsperiodeSvarType anmodningsperiodeSvarType;
@@ -33,6 +33,17 @@ public class AnmodningsperiodeSvar {
     @Column(name = "tom_dato")
     private LocalDate tom;
 
+    public AnmodningsperiodeSvar() {
+    }
+
+    public AnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvarType anmodningsperiodeSvarType, LocalDate registrertDato, String begrunnelseFritekst, LocalDate fom, LocalDate tom) {
+        this.anmodningsperiode = anmodningsperiode;
+        this.anmodningsperiodeSvarType = anmodningsperiodeSvarType;
+        this.registrertDato = registrertDato;
+        this.begrunnelseFritekst = begrunnelseFritekst;
+        this.fom = fom;
+        this.tom = tom;
+    }
 
     public Long getId() {
         return id;
@@ -42,12 +53,12 @@ public class AnmodningsperiodeSvar {
         this.id = id;
     }
 
-    public Anmodningsperiode getBehandlingsresultat() {
-        return behandlingsresultat;
+    public Anmodningsperiode getAnmodningsperiode() {
+        return anmodningsperiode;
     }
 
-    public void setBehandlingsresultat(Anmodningsperiode behandlingsresultat) {
-        this.behandlingsresultat = behandlingsresultat;
+    public void setAnmodningsperiode(Anmodningsperiode anmodningsperiode) {
+        this.anmodningsperiode = anmodningsperiode;
     }
 
     public AnmodningsperiodeSvarType getAnmodningsperiodeSvarType() {
