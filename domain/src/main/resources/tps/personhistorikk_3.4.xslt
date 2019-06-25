@@ -111,4 +111,11 @@
         </periode>
     </xsl:template>
 
+    <xsl:template match="postleveringsPeriode" >
+        <postleveringsPeriode>
+            <fom><xsl:value-of select ="fom" /></fom>
+            <tom><xsl:value-of select ="tom" /></tom>
+        </postleveringsPeriode>
+    </xsl:template>
+
 </xsl:stylesheet>

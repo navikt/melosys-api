@@ -8,17 +8,16 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = {"eessi"})
@@ -73,20 +72,19 @@ public class EessiTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("/seder/{behandlingID}")
+    @Path("/bucer/{behandlingID}")
     @ApiOperation(
-        value = "Returnerer en liste av seder for gjeldende sak.",
-        response = SedInformasjon.class,
-        responseContainer = "List"
+        value = "Returnerer en liste av bucer for gjeldende behandling.",
+        response = BucerTilknyttetBehandlingDto.class
     )
-    @Transactional
-    public Response hentSeder(@PathParam("behandlingID") long behandlingID,
+    public Response hentBucer(@PathParam("behandlingID") long behandlingID,
                               @QueryParam("status") String status) throws MelosysException {
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
 
-        log.info("Henter tilknyttede seder for gsak {}", gsakSaksnummer);
-        return Response.ok(eessiService.hentTilknyttedeSeder(gsakSaksnummer, status)).build();
+        log.info("Henter tilknyttede bucer for gsak {}", gsakSaksnummer);
+        BucerTilknyttetBehandlingDto bucerDto = new BucerTilknyttetBehandlingDto(eessiService.hentTilknyttedeBucer(gsakSaksnummer, status));
+        return Response.ok(bucerDto).build();
     }
 }

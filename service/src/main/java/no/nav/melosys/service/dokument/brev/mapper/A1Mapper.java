@@ -2,25 +2,27 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000067.*;
+import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.service.dokument.brev.mapper.felles.FysiskArbeidssted;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public class A1Mapper {
@@ -51,16 +53,12 @@ public class A1Mapper {
 
         a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.hovedvirksomhet));
 
-        a1.setBivirksomhetListe(mapBivirksomheter(brevData.arbeidssteder));
+        a1.setBivirksomhetListe(mapBivirksomheter(brevData.utenlandskeVirksomheter));
 
-        if (harIkkeFysiskArbeidssted(brevData.arbeidssteder)) {
-            a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(Collections.emptyList()));
-            a1.setIkkeFysiskArbeidssted("true");
-        }
-        else {
-            a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder));
-            a1.setIkkeFysiskArbeidssted("false");
-        }
+        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder));
+
+        String ikkeFysiskArbeidssted = harIkkeFastArbeidssted(brevData.arbeidssteder) ? "true" : "false";
+        a1.setIkkeFysiskArbeidssted(ikkeFysiskArbeidssted);
 
         return a1;
     }
@@ -125,26 +123,26 @@ public class A1Mapper {
         return hovedvirksomhetBrev;
     }
 
-    private BivirksomhetListeType mapBivirksomheter(List<Arbeidssted> arbeidssteder) {
-        arbeidssteder = fyllMinimumAntallArbeidsstederMedDummyVerdier(arbeidssteder, ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1);
+    private BivirksomhetListeType mapBivirksomheter(List<AvklartVirksomhet> avklarteVirksomheter) {
+        avklarteVirksomheter = fyllMinimumAntallArbeidsgiverOppdragsgiverMedDummyVerdier(avklarteVirksomheter);
 
         BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
-        for (Arbeidssted arbeidssted : arbeidssteder) {
+        for (AvklartVirksomhet arbeidssted : avklarteVirksomheter) {
             BivirksomhetType bivirksomhetType = new BivirksomhetType();
             bivirksomhetType.setNavn(arbeidssted.navn);
-            bivirksomhetType.setOrgnummer(arbeidssted.orgnummer);
+            bivirksomhetType.setOrgnummer(arbeidssted.orgnr);
             bivirksomheterBrev.getBivirksomhet().add(bivirksomhetType);
         }
         return bivirksomheterBrev;
     }
 
     private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder) {
-        arbeidssteder = fyllMinimumAntallArbeidsstederMedDummyVerdier(arbeidssteder, ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2);
+        arbeidssteder = fyllMinimumAntallArbeidsstederMedDummyVerdier(arbeidssteder);
 
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         for (Arbeidssted arbeidssted : arbeidssteder) {
             if (arbeidssted.erFysisk()) {
-                fysiskeAdresserBrev.getAdresse().add(mapFysiskArbeidssted(arbeidssted));
+                fysiskeAdresserBrev.getAdresse().add(mapFysiskArbeidssted((FysiskArbeidssted)arbeidssted));
             }
             else {
                 fysiskeAdresserBrev.getAdresse().add(mapIkkeFysiskArbeidssted(arbeidssted));
@@ -157,21 +155,31 @@ public class A1Mapper {
      * Brevtjenesten trenger et fast antall enheter i listen.
      * Fyller derfor opp med tomme elementer for resterende felter
      */
-    private List<Arbeidssted> fyllMinimumAntallArbeidsstederMedDummyVerdier(List<Arbeidssted> arbeidssteder, int forventetAntall) {
+    private List<AvklartVirksomhet> fyllMinimumAntallArbeidsgiverOppdragsgiverMedDummyVerdier(List<AvklartVirksomhet> avklarteVirksomheter) {
+        List<AvklartVirksomhet> utfylltListe = new ArrayList<>(avklarteVirksomheter);
+        int antallAdresserIListe = avklarteVirksomheter.size();
+        int gjenståendeAdresser = ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 - antallAdresserIListe;
+        for (int i = 0; i < gjenståendeAdresser; i++) {
+            utfylltListe.add(new AvklartVirksomhet("", "", null, null));
+        }
+        return utfylltListe;
+    }
+
+    private List<Arbeidssted> fyllMinimumAntallArbeidsstederMedDummyVerdier(List<Arbeidssted> arbeidssteder) {
         List<Arbeidssted> utfylltListe = new ArrayList<>(arbeidssteder);
         int antallAdresserIListe = arbeidssteder.size();
-        int gjenståendeAdresser = forventetAntall - antallAdresserIListe;
+        int gjenståendeAdresser = ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 - antallAdresserIListe;
         for (int i = 0; i < gjenståendeAdresser; i++) {
             utfylltListe.add(new Arbeidssted("", "", ""));
         }
         return utfylltListe;
     }
 
-    private AdresseType mapFysiskArbeidssted(Arbeidssted fysiskArbeidssted) {
+    private AdresseType mapFysiskArbeidssted(FysiskArbeidssted fysiskArbeidssted) {
         AdresseType adresseType = new AdresseType();
-        adresseType.setNavn(fysiskArbeidssted.navn);
+        adresseType.setNavn(fysiskArbeidssted.getNavn());
         StrukturertAdresse adresse = fysiskArbeidssted.adresse;
-        adresseType.setAdresselinje1(adresse.gatenavn + " " + adresse.husnummer);
+        adresseType.setAdresselinje1(Objects.toString(adresse.gatenavn, "") + " " + Objects.toString(adresse.husnummer, ""));
         adresseType.setAdresselinje2(adresse.postnummer);
         adresseType.setAdresselinje3(adresse.poststed);
         adresseType.setAdresselinje4(adresse.region);
@@ -181,21 +189,18 @@ public class A1Mapper {
 
     private AdresseType mapIkkeFysiskArbeidssted(Arbeidssted ikkeFysiskArbeidssted) {
         AdresseType adresseType = new AdresseType();
-        adresseType.setNavn(ikkeFysiskArbeidssted.navn);
-        adresseType.setLand(ikkeFysiskArbeidssted.landkode);
+        adresseType.setNavn(ikkeFysiskArbeidssted.getNavn());
+        adresseType.setLand(ikkeFysiskArbeidssted.getOmråde());
         return adresseType;
     }
 
     /**
-     * Ikke fysisk Arbeidssted er definert som flere enn 3 fysiske arbeidssteder
-     * eller ingen fysiske arbeidssteder.
+     * Ikke fast Arbeidssted er definert som flere enn 3 arbeidssteder eller ingen arbeidssteder.
      */
-    private boolean harIkkeFysiskArbeidssted(List<Arbeidssted> fysiskArbeidssteder) {
-        long antallFysiskeArbeidssteder = fysiskArbeidssteder.stream()
-                .filter(fa -> fa.adresse != null)
-                .count();
+    private boolean harIkkeFastArbeidssted(List<Arbeidssted> fysiskArbeidssteder) {
+        long antallArbeidssteder = fysiskArbeidssteder.size();
 
-        return antallFysiskeArbeidssteder < 1 ||
-               antallFysiskeArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
+        return antallArbeidssteder < 1 ||
+               antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
     }
 }

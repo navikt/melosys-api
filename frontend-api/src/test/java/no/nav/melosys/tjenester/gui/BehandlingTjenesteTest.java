@@ -1,13 +1,26 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.core.Response;
 
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
+import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -25,20 +39,38 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjenesteTest.class);
 
     private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-medlemsperioder-post-schema.json";
+    private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
 
     private BehandlingTjeneste behandlingTjeneste;
 
+    private String schemaType;
+
     @Mock
     private BehandlingService behandlingService;
+    private EasyRandom random;
 
     @Before
     public void setUp() {
         behandlingTjeneste = new BehandlingTjeneste(behandlingService, mock(Tilgang.class));
+
+        random = new EasyRandom(new EasyRandomParameters()
+            .overrideDefaultInitialization(true)
+            .collectionSizeRange(1, 4)
+            .objectPoolSize(100)
+            .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
+            .excludeField(named("tilleggsinformasjonDetaljer").and(ofType(TilleggsinformasjonDetaljer.class)).and(inClass(Tilleggsinformasjon.class)))
+            .excludeField(named("sed").and(ofType(SedDokument.class)))
+            .stringLengthRange(2, 10)
+            .randomize(GeografiskAdresse.class, () -> random.nextObject(SemistrukturertAdresse.class))
+            .randomize(MidlertidigPostadresse.class, () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
+            .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
+            .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9))
+        );
     }
 
     @Override
     public String schemaNavn() {
-        return TIDLIGERE_MEDLEMSPERIODER_SCHEMA;
+        return schemaType;
     }
 
     @Test
@@ -48,6 +80,18 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
         String jsonString = objectMapper().writeValueAsString(tidligereMedlemsperioderDto);
         assertThat(jsonString).isNotEmpty();
+
+        schemaType = TIDLIGERE_MEDLEMSPERIODER_SCHEMA;
+        valider(jsonString, log);
+    }
+
+    @Test
+    public void hentBehandling_erSchemaValidert() throws IOException {
+        BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
+        behandlingDto.getSaksopplysninger().setSed(null);
+
+        schemaType = BEHANDLINGER_SCHEMA;
+        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(behandlingDto);
         valider(jsonString, log);
     }
 

@@ -1,21 +1,24 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.RestTjeneste;
+import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -31,33 +34,38 @@ public class UnntakTjeneste extends RestTjeneste {
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public UnntakTjeneste(UnntaksperiodeService unntaksperiodeService, BehandlingRepository behandlingRepository) {
+    public UnntakTjeneste(UnntaksperiodeService unntaksperiodeService, BehandlingRepository behandlingRepository, Tilgang tilgang) {
         this.unntaksperiodeService = unntaksperiodeService;
         this.behandlingRepository = behandlingRepository;
     }
 
     @POST
     @Path("{behandlingID}/ikkegodkjenn")
-    public Response ikkeGodkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException {
+    public Response ikkeGodkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
         unntaksperiodeService.ikkeGodkjennPeriode(behandling, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
-    @POST
-    @Path("{behandlingID}/godkjenn")
-    public Response godkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws IkkeFunnetException {
+
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/{behandlingID}/godkjenn")
+    public Response godkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
         unntaksperiodeService.godkjennPeriode(behandling);
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
-    @POST
-    @Path("{behandlingID}/innhentinfo")
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/{behandlingID}/innhentinfo")
     public Response innhentInformasjonUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws IkkeFunnetException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
         unntaksperiodeService.behandlingUnderAvklaring(behandling);
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
     private Behandling hentOgValiderBehandlingsTypeUnntak(long behandlingId) throws IkkeFunnetException {

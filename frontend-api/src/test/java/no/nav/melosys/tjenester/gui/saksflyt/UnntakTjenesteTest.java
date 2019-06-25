@@ -6,14 +6,17 @@ import javax.ws.rs.BadRequestException;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
+import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +50,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
 
 
     @Test(expected = BadRequestException.class)
-    public void godkjennUnntaksperiode_feilBehandlingstype_kasterException() throws IkkeFunnetException {
+    public void godkjennUnntaksperiode_feilBehandlingstype_kasterException() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.ENDRET_PERIODE);
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
@@ -56,7 +59,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test(expected = BadRequestException.class)
-    public void godkjennUnntaksperiode_feilStatus_kasterException() throws IkkeFunnetException {
+    public void godkjennUnntaksperiode_feilStatus_kasterException() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -66,7 +69,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void godkjennUnntaksperiode_korrektStatus_ingenFeil() throws IkkeFunnetException {
+    public void godkjennUnntaksperiode_korrektStatus_ingenFeil() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -77,7 +80,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void innhentInfoUnntaksperiode_korrektStatus_ingenFeil() throws IkkeFunnetException {
+    public void innhentInfoUnntaksperiode_korrektStatus_ingenFeil() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -88,7 +91,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void ikkeGodkjennUnntaksperiode_gyldigBehandlingIdValiderSchema_ingenFeil() throws FunksjonellException, IOException {
+    public void ikkeGodkjennUnntaksperiode_gyldigBehandlingIdValiderSchema_ingenFeil() throws FunksjonellException, IOException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);

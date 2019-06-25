@@ -1,40 +1,44 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 
 public class Arbeidssted {
-    public Arbeidssted(String navn, String landkode, Yrkesgrupper type) {
+    public Arbeidssted(String navn, String idnummer, String landkode) {
         this.navn = navn;
+        this.idnummer = idnummer;
         this.landkode = landkode;
-        this.yrkesgruppe = type;
-        this.adresse = null;
-        this.orgnummer = null;
-    }
-
-    public Arbeidssted(String navn, String orgnummer, StrukturertAdresse adresse) {
-        this.navn = navn;
-        this.orgnummer = orgnummer;
-        this.landkode = adresse.landkode;
-        this.adresse = adresse;
-        this.yrkesgruppe = Yrkesgrupper.ORDINAER;
-    }
-
-    public Arbeidssted(String navn, String orgnummer, String landkode) {
-        this.navn = navn;
-        this.orgnummer = orgnummer;
-        this.landkode = landkode;
-        this.adresse = null;
-        this.yrkesgruppe = Yrkesgrupper.ORDINAER;
     }
 
     public boolean erFysisk() {
-        return adresse != null;
+        return false;
     }
 
-    public final String navn;
-    public final String orgnummer;
-    public final String landkode;
-    public final Yrkesgrupper yrkesgruppe;
-    public final StrukturertAdresse adresse;
+    public String getNavn() {
+        return navn;
+    }
+
+    /**
+     * Område tilsvarer landkode for fysiske arbeidssteder,
+     * men er en formatert landkode for maritimtarbeidssted.
+     * Eks: for sokkel "offshore, <landkode>"
+     **/
+    public String getOmråde() {
+        return getLandkode();
+    }
+
+    public String getLandkode() {
+        return  landkode;
+    }
+
+    public String getIdnummer() {
+        return idnummer;
+    }
+
+    public Yrkesgrupper getYrkesgruppe() {
+        return Yrkesgrupper.ORDINAER;
+    }
+
+    protected final String navn;
+    protected final String landkode;
+    protected final String idnummer;
 }
