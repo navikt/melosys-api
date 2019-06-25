@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.anmodningsperiode.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeTyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -52,6 +53,10 @@ public class Anmodningsperiode implements ErPeriode {
     @Column(name = "anmodningsperiode_type", updatable = false)
     @Enumerated(EnumType.STRING)
     private AnmodningsperiodeTyper anmodningsperiodeType;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "svar_id", referencedColumnName = "id")
+    private AnmodningsperiodeSvar anmodningsperiodeSvar; //TODO: anmodningsperiodeSvar gjør Anmosningsperiode _endelig_ IMMUTABLE, eller status gjør det?
 
     @SuppressWarnings("unused") // Trengs av Hibernate
     Anmodningsperiode() {
@@ -121,6 +126,10 @@ public class Anmodningsperiode implements ErPeriode {
 
     public AnmodningsperiodeTyper getAnmodningsperiodeType() {
         return anmodningsperiodeType;
+    }
+
+    public AnmodningsperiodeSvar getAnmodningsperiodeSvar() {
+        return anmodningsperiodeSvar;
     }
 
     @Override

@@ -10,6 +10,7 @@ CREATE TABLE anmodningsperiode (
     unntak_fra_bestemmelse  VARCHAR(99)    NULL,
     medlperiode_id          NUMBER(19)     NULL,
     anmodningsperiode_type  VARCHAR(10)    NULL,
+    svar_id                 NUMBER(19)     NULL,
     CONSTRAINT pk_anmodningsperiode PRIMARY KEY (id)
 );
 

@@ -46,8 +46,7 @@ public final class AnmodningsperiodeDto {
     @JsonCreator
     @SuppressWarnings("unused")
     public AnmodningsperiodeDto(Map<String, String> json) {
-        this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
-                LocalDate.parse(json.get("tomDato"))),
+        this(new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
             konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
             konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
@@ -58,9 +57,7 @@ public final class AnmodningsperiodeDto {
     }
 
     public static AnmodningsperiodeDto av(Anmodningsperiode anmodningsperiode) {
-        return new AnmodningsperiodeDto(new PeriodeDto(
-            anmodningsperiode.getFom(),
-            anmodningsperiode.getTom()),
+        return new AnmodningsperiodeDto(new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
             anmodningsperiode.getBestemmelse(),
             anmodningsperiode.getTilleggsbestemmelse(),
             anmodningsperiode.getLovvalgsland(),
