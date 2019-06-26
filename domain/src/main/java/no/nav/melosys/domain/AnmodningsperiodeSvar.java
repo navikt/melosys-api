@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
@@ -100,5 +101,23 @@ public class AnmodningsperiodeSvar {
 
     public void setInnvilgetTom(LocalDate innvilgetTom) {
         this.innvilgetTom = innvilgetTom;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AnmodningsperiodeSvar that = (AnmodningsperiodeSvar) o;
+        return Objects.equals(id, that.id) &&
+            anmodningsperiodeSvarType == that.anmodningsperiodeSvarType &&
+            Objects.equals(registrertDato, that.registrertDato) &&
+            Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst) &&
+            Objects.equals(innvilgetFom, that.innvilgetFom) &&
+            Objects.equals(innvilgetTom, that.innvilgetTom);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, registrertDato, begrunnelseFritekst, innvilgetFom, innvilgetTom);
     }
 }

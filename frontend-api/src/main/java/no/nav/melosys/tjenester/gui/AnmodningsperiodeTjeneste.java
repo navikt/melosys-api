@@ -74,13 +74,14 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathParam("anmodningperiodeID") long anmodningperiodeID)
         throws FunksjonellException, TekniskException {
 
-        long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)
-            .map(Anmodningsperiode::getBehandlingsresultat)
+        Optional<Anmodningsperiode> anmodningsperiodeOptional = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID);
+
+        long behandlingID = anmodningsperiodeOptional.map(Anmodningsperiode::getBehandlingsresultat)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
+
         tilgang.sjekk(behandlingID);
 
-        Optional<AnmodningsperiodeSvar> svar = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)
-            .map(Anmodningsperiode::getAnmodningsperiodeSvar);
+        Optional<AnmodningsperiodeSvar> svar = anmodningsperiodeOptional.map(Anmodningsperiode::getAnmodningsperiodeSvar);
 
         return svar.map(AnmodningsperiodeSvarDto::fra).orElseGet(AnmodningsperiodeSvarDto::new);
     }
@@ -90,7 +91,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     @ApiOperation("Lagrer svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
     public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathParam("anmodningperiodeID") long anmodningperiodeID,
-                                                                                     @ApiParam(value = "En liste av anmodningsperioder å lagre.") AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
+                                                                                     @ApiParam(value = "Svar på anmodningsperiode som skal lagres.") AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
         throws FunksjonellException, TekniskException {
 
         long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)

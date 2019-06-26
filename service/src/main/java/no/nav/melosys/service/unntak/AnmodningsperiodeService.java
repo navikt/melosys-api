@@ -91,7 +91,7 @@ public class AnmodningsperiodeService {
         } else if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE
                         && !gyldigSvarDelvisInnvilgelse(anmodningsperiodeSvar)) {
 
-            throw new FunksjonellException("Periode må være fyllt ut ved " + AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
+            throw new FunksjonellException("Periode og begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
 
         } else if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.AVSLAG
                         && StringUtils.isEmpty(anmodningsperiodeSvar.getBegrunnelseFritekst())) {

@@ -52,7 +52,7 @@ public class Anmodningsperiode implements ErPeriode {
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
     @SuppressWarnings("unused") // Trengs av Hibernate
-    Anmodningsperiode() {
+    public Anmodningsperiode() {
     }
 
     public Anmodningsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse,
