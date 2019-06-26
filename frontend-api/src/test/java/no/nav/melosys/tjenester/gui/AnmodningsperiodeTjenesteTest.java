@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -9,9 +8,6 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.periode.AnmodningsperiodeDto;
@@ -47,7 +43,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentAnmodningsperioder() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+    public void hentAnmodningsperioder() throws Exception {
         Set<Anmodningsperiode> mockliste = random.objects(Anmodningsperiode.class, 3).collect(Collectors.toSet());
         when(anmodningsperiodeService.hentAnmodningsperioder(1L)).thenReturn(mockliste);
 
