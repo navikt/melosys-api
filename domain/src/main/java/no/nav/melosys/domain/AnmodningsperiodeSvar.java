@@ -1,23 +1,23 @@
-package no.nav.melosys.domain.anmodningsperiode;
+package no.nav.melosys.domain;
 
 import java.time.LocalDate;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 
 @Entity
-@Table(name = "anmodningsperiodeSvar")
+@Table(name = "anmodningsperiode_svar")
 public class AnmodningsperiodeSvar {
 
+    //mappes av hibernate til anmodningsperiode.id
     @Id
     private Long id;
 
     @MapsId
-    @OneToOne(optional = false, mappedBy = "anmodningsperiode")
-    @JoinColumn(name = "anmodningsperiode_id", nullable = false, updatable = false)
+    @OneToOne(optional = false)
     private Anmodningsperiode anmodningsperiode;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "svar_type")
     private AnmodningsperiodeSvarType anmodningsperiodeSvarType;
 
@@ -27,22 +27,23 @@ public class AnmodningsperiodeSvar {
     @Column(name = "begrunnelseFritekst")
     private String begrunnelseFritekst;
 
-    @Column(name = "fom_dato")
-    private LocalDate fom;
+    @Column(name = "innvilget_fom_dato")
+    private LocalDate innvilgetFom;
 
-    @Column(name = "tom_dato")
-    private LocalDate tom;
+    @Column(name = "innvilget_tom_dato")
+    private LocalDate innvilgetTom;
 
+    @SuppressWarnings("unused")
     public AnmodningsperiodeSvar() {
     }
 
-    public AnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvarType anmodningsperiodeSvarType, LocalDate registrertDato, String begrunnelseFritekst, LocalDate fom, LocalDate tom) {
+    public AnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvarType anmodningsperiodeSvarType, LocalDate registrertDato, String begrunnelseFritekst, LocalDate innvilgetFom, LocalDate innvilgetTom) {
         this.anmodningsperiode = anmodningsperiode;
         this.anmodningsperiodeSvarType = anmodningsperiodeSvarType;
         this.registrertDato = registrertDato;
         this.begrunnelseFritekst = begrunnelseFritekst;
-        this.fom = fom;
-        this.tom = tom;
+        this.innvilgetFom = innvilgetFom;
+        this.innvilgetTom = innvilgetTom;
     }
 
     public Long getId() {
@@ -85,19 +86,19 @@ public class AnmodningsperiodeSvar {
         this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
-    public LocalDate getFom() {
-        return fom;
+    public LocalDate getInnvilgetFom() {
+        return innvilgetFom;
     }
 
-    public void setFom(LocalDate fom) {
-        this.fom = fom;
+    public void setInnvilgetFom(LocalDate innvilgetFom) {
+        this.innvilgetFom = innvilgetFom;
     }
 
-    public LocalDate getTom() {
-        return tom;
+    public LocalDate getInnvilgetTom() {
+        return innvilgetTom;
     }
 
-    public void setTom(LocalDate tom) {
-        this.tom = tom;
+    public void setInnvilgetTom(LocalDate innvilgetTom) {
+        this.innvilgetTom = innvilgetTom;
     }
 }

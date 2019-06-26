@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -9,7 +10,7 @@ import javax.ws.rs.PathParam;
 
 import io.swagger.annotations.*;
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.anmodningsperiode.AnmodningsperiodeSvar;
+import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -65,13 +66,37 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         return anmodningsperioder.stream().map(AnmodningsperiodeDto::av).collect(Collectors.toList());
     }
 
+    @GET
+    @Path("anmodningsperiode/{anmodningperiodeID}/svar")
+    @ApiOperation("Henter svar på en anmodningsperiode.")
+    @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
+    public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathParam("anmodningperiodeID") long anmodningperiodeID)
+        throws FunksjonellException, TekniskException {
+
+        long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)
+            .map(Anmodningsperiode::getBehandlingsresultat)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
+        tilgang.sjekk(behandlingID);
+
+        Optional<AnmodningsperiodeSvar> svar = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)
+            .map(Anmodningsperiode::getAnmodningsperiodeSvar);
+
+        return svar.map(AnmodningsperiodeSvarDto::fra).orElseGet(AnmodningsperiodeSvarDto::new);
+    }
+
     @POST
     @Path("anmodningsperiode/{anmodningperiodeID}/svar")
-    @ApiOperation("Lagrer en anmodningsperiode for en gitt behandling.")
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
+    @ApiOperation("Lagrer svar på en anmodningsperiode.")
+    @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
     public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathParam("anmodningperiodeID") long anmodningperiodeID,
                                                                                      @ApiParam(value = "En liste av anmodningsperioder å lagre.") AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        throws FunksjonellException, TekniskException {
+
+        long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)
+            .map(Anmodningsperiode::getBehandlingsresultat)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
+        tilgang.sjekk(behandlingID);
+
         AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningperiodeID, anmodningsperiodeSvarDto.til());
         return AnmodningsperiodeSvarDto.fra(svar);
     }

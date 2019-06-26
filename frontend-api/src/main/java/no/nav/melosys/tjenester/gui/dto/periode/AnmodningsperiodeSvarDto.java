@@ -2,20 +2,22 @@ package no.nav.melosys.tjenester.gui.dto.periode;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.anmodningsperiode.AnmodningsperiodeSvar;
+import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 
 public class AnmodningsperiodeSvarDto {
 
-    private final String anmodningsperiodeSvarType;
-    private final LocalDate fom;
-    private final LocalDate tom;
-    private final String begrunnelseFritekst;
+    public final String anmodningsperiodeSvarType;
+    public final PeriodeDto endretPeriode;
+    public final String begrunnelseFritekst;
 
-    public AnmodningsperiodeSvarDto(String anmodningsperiodeSvarType, LocalDate fom, LocalDate tom, String begrunnelseFritekst) {
+    public AnmodningsperiodeSvarDto() {
+        this(null, new PeriodeDto(), null);
+    }
+
+    public AnmodningsperiodeSvarDto(String anmodningsperiodeSvarType, PeriodeDto endretPeriode, String begrunnelseFritekst) {
         this.anmodningsperiodeSvarType = anmodningsperiodeSvarType;
-        this.fom = fom;
-        this.tom = tom;
+        this.endretPeriode = endretPeriode;
         this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
@@ -23,18 +25,17 @@ public class AnmodningsperiodeSvarDto {
         return new AnmodningsperiodeSvar(
             null,
             enumVerdiEllerNull(AnmodningsperiodeSvarType.class, anmodningsperiodeSvarType),
-            null,
+            LocalDate.now(),
             begrunnelseFritekst,
-            fom,
-            tom
+            endretPeriode != null ? endretPeriode.getFom() : null,
+            endretPeriode != null ? endretPeriode.getTom() : null
         );
     }
 
     public static AnmodningsperiodeSvarDto fra(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         return new AnmodningsperiodeSvarDto(
             anmodningsperiodeSvar.getAnmodningsperiodeSvarType().getKode(),
-            anmodningsperiodeSvar.getFom(),
-            anmodningsperiodeSvar.getTom(),
+            new PeriodeDto(anmodningsperiodeSvar.getInnvilgetFom(), anmodningsperiodeSvar.getInnvilgetTom()),
             anmodningsperiodeSvar.getBegrunnelseFritekst()
         );
     }

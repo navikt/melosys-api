@@ -6,11 +6,11 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeTyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
+import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,11 +29,13 @@ public class AnmodningsperiodeServiceTest {
     private AnmodningsperiodeRepository anmodningsperiodeRepository;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
     private AnmodningsperiodeService anmodningsperiodeService;
 
     @Before
     public void setUp() {
-        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository, behandlingsresultatService);
+        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository, behandlingsresultatService, anmodningsperiodeSvarRepository);
     }
 
     @Test
@@ -44,10 +46,10 @@ public class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    public void lagreAnmodningsperioder() throws IkkeFunnetException {
+    public void lagreAnmodningsperioder() throws FunksjonellException {
         long behandlingID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, AnmodningsperiodeTyper.SENDT);
+            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, null);
         Collection<Anmodningsperiode> anmodningperioder = Collections.singleton(anmodningsperiode);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(2)).thenReturn(behandlingsresultat);
