@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.tjenester.gui.dto.periode;
 
 import no.nav.melosys.service.kodeverk.KodeDto;
 

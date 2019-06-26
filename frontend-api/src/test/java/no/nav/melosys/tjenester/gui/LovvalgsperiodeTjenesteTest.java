@@ -22,8 +22,8 @@ import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
+import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

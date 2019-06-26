@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.tjenester.gui.dto.periode;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -7,10 +7,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.*;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-import static no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto.enumVerdiEllerNull;
-import static org.assertj.core.api.Assertions.assertThat;
+import static no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto.enumVerdiEllerNull;
 
 public class LovvalgsperiodeDtoTest {
 
@@ -37,7 +37,7 @@ public class LovvalgsperiodeDtoTest {
         });
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
-        assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+        Assertions.assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class LovvalgsperiodeDtoTest {
 
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
-        assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+        Assertions.assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
     }
 
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {

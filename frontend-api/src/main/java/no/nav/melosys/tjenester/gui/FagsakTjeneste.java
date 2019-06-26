@@ -26,6 +26,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;

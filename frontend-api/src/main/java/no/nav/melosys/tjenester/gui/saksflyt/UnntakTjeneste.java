@@ -5,20 +5,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.RestTjeneste;
-import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -32,25 +28,11 @@ import org.springframework.web.context.WebApplicationContext;
 public class UnntakTjeneste extends RestTjeneste {
     private final UnntaksperiodeService unntaksperiodeService;
     private final BehandlingRepository behandlingRepository;
-    private final Tilgang tilgang;
 
     @Autowired
-    public UnntakTjeneste(UnntaksperiodeService unntaksperiodeService, BehandlingRepository behandlingRepository, Tilgang tilgang) {
+    public UnntakTjeneste(UnntaksperiodeService unntaksperiodeService, BehandlingRepository behandlingRepository) {
         this.unntaksperiodeService = unntaksperiodeService;
         this.behandlingRepository = behandlingRepository;
-        this.tilgang = tilgang;
-    }
-
-    @POST
-    @Path("{behandlingID}/anmodning")
-    @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
-    public Response anmodningOmUnntak(@PathParam("behandlingID") long behandlingID, @ApiParam("fattVedtakDto") FattVedtakDto fattVedtakDto) throws FunksjonellException, TekniskException {
-        if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultattype() != Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
-            throw new BadRequestException();
-        }
-        tilgang.sjekk(behandlingID);
-        unntaksperiodeService.anmodningOmUnntak(behandlingID);
-        return Response.ok().build();
     }
 
     @POST

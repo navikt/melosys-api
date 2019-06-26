@@ -38,19 +38,6 @@ public class UnntaksperiodeService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntak(long behandlingID) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke sende andmodning om unntak fordi behandling " + behandlingID + " finne ikke."));
-        log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
-
-        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
-        behandlingRepository.save(behandling);
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling);
-
-        oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    @Transactional(rollbackFor = MelosysException.class)
     public void godkjennPeriode(Behandling behandling) throws FunksjonellException, TekniskException {
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(behandling);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());

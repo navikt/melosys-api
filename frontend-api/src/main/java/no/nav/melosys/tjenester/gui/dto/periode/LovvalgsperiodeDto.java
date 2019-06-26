@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.tjenester.gui.dto.periode;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Lovvalgsperiode.LovvalgBestemmelsekonverterer;
+import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -68,9 +68,8 @@ public final class LovvalgsperiodeDto {
 
     /**
      * Factory-metode for å lage en DTO fra det korresponderende domeneobjektet.
-     * 
-     * @param lovvalgsperiode
-     *            ett domeneobjekt å konvertere.
+     *
+     * @param lovvalgsperiode ett domeneobjekt å konvertere.
      * @return en ny DTO-instanse.
      */
     public static LovvalgsperiodeDto av(Lovvalgsperiode lovvalgsperiode) {
@@ -90,7 +89,7 @@ public final class LovvalgsperiodeDto {
 
     /**
      * Konverter denne instansen til ett korresponderende domeneobjekt.
-     * 
+     *
      * @return ett domeneobjekt initialisert fra denne instansen.
      */
     public final Lovvalgsperiode til() {
@@ -115,6 +114,5 @@ public final class LovvalgsperiodeDto {
 
     static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {
         return nøkkel == null ? null : Enum.valueOf(enumKlasse, nøkkel);
-
     }
 }

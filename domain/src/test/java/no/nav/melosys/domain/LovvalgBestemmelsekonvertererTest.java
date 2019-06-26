@@ -1,6 +1,6 @@
 package no.nav.melosys.domain;
 
-import no.nav.melosys.domain.Lovvalgsperiode.LovvalgBestemmelsekonverterer;
+import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_987_2009;
