@@ -6,7 +6,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -19,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -41,7 +41,7 @@ public class LandvelgerServiceTest {
 
     private Landkoder søknadsland = Landkoder.NO;
     private Landkoder avklartArbeidsland = Landkoder.DK;
-    private Landkoder bostedsland = Landkoder.SE;
+    private Landkoder oppgittbostedsland = Landkoder.SE;
     private Landkoder avklartBostedsland = Landkoder.FI;
     private Landkoder territorialfarvannLand = Landkoder.GB;
 
@@ -53,8 +53,7 @@ public class LandvelgerServiceTest {
         soeknad.setType(SaksopplysningType.SØKNAD);
         søknad.oppholdUtland.oppholdslandkoder.add("NO");
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
-        søknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        søknad.bosted.oppgittAdresse.landkode = bostedsland.getKode();
+        søknad.bosted.oppgittAdresse.landkode = oppgittbostedsland.getKode();
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.territorialfarvann = territorialfarvannLand.getKode();
         søknad.maritimtArbeid.add(maritimtArbeid);
@@ -117,11 +116,11 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt1142_girBostedsland() throws TekniskException {
+    public void hentTrygdemyndighetsland_medArt1142_girOppgittBostedsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART11_4_2);
 
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(bostedsland.getBeskrivelse());
+        assertThat(land).isEqualTo(oppgittbostedsland.getBeskrivelse());
     }
 
     @Test
@@ -134,12 +133,12 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt113A_girAvklartBosted() throws TekniskException {
+    public void hentTrygdemyndighetsland_medArt113A_girOppgittBostedsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART11_3A);
         oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
 
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(bostedsland.getBeskrivelse());
+        assertThat(land).isEqualTo(oppgittbostedsland.getBeskrivelse());
     }
 
     @Test
@@ -150,5 +149,16 @@ public class LandvelgerServiceTest {
 
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
         assertThat(land).isEqualTo(avklartBostedsland.getBeskrivelse());
+    }
+
+    @Test
+    public void hentTrygdemyndighetsland_medArt113AUtenOppgittEllerAvkartBostedsland_girNorge() throws TekniskException {
+        oppfyll(Vilkaar.FO_883_2004_ART11_3A);
+        oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
+
+        søknad.bosted.oppgittAdresse.landkode = null;
+
+        String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
+        assertThat(land).isEqualTo(Landkoder.NO.getBeskrivelse());
     }
 }

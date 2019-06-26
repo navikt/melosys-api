@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.sed.BucType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -96,17 +98,19 @@ public class EessiMottakService {
 
     private SedDokument opprettSedDokument(MelosysEessiMelding melosysEessiMelding) {
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsland(Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()));
+        sedDokument.setLovvalgslandKode(Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()));
         sedDokument.setLovvalgBestemmelse(
             LovvalgTilBestemmelseDtoMapper.mapBestemmelseVerdiTilMelosysLovvalgBestemmelse(melosysEessiMelding.getArtikkel())
         );
         sedDokument.setRinaSaksnummer(melosysEessiMelding.getRinaSaksnummer());
-        sedDokument.setPeriode(tilPeriode(melosysEessiMelding.getPeriode()));
-        sedDokument.setRinaDokumentId(melosysEessiMelding.getSedId());
-        sedDokument.setStatsborgerskap(
+        sedDokument.setLovvalgsperiode(tilPeriode(melosysEessiMelding.getPeriode()));
+        sedDokument.setRinaDokumentID(melosysEessiMelding.getSedId());
+        sedDokument.setStatsborgerskapKoder(
             melosysEessiMelding.getStatsborgerskap().stream().map(Statsborgerskap::getLandkode).collect(Collectors.toList())
         );
         sedDokument.setErEndring(melosysEessiMelding.getErEndring());
+        sedDokument.setSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
+        sedDokument.setBucType(BucType.valueOf(melosysEessiMelding.getBucType()));
 
         return sedDokument;
     }

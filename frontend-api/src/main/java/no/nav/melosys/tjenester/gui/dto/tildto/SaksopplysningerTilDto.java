@@ -20,9 +20,12 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
+import no.nav.melosys.tjenester.gui.dto.dokument.PersonhistorikkDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
@@ -30,8 +33,12 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
  */
-public class SaksopplysningerTilDto {
+public final class SaksopplysningerTilDto {
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
+
+    private SaksopplysningerTilDto() {
+        throw new IllegalStateException("Utility");
+    }
 
     //Medlemsperioder sorteres fra nyest til eldst.
      static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
@@ -75,6 +82,7 @@ public class SaksopplysningerTilDto {
                     break;
                 case PERSHIST:
                     PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) dokument;
+                    dto.setPersonhistorikk(new PersonhistorikkDto(personhistorikk));
                     if (!personhistorikk.statsborgerskapListe.isEmpty()) {
                         historiskStatsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
                     }
@@ -84,24 +92,14 @@ public class SaksopplysningerTilDto {
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
                 case SEDOPPL:
-                    //TODO: MELOSYS-2535
+                    dto.setSed(SedDokumentDto.fra((SedDokument)dokument));
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
             }
         }
 
-        /*
-        - Ved søknad tilbake i tid, brukes historisk statsborgerskap med fom-dato for søknad som dato
-        - Ved søknad framover i tid, brukes statsborgerskap fra TPS med gjeldende dato, avgrenset
-            av dato for henting av opplysninger (hvis tilstede) eller endring av behandling
-        */
-        LocalDate gjeldendeDato;
-        if (behandling.getSistOpplysningerHentetDato() != null) {
-            gjeldendeDato = LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), TIME_ZONE_ID).toLocalDate();
-        } else {
-            gjeldendeDato = LocalDateTime.ofInstant(behandling.getEndretDato(), TIME_ZONE_ID).toLocalDate();
-        }
+        LocalDate gjeldendeDato = hentGjeldendeDato(behandling);
 
         if (søknadsperiode != null && søknadsperiode.getFom() != null && søknadsperiode.getFom().isBefore(gjeldendeDato)) {
             dto.getPerson().statsborgerskap = historiskStatsborgerskap;
@@ -111,6 +109,18 @@ public class SaksopplysningerTilDto {
         }
 
         return dto;
+    }
+
+    /**
+    - Ved søknad tilbake i tid, brukes historisk statsborgerskap med fom-dato for søknad som dato
+    - Ved søknad framover i tid, brukes statsborgerskap fra TPS med gjeldende dato, avgrenset
+        av dato for henting av opplysninger (hvis tilstede) eller endring av behandling
+    */
+    private static LocalDate hentGjeldendeDato(Behandling behandling) {
+        if (behandling.getSistOpplysningerHentetDato() != null) {
+            return LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), TIME_ZONE_ID).toLocalDate();
+        }
+        return LocalDateTime.ofInstant(behandling.getEndretDato(), TIME_ZONE_ID).toLocalDate();
     }
 
     /**

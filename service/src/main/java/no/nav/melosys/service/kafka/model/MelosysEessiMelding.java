@@ -15,6 +15,9 @@ public class MelosysEessiMelding {
     private String lovvalgsland;
     private String artikkel;
     private boolean erEndring;
+    private boolean midlertidigBestemmelse;
+    private String bucType;
+    private String sedType;
 
     public String getSedId() {
         return sedId;
@@ -102,5 +105,29 @@ public class MelosysEessiMelding {
 
     public void setErEndring(boolean erEndring) {
         this.erEndring = erEndring;
+    }
+
+    public boolean erMidlertidigBestemmelse() {
+        return midlertidigBestemmelse;
+    }
+
+    public void setMidlertidigBestemmelse(boolean midlertidigBestemmelse) {
+        this.midlertidigBestemmelse = midlertidigBestemmelse;
+    }
+
+    public String getBucType() {
+        return bucType;
+    }
+
+    public void setBucType(String bucType) {
+        this.bucType = bucType;
+    }
+
+    public String getSedType() {
+        return sedType;
+    }
+
+    public void setSedType(String sedType) {
+        this.sedType = sedType;
     }
 }

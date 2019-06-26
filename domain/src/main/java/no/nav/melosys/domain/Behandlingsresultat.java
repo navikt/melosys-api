@@ -12,6 +12,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -48,6 +49,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @Column(name = "vedtak_klagefrist")
     private LocalDate vedtakKlagefrist;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "utfall_registrering_unntak")
+    private UtfallRegistreringUnntak utfallRegistreringUnntak;
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
@@ -123,6 +128,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setVedtakKlagefrist(LocalDate vedtakKlagefrist) {
         this.vedtakKlagefrist = vedtakKlagefrist;
+    }
+
+    public UtfallRegistreringUnntak getUtfallRegistreringUnntak() {
+        return utfallRegistreringUnntak;
+    }
+
+    public void setUtfallRegistreringUnntak(UtfallRegistreringUnntak utfallRegistreringUnntak) {
+        this.utfallRegistreringUnntak = utfallRegistreringUnntak;
     }
 
     public Set<Lovvalgsperiode> getLovvalgsperioder() {

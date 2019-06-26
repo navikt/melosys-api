@@ -8,7 +8,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class MedlemskapDokument extends SaksopplysningDokument {
+public class MedlemskapDokument implements SaksopplysningDokument {
 
     @XmlElementWrapper(name="medlemsperiode")
     @XmlElement(name="medlemsperiode")

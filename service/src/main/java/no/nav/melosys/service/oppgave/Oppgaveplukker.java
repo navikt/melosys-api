@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -68,12 +67,6 @@ public class Oppgaveplukker {
         String type = plukkDto.getOppgavetype();
         Oppgavetyper oppgavetype = KodeverkUtils.dekod(Oppgavetyper.class, type);
 
-        Tema fagområde = null;
-        if (oppgavetype == Oppgavetyper.JFR) {
-            String fagområdeKode = plukkDto.getFagomrade();
-            fagområde = KodeverkUtils.dekod(Tema.class, fagområdeKode);
-        }
-
         List<Sakstyper> fagsakstypeListe = new ArrayList<>();
         List<Behandlingstyper> behandlingstypeListe = new ArrayList<>();
         List<Behandlingstema> behandlingstemaListe = new ArrayList<>();
@@ -93,7 +86,7 @@ public class Oppgaveplukker {
             behandlingstemaListe.addAll(hentBehandlingstema(fagsakstypeListe));
         }
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe, behandlingstemaListe);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagsakstypeListe, behandlingstypeListe, behandlingstemaListe);
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);

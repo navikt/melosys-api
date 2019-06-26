@@ -15,10 +15,10 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 /**
  * Representerer svar fra personregisteret (TPS)
- *  
+ *
  */
 @XmlRootElement
-public class PersonDokument extends SaksopplysningDokument {
+public class PersonDokument implements SaksopplysningDokument {
 
     public String fnr;
 
@@ -60,11 +60,13 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public LocalDate statsborgerskapDato;
 
+    @JsonIgnore
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
     @JsonIgnore
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
+    @JsonIgnore
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
     @XmlTransient

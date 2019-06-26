@@ -10,7 +10,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class PersonhistorikkDokument extends SaksopplysningDokument {
+public class PersonhistorikkDokument implements SaksopplysningDokument {
 
     public List<StatsborgerskapPeriode> statsborgerskapListe = new ArrayList<>();
 

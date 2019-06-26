@@ -1,11 +1,11 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
@@ -21,7 +21,6 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +35,6 @@ public class AbstraktDokumentDataByggerTest {
 
     private SoeknadDokument søknad;
     private PersonDokument person;
-    private Set<String> avklarteOrganisasjoner = new HashSet<>();
 
     private BrevDatabyggerbaseImpl brevDatabyggerbase;
 
@@ -83,8 +81,6 @@ public class AbstraktDokumentDataByggerTest {
 
         søknad = new SoeknadDokument();
 
-        avklarteOrganisasjoner.add("12345678910");
-
         brevDatabyggerbase = new BrevDatabyggerbaseImpl(kodeverkService, avklartefaktaService, person, søknad);
     }
 
@@ -127,35 +123,46 @@ public class AbstraktDokumentDataByggerTest {
 
     @Test
     public void hentFysiskeArbeidsstedFraForetaketsAdresse() {
+        ForetakUtland foretakUtland = lagForetakUtland();
+        søknad.foretakUtland.add(foretakUtland);
+
+        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
+        assertThat(arbeidssteder.get(0).getNavn()).isEqualTo(foretakUtland.navn);
+        assertThat(arbeidssteder.get(0).getOmråde()).isEqualTo(foretakUtland.adresse.landkode);
+    }
+
+    private ForetakUtland lagForetakUtland() {
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.orgnr = "12345678910";
         foretakUtland.navn = "Jarlsberg INTERNATIONAL";
         foretakUtland.adresse = new StrukturertAdresse();
         foretakUtland.adresse.landkode = "NO";
-        søknad.foretakUtland.add(foretakUtland);
-
-        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
-        assertThat(arbeidssteder.get(0).navn).isEqualTo(foretakUtland.navn);
-        assertThat(arbeidssteder.get(0).landkode).isEqualTo(foretakUtland.adresse.landkode);
+        return foretakUtland;
     }
 
     @Test
-    public void hentArbeidsstederForMartimtArbeid_listMedArbeidssteder() {
-        this.søknad.foretakUtland.add(new ForetakUtland());
+    public void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() {
+        ForetakUtland foretakUtland = lagForetakUtland();
+        foretakUtland.adresse.landkode = null;
+        this.søknad.foretakUtland.add(foretakUtland);
+
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setType(Avklartefaktatype.ARBEIDSLAND);
         avklartefakta.setFakta("BG");
         avklartefakta.setReferanse("INSTALLASJON_ARBEIDSLAND");
         avklartefakta.setSubjekt("Dunfjæder");
 
-        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Collections.singletonList((avklartefakta))));
+        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("Dunfjæder");
+        avklartMaritimtArbeid.leggTilFakta(avklartefakta);
 
-        List<Arbeidssted> arbeidSteder = brevDatabyggerbase.hentArbeidssteder();
+        when(avklartefaktaService.hentMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonList(avklartMaritimtArbeid));
 
-        assertThat(arbeidSteder.size()).isEqualTo(1);
-        Arbeidssted arbeidssted = arbeidSteder.get(0);
-        assertThat(arbeidssted.navn).isEqualTo("Dunfjæder");
-        assertThat(arbeidssted.landkode).isEqualTo("BG");
-        assertThat(arbeidssted.yrkesgruppe.getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
+        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
+
+        assertThat(arbeidssteder.size()).isEqualTo(1);
+        Arbeidssted arbeidssted = arbeidssteder.get(0);
+        assertThat(arbeidssted.getNavn()).isEqualTo("Dunfjæder");
+        assertThat(arbeidssted.getOmråde()).isEqualTo("BG");
+        assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
     }
 }

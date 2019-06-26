@@ -13,24 +13,28 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 
 @XmlRootElement
-public class SedDokument extends SaksopplysningDokument {
+public class SedDokument implements SaksopplysningDokument {
 
     private String rinaSaksnummer;
 
-    private String rinaDokumentId;
+    private String rinaDokumentID;
 
     private String fnr;
 
-    private Periode periode;
+    private Periode lovvalgsperiode;
 
     @XmlJavaTypeAdapter(LovvalgBestemmelseXmlAdapter.class)
     private LovvalgBestemmelse lovvalgBestemmelse;
 
-    private Landkoder lovvalgsland;
+    private Landkoder lovvalgslandKode;
 
     private boolean erEndring;
 
-    private List<String> statsborgerskap = new ArrayList<>();
+    private SedType sedType;
+
+    private BucType bucType;
+
+    private List<String> statsborgerskapKoder = new ArrayList<>();
 
     public String getRinaSaksnummer() {
         return rinaSaksnummer;
@@ -40,12 +44,12 @@ public class SedDokument extends SaksopplysningDokument {
         this.rinaSaksnummer = rinaSaksnummer;
     }
 
-    public String getRinaDokumentId() {
-        return rinaDokumentId;
+    public String getRinaDokumentID() {
+        return rinaDokumentID;
     }
 
-    public void setRinaDokumentId(String rinaDokumentId) {
-        this.rinaDokumentId = rinaDokumentId;
+    public void setRinaDokumentID(String rinaDokumentID) {
+        this.rinaDokumentID = rinaDokumentID;
     }
 
     public String getFnr() {
@@ -56,12 +60,12 @@ public class SedDokument extends SaksopplysningDokument {
         this.fnr = fnr;
     }
 
-    public Periode getPeriode() {
-        return periode;
+    public Periode getLovvalgsperiode() {
+        return lovvalgsperiode;
     }
 
-    public void setPeriode(Periode periode) {
-        this.periode = periode;
+    public void setLovvalgsperiode(Periode lovvalgsperiode) {
+        this.lovvalgsperiode = lovvalgsperiode;
     }
 
     @XmlTransient
@@ -73,12 +77,12 @@ public class SedDokument extends SaksopplysningDokument {
         this.lovvalgBestemmelse = lovvalgBestemmelse;
     }
 
-    public Landkoder getLovvalgsland() {
-        return lovvalgsland;
+    public Landkoder getLovvalgslandKode() {
+        return lovvalgslandKode;
     }
 
-    public void setLovvalgsland(Landkoder lovvalgsland) {
-        this.lovvalgsland = lovvalgsland;
+    public void setLovvalgslandKode(Landkoder lovvalgslandKode) {
+        this.lovvalgslandKode = lovvalgslandKode;
     }
 
     public boolean getErEndring() {
@@ -89,12 +93,27 @@ public class SedDokument extends SaksopplysningDokument {
         this.erEndring = erEndring;
     }
 
-    public List<String> getStatsborgerskap() {
-        return statsborgerskap;
+    public List<String> getStatsborgerskapKoder() {
+        return statsborgerskapKoder;
     }
 
-    public void setStatsborgerskap(List<String> statsborgerskap) {
-        this.statsborgerskap = statsborgerskap;
+    public void setStatsborgerskapKoder(List<String> statsborgerskapKoder) {
+        this.statsborgerskapKoder = statsborgerskapKoder;
     }
 
+    public SedType getSedType() {
+        return sedType;
+    }
+
+    public void setSedType(SedType sedType) {
+        this.sedType = sedType;
+    }
+
+    public BucType getBucType() {
+        return bucType;
+    }
+
+    public void setBucType(BucType bucType) {
+        this.bucType = bucType;
+    }
 }

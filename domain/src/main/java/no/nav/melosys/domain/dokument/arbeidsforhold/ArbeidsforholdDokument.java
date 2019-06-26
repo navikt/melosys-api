@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ArbeidsforholdDokument extends SaksopplysningDokument {
+public class ArbeidsforholdDokument implements SaksopplysningDokument {
 
     @XmlElementWrapper(name="arbeidsforhold")
     @XmlElement(name="arbeidsforhold")

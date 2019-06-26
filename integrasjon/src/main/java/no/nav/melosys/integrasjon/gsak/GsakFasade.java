@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.gsak;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -23,7 +22,6 @@ public interface GsakFasade {
      * GSAK sorterer oppgavene stigende etter frist.
      */
     List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype,
-                                                  Tema tema,
                                                   List<Sakstyper> sakstyper,
                                                   List<Behandlingstyper> behandlingstyper,
                                                   List<Behandlingstema> behandlingstemaer
@@ -34,12 +32,6 @@ public interface GsakFasade {
      * GSAK sorterer oppgavene stigende etter frist.
      */
     List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
-
-    /**
-     * Finner Oppgaver basert på bruker.
-     * GSAK sorterer oppgavene stigende etter frist.
-     */
-    List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException, FunksjonellException;
 
     /**
      * Finner Oppgave med gitt saksnummer.
