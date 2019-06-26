@@ -1,7 +1,9 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -9,12 +11,26 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Ignore;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.KonverteringTest;
+import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import org.junit.Test;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-public class SoeknadDokumentTest {
+public class SoeknadDokumentTest implements KonverteringTest {
+
+    private static DokumentFactory factory;
+
+    public SoeknadDokumentTest() {
+        Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
+        XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
+        factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
+    }
 
     // @Test Testen bruktes til å validere json søknaden som kom fra frontend
     @SuppressWarnings("unused")
@@ -79,5 +95,32 @@ public class SoeknadDokumentTest {
         assertThat(organisasjonsnumre.size()).isEqualTo(2);
         assertThat(organisasjonsnumre.contains(selvstendigForetak.orgnr));
         assertThat(organisasjonsnumre.contains(orgNr2));
+    }
+
+    @Test
+    public void testKonverteringSoeknad_v1_0() throws IOException {
+        final String XML_PATH = "soeknad/soeknad_1.0.xml";
+        SoeknadDokument søknad = hentSoeknadDokumentFraFil(XML_PATH, "1.0");
+    }
+
+    @Test
+    public void testKonverteringSoeknad_v1_1() throws IOException {
+        final String XML_PATH = "soeknad/soeknad_1.1.xml";
+        SoeknadDokument søknad = hentSoeknadDokumentFraFil(XML_PATH, "1.1");
+    }
+
+    public SoeknadDokument hentSoeknadDokumentFraFil(String sti, String versjon) throws IOException {
+        return (SoeknadDokument) getSaksopplysning(sti, versjon).getDokument();
+    }
+
+    public Saksopplysning getSaksopplysning(String ressurs, String versjon) throws IOException {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
+        Objects.requireNonNull(kilde);
+        return konverter(kilde, factory, SaksopplysningType.SØKNAD, versjon);
+    }
+
+    @Override
+    public Saksopplysning getSaksopplysning(String ressurs) throws IOException {
+        return null;
     }
 }

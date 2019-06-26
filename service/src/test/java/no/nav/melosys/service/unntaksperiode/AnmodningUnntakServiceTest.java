@@ -1,12 +1,11 @@
 package no.nav.melosys.service.unntaksperiode;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
@@ -19,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +28,7 @@ public class AnmodningUnntakServiceTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
     @Mock
     private OppgaveService oppgaveService;
     @Mock
@@ -38,7 +38,7 @@ public class AnmodningUnntakServiceTest {
 
     @Before
     public void setUp() {
-        anmodningUnntakService = new AnmodningUnntakService(behandlingRepository, oppgaveService, prosessinstansService);
+        anmodningUnntakService = new AnmodningUnntakService(behandlingService, oppgaveService, prosessinstansService);
     }
 
     @Test
@@ -48,12 +48,11 @@ public class AnmodningUnntakServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
         behandling.setFagsak(fagsak);
-        when(behandlingRepository.findById(behandlingID)).thenReturn(Optional.of(behandling));
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID);
 
-        verify(behandlingRepository).findById(behandlingID);
-        verify(behandlingRepository).save(behandling);
+        verify(behandlingService).oppdaterStatus(eq(behandlingID), eq(Behandlingsstatus.AVVENT_DOK_UTL));
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }

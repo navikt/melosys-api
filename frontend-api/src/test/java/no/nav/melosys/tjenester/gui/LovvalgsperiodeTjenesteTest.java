@@ -147,7 +147,7 @@ public final class LovvalgsperiodeTjenesteTest {
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
         lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET.lovvalgsland));
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.valueOf(FORVENTET.lovvalgBestemmelse));
+        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.valueOf(FORVENTET.lovvalgsbestemmelse));
         lovvalgsperiode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));

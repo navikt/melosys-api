@@ -6,9 +6,4 @@
             <xsl:apply-templates select="@*|*|text()"/>
         </xsl:copy>
     </xsl:template>
-
-    <xsl:template match="forutgaendeBostedINorge"/>
-    <xsl:template match="sammeAdresseSomArbeidsgiver"/>
-    <xsl:template match="familiesBostedLandkode"/>
-    <xsl:template match="adresseIUtlandet"/>
 </xsl:stylesheet>

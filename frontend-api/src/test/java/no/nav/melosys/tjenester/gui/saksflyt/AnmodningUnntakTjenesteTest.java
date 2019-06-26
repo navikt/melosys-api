@@ -1,10 +1,6 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
-import java.io.IOException;
-
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
@@ -37,7 +33,7 @@ public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException, IOException {
+    public void anmodningOmUnntak_fungerer() throws Exception {
         FattVedtakDto fattVedtakDto = new FattVedtakDto();
         long behandlingID = 3;
         fattVedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);

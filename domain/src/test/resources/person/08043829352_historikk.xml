@@ -279,6 +279,10 @@
             </ustrukturertAdresse>
         </midlertidigAdressePeriodeListe>
         <midlertidigAdressePeriodeListe xsi:type="ns3:MidlertidigPostadresseNorge" endringstidspunkt="2009-03-12T00:00:00.000+01:00" endretAv="LMA2101, IT00" endringstype="endret" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <postleveringsPeriode>
+                <fom>2009-03-12T00:00:00.000+01:00</fom>
+                <tom>2011-11-24T00:00:00.000+01:00</tom>
+            </postleveringsPeriode>
             <strukturertAdresse xsi:type="ns3:Gateadresse">
                 <landkode>NOR</landkode>
                 <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>

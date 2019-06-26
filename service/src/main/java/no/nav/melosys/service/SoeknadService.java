@@ -23,7 +23,7 @@ public class SoeknadService {
 
     private final BehandlingRepository behandlingRepo;
 
-    private static final String SØKNAD_VERSJON = "1.0";
+    private static final String SØKNAD_VERSJON = "1.1";
 
     private final SaksopplysningRepository saksopplysningRepo;
 
@@ -42,13 +42,13 @@ public class SoeknadService {
             throw new IkkeFunnetException("Behandling ikke funnet");
         }
 
-        Optional<Saksopplysning> soeknadOpt = behandling.getSaksopplysninger().stream()
+        Optional<Saksopplysning> saksopplysningOpt = behandling.getSaksopplysninger().stream()
                 .filter(s -> s.getType().equals(SaksopplysningType.SØKNAD))
                 .findFirst();
 
-        Saksopplysning soeknad = soeknadOpt.orElseThrow(() -> 
+        Saksopplysning saksopplysning = saksopplysningOpt.orElseThrow(() ->
             new IkkeFunnetException(String.format("Søknad ikke funnet for behandlingsid %s.", behandlingID)));
-        return (SoeknadDokument) soeknad.getDokument();
+        return (SoeknadDokument) saksopplysning.getDokument();
     }
 
     @Transactional(rollbackFor = MelosysException.class)
