@@ -46,11 +46,9 @@ public class AnmodningsperiodeService {
 
         List<Anmodningsperiode> eksisterende = anmodningsperiodeRepository.findByBehandlingsresultatId(behandlingID);
 
-        if (!eksisterende.isEmpty()) {
-            for (Anmodningsperiode anmodningsperiode : eksisterende) {
-                if (anmodningsperiode.getAnmodningsperiodeSvar() != null) {
-                    throw new FunksjonellException("Kan ikke oppdatere anmodningsperiode etter at svar er registrert!");
-                }
+        for (Anmodningsperiode anmodningsperiode : eksisterende) {
+            if (anmodningsperiode.getAnmodningsperiodeSvar() != null) {
+                throw new FunksjonellException("Kan ikke oppdatere anmodningsperiode etter at svar er registrert!");
             }
         }
 
@@ -77,9 +75,10 @@ public class AnmodningsperiodeService {
 
     private AnmodningsperiodeSvar oppdaterOpprinneligSvar(AnmodningsperiodeSvar opprinnelig, AnmodningsperiodeSvar oppdatert) {
         opprinnelig.setAnmodningsperiodeSvarType(oppdatert.getAnmodningsperiodeSvarType());
-        opprinnelig.setAnmodningsperiode(oppdatert.getAnmodningsperiode());
         opprinnelig.setRegistrertDato(LocalDate.now());
         opprinnelig.setBegrunnelseFritekst(oppdatert.getBegrunnelseFritekst());
+        opprinnelig.setInnvilgetFom(oppdatert.getInnvilgetFom());
+        opprinnelig.setInnvilgetTom(oppdatert.getInnvilgetTom());
         return opprinnelig;
     }
 
