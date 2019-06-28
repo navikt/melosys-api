@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -15,6 +16,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -34,7 +37,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     private static final String MOTTAKERINSTITUSJONER_SCHEMA = "mottakerinstitusjoner-schema.json";
     private static final String OPPRETT_BUC_SCHEMA = "opprettbuc-post-schema.json";
-    private static final String SED_UNDER_ARBEID_SCHEMA = "sedunderarbeid-schema.json";
+    private static final String BUCER_UNDER_ARBEID_SCHEMA = "bucerunderarbeid-schema.json";
 
     private static final String MOCK_RINA_URL = "http://rina-url.local/";
 
@@ -68,9 +71,9 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     public void hentMottakerInstitusjoner() throws IOException, MelosysException {
         when(eessiService.hentMottakerinstitusjoner(anyString()))
             .thenReturn(Arrays.asList(
-                defaultEnhancedRandom().nextObject(Institusjon.class),
-                defaultEnhancedRandom().nextObject(Institusjon.class),
-                defaultEnhancedRandom().nextObject(Institusjon.class)
+                defaultEasyRandom().nextObject(Institusjon.class),
+                defaultEasyRandom().nextObject(Institusjon.class),
+                defaultEasyRandom().nextObject(Institusjon.class)
             ));
 
         Response response = eessiTjeneste.hentMottakerinstitusjoner("LA_BUC_01");
@@ -98,32 +101,44 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentSederUnderArbeid() throws IOException, MelosysException {
-        when(eessiService.hentTilknyttedeSeder(anyLong(), anyString()))
+    public void hentBucerUnderArbeid() throws IOException, MelosysException {
+        when(eessiService.hentTilknyttedeBucer(anyLong(), anyString()))
             .thenReturn(Arrays.asList(
-                sedinformasjonMedGyldigUrl(),
-                sedinformasjonMedGyldigUrl(),
-                sedinformasjonMedGyldigUrl()
+                bucInformasjon(),
+                bucInformasjon(),
+                bucInformasjon()
             ));
 
-        Response response = eessiTjeneste.hentSeder(123L, "utkast");
-        assertThat(response.getEntity()).isInstanceOf(List.class);
-        assertThat((List) response.getEntity()).hasOnlyElementsOfType(SedInformasjon.class);
+        Response response = eessiTjeneste.hentBucer(123L, "utkast");
+        assertThat(response.getEntity()).isInstanceOf(BucerTilknyttetBehandlingDto.class);
 
-        List<SedInformasjon> sederUnderArbeid = (List<SedInformasjon>) response.getEntity();
+        BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto)  response.getEntity();
+        assertThat(dto.getBucer()).hasOnlyElementsOfType(BucInformasjon.class);
 
-        schemaType = SED_UNDER_ARBEID_SCHEMA;
-        validerListe(sederUnderArbeid, log);
+        schemaType = BUCER_UNDER_ARBEID_SCHEMA;
+        valider(dto, log);
     }
 
-    private SedInformasjon sedinformasjonMedGyldigUrl() {
+    private BucInformasjon bucInformasjon() {
+        return new BucInformasjon(
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(LocalDate.class),
+            Arrays.asList(
+                sedInformasjonMedGyldigUrl(),
+                sedInformasjonMedGyldigUrl()
+            )
+        );
+    }
+
+    private SedInformasjon sedInformasjonMedGyldigUrl() {
         return new SedInformasjon(
-            defaultEnhancedRandom().nextObject(String.class),
-            defaultEnhancedRandom().nextObject(String.class),
-            defaultEnhancedRandom().nextObject(LocalDate.class),
-            defaultEnhancedRandom().nextObject(LocalDate.class),
-            defaultEnhancedRandom().nextObject(String.class),
-            defaultEnhancedRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(LocalDate.class),
+            defaultEasyRandom().nextObject(LocalDate.class),
+            defaultEasyRandom().nextObject(String.class),
+            defaultEasyRandom().nextObject(String.class),
             MOCK_RINA_URL
         );
     }

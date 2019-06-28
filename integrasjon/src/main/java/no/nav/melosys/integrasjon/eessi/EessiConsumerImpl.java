@@ -3,15 +3,16 @@ package no.nav.melosys.integrasjon.eessi;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.eessi.dto.BucinfoDto;
 import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -57,12 +58,14 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public List<SedInformasjon> hentTilknyttedeSeder(long gsakSaksnummer, String status) throws MelosysException {
-        List<SedinfoDto> sedinfoDtoList = exchange(String.format("/sak/%s/sed/?status=%s", gsakSaksnummer, status), HttpMethod.GET,
-            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SedinfoDto>>() {
+    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException {
+        status = Optional.ofNullable(status).orElse("");
+
+        List<BucinfoDto> bucinfoDtoList = exchange(String.format("/sak/%s/bucer/?status=%s", gsakSaksnummer, status), HttpMethod.GET,
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucinfoDto>>() {
             });
 
-        return sedinfoDtoList.stream().map(EessiConsumerImpl::tilSedInformasjon).collect(Collectors.toList());
+        return bucinfoDtoList.stream().map(BucinfoDto::tilDomene).collect(Collectors.toList());
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {
@@ -78,17 +81,5 @@ public class EessiConsumerImpl implements EessiConsumer {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         return headers;
-    }
-
-    private static SedInformasjon tilSedInformasjon(SedinfoDto sedinfoDto) {
-        return new SedInformasjon(
-            sedinfoDto.getBucId(),
-            sedinfoDto.getSedId(),
-            sedinfoDto.getOpprettetDato(),
-            sedinfoDto.getSistOppdatert(),
-            sedinfoDto.getSedType(),
-            sedinfoDto.getStatus(),
-            sedinfoDto.getRinaUrl()
-        );
     }
 }

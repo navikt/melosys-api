@@ -9,7 +9,7 @@ import java.util.HashSet;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import io.github.benas.randombeans.api.EnhancedRandom;
+import org.jeasy.random.EasyRandom;
 import no.nav.dok.melosysbrev._000067.A1;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
@@ -21,6 +21,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
@@ -31,6 +32,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.felles.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.felles.MaritimtArbeidssted;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,7 +53,7 @@ public class A1MapperTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private EnhancedRandom enhancedRandom;
+    private EasyRandom easyRandom;
 
     private Behandlingsresultat behandlingsresultat;
     private Behandling behandling;
@@ -60,7 +63,7 @@ public class A1MapperTest {
     @Before
     public void setUp() {
         mapper = new A1Mapper();
-        enhancedRandom = EnhancedRandomConfigurer.randomForDokProd();
+        easyRandom = EasyRandomConfigurer.randomForDokProd();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
@@ -105,8 +108,13 @@ public class A1MapperTest {
                                                                         strukturertAdresse,
                                                                         Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
-        Arbeidssted maritimtArbeidssted = new Arbeidssted("Dunfjæder", "GB", Yrkesgrupper.SOKKEL_ELLER_SKIP);
+        Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
+
+        AvklartMaritimtArbeid avklartMaritimtArbeid = mock(AvklartMaritimtArbeid.class);
+        when(avklartMaritimtArbeid.getMaritimtype()).thenReturn(Maritimtyper.SOKKEL);
+        when(avklartMaritimtArbeid.getLand()).thenReturn(Landkoder.GB.getKode());
+        when(avklartMaritimtArbeid.getNavn()).thenReturn("Dunfjæder");
+        Arbeidssted maritimtArbeidssted = new MaritimtArbeidssted(avklartMaritimtArbeid);
 
         brevData = new BrevDataA1();
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
@@ -136,7 +144,7 @@ public class A1MapperTest {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-4");
 
-        MelosysNAVFelles navFelles = enhancedRandom.nextObject(MelosysNAVFelles.class);
+        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
@@ -150,7 +158,7 @@ public class A1MapperTest {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-4");
 
-        MelosysNAVFelles navFelles = enhancedRandom.nextObject(MelosysNAVFelles.class);
+        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 

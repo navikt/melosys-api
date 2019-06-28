@@ -3,14 +3,14 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import javax.ws.rs.core.Response;
 
-import io.github.benas.randombeans.EnhancedRandomBuilder;
-import io.github.benas.randombeans.api.EnhancedRandom;
+import org.jeasy.random.EasyRandom;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
+import org.jeasy.random.EasyRandomParameters;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     private static final String SAMPLE_ORGNR = "899655123";
     private static final String SAMPLE_FNR = "77777777772";
 
-    private EnhancedRandom random;
+    private EasyRandom random;
 
     private String schemaType;
 
@@ -57,8 +57,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     public void setUp() {
         tjeneste = new JournalfoeringTjeneste(journalføringService);
 
-        random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
-            .collectionSizeRange(1, 4).build();
+        random = new EasyRandom(new EasyRandomParameters().collectionSizeRange(1, 4));
     }
 
     @Test

@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.tjenester.gui.dto.periode;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -7,10 +7,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.*;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-import static no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto.enumVerdiEllerNull;
-import static org.assertj.core.api.Assertions.assertThat;
+import static no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto.enumVerdiEllerNull;
 
 public class LovvalgsperiodeDtoTest {
 
@@ -18,7 +18,7 @@ public class LovvalgsperiodeDtoTest {
             "{" +
             "  \"fomDato\": \"2019-01-01\"," +
             "  \"tomDato\": \"2020-01-01\"," +
-            "  \"lovvalgBestemmelse\": \"FO_883_2004_ART12_1\"," +
+            "  \"lovvalgsbestemmelse\": \"FO_883_2004_ART12_1\"," +
             "  \"tilleggBestemmelse\": \"FO_883_2004_ART11_2\"," +
             "  \"unntakFraBestemmelse\": %s," +
             "  \"innvilgelsesResultat\": \"INNVILGET\"," +
@@ -37,7 +37,7 @@ public class LovvalgsperiodeDtoTest {
         });
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
-        assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+        Assertions.assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
     }
 
     @Test
@@ -46,17 +46,17 @@ public class LovvalgsperiodeDtoTest {
         });
         json.remove("lovvalgsland");
         json.remove("medlemskapstype");
-        json.remove("lovvalgBestemmelse");
+        json.remove("lovvalgsbestemmelse");
 
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
-        assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+        Assertions.assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
     }
 
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {
         LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(
             new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
-            enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("lovvalgBestemmelse")),
+            enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("lovvalgsbestemmelse")),
             TilleggsBestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
             enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("unntakFraBestemmelse")),

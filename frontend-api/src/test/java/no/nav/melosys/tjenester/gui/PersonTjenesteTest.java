@@ -3,8 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.benas.randombeans.EnhancedRandomBuilder;
-import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -32,7 +30,7 @@ public class PersonTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() throws Exception {
-        PersonDto person = defaultEnhancedRandom().nextObject(PersonDto.class);
+        PersonDto person = defaultEasyRandom().nextObject(PersonDto.class);
         when(personTjeneste.getPerson(anyString())).thenReturn(Response.ok(person).build());
     }
 

@@ -5,9 +5,9 @@ import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_987_2009;
 import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 
-public final class LovvalgBestemmelseUtil {
+public final class LovvalgBestemmelseUtils {
 
-    private LovvalgBestemmelseUtil() {
+    private LovvalgBestemmelseUtils() {
         throw new IllegalStateException("Utility");
     }
 

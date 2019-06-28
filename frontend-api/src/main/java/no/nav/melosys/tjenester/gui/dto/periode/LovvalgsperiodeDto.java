@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.tjenester.gui.dto.periode;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Lovvalgsperiode.LovvalgBestemmelsekonverterer;
+import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -19,7 +19,7 @@ public final class LovvalgsperiodeDto {
 
     @JsonUnwrapped(suffix = "Dato")
     public final PeriodeDto periode;
-    public final String lovvalgBestemmelse;
+    public final String lovvalgsbestemmelse;
     public final String tilleggBestemmelse;
     public final String lovvalgsland;
     public final String unntakFraBestemmelse;
@@ -30,7 +30,7 @@ public final class LovvalgsperiodeDto {
     public final String medlemskapsperiodeID;
 
     public LovvalgsperiodeDto(PeriodeDto periode,
-            LovvalgBestemmelse lovvalgBestemmelse,
+            LovvalgBestemmelse lovvalgsbestemmelse,
             LovvalgBestemmelse tilleggBestemmelse,
             Landkoder lovvalgsland,
             LovvalgBestemmelse unntakFraBestemmelse,
@@ -40,7 +40,7 @@ public final class LovvalgsperiodeDto {
             Medlemskapstyper medlemskapstype,
             String medlemskapsperiodeID) {
         this.periode = periode;
-        this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
+        this.lovvalgsbestemmelse = lovvalgsbestemmelse != null ? lovvalgsbestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
         this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
@@ -55,7 +55,7 @@ public final class LovvalgsperiodeDto {
     public LovvalgsperiodeDto(Map<String, String> json) {
         this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 LocalDate.parse(json.get("tomDato"))),
-                konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
+                konverterLovvalgsBestemmelse(json.get("lovvalgsbestemmelse")),
                 konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
                 enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
                 konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
@@ -68,9 +68,8 @@ public final class LovvalgsperiodeDto {
 
     /**
      * Factory-metode for å lage en DTO fra det korresponderende domeneobjektet.
-     * 
-     * @param lovvalgsperiode
-     *            ett domeneobjekt å konvertere.
+     *
+     * @param lovvalgsperiode ett domeneobjekt å konvertere.
      * @return en ny DTO-instanse.
      */
     public static LovvalgsperiodeDto av(Lovvalgsperiode lovvalgsperiode) {
@@ -90,7 +89,7 @@ public final class LovvalgsperiodeDto {
 
     /**
      * Konverter denne instansen til ett korresponderende domeneobjekt.
-     * 
+     *
      * @return ett domeneobjekt initialisert fra denne instansen.
      */
     public final Lovvalgsperiode til() {
@@ -98,7 +97,7 @@ public final class LovvalgsperiodeDto {
         resultat.setFom(periode.getFom());
         resultat.setTom(periode.getTom());
         resultat.setLovvalgsland(enumVerdiEllerNull(Landkoder.class, lovvalgsland));
-        resultat.setBestemmelse(konverterer.convertToEntityAttribute(lovvalgBestemmelse));
+        resultat.setBestemmelse(konverterer.convertToEntityAttribute(lovvalgsbestemmelse));
         resultat.setUnntakFraBestemmelse(konverterer.convertToEntityAttribute(unntakFraBestemmelse));
         resultat.setTilleggsbestemmelse(konverterer.convertToEntityAttribute(tilleggBestemmelse));
         resultat.setUnntakFraLovvalgsland(enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland));
@@ -115,6 +114,5 @@ public final class LovvalgsperiodeDto {
 
     static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {
         return nøkkel == null ? null : Enum.valueOf(enumKlasse, nøkkel);
-
     }
 }

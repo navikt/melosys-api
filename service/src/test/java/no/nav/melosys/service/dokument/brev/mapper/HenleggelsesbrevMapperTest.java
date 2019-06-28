@@ -2,9 +2,6 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 
-import io.github.benas.randombeans.FieldDefinition;
-import io.github.benas.randombeans.api.EnhancedRandom;
-import io.github.benas.randombeans.api.Randomizer;
 import no.nav.dok.brevdata.felles.v1.navfelles.NorskPostadresse;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
@@ -14,18 +11,20 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jeasy.random.FieldPredicates.*;
+import static org.jeasy.random.FieldPredicates.named;
 
 public class HenleggelsesbrevMapperTest {
 
-    private static final EnhancedRandom enhancedRandom = EnhancedRandomConfigurer.builderForDokProd()
+    private static final EasyRandom easyRandom = new EasyRandom(EasyRandomConfigurer.paramForDokProd()
         .collectionSizeRange(0, 2)
         .objectPoolSize(3)
-        .randomize(new FieldDefinition<>("postnummer", String.class, NorskPostadresse.class),
-                (Randomizer<String>) (() -> "1234"))
-        .build();
+        .excludeField(named("lovvalgsperioder").or(named("avklartefakta").or(named("vilkaarsresultater"))))
+        .randomize(named("postnummer").and(ofType(String.class)).and(inClass(NorskPostadresse.class)), () -> "1234"));
 
     @Test
     public void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
@@ -37,7 +36,7 @@ public class HenleggelsesbrevMapperTest {
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
-        return enhancedRandom.nextObject(Behandlingsresultat.class, "lovvalgsperioder", "avklartefakta", "vilkaarsresultater");
+        return easyRandom.nextObject(Behandlingsresultat.class);
     }
 
     private void testMapTilBrevXml(Behandlingsresultat behandlingsresultat) throws Exception {
@@ -45,11 +44,11 @@ public class HenleggelsesbrevMapperTest {
     }
 
     private Fagsak lagFagsak() {
-        return enhancedRandom.nextObject(Fagsak.class);
+        return easyRandom.nextObject(Fagsak.class);
     }
 
     private Behandling lagBehandling(Fagsak fagsak) {
-        return enhancedRandom.nextObject(Behandling.class);
+        return easyRandom.nextObject(Behandling.class);
     }
 
     private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
@@ -69,11 +68,11 @@ public class HenleggelsesbrevMapperTest {
     }
 
     private MelosysNAVFelles LagMelosysNAVFelles() {
-        return enhancedRandom.nextObject(MelosysNAVFelles.class);
+        return easyRandom.nextObject(MelosysNAVFelles.class);
     }
 
     private FellesType lagFellesType() {
-        return enhancedRandom.nextObject(FellesType.class);
+        return easyRandom.nextObject(FellesType.class);
     }
 
 }

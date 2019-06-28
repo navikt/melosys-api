@@ -70,10 +70,10 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void mineOppgaver() throws MelosysException, IOException, JSONException {
         List<OppgaveDto> oppgaver = new ArrayList<>();
-        int oppgaveNr = 1 + defaultEnhancedRandom().nextInt(2);
+        int oppgaveNr = 1 + defaultEasyRandom().nextInt(2);
         for (int i = 0; i < oppgaveNr; i++) {
-            oppgaver.add(defaultEnhancedRandom().nextObject(BehandlingsoppgaveDto.class));
-            oppgaver.add(defaultEnhancedRandom().nextObject(JournalfoeringsoppgaveDto.class));
+            oppgaver.add(defaultEasyRandom().nextObject(BehandlingsoppgaveDto.class));
+            oppgaver.add(defaultEasyRandom().nextObject(JournalfoeringsoppgaveDto.class));
         }
 
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
@@ -132,7 +132,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void tilbakeleggOppgave() throws IOException {
-        TilbakeleggingDto tilbakelegging = defaultEnhancedRandom().nextObject(TilbakeleggingDto.class);
+        TilbakeleggingDto tilbakelegging = defaultEasyRandom().nextObject(TilbakeleggingDto.class);
 
         assertThat(tilbakelegging).isNotNull();
 
@@ -142,7 +142,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void sokEtterBehandlingsoppgave() throws FunksjonellException, TekniskException, IOException {
-        BehandlingsoppgaveDto behandlingsoppgaveDto = defaultEnhancedRandom().nextObject(BehandlingsoppgaveDto.class);
+        BehandlingsoppgaveDto behandlingsoppgaveDto = defaultEasyRandom().nextObject(BehandlingsoppgaveDto.class);
         List<BehandlingsoppgaveDto> oppgaver = Arrays.asList(behandlingsoppgaveDto);
 
         when(oppgaveService.hentBehandlingsoppgaverMedBruker(anyString())).thenReturn(oppgaver);

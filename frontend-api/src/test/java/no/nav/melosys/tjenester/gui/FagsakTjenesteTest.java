@@ -6,14 +6,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import io.github.benas.randombeans.EnhancedRandomBuilder;
-import io.github.benas.randombeans.FieldDefinitionBuilder;
-import io.github.benas.randombeans.api.EnhancedRandom;
-import io.github.benas.randombeans.api.Randomizer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
@@ -31,6 +28,8 @@ import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import static no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory.fagsakMedBehandlinger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -62,24 +62,23 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private String schemaType;
 
-    private EnhancedRandom random;
+    private EasyRandom random;
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() {
-        random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
+        random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
             .collectionSizeRange(1, 4)
             .objectPoolSize(100)
             .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
-            .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
+            .excludeField(named("tilleggsinformasjonDetaljer").and(ofType(TilleggsinformasjonDetaljer.class)).and(inClass(Tilleggsinformasjon.class)))
             .stringLengthRange(2, 10)
-            .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
-            .randomize(FieldDefinitionBuilder.field().named("fnr").ofType(String.class).get(), new NumericStringRandomizer(11))
-            .randomize(FieldDefinitionBuilder.field().named("orgnummer").ofType(String.class).get(), new NumericStringRandomizer(9))
-            .build();
+            .randomize(MidlertidigPostadresse.class, () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
+            .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
+            .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9)));
     }
 
     @Override
@@ -98,8 +97,8 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void fagsakSøkSchemaValidering() throws IOException, JSONException {
-        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = EnhancedRandom.randomListOf(1, FagsakOppsummeringDto.class);
-        List<BehandlingOversiktDto> behandlingOversiktDtoer = EnhancedRandom.randomListOf(1, BehandlingOversiktDto.class);
+        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());
+        List<BehandlingOversiktDto> behandlingOversiktDtoer = random.objects(BehandlingOversiktDto.class, 1).collect(Collectors.toList());
         behandlingOversiktDtoer.get(0).setLand(Collections.singletonList(Landkoder.NO.getKode()));
         fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 

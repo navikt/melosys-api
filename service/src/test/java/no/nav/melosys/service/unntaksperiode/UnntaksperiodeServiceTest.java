@@ -1,14 +1,12 @@
 package no.nav.melosys.service.unntaksperiode;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -23,19 +21,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnntaksperiodeServiceTest {
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private ProsessinstansService prosessinstansService;
     @Mock
     private OppgaveService oppgaveService;
     @Mock
-    private ProsessinstansService prosessinstansService;
+    private BehandlingRepository behandlingRepository;
 
     private UnntaksperiodeService unntaksperiodeService;
 
@@ -45,27 +42,10 @@ public class UnntaksperiodeServiceTest {
     }
 
     @Test
-    public void anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException {
-        long behandlingID = 1L;
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
-        behandling.setFagsak(fagsak);
-        when(behandlingRepository.findById(behandlingID)).thenReturn(Optional.of(behandling));
-
-        unntaksperiodeService.anmodningOmUnntak(behandlingID);
-
-        verify(behandlingRepository).findById(behandlingID);
-        verify(behandlingRepository).save(behandling);
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class));
-        verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
-    }
-
-    @Test
     public void ikkeGodkjennPeriode_medBegrunnelser_ingenFeil() throws Exception {
         Set<String> begrunnelser = new HashSet<>();
         begrunnelser.add(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
-        unntaksperiodeService.ikkeGodkjennPeriode(new Behandling(), begrunnelser, null);
+        unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), begrunnelser, null);
         verify(prosessinstansService).opprettProsessinstansUnntaksperiodeAvvist(any(), anySet(), any());
     }
 
@@ -73,7 +53,7 @@ public class UnntaksperiodeServiceTest {
     public void ikkeGodkjennPeriode_ingenBegrunnelser_forventException() throws Exception {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Ingen begrunnelser for avlag av periode");
-        unntaksperiodeService.ikkeGodkjennPeriode(new Behandling(), new HashSet<>(), null);
+        unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), new HashSet<>(), null);
     }
 
     @Test
@@ -84,6 +64,12 @@ public class UnntaksperiodeServiceTest {
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Begrunnelse " + IkkeGodkjentBegrunnelser.ANNET + " krever fritekst!");
-        unntaksperiodeService.ikkeGodkjennPeriode(new Behandling(), begrunnelser, null);
+        unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), begrunnelser, null);
+    }
+
+    private Behandling hentBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+        return behandling;
     }
 }

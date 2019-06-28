@@ -38,10 +38,10 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>0.23.2-SNAPSHOT</melosys.frontend.version>
-        <melosys.jsonschema.version>1.23.0-SNAPSHOT</melosys.jsonschema.version>
+        <melosys.frontend.version>0.24.1-SNAPSHOT</melosys.frontend.version>
+        <melosys.jsonschema.version>1.24.0-SNAPSHOT</melosys.jsonschema.version>
         <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
-        <melosys.internt.kodeverk.version>1.2.18</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>1.2.20</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -49,7 +49,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.0.64</dokprod.melosysbrev.version>
+        <dokprod.melosysbrev.version>1.0.66</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
@@ -66,6 +66,7 @@
         <cxf.version>3.1.11</cxf.version>
         <commons-lang.version>3.2.1</commons-lang.version>
         <everit.jsonschema.validator.version>1.9.1</everit.jsonschema.validator.version>
+        <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>21.0</guava.version>
         <logback.version>1.2.3</logback.version>
         <logstash.version>4.10</logstash.version>
@@ -81,7 +82,7 @@
         <oxmlparserv2.version>11.2.0.1</oxmlparserv2.version>
         <pac4j.version>3.4.0</pac4j.version>
         <prometheus.version>0.5.0</prometheus.version>
-        <random-beans.version>3.7.0</random-beans.version>
+        <easy-random.version>4.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <slf4j.version>1.7.25</slf4j.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
@@ -185,6 +186,11 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${findbugs.jsr305.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
@@ -442,9 +448,9 @@
                 <version>${mockrunner.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.benas</groupId>
-                <artifactId>random-beans</artifactId>
-                <version>${random-beans.version}</version>
+                <groupId>org.jeasy</groupId>
+                <artifactId>easy-random-core</artifactId>
+                <version>${easy-random.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.json</groupId>

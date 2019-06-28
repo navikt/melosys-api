@@ -1,9 +1,6 @@
 package no.nav.melosys.service.avklartefakta;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -166,6 +163,36 @@ public class AvklartefaktaServiceTest {
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
         assertThat(maritimType.get()).isEqualTo(Maritimtyper.SKIP);
+    }
+
+    public static Set<Avklartefakta> lagAlleMaritimeAvklartefakta(String navn, String maritimType, String landkode) {
+        Avklartefakta avklartSokkel = AvklartMaritimtArbeidTest.lagAvklartefaktaSokkelSkip(navn, maritimType);
+        Avklartefakta avklartArbeidsland = AvklartMaritimtArbeidTest.lagAvklartefaktaArbeidsland(navn, landkode);
+        return new HashSet<>(Arrays.asList(avklartSokkel, avklartArbeidsland));
+    }
+
+    @Test
+    public void hentAvklartMaritimeAvklartfakta_medAvklartSokkel_girAvklartMaritimtArbeid() {
+        Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "GB");
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anyList())).thenReturn(alleMaritimeFakta);
+        Collection<AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfakta(1L);
+        assertThat(avklarteMaritimeArbeid).hasSize(1);
+
+        avklarteMaritimeArbeid.forEach(maritimtArbeid -> {
+            assertThat(maritimtArbeid.getNavn()).isEqualTo("Stena Don");
+            assertThat(maritimtArbeid.getMaritimtype()).isEqualTo(Maritimtyper.SOKKEL);
+            assertThat(maritimtArbeid.getLand()).isEqualTo("GB");
+        });
+    }
+
+    @Test
+    public void hentAvklartMaritimeAvklartfakta_medAvklartSkip_girAvklartMaritimtArbeid() {
+        Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "SE");
+        alleMaritimeFakta.addAll(lagAlleMaritimeAvklartefakta("Seven Kestrel", "SKIP", "GB"));
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anyList())).thenReturn(alleMaritimeFakta);
+
+        Collection<AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfakta(1L);
+        assertThat(avklarteMaritimeArbeid).hasSize(2);
     }
 
     @Test
