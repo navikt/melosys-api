@@ -6,10 +6,10 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -19,7 +19,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-@Profile("!nais")
+@ConditionalOnProperty(name = "NAIS_CLUSTER_NAME", havingValue = "dev-fss", matchIfMissing = true)
 public class SwaggerConfig implements
     ApplicationListener<ContextRefreshedEvent> {
 

@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Resource;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import springfox.documentation.swagger.web.InMemorySwaggerResourcesProvider;
 import springfox.documentation.swagger.web.SwaggerResource;
@@ -14,7 +14,7 @@ import springfox.documentation.swagger.web.SwaggerResourcesProvider;
 
 @Component
 @Primary
-@Profile("!nais")
+@ConditionalOnProperty(name = "NAIS_CLUSTER_NAME", havingValue = "dev-fss", matchIfMissing = true)
 public class CombinedResourceProvider implements SwaggerResourcesProvider {
 
     @Resource
