@@ -36,7 +36,7 @@ public class UnntaksperiodeUnderAvklaringTest {
     private UnntaksperiodeUnderAvklaring unntaksperiodeUnderAvklaring;
 
     private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    
+
     @Before
     public void setUp() {
         unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingService, behandlingsresultatRepository);
@@ -57,21 +57,44 @@ public class UnntaksperiodeUnderAvklaringTest {
         unntaksperiodeUnderAvklaring.utfør(prosessinstans);
 
         verify(medlFasade).opprettPeriodeUnderAvklaring(any(), any(Lovvalgsperiode.class), any());
+        verify(felles).lagreMedlPeriodeId(anyLong(), any(), anyLong());
     }
 
     @Test
-    public void utfør_eksisterendePeriode_ingenNyPeriode() throws Exception {
+    public void utfør_eksisterendePeriodeMedMedlId_ingenNyPeriode() throws Exception {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(hentSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(1L)));
         prosessinstans.setBehandling(behandling);
 
-        behandlingsresultat.getLovvalgsperioder().add(new Lovvalgsperiode());
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setMedlPeriodeID(123456L);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
         unntaksperiodeUnderAvklaring.utfør(prosessinstans);
 
         verify(medlFasade, never()).opprettPeriodeUnderAvklaring(any(), any(), any());
+    }
+
+    @Test
+    public void utfør_eksisterendePeriodeUtenMedlId_opprettPeriodeUnderAvklaring() throws Exception {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setSaksopplysninger(Sets.newHashSet(
+            hentSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(1L)), hentPersonDokument())
+        );
+        prosessinstans.setBehandling(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+
+        unntaksperiodeUnderAvklaring.utfør(prosessinstans);
+
+        verify(medlFasade).opprettPeriodeUnderAvklaring(any(), any(Lovvalgsperiode.class), any());
+        verify(felles).lagreMedlPeriodeId(anyLong(), any(), anyLong());
     }
 
     private Saksopplysning hentSedSaksopplysning(LocalDate fom, LocalDate tom) {
