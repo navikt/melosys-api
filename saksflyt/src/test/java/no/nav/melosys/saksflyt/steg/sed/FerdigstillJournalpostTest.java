@@ -36,6 +36,6 @@ public class FerdigstillJournalpostTest {
         ferdigstillJournalpost.utfør(prosessinstans);
 
         verify(joarkFasade).ferdigstillJournalføring(eq("123"));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_RUTING);
     }
 }

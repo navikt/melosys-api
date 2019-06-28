@@ -2,13 +2,17 @@ package no.nav.melosys.service.eessi;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 //A002,A011
@@ -16,29 +20,45 @@ import org.springframework.util.StringUtils;
 public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedInitialiserer {
 
     private final FagsakService fagsakService;
+    private final AnmodningsperiodeService anmodningsperiodeService;
 
     @Autowired
-    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService) {
+    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService, AnmodningsperiodeService anmodningsperiodeService) {
         this.fagsakService = fagsakService;
+        this.anmodningsperiodeService = anmodningsperiodeService;
     }
 
-    public void initialiserProsessinstans(Prosessinstans prosessinstans) throws TekniskException {
+    @Override
+    @Transactional
+    public void initialiserProsessinstans(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         Behandling behandling = hentBehandling(melosysEessiMelding.getGsakSaksnummer());
 
         if (behandling.getStatus() != Behandlingsstatus.ANMODNING_UNNTAK_SENDT) {
             throw new TekniskException("Finner behandling " + behandling.getId() + " for sed fra rinaSak " + melosysEessiMelding.getRinaSaksnummer()
-            + ", men behandlingen har status " + behandling.getStatus());
+                + ", men behandlingen har status " + behandling.getStatus());
         }
 
+        prosessinstans.setBehandling(behandling);
         if (vedtakFattesAutomatisk(melosysEessiMelding)) {
-            prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
-            prosessinstans.setSteg(ProsessSteg.IV_VALIDERING);
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-            prosessinstans.setBehandling(behandling);
+            settTilIverksettVedtak(prosessinstans);
         } else {
             throw new TekniskException("Støtte for manuell behandling av svar på A001 ikke støttet enda");
         }
+    }
+
+    private void settTilIverksettVedtak(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
+        prosessinstans.setSteg(ProsessSteg.IV_VALIDERING);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+
+        long behandlingID = prosessinstans.getBehandling().getId();
+        Anmodningsperiode anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
+            .stream().findFirst().orElseThrow(() -> new TekniskException("Finner ikke anmodningsperiode for behandling"));
+
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.INNVILGELSE);
+        anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiode.getId(), anmodningsperiodeSvar);
     }
 
     private boolean vedtakFattesAutomatisk(MelosysEessiMelding melosysEessiMelding) {

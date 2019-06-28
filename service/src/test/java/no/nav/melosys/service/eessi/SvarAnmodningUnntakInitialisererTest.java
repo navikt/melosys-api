@@ -9,11 +9,13 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -27,10 +29,16 @@ public class SvarAnmodningUnntakInitialisererTest {
 
     @Mock
     private FagsakService fagsakService;
+    @Mock
+    private AnmodningsperiodeService anmodningsperiodeService;
 
     @Before
     public void setUp() {
-        svarAnmodningUnntakInitialiserer = new SvarAnmodningUnntakInitialiserer(fagsakService);
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        ReflectionTestUtils.setField(anmodningsperiode, "id", 123L);
+        svarAnmodningUnntakInitialiserer = new SvarAnmodningUnntakInitialiserer(fagsakService, anmodningsperiodeService);
+        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong()))
+            .thenReturn(Collections.singleton(anmodningsperiode));
     }
 
     @Test
@@ -64,6 +72,7 @@ public class SvarAnmodningUnntakInitialisererTest {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        behandling.setId(123L);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         return fagsak;
     }
