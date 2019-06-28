@@ -15,11 +15,11 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
-import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import org.slf4j.Logger;
@@ -71,12 +71,11 @@ public class OppdaterMedl extends AbstraktStegBehandler {
                 behandlingId, Collections.singletonList(UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument))
             );
 
-            String ident = SaksopplysningerUtils.hentPersonDokument(behandling).fnr;
-
-            Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
-            Long medlId = medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
-            felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, behandlingId);
+            Long medlId = opprettOgLagrePeriodeEndelig(behandlingId, behandling, lagretLovvalgsperiode);
             log.info("Lovvalgsperiode opprettet for behandling {} med medlId {}", behandlingId, medlId);
+        } else if (lovvalgsperioder.iterator().next().getMedlPeriodeID() == null) {
+            Long medlId = opprettOgLagrePeriodeEndelig(behandlingId, behandling, lovvalgsperioder);
+            log.info("Lovvalgsperiode for behandling {} opprettet og lagret i Medl med medlId {}", behandlingId, medlId);
         } else {
             Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
             medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.SED);
@@ -84,5 +83,14 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         }
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+    }
+
+    private Long opprettOgLagrePeriodeEndelig(long behandlingId, Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder) throws TekniskException, FunksjonellException {
+        String ident = SaksopplysningerUtils.hentPersonDokument(behandling).fnr;
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
+        Long medlId = medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
+        felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, behandlingId);
+
+        return medlId;
     }
 }
