@@ -184,7 +184,7 @@ public class OpprettOppgaveTest {
         fagsak.setType(Sakstyper.EU_EOS);
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(Behandlingstyper.NORGE_UTPEKT);
+        behandling.setType(Behandlingstyper.UTL_MYND_UTPEKT_NORGE);
         behandling.setFagsak(fagsak);
 
         Prosessinstans p = new Prosessinstans();

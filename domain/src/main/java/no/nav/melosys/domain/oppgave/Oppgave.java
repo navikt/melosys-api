@@ -152,10 +152,12 @@ public class Oppgave {
                 return Oppgavetyper.VUR;
             case ANKE:
             case KLAGE:
-            case NORGE_UTPEKT:
+            case UTL_MYND_UTPEKT_NORGE:
             case NY_VURDERING:
-            case PAASTAND_UTL:
-            case UNNTAK_FRA_MEDLEMSKAP:
+            case UTL_MYND_UTPEKT_SEG_SELV:
+            case REGISTRERING_UNNTAK_NORSK_TRYGD:
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
+            case ØVRIGE_SED:
             default:
                 throw new UnsupportedOperationException();
         }
