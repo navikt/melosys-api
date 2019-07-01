@@ -55,9 +55,7 @@ public class VedtakTjeneste extends RestTjeneste {
             throw new BadRequestException("Mangler BegrunnelseKode");
         }
         tilgangService.sjekkTilgang(behandlingID);
-
         vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode());
-
         return Response.ok().build();
     }
 }

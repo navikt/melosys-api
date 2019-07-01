@@ -80,7 +80,6 @@ public class ProsessinstansService {
     }
 
     void lagre(Prosessinstans prosessinstans, String saksbehandler) {
-
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
@@ -105,7 +104,6 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansHenleggSak(Behandling behandling, Henleggelsesgrunner begrunnelseKode, String fritekst) {
         Prosessinstans prosessinstans = new Prosessinstans();
-
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.HENLEGG_SAK);
 
@@ -122,8 +120,12 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
         prosessinstans.setSteg(ProsessSteg.IV_VALIDERING);
+        if (behandlingsresultatType == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+            prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER);
+        } else {
+            prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
+        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
         prosessinstans.setBehandling(behandling);
 
@@ -159,10 +161,6 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperioder endretperiode) {
         Prosessinstans nyprosessinstans = new Prosessinstans();
-
-        String saksbehandler = SubjectHandler.getInstance().getUserID();
-        nyprosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
-
         nyprosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiode);
         nyprosessinstans.setBehandling(behandling);
         nyprosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);

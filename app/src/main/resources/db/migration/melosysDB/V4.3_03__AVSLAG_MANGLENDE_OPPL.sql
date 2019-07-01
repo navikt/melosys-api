@@ -1,0 +1,2 @@
+INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER', 'Iverksetter et avslått vedtak pga manglende opplysninger');
+INSERT INTO behandlingsresultat_type (kode, navn) VALUES('AVSLAG_MANGLENDE_OPPL', 'avslått pga manglende opplysninger');

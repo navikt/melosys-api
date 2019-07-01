@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,13 +54,18 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
     protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
         return FeilStrategi.standardFeilHåndtering();
     }
-    
+
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
+        EnumSet<ProsessType> aksepterteProsesstyper = EnumSet.of(
+            ProsessType.IVERKSETT_VEDTAK,
+            ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
+            ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER);
+
         ProsessType prosessType = prosessinstans.getType();
-        if (prosessType != ProsessType.IVERKSETT_VEDTAK && prosessType != ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE) {
+        if (!aksepterteProsesstyper.contains(prosessType)) {
             String feilmelding = "ProsessType " + prosessType + " er ikke støttet.";
             håndterUnntak(TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;
@@ -79,23 +85,29 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
             return;
         }
 
-        Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
-        if (lovvalgsperioder.isEmpty()) {
-            String feilmelding = "Lovvalgsperiode mangler for behandlingsresultat " + behandlingsresultat.getId();
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
-            return;
-        }
-
         String saksbehandlerID = prosessinstans.getData(SAKSBEHANDLER);
         if (saksbehandlerID == null) {
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "SaksbehandlerID er ikke oppgitt.", null);
             return;
         }
 
-        String behandlingsResultatType = prosessinstans.getData(BEHANDLINGSRESULTATTYPE);
-        if (behandlingsResultatType == null && prosessType == ProsessType.IVERKSETT_VEDTAK) {
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "behandlingsResultatType er ikke oppgitt.", null);
-            return;
+        if (prosessType == ProsessType.IVERKSETT_VEDTAK ||
+            prosessType == ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE) {
+            Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
+            if (lovvalgsperioder.isEmpty()) {
+                String feilmelding = "Lovvalgsperiode mangler for behandlingsresultat " + behandlingsresultat.getId();
+                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
+                return;
+            }
+        }
+
+        if (prosessType == ProsessType.IVERKSETT_VEDTAK ||
+            prosessType == ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER) {
+            String behandlingsResultatType = prosessinstans.getData(BEHANDLINGSRESULTATTYPE);
+            if (behandlingsResultatType == null) {
+                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "behandlingsResultatType er ikke oppgitt.", null);
+                return;
+            }
         }
 
         prosessinstans.setSteg(IV_OPPDATER_RESULTAT);

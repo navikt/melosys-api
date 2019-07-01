@@ -9,6 +9,7 @@ public enum ProsessType implements Kodeverk {
     HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
     IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),
     IVERKSETT_VEDTAK_FORKORT_PERIODE("IVERKSETT_VEDTAK_FORKORT_PERIODE", "Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet"),
+    IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER("IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER", "Iverksetter et avslått vedtak pga manglende opplysninger"),
     JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
     JFR_NY_BEHANDLING("JFR_NY_BEHANDLING", "Journalføring på eksisterende sak oppretter en ny behandling"),
     JFR_NY_SAK("JFR_NY_SAK", "Journalføring med ny sak og søknad"),
@@ -24,7 +25,7 @@ public enum ProsessType implements Kodeverk {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
-    
+
     @Override
     public String getKode() {
         return kode;

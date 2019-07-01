@@ -82,55 +82,28 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
         }
 
+        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        Fagsak fagsak = behandling.getFagsak();
+
+        ProsessType prosessType = prosessinstans.getType();
+        if (prosessType == ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER) {
+            sendAvslagsbrevManglendeOpplysninger(behandling, saksbehandler, fagsak);
+            prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
+            return;
+        }
+
         Behandlingsresultat resultat = behandlingsResultatRepo.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat " + behandling.getId()));
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode(resultat.getLovvalgsperioder());
         log.info("Behandler lovvalgsperiode: {}", lovvalgsperiode);
 
-        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        Fagsak fagsak = behandling.getFagsak();
-
         if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, Mottaker.av(BRUKER), behandling);
-
-            if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-                brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
-            }
-
-            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(HELFO), behandling);
-            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(SKATT), behandling);
-
+            sendAvslagsbrev(behandling, saksbehandler, fagsak);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
         } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-            Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
-            String begrunnelseKode = null;
-            if (endretPeriodeBegrunnelseKode != null) {
-                begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
-            }
-
-            Brevbestilling.Builder innvilgelseBuilder = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
-                .medAvsender(saksbehandler)
-                .medBehandling(behandling)
-                .medBegrunnelseKode(begrunnelseKode);
-            Brevbestilling innvilgelseBruker = innvilgelseBuilder.medMottaker(Mottaker.av(BRUKER)).build();
-            brevBestiller.bestill(innvilgelseBruker);
-            Brevbestilling innvilgelseSkatt = innvilgelseBuilder.medMottaker(FastMottaker.av(SKATT)).build();
-            brevBestiller.bestill(innvilgelseSkatt);
-
-            if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-                brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
-            }
-            if (myndighetØnskerInnvilgelsesbrev(fagsak.hentMyndighetLandkode())) {
-                Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-                    .medAvsender(saksbehandler)
-                    .medMottaker(Mottaker.av(MYNDIGHET))
-                    .medBehandling(behandling)
-                    .medBegrunnelseKode(begrunnelseKode).build();
-                brevBestiller.bestill(A1_Myndighet);
-            }
-
+            sendInnvilgelsesbrev(prosessinstans, behandling, saksbehandler, fagsak);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
@@ -138,6 +111,53 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                     + "prosessinstansen {}.",
                 behandling.getId(), prosessinstans.getId());
             prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+        }
+    }
+
+    private void sendAvslagsbrevManglendeOpplysninger(Behandling behandling, String saksbehandler, Fagsak fagsak) throws FunksjonellException, TekniskException {
+//        brevBestiller.bestill(AVSLAG_MANGLENDE_OPPL, saksbehandler, Mottaker.av(BRUKER), behandling);
+//        if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
+//            brevBestiller.bestill(AVSLAG_MANGLENDE_OPPL, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+//        }
+    }
+
+    private void sendAvslagsbrev(Behandling behandling, String saksbehandler, Fagsak fagsak) throws FunksjonellException, TekniskException {
+        brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, Mottaker.av(BRUKER), behandling);
+
+        if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
+            brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+        }
+
+        brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(HELFO), behandling);
+        brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(SKATT), behandling);
+    }
+
+    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, String saksbehandler, Fagsak fagsak) throws FunksjonellException, TekniskException {
+        Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
+        String begrunnelseKode = null;
+        if (endretPeriodeBegrunnelseKode != null) {
+            begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
+        }
+
+        Brevbestilling.Builder innvilgelseBuilder = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
+            .medAvsender(saksbehandler)
+            .medBehandling(behandling)
+            .medBegrunnelseKode(begrunnelseKode);
+        Brevbestilling innvilgelseBruker = innvilgelseBuilder.medMottaker(Mottaker.av(BRUKER)).build();
+        brevBestiller.bestill(innvilgelseBruker);
+        Brevbestilling innvilgelseSkatt = innvilgelseBuilder.medMottaker(FastMottaker.av(SKATT)).build();
+        brevBestiller.bestill(innvilgelseSkatt);
+
+        if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
+            brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+        }
+        if (myndighetØnskerInnvilgelsesbrev(fagsak.hentMyndighetLandkode())) {
+            Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
+                .medAvsender(saksbehandler)
+                .medMottaker(Mottaker.av(MYNDIGHET))
+                .medBehandling(behandling)
+                .medBegrunnelseKode(begrunnelseKode).build();
+            brevBestiller.bestill(A1_Myndighet);
         }
     }
 

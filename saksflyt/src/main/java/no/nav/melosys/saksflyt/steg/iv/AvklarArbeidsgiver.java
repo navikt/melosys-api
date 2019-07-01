@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_ARBEIDSGIVER;
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
 
 /**
  * Oppdaterer aktør med avklart arbeidsgiver i saken.
@@ -54,11 +55,17 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        // IVERKSETT_VEDTAK omfatter både Innvilgelse og Avslag
-        if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
+        ProsessType prosessType = prosessinstans.getType();
+        // Ved forkortet periode har allerede arbeidsgiver blitt avklart
+        if (prosessType != ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE) {
             super.utfør(prosessinstans);
         }
 
-        prosessinstans.setSteg(IV_OPPDATER_MEDL);
+        // Medl skal ikke oppdateres ved avslag. Hopper rett til utsendelse av brev
+        if (prosessType == ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER) {
+            prosessinstans.setSteg(IV_SEND_BREV);
+        } else {
+            prosessinstans.setSteg(IV_OPPDATER_MEDL);
+        }
     }
 }
