@@ -83,14 +83,14 @@ public class UnntaksperiodeMottakInitialisererTest {
     }
 
     @Test
-    public void initialiserProsessinstans_erEndringTomErNull_skalBehandles() throws Exception {
+    public void initialiserProsessinstans_erEndringNyTomErNull_skalBehandles() throws Exception {
         LocalDate fom = LocalDate.now();
         LocalDate tom = null;
         Prosessinstans prosessinstans = hentProsessinstans(true, fom, tom);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(fom.plusMonths(1));
-        lovvalgsperiode.setTom(tom);
+        lovvalgsperiode.setTom(LocalDate.now().plusYears(2));
 
         unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans);
 

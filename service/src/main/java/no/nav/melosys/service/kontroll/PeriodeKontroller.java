@@ -27,4 +27,17 @@ public final class PeriodeKontroller {
     public static boolean datoOver1ÅrFremITid(LocalDate fom) {
         return fom.isAfter(LocalDate.now().plusYears(1L));
     }
+
+    public static boolean periodeErLik(LocalDate fom1, LocalDate tom1, LocalDate fom2, LocalDate tom2) {
+        return datoErLik(fom1, fom2) && datoErLik(tom1, tom2);
+    }
+
+    private static boolean datoErLik(LocalDate date1, LocalDate date2) {
+
+        if (date1 == null || date2 == null) {
+            return date1 == null && date2 == null;
+        }
+
+        return date1.equals(date2);
+    }
 }

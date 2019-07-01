@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +69,8 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
                 Fagsak fagsak = eksisterendeFagsak.get();
                 Behandling behandling = fagsak.getTidligsteInaktiveBehandling();
                 lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandling.getId());
-                return !lovvalgsperiode.getFom().equals(periode.getFom()) &&
-                    (periode.getTom() == null || !lovvalgsperiode.getTom().equals(periode.getTom()));
+                return !PeriodeKontroller.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(),
+                    periode.getFom(), periode.getTom());
             }
         } catch (IkkeFunnetException ex) {
             // Om ikke finner fagsak -> behandle på nytt
