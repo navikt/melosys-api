@@ -79,7 +79,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
             OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
                 .medAktørID(prosessinstans.getData(AKTØR_ID))
-                .medBehandlingstype(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD)
+                .medBehandlingstype(prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class))
                 .medInitierendeJournalpostId(prosessinstans.getData(JOURNALPOST_ID))
                 .medInitierendeDokumentId(prosessinstans.getData(DOKUMENT_ID))
                 .medGsakSaksnummer(gsakSaksnummer)
