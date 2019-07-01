@@ -16,6 +16,7 @@ class KontrollFactory {
             case A003:
                 return a003Kontroller();
             case A009:
+            case A010:
                 return a009Kontroller();
             default:
                 throw new UnsupportedOperationException("SedType: " + sedType + " er ikke støttet for automatiske kontroller");
