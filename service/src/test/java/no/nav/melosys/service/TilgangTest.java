@@ -10,6 +10,7 @@ import no.nav.freg.abac.core.service.AbacService;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -84,6 +85,24 @@ public class TilgangTest {
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandlingMocked));
 
         tilgang.sjekk(102323934);
+    }
+
+    @Test
+    public void sjekkRedigerbar_behandlingErRedigerbar_Ok() throws FunksjonellException, TekniskException {
+        when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
+
+        when(behandlingMocked.erRedigerbar()).thenReturn(true);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandlingMocked));
+
+        tilgang.sjekkRedigerbar(123123123);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void sjekkRedigerbar_behandlingIkkeRedigerbar_girFeil() throws FunksjonellException, TekniskException {
+        when(behandlingMocked.erRedigerbar()).thenReturn(false);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandlingMocked));
+
+        tilgang.sjekkRedigerbar(123123123);
     }
 
     @Test

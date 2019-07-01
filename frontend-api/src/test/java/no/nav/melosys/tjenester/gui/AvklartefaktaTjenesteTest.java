@@ -1,8 +1,12 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -15,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -57,6 +63,20 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
         when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(avklartefaktaDtoer);
         Set<AvklartefaktaDto> resultat = avklartefaktaTjeneste.lagreAvklarteFakta(1, avklartefaktaDtoer);
         assertThat(resultat).isEqualTo(avklartefaktaDtoer);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void lagreAvklartefakta_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
+        doThrow(FunksjonellException.class).when(tilgang).sjekkRedigerbar(anyLong());
+
+        avklartefaktaTjeneste.lagreAvklarteFakta(1, Collections.emptySet());
+    }
+
+    @Test(expected = SikkerhetsbegrensningException.class)
+    public void hentAvklartefakta_ikkeTilgang_girFeil() throws FunksjonellException, TekniskException {
+        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekk(anyLong());
+
+        avklartefaktaTjeneste.hentAvklarteFakta(1);
     }
 }
 
