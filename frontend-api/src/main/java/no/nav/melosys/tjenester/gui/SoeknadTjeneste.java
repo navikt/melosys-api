@@ -13,10 +13,7 @@ import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
@@ -67,10 +64,10 @@ public class SoeknadTjeneste extends RestTjeneste {
     @ApiOperation(
         value = "Tjeneste for å registrere opplysninger fra papirsøknaden manuelt.",
         response = SoeknadDto.class)
-    public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) throws FunksjonellException, TekniskException {
         long behandlingID = soeknadInnDto.getBehandlingID();
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoeknadDokument();
-        tilgang.sjekk(behandlingID);
+        tilgang.sjekkRedigerbar(behandlingID);
         soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
         SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         return new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);
