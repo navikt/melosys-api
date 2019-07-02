@@ -1,20 +1,14 @@
 package no.nav.melosys.service.eessi;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Optional;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kafka.model.Periode;
 import no.nav.melosys.service.kafka.model.Statsborgerskap;
-import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiMottakServiceTest {
@@ -37,21 +31,17 @@ public class EessiMottakServiceTest {
 
     @Mock
     private ProsessinstansService prosessinstansService;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
 
     private EessiMottakService eessiMottakService;
 
     @Before
     public void setUp() {
-        eessiMottakService = new EessiMottakService(prosessinstansService, fagsakService, lovvalgsperiodeService);
+        eessiMottakService = new EessiMottakService(prosessinstansService);
     }
 
     @Test
-    public void behandleMottatMelding_ikkeEndring_sjekkAlleVerdierErSatt() {
-        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(false, LocalDate.now(), LocalDate.now().plusYears(1));
+    public void behandleMottatMelding() {
+        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(LocalDate.now(), LocalDate.now().plusYears(1));
         eessiMottakService.behandleMottattMelding(eessiMelding);
 
         verify(prosessinstansService).lagre(captor.capture());
@@ -60,89 +50,17 @@ public class EessiMottakServiceTest {
         assertThat(prosessinstans).isNotNull();
         assertThat(prosessinstans.getData()).isNotEmpty();
 
-        SedDokument sedDokument = prosessinstans.getData(ProsessDataKey.SED_DOKUMENT, SedDokument.class);
-        assertThat(sedDokument).isNotNull();
-        assertThat(sedDokument.getLovvalgBestemmelse()).isEqualTo(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        assertThat(sedDokument.getLovvalgsperiode()).isNotNull();
-        assertThat(sedDokument.getLovvalgsperiode().getFom()).isBeforeOrEqualTo(LocalDate.of(2020, 12, 12));
-        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isNotNull();
-        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotNull();
-        assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isNotNull();
+        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isNotEmpty();
+        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotEmpty();
+        assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isNotEmpty();
+        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING)).isNotEmpty();
     }
 
-    @Test
-    public void behandleMottatMelding_erEndringIkkeEndretPeriode_skalIkkeBehandles() throws Exception {
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = LocalDate.now().plusYears(1);
-        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(true, fom, tom);
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(fom);
-        lovvalgsperiode.setTom(tom);
-
-        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(anyLong()))
-            .thenReturn(lovvalgsperiode);
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong()))
-            .thenReturn(Optional.of(hentFagsak()));
-
-        eessiMottakService.behandleMottattMelding(eessiMelding);
-
-        verify(prosessinstansService, never()).lagre(any(Prosessinstans.class));
-    }
-
-    @Test
-    public void behandleMottatMelding_erEndringFinnerIkkeTidligerBehandling_skalBehandles() throws Exception {
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = LocalDate.now().plusYears(1);
-        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(true, fom, tom);
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(fom);
-        lovvalgsperiode.setTom(tom);
-
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong()))
-            .thenReturn(Optional.empty());
-        eessiMottakService.behandleMottattMelding(eessiMelding);
-
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
-    }
-
-    @Test
-    public void behandleMottatMelding_erEndringTomErNull_skalBehandles() throws Exception {
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = null;
-        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(true, fom, tom);
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(fom.plusMonths(1));
-        lovvalgsperiode.setTom(tom);
-
-        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(anyLong()))
-            .thenReturn(lovvalgsperiode);
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong()))
-            .thenReturn(Optional.of(hentFagsak()));
-        eessiMottakService.behandleMottattMelding(eessiMelding);
-
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
-    }
-
-    private Fagsak hentFagsak() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setRegistrertDato(Instant.now());
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        return fagsak;
-    }
-
-    private MelosysEessiMelding hentMelosysEessiMelding(boolean erEndring, LocalDate fom, LocalDate tom) {
+    private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom) {
         MelosysEessiMelding melding = new MelosysEessiMelding();
         melding.setAktoerId("123");
         melding.setArtikkel("12_1");
         melding.setDokumentId("123321");
-        melding.setErEndring(erEndring);
         melding.setGsakSaksnummer(432432L);
         melding.setJournalpostId("j123");
         melding.setLovvalgsland("SE");

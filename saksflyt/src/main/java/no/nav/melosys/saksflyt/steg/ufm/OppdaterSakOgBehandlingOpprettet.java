@@ -34,6 +34,6 @@ public class OppdaterSakOgBehandlingOpprettet extends SakOgBehandlingStegBehande
         }
 
         sakOgBehandlingOpprettet(saksnummer, behandlingId, aktørId);
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_FERDIGSTILL_JOURNALPOST);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE);
     }
 }

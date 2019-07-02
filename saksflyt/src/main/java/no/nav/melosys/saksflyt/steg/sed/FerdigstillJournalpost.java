@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.ufm;
+package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Map;
 
@@ -31,7 +31,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.REG_UNNTAK_FERDIGSTILL_JOURNALPOST;
+        return ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST;
     }
 
     @Override
@@ -45,6 +45,6 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         joarkFasade.ferdigstillJournalføring(journalpostId);
         log.info("Journalpost {} ferdigstilt for behandling {}", journalpostId, prosessinstans.getBehandling().getId());
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE);
+        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_RUTING);
     }
 }

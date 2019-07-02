@@ -24,6 +24,7 @@ public enum ProsessDataKey {
     BREVDATA("brevData"),
     BRUKER_ID("brukerID"),
     DOKUMENT_ID("dokumentID"),
+    EESSI_MELDING("eessiMelding"),
     ER_ENDRING("erEndring"),
     FRITEKST("fritekst"),
     GSAK_SAK_ID("gsakSakID"),

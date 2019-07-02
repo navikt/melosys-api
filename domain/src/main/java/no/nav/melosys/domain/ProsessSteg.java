@@ -65,10 +65,13 @@ public enum ProsessSteg implements Kodeverk {
     HS_HENLEGG_SAK("HS_HENLEGG_SAK", "Henlegg en sak"),
     HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
 
+    //Mottak av SED
+    SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
+    SED_MOTTAK_RUTING("SED_MOTTAK_RUTING", "Bestemmer videre behandling for innkommende SED"),
+
     //Unntak medlemskap
     REG_UNNTAK_OPPRETT_SAK_OG_BEH("REG_UNNTAK_OPPRETT_SAK_OG_BEH","Opprett sak og behandling"),
     REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
-    REG_UNNTAK_FERDIGSTILL_JOURNALPOST("REG_UNNTAK_FERDIGSTILL_JOURNALPOST","Ferdigstiller journalpost"),
     REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
     REG_UNNTAK_OPPRETT_SEDDOKUMENT("REG_UNNTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
     REG_UNNTAK_HENT_PERSON("REG_UNNTAK_HENT_PERSON","Henter person tilknyttet SED"),
