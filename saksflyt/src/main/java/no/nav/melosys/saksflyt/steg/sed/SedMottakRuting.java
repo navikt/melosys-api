@@ -43,7 +43,7 @@ public class SedMottakRuting extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
-        BehandleMottattSedInitialiserer behandleMottattSedInitialiserer = hentBehandlingForType(SedType.valueOf(melosysEessiMelding.getSedType()));
+        BehandleMottattSedInitialiserer behandleMottattSedInitialiserer = hentInitialisererForSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
         behandleMottattSedInitialiserer.initialiserProsessinstans(prosessinstans);
 
         if (prosessinstans.getSteg() == inngangsSteg()) {
@@ -51,7 +51,7 @@ public class SedMottakRuting extends AbstraktStegBehandler {
         }
     }
 
-    private BehandleMottattSedInitialiserer hentBehandlingForType(SedType sedType) throws IkkeFunnetException {
+    private BehandleMottattSedInitialiserer hentInitialisererForSedType(SedType sedType) throws IkkeFunnetException {
         return sedMottattInitialiserere.stream()
             .filter(initialiserer -> initialiserer.gjelderSedType(sedType)).findFirst()
             .orElseThrow(() -> new IkkeFunnetException("Melosys støtter ikke behandling av sedtype" + sedType));
