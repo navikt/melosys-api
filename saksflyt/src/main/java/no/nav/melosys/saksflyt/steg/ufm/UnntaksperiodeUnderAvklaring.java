@@ -58,22 +58,25 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (lovvalgsperioder.isEmpty()) {
-            behandlingService.oppdaterStatus(behandlingId, Behandlingsstatus.AVVENT_DOK_UTL);
             Behandling behandling = behandlingService.hentBehandling(behandlingId);
             SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
-            PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
             Lovvalgsperiode lovvalgsperiode = UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument);
-            Long medlperiodeId = medlFasade.opprettPeriodeUnderAvklaring(personDokument.fnr, lovvalgsperiode, KildedokumenttypeMedl.SED);
-            felles.lagreMedlPeriodeId(medlperiodeId, lovvalgsperiode, behandlingId);
+            oppdaterStatusOgLagreMedlPeriode(behandlingId, lovvalgsperiode, behandling);
         } else if (lovvalgsperioder.iterator().next().getMedlPeriodeID() == null) {
-            behandlingService.oppdaterStatus(behandlingId, Behandlingsstatus.AVVENT_DOK_UTL);
             Behandling behandling = behandlingService.hentBehandling(behandlingId);
-            PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
             Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
-            Long medlperiodeId = medlFasade.opprettPeriodeUnderAvklaring(personDokument.fnr, lovvalgsperiode, KildedokumenttypeMedl.SED);
-            felles.lagreMedlPeriodeId(medlperiodeId, lovvalgsperiode, behandlingId);
+            oppdaterStatusOgLagreMedlPeriode(behandlingId, lovvalgsperiode, behandling);
         }
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
+    }
+
+    private void oppdaterStatusOgLagreMedlPeriode(long behandlingId, Lovvalgsperiode lovvalgsperiode, Behandling behandling)
+        throws FunksjonellException, TekniskException {
+
+        behandlingService.oppdaterStatus(behandlingId, Behandlingsstatus.AVVENT_DOK_UTL);
+        PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
+        Long medlperiodeId = medlFasade.opprettPeriodeUnderAvklaring(personDokument.fnr, lovvalgsperiode, KildedokumenttypeMedl.SED);
+        felles.lagreMedlPeriodeId(medlperiodeId, lovvalgsperiode, behandlingId);
     }
 }
