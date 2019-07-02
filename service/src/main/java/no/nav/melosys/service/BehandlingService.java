@@ -24,6 +24,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -68,13 +69,12 @@ public class BehandlingService {
      * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
      */
     public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException {
-        if (!erLovligNesteStatusEtterDokumentVurdering(status)) {
-            throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
-        }
-
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
-        if (!behandling.erAktiv()) {
+
+        if (behandling.getStatus() == Behandlingsstatus.VURDER_DOKUMENT && !erLovligNesteStatusEtterDokumentVurdering(status)) {
+            throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
+        } else if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
         }
         behandling.setStatus(status);

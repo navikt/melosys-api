@@ -20,6 +20,8 @@ public class MelosysEessiMelding {
     private String bucType;
     private String sedType;
 
+    private SvarAnmodningUnntak svarAnmodningUnntak;
+
     public String getSedId() {
         return sedId;
     }
@@ -138,5 +140,13 @@ public class MelosysEessiMelding {
 
     public void setSedType(String sedType) {
         this.sedType = sedType;
+    }
+
+    public SvarAnmodningUnntak getSvarAnmodningUnntak() {
+        return svarAnmodningUnntak;
+    }
+
+    public void setSvarAnmodningUnntak(SvarAnmodningUnntak svarAnmodningUnntak) {
+        this.svarAnmodningUnntak = svarAnmodningUnntak;
     }
 }
