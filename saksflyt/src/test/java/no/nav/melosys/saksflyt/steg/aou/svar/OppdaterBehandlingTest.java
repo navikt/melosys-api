@@ -56,6 +56,7 @@ public class OppdaterBehandlingTest {
         oppdaterBehandling.utfør(prosessinstans);
 
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 
     @Test

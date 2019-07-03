@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.aou.svar;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
@@ -51,24 +50,12 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
             throw new TekniskException("Prosessinstans ikke av type" + ProsessType.ANMODNING_OM_UNNTAK_SVAR);
         }
 
-        Anmodningsperiode anmodningsperiode = hentAnmodningsperiode(prosessinstans.getBehandling().getId());
-
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         AnmodningsperiodeSvar anmodningsperiodeSvar = opprettAnmodningsperiodeSvar(melosysEessiMelding.getSvarAnmodningUnntak());
 
-        anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiode.getId(), anmodningsperiodeSvar);
+        anmodningsperiodeService.lagreAnmodningsperiodeSvarForBehandling(prosessinstans.getBehandling().getId(), anmodningsperiodeSvar);
 
         prosessinstans.setSteg(ProsessSteg.AOU_SVAR_OPPDATER_BEHANDLING);
-    }
-
-    private Anmodningsperiode hentAnmodningsperiode(Long behandlingID) throws FunksjonellException {
-        Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.hentAnmodningsperioder(behandlingID);
-
-        if (anmodningsperioder.size() != 1) {
-            throw new FunksjonellException("Forventet èn anmodningsperiode, fant " + anmodningsperioder.size());
-        }
-
-        return anmodningsperioder.iterator().next();
     }
 
     private AnmodningsperiodeSvar opprettAnmodningsperiodeSvar(SvarAnmodningUnntak svar) {

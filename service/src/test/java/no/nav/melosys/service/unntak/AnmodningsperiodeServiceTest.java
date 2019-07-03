@@ -116,7 +116,7 @@ public class AnmodningsperiodeServiceTest {
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
-
+        when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Periode og begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
 
@@ -131,9 +131,9 @@ public class AnmodningsperiodeServiceTest {
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.AVSLAG);
-
+        when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Begrunnelse på være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
+        expectedException.expectMessage("Begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
     }
@@ -146,9 +146,9 @@ public class AnmodningsperiodeServiceTest {
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.AVSLAG);
-
+        when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Begrunnelse på være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
+        expectedException.expectMessage("Begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
     }

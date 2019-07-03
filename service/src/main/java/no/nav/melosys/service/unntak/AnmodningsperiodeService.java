@@ -60,9 +60,18 @@ public class AnmodningsperiodeService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(long anmodningsperiodeId, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
-        validerSvar(anmodningsperiodeSvar);
         Anmodningsperiode anmodningsperiode = anmodningsperiodeRepository.findById(anmodningsperiodeId)
             .orElseThrow(() -> new IkkeFunnetException("Anmodningsperiode med id " + anmodningsperiodeId + " finnes ikke"));
+
+        return lagreAnmodningsperiodeSvar(anmodningsperiode, anmodningsperiodeSvar);
+    }
+
+    public AnmodningsperiodeSvar lagreAnmodningsperiodeSvarForBehandling(long behandlingID, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+        return lagreAnmodningsperiodeSvar(hentFørsteAnmodningsperiode(behandlingID), anmodningsperiodeSvar);
+    }
+
+    private AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+        validerSvar(anmodningsperiodeSvar);
 
         if (anmodningsperiode.getAnmodningsperiodeSvar() != null) {
             anmodningsperiodeSvar = oppdaterOpprinneligSvar(anmodningsperiode.getAnmodningsperiodeSvar(), anmodningsperiodeSvar);
@@ -70,6 +79,16 @@ public class AnmodningsperiodeService {
 
         anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
         return anmodningsperiodeSvarRepository.save(anmodningsperiodeSvar);
+    }
+
+    private Anmodningsperiode hentFørsteAnmodningsperiode(Long behandlingID) throws FunksjonellException {
+        Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder(behandlingID);
+
+        if (anmodningsperioder.size() != 1) {
+            throw new FunksjonellException("Forventet èn anmodningsperiode, fant " + anmodningsperioder.size());
+        }
+
+        return anmodningsperioder.iterator().next();
     }
 
     private AnmodningsperiodeSvar oppdaterOpprinneligSvar(AnmodningsperiodeSvar opprinnelig, AnmodningsperiodeSvar oppdatert) {

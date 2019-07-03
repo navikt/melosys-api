@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.steg.aou.svar;
 
-import java.util.Collections;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
@@ -20,7 +18,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettAnmodningsperiodeSvarTest {
@@ -38,7 +35,6 @@ public class OpprettAnmodningsperiodeSvarTest {
         opprettAnmodningsperiodeSvar = new OpprettAnmodningsperiodeSvar(anmodningsperiodeService);
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         ReflectionTestUtils.setField(anmodningsperiode, "id", 123L);
-        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
     }
 
     @Test
@@ -46,7 +42,7 @@ public class OpprettAnmodningsperiodeSvarTest {
         Prosessinstans prosessinstans = hentProsessinstans(true);
         opprettAnmodningsperiodeSvar.utfør(prosessinstans);
 
-        verify(anmodningsperiodeService).lagreAnmodningsperiodeSvar(anyLong(), captor.capture());
+        verify(anmodningsperiodeService).lagreAnmodningsperiodeSvarForBehandling(anyLong(), captor.capture());
 
         AnmodningsperiodeSvar anmodningsperiodeSvar = captor.getValue();
         assertThat(anmodningsperiodeSvar.getAnmodningsperiodeSvarType()).isEqualTo(AnmodningsperiodeSvarType.INNVILGELSE);
@@ -58,7 +54,7 @@ public class OpprettAnmodningsperiodeSvarTest {
         Prosessinstans prosessinstans = hentProsessinstans(false);
         opprettAnmodningsperiodeSvar.utfør(prosessinstans);
 
-        verify(anmodningsperiodeService).lagreAnmodningsperiodeSvar(anyLong(), captor.capture());
+        verify(anmodningsperiodeService).lagreAnmodningsperiodeSvarForBehandling(anyLong(), captor.capture());
 
         AnmodningsperiodeSvar anmodningsperiodeSvar = captor.getValue();
         assertThat(anmodningsperiodeSvar.getAnmodningsperiodeSvarType()).isEqualTo(AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
