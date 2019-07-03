@@ -10,10 +10,8 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.exception.TekniskException;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
@@ -84,7 +82,7 @@ public final class BrevDataUtils {
         return adresse;
     }
 
-    public static BostedsadresseType lagBostedsadresse(StrukturertAdresse bosted) throws TekniskException {
+    public static BostedsadresseType lagBostedsadresse(StrukturertAdresse bosted) {
         BostedsadresseType bostedAdresse = new BostedsadresseType();
         if (StringUtils.isNotEmpty(bosted.gatenavn)) {
             bostedAdresse.setGatenavn(bosted.gatenavn);
@@ -95,7 +93,7 @@ public final class BrevDataUtils {
         bostedAdresse.setPostnr(bosted.postnummer);
         bostedAdresse.setPoststed(bosted.poststed);
         bostedAdresse.setRegion(bosted.region);
-        bostedAdresse.setLandkode(tilIso3(bosted.landkode));
+        bostedAdresse.setLandkode(bosted.landkode);
         return bostedAdresse;
     }
 
