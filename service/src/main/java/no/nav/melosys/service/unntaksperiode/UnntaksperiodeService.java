@@ -7,12 +7,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
@@ -26,13 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class UnntaksperiodeService {
     private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeService.class);
 
-    private final BehandlingRepository behandlingRepository;
+    private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
 
     @Autowired
-    public UnntaksperiodeService(BehandlingRepository behandlingRepository, OppgaveService oppgaveService, ProsessinstansService prosessinstansService) {
-        this.behandlingRepository = behandlingRepository;
+    public UnntaksperiodeService(BehandlingService behandlingService, OppgaveService oppgaveService, ProsessinstansService prosessinstansService) {
+        this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
     }
@@ -52,8 +49,9 @@ public class UnntaksperiodeService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void behandlingUnderAvklaring(Behandling behandling) {
+    public void behandlingUnderAvklaring(Behandling behandling) throws FunksjonellException {
         prosessinstansService.opprettProsessinstansUnntaksperiodeUnderAvklaring(behandling);
+        behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.AVVENT_DOK_UTL);
     }
 
     private Set<IkkeGodkjentBegrunnelser> tilIkkeGodkjentBegrunnelser(Set<String> begrunnelser) {

@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
@@ -32,13 +32,13 @@ public class UnntaksperiodeServiceTest {
     @Mock
     private OppgaveService oppgaveService;
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
 
     private UnntaksperiodeService unntaksperiodeService;
 
     @Before
     public void setUp() {
-        unntaksperiodeService = new UnntaksperiodeService(behandlingRepository, oppgaveService, prosessinstansService);
+        unntaksperiodeService = new UnntaksperiodeService(behandlingService, oppgaveService, prosessinstansService);
     }
 
     @Test

@@ -5,12 +5,16 @@ import java.util.Optional;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +36,8 @@ public class UnntaksperiodeUnderAvklaringTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
+    @Mock
+    private AvklartefaktaService avklartefaktaService;
 
     private UnntaksperiodeUnderAvklaring unntaksperiodeUnderAvklaring;
 
@@ -39,7 +45,7 @@ public class UnntaksperiodeUnderAvklaringTest {
 
     @Before
     public void setUp() {
-        unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingService, behandlingsresultatRepository);
+        unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingService, behandlingsresultatRepository, avklartefaktaService);
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
     }
 
@@ -95,6 +101,33 @@ public class UnntaksperiodeUnderAvklaringTest {
 
         verify(medlFasade).opprettPeriodeUnderAvklaring(any(), any(Lovvalgsperiode.class), any());
         verify(felles).lagreMedlPeriodeId(anyLong(), any(), anyLong());
+    }
+
+    @Test
+    public void utfør_eksisterendePeriodeUtenMedlIdPeriodeForLang_ikkeOpprettPeriodeIMedl() throws Exception {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
+        registrering.setBegrunnelseKode(Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD.getKode());
+        avklartefakta.getRegistreringer().add(registrering);
+
+        when(avklartefaktaService.hentVurderingUnntakPeriode(anyLong())).thenReturn(Optional.of(avklartefakta));
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setSaksopplysninger(Sets.newHashSet(
+            hentSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(1L)), hentPersonDokument())
+        );
+        prosessinstans.setBehandling(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+
+        unntaksperiodeUnderAvklaring.utfør(prosessinstans);
+
+        verify(medlFasade, never()).opprettPeriodeUnderAvklaring(any(), any(Lovvalgsperiode.class), any());
+        verify(felles, never()).lagreMedlPeriodeId(anyLong(), any(), anyLong());
     }
 
     private Saksopplysning hentSedSaksopplysning(LocalDate fom, LocalDate tom) {

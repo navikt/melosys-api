@@ -58,7 +58,7 @@ public class UnntakTjeneste extends RestTjeneste {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/{behandlingID}/innhentinfo")
-    public Response innhentInformasjonUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws IkkeFunnetException {
+    public Response innhentInformasjonUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws FunksjonellException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
         unntaksperiodeService.behandlingUnderAvklaring(behandling);
         return Response.noContent().build();
@@ -70,8 +70,8 @@ public class UnntakTjeneste extends RestTjeneste {
 
         if (behandling.getType() != Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP) {
             throw new BadRequestException("Behandling er ikke av type UNNTAK_FRA_MEDLEMSKAP");
-        } else if (behandling.getStatus() != Behandlingsstatus.UNDER_BEHANDLING) {
-            throw new BadRequestException("Behandling har status " + behandling.getStatus());
+        } else if (behandling.getStatus() == Behandlingsstatus.AVSLUTTET) {
+            throw new BadRequestException("Behandlingen er avsluttet");
         }
 
         return behandling;
