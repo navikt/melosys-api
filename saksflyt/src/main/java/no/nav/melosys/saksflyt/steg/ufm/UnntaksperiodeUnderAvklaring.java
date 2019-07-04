@@ -1,12 +1,15 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -20,6 +23,7 @@ import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,13 +34,15 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
     private final MedlFasade medlFasade;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final AvklartefaktaService avklartefaktaService;
 
     @Autowired
-    public UnntaksperiodeUnderAvklaring(OppdaterMedlFelles felles, MedlFasade medlFasade, BehandlingService behandlingService, BehandlingsresultatRepository behandlingsresultatRepository) {
+    public UnntaksperiodeUnderAvklaring(OppdaterMedlFelles felles, MedlFasade medlFasade, BehandlingService behandlingService, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaService avklartefaktaService) {
         this.felles = felles;
         this.medlFasade = medlFasade;
         this.behandlingService = behandlingService;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.avklartefaktaService = avklartefaktaService;
     }
 
     @Override
@@ -58,15 +64,38 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (lovvalgsperioder.isEmpty()) {
-            behandlingService.oppdaterStatus(behandlingId, Behandlingsstatus.AVVENT_DOK_UTL);
             Behandling behandling = behandlingService.hentBehandling(behandlingId);
             SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
-            PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
             Lovvalgsperiode lovvalgsperiode = UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument);
-            Long medlperiodeId = medlFasade.opprettPeriodeUnderAvklaring(personDokument.fnr, lovvalgsperiode, KildedokumenttypeMedl.SED);
-            felles.lagreMedlPeriodeId(medlperiodeId, lovvalgsperiode, behandlingId);
+            oppdaterStatusOgLagreMedlPeriode(behandlingId, lovvalgsperiode, behandling);
+        } else if (lovvalgsperioder.iterator().next().getMedlPeriodeID() == null) {
+            Behandling behandling = behandlingService.hentBehandling(behandlingId);
+            Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
+            oppdaterStatusOgLagreMedlPeriode(behandlingId, lovvalgsperiode, behandling);
         }
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
+    }
+
+    private void oppdaterStatusOgLagreMedlPeriode(long behandlingID, Lovvalgsperiode lovvalgsperiode, Behandling behandling)
+        throws FunksjonellException, TekniskException {
+
+        if (harAvklartefaktaPeriodeForLang(behandlingID)) {
+            return; //Medl aksepterer ikke periode over 24 mnd ved art 12
+        }
+
+        PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
+        Long medlperiodeId = medlFasade.opprettPeriodeUnderAvklaring(personDokument.fnr, lovvalgsperiode, KildedokumenttypeMedl.SED);
+        felles.lagreMedlPeriodeId(medlperiodeId, lovvalgsperiode, behandlingID);
+    }
+
+    private boolean harAvklartefaktaPeriodeForLang(long behandlingID) {
+         return avklartefaktaService.hentVurderingUnntakPeriode(behandlingID)
+            .map(Avklartefakta::getRegistreringer)
+             .orElse(Collections.emptySet())
+             .stream()
+             .map(AvklartefaktaRegistrering::getBegrunnelseKode)
+             .anyMatch(Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD.getKode()::equals);
+
     }
 }

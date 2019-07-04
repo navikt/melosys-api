@@ -6,6 +6,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
 import org.springframework.util.Assert;
 
@@ -23,6 +24,7 @@ public class LovvalgTilBestemmelseDtoMapper {
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3B, Bestemmelse.ART_11_3_b);
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3C, Bestemmelse.ART_11_3_c);
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3E, Bestemmelse.ART_11_3_e);
+        mapper.put(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_5, Bestemmelse.ART_11_5);
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, Bestemmelse.ART_12_1);
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2, Bestemmelse.ART_12_2);
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, Bestemmelse.ART_13_1_a);
@@ -49,7 +51,7 @@ public class LovvalgTilBestemmelseDtoMapper {
         return mapBestemmelseDtoTilMelosysLovvalgBestemmelse(bestemmelseEnum);
     }
 
-    public static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse bestemmelse) {
+    private static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse bestemmelse) {
         Assert.notNull(bestemmelse, "LovvalgBestemmelse er null.");
 
         if (mapper.inverse().containsKey(bestemmelse)) {

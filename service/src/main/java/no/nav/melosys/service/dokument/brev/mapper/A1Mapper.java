@@ -7,8 +7,8 @@ import java.util.Objects;
 import java.util.Set;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000067.*;
 import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
+import no.nav.dok.melosysbrev._000067.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -16,6 +16,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
@@ -66,7 +67,7 @@ public class A1Mapper {
     private PersonType mapPerson(PersonDokument personDokument) throws TekniskException {
         PersonType person = new PersonType();
         person.setKjoenn(KjoennKode.fromValue(personDokument.kjønn.getKode()));
-        person.setStatsborgerskap(personDokument.statsborgerskap.getKode());
+        person.setStatsborgerskap(LandkoderUtils.tilIso2(personDokument.statsborgerskap.getKode()).getKode());
 
         person.setPersonnavn(lagPersonnavn(personDokument));
 

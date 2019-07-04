@@ -48,7 +48,7 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void utfør_ingenLovvalgsperiode_oppretNyLovvalgsperiode() throws Exception {
+    public void utfør_ingenLovvalgsperiode_opprettNyLovvalgsperiode() throws Exception {
         PersonDokument personDokument = new PersonDokument();
         personDokument.fnr = "123";
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -67,11 +67,12 @@ public class OppdaterMedlTest {
 
         verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
+        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
     @Test
-    public void utfør_erEksisterendeLovvalgsperiode_oppdaterPeriodeEndeligMedl() throws Exception {
+    public void utfør_erEksisterendeLovvalgsperiodeMedMedlId_oppdaterPeriodeEndeligMedl() throws Exception {
         PersonDokument personDokument = new PersonDokument();
         personDokument.fnr = "123";
         Saksopplysning personSaksopplysning = new Saksopplysning();
@@ -79,6 +80,7 @@ public class OppdaterMedlTest {
         personSaksopplysning.setType(SaksopplysningType.PERSOPL);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setMedlPeriodeID(123456L);
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singleton(lovvalgsperiode));
 
         behandling.setId(12L);
@@ -90,6 +92,29 @@ public class OppdaterMedlTest {
 
         verify(medlFasade).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(lovvalgsperiodeService).hentLovvalgsperioder(eq(12L));
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+    }
+
+    @Test
+    public void utfør_erEksisterendeLovvalgsperiodeUtenMedlId_opprettOgLagrePeriodeEndelig() throws Exception {
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.fnr = "123";
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personDokument);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singleton(lovvalgsperiode));
+
+        behandling.setId(12L);
+        behandling.getSaksopplysninger().addAll(Sets.newHashSet(saksopplysning, hentSedSaksopplysning()));
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        oppdaterMedl.utfør(prosessinstans);
+
+        verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 

@@ -57,4 +57,39 @@ public class PeriodeKontrollerTest {
     public void periodeOver1ÅrFremITid_periodeNå_ingenTreff() {
         assertThat(PeriodeKontroller.datoOver1ÅrFremITid(LocalDate.now())).isFalse();
     }
+
+    @Test
+    public void periodeErLik_periodeLik_ingenTreff() {
+        assertThat(
+            PeriodeKontroller.periodeErLik(LocalDate.now(), LocalDate.now(), LocalDate.now(), LocalDate.now())
+        ).isTrue();
+    }
+
+    @Test
+    public void periodeErLik_periodeIkkeLik_ingenTreff() {
+        assertThat(
+            PeriodeKontroller.periodeErLik(LocalDate.now(), LocalDate.now().plusYears(1), LocalDate.now(), LocalDate.now())
+        ).isFalse();
+    }
+
+    @Test
+    public void periodeErLik_periodeIkkeLik_registrerTreff() {
+        assertThat(
+            PeriodeKontroller.periodeErLik(LocalDate.now(), LocalDate.now().plusYears(1), LocalDate.now(), LocalDate.now())
+        ).isFalse();
+    }
+
+    @Test
+    public void periodeErLik_tomErNullPeriodeLik_registrerTreff() {
+        assertThat(
+            PeriodeKontroller.periodeErLik(LocalDate.now(), null, LocalDate.now(), null)
+        ).isTrue();
+    }
+
+    @Test
+    public void periodeErLik_tom2ErNullPeriodeIkkeLik_registrerTreff() {
+        assertThat(
+            PeriodeKontroller.periodeErLik(LocalDate.now(), LocalDate.now(), LocalDate.now(), null)
+        ).isFalse();
+    }
 }
