@@ -50,7 +50,7 @@ public class OpprettFagsakOgBehandlingTest {
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
         Prosessinstans prosessinstans = hentProsessinstans(true);
         opprettFagsakOgBehandling.utfør(prosessinstans);
-        verify(behandlingService).nyBehandling(any(Fagsak.class), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP), eq("123"), eq("321"));
+        verify(behandlingService).nyBehandling(any(Fagsak.class), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD), eq("123"), eq("321"));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 

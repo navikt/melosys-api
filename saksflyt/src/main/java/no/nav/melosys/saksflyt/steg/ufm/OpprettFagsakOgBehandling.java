@@ -72,14 +72,14 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             }
 
             avsluttTidligereBehandling(fagsak);
-            behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP,
+            behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD,
                 prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
             log.info("Opprettet ny behandling for fagsak {}", gsakSaksnummer);
         } else {
 
             OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
                 .medAktørID(prosessinstans.getData(AKTØR_ID))
-                .medBehandlingstype(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP)
+                .medBehandlingstype(prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class))
                 .medInitierendeJournalpostId(prosessinstans.getData(JOURNALPOST_ID))
                 .medInitierendeDokumentId(prosessinstans.getData(DOKUMENT_ID))
                 .medGsakSaksnummer(gsakSaksnummer)

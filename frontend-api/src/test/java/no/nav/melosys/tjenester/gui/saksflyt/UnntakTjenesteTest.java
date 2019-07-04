@@ -58,7 +58,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     @Test(expected = BadRequestException.class)
     public void godkjennUnntaksperiode_feilStatus_kasterException() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
@@ -68,7 +68,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void godkjennUnntaksperiode_korrektStatus_ingenFeil() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
@@ -79,7 +79,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void innhentInfoUnntaksperiode_korrektStatus_ingenFeil() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
@@ -90,7 +90,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void ikkeGodkjennUnntaksperiode_gyldigBehandlingIdValiderSchema_ingenFeil() throws FunksjonellException, IOException, TekniskException {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 

@@ -7,6 +7,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
@@ -38,14 +39,26 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
     @Transactional
     public void initialiserProsessinstans(Prosessinstans prosessinstans) {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+        SedType sedType = SedType.valueOf(melosysEessiMelding.getSedType());
 
         if (skalBehandles(melosysEessiMelding)) {
             log.info("Behandler mottatt EESSI-medling. Buc: {}, SED: {}", melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getSedId());
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, hentBehandlingstypeForSedType(sedType));
             prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SAK_OG_BEH);
         } else {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
         }
+    }
+
+    private Behandlingstyper hentBehandlingstypeForSedType(SedType sedType) {
+        if (sedType == SedType.A009 || sedType == SedType.A010) {
+            return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD;
+        } else if (sedType == SedType.A003) {
+            return Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV;
+        }
+
+        throw new IllegalArgumentException("UnntaksperiodeMottakInitialiserer støtter ikke sedtype " + sedType);
     }
 
     @Override

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+
 import static no.nav.melosys.domain.kodeverk.Behandlingstyper.SOEKNAD;
 import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
@@ -284,10 +285,10 @@ public class GsakService implements GsakFasade {
             case ENDRET_PERIODE: return "ae0052";
             case ANKE: return "ae0046";
             case KLAGE: return  "ae0058";
-            case NORGE_UTPEKT: return "ae0112";
+            case UTL_MYND_UTPEKT_NORGE: return "ae0112";
             case NY_VURDERING: return "ae0028";
-            case PAASTAND_UTL: return "ae0113";
-            case UNNTAK_FRA_MEDLEMSKAP: return "ae0111"; //TODO: avklar om korrekt kode eller trenger ny
+            case UTL_MYND_UTPEKT_SEG_SELV: return "ae0113";
+            case REGISTRERING_UNNTAK_NORSK_TRYGD: return "ae0111"; //TODO: avklar om korrekt kode eller trenger ny
             default: throw new IllegalArgumentException(this + " er ikke implementert i felleskodeverk.");
         }
     }

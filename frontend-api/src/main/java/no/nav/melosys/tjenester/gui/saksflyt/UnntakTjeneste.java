@@ -68,8 +68,8 @@ public class UnntakTjeneste extends RestTjeneste {
         Behandling behandling = behandlingRepository.findById(behandlingId)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id" + behandlingId));
 
-        if (behandling.getType() != Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP) {
-            throw new BadRequestException("Behandling er ikke av type UNNTAK_FRA_MEDLEMSKAP");
+        if (behandling.getType() != Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD && behandling.getType() != Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV) {
+            throw new BadRequestException("Behandling er ikke av type REGISTRERING_UNNTAK_NORSK_TRYGD");
         } else if (behandling.getStatus() == Behandlingsstatus.AVSLUTTET) {
             throw new BadRequestException("Behandlingen er avsluttet");
         }
