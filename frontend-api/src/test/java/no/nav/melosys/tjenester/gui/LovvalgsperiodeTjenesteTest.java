@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -65,15 +66,13 @@ public final class LovvalgsperiodeTjenesteTest {
     }
 
     @Test
-    public void hentLovvalgsperiodeUtenTilgang() throws Exception {
-        testUnntakIhentLovvalgsperiode(BEHANDLING_UTEN_TILGANG,
-                Collections.emptyList(), new SikkerhetsbegrensningException("ignorert"));
+    public void hentLovvalgsperiodeUtenTilgang() {
+        testUnntakIhentLovvalgsperiode(BEHANDLING_UTEN_TILGANG, new SikkerhetsbegrensningException("ignorert"));
     }
 
     @Test
-    public void hentLovvalgsperiodeMedTekniskFeil() throws Exception {
-        testUnntakIhentLovvalgsperiode(BEHANDLING_MED_TEKNISK_FEIL,
-                Collections.emptyList(), new TekniskException("ignorert"));
+    public void hentLovvalgsperiodeMedTekniskFeil() {
+        testUnntakIhentLovvalgsperiode(BEHANDLING_MED_TEKNISK_FEIL, new TekniskException("ignorert"));
     }
 
     @Test
@@ -93,8 +92,7 @@ public final class LovvalgsperiodeTjenesteTest {
         assertThat(periodeDto.getTom()).isEqualTo(tomDato);
     }
 
-    private void testUnntakIhentLovvalgsperiode(long behandlingsid,
-            Collection<LovvalgsperiodeDto> forventet, Throwable forventetUnntak) {
+    private void testUnntakIhentLovvalgsperiode(long behandlingsid, Throwable forventetUnntak) {
         Throwable unntak = catchThrowable(() -> testHentLovvalgsperioder(behandlingsid, Collections.emptyList()));
         assertThat(unntak).isInstanceOf(forventetUnntak.getClass());
         if (forventetUnntak.getCause() != null) {
@@ -171,4 +169,21 @@ public final class LovvalgsperiodeTjenesteTest {
         return resultat;
     }
 
+    @Test(expected = FunksjonellException.class)
+    public void lagreLovvalgsperioder_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
+        Tilgang tilgang = mock(Tilgang.class);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekkRedigerbar(anyLong());
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgang);
+
+        instans.lagreLovvalgsperioder(42L, Collections.emptyList());
+    }
+
+    @Test(expected = SikkerhetsbegrensningException.class)
+    public void hentLovvalgsperioder_ikketilgang_girFeil() throws FunksjonellException, TekniskException {
+        Tilgang tilgang = mock(Tilgang.class);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekk(anyLong());
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgang);
+
+        instans.hentLovvalgsperioder(42L);
+    }
 }

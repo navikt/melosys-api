@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -25,11 +26,26 @@ public class Tilgang {
         this.pep = pep;
     }
 
+    public void sjekkRedigerbar(long behandlingsId) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingRepository.findById(behandlingsId)
+            .orElseThrow(() -> new IkkeFunnetException(String.format("Klarte ikke å finne behandlingen med id %s.", behandlingsId)));
+
+        if(!behandling.erRedigerbar()) {
+            throw new FunksjonellException(String.format("Forsøk på å endre en ikke-redigerbar behandling med id %s", behandlingsId));
+        }
+
+        sjekk(behandling);
+    }
+
     // Behandling
     public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
         Behandling behandling = behandlingRepository.findById(behandlingsId)
             .orElseThrow(() -> new IkkeFunnetException(String.format("Klarte ikke å finne behandlingen med id %s.", behandlingsId)));
 
+        sjekk(behandling);
+    }
+
+    private void sjekk(Behandling behandling) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer aktør = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
         if (aktør != null) {

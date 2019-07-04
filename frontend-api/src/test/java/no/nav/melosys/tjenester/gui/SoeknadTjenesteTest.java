@@ -10,9 +10,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
@@ -34,6 +32,7 @@ import static org.jeasy.random.FieldPredicates.named;
 import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -121,5 +120,27 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
             throw e;
         }
     }
-}
 
+    @Test(expected = FunksjonellException.class)
+    public void lagreSoeknad_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
+        SoeknadService soeknadService = mock(SoeknadService.class);
+        RegisterOppslagService registerOppslagService = mock(RegisterOppslagService.class);
+        Tilgang tilgang = mock(Tilgang.class);
+        SoeknadTjeneste soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgang);
+
+        doThrow(FunksjonellException.class).when(tilgang).sjekkRedigerbar(anyLong());
+
+        soeknadTjeneste.registrerSøknad(new SoeknadDto(1L, soeknadDokument));
+    }
+
+    @Test(expected = SikkerhetsbegrensningException.class)
+    public void hentSoeknad_ikkeTilgang_girFeil() throws FunksjonellException, TekniskException {
+        SoeknadService soeknadService = mock(SoeknadService.class);
+        RegisterOppslagService registerOppslagService = mock(RegisterOppslagService.class);
+        Tilgang tilgang = mock(Tilgang.class);
+        SoeknadTjeneste soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgang);
+
+        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekk(anyLong());
+        soeknadTjeneste.hentSøknad(1);
+    }
+}

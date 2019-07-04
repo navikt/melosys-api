@@ -60,7 +60,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     public Collection<AnmodningsperiodeDto> lagreAnmodningsperioder(@PathParam("behandlingID") long behandlingID,
                                                                 @ApiParam(value = "En liste av anmodningsperioder å lagre.") Collection<AnmodningsperiodeDto> anmodningsperiodeDtoer)
         throws TekniskException, FunksjonellException {
-        tilgang.sjekk(behandlingID);
+        tilgang.sjekkRedigerbar(behandlingID);
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
             behandlingID, anmodningsperiodeDtoer.stream().map(AnmodningsperiodeDto::til).collect(Collectors.toList())
         );
@@ -97,7 +97,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)
             .map(Anmodningsperiode::getBehandlingsresultat)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
-        tilgang.sjekk(behandlingID);
+        tilgang.sjekkRedigerbar(behandlingID);
 
         AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningperiodeID, anmodningsperiodeSvarDto.til());
         return AnmodningsperiodeSvarDto.fra(svar);

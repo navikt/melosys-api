@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.*;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -58,8 +59,8 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @ApiOperation("Lagrer en lovvalgsperiode for en gitt behandling.")
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
     public Collection<LovvalgsperiodeDto> lagreLovvalgsperioder(@PathParam("behandlingsid") long behandlingsid,
-            @ApiParam(value = "En liste av lovvalgsperioder å lagre.") Collection<LovvalgsperiodeDto> lovvalgsperiodeDtoer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        tilgang.sjekk(behandlingsid);
+            @ApiParam(value = "En liste av lovvalgsperioder å lagre.") Collection<LovvalgsperiodeDto> lovvalgsperiodeDtoer) throws FunksjonellException, TekniskException {
+        tilgang.sjekkRedigerbar(behandlingsid);
         List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeDtoer.stream()
                 .map(LovvalgsperiodeDto::til)
                 .collect(Collectors.toList());

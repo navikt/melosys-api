@@ -11,6 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -54,9 +55,9 @@ public class VilkaarTjeneste extends RestTjeneste {
     @Path("{behandlingID}")
     @ApiOperation(value = "Lagre vilkår")
     public List<VilkaarDto> registrerVilkår(@PathParam("behandlingID") long behandlingID,
-            @ApiParam("VilkaarData") List<VilkaarDto> vilkaarDtoer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+            @ApiParam("VilkaarData") List<VilkaarDto> vilkaarDtoer) throws FunksjonellException, TekniskException {
         List<VilkaarDto> vilkaarDtoListe;
-        tilgang.sjekk(behandlingID);
+        tilgang.sjekkRedigerbar(behandlingID);
         vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);
         vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
 
