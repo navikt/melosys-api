@@ -66,7 +66,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         anmodningsperiodeTjeneste.lagreAnmodningsperioder(1L, anmodningsperiodeDtoer);
 
-        verify(tilgang).sjekk(anyLong());
+        verify(tilgang).sjekkRedigerbar(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(anyLong(), anyCollection());
         //TODO schema
     }
@@ -110,6 +110,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         AnmodningsperiodeSvarDto svarDto = anmodningsperiodeTjeneste.lagreAnmodningsperiodeSvar(1L, new AnmodningsperiodeSvarDto());
         assertThat(svarDto).isNotNull();
         assertThat(svarDto.anmodningsperiodeSvarType).isEqualTo(AnmodningsperiodeSvarType.INNVILGELSE.name());
+        verify(tilgang).sjekkRedigerbar(anyLong());
         //TODO schema
     }
 
