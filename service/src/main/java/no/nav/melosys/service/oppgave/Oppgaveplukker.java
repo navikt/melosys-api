@@ -24,7 +24,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +77,7 @@ public class Oppgaveplukker {
             behandlingstemaer.addAll(hentBehandlingstema(sakstyper));
 
             List<String> behandlingstypeKoder = plukkDto.getBehandlingstyper();
-            if (CollectionUtils.isNotEmpty(behandlingstypeKoder)) {
+            if (behandlingstypeKoder != null && !behandlingstypeKoder.isEmpty()) {
                 for (String behandlingstype : behandlingstypeKoder) {
                     behandlingstyper.add(KodeverkUtils.dekod(Behandlingstyper.class, behandlingstype));
                 }
