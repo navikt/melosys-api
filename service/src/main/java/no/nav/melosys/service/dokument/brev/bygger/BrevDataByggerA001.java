@@ -91,7 +91,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
 
     private Optional<String> hentUtenlandskIdent(Landkoder landkode) {
         return søknad.personOpplysninger.utenlandskIdent.stream()
-            .filter(utenlandskIdent -> !utenlandskIdent.landkode.equals(landkode.getKode()))
+            .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
             .map(utenlandskIdent -> utenlandskIdent.ident)
             .findFirst();
     }
