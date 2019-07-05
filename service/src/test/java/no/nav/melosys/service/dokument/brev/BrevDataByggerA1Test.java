@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -24,6 +25,8 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.felles.FysiskArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +74,7 @@ public class BrevDataByggerA1Test {
         oppgittAdresse.husnummer = "23B";
         oppgittAdresse.postnummer = "0165";
         oppgittAdresse.poststed = "Oslo";
-        oppgittAdresse.landkode = Landkoder.NO.getKode();;
+        oppgittAdresse.landkode = Landkoder.NO.getKode();
 
         søknad = new SoeknadDokument();
         søknad.bosted.oppgittAdresse = oppgittAdresse;
@@ -82,6 +85,7 @@ public class BrevDataByggerA1Test {
 
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.orgnr = orgnr1;
+        foretakUtland.navn = "Utenlandsk arbeidsgiver AS";
         søknad.foretakUtland.add(foretakUtland);
 
         Saksopplysning person = new Saksopplysning();
@@ -153,5 +157,30 @@ public class BrevDataByggerA1Test {
         assertThat(brevDataDto.selvstendigeForetak).isEmpty();
         // TODO: Orgnr ikke obligatorisk registrert for utenlandske foretak
         //assertThat(brevDataDto.utenlandskeVirksomheter).isEmpty();
+    }
+
+    private StrukturertAdresse lagStrukturertAdresse() {
+        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
+        oppgittAdresse.gatenavn = "HjemmeGata";
+        oppgittAdresse.husnummer = "23B";
+        oppgittAdresse.postnummer = "0165";
+        oppgittAdresse.poststed = "Oslo";
+        oppgittAdresse.landkode = Landkoder.NO.getKode();
+        return oppgittAdresse;
+    }
+
+    @Test
+    public void testArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.foretakNavn = "Utenlandsk Oppdragsgiver LTD";
+        arbeidUtland.adresse = lagStrukturertAdresse();
+        søknad.arbeidUtland.add(arbeidUtland);
+
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
+        assertThat(brevDataDto.utenlandskeVirksomheter.stream().map(uv -> uv.navn)).contains(arbeidUtland.foretakNavn);
+        assertThat(brevDataDto.arbeidssteder.stream()
+            .filter(Arbeidssted::erFysisk)
+            .map(FysiskArbeidssted.class::cast)
+            .map(uv -> uv.adresse)).contains(arbeidUtland.adresse);
     }
 }

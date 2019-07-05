@@ -3,54 +3,32 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000081.BrevdataType;
 import no.nav.dok.melosysbrev._000081.Fag;
 import no.nav.dok.melosysbrev._000081.LovvalgsperiodeType;
-import no.nav.dok.melosysbrev._000081.ObjectFactory;
-import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*;
 
 /**
- * Anmodning om unntak og avslag deler samme mal.
+ * Anmodning om unntak og avslag har to forskjellige maler med samme innhold
  */
 abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
     private static final Logger log = LoggerFactory.getLogger(AbstraktAnmodningUnntakOgAvslagMapper.class);
-
-    private static final String XSD_LOCATION = "melosysbrev/melosys_000081.xsd";
-
-    static final String JA = "true";
-
-    abstract Fag mapArt161(Fag fag, Behandlingsresultat resultat, BrevData brevData) throws TekniskException;
-
-    @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
-        Fag fag = mapFag(behandling, resultat, (BrevDataAnmodningUnntakOgAvslag) brevData);
-        fag = mapArt161(fag, resultat, brevData);
-        JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
-    }
 
     Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {
         Fag fag = new Fag();
@@ -88,7 +66,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
         return fag;
     }
 
-    private Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, Vilkaar vilkaarType) {
+    private static Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, Vilkaar vilkaarType) {
         return resultat.getVilkaarsresultater().stream()
             .filter(vr -> vr.getVilkaar() == vilkaarType)
             .flatMap(vr -> vr.getBegrunnelser().stream())
@@ -109,7 +87,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             .findFirst();
     }
 
-    private LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
+    private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
         Lovvalgsperiode lovvalgsperiode = resultat.getLovvalgsperioder()
             .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat" + resultat.getId()));
 
@@ -126,15 +104,5 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             log.error("", e);
         }
         return lovvalgsperiodeType;
-    }
-
-    @SuppressWarnings("Duplicates")
-    private JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
-        ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = factory.createBrevdataType();
-        brevdataType.setFelles(fellesType);
-        brevdataType.setNAVFelles(navFelles);
-        brevdataType.setFag(fag);
-        return factory.createBrevdata(brevdataType);
     }
 }

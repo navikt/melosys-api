@@ -26,8 +26,6 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInfor
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 
 public class AvslagYrkesaktivMapperTest {
 
@@ -106,6 +104,5 @@ public class AvslagYrkesaktivMapperTest {
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
-        verify(spy).mapArt161(any(), any(), any());
     }
 }
