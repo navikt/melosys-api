@@ -115,10 +115,10 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     }
 
     private void sendAvslagsbrevManglendeOpplysninger(Behandling behandling, String saksbehandler, Fagsak fagsak) throws FunksjonellException, TekniskException {
-//        brevBestiller.bestill(AVSLAG_MANGLENDE_OPPL, saksbehandler, Mottaker.av(BRUKER), behandling);
-//        if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-//            brevBestiller.bestill(AVSLAG_MANGLENDE_OPPL, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
-//        }
+        brevBestiller.bestill(AVSLAG_MANGLENDE_OPPLYSNINGER, saksbehandler, Mottaker.av(BRUKER), behandling);
+        if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
+            brevBestiller.bestill(AVSLAG_MANGLENDE_OPPLYSNINGER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+        }
     }
 
     private void sendAvslagsbrev(Behandling behandling, String saksbehandler, Fagsak fagsak) throws FunksjonellException, TekniskException {
