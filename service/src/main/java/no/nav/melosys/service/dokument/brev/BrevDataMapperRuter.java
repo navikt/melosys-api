@@ -17,6 +17,7 @@ class BrevDataMapperRuter {
         mappere.put(Produserbaredokumenter.ATTEST_A1, AttestMapper.class);
         mappere.put(Produserbaredokumenter.AVSLAG_YRKESAKTIV, AvslagYrkesaktivMapper.class);
         mappere.put(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER, AvslagArbeidsgiverMapper.class);
+        mappere.put(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, AvslagManglendeOpplysningerMapper.class);
         mappere.put(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class);
         mappere.put(Produserbaredokumenter.INNVILGELSE_ARBEIDSGIVER, InnvilgelseArbeidsgiverMapper.class);
         mappere.put(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, ForvaltningsmeldingMapper.class);

@@ -46,6 +46,14 @@ public class BrevDataMapperRuterTest {
         assertThat(resultat).isInstanceOf(AvslagArbeidsgiverMapper.class);
     }
 
+
+    @Test
+    public void oppslagAvAvslagManglendeOpplysningerGirAvslagManglendeOpplysningerMapper() throws Exception {
+        BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);
+        assertThat(resultat).isInstanceOf(AvslagManglendeOpplysningerMapper.class);
+    }
+
+
     @Test
     public void oppslagAvUkjentDoktypeKasterUnntak() {
         BrevDataMapperRuter.mappere.remove(Produserbaredokumenter.MELDING_HENLAGT_SAK); //Fjerner mapperen for å kunne teste på mapper ikke funnet

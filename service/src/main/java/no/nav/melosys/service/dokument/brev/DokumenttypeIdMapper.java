@@ -21,6 +21,8 @@ public enum DokumenttypeIdMapper {
                 return "000127";
             case AVSLAG_YRKESAKTIV:
                 return "000081";
+            case AVSLAG_MANGLENDE_OPPLYSNINGER:
+                return "000125";
             case ORIENTERING_ANMODNING_UNNTAK:
                 return "000084";
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
