@@ -1,6 +1,5 @@
 package no.nav.melosys.service.eessi;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
@@ -95,8 +94,8 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
 
     private Periode tilPeriode(no.nav.melosys.service.kafka.model.Periode periode) {
         return new Periode(
-            LocalDate.parse(periode.getFom(), dateTimeFormatter),
-            periode.getTom() != null ? LocalDate.parse(periode.getTom(), dateTimeFormatter) : null
+                periode.getFom(),
+                periode.getTom()
         );
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
+import java.time.LocalDate;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
@@ -66,8 +67,8 @@ public class OpprettSedDokumentTest {
         melding.setLovvalgsland("SE");
 
         Periode periode = new Periode();
-        periode.setFom("2012-12-12");
-        periode.setTom("2012-12-13");
+        periode.setFom(LocalDate.of(2012, 12, 12));
+        periode.setTom(LocalDate.of(2012, 12, 13));
         melding.setPeriode(periode);
 
         Statsborgerskap statsborgerskap = new Statsborgerskap();
