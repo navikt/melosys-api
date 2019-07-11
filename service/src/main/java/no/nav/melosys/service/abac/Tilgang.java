@@ -8,27 +8,24 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.sikkerhet.abac.Pep;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class Tilgang {
-
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
     private Pep pep;
 
     @Autowired
-    public Tilgang(BehandlingRepository behandlingRepository, Pep pep) {
-        this.behandlingRepository = behandlingRepository;
+    public Tilgang(BehandlingService behandlingService, Pep pep) {
+        this.behandlingService = behandlingService;
         this.pep = pep;
     }
 
     public void sjekkRedigerbar(long behandlingsId) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingRepository.findById(behandlingsId)
-            .orElseThrow(() -> new IkkeFunnetException(String.format("Klarte ikke å finne behandlingen med id %s.", behandlingsId)));
+        Behandling behandling = behandlingService.hentBehandling(behandlingsId);
 
         if(!behandling.erRedigerbar()) {
             throw new FunksjonellException(String.format("Forsøk på å endre en ikke-redigerbar behandling med id %s", behandlingsId));
@@ -39,13 +36,12 @@ public class Tilgang {
 
     // Behandling
     public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
-        Behandling behandling = behandlingRepository.findById(behandlingsId)
-            .orElseThrow(() -> new IkkeFunnetException(String.format("Klarte ikke å finne behandlingen med id %s.", behandlingsId)));
+        Behandling behandling = behandlingService.hentBehandling(behandlingsId);
 
         sjekk(behandling);
     }
 
-    private void sjekk(Behandling behandling) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
+    private void sjekk(Behandling behandling) throws SikkerhetsbegrensningException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer aktør = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
         if (aktør != null) {

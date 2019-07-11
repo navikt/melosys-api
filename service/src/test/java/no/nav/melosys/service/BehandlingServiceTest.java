@@ -62,6 +62,17 @@ public class BehandlingServiceTest {
     }
 
     @Test
+    public void hentBehandling() throws FunksjonellException {
+        long behandlingID = 11L;
+        when(behandlingRepo.findWithSaksopplysningerById(eq(behandlingID))).thenReturn(null);
+
+        expectedException.expect(IkkeFunnetException.class);
+        expectedException.expectMessage("Finner ikke behandling med id " + behandlingID);
+
+        behandlingService.hentBehandling(behandlingID);
+    }
+
+    @Test
     public void oppdaterStatus() throws FunksjonellException {
         long behandlingID = 11L;
         Behandling behandling = new Behandling();
