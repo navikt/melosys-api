@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
@@ -32,7 +32,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     private VedtakService vedtakService;
 
     @Mock
-    private Tilgang tilgang;
+    private TilgangService tilgangService;
 
     private VedtakTjeneste vedtakTjeneste;
     private FattVedtakDto fattVedtakDto;
@@ -47,7 +47,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        vedtakTjeneste = new VedtakTjeneste(vedtakService, tilgang);
+        vedtakTjeneste = new VedtakTjeneste(vedtakService, tilgangService);
         fattVedtakDto = new FattVedtakDto();
         endreVedtakDto = new EndreVedtakDto();
         behandlingID = 3;
@@ -58,7 +58,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         fattVedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.HENLEGGELSE);
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
-        verify(tilgang).sjekk(behandlingID);
+        verify(tilgangService).sjekk(behandlingID);
         verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultattype());
 
         valider(fattVedtakDto);
@@ -68,7 +68,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     public void fattVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
-        verify(tilgang).sjekk(behandlingID);
+        verify(tilgangService).sjekk(behandlingID);
         valider(fattVedtakDto);
     }
 
@@ -77,7 +77,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         endreVedtakDto.setBegrunnelseKode(Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
-        verify(tilgang).sjekk(behandlingID);
+        verify(tilgangService).sjekk(behandlingID);
         verify(vedtakService).endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
 
         valider(fattVedtakDto);
@@ -88,7 +88,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         expectedException.expect(BadRequestException.class);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
-        verify(tilgang, never()).sjekk(behandlingID);
+        verify(tilgangService, never()).sjekk(behandlingID);
         valider(fattVedtakDto);
     }
 }

@@ -26,8 +26,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TilgangTest {
-    private Tilgang tilgang;
+public class TilgangServiceTest {
+    private TilgangService tilgangService;
 
     @Mock
     private Pep pep;
@@ -57,7 +57,7 @@ public class TilgangTest {
         when(fagsakMocked.hentAktørMedRolleType(any())).thenReturn(new Aktoer());
         when(behandlingMocked.getFagsak()).thenReturn(fagsakMocked);
 
-        tilgang = new Tilgang(behandlingService, pep);
+        tilgangService = new TilgangService(behandlingService, pep);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
@@ -66,7 +66,7 @@ public class TilgangTest {
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
 
-        tilgang.sjekk(102323934);
+        tilgangService.sjekk(102323934);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class TilgangTest {
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
 
-        tilgang.sjekk(102323934);
+        tilgangService.sjekk(102323934);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class TilgangTest {
         when(behandlingMocked.erRedigerbar()).thenReturn(true);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
 
-        tilgang.sjekkRedigerbar(123123123);
+        tilgangService.sjekkRedigerbar(123123123);
     }
 
     @Test(expected = FunksjonellException.class)
@@ -93,18 +93,18 @@ public class TilgangTest {
         when(behandlingMocked.erRedigerbar()).thenReturn(false);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
 
-        tilgang.sjekkRedigerbar(123123123);
+        tilgangService.sjekkRedigerbar(123123123);
     }
 
     @Test
     public void testFagsakOk() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
-        tilgang.sjekkSak(fagsakMocked);
+        tilgangService.sjekkSak(fagsakMocked);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        tilgang.sjekkSak(fagsakMocked);
+        tilgangService.sjekkSak(fagsakMocked);
     }
 }

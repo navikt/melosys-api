@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
@@ -18,7 +18,7 @@ public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private AnmodningUnntakService anmodningUnntakService;
     @Mock
-    private Tilgang tilgang;
+    private TilgangService tilgangService;
 
     private AnmodningUnntakTjeneste anmodningUnntakTjeneste;
 
@@ -29,7 +29,7 @@ public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        anmodningUnntakTjeneste = new AnmodningUnntakTjeneste(anmodningUnntakService, tilgang);
+        anmodningUnntakTjeneste = new AnmodningUnntakTjeneste(anmodningUnntakService, tilgangService);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
 
         anmodningUnntakTjeneste.anmodningOmUnntak(behandlingID, fattVedtakDto);
 
-        verify(tilgang).sjekk(behandlingID);
+        verify(tilgangService).sjekk(behandlingID);
         verify(anmodningUnntakService).anmodningOmUnntak(behandlingID);
 
         valider(fattVedtakDto);

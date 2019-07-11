@@ -18,7 +18,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.springframework.context.annotation.Scope;
@@ -32,12 +32,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class LovvalgsperiodeTjeneste extends RestTjeneste {
 
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
-    public LovvalgsperiodeTjeneste(LovvalgsperiodeService lovvalgsperiodeService, Tilgang tilgang) {
+    public LovvalgsperiodeTjeneste(LovvalgsperiodeService lovvalgsperiodeService, TilgangService tilgangService) {
         super();
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @GET
@@ -45,7 +45,7 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter en lovvalgsperiode for en gitt behandling", response = LovvalgsperiodeDto.class)
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
     public Response hentLovvalgsperioder(@PathParam("behandlingsid") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        tilgang.sjekk(behandlingsid);
+        tilgangService.sjekk(behandlingsid);
         Collection<LovvalgsperiodeDto> resultat = lovvalgsperiodeService
                 .hentLovvalgsperioder(behandlingsid)
                 .stream()
@@ -60,7 +60,7 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
     public Collection<LovvalgsperiodeDto> lagreLovvalgsperioder(@PathParam("behandlingsid") long behandlingsid,
             @ApiParam(value = "En liste av lovvalgsperioder å lagre.") Collection<LovvalgsperiodeDto> lovvalgsperiodeDtoer) throws FunksjonellException, TekniskException {
-        tilgang.sjekkRedigerbar(behandlingsid);
+        tilgangService.sjekkRedigerbar(behandlingsid);
         List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeDtoer.stream()
                 .map(LovvalgsperiodeDto::til)
                 .collect(Collectors.toList());
@@ -73,7 +73,7 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter den opprinnelig lovvalgsperioden en replikert avsluttet behandling har", response = LovvalgsperiodeDto.class)
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
     public Map<String, PeriodeDto> hentOpprinneligLovvalgsperiode(@PathParam("behandlingsid") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        tilgang.sjekk(behandlingsid);
+        tilgangService.sjekk(behandlingsid);
         Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandlingsid);
         PeriodeDto periodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
         return ImmutableMap.of("opprinneligLovvalgsperiode", periodeDto);

@@ -13,7 +13,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.SoeknadService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
@@ -56,8 +56,8 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
         SoeknadService soeknadService = mock(SoeknadService.class);
         RegisterOppslagService registerOppslagService = mock(RegisterOppslagService.class);
 
-        Tilgang tilgang = mock(Tilgang.class);
-        soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgang);
+        TilgangService tilgangService = mock(TilgangService.class);
+        soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgangService);
         EasyRandom random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
             .collectionSizeRange(1, 4)
@@ -125,10 +125,10 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
     public void lagreSoeknad_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
         SoeknadService soeknadService = mock(SoeknadService.class);
         RegisterOppslagService registerOppslagService = mock(RegisterOppslagService.class);
-        Tilgang tilgang = mock(Tilgang.class);
-        SoeknadTjeneste soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgang);
+        TilgangService tilgangService = mock(TilgangService.class);
+        SoeknadTjeneste soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgangService);
 
-        doThrow(FunksjonellException.class).when(tilgang).sjekkRedigerbar(anyLong());
+        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbar(anyLong());
 
         soeknadTjeneste.registrerSøknad(new SoeknadDto(1L, soeknadDokument));
     }
@@ -137,10 +137,10 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
     public void hentSoeknad_ikkeTilgang_girFeil() throws FunksjonellException, TekniskException {
         SoeknadService soeknadService = mock(SoeknadService.class);
         RegisterOppslagService registerOppslagService = mock(RegisterOppslagService.class);
-        Tilgang tilgang = mock(Tilgang.class);
-        SoeknadTjeneste soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgang);
+        TilgangService tilgangService = mock(TilgangService.class);
+        SoeknadTjeneste soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgangService);
 
-        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekk(anyLong());
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekk(anyLong());
         soeknadTjeneste.hentSøknad(1);
     }
 }

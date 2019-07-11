@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        behandlingsresultatTjeneste = new BehandlingsresultatTjeneste(behandlingsresultatService, mock(Tilgang.class));
+        behandlingsresultatTjeneste = new BehandlingsresultatTjeneste(behandlingsresultatService, mock(TilgangService.class));
     }
 
     @Override

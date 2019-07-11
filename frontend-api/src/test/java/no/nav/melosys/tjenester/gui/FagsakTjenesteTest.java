@@ -21,7 +21,7 @@ import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
@@ -58,7 +58,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
 
-    private static Tilgang tilgang;
+    private static TilgangService tilgangService;
 
     private String schemaType;
 
@@ -176,7 +176,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
-        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekkSak(fagsak);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkSak(fagsak);
 
         expectedException.expect(SikkerhetsbegrensningException.class);
         instans.henleggFagsak("123", new HenleggelseDto());
@@ -235,7 +235,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     public final void avsluttSakSomBortfalt_sakEksistererIkke_kasterException() throws Exception {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
-        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekkSak(fagsak);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkSak(fagsak);
 
         expectedException.expect(SikkerhetsbegrensningException.class);
         instans.avsluttSakSomBortfalt("123");
@@ -244,14 +244,14 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
-        tilgang = mock(Tilgang.class);
+        tilgangService = mock(TilgangService.class);
         fagsakService = mock(FagsakService.class);
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(fagsakService.hentFagsak("Finnes ikke")).thenThrow(new IkkeFunnetException("Finnes ikke"));
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, tilgang);
+        return new FagsakTjeneste(fagsakService, tilgangService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto() {

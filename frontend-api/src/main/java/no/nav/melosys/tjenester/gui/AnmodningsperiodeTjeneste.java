@@ -15,7 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.periode.AnmodningsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.AnmodningsperiodeSvarDto;
@@ -31,13 +31,13 @@ import org.springframework.web.context.WebApplicationContext;
 public class AnmodningsperiodeTjeneste extends RestTjeneste {
 
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public AnmodningsperiodeTjeneste(AnmodningsperiodeService anmodningsperiodeService, Tilgang tilgang) {
+    public AnmodningsperiodeTjeneste(AnmodningsperiodeService anmodningsperiodeService, TilgangService tilgangService) {
         super();
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @GET
@@ -45,7 +45,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter en anmodningsperiode for en gitt behandling", response = AnmodningsperiodeDto.class)
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
     public Collection<AnmodningsperiodeDto> hentAnmodningsperioder(@PathParam("behandlingID") long behandlingID) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
         return anmodningsperiodeService
             .hentAnmodningsperioder(behandlingID)
             .stream()
@@ -60,7 +60,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     public Collection<AnmodningsperiodeDto> lagreAnmodningsperioder(@PathParam("behandlingID") long behandlingID,
                                                                 @ApiParam(value = "En liste av anmodningsperioder å lagre.") Collection<AnmodningsperiodeDto> anmodningsperiodeDtoer)
         throws TekniskException, FunksjonellException {
-        tilgang.sjekkRedigerbar(behandlingID);
+        tilgangService.sjekkRedigerbar(behandlingID);
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
             behandlingID, anmodningsperiodeDtoer.stream().map(AnmodningsperiodeDto::til).collect(Collectors.toList())
         );
@@ -79,7 +79,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         long behandlingID = anmodningsperiodeOptional.map(Anmodningsperiode::getBehandlingsresultat)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
 
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
 
         Optional<AnmodningsperiodeSvar> svar = anmodningsperiodeOptional.map(Anmodningsperiode::getAnmodningsperiodeSvar);
 
@@ -97,7 +97,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)
             .map(Anmodningsperiode::getBehandlingsresultat)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
-        tilgang.sjekkRedigerbar(behandlingID);
+        tilgangService.sjekkRedigerbar(behandlingID);
 
         AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningperiodeID, anmodningsperiodeSvarDto.til());
         return AnmodningsperiodeSvarDto.fra(svar);

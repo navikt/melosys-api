@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
@@ -33,7 +33,7 @@ public class VilkaarTjenesteTest extends JsonSchemaTestParent {
     private VilkaarsresultatService vilkaarsresultatService;
 
     @Mock
-    private Tilgang tilgang;
+    private TilgangService tilgangService;
 
     private VilkaarTjeneste vilkaarTjeneste;
 
@@ -49,7 +49,7 @@ public class VilkaarTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        vilkaarTjeneste = new VilkaarTjeneste(vilkaarsresultatService, tilgang);
+        vilkaarTjeneste = new VilkaarTjeneste(vilkaarsresultatService, tilgangService);
     }
 
     @Test
@@ -64,14 +64,14 @@ public class VilkaarTjenesteTest extends JsonSchemaTestParent {
 
     @Test(expected = FunksjonellException.class)
     public void lagreVilkaar_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(FunksjonellException.class).when(tilgang).sjekkRedigerbar(anyLong());
+        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbar(anyLong());
 
         vilkaarTjeneste.registrerVilkår(1L, Collections.emptyList());
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void hentVilkaar_ikkeTilgang_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekk(anyLong());
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekk(anyLong());
 
         vilkaarTjeneste.hentVilkår(1L);
     }

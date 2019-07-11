@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.periode.AnmodningsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.AnmodningsperiodeSvarDto;
@@ -34,7 +34,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
-    private Tilgang tilgang;
+    private TilgangService tilgangService;
 
     private AnmodningsperiodeTjeneste anmodningsperiodeTjeneste;
 
@@ -44,7 +44,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, tilgang);
+        anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, tilgangService);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         anmodningsperiodeTjeneste.lagreAnmodningsperioder(1L, anmodningsperiodeDtoer);
 
-        verify(tilgang).sjekkRedigerbar(anyLong());
+        verify(tilgangService).sjekkRedigerbar(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(anyLong(), anyCollection());
         //TODO schema
     }
@@ -110,7 +110,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         AnmodningsperiodeSvarDto svarDto = anmodningsperiodeTjeneste.lagreAnmodningsperiodeSvar(1L, new AnmodningsperiodeSvarDto());
         assertThat(svarDto).isNotNull();
         assertThat(svarDto.anmodningsperiodeSvarType).isEqualTo(AnmodningsperiodeSvarType.INNVILGELSE.name());
-        verify(tilgang).sjekkRedigerbar(anyLong());
+        verify(tilgangService).sjekkRedigerbar(anyLong());
         //TODO schema
     }
 

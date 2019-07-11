@@ -23,7 +23,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
@@ -48,12 +48,12 @@ public class FagsakTjeneste extends RestTjeneste {
 
     private final FagsakService fagsakService;
 
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
+    public FagsakTjeneste(FagsakService fagsakService, TilgangService tilgangService) {
         this.fagsakService = fagsakService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @GET
@@ -61,7 +61,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."), response = Fagsak.class)
     public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
-        tilgang.sjekkSak(sak);
+        tilgangService.sjekkSak(sak);
         FagsakDto fagsakDto = tilFagsakDto(sak);
         return Response.ok(fagsakDto).build();
     }
@@ -78,7 +78,7 @@ public class FagsakTjeneste extends RestTjeneste {
         if (fnr == null) {
             throw new BadRequestException();
         }
-        tilgang.sjekkFnr(fnr);
+        tilgangService.sjekkFnr(fnr);
         saker = fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fnr);
         return tilFagsakOppsummeringDtoer(saker);
     }
@@ -88,7 +88,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henlegger en fagsak")
     public Response henleggFagsak(@ApiParam @PathParam("saksnr") String saksnummer, @ApiParam("henleggelseDto") HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
-        tilgang.sjekkSak(sak);
+        tilgangService.sjekkSak(sak);
 
         fagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
         return Response.ok().build();
@@ -101,7 +101,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @ApiOperation(value = "Avslutter en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys")
     public Response avsluttSakSomBortfalt(@PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgang.sjekkSak(fagsak);
+        tilgangService.sjekkSak(fagsak);
 
         fagsakService.avsluttSakSomBortfalt(fagsak);
         return Response.noContent().build();

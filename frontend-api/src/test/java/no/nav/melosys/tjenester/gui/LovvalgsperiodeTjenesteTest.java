@@ -22,7 +22,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.junit.Test;
@@ -84,7 +84,7 @@ public final class LovvalgsperiodeTjenesteTest {
         lovvalgsperiode.setFom(fomDato);
         lovvalgsperiode.setTom(tomDato);
         doReturn(lovvalgsperiode).when(lovvalgsperiodeService).hentOpprinneligLovvalgsperiode(5L);
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, mock(Tilgang.class));
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, mock(TilgangService.class));
 
         PeriodeDto periodeDto = instans.hentOpprinneligLovvalgsperiode(5L).get("opprinneligLovvalgsperiode");
 
@@ -102,12 +102,12 @@ public final class LovvalgsperiodeTjenesteTest {
 
     private void testHentLovvalgsperioder(long behandlingsid, Collection<LovvalgsperiodeDto> forventet) throws Exception {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
-        Tilgang tilgang = mock(Tilgang.class);
+        TilgangService tilgangService = mock(TilgangService.class);
         doThrow(new SikkerhetsbegrensningException("Computer says no"))
-                .when(tilgang).sjekk(eq(BEHANDLING_UTEN_TILGANG));
+                .when(tilgangService).sjekk(eq(BEHANDLING_UTEN_TILGANG));
         doThrow(new TekniskException("Det har oppstått en..."))
-                .when(tilgang).sjekk(eq(BEHANDLING_MED_TEKNISK_FEIL));
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgang);
+                .when(tilgangService).sjekk(eq(BEHANDLING_MED_TEKNISK_FEIL));
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
         Response resultat = instans.hentLovvalgsperioder(behandlingsid);
         assertEquals(Response.Status.OK.getStatusCode(), resultat.getStatus());
         @SuppressWarnings("unchecked")
@@ -124,8 +124,8 @@ public final class LovvalgsperiodeTjenesteTest {
     private void testLagreLovvalgsperioder(long behandlingsid,
             Collection<LovvalgsperiodeDto> perioder) throws Exception {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
-        Tilgang tilgang = mock(Tilgang.class);
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgang);
+        TilgangService tilgangService = mock(TilgangService.class);
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
         jsonSchemaTest.validerListe(perioder);
         Collection<LovvalgsperiodeDto> resultat = instans.lagreLovvalgsperioder(behandlingsid, perioder);
         assertThat(resultat.size()).isEqualTo(perioder.size());
@@ -171,18 +171,18 @@ public final class LovvalgsperiodeTjenesteTest {
 
     @Test(expected = FunksjonellException.class)
     public void lagreLovvalgsperioder_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
-        Tilgang tilgang = mock(Tilgang.class);
-        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekkRedigerbar(anyLong());
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgang);
+        TilgangService tilgangService = mock(TilgangService.class);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkRedigerbar(anyLong());
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgangService);
 
         instans.lagreLovvalgsperioder(42L, Collections.emptyList());
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void hentLovvalgsperioder_ikketilgang_girFeil() throws FunksjonellException, TekniskException {
-        Tilgang tilgang = mock(Tilgang.class);
-        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekk(anyLong());
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgang);
+        TilgangService tilgangService = mock(TilgangService.class);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekk(anyLong());
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgangService);
 
         instans.hentLovvalgsperioder(42L);
     }

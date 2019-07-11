@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
@@ -36,7 +36,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     private AvklartefaktaService avklartefaktaService;
 
     @Mock
-    private Tilgang tilgang;
+    private TilgangService tilgangService;
 
     @Override
     public String schemaNavn() {
@@ -45,7 +45,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgang);
+        avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgangService);
     }
 
     @Test
@@ -67,14 +67,14 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
     @Test(expected = FunksjonellException.class)
     public void lagreAvklartefakta_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(FunksjonellException.class).when(tilgang).sjekkRedigerbar(anyLong());
+        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbar(anyLong());
 
         avklartefaktaTjeneste.lagreAvklarteFakta(1, Collections.emptySet());
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void hentAvklartefakta_ikkeTilgang_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekk(anyLong());
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekk(anyLong());
 
         avklartefaktaTjeneste.hentAvklarteFakta(1);
     }

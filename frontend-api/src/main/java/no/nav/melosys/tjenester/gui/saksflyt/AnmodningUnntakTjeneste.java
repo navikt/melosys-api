@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.RestTjeneste;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
@@ -27,12 +27,12 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningUnntakTjeneste extends RestTjeneste {
     private final AnmodningUnntakService anmodningUnntakService;
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public AnmodningUnntakTjeneste(AnmodningUnntakService anmodningUnntakService, Tilgang tilgang) {
+    public AnmodningUnntakTjeneste(AnmodningUnntakService anmodningUnntakService, TilgangService tilgangService) {
         this.anmodningUnntakService = anmodningUnntakService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @POST
@@ -42,7 +42,7 @@ public class AnmodningUnntakTjeneste extends RestTjeneste {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultattype() != Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
             throw new BadRequestException();
         }
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID);
         return Response.ok().build();
     }

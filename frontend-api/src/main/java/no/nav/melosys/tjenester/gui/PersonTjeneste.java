@@ -14,7 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.RegisterOppslagService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +30,12 @@ public class PersonTjeneste extends RestTjeneste {
     
     private RegisterOppslagService registerOppslag;
 
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public PersonTjeneste(RegisterOppslagService registerOppslag, Tilgang tilgang) {
+    public PersonTjeneste(RegisterOppslagService registerOppslag, TilgangService tilgangService) {
         this.registerOppslag = registerOppslag;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @GET
@@ -45,7 +45,7 @@ public class PersonTjeneste extends RestTjeneste {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         PersonDokument personDokument = registerOppslag.hentPerson(personnummer);
-        tilgang.sjekkFnr(personnummer);
+        tilgangService.sjekkFnr(personnummer);
         return Response.ok(new PersonDto(personDokument)).build();
     }
 }

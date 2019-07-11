@@ -14,12 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class Tilgang {
+public class TilgangService {
     private BehandlingService behandlingService;
     private Pep pep;
 
     @Autowired
-    public Tilgang(BehandlingService behandlingService, Pep pep) {
+    public TilgangService(BehandlingService behandlingService, Pep pep) {
         this.behandlingService = behandlingService;
         this.pep = pep;
     }

@@ -16,7 +16,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.SoeknadService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +34,13 @@ public class SoeknadTjeneste extends RestTjeneste {
 
     private final RegisterOppslagService registerOppslagService;
 
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public SoeknadTjeneste(SoeknadService soeknadService, RegisterOppslagService registerOppslagService, Tilgang tilgang) {
+    public SoeknadTjeneste(SoeknadService soeknadService, RegisterOppslagService registerOppslagService, TilgangService tilgangService) {
         this.soeknadService = soeknadService;
         this.registerOppslagService = registerOppslagService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @GET
@@ -51,7 +51,7 @@ public class SoeknadTjeneste extends RestTjeneste {
         response = SoeknadDto.class)
     public Response hentSøknad(@ApiParam @PathParam("behandlingID") long behandlingID) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
         SoeknadDokument soeknadDokument;
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
         soeknadDokument = soeknadService.hentSoeknad(behandlingID);
         SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         SoeknadDto soeknadDto;
@@ -67,7 +67,7 @@ public class SoeknadTjeneste extends RestTjeneste {
     public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) throws FunksjonellException, TekniskException {
         long behandlingID = soeknadInnDto.getBehandlingID();
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoeknadDokument();
-        tilgang.sjekkRedigerbar(behandlingID);
+        tilgangService.sjekkRedigerbar(behandlingID);
         soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
         SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         return new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);

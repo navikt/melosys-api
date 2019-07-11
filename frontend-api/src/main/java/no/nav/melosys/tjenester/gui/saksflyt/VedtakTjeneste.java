@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import no.nav.melosys.tjenester.gui.RestTjeneste;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
@@ -27,12 +27,12 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VedtakTjeneste extends RestTjeneste {
     private final VedtakService vedtakService;
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public VedtakTjeneste(VedtakService vedtakService, Tilgang tilgang) {
+    public VedtakTjeneste(VedtakService vedtakService, TilgangService tilgangService) {
         this.vedtakService = vedtakService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @POST
@@ -42,7 +42,7 @@ public class VedtakTjeneste extends RestTjeneste {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultattype() == null) {
             throw new BadRequestException();
         }
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
         vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultattype());
         return Response.ok().build();
     }
@@ -54,7 +54,7 @@ public class VedtakTjeneste extends RestTjeneste {
         if (endreVedtakDto.getBegrunnelseKode() == null) {
             throw new BadRequestException("Mangler BegrunnelseKode");
         }
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
 
         vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode());
 

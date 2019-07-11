@@ -11,7 +11,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.DokumentVisningService;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
@@ -48,11 +48,11 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     private DokumentVisningService dokumentVisningService;
 
     @Mock
-    private Tilgang tilgang;
+    private TilgangService tilgangService;
 
     @Before
     public void setUp() {
-        dokumentTjeneste = new DokumentTjeneste(dokumentService, dokumentVisningService, tilgang);
+        dokumentTjeneste = new DokumentTjeneste(dokumentService, dokumentVisningService, tilgangService);
     }
 
     @Test

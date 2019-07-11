@@ -13,7 +13,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -34,12 +34,12 @@ public class BehandlingTjeneste extends RestTjeneste {
 
     private final BehandlingService behandlingService;
 
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public BehandlingTjeneste(BehandlingService behandlingService, Tilgang tilgang) {
+    public BehandlingTjeneste(BehandlingService behandlingService, TilgangService tilgangService) {
         this.behandlingService = behandlingService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @POST
@@ -49,7 +49,7 @@ public class BehandlingTjeneste extends RestTjeneste {
     public void oppdaterStatus(@PathParam("behandlingID") long behandlingID,
                                @ApiParam("statusKode") BehandlingsstatusDto status) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, status.getBehandlingsstatus().getKode());
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
         behandlingService.oppdaterStatus(behandlingID, status.getBehandlingsstatus());
     }
 
@@ -60,7 +60,7 @@ public class BehandlingTjeneste extends RestTjeneste {
     public Response knyttMedlemsperioder(@PathParam("behandlingID") long behandlingID,
                                          TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
 
         behandlingService.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioder.periodeIder);
         return Response.ok(tidligereMedlemsperioder).build();
@@ -72,7 +72,7 @@ public class BehandlingTjeneste extends RestTjeneste {
         response = TidligereMedlemsperioderDto.class)
     public Response hentMedlemsperioder(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
 
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
@@ -86,7 +86,7 @@ public class BehandlingTjeneste extends RestTjeneste {
     public Response hentBehandling(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         log.info("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekk(behandlingID);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);

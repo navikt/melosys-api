@@ -12,7 +12,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -42,7 +42,7 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
     private AktoerTjeneste aktoerTjeneste;
 
     @Mock
-    private Tilgang tilgang;
+    private TilgangService tilgangService;
 
     @Mock
     private AktoerService aktoerService;
@@ -52,7 +52,7 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        aktoerTjeneste = new AktoerTjeneste(tilgang, aktoerService, fagsakService);
+        aktoerTjeneste = new AktoerTjeneste(tilgangService, aktoerService, fagsakService);
         when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
     }
 

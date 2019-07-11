@@ -15,7 +15,7 @@ import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
@@ -51,7 +51,7 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, mock(Tilgang.class));
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, mock(TilgangService.class));
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
