@@ -104,9 +104,9 @@ public final class LovvalgsperiodeTjenesteTest {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
         TilgangService tilgangService = mock(TilgangService.class);
         doThrow(new SikkerhetsbegrensningException("Computer says no"))
-                .when(tilgangService).sjekk(eq(BEHANDLING_UTEN_TILGANG));
+                .when(tilgangService).sjekkTilgang(eq(BEHANDLING_UTEN_TILGANG));
         doThrow(new TekniskException("Det har oppstått en..."))
-                .when(tilgangService).sjekk(eq(BEHANDLING_MED_TEKNISK_FEIL));
+                .when(tilgangService).sjekkTilgang(eq(BEHANDLING_MED_TEKNISK_FEIL));
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
         Response resultat = instans.hentLovvalgsperioder(behandlingsid);
         assertEquals(Response.Status.OK.getStatusCode(), resultat.getStatus());
@@ -172,7 +172,7 @@ public final class LovvalgsperiodeTjenesteTest {
     @Test(expected = FunksjonellException.class)
     public void lagreLovvalgsperioder_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
         TilgangService tilgangService = mock(TilgangService.class);
-        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkRedigerbar(anyLong());
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgangService);
 
         instans.lagreLovvalgsperioder(42L, Collections.emptyList());
@@ -181,7 +181,7 @@ public final class LovvalgsperiodeTjenesteTest {
     @Test(expected = SikkerhetsbegrensningException.class)
     public void hentLovvalgsperioder_ikketilgang_girFeil() throws FunksjonellException, TekniskException {
         TilgangService tilgangService = mock(TilgangService.class);
-        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekk(anyLong());
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkTilgang(anyLong());
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgangService);
 
         instans.hentLovvalgsperioder(42L);

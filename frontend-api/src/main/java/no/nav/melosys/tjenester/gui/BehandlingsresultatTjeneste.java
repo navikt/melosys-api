@@ -38,7 +38,7 @@ public class BehandlingsresultatTjeneste extends RestTjeneste {
     @ApiOperation(value = "Hent behandlingsresultat knyttet til en behandling",
         response = BehandlingsresultatDto.class)
     public Response hentBehandlingsresultat(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
 
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         return Response.ok(BehandlingsresultatDto.av(resultat)).build();

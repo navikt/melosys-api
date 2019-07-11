@@ -44,7 +44,7 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
                   response = Avklartefakta.class,
                   responseContainer = "Set")
     public Set<AvklartefaktaDto> hentAvklarteFakta(@ApiParam("BehandlingsID") @PathParam("behandlingID") long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
     }
 
@@ -53,7 +53,7 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
     @ApiOperation(value = "Lagre avklartefakta")
     public Set<AvklartefaktaDto> lagreAvklarteFakta(@PathParam("behandlingID") long behandlingID,
                                                     @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) throws TekniskException, FunksjonellException {
-        tilgangService.sjekkRedigerbar(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
         avklartefaktaService.lagreAvklarteFakta(behandlingID, avklartefaktaDtoer);
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);

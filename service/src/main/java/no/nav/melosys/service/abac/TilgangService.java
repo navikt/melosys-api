@@ -24,24 +24,24 @@ public class TilgangService {
         this.pep = pep;
     }
 
-    public void sjekkRedigerbar(long behandlingsId) throws FunksjonellException, TekniskException {
+    public void sjekkRedigerbarOgTilgang(long behandlingsId) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingsId);
 
         if(!behandling.erRedigerbar()) {
             throw new FunksjonellException(String.format("Forsøk på å endre en ikke-redigerbar behandling med id %s", behandlingsId));
         }
 
-        sjekk(behandling);
+        sjekkTilgang(behandling);
     }
 
     // Behandling
-    public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
+    public void sjekkTilgang(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(behandlingsId);
 
-        sjekk(behandling);
+        sjekkTilgang(behandling);
     }
 
-    private void sjekk(Behandling behandling) throws SikkerhetsbegrensningException, TekniskException {
+    private void sjekkTilgang(Behandling behandling) throws SikkerhetsbegrensningException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer aktør = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
         if (aktør != null) {

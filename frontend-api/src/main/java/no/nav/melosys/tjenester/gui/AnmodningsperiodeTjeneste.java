@@ -45,7 +45,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter en anmodningsperiode for en gitt behandling", response = AnmodningsperiodeDto.class)
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
     public Collection<AnmodningsperiodeDto> hentAnmodningsperioder(@PathParam("behandlingID") long behandlingID) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         return anmodningsperiodeService
             .hentAnmodningsperioder(behandlingID)
             .stream()
@@ -60,7 +60,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     public Collection<AnmodningsperiodeDto> lagreAnmodningsperioder(@PathParam("behandlingID") long behandlingID,
                                                                 @ApiParam(value = "En liste av anmodningsperioder å lagre.") Collection<AnmodningsperiodeDto> anmodningsperiodeDtoer)
         throws TekniskException, FunksjonellException {
-        tilgangService.sjekkRedigerbar(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
             behandlingID, anmodningsperiodeDtoer.stream().map(AnmodningsperiodeDto::til).collect(Collectors.toList())
         );
@@ -79,7 +79,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         long behandlingID = anmodningsperiodeOptional.map(Anmodningsperiode::getBehandlingsresultat)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
 
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
 
         Optional<AnmodningsperiodeSvar> svar = anmodningsperiodeOptional.map(Anmodningsperiode::getAnmodningsperiodeSvar);
 
@@ -97,7 +97,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)
             .map(Anmodningsperiode::getBehandlingsresultat)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
-        tilgangService.sjekkRedigerbar(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
         AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningperiodeID, anmodningsperiodeSvarDto.til());
         return AnmodningsperiodeSvarDto.fra(svar);

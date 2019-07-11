@@ -51,7 +51,7 @@ public class SoeknadTjeneste extends RestTjeneste {
         response = SoeknadDto.class)
     public Response hentSøknad(@ApiParam @PathParam("behandlingID") long behandlingID) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
         SoeknadDokument soeknadDokument;
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         soeknadDokument = soeknadService.hentSoeknad(behandlingID);
         SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         SoeknadDto soeknadDto;
@@ -67,7 +67,7 @@ public class SoeknadTjeneste extends RestTjeneste {
     public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) throws FunksjonellException, TekniskException {
         long behandlingID = soeknadInnDto.getBehandlingID();
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoeknadDokument();
-        tilgangService.sjekkRedigerbar(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
         SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         return new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);

@@ -64,14 +64,14 @@ public class VilkaarTjenesteTest extends JsonSchemaTestParent {
 
     @Test(expected = FunksjonellException.class)
     public void lagreVilkaar_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbar(anyLong());
+        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
 
         vilkaarTjeneste.registrerVilkår(1L, Collections.emptyList());
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void hentVilkaar_ikkeTilgang_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekk(anyLong());
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkTilgang(anyLong());
 
         vilkaarTjeneste.hentVilkår(1L);
     }

@@ -68,7 +68,7 @@ public class DokumentTjeneste extends RestTjeneste {
                                    @PathParam("produserbartDokument") Produserbaredokumenter produserbartDokument,
             BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
         byte[] dokument;
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
@@ -82,7 +82,7 @@ public class DokumentTjeneste extends RestTjeneste {
         if (brevBestillingDto.mottaker == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         dokumentService.produserDokumentISaksflyt(produserbartDokument, brevBestillingDto.mottaker, behandlingID, new BrevData(brevBestillingDto));
         return Response.noContent().build();
     }

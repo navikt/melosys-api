@@ -128,7 +128,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
         TilgangService tilgangService = mock(TilgangService.class);
         SoeknadTjeneste soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgangService);
 
-        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbar(anyLong());
+        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
 
         soeknadTjeneste.registrerSøknad(new SoeknadDto(1L, soeknadDokument));
     }
@@ -140,7 +140,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
         TilgangService tilgangService = mock(TilgangService.class);
         SoeknadTjeneste soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgangService);
 
-        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekk(anyLong());
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkTilgang(anyLong());
         soeknadTjeneste.hentSøknad(1);
     }
 }

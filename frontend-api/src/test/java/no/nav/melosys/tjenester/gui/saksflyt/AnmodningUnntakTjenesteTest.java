@@ -40,7 +40,7 @@ public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
 
         anmodningUnntakTjeneste.anmodningOmUnntak(behandlingID, fattVedtakDto);
 
-        verify(tilgangService).sjekk(behandlingID);
+        verify(tilgangService).sjekkTilgang(behandlingID);
         verify(anmodningUnntakService).anmodningOmUnntak(behandlingID);
 
         valider(fattVedtakDto);

@@ -42,7 +42,7 @@ public class VedtakTjeneste extends RestTjeneste {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultattype() == null) {
             throw new BadRequestException();
         }
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultattype());
         return Response.ok().build();
     }
@@ -54,7 +54,7 @@ public class VedtakTjeneste extends RestTjeneste {
         if (endreVedtakDto.getBegrunnelseKode() == null) {
             throw new BadRequestException("Mangler BegrunnelseKode");
         }
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
 
         vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode());
 

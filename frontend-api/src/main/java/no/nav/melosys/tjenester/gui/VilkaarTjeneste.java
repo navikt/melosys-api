@@ -45,7 +45,7 @@ public class VilkaarTjeneste extends RestTjeneste {
     public List<VilkaarDto> hentVilkår(@PathParam("behandlingID") long behandlingID) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         List<VilkaarDto> vilkaarDtoListe;
 
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
 
         return vilkaarDtoListe;
@@ -57,7 +57,7 @@ public class VilkaarTjeneste extends RestTjeneste {
     public List<VilkaarDto> registrerVilkår(@PathParam("behandlingID") long behandlingID,
             @ApiParam("VilkaarData") List<VilkaarDto> vilkaarDtoer) throws FunksjonellException, TekniskException {
         List<VilkaarDto> vilkaarDtoListe;
-        tilgangService.sjekkRedigerbar(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);
         vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
 

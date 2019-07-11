@@ -58,7 +58,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         fattVedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.HENLEGGELSE);
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
-        verify(tilgangService).sjekk(behandlingID);
+        verify(tilgangService).sjekkTilgang(behandlingID);
         verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultattype());
 
         valider(fattVedtakDto);
@@ -68,7 +68,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     public void fattVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
-        verify(tilgangService).sjekk(behandlingID);
+        verify(tilgangService).sjekkTilgang(behandlingID);
         valider(fattVedtakDto);
     }
 
@@ -77,7 +77,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         endreVedtakDto.setBegrunnelseKode(Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
-        verify(tilgangService).sjekk(behandlingID);
+        verify(tilgangService).sjekkTilgang(behandlingID);
         verify(vedtakService).endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
 
         valider(fattVedtakDto);
@@ -88,7 +88,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         expectedException.expect(BadRequestException.class);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
-        verify(tilgangService, never()).sjekk(behandlingID);
+        verify(tilgangService, never()).sjekkTilgang(behandlingID);
         valider(fattVedtakDto);
     }
 }

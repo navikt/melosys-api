@@ -45,7 +45,7 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter en lovvalgsperiode for en gitt behandling", response = LovvalgsperiodeDto.class)
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
     public Response hentLovvalgsperioder(@PathParam("behandlingsid") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        tilgangService.sjekk(behandlingsid);
+        tilgangService.sjekkTilgang(behandlingsid);
         Collection<LovvalgsperiodeDto> resultat = lovvalgsperiodeService
                 .hentLovvalgsperioder(behandlingsid)
                 .stream()
@@ -60,7 +60,7 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
     public Collection<LovvalgsperiodeDto> lagreLovvalgsperioder(@PathParam("behandlingsid") long behandlingsid,
             @ApiParam(value = "En liste av lovvalgsperioder å lagre.") Collection<LovvalgsperiodeDto> lovvalgsperiodeDtoer) throws FunksjonellException, TekniskException {
-        tilgangService.sjekkRedigerbar(behandlingsid);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingsid);
         List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeDtoer.stream()
                 .map(LovvalgsperiodeDto::til)
                 .collect(Collectors.toList());
@@ -73,7 +73,7 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter den opprinnelig lovvalgsperioden en replikert avsluttet behandling har", response = LovvalgsperiodeDto.class)
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
     public Map<String, PeriodeDto> hentOpprinneligLovvalgsperiode(@PathParam("behandlingsid") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        tilgangService.sjekk(behandlingsid);
+        tilgangService.sjekkTilgang(behandlingsid);
         Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandlingsid);
         PeriodeDto periodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
         return ImmutableMap.of("opprinneligLovvalgsperiode", periodeDto);

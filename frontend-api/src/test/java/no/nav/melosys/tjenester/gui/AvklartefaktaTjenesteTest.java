@@ -67,14 +67,14 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
     @Test(expected = FunksjonellException.class)
     public void lagreAvklartefakta_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbar(anyLong());
+        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
 
         avklartefaktaTjeneste.lagreAvklarteFakta(1, Collections.emptySet());
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void hentAvklartefakta_ikkeTilgang_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekk(anyLong());
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkTilgang(anyLong());
 
         avklartefaktaTjeneste.hentAvklarteFakta(1);
     }

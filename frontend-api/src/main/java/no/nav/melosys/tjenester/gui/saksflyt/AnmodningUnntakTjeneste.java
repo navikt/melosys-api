@@ -42,7 +42,7 @@ public class AnmodningUnntakTjeneste extends RestTjeneste {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultattype() != Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
             throw new BadRequestException();
         }
-        tilgangService.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID);
         return Response.ok().build();
     }

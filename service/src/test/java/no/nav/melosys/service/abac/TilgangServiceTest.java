@@ -66,7 +66,7 @@ public class TilgangServiceTest {
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
 
-        tilgangService.sjekk(102323934);
+        tilgangService.sjekkTilgang(102323934);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class TilgangServiceTest {
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
 
-        tilgangService.sjekk(102323934);
+        tilgangService.sjekkTilgang(102323934);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class TilgangServiceTest {
         when(behandlingMocked.erRedigerbar()).thenReturn(true);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
 
-        tilgangService.sjekkRedigerbar(123123123);
+        tilgangService.sjekkRedigerbarOgTilgang(123123123);
     }
 
     @Test(expected = FunksjonellException.class)
@@ -93,7 +93,7 @@ public class TilgangServiceTest {
         when(behandlingMocked.erRedigerbar()).thenReturn(false);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
 
-        tilgangService.sjekkRedigerbar(123123123);
+        tilgangService.sjekkRedigerbarOgTilgang(123123123);
     }
 
     @Test
