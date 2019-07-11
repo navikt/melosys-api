@@ -32,7 +32,7 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
                                 BrevData brevData) throws JAXBException, SAXException, TekniskException {
         Fag fag = mapFag(behandling, resultat, (BrevDataAnmodningUnntakOgAvslag) brevData);
-        fag = mapArt161(fag, resultat);
+        mapArt161(fag, resultat);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
@@ -44,7 +44,7 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
         return fag;
     }
 
-    private Fag mapArt161(Fag fag, Behandlingsresultat resultat) throws TekniskException {
+    private void mapArt161(Fag fag, Behandlingsresultat resultat) throws TekniskException {
         Optional<Vilkaarsresultat> vilkaarsresultat = hentFørsteGyldigeVilkaarsresultatForArt16(resultat);
         Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet());
         Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagArt161AvslagBegrunnelse();
@@ -72,7 +72,6 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
         }
 
         fag.setArt161AvslagBegrunnelse(art161AvslagBegrunnelser);
-        return fag;
     }
 
     private static Art161AvslagBegrunnelse lagArt161AvslagBegrunnelse() {

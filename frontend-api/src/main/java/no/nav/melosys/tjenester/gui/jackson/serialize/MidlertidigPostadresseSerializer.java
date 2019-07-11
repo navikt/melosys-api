@@ -20,7 +20,7 @@ import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
 public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melosys.domain.dokument.person.MidlertidigPostadresse> {
 
-    private KodeverkService kodeverkService;
+    private transient KodeverkService kodeverkService;
 
     public MidlertidigPostadresseSerializer(KodeverkService kodeverkService) {
         super(no.nav.melosys.domain.dokument.person.MidlertidigPostadresse.class);

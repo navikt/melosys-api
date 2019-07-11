@@ -18,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> {
 
-    private final KodeverkService kodeverkService;
+    private final transient KodeverkService kodeverkService;
 
     public OrganisasjonSerializer(KodeverkService kodeverkService) {
         super(OrganisasjonDokument.class);

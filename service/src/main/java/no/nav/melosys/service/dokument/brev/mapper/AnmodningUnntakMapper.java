@@ -28,20 +28,18 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
                                 BrevData brevData) throws JAXBException, SAXException, TekniskException {
         Fag fag = til000084Fag(mapFag(behandling, resultat, (BrevDataAnmodningUnntakOgAvslag) brevData));
-        fag = mapArt161(fag, resultat);
+        mapArt161(fag, resultat);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapArt161(Fag fag, Behandlingsresultat resultat) throws TekniskException {
+    private void mapArt161(Fag fag, Behandlingsresultat resultat) throws TekniskException {
 
         Vilkaarsresultat vilkaarsresultat = hentFørsteGyldigeVilkaarsresultatForArt16(resultat)
             .orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1"));
 
         VilkaarBegrunnelse vilkaarBegrunnelse = vilkaarsresultat.getBegrunnelser().iterator().next();
         fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(vilkaarBegrunnelse.getKode()));
-
-        return fag;
     }
 
     private static JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {

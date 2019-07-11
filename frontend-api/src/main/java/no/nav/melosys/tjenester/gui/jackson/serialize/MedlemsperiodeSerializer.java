@@ -15,7 +15,7 @@ import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
 public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
 
-    private KodeverkService kodeverkService;
+    private transient KodeverkService kodeverkService;
 
     public MedlemsperiodeSerializer(KodeverkService kodeverkService) {
         super(Medlemsperiode.class);

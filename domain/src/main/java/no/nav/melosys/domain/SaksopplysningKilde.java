@@ -19,7 +19,7 @@ public enum SaksopplysningKilde implements InterntKodeverkTabell<SaksopplysningK
     private String kode;
     private String beskrivelse;
 
-    private SaksopplysningKilde(String kode, String beskrivelse) {
+    SaksopplysningKilde(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
