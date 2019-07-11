@@ -45,7 +45,6 @@ public class KafkaConfig {
 
     private Map<String, Object> consumerConfig() {
         Map<String, Object> props = new HashMap<>();
-        //Without this, the consumer will receive GenericData records.
         props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
