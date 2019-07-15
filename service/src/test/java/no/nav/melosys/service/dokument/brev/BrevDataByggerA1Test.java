@@ -25,8 +25,8 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -181,6 +181,6 @@ public class BrevDataByggerA1Test {
         assertThat(brevDataDto.arbeidssteder.stream()
             .filter(Arbeidssted::erFysisk)
             .map(FysiskArbeidssted.class::cast)
-            .map(uv -> uv.adresse)).contains(arbeidUtland.adresse);
+            .map(uv -> uv.getAdresse())).contains(arbeidUtland.adresse);
     }
 }

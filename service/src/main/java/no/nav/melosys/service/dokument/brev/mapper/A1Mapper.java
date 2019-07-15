@@ -19,8 +19,10 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.DummyArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
@@ -146,7 +148,7 @@ public class A1Mapper {
                 fysiskeAdresserBrev.getAdresse().add(mapFysiskArbeidssted((FysiskArbeidssted)arbeidssted));
             }
             else {
-                fysiskeAdresserBrev.getAdresse().add(mapIkkeFysiskArbeidssted(arbeidssted));
+                fysiskeAdresserBrev.getAdresse().add(mapIkkeFysiskArbeidssted((IkkeFysiskArbeidssted)arbeidssted));
             }
         }
         return fysiskeAdresserBrev;
@@ -171,7 +173,7 @@ public class A1Mapper {
         int antallAdresserIListe = arbeidssteder.size();
         int gjenståendeAdresser = ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 - antallAdresserIListe;
         for (int i = 0; i < gjenståendeAdresser; i++) {
-            utfylltListe.add(new Arbeidssted("", "", ""));
+            utfylltListe.add(new DummyArbeidssted());
         }
         return utfylltListe;
     }
@@ -179,7 +181,7 @@ public class A1Mapper {
     private AdresseType mapFysiskArbeidssted(FysiskArbeidssted fysiskArbeidssted) {
         AdresseType adresseType = new AdresseType();
         adresseType.setNavn(fysiskArbeidssted.getNavn());
-        StrukturertAdresse adresse = fysiskArbeidssted.adresse;
+        StrukturertAdresse adresse = fysiskArbeidssted.getAdresse();
         adresseType.setAdresselinje1(Objects.toString(adresse.gatenavn, "") + " " + Objects.toString(adresse.husnummer, ""));
         adresseType.setAdresselinje2(adresse.postnummer);
         adresseType.setAdresselinje3(adresse.poststed);
@@ -188,7 +190,7 @@ public class A1Mapper {
         return adresseType;
     }
 
-    private AdresseType mapIkkeFysiskArbeidssted(Arbeidssted ikkeFysiskArbeidssted) {
+    private AdresseType mapIkkeFysiskArbeidssted(IkkeFysiskArbeidssted ikkeFysiskArbeidssted) {
         AdresseType adresseType = new AdresseType();
         adresseType.setNavn(ikkeFysiskArbeidssted.getNavn());
         adresseType.setLand(ikkeFysiskArbeidssted.getOmråde());

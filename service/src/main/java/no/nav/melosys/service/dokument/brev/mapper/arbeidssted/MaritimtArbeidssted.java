@@ -1,11 +1,13 @@
-package no.nav.melosys.service.dokument.brev.mapper.felles;
+package no.nav.melosys.service.dokument.brev.mapper.arbeidssted;
 
-import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 
-public class MaritimtArbeidssted extends Arbeidssted {
-    public final AvklartMaritimtArbeid avklartMaritimtArbeid;
+public final class MaritimtArbeidssted extends AbstractArbeidssted implements IkkeFysiskArbeidssted {
+    private static final String OFFSHORE = "offshore";
+
+    private final AvklartMaritimtArbeid avklartMaritimtArbeid;
 
     public MaritimtArbeidssted(AvklartMaritimtArbeid avklartMaritimtArbeid) {
         super(avklartMaritimtArbeid.getNavn(), null, avklartMaritimtArbeid.getLand());
@@ -13,21 +15,16 @@ public class MaritimtArbeidssted extends Arbeidssted {
     }
 
     @Override
-    public boolean erFysisk() {
-        return false;
+    public String getOmråde() {
+        if (avklartMaritimtArbeid.getMaritimtype() == Maritimtyper.SOKKEL) {
+            return OFFSHORE + ", " + landkode;
+        } else {
+            return landkode;
+        }
     }
 
     @Override
     public Yrkesgrupper getYrkesgruppe() {
         return Yrkesgrupper.SOKKEL_ELLER_SKIP;
-    }
-
-    @Override
-    public String getOmråde() {
-        if (avklartMaritimtArbeid.getMaritimtype() == Maritimtyper.SOKKEL) {
-            return "offshore, " + landkode;
-        } else {
-            return landkode;
-        }
     }
 }

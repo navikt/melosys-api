@@ -20,7 +20,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +43,7 @@ public class AbstraktDokumentDataByggerTest {
 
     class BrevDatabyggerbaseImpl extends AbstraktDokumentDataBygger {
 
-        protected BrevDatabyggerbaseImpl(KodeverkService kodeverkService,
+        BrevDatabyggerbaseImpl(KodeverkService kodeverkService,
                                          AvklartefaktaService avklartefaktaService,
                                          PersonDokument person,
                                          SoeknadDokument søknad) {
@@ -55,9 +56,11 @@ public class AbstraktDokumentDataByggerTest {
         public StrukturertAdresse hentBostedsadresse() throws TekniskException {
             return super.hentBostedsadresse();
         }
+
         public List<Arbeidssted> hentArbeidssteder() {
             return super.hentArbeidssteder();
         }
+
         public List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
             return super.hentUtenlandskeVirksomheter();
         }
@@ -128,7 +131,7 @@ public class AbstraktDokumentDataByggerTest {
 
         List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
         assertThat(arbeidssteder.get(0).getNavn()).isEqualTo(foretakUtland.navn);
-        assertThat(arbeidssteder.get(0).getOmråde()).isEqualTo(foretakUtland.adresse.landkode);
+        assertThat(arbeidssteder.get(0).getLandkode()).isEqualTo(foretakUtland.adresse.landkode);
     }
 
     private ForetakUtland lagForetakUtland() {
@@ -160,7 +163,7 @@ public class AbstraktDokumentDataByggerTest {
         List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
 
         assertThat(arbeidssteder.size()).isEqualTo(1);
-        Arbeidssted arbeidssted = arbeidssteder.get(0);
+        MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
         assertThat(arbeidssted.getNavn()).isEqualTo("Dunfjæder");
         assertThat(arbeidssted.getOmråde()).isEqualTo("BG");
         assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());

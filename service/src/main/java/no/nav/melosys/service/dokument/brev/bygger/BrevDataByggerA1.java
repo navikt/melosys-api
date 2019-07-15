@@ -14,8 +14,8 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
 
@@ -75,6 +75,6 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
     }
 
     private AvklartVirksomhet utledVirksomhetFraArbeidssted(FysiskArbeidssted arbeidssted) {
-        return new AvklartVirksomhet(arbeidssted.getNavn(), arbeidssted.getIdnummer(), arbeidssted.adresse, null);
+        return new AvklartVirksomhet(arbeidssted.getNavn(), arbeidssted.getIdnummer(), arbeidssted.getAdresse(), null);
     }
 }

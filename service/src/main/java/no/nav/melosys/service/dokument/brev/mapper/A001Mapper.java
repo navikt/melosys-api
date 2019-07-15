@@ -22,15 +22,15 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public class A001Mapper {
 
-    public SEDA001 mapSEDA001(BrevDataA001 brevData) throws TekniskException {
+    SEDA001 mapSEDA001(BrevDataA001 brevData) throws TekniskException {
         SEDA001 seda001 = new SEDA001();
 
         seda001.setAntallVedlegg("0");
@@ -83,7 +83,7 @@ public class A001Mapper {
         return seda001;
     }
 
-    public AnsettelsesPeriodeType mapAnsettelsesperiode(Periode ansettelsesperiode) {
+    private AnsettelsesPeriodeType mapAnsettelsesperiode(Periode ansettelsesperiode) {
         AnsettelsesPeriodeType ansettelsesperiodeType = new AnsettelsesPeriodeType();
         ansettelsesperiodeType.setFomDato(ansettelsesperiode.getFom().toString());
         return ansettelsesperiodeType;
@@ -199,7 +199,7 @@ public class A001Mapper {
         arbeidsstedBrev.setIkkeFysiskArbeidssted("false");
         arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.ORDINAER);
 
-        StrukturertAdresse adresse = arbeidssted.adresse;
+        StrukturertAdresse adresse = arbeidssted.getAdresse();
         AdresseType3 adresseBrev = new AdresseType3();
         adresseBrev.setGatenavn(adresse.gatenavn);
         adresseBrev.setHusnummer(adresse.husnummer);

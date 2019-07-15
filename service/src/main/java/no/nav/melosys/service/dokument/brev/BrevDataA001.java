@@ -13,7 +13,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 
 /*
  * Alle feltene er resultatverdier fra funksjoner i brevbygger, som brukes direkte i mapper.
