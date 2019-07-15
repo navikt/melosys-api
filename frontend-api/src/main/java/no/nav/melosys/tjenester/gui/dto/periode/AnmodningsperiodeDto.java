@@ -82,7 +82,7 @@ public final class AnmodningsperiodeDto {
         return konverterer.convertToEntityAttribute(bestemmelsesnavn);
     }
 
-    static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {
+    private static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {
         return nøkkel == null ? null : Enum.valueOf(enumKlasse, nøkkel);
     }
 }

@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.avklartefakta;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,14 +25,14 @@ public class AvklartefaktaTest {
 
     @Test
     public void testOppdaterMedEkstraRegistrering() {
-        String opphold1 = new String("Opphold");
-        String opphold2 = new String("Opphold");
-        String familie = new String("Familie");
+        String opphold1 = "Opphold";
+        String opphold2 = "Opphold";
+        String familie = "Familie";
 
         Avklartefakta avklartefakta = new Avklartefakta();
 
         AvklartefaktaRegistrering førsteRegistrering = lagRegistrering(opphold1, avklartefakta);
-        avklartefakta.setRegistreringer(new HashSet<>(Arrays.asList(førsteRegistrering)));
+        avklartefakta.setRegistreringer(new HashSet<>(Collections.singletonList(førsteRegistrering)));
 
         Set<AvklartefaktaRegistrering> nyeRegistreringer = new HashSet<>();
         nyeRegistreringer.add(lagRegistrering(opphold2, avklartefakta));

@@ -29,8 +29,8 @@ public class Saksopplysning {
     @Column(name="versjon", nullable = false, updatable = false)
     private String versjon;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "kilde", nullable = false, updatable = false)
-    @Convert(converter = SaksopplysningKilde.DbKonverterer.class)
     private SaksopplysningKilde kilde;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)

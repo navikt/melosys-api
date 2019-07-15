@@ -1,10 +1,8 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Converter;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
-import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
-
-public enum SaksopplysningKilde implements InterntKodeverkTabell<SaksopplysningKilde> {
+public enum SaksopplysningKilde implements Kodeverk {
 
     AAREG("AAREG", "Aa-registeret"),
     EESSI("EESSI", "EESSI-prosjektet"),
@@ -33,13 +31,4 @@ public enum SaksopplysningKilde implements InterntKodeverkTabell<SaksopplysningK
     public String getBeskrivelse() {
         return beskrivelse;
     }
-
-    @Converter
-    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<SaksopplysningKilde> {
-        @Override
-        protected SaksopplysningKilde[] getLovligeVerdier() {
-            return SaksopplysningKilde.values();
-        }
-    }
-
 }
