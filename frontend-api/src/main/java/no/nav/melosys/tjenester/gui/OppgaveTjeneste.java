@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,8 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
-
-import static no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste.session;
 
 @Api(tags = "oppgaver")
 @Path("/oppgaver")
@@ -91,15 +88,9 @@ public class OppgaveTjeneste extends RestTjeneste {
     @GET
     @Path("/oversikt")
     @ApiOperation(
-        value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.",
+        value = "Henter alle oppgaver som er tildelt en gitt saksbeh andler.",
         response = OppgaveOversiktDto.class)
     public Response mineOppgaver() throws TekniskException, FunksjonellException {
-        HttpSession session = session();
-        
-        if (session != null) {
-//            log.info("session : " + session.getId() + " " + session.getCreationTime());
-        }
-        
         String ident = SubjectHandler.getInstance().getUserID();
         List<OppgaveDto> oppgaveDtoListe;
         oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
