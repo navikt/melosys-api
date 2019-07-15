@@ -48,16 +48,16 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
 
         //Midlertidige verdier for oppgave satt til disse er nærmere avklart
-        Oppgave oppgave = new Oppgave();
-        oppgave.setPrioritet(PrioritetType.NORM);
-        oppgave.setTema(Tema.MED);
-        oppgave.setSaksnummer(fagsak.getSaksnummer());
-        oppgave.setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID));
-        oppgave.setJournalpostId(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));
-        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setPrioritet(PrioritetType.NORM);
+        oppgaveBuilder.setTema(Tema.MED);
+        oppgaveBuilder.setSaksnummer(fagsak.getSaksnummer());
+        oppgaveBuilder.setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID));
+        oppgaveBuilder.setJournalpostId(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
 
-        String oppgaveId = gsakFasade.opprettOppgave(oppgave);
+        String oppgaveId = gsakFasade.opprettOppgave(oppgaveBuilder.build());
         log.info("Opprettet oppgave {} til manuell behandling for sak {}", oppgaveId, fagsak.getSaksnummer());
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);

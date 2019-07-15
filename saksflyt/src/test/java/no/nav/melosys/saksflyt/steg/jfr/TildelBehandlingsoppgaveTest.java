@@ -47,10 +47,10 @@ public class TildelBehandlingsoppgaveTest {
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER);
 
-        Oppgave oppgave = new Oppgave();
-        oppgave.setOppgaveId(OPPGAVE_ID);
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgaveId(OPPGAVE_ID);
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(eq(SAKSNUMMER))).thenReturn(oppgave);
+        when(gsakFasade.finnOppgaveMedSaksnummer(eq(SAKSNUMMER))).thenReturn(oppgaveBuilder.build());
     }
 
     @Test

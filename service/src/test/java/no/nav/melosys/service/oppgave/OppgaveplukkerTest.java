@@ -11,10 +11,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.oppgave.Behandlingstema;
-import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
-import no.nav.melosys.domain.oppgave.PrioritetType;
+import no.nav.melosys.domain.oppgave.*;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -224,13 +221,13 @@ public class OppgaveplukkerTest {
     @Test
     public void leggTilbakeOppgave_medBegrunnelse() throws MelosysException {
         final String oppgaveId = String.valueOf(GSAK_SAKSNUMMER);
-        final Oppgave oppgave = new Oppgave();
-        oppgave.setOppgaveId(oppgaveId);
-        oppgave.setPrioritet(PrioritetType.valueOf("HOY"));
+        final Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgaveId(oppgaveId);
+        oppgaveBuilder.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
         final String begrunnelse = "Oppgaven er kjedelig";
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgave);
+        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
@@ -252,12 +249,12 @@ public class OppgaveplukkerTest {
     @Test
     public void leggTilbakeOppgave_venterPåDokumentasjon() throws MelosysException {
         final String oppgaveId = String.valueOf(GSAK_SAKSNUMMER);
-        final Oppgave oppgave = new Oppgave();
-        oppgave.setOppgaveId(oppgaveId);
-        oppgave.setPrioritet(PrioritetType.valueOf("HOY"));
+        final Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgaveId(oppgaveId);
+        oppgaveBuilder.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgave);
+        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
         tilbakelegging.setBehandlingID(BEHANDLING_ID);
@@ -363,13 +360,13 @@ public class OppgaveplukkerTest {
     }
 
     private Oppgave opprettOppgave(String oppgaveId, Oppgavetyper oppgavetype, PrioritetType prioritet, LocalDate fristFerdigstillelse, String saksnummer) {
-        Oppgave oppgave1 = new Oppgave();
-        oppgave1.setOppgavetype(oppgavetype);
-        oppgave1.setOppgaveId(oppgaveId);
-        oppgave1.setPrioritet(prioritet);
-        oppgave1.setFristFerdigstillelse(fristFerdigstillelse);
-        oppgave1.setSaksnummer(saksnummer);
-        return oppgave1;
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgavetype(oppgavetype);
+        oppgaveBuilder.setOppgaveId(oppgaveId);
+        oppgaveBuilder.setPrioritet(prioritet);
+        oppgaveBuilder.setFristFerdigstillelse(fristFerdigstillelse);
+        oppgaveBuilder.setSaksnummer(saksnummer);
+        return oppgaveBuilder.build();
     }
 
     private PlukkOppgaveInnDto opprettPlukkOppgaveInnDto(List<String> sakstyper, String beh_sak_mk) {

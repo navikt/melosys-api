@@ -50,7 +50,7 @@ public final class GsakServiceTest {
     }
 
     @Test
-    public final void tildelIkkeEksisterendeOppgaveGirIkkeFunnetException() throws Exception {
+    public final void tildelIkkeEksisterendeOppgaveGirIkkeFunnetException() {
         Throwable unntak = catchThrowable(() -> instans.tildelOppgave("1", "2"));
         assertThat(unntak)
                 .isInstanceOf(IkkeFunnetException.class)
@@ -60,11 +60,11 @@ public final class GsakServiceTest {
 
     @Test
     public void opprettOppgave_vurderDokument_setterData() throws Exception {
-        Oppgave oppgave = new Oppgave();
-        oppgave.setOppgavetype(Oppgavetyper.VUR);
-        oppgave.setTema(Tema.MED);
-        oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
-        instans.opprettOppgave(oppgave);
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.VUR);
+        oppgaveBuilder.setTema(Tema.MED);
+        oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
+        instans.opprettOppgave(oppgaveBuilder.build());
 
         ArgumentCaptor<OpprettOppgaveDto> captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
         verify(oppgaveConsumer).opprettOppgave(captor.capture());
@@ -113,15 +113,15 @@ public final class GsakServiceTest {
     }
 
     private Oppgave lagOppgave() {
-        Oppgave oppgave = new Oppgave();
-        oppgave.setAktørId("aktoer123");
-        oppgave.setBehandlingstype(Behandlingstyper.SOEKNAD);
-        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgave.setJournalpostId("journalpost123");
-        oppgave.setSaksnummer("sak123");
-        oppgave.setTema(Tema.MED);
-        oppgave.setTilordnetRessurs("ressurs123");
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setAktørId("aktoer123");
+        oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgaveBuilder.setJournalpostId("journalpost123");
+        oppgaveBuilder.setSaksnummer("sak123");
+        oppgaveBuilder.setTema(Tema.MED);
+        oppgaveBuilder.setTilordnetRessurs("ressurs123");
 
-        return oppgave;
+        return oppgaveBuilder.build();
     }
 }

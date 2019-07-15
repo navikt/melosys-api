@@ -58,8 +58,8 @@ public class VedtakServiceTest {
 
     @Test
     public void fattVedtak_fungerer() throws FunksjonellException, TekniskException {
-        Oppgave oppgave = new Oppgave();
-        oppgave.setOppgaveId("1");
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 
         vedtakService.fattVedtak(behandlingID, resultatType);

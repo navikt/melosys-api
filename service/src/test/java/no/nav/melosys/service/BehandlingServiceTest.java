@@ -234,10 +234,9 @@ public class BehandlingServiceTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        Oppgave oppgave = new Oppgave();
-        oppgave.setTilordnetRessurs(SAKSBEHANDLER);
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder().setTilordnetRessurs(SAKSBEHANDLER);
 
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(oppgave);
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(oppgaveBuilder.build());
 
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
@@ -255,10 +254,14 @@ public class BehandlingServiceTest {
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
 
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        oppgave.setTilordnetRessurs("noen andre");
+        oppgaveBuilder.setTilordnetRessurs("noen andre");
+        Oppgave oppgave2 = oppgaveBuilder.build();
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(oppgave2);
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
 
-        oppgave.setTilordnetRessurs(null);
+        oppgaveBuilder.setTilordnetRessurs(null);
+        Oppgave oppgave3 = oppgaveBuilder.build();
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(oppgave3);
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
     }
 

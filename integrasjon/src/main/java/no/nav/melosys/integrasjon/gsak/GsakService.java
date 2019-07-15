@@ -192,37 +192,37 @@ public class GsakService implements GsakFasade {
     }
 
     private static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgave) {
-        Oppgave domainOppgave = new Oppgave();
-        domainOppgave.setOppgaveId(oppgave.getId());
-        domainOppgave.setVersjon(oppgave.getVersjon());
+        Oppgave.Builder domainOppgaveBuilder = new Oppgave.Builder();
+        domainOppgaveBuilder.setOppgaveId(oppgave.getId());
+        domainOppgaveBuilder.setVersjon(oppgave.getVersjon());
         if (oppgave.getPrioritet() != null) {
-            domainOppgave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet()));
+            domainOppgaveBuilder.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet()));
         }
-        domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
-        domainOppgave.setJournalpostId(oppgave.getJournalpostId());
+        domainOppgaveBuilder.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
+        domainOppgaveBuilder.setJournalpostId(oppgave.getJournalpostId());
 
         if (oppgave.getSaksreferanse() != null) {
-            domainOppgave.setSaksnummer(oppgave.getSaksreferanse());
+            domainOppgaveBuilder.setSaksnummer(oppgave.getSaksreferanse());
         }
 
-        domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
+        domainOppgaveBuilder.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
 
         if (oppgave.getTema() != null && erGyldigKode(Tema.class, oppgave.getTema())) {
-            domainOppgave.setTema(Tema.valueOf(oppgave.getTema()));
+            domainOppgaveBuilder.setTema(Tema.valueOf(oppgave.getTema()));
         } else {
             log.error("Fikk uventet Tema: {} for OppgaveID: {}", oppgave.getTema(), oppgave.getId());
         }
 
         if (oppgave.getOppgavetype() != null && erGyldigKode(Oppgavetyper.class, oppgave.getOppgavetype())) {
-            domainOppgave.setOppgavetype(no.nav.melosys.domain.kodeverk.Oppgavetyper.valueOf(oppgave.getOppgavetype()));
+            domainOppgaveBuilder.setOppgavetype(no.nav.melosys.domain.kodeverk.Oppgavetyper.valueOf(oppgave.getOppgavetype()));
         } else {
             log.error("Fikk uventet oppgaveType: {} for OppgaveID: {}", oppgave.getOppgavetype(), oppgave.getId());
         }
-        domainOppgave.setJournalpostId(oppgave.getJournalpostId());
-        domainOppgave.setTilordnetRessurs(oppgave.getTilordnetRessurs());
-        domainOppgave.setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon());
-        domainOppgave.setAktørId(oppgave.getAktørId());
-        return domainOppgave;
+        domainOppgaveBuilder.setJournalpostId(oppgave.getJournalpostId());
+        domainOppgaveBuilder.setTilordnetRessurs(oppgave.getTilordnetRessurs());
+        domainOppgaveBuilder.setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon());
+        domainOppgaveBuilder.setAktørId(oppgave.getAktørId());
+        return domainOppgaveBuilder.build();
     }
 
     @Override

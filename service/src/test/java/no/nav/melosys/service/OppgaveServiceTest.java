@@ -65,16 +65,16 @@ public class OppgaveServiceTest {
                 tpsFasade,
             saksopplysningerService);
 
-        Oppgave oppgave = new Oppgave();
-        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgave.setTilordnetRessurs("Z998877");
-        oppgave.setSaksnummer("MEL-12345");
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgaveBuilder.setTilordnetRessurs("Z998877");
+        oppgaveBuilder.setSaksnummer("MEL-12345");
 
         when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).
             thenAnswer((Answer<Oppgave>) invocation -> {
                 String string = invocation.getArgument(0);
                 if (string.equals("MEL-12345")) {
-                    return oppgave;
+                    return oppgaveBuilder.build();
                 } else {
                     throw new TekniskException("Finner ingen oppgave for fagsak " + string);
                 }
@@ -85,14 +85,14 @@ public class OppgaveServiceTest {
     public void hentOppgaverMedAnsvarlig() throws MelosysException {
 
         List<Oppgave> oppgaver = new ArrayList<>();
-        Oppgave oppgave1 = new Oppgave();
+        Oppgave.Builder oppgave1 = new Oppgave.Builder();
         oppgave1.setOppgaveId("1");
         oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgave1.setPrioritet(PrioritetType.HOY);
         oppgave1.setSaksnummer("MEL-12345");
         oppgave1.setTilordnetRessurs("12345678901");
         oppgave1.setAktørId("aktørid");
-        oppgaver.add(oppgave1);
+        oppgaver.add(oppgave1.build());
 
         when(gsakFasade.finnOppgaveListeMedAnsvarlig(anyString())).
                 thenAnswer((Answer<List<Oppgave>>) invocation -> {

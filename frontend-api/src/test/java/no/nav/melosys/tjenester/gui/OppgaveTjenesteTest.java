@@ -106,13 +106,13 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
         innData.setBehandlingstyper(behandlingstyper);
 
-        Oppgave oppgave = new Oppgave();
-        oppgave.setOppgaveId("1");
-        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgave.setSaksnummer("MEl-1");
-        oppgave.setJournalpostId("123");
-        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        Optional<Oppgave> plukket = Optional.of(oppgave);
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgaveId("1");
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgaveBuilder.setSaksnummer("MEl-1");
+        oppgaveBuilder.setJournalpostId("123");
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        Optional<Oppgave> plukket = Optional.of(oppgaveBuilder.build());
 
         when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);
 

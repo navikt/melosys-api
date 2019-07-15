@@ -79,12 +79,12 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         String aktørID = prosessinstans.getData(AKTØR_ID);
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
-        Oppgave oppgave = new Oppgave();
-        oppgave.setTema(Tema.MED);
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setTema(Tema.MED);
 
         if (fagsak.getType() == Sakstyper.EU_EOS) {
-            oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
-            oppgave.setBehandlingstype(null);
+            oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
+            oppgaveBuilder.setBehandlingstype(null);
         } else {
             String feilmelding = "Sakstyper " + fagsak.getType() + STØTTES_IKKE;
             log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
@@ -93,9 +93,9 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         }
 
         if (behandlingstype == Behandlingstyper.SOEKNAD) {
-            oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+            oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         } else if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
-            oppgave.setOppgavetype(Oppgavetyper.VUR);
+            oppgaveBuilder.setOppgavetype(Oppgavetyper.VUR);
         } else {
             String feilmelding = "Behandlingstype " + behandlingstype + STØTTES_IKKE;
             log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
@@ -103,17 +103,17 @@ public class OpprettOppgave extends AbstraktStegBehandler {
             return;
         }
 
-        oppgave.setAktørId(aktørID);
-        oppgave.setJournalpostId(journalpostID);
-        oppgave.setPrioritet(PrioritetType.NORM);
-        oppgave.setSaksnummer(saksnummer);
+        oppgaveBuilder.setAktørId(aktørID);
+        oppgaveBuilder.setJournalpostId(journalpostID);
+        oppgaveBuilder.setPrioritet(PrioritetType.NORM);
+        oppgaveBuilder.setSaksnummer(saksnummer);
 
         boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
         if (skalTilordnes) {
-            oppgave.setTilordnetRessurs(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
+            oppgaveBuilder.setTilordnetRessurs(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         }
 
-        String oppgaveId = gsakFasade.opprettOppgave(oppgave);
+        String oppgaveId = gsakFasade.opprettOppgave(oppgaveBuilder.build());
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
