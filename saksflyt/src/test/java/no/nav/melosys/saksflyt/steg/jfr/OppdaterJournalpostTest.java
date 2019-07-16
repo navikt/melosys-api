@@ -8,31 +8,34 @@ import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterJournalpostTest {
-
     @Mock
     private JoarkFasade joarkFasade;
+    @Mock
+    private FagsakRepository fagsakRepository;
 
     private OppdaterJournalpost agent;
-    private FagsakRepository fagsakRepository;
+
+    @Captor
+    private ArgumentCaptor<JournalpostOppdatering> oppdateringArgumentCaptor;
 
     @Before
     public void setUp() {
-        fagsakRepository = mock(FagsakRepository.class);
         agent = new OppdaterJournalpost(joarkFasade, fagsakRepository);
     }
 
@@ -45,7 +48,8 @@ public class OppdaterJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade).utledJournalfoeringsbehov(any());
-        verify(joarkFasade).oppdaterJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), eq(false));
+        verify(joarkFasade).oppdaterJournalpost(any(), any(), oppdateringArgumentCaptor.capture());
+        assertThat(oppdateringArgumentCaptor.getValue().isMedDokumentkategori()).isFalse();
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
     }
 
@@ -62,7 +66,8 @@ public class OppdaterJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade).utledJournalfoeringsbehov(any());
-        verify(joarkFasade).oppdaterJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), eq(true));
+        verify(joarkFasade).oppdaterJournalpost(any(), any(), oppdateringArgumentCaptor.capture());
+        assertThat(oppdateringArgumentCaptor.getValue().isMedDokumentkategori()).isTrue();
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
     }
 
@@ -80,10 +85,9 @@ public class OppdaterJournalpostTest {
         p.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
         agent.utførSteg(p);
 
-        ArgumentCaptor<Long> gsakSaksnummerCaptor = ArgumentCaptor.forClass(Long.class);
         verify(joarkFasade).utledJournalfoeringsbehov(any());
-        verify(joarkFasade).oppdaterJournalpost(any(), any(), gsakSaksnummerCaptor.capture(), any(), any(), any(), any(), any(), eq(false));
+        verify(joarkFasade).oppdaterJournalpost(any(), any(), oppdateringArgumentCaptor.capture());
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
-        assertThat(gsakSaksnummerCaptor.getValue()).isEqualTo(gsakSaksnummer);
+        assertThat(oppdateringArgumentCaptor.getValue().getGsakSaksnummer()).isEqualTo(gsakSaksnummer);
     }
 }

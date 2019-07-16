@@ -10,6 +10,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
@@ -97,7 +98,10 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
 
         List<String> vedleggTittelListe = prosessinstans.getData(VEDLEGG_TITTEL_LISTE, List.class);
 
-        joarkFasade.oppdaterJournalpost(journalpostID, dokumentID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, vedleggTittelListe, medDokumentkategori);
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(gsakSakID).medBrukerID(brukerID)
+            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medTittel(tittel).medVedleggTittelListe(vedleggTittelListe)
+            .medDokumentkategori(medDokumentkategori).build();
+        joarkFasade.oppdaterJournalpost(journalpostID, dokumentID, journalpostOppdatering);
 
         prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);
         log.info("Prosessinstans {} har oppdatert journalpost {}. SakId: {}", prosessinstans.getId(), journalpostID, gsakSakID);

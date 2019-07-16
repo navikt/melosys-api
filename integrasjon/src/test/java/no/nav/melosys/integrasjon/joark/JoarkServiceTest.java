@@ -76,7 +76,7 @@ public class JoarkServiceTest {
 
     @Test
     public void hentKjerneJournalpostListe() throws SikkerhetsbegrensningException, IntegrasjonException, HentKjerneJournalpostListeUgyldigInput, HentKjerneJournalpostListeSikkerhetsbegrensning, DatatypeConfigurationException {
-        Long arkivSakID = Long.valueOf(1);
+        Long arkivSakID = 1L;
         HentKjerneJournalpostListeResponse response = new HentKjerneJournalpostListeResponse();
         no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost journalpost = new no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost();
         ArkivSak arkivSak = new ArkivSak();
@@ -149,10 +149,11 @@ public class JoarkServiceTest {
 
     @Test
     public void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
-
         String tittel = "tittel";
-        joarkService.oppdaterJournalpost("123", "1234", 1L, "12345",
-            "12", "321", tittel, Arrays.asList("dok1", "dok2"), true);
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(1L).medBrukerID("12345")
+            .medAvsenderID("12").medAvsenderNavn("321").medTittel(tittel).medVedleggTittelListe(Arrays.asList("dok1", "dok2"))
+            .medDokumentkategori(true).build();
+        joarkService.oppdaterJournalpost("123", "1234", journalpostOppdatering);
 
         verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
         PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();

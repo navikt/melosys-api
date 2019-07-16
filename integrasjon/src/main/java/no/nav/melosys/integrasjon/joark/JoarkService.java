@@ -198,40 +198,41 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJournalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, List<String> vedleggTittelListe, boolean medDokumentkategori)
+    public void oppdaterJournalpost(String journalpostID, String hovedDokumentID, JournalpostOppdatering journalpostOppdatering)
         throws SikkerhetsbegrensningException, IntegrasjonException {
 
-        oppdaterDokument(journalpostId, dokumentID, tittel, medDokumentkategori);
+        oppdaterDokument(journalpostID, hovedDokumentID, journalpostOppdatering.getTittel(), journalpostOppdatering.isMedDokumentkategori());
+        List<String> vedleggTittelListe = journalpostOppdatering.getVedleggTittelListe();
         if (!CollectionUtils.isEmpty(vedleggTittelListe)) {
             for (String vedleggTittel : vedleggTittelListe) {
                 PostLogiskVedleggRequest logiskVedleggRequest = new PostLogiskVedleggRequest();
                 logiskVedleggRequest.setTittel(vedleggTittel);
-                journalfoerInngaaendeConsumer.leggTilLogiskVedlegg(logiskVedleggRequest, journalpostId, dokumentID);
+                journalfoerInngaaendeConsumer.leggTilLogiskVedlegg(logiskVedleggRequest, journalpostID, hovedDokumentID);
             }
         }
 
         PutJournalpostRequest journalpost = new PutJournalpostRequest();
-        journalpost.setTittel(tittel);
+        journalpost.setTittel(journalpostOppdatering.getTittel());
 
         ArkivSakWithArkivsakSystemEnum arkivsak = new ArkivSakWithArkivsakSystemEnum();
-        arkivsak.setArkivSakId(Long.toString(gsakSaksnummer));
+        arkivsak.setArkivSakId(Long.toString(journalpostOppdatering.getGsakSaksnummer()));
         arkivsak.setArkivSakSystem(ArkivSakWithArkivsakSystemEnum.ArkivSakSystem.GSAK);
         journalpost.setArkivSak(arkivsak);
 
         Bruker bruker = new Bruker();
-        bruker.setIdentifikator(brukerID);
+        bruker.setIdentifikator(journalpostOppdatering.getBrukerID());
         bruker.setBrukerType(Bruker.BrukerType.PERSON);
         journalpost.setBruker(bruker);
 
         no.nav.dok.tjenester.journalfoerinngaaende.Avsender avsender = new no.nav.dok.tjenester.journalfoerinngaaende.Avsender();
         avsender.setAvsenderType(no.nav.dok.tjenester.journalfoerinngaaende.Avsender.AvsenderType.PERSON);
-        avsender.setIdentifikator(avsenderID);
-        avsender.setNavn(avsenderNavn);
+        avsender.setIdentifikator(journalpostOppdatering.getAvsenderID());
+        avsender.setNavn(journalpostOppdatering.getAvsenderNavn());
         journalpost.setAvsender(avsender);
 
         journalpost.setForsoekEndeligJF(false);
 
-        journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpost, journalpostId);
+        journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpost, journalpostID);
     }
 
     private void oppdaterDokument(String journalpostId, String dokumentID, String tittel, boolean medDokumentkategori) throws SikkerhetsbegrensningException, IntegrasjonException {
