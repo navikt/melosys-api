@@ -1,6 +1,9 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class JournalpostOppdatering {
     private final Long gsakSaksnummer;
@@ -8,7 +11,8 @@ public final class JournalpostOppdatering {
     private final String avsenderID;
     private final String avsenderNavn;
     private final String tittel;
-    private final List<String> vedleggTittelListe;
+    private final Map<String, String> fysiskeVedlegg;
+    private final List<String> logiskeVedleggTitler;
     // Om dokumentkategori skal oppdatteres med standardverdi "IS", Ikke tolkbart skjema
     private final boolean medDokumentkategori;
 
@@ -18,7 +22,8 @@ public final class JournalpostOppdatering {
         private String avsenderID;
         private String avsenderNavn;
         private String tittel;
-        private List<String> vedleggTittelListe;
+        private Map<String, String> fysiskeVedlegg = new HashMap<>();
+        private List<String> logiskeVedleggTitler = new ArrayList<>();
         private boolean medDokumentkategori;
 
         public Builder medGsakSaksnummer(Long gsakSaksnummer) {
@@ -46,8 +51,13 @@ public final class JournalpostOppdatering {
             return this;
         }
 
-        public Builder medVedleggTittelListe(List<String> vedleggTittelListe) {
-            this.vedleggTittelListe = vedleggTittelListe;
+        public Builder medFysiskeVedlegg(Map<String, String> fysiskeVedlegg) {
+            this.fysiskeVedlegg = fysiskeVedlegg;
+            return this;
+        }
+
+        public Builder medLogiskeVedleggTitler(List<String> logiskeVedleggTitler) {
+            this.logiskeVedleggTitler = logiskeVedleggTitler;
             return this;
         }
 
@@ -67,7 +77,8 @@ public final class JournalpostOppdatering {
         this.avsenderID = builder.avsenderID;
         this.avsenderNavn = builder.avsenderNavn;
         this.tittel = builder.tittel;
-        this.vedleggTittelListe = builder.vedleggTittelListe;
+        this.fysiskeVedlegg = builder.fysiskeVedlegg;
+        this.logiskeVedleggTitler = builder.logiskeVedleggTitler;
         this.medDokumentkategori = builder.medDokumentkategori;
     }
 
@@ -91,8 +102,12 @@ public final class JournalpostOppdatering {
         return tittel;
     }
 
-    public List<String> getVedleggTittelListe() {
-        return vedleggTittelListe;
+    Map<String, String> getFysiskeVedlegg() {
+        return fysiskeVedlegg;
+    }
+
+    List<String> getLogiskeVedleggTitler() {
+        return logiskeVedleggTitler;
     }
 
     public boolean isMedDokumentkategori() {

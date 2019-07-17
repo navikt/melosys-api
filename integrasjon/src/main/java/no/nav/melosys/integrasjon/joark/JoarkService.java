@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
@@ -202,9 +203,13 @@ public class JoarkService implements JoarkFasade {
         throws SikkerhetsbegrensningException, IntegrasjonException {
 
         oppdaterDokument(journalpostID, hovedDokumentID, journalpostOppdatering.getTittel(), journalpostOppdatering.isMedDokumentkategori());
-        List<String> vedleggTittelListe = journalpostOppdatering.getVedleggTittelListe();
-        if (!CollectionUtils.isEmpty(vedleggTittelListe)) {
-            for (String vedleggTittel : vedleggTittelListe) {
+        for (Map.Entry<String, String> vedleggIdMedTittel : journalpostOppdatering.getFysiskeVedlegg().entrySet()) {
+            oppdaterDokument(journalpostID, vedleggIdMedTittel.getKey(), vedleggIdMedTittel.getValue(), false);
+        }
+
+        List<String> logiskeVedleggTitler = journalpostOppdatering.getLogiskeVedleggTitler();
+        if (!CollectionUtils.isEmpty(logiskeVedleggTitler)) {
+            for (String vedleggTittel : logiskeVedleggTitler) {
                 PostLogiskVedleggRequest logiskVedleggRequest = new PostLogiskVedleggRequest();
                 logiskVedleggRequest.setTittel(vedleggTittel);
                 journalfoerInngaaendeConsumer.leggTilLogiskVedlegg(logiskVedleggRequest, journalpostID, hovedDokumentID);
@@ -258,8 +263,8 @@ public class JoarkService implements JoarkFasade {
             throw new SikkerhetsbegrensningException(s);
         } catch (UtledJournalfoeringsbehovJournalpostIkkeFunnet e) {
             throw new IkkeFunnetException(e.getMessage());
-        } catch (UtledJournalfoeringsbehovUgyldigInput | UtledJournalfoeringsbehovJournalpostKanIkkeBehandles 
-            | UtledJournalfoeringsbehovJournalpostIkkeInngaaende  e) {
+        } catch (UtledJournalfoeringsbehovUgyldigInput | UtledJournalfoeringsbehovJournalpostKanIkkeBehandles
+            | UtledJournalfoeringsbehovJournalpostIkkeInngaaende e) {
             throw new FunksjonellException(e);
         }
 
@@ -292,7 +297,7 @@ public class JoarkService implements JoarkFasade {
         if (input.getInnhold() == Journalfoeringsbehov.MANGLER) {
             mangler.add(JournalfoeringMangel.INNHOLD);
         }
-        if (input.getVedleggListe() != null && !input.getVedleggListe().isEmpty()) {
+        if (!CollectionUtils.isEmpty(input.getVedleggListe())) {
             mangler.add(JournalfoeringMangel.VEDLEGG);
         }
         if (input.getTema() == Journalfoeringsbehov.MANGLER) {

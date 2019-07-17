@@ -1,6 +1,8 @@
 package no.nav.melosys.service.saksflyt;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.google.common.collect.Lists;
@@ -11,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -182,6 +185,29 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
+    public void opprettProsessinstansJournalføring_medVedlegg_setterVedleggOgTitler() {
+        settInnloggetSaksbehandler();
+        JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
+        journalfoeringDto.setDokumentID("hovedDokumentID");
+        List<DokumentDto> vedlegg = new ArrayList<>();
+        DokumentDto fysiskVedlegg = new DokumentDto("ID_F_01", "Fysisk");
+        vedlegg.add(fysiskVedlegg);
+        DokumentDto logiskVedlegg_1 = new DokumentDto(null, "Logisk");
+        vedlegg.add(logiskVedlegg_1);
+        DokumentDto logiskVedlegg_2 = new DokumentDto("hovedDokumentID", "Logisk ??");
+        vedlegg.add(logiskVedlegg_2);
+        journalfoeringDto.setVedlegg(vedlegg);
+
+        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+
+        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_1.getTittel());
+        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_2.getTittel());
+
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsOnlyKeys(fysiskVedlegg.getDokumentID());
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsValues(fysiskVedlegg.getTittel());
+    }
+
+    @Test
     public void opprettProsessinstansGodkjennUnntaksperiode() {
         service.opprettProsessinstansGodkjennUnntaksperiode(new Behandling());
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -205,7 +231,7 @@ public class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isEqualTo("fritekst");
     }
 
-    private JournalfoeringDto lagJournalfoeringDTO() {
+    private static JournalfoeringDto lagJournalfoeringDTO() {
         JournalfoeringDto journalfoeringDto = new JournalfoeringDto();
         journalfoeringDto.setJournalpostID("journalpostid");
         journalfoeringDto.setDokumentID("dokumentid");

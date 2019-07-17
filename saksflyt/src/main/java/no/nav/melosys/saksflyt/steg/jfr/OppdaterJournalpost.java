@@ -67,7 +67,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
             medDokumentkategori = true;
         }
 
-        Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
+        Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Long gsakSakID = null;
         if (prosessinstans.getType() == ProsessType.JFR_KNYTT || Behandlingstyper.ENDRET_PERIODE.equals(behandlingstype)) {
             Fagsak sak = fagsakRepo.findBySaksnummer(prosessinstans.getData(SAKSNUMMER));
@@ -96,11 +96,12 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
         String dokumentID = prosessinstans.getData(DOKUMENT_ID);
 
-        List<String> vedleggTittelListe = prosessinstans.getData(VEDLEGG_TITTEL_LISTE, List.class);
+        List<String> logiskeVedleggTitler = prosessinstans.getData(LOGISKE_VEDLEGG_TITLER, List.class);
+        Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
 
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(gsakSakID).medBrukerID(brukerID)
-            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medTittel(tittel).medVedleggTittelListe(vedleggTittelListe)
-            .medDokumentkategori(medDokumentkategori).build();
+            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medTittel(tittel).medFysiskeVedlegg(fysiskeVedleggMedTitler)
+            .medLogiskeVedleggTitler(logiskeVedleggTitler).medDokumentkategori(medDokumentkategori).build();
         joarkFasade.oppdaterJournalpost(journalpostID, dokumentID, journalpostOppdatering);
 
         prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);

@@ -1,9 +1,5 @@
 package no.nav.melosys.domain;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * Property keys brukt i saksflyt
  */
@@ -27,10 +23,12 @@ public enum ProsessDataKey {
     EESSI_MELDING("eessiMelding"),
     ER_ENDRING("erEndring"),
     FRITEKST("fritekst"),
+    FYSISKE_VEDLEGG("fysiskeVedlegg"),
     GSAK_SAK_ID("gsakSakID"),
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     JFR_INGEN_VURDERING("ingenVurdering"),
     JOURNALPOST_ID("journalpostID"),
+    LOGISKE_VEDLEGG_TITLER("logiskeVedleggTitler"),
     MOTTAKER("mottaker"),
     OPPHOLDSLAND("oppholdsland"),
     OPPGAVE_ID("oppgaveID"),
@@ -43,20 +41,9 @@ public enum ProsessDataKey {
     STATSBORGERSKAP("statsborgerskap"),
     SØKNADSLAND("land"),
     SØKNADSPERIODE("søknadsperiode"),
-    TEMA("tema"),
-    VEDLEGG_TITTEL_LISTE("vedleggTittelListe");
+    TEMA("tema");
 
     private String kode;
-
-    private static final Map<String, ProsessDataKey> KEYS;
-
-    static {
-        Map<String, ProsessDataKey> map = new ConcurrentHashMap<>();
-        for (ProsessDataKey key : ProsessDataKey.values()) {
-            map.put(key.getKode(), key);
-        }
-        KEYS = Collections.unmodifiableMap(map);
-    }
 
     ProsessDataKey(String kode) {
         this.kode = kode;
@@ -64,9 +51,5 @@ public enum ProsessDataKey {
 
     public String getKode() {
         return kode;
-    }
-
-    public static ProsessDataKey fraKode(String kode) {
-        return KEYS.get(kode);
     }
 }

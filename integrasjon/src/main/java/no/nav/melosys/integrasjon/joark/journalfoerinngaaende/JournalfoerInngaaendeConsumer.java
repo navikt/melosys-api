@@ -31,8 +31,8 @@ public class JournalfoerInngaaendeConsumer {
             new HttpEntity<>(journalpostRequest, getHttpHeaders()), PutJournalpostResponse.class);
     }
 
-    public PutDokumentResponse oppdaterDokument(PutDokumentRequest dokumentRequest, String journalpostId, String dokumentId) throws SikkerhetsbegrensningException, IntegrasjonException {
-        return exchange(String.format("/journalposter/%s/dokumenter/%s", journalpostId, dokumentId),
+    public void oppdaterDokument(PutDokumentRequest dokumentRequest, String journalpostId, String dokumentId) throws SikkerhetsbegrensningException, IntegrasjonException {
+        exchange(String.format("/journalposter/%s/dokumenter/%s", journalpostId, dokumentId),
             HttpMethod.PUT, new HttpEntity<>(dokumentRequest, getHttpHeaders()), PutDokumentResponse.class);
     }
 
