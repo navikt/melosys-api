@@ -57,8 +57,11 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
-            prosessinstans.setData(ProsessDataKey.VEDLEGG_TITTEL_LISTE,
-                journalfoeringDto.getVedlegg().stream().map(DokumentDto::getTittel).filter(StringUtils::isNotEmpty).collect(Collectors.toList()));
+            final String hovedDokumentID = journalfoeringDto.getDokumentID();
+            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER,
+                journalfoeringDto.getVedlegg().stream().filter(v -> v.erLogiskVedlegg(hovedDokumentID)).map(DokumentDto::getTittel).collect(Collectors.toList()));
+            prosessinstans.setData(ProsessDataKey.FYSISKE_VEDLEGG,
+                journalfoeringDto.getVedlegg().stream().filter(v -> v.erFysiskVedlegg(hovedDokumentID)).collect(Collectors.toMap(DokumentDto::getDokumentID, DokumentDto::getTittel)));
         }
 
         return prosessinstans;

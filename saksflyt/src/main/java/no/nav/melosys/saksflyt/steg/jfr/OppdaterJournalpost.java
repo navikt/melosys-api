@@ -10,6 +10,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
@@ -66,7 +67,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
             medDokumentkategori = true;
         }
 
-        Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
+        Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Long gsakSakID = null;
         if (prosessinstans.getType() == ProsessType.JFR_KNYTT || Behandlingstyper.ENDRET_PERIODE.equals(behandlingstype)) {
             Fagsak sak = fagsakRepo.findBySaksnummer(prosessinstans.getData(SAKSNUMMER));
@@ -95,9 +96,13 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
         String dokumentID = prosessinstans.getData(DOKUMENT_ID);
 
-        List<String> vedleggTittelListe = prosessinstans.getData(VEDLEGG_TITTEL_LISTE, List.class);
+        List<String> logiskeVedleggTitler = prosessinstans.getData(LOGISKE_VEDLEGG_TITLER, List.class);
+        Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
 
-        joarkFasade.oppdaterJournalpost(journalpostID, dokumentID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, vedleggTittelListe, medDokumentkategori);
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(gsakSakID).medBrukerID(brukerID)
+            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medTittel(tittel).medFysiskeVedlegg(fysiskeVedleggMedTitler)
+            .medLogiskeVedleggTitler(logiskeVedleggTitler).medDokumentkategori(medDokumentkategori).build();
+        joarkFasade.oppdaterJournalpost(journalpostID, dokumentID, journalpostOppdatering);
 
         prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);
         log.info("Prosessinstans {} har oppdatert journalpost {}. SakId: {}", prosessinstans.getId(), journalpostID, gsakSakID);

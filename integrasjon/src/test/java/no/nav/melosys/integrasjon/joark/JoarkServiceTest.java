@@ -1,10 +1,7 @@
 package no.nav.melosys.integrasjon.joark;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
@@ -76,7 +73,7 @@ public class JoarkServiceTest {
 
     @Test
     public void hentKjerneJournalpostListe() throws SikkerhetsbegrensningException, IntegrasjonException, HentKjerneJournalpostListeUgyldigInput, HentKjerneJournalpostListeSikkerhetsbegrensning, DatatypeConfigurationException {
-        Long arkivSakID = Long.valueOf(1);
+        Long arkivSakID = 1L;
         HentKjerneJournalpostListeResponse response = new HentKjerneJournalpostListeResponse();
         no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost journalpost = new no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost();
         ArkivSak arkivSak = new ArkivSak();
@@ -149,10 +146,14 @@ public class JoarkServiceTest {
 
     @Test
     public void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
-
         String tittel = "tittel";
-        joarkService.oppdaterJournalpost("123", "1234", 1L, "12345",
-            "12", "321", tittel, Arrays.asList("dok1", "dok2"), true);
+        Map<String, String> vedleggMedTitler = new HashMap<>();
+        String fysiskVedleggTittel = "Fysisk vedlegg";
+        vedleggMedTitler.put("vedleggDokID", fysiskVedleggTittel);
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(1L).medBrukerID("12345")
+            .medAvsenderID("12").medAvsenderNavn("321").medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
+            .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).medDokumentkategori(true).build();
+        joarkService.oppdaterJournalpost("123", "1234", journalpostOppdatering);
 
         verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
         PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
@@ -170,12 +171,12 @@ public class JoarkServiceTest {
         assertThat(request.getArkivSak().getArkivSakId()).isNotNull();
         assertThat(request.getArkivSak().getArkivSakSystem()).isNotNull();
 
-        verify(journalfoerInngaaendeConsumer).oppdaterDokument(oppdaterDokumentCaptor.capture(), anyString(), anyString());
-        PutDokumentRequest dokumentRequest = oppdaterDokumentCaptor.getValue();
-
-        assertThat(dokumentRequest).isNotNull();
-        assertThat(dokumentRequest.getDokumentKategori()).isNotNull();
-        assertThat(dokumentRequest.getTittel()).isEqualTo(tittel);
+        verify(journalfoerInngaaendeConsumer, times(2)).oppdaterDokument(oppdaterDokumentCaptor.capture(), anyString(), anyString());
+        List<PutDokumentRequest> dokumentRequest = oppdaterDokumentCaptor.getAllValues();
+        assertThat(dokumentRequest.size()).isEqualTo(2);
+        assertThat(dokumentRequest.get(0).getDokumentKategori()).isEqualTo(DokumentKategoriKode.IS.getKode());
+        assertThat(dokumentRequest.get(0).getTittel()).isEqualTo(tittel);
+        assertThat(dokumentRequest.get(1).getTittel()).isEqualTo(fysiskVedleggTittel);
 
         verify(journalfoerInngaaendeConsumer, times(2)).leggTilLogiskVedlegg(logiskVedleggCaptor.capture(), anyString(), anyString());
         List<PostLogiskVedleggRequest> logiskVedleggRequest = logiskVedleggCaptor.getAllValues();
