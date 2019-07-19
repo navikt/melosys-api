@@ -80,7 +80,6 @@
         <mockrunner.version>2.0.1</mockrunner.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
         <org.json.version>20180813</org.json.version>
-        <oxmlparserv2.version>11.2.0.1</oxmlparserv2.version>
         <pac4j.version>3.7.0</pac4j.version>
         <prometheus.version>0.5.0</prometheus.version>
         <easy-random.version>4.0.0</easy-random.version>
@@ -197,16 +196,6 @@
                 <groupId>com.oracle</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>${ojdbc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.oracle</groupId>
-                <artifactId>xdb6</artifactId>
-                <version>${ojdbc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.oracle</groupId>
-                <artifactId>xmlparserv2</artifactId>
-                <version>${oxmlparserv2.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.zaxxer</groupId>

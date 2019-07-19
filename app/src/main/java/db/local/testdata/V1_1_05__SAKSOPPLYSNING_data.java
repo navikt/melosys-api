@@ -1,6 +1,7 @@
 package db.local.testdata;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -12,7 +13,6 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.XsltConfig;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
-import oracle.xdb.XMLType;
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.flywaydb.core.api.migration.Context;
 import org.slf4j.Logger;
@@ -100,10 +100,8 @@ public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
     }
 
     private void insertXML(Resource file, Connection conn, SaksopplysningType opplysning_type, String versjon, SaksopplysningKilde kilde, int i) {
-        String query = "INSERT INTO SAKSOPPLYSNING (ID, BEHANDLING_ID, OPPLYSNING_TYPE, VERSJON, KILDE, REGISTRERT_DATO, ENDRET_DATO, DOKUMENT_XML) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
+        String query = "INSERT INTO SAKSOPPLYSNING (ID, BEHANDLING_ID, OPPLYSNING_TYPE, VERSJON, KILDE, REGISTRERT_DATO, ENDRET_DATO, DOKUMENT_XML) VALUES (?, ?, ?, ?, ?, ?, ?, XMLType(?)) ";
         try (OraclePreparedStatement ps = (OraclePreparedStatement) conn.prepareStatement(query)) {
-            // Oppretter XML-type med Oracle API
-            XMLType xml = XMLType.createXML(conn, file.getInputStream());
             ps.setInt(1, currentRowNum++);
             ps.setInt(2, MOCK_BEHANDLING_ID);
             ps.setString(3, opplysning_type.getKode());
@@ -112,7 +110,7 @@ public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
             Timestamp x = Timestamp.valueOf(LocalDateTime.now());
             ps.setTimestamp(6, x);
             ps.setTimestamp(7, x);
-            ps.setObject(8, xml);
+            ps.setCharacterStream(8, new InputStreamReader(file.getInputStream()), file.contentLength());
             if (ps.executeUpdate() == 1) {
                 log.info("Successfully inserted {} {}", i, file.getFilename());
             }
