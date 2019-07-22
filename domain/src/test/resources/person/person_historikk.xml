@@ -4,7 +4,7 @@
     <response>
         <aktoer xsi:type="ns3:PersonIdent" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <ident>
-                <ident>FJERNET</ident>
+                <ident>1234569876</ident>
                 <type>FNR</type>
             </ident>
         </aktoer>
@@ -130,12 +130,14 @@
             <bostedsadresse>
                 <strukturertAdresse xsi:type="ns3:Gateadresse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <landkode>NOR</landkode>
-                    <poststed>0963</poststed>
-                    <kommunenummer>0301</kommunenummer>
-                    <gatenummer>12572</gatenummer>
-                    <gatenavn>HAGALØKKA</gatenavn>
-                    <husnummer>3</husnummer>
-                    <husbokstav>B</husbokstav>
+                    <tilleggsadresse>C/O DONALD DUCK</tilleggsadresse>
+                    <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>
+                    <poststed>0546</poststed>
+                    <kommunenummer>0071</kommunenummer>
+                    <gatenummer>12972</gatenummer>
+                    <gatenavn>STORLØKKA</gatenavn>
+                    <husnummer>2</husnummer>
+                    <husbokstav>Z</husbokstav>
                 </strukturertAdresse>
             </bostedsadresse>
         </bostedsadressePeriodeListe>
@@ -147,12 +149,12 @@
             <bostedsadresse>
                 <strukturertAdresse xsi:type="ns3:Gateadresse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <landkode>NOR</landkode>
-                    <poststed>0963</poststed>
-                    <kommunenummer>0301</kommunenummer>
-                    <gatenummer>12572</gatenummer>
-                    <gatenavn>HAGALØKKA</gatenavn>
+                    <poststed>0546</poststed>
+                    <kommunenummer>0071</kommunenummer>
+                    <gatenummer>12972</gatenummer>
+                    <gatenavn>STORLØKKA</gatenavn>
                     <husnummer>3</husnummer>
-                    <husbokstav>B</husbokstav>
+                    <husbokstav>Z</husbokstav>
                 </strukturertAdresse>
             </bostedsadresse>
         </bostedsadressePeriodeListe>
@@ -164,11 +166,11 @@
             <bostedsadresse>
                 <strukturertAdresse xsi:type="ns3:Gateadresse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <landkode>NOR</landkode>
-                    <poststed>0958</poststed>
+                    <poststed>1234</poststed>
                     <bolignummer>H0301</bolignummer>
                     <kommunenummer>0301</kommunenummer>
                     <gatenummer>10151</gatenummer>
-                    <gatenavn>AMMERUDVEIEN</gatenavn>
+                    <gatenavn>EKSEMPELVEIEN</gatenavn>
                     <husnummer>57</husnummer>
                 </strukturertAdresse>
             </bostedsadresse>
@@ -181,11 +183,11 @@
             <bostedsadresse>
                 <strukturertAdresse xsi:type="ns3:Gateadresse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <landkode>NOR</landkode>
-                    <poststed>0958</poststed>
+                    <poststed>1234</poststed>
                     <bolignummer>H0301</bolignummer>
                     <kommunenummer>0301</kommunenummer>
                     <gatenummer>10151</gatenummer>
-                    <gatenavn>AMMERUDVEIEN</gatenavn>
+                    <gatenavn>EKSEMPELVEIEN</gatenavn>
                     <husnummer>57</husnummer>
                 </strukturertAdresse>
             </bostedsadresse>
@@ -198,10 +200,10 @@
             <bostedsadresse>
                 <strukturertAdresse xsi:type="ns3:Gateadresse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <landkode>NOR</landkode>
-                    <poststed>0958</poststed>
+                    <poststed>1234</poststed>
                     <kommunenummer>0301</kommunenummer>
                     <gatenummer>10151</gatenummer>
-                    <gatenavn>AMMERUDVEIEN</gatenavn>
+                    <gatenavn>EKSEMPELVEIEN</gatenavn>
                     <husnummer>57</husnummer>
                 </strukturertAdresse>
             </bostedsadresse>
@@ -214,11 +216,11 @@
             <bostedsadresse>
                 <strukturertAdresse xsi:type="ns3:Gateadresse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <landkode>NOR</landkode>
-                    <poststed>0958</poststed>
+                    <poststed>1234</poststed>
                     <bolignummer>H0302</bolignummer>
                     <kommunenummer>0301</kommunenummer>
                     <gatenummer>10151</gatenummer>
-                    <gatenavn>AMMERUDVEIEN</gatenavn>
+                    <gatenavn>EKSEMPELVEIEN</gatenavn>
                     <husnummer>57</husnummer>
                 </strukturertAdresse>
             </bostedsadresse>
@@ -231,10 +233,10 @@
             <bostedsadresse>
                 <strukturertAdresse xsi:type="ns3:Gateadresse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <landkode>NOR</landkode>
-                    <poststed>0958</poststed>
+                    <poststed>1234</poststed>
                     <kommunenummer>0301</kommunenummer>
                     <gatenummer>10151</gatenummer>
-                    <gatenavn>AMMERUDVEIEN</gatenavn>
+                    <gatenavn>EKSEMPELVEIEN</gatenavn>
                     <husnummer>57</husnummer>
                 </strukturertAdresse>
             </bostedsadresse>
@@ -247,13 +249,12 @@
             <postadresse>
                 <ustrukturertAdresse>
                     <landkode>NOR</landkode>
-                    <adresselinje1>AMMERUDVEIEN 57</adresselinje1>
-                    <postnr>0958</postnr>
+                    <adresselinje1>EKSEMPELVEIEN 57</adresselinje1>
+                    <postnr>1234</postnr>
                     <poststed>OSLO</poststed>
                 </ustrukturertAdresse>
             </postadresse>
         </postadressePeriodeListe>
-        <!-- Fra FJERNET -->
         <midlertidigAdressePeriodeListe xsi:type="ns3:MidlertidigPostadresseUtland" endringstidspunkt="2011-11-25T00:00:00.000+01:00" endretAv="O107147, PP01" endringstype="endret" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <postleveringsPeriode>
                 <fom>2011-11-25T00:00:00.000+01:00</fom>
@@ -261,8 +262,8 @@
             </postleveringsPeriode>
             <ustrukturertAdresse>
                 <landkode>MNE</landkode>
-                <adresselinje1>RADSOVA BURICA 13</adresselinje1>
-                <adresselinje2>81000 PODGORICA</adresselinje2>
+                <adresselinje1>LALA LALA 12</adresselinje1>
+                <adresselinje2>81000 COSTARICA</adresselinje2>
                 <adresselinje3>MONTENEGRO</adresselinje3>
             </ustrukturertAdresse>
         </midlertidigAdressePeriodeListe>
@@ -273,8 +274,8 @@
             </postleveringsPeriode>
             <ustrukturertAdresse>
                 <landkode>MNE</landkode>
-                <adresselinje1>RADSOVA BURICA 13</adresselinje1>
-                <adresselinje2>81000 PODGORICA</adresselinje2>
+                <adresselinje1>LALA LALA 12</adresselinje1>
+                <adresselinje2>81000 COSTARICA</adresselinje2>
                 <adresselinje3>MONTENEGRO</adresselinje3>
             </ustrukturertAdresse>
         </midlertidigAdressePeriodeListe>
@@ -285,6 +286,7 @@
             </postleveringsPeriode>
             <strukturertAdresse xsi:type="ns3:Gateadresse">
                 <landkode>NOR</landkode>
+                <tilleggsadresse>C/O DONALD DUCK</tilleggsadresse>
                 <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>
                 <poststed>5141</poststed>
                 <kommunenummer>1201</kommunenummer>
