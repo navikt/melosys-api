@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.CollectionUtils;
+
 public final class JournalpostOppdatering {
     private final Long gsakSaksnummer;
     private final String brukerID;
@@ -52,12 +54,16 @@ public final class JournalpostOppdatering {
         }
 
         public Builder medFysiskeVedlegg(Map<String, String> fysiskeVedlegg) {
-            this.fysiskeVedlegg = fysiskeVedlegg;
+            if (!CollectionUtils.isEmpty(fysiskeVedlegg)) {
+                this.fysiskeVedlegg = fysiskeVedlegg;
+            }
             return this;
         }
 
         public Builder medLogiskeVedleggTitler(List<String> logiskeVedleggTitler) {
-            this.logiskeVedleggTitler = logiskeVedleggTitler;
+            if (!CollectionUtils.isEmpty(logiskeVedleggTitler)) {
+                this.logiskeVedleggTitler = logiskeVedleggTitler;
+            }
             return this;
         }
 

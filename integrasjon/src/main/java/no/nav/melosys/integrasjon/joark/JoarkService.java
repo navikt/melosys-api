@@ -203,8 +203,11 @@ public class JoarkService implements JoarkFasade {
         throws SikkerhetsbegrensningException, IntegrasjonException {
 
         oppdaterDokument(journalpostID, hovedDokumentID, journalpostOppdatering.getTittel(), journalpostOppdatering.isMedDokumentkategori());
-        for (Map.Entry<String, String> vedleggIdMedTittel : journalpostOppdatering.getFysiskeVedlegg().entrySet()) {
-            oppdaterDokument(journalpostID, vedleggIdMedTittel.getKey(), vedleggIdMedTittel.getValue(), false);
+        Map<String, String> fysiskeVedlegg = journalpostOppdatering.getFysiskeVedlegg();
+        if (!CollectionUtils.isEmpty(fysiskeVedlegg)) {
+            for (Map.Entry<String, String> vedleggIdMedTittel : fysiskeVedlegg.entrySet()) {
+                oppdaterDokument(journalpostID, vedleggIdMedTittel.getKey(), vedleggIdMedTittel.getValue(), false);
+            }
         }
 
         List<String> logiskeVedleggTitler = journalpostOppdatering.getLogiskeVedleggTitler();

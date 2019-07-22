@@ -186,6 +186,38 @@ public class JoarkServiceTest {
     }
 
     @Test
+    public void oppdaterJournalpost_utenVedlegg_fungerer() throws Exception {
+        String tittel = "tittel";
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(1L).medBrukerID("12345")
+            .medAvsenderID("12").medAvsenderNavn("321").medTittel(tittel).medFysiskeVedlegg(null)
+            .medLogiskeVedleggTitler(null).medDokumentkategori(true).build();
+        joarkService.oppdaterJournalpost("123", "1234", journalpostOppdatering);
+
+        verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
+        PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
+
+        assertThat(request).isNotNull();
+        assertThat(request.getTittel()).isEqualTo(tittel);
+        assertThat(request.getAvsender()).isNotNull();
+        assertThat(request.getAvsender().getNavn()).isNotNull();
+
+        assertThat(request.getBruker()).isNotNull();
+        assertThat(request.getBruker().getIdentifikator()).isNotNull();
+        assertThat(request.getBruker().getBrukerType()).isNotNull();
+
+        assertThat(request.getArkivSak()).isNotNull();
+        assertThat(request.getArkivSak().getArkivSakId()).isNotNull();
+        assertThat(request.getArkivSak().getArkivSakSystem()).isNotNull();
+
+        verify(journalfoerInngaaendeConsumer).oppdaterDokument(oppdaterDokumentCaptor.capture(), anyString(), anyString());
+        PutDokumentRequest dokumentRequest = oppdaterDokumentCaptor.getValue();
+        assertThat(dokumentRequest.getDokumentKategori()).isEqualTo(DokumentKategoriKode.IS.getKode());
+        assertThat(dokumentRequest.getTittel()).isEqualTo(tittel);
+
+        verify(journalfoerInngaaendeConsumer, never()).leggTilLogiskVedlegg(logiskVedleggCaptor.capture(), anyString(), anyString());
+    }
+
+    @Test
     public void hentJournalpost_forventJournalpost() throws Exception {
         String arkivsakId = "123arkivsak";
         GetJournalpostResponse getJournalpostResponse = new GetJournalpostResponse();
