@@ -5,6 +5,7 @@ import java.util.Map;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.FagsakRepository;
@@ -56,7 +57,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException {
+    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType prosessType = prosessinstans.getType();
@@ -69,11 +70,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
 
         if (prosessType == ProsessType.JFR_NY_SAK) {
             Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-            if (periode == null || periode.getFom() == null) {
-                log.error("Funksjonell feil for prosessinstans {}: Søknadsperioden er ikke oppgitt eller mangler fom.", prosessinstans.getId());
-                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Søknadsperioden er ikke oppgitt eller mangler fom.", null);
-                return;
-            }
+            validerSøknadsperiode(periode);
         }
 
         if (prosessType == ProsessType.JFR_KNYTT) {
@@ -143,4 +140,15 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
         log.info("Ferdig med grunnleggende validering av prosessinstans {}", prosessinstans.getId());
     }
 
+    private void validerSøknadsperiode(Periode periode) throws FunksjonellException {
+        if (periode == null || periode.getFom() == null) {
+            throw new FunksjonellException("Søknadsperioden er ikke oppgitt eller mangler fom.");
+        }
+        if (periode.getTom() != null && periode.getFom().equals(periode.getTom())) {
+            throw new FunksjonellException("Fra og med dato kan ikke være lik til og med dato.");
+        }
+        if (periode.getTom() != null && periode.getFom().isAfter(periode.getTom())) {
+            throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
+        }
+    }
 }

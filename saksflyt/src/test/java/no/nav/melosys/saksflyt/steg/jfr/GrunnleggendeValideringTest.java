@@ -9,19 +9,29 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
 import org.assertj.core.api.AssertionsForClassTypes;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class GrunnleggendeValideringTest {
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    @Mock
+    private FagsakRepository fagsakRepository;
 
     private GrunnleggendeValidering agent;
     private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
@@ -31,7 +41,6 @@ public class GrunnleggendeValideringTest {
 
     @Before
     public void setUp() {
-        FagsakRepository fagsakRepository = Mockito.mock(FagsakRepository.class);
         agent = new GrunnleggendeValidering(fagsakRepository);
 
         Fagsak fagsakUtenBehandlinger = new Fagsak();
@@ -54,7 +63,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_ukjentProsess_feiler() throws TekniskException {
+    public void utførSteg_ukjentProsess_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
         agent.utfør(prosessinstans);
@@ -62,7 +71,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_nySak_tilInkommendeDok() throws TekniskException {
+    public void utførSteg_nySak_tilInkommendeDok() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -73,17 +82,44 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_nySakManglerSøknadsperiode_feiler() throws TekniskException {
+    public void utførSteg_nySakManglerSøknadsperiode_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
         prosessinstans.setData(lagProsessData_nySak());
+
+        expectedException.expect(FunksjonellException.class);
         agent.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
     }
 
     @Test
-    public void utførSteg_knyttManglerSaksnummer_tilInkommendeDok() throws TekniskException {
+    public void utførSteg_nySakSøknadsperiodeMedLikFomOgTom_feiler() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.JFR_NY_SAK);
+        prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
+        prosessinstans.setData(lagProsessData_nySak());
+        prosessinstans.setData(SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now()));
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("lik");
+        agent.utfør(prosessinstans);
+    }
+
+    @Test
+    public void utførSteg_nySakSøknadsperiodeMedFomEtterTom_feiler() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.JFR_NY_SAK);
+        prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
+        prosessinstans.setData(lagProsessData_nySak());
+        prosessinstans.setData(SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now().minusYears(1)));
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("etter");
+        agent.utfør(prosessinstans);
+    }
+
+    @Test
+    public void utførSteg_knyttManglerSaksnummer_tilInkommendeDok() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -94,7 +130,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerBrukerID_feiler() throws TekniskException {
+    public void utførSteg_knyttManglerBrukerID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -106,7 +142,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerJournalpostID_feiler() throws TekniskException {
+    public void utførSteg_knyttManglerJournalpostID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -118,7 +154,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerTittel_feiler() throws TekniskException {
+    public void utførSteg_knyttManglerTittel_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -130,7 +166,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerDokumentID_feiler() throws TekniskException {
+    public void utførSteg_knyttManglerDokumentID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -142,7 +178,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerSakbehandler_feiler() throws TekniskException {
+    public void utførSteg_knyttManglerSakbehandler_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -160,8 +196,8 @@ public class GrunnleggendeValideringTest {
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         agent.utførSteg(p);
-        AssertionsForInterfaceTypes.assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        AssertionsForInterfaceTypes.assertThat(p.getHendelser()).isNotEmpty();
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        assertThat(p.getHendelser()).isNotEmpty();
         AssertionsForClassTypes.assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som mangler en inaktiv behandling");
     }
 
@@ -172,9 +208,9 @@ public class GrunnleggendeValideringTest {
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         agent.utførSteg(p);
-        AssertionsForInterfaceTypes.assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        AssertionsForInterfaceTypes.assertThat(p.getHendelser()).isNotEmpty();
-        AssertionsForClassTypes.assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling");
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        assertThat(p.getHendelser()).isNotEmpty();
+        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling");
     }
 
     @Test
@@ -184,9 +220,9 @@ public class GrunnleggendeValideringTest {
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING_OG_INAKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         agent.utførSteg(p);
-        AssertionsForInterfaceTypes.assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        AssertionsForInterfaceTypes.assertThat(p.getHendelser()).isNotEmpty();
-        AssertionsForClassTypes.assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling");
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        assertThat(p.getHendelser()).isNotEmpty();
+        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling");
     }
 
     @Test

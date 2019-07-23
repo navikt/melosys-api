@@ -129,9 +129,6 @@ public class JournalfoeringService {
         if (journalfoeringDto.getFagsak().getSoknadsperiode().getFom() == null) {
             throw new FunksjonellException("Søknadsperiodes fra og med dato mangler");
         }
-        if (journalfoeringDto.getFagsak().getSoknadsperiode().getTom() == null) {
-            throw new FunksjonellException("Søknadsperiodes til og med dato mangler");
-        }
         if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().isEmpty()) {
             throw new FunksjonellException("Land mangler");
         }
