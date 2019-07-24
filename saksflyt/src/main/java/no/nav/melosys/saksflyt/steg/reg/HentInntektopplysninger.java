@@ -58,22 +58,29 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
     protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
         return FeilStrategi.standardFeilHåndtering();
     }
-    
+
     @Override
     public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, SikkerhetsbegrensningException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
-        YearMonth fom = YearMonth.from(periode.getFom()).minusMonths(inntektshistorikkAntallMåneder);
+        final LocalDate iDag = LocalDate.now();
+        YearMonth fom;
+        if (periode.getFom().isAfter(iDag)) {
+            fom = YearMonth.from(iDag).minusMonths(inntektshistorikkAntallMåneder);
+        } else {
+            fom = YearMonth.from(periode.getFom()).minusMonths(inntektshistorikkAntallMåneder);
+        }
 
         YearMonth tom;
-        if (periode.getTom().isAfter(LocalDate.now())) {
-            tom = YearMonth.now();
+        if (periode.getTom().isAfter(iDag)) {
+            tom = YearMonth.from(iDag);
         } else {
             tom = YearMonth.from(periode.getTom());
         }
-        Instant nå = Instant.now();
+
+        final Instant nå = Instant.now();
         Behandling behandling = prosessinstans.getBehandling();
         Saksopplysning saksopplysning = inntektFasade.hentInntektListe(brukerId, fom, tom);
         saksopplysning.setBehandling(behandling);

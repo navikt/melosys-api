@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 public class Tps3PersonKonverteringTest implements KonverteringTest {
     private static final String TPS_PERSON_3_0_MOCK = "person/tps_person_3.0_mock.xml";
-    private static final String TPS_PERSON_MED_FAMILIERELASJONER = "person/88888888886.xml";
+    private static final String TPS_PERSON_MED_FAMILIERELASJONER = "person/familierelasjoner.xml";
 
     private static DokumentFactory factory;
 
@@ -54,7 +54,7 @@ public class Tps3PersonKonverteringTest implements KonverteringTest {
     }
 
     @Test
-    public void testPostadresse() throws Exception {
+    public void testMidlertidigPostadresseUtland() throws Exception {
         final String kilde = "person/midlertidig_postadresse_utland.xml";
         PersonDokument dokument = (PersonDokument) getSaksopplysning(kilde).getDokument();
 

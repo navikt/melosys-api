@@ -67,16 +67,22 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
-        LocalDate fom = periode.getFom().minusMonths(arbeidsforholdhistorikkAntallMåneder);
+        final LocalDate iDag = LocalDate.now();
+        LocalDate fom;
+        if (periode.getFom().isAfter(iDag)) {
+            fom = iDag.minusMonths(arbeidsforholdhistorikkAntallMåneder);
+        } else {
+            fom = periode.getFom().minusMonths(arbeidsforholdhistorikkAntallMåneder);
+        }
 
         LocalDate tom;
-        if (periode.getTom().isAfter(LocalDate.now())) {
-            tom = LocalDate.now();
+        if (periode.getTom() == null || periode.getTom().isAfter(iDag)) {
+            tom = iDag;
         } else {
             tom = periode.getTom();
         }
 
-        Instant nå = Instant.now();
+        final Instant nå = Instant.now();
         Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, fom, tom);
         saksopplysning.setBehandling(behandling);
         saksopplysning.setRegistrertDato(nå);

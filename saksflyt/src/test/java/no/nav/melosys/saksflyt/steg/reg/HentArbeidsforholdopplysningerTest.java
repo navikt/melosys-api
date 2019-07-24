@@ -59,4 +59,26 @@ public class HentArbeidsforholdopplysningerTest {
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_INNT_OPPL);
     }
 
+    @Test
+    public void utfoerSteg_fremtidigPeriode() throws TekniskException, SikkerhetsbegrensningException {
+        Prosessinstans p = new Prosessinstans();
+        p.setBehandling(new Behandling());
+        p.getBehandling().setSaksopplysninger(new HashSet<>());
+
+        String brukerID = "99999999991";
+        Periode periode = new Periode(LocalDate.now().plusYears(1), LocalDate.now().plusYears(2));
+
+        p.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        p.setData(ProsessDataKey.SØKNADSPERIODE, periode);
+        when(aaregFasade.finnArbeidsforholdPrArbeidstaker(any(), any(), any())).thenReturn(new Saksopplysning());
+
+        agent.utførSteg(p);
+
+        LocalDate forventetFom = LocalDate.now().minusMonths(ARBEIDSFORHOLD_HISTORIKK_ANTALL_MÅNEDER);
+        LocalDate forventetTom = LocalDate.now();
+
+        verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(brukerID, forventetFom, forventetTom);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_INNT_OPPL);
+    }
+
 }

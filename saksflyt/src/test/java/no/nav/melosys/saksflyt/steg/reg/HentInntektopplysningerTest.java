@@ -53,10 +53,32 @@ public class HentInntektopplysningerTest {
 
         agent.utførSteg(p);
 
-        YearMonth fom = YearMonth.from(periode.getFom()).minusMonths(INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
-        YearMonth tom = YearMonth.now();
+        YearMonth forventetFom = YearMonth.from(periode.getFom()).minusMonths(INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
+        YearMonth forventetTom = YearMonth.now();
 
-        verify(inntektFasade, times(1)).hentInntektListe(brukerID, fom, tom);
+        verify(inntektFasade).hentInntektListe(brukerID, forventetFom, forventetTom);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ORG_OPPL);
+    }
+
+    @Test
+    public void utfoerSteg_fremtidigPeriode() throws IntegrasjonException, SikkerhetsbegrensningException {
+        Prosessinstans p = new Prosessinstans();
+        p.setBehandling(new Behandling());
+        p.getBehandling().setSaksopplysninger(new HashSet<>());
+
+        String brukerID = "99999999991";
+        Periode periode = new Periode(LocalDate.now().plusYears(1), LocalDate.now().plusYears(2));
+
+        p.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        p.setData(ProsessDataKey.SØKNADSPERIODE, periode);
+        when(inntektFasade.hentInntektListe(any(), any(), any())).thenReturn(new Saksopplysning());
+
+        agent.utførSteg(p);
+
+        YearMonth forventetFom = YearMonth.now().minusMonths(INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
+        YearMonth forventetTom = YearMonth.now();
+
+        verify(inntektFasade).hentInntektListe(brukerID, forventetFom, forventetTom);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ORG_OPPL);
     }
 

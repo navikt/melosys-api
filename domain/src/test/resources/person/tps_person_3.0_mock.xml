@@ -4,6 +4,7 @@
             <bostedsadresse>
                 <strukturertAdresse c:type="a:Gateadresse">
                     <landkode>NOR</landkode>
+                    <tilleggsadresse>C/O DONALD DUCK</tilleggsadresse>
                     <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>
                     <poststed>5141</poststed>
                     <kommunenummer>1201</kommunenummer>

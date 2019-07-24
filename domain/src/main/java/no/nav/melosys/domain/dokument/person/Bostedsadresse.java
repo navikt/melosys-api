@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.person;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.felles.Land;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -7,11 +8,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class Bostedsadresse {
 
     private Gateadresse gateadresse;
-
+    private String tilleggsadresse;
+    private String tilleggsadresseType;
     private String postnr;
-
     private String poststed;
-
     private Land land;
 
     public Bostedsadresse() {
@@ -27,12 +27,22 @@ public class Bostedsadresse {
         this.gateadresse = gateadresse;
     }
 
-    public Land getLand() {
-        return land;
+    @JsonIgnore
+    public String getTilleggsadresse() {
+        return tilleggsadresse;
     }
 
-    public void setLand(Land land) {
-        this.land = land;
+    public void setTilleggsadresse(String tilleggsadresse) {
+        this.tilleggsadresse = tilleggsadresse;
+    }
+
+    @JsonIgnore
+    public String getTilleggsadresseType() {
+        return tilleggsadresseType;
+    }
+
+    public void setTilleggsadresseType(String tilleggsadresseType) {
+        this.tilleggsadresseType = tilleggsadresseType;
     }
 
     public String getPostnr() {
@@ -49,6 +59,14 @@ public class Bostedsadresse {
 
     public void setPoststed(String poststed) {
         this.poststed = poststed;
+    }
+
+    public Land getLand() {
+        return land;
+    }
+
+    public void setLand(Land land) {
+        this.land = land;
     }
 
     @Override
