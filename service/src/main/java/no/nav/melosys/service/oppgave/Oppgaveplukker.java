@@ -33,15 +33,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class Oppgaveplukker {
-
     private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
+    static final List<Oppgavetyper> KJENTE_OPPGAVETYPER = Arrays.asList(Oppgavetyper.BEH_SAK_MK, Oppgavetyper.VUR);
+
     private final GsakFasade gsakFasade;
-
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
-
     private final FagsakRepository fagsakRepository;
-
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
@@ -85,11 +83,11 @@ public class Oppgaveplukker {
                 oppgavetyper.addAll(hentOppgavetyper(behandlingstyper));
             } else {
                 // Når behandlingstype ikke velges skal alle behandlingsoppgaver klare til behandling plukkes uansett behandlingstype.
-                oppgavetyper.addAll(Arrays.asList(Oppgavetyper.BEH_SAK_MK, Oppgavetyper.VUR));
+                oppgavetyper.addAll(KJENTE_OPPGAVETYPER);
             }
         }
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, sakstyper, behandlingstyper, behandlingstemaer);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, sakstyper, Collections.EMPTY_SET, behandlingstemaer);
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
@@ -107,7 +105,7 @@ public class Oppgaveplukker {
             .collect(Collectors.toSet());
     }
 
-    private Set<Oppgavetyper> hentOppgavetyper(Set<Behandlingstyper> behandlingstypeListe) {
+    Set<Oppgavetyper> hentOppgavetyper(Set<Behandlingstyper> behandlingstypeListe) {
         return behandlingstypeListe.stream()
             .map(Oppgave::hentOppgavetype)
             .collect(Collectors.toSet());

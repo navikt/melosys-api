@@ -28,6 +28,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static no.nav.melosys.service.oppgave.Oppgaveplukker.KJENTE_OPPGAVETYPER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -301,9 +303,18 @@ public class OppgaveplukkerTest {
     public void hentBehandlingstema_støtterAlleSakstyper() {
         Set<Sakstyper> sakstyper = new HashSet<>(Arrays.asList(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE, Sakstyper.FTRL));
 
-        Set<Behandlingstema> behandlingstemaList = oppgaveplukker.hentBehandlingstema(sakstyper);
+        Set<Behandlingstema> behandlingstemaSet = oppgaveplukker.hentBehandlingstema(sakstyper);
 
-        assertThat(behandlingstemaList).containsExactlyInAnyOrder(Behandlingstema.values());
+        assertThat(behandlingstemaSet).containsExactlyInAnyOrder(Behandlingstema.values());
+    }
+
+    @Test
+    public void hentOppgaveTyper_støtterKjenteBehandlingstyper() {
+        Set<Behandlingstyper> behandlingstyper = new HashSet<>(Arrays.asList(Behandlingstyper.SOEKNAD, Behandlingstyper.ENDRET_PERIODE));
+
+        Set<Oppgavetyper> oppgavetypeSet = oppgaveplukker.hentOppgavetyper(behandlingstyper);
+
+        assertThat(oppgavetypeSet).containsAll(KJENTE_OPPGAVETYPER);
     }
 
     @Test
