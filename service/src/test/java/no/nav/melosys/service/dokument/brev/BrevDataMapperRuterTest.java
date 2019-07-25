@@ -60,6 +60,6 @@ public class BrevDataMapperRuterTest {
     public void oppslagAvIkkeInstansierbarMapperKasterUnntak() {
         BrevDataMapperRuter.mappere.put(Produserbaredokumenter.MELDING_HENLAGT_SAK, IkkeInstansierbarMapper.class);
         Throwable unntak = catchThrowable(() -> BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.MELDING_HENLAGT_SAK));
-        assertThat(unntak).isInstanceOf(TekniskException.class).hasCauseInstanceOf(InstantiationException.class);
+        assertThat(unntak).isInstanceOf(TekniskException.class).hasCauseInstanceOf(NoSuchMethodException.class);
     }
 }

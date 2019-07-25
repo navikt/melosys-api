@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.*;
 
-public class BrevDataMapperRuter {
+class BrevDataMapperRuter {
 
     static Map<Produserbaredokumenter, Class<? extends BrevDataMapper>> mappere = new EnumMap<>(Produserbaredokumenter.class);
 
@@ -27,13 +28,14 @@ public class BrevDataMapperRuter {
     private BrevDataMapperRuter() {
     }
 
-    public static BrevDataMapper brevDataMapper(Produserbaredokumenter type) throws TekniskException {
+    static BrevDataMapper brevDataMapper(Produserbaredokumenter type) throws TekniskException {
         if (!mappere.containsKey(type)) {
             throw new TekniskException("Produserbaredokumenter " + type.getKode() + " støttes ikke");
         }
+
         try {
-            return mappere.get(type).newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            return mappere.get(type).getConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new TekniskException(e);
         }
     }

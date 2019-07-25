@@ -23,24 +23,6 @@ public final class Oppgave {
     private final String aktørId;
     private final Behandlingstyper behandlingstype;
     private final Behandlingstema behandlingstema;
-    private final String behandlesAvApplikasjon;
-
-    private Oppgave(String oppgaveId, String saksnummer, LocalDate fristFerdigstillelse, Tema tema, Oppgavetyper oppgavetype, PrioritetType prioritet, String journalpostId,
-                    String tilordnetRessurs, int versjon, String aktørId, Behandlingstyper behandlingstype, Behandlingstema behandlingstema, String behandlesAvApplikasjon) {
-        this.oppgaveId = oppgaveId;
-        this.saksnummer = saksnummer;
-        this.fristFerdigstillelse = fristFerdigstillelse;
-        this.tema = tema;
-        this.oppgavetype = oppgavetype;
-        this.prioritet = prioritet;
-        this.journalpostId = journalpostId;
-        this.tilordnetRessurs = tilordnetRessurs;
-        this.versjon = versjon;
-        this.aktørId = aktørId;
-        this.behandlingstype = behandlingstype;
-        this.behandlingstema = behandlingstema;
-        this.behandlesAvApplikasjon = behandlesAvApplikasjon;
-    }
 
     public static class Builder {
         private String oppgaveId;
@@ -55,7 +37,6 @@ public final class Oppgave {
         private String aktørId;
         private Behandlingstyper behandlingstype;
         private Behandlingstema behandlingstema;
-        private String behandlesAvApplikasjon;
 
         public Builder setOppgaveId(String oppgaveId) {
             this.oppgaveId = oppgaveId;
@@ -117,15 +98,24 @@ public final class Oppgave {
             return this;
         }
 
-        public Builder setBehandlesAvApplikasjon(String behandlesAvApplikasjon) {
-            this.behandlesAvApplikasjon = behandlesAvApplikasjon;
-            return this;
-        }
-
         public Oppgave build() {
-            return new Oppgave(oppgaveId, saksnummer, fristFerdigstillelse, tema, oppgavetype, prioritet, journalpostId,
-                tilordnetRessurs, versjon, aktørId, behandlingstype, behandlingstema, behandlesAvApplikasjon);
+            return new Oppgave(this);
         }
+    }
+
+    private Oppgave(Builder builder) {
+        this.oppgaveId = builder.oppgaveId;
+        this.saksnummer = builder.saksnummer;
+        this.fristFerdigstillelse = builder.fristFerdigstillelse;
+        this.tema = builder.tema;
+        this.oppgavetype = builder.oppgavetype;
+        this.prioritet = builder.prioritet;
+        this.journalpostId = builder.journalpostId;
+        this.tilordnetRessurs = builder.tilordnetRessurs;
+        this.versjon = builder.versjon;
+        this.aktørId = builder.aktørId;
+        this.behandlingstype = builder.behandlingstype;
+        this.behandlingstema = builder.behandlingstema;
     }
 
     public String getOppgaveId() {
