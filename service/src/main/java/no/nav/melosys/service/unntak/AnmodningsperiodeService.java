@@ -110,7 +110,7 @@ public class AnmodningsperiodeService {
 
         } else if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.AVSLAG
                         && StringUtils.isEmpty(anmodningsperiodeSvar.getBegrunnelseFritekst())) {
-            throw new FunksjonellException("Begrunnelse på være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
+            throw new FunksjonellException("Begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
         }
     }
 }
