@@ -79,6 +79,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     }
 
     boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
-        return behandlingsresultat.getType() == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
+        return behandlingsresultat.getType() == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
     }
 }

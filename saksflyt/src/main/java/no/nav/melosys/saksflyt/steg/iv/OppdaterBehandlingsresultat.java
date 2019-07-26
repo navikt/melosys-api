@@ -29,7 +29,6 @@ import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_RESULTAT;
  */
 @Component
 public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingsresultat.class);
 
     static final int FRIST_KLAGE_UKER = 6;
@@ -63,8 +62,6 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
             behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
             behandlingsresultat.setFastsattAvLand(Landkoder.NO);
-        } else if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER) {
-            behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         }
 
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));

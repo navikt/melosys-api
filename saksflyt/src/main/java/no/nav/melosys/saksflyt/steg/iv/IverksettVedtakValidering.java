@@ -61,8 +61,7 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
 
         EnumSet<ProsessType> aksepterteProsesstyper = EnumSet.of(
             ProsessType.IVERKSETT_VEDTAK,
-            ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
-            ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER);
+            ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
 
         ProsessType prosessType = prosessinstans.getType();
         if (!aksepterteProsesstyper.contains(prosessType)) {
@@ -91,23 +90,19 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
             return;
         }
 
-        if (prosessType == ProsessType.IVERKSETT_VEDTAK ||
-            prosessType == ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE) {
-            Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
-            if (lovvalgsperioder.isEmpty()) {
-                String feilmelding = "Lovvalgsperiode mangler for behandlingsresultat " + behandlingsresultat.getId();
-                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
-                return;
-            }
-        }
-
-        if (prosessType == ProsessType.IVERKSETT_VEDTAK ||
-            prosessType == ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER) {
+        if (prosessType == ProsessType.IVERKSETT_VEDTAK) {
             String behandlingsResultatType = prosessinstans.getData(BEHANDLINGSRESULTATTYPE);
             if (behandlingsResultatType == null) {
                 håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "behandlingsResultatType er ikke oppgitt.", null);
                 return;
             }
+        }
+
+        Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
+        if (lovvalgsperioder.isEmpty()) {
+            String feilmelding = "Lovvalgsperiode mangler for behandlingsresultat " + behandlingsresultat.getId();
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
+            return;
         }
 
         prosessinstans.setSteg(IV_OPPDATER_RESULTAT);

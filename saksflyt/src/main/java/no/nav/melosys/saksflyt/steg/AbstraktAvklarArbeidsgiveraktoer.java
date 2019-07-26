@@ -20,11 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstraktAvklarArbeidsgiveraktoer extends AbstraktStegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(AbstraktAvklarArbeidsgiveraktoer.class);
 
     private final AktoerService aktoerService;
-
     private final AvklarteVirksomheterService avklarteVirksomheterSystemService;
     private final BehandlingRepository behandlingRepository;
 
@@ -36,7 +34,7 @@ public abstract class AbstraktAvklarArbeidsgiveraktoer extends AbstraktStegBehan
         this.behandlingRepository = behandlingRepository;
     }
 
-    Function<OrganisasjonDokument, Adresse> ingenAdresse = org -> null;
+    private static final Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
@@ -45,7 +43,7 @@ public abstract class AbstraktAvklarArbeidsgiveraktoer extends AbstraktStegBehan
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
 
-        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterSystemService.hentArbeidsgivere(behandling, ingenAdresse);
+        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterSystemService.hentArbeidsgivere(behandling, INGEN_ADRESSE);
         List<String> norskeOrgnumre = avklarteNorskeArbeidsgivere.stream()
             .map(avklartVirksomhet -> avklartVirksomhet.orgnr)
             .collect(Collectors.toList());

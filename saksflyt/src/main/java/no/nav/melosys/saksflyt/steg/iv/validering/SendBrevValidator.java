@@ -32,7 +32,8 @@ public enum SendBrevValidator {
      * <li>Lovvalgbestemmelsen er 12.1, 12.2 eller 16.1</li>
      */
     public static boolean avslagsbrevSkalSendes(Behandlingsresultattyper behandlingsresultatType, Lovvalgsperiode lovvalgsperiode) {
-        return behandlingsresultatType == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        return (behandlingsresultatType == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            || behandlingsresultatType == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
             && lovvalgsperiode.getInnvilgelsesresultat().equals(InnvilgelsesResultat.AVSLAATT)
             && lovvalgsperiode.getLovvalgsland() != Landkoder.NO
             && erGyldigBestemmelse(lovvalgsperiode.getBestemmelse());

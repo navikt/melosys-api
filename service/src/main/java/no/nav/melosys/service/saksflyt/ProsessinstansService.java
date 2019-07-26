@@ -26,7 +26,6 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
 @Service
 public class ProsessinstansService {
-
     private static Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
 
     private final ProsessinstansRepository prosessinstansRepo;
@@ -121,11 +120,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setSteg(ProsessSteg.IV_VALIDERING);
-        if (behandlingsresultatType == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
-            prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER);
-        } else {
-            prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
-        }
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
         prosessinstans.setBehandling(behandling);
 

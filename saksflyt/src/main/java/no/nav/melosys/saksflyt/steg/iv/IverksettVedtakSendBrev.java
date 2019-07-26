@@ -8,6 +8,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -34,7 +35,7 @@ import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
 
 
 /**
- * Sende ulike brev basert på lovvalgsbestemmelse.
+ * Sender ulike brev basert på behandlingsresultat og lovvalgsbestemmelse.
  * <p>
  * Transisjoner:
  * ProsessType.IVERKSETT_VEDTAK
@@ -42,7 +43,6 @@ import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
  */
 @Component
 public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(IverksettVedtakSendBrev.class);
 
     private final BrevBestiller brevBestiller;
@@ -82,28 +82,20 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
         }
 
-        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        Fagsak fagsak = behandling.getFagsak();
-
-        ProsessType prosessType = prosessinstans.getType();
-        if (prosessType == ProsessType.IVERKSETT_VEDTAK_AVSLAG_MANGLENDE_OPPLYSNINGER) {
-            sendAvslagsbrevManglendeOpplysninger(behandling, saksbehandler, fagsak);
-            prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
-            return;
-        }
-
         Behandlingsresultat resultat = behandlingsResultatRepo.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat " + behandling.getId()));
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode(resultat.getLovvalgsperioder());
         log.info("Behandler lovvalgsperiode: {}", lovvalgsperiode);
 
+        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+
         if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-            sendAvslagsbrev(behandling, saksbehandler, fagsak);
+            sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
         } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-            sendInnvilgelsesbrev(prosessinstans, behandling, saksbehandler, fagsak);
+            sendInnvilgelsesbrev(prosessinstans, behandling, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
@@ -114,25 +106,27 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         }
     }
 
-    private void sendAvslagsbrevManglendeOpplysninger(Behandling behandling, String saksbehandler, Fagsak fagsak) throws FunksjonellException, TekniskException {
-        brevBestiller.bestill(AVSLAG_MANGLENDE_OPPLYSNINGER, saksbehandler, Mottaker.av(BRUKER), behandling);
-        if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-            brevBestiller.bestill(AVSLAG_MANGLENDE_OPPLYSNINGER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+    private void sendAvslagsbrev(Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String saksbehandler)
+        throws FunksjonellException, TekniskException {
+        Produserbaredokumenter avslagType = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
+            ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
+
+        brevBestiller.bestill(avslagType, saksbehandler, Mottaker.av(BRUKER), behandling);
+
+        if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)) {
+            if (avslagType == AVSLAG_MANGLENDE_OPPLYSNINGER) {
+                brevBestiller.bestill(AVSLAG_MANGLENDE_OPPLYSNINGER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+            } else {
+                brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+            }
         }
+
+        brevBestiller.bestill(avslagType, saksbehandler, FastMottaker.av(HELFO), behandling);
+        brevBestiller.bestill(avslagType, saksbehandler, FastMottaker.av(SKATT), behandling);
     }
 
-    private void sendAvslagsbrev(Behandling behandling, String saksbehandler, Fagsak fagsak) throws FunksjonellException, TekniskException {
-        brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, Mottaker.av(BRUKER), behandling);
-
-        if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-            brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
-        }
-
-        brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(HELFO), behandling);
-        brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(SKATT), behandling);
-    }
-
-    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, String saksbehandler, Fagsak fagsak) throws FunksjonellException, TekniskException {
+    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, String saksbehandler)
+        throws FunksjonellException, TekniskException {
         Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
         String begrunnelseKode = null;
         if (endretPeriodeBegrunnelseKode != null) {
@@ -148,6 +142,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         Brevbestilling innvilgelseSkatt = innvilgelseBuilder.medMottaker(FastMottaker.av(SKATT)).build();
         brevBestiller.bestill(innvilgelseSkatt);
 
+        Fagsak fagsak = behandling.getFagsak();
         if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
             brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
         }

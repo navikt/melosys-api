@@ -6,12 +6,16 @@ import java.util.List;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.steg.iv.AvklarArbeidsgiver;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import org.junit.Before;
@@ -21,38 +25,33 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AvklarArbeidsgiveraktoerTest {
-
+public class AvklarArbeidsgiverTest {
     @Mock
     AktoerRepository aktoerRepository;
-
     @Mock
     BehandlingRepository behandlingRepository;
-
+    @Mock
+    BehandlingsresultatService behandlingsresultatService;
     @Mock
     Behandling behandling;
-
     @Mock
     AvklarteVirksomheterSystemService avklarteVirksomheterService;
 
     private AvklarArbeidsgiver steg;
-
     private Prosessinstans p;
-
-    AvklartVirksomhet avklartVirksomhet;
-    Fagsak fagsak;
+    private AvklartVirksomhet avklartVirksomhet;
+    private Fagsak fagsak;
+    private Behandlingsresultat behandlingsresultat;
+    private Lovvalgsperiode lovvalgsperiode;
 
     @Before
-    public void setUp() {
-
+    public void setUp() throws IkkeFunnetException {
         AktoerService aktoerService = new AktoerService(aktoerRepository);
-        steg = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingRepository);
+        steg = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingRepository, behandlingsresultatService);
 
         p = new Prosessinstans();
         p.setBehandling(behandling);
@@ -62,6 +61,14 @@ public class AvklarArbeidsgiveraktoerTest {
         fagsak.setSaksnummer("saksnr");
         when(behandling.getFagsak()).thenReturn(fagsak);
         when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         avklartVirksomhet =
             new AvklartVirksomhet("Test", "123456789", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
@@ -86,15 +93,23 @@ public class AvklarArbeidsgiveraktoerTest {
     @Test
     public void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() throws FunksjonellException, TekniskException {
         steg.utfør(p);
-
         verify(aktoerRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
-        verify(aktoerRepository, times(0)).save(any());
+        verify(aktoerRepository, never()).save(any());
     }
 
     @Test
-    public void utfør_iverksettVedtakSjekkSteg_forventIvOppdaterMedl() throws Exception {
+    public void utfør_iverksettVedtakType_forventStegIvOppdaterMedl() throws Exception {
         when(avklarteVirksomheterService.hentArbeidsgivere(any(), any())).thenReturn(Collections.singletonList(avklartVirksomhet));
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_MEDL);
+    }
+
+    @Test
+    public void utfør_avslagManglendeOpplysningerType_forventStegIvSendBrev() throws Exception {
+        when(avklarteVirksomheterService.hentArbeidsgivere(any(), any())).thenReturn(Collections.singletonList(avklartVirksomhet));
+        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        steg.utfør(p);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
     }
 }
