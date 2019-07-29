@@ -122,6 +122,19 @@ public class AnmodningsperiodeSvar {
         return Objects.hash(id, registrertDato, begrunnelseFritekst, innvilgetFom, innvilgetTom);
     }
 
+    @Override
+    public String toString() {
+        return "AnmodningsperiodeSvar{" +
+            "id=" + id +
+            ", anmodningsperiode=" + anmodningsperiode +
+            ", anmodningsperiodeSvarType=" + anmodningsperiodeSvarType +
+            ", registrertDato=" + registrertDato +
+            ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
+            ", innvilgetFom=" + innvilgetFom +
+            ", innvilgetTom=" + innvilgetTom +
+            '}';
+    }
+
     public boolean erGyldigDelvisInnvilgelse() {
         return AnmodningsperiodeSvarType.DELVIS_INNVILGELSE == getAnmodningsperiodeSvarType()
             && (getInnvilgetFom() != null || getInnvilgetTom() != null || StringUtils.isNotEmpty(getBegrunnelseFritekst()));

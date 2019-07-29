@@ -61,20 +61,19 @@ public class OppgaveService {
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
-    public void ferdigstillOppgaverforAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
-        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
-        for (Oppgave oppgave : oppgaverFraDomain) {
-            gsakFasade.ferdigstillOppgave(oppgave.getOppgaveId());
-        }
-    }
-
     public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
         log.info("Ferdigstiller oppgave {}", oppgaveID);
         gsakFasade.ferdigstillOppgave(oppgaveID);
     }
 
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
+        Oppgave oppgave;
+        try {
+            oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
+        } catch (IkkeFunnetException e) {
+            log.debug("Sak {} har ingen oppgaver å ferdigstille.", fagSaksnummer);
+            return;
+        }
         ferdigstillOppgave(oppgave.getOppgaveId());
     }
 

@@ -4,10 +4,12 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vedtak.VedtakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,20 +24,21 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterBehandlingTest {
-
     private OppdaterBehandling oppdaterBehandling;
 
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private VedtakService vedtakService;
 
     private Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
-        oppdaterBehandling = new OppdaterBehandling(anmodningsperiodeService, behandlingService);
+        oppdaterBehandling = new OppdaterBehandling(anmodningsperiodeService, behandlingService, vedtakService);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
     }
 
@@ -60,7 +63,7 @@ public class OppdaterBehandlingTest {
     }
 
     @Test
-    public void utfør_anmodningsperiodeInnvilget_statusIverksettVedtak() throws Exception {
+    public void utfør_anmodningsperiodeInnvilget_fattVedtak() throws Exception {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.INNVILGELSE);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
 
@@ -74,9 +77,8 @@ public class OppdaterBehandlingTest {
 
         oppdaterBehandling.utfør(prosessinstans);
 
-        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.IVERKSETTER_VEDTAK));
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
+        verify(vedtakService).fattVedtak(eq(behandling.getId()), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 
     @Test

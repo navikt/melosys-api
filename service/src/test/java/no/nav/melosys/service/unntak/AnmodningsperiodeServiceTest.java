@@ -20,12 +20,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,9 +38,6 @@ public class AnmodningsperiodeServiceTest {
     @Mock
     private AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
     private AnmodningsperiodeService anmodningsperiodeService;
-
-    @Captor
-    private ArgumentCaptor<AnmodningsperiodeSvar> svarCaptor;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -80,7 +76,7 @@ public class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    public void lagreAnmodningsperioder_SvarErRegistrert_forventFunksjonellException() throws FunksjonellException {
+    public void lagreAnmodningsperioder_svarErRegistrert_forventFunksjonellException() throws FunksjonellException {
         long behandlingID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, new AnmodningsperiodeSvar());
@@ -91,21 +87,18 @@ public class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    public void lagreAnmodningsperiodeSvar_svarErInnvilgelse_forventAnmodningsperiodeSvar() throws FunksjonellException {
+    public void lagreAnmodningsperiodeSvar_svarErInnvilgelse_lagrerAnmodningsperiodeSvar() throws FunksjonellException {
         long anmodningsperiodeID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, new AnmodningsperiodeSvar());
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.INNVILGELSE);
-
-
         when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
-        when(anmodningsperiodeSvarRepository.save(svarCaptor.capture())).thenReturn(svar);
 
-        AnmodningsperiodeSvar resultat = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
+        anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
 
-        assertThat(resultat).isEqualTo(svar);
+        verify(anmodningsperiodeSvarRepository).save(any(AnmodningsperiodeSvar.class));
     }
 
     @Test
