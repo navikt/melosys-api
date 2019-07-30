@@ -39,11 +39,11 @@ public class VedtakTjeneste extends RestTjeneste {
     @Path("{behandlingID}")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public Response fattVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("fattVedtakDto") FattVedtakDto fattVedtakDto) throws FunksjonellException, TekniskException {
-        if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultattype() == null) {
+        if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null) {
             throw new BadRequestException();
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultattype());
+        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode());
         return Response.ok().build();
     }
 

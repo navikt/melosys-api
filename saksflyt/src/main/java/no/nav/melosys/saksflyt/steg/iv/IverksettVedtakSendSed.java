@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import static no.nav.melosys.saksflyt.steg.iv.validering.SendBrevValidator.validerLovvalgsperiode;
-import static no.nav.melosys.saksflyt.steg.iv.validering.SendSedValidator.sedSkalSendes;
 
 
 @Component
@@ -45,6 +43,6 @@ public class IverksettVedtakSendSed extends AbstraktSendSed {
 
     @Override
     protected boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
-        return sedSkalSendes(behandlingsresultat.getType(), validerLovvalgsperiode(behandlingsresultat.getLovvalgsperioder()));
+        return behandlingsresultat.sedSkalSendes();
     }
 }

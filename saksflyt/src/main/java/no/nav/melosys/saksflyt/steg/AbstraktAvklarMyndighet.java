@@ -6,7 +6,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.saksflyt.steg.iv.validering.SendBrevValidator;
 import no.nav.melosys.service.aktoer.AvklarMyndighetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +34,8 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithSaksbehandlingById(behandlingID)
             .orElseThrow(() -> new TekniskException("Behandlingsresultat " + behandlingID + " finnes ikke."));
 
-        boolean innvilgelseEllerAnmodningUnntakSkalSendes = prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK ||
-            SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultat.getType(), behandlingsresultat.getLovvalgsperioder().iterator().next());
+        boolean innvilgelseEllerAnmodningUnntakSkalSendes = prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK
+            || behandlingsresultat.erInnvilgelse();
 
         if (innvilgelseEllerAnmodningUnntakSkalSendes) {
 

@@ -39,7 +39,7 @@ public class AnmodningUnntakTjeneste extends RestTjeneste {
     @Path("{behandlingID}")
     @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
     public Response anmodningOmUnntak(@PathParam("behandlingID") long behandlingID, @ApiParam("fattVedtakDto") FattVedtakDto fattVedtakDto) throws FunksjonellException, TekniskException {
-        if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultattype() != Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
+        if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() != Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
             throw new BadRequestException();
         }
         tilgangService.sjekkTilgang(behandlingID);

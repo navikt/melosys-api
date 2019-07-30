@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
@@ -36,13 +37,14 @@ public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
     public void anmodningOmUnntak_fungerer() throws Exception {
         FattVedtakDto fattVedtakDto = new FattVedtakDto();
         long behandlingID = 3;
-        fattVedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
         anmodningUnntakTjeneste.anmodningOmUnntak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
         verify(anmodningUnntakService).anmodningOmUnntak(behandlingID);
 
-        valider(fattVedtakDto);
+        String json = new ObjectMapper().writeValueAsString(fattVedtakDto);
+        valider(json);
     }
 }

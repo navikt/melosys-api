@@ -12,14 +12,14 @@ import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.brev.FastMottaker;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,6 @@ import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
-import static no.nav.melosys.saksflyt.steg.iv.validering.SendBrevValidator.*;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.HELFO;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
 
@@ -46,18 +45,18 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(IverksettVedtakSendBrev.class);
 
     private final BrevBestiller brevBestiller;
-    private final BehandlingRepository behandlingRepository;
-    private final BehandlingsresultatRepository behandlingsResultatRepo;
+    private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Autowired
     public IverksettVedtakSendBrev(BrevBestiller brevBestiller,
-                                   BehandlingRepository behandlingRepository,
-                                   BehandlingsresultatRepository behandlingsResultatRepo,
+                                   BehandlingService behandlingService,
+                                   BehandlingsresultatService behandlingsresultatService,
                                    UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.brevBestiller = brevBestiller;
-        this.behandlingRepository = behandlingRepository;
-        this.behandlingsResultatRepo = behandlingsResultatRepo;
+        this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
 
         log.info("IverksetteVedtakSendBrev initialisert");
@@ -77,24 +76,16 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
         // Henter ut behandling med saksopplysninger
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
-        if (behandling == null) {
-            throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
-        }
-
-        Behandlingsresultat resultat = behandlingsResultatRepo.findById(behandling.getId())
-            .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat " + behandling.getId()));
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
-        Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode(resultat.getLovvalgsperioder());
-        log.info("Behandler lovvalgsperiode: {}", lovvalgsperiode);
-
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
-        if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
+        if (resultat.erAvslag()) {
             sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
-        } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
+        } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(prosessinstans, behandling, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
