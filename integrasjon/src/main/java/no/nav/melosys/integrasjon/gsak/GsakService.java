@@ -131,7 +131,7 @@ public class GsakService implements GsakFasade {
         if (oppgave.erJournalFøring()) {
             oppgaveDto.setFristFerdigstillelse(idag.plusDays(FRIST_JFR_DAGER));
         } else if (oppgave.erBehandling()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_BEH_UKER));
+            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_BEH_UKER)); // TODO: frist sed
         } else if (oppgave.erVurderDokument()) {
             oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_VUR_DAGER));
         } else {
@@ -244,7 +244,7 @@ public class GsakService implements GsakFasade {
     public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode()})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 

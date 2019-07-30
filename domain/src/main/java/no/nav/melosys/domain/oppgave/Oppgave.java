@@ -178,18 +178,23 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.VUR;
     }
 
+    public boolean erSed() {
+        return oppgavetype == Oppgavetyper.BEH_SED;
+    }
+
     public static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
         switch (behandlingstype) {
             case SOEKNAD:
                 return Oppgavetyper.BEH_SAK_MK;
             case ENDRET_PERIODE:
                 return Oppgavetyper.VUR;
+            case UTL_MYND_UTPEKT_SEG_SELV:
+            case REGISTRERING_UNNTAK_NORSK_TRYGD:
+                return Oppgavetyper.BEH_SED;
             case ANKE:
             case KLAGE:
             case UTL_MYND_UTPEKT_NORGE:
             case NY_VURDERING:
-            case UTL_MYND_UTPEKT_SEG_SELV:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD:
             case ANMODNING_OM_UNNTAK_HOVEDREGEL:
             case ØVRIGE_SED:
             default:

@@ -60,8 +60,8 @@ public class OppgaveTjeneste extends RestTjeneste {
             PlukketOppgaveDto dto = new PlukketOppgaveDto();
 
             dto.setOppgaveID(oppgave.getOppgaveId());
-            if (oppgave.erBehandling()) {
-                dto.setOppgavetype(Oppgavetyper.BEH_SAK_MK.getKode());
+            if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSed()) {
+                dto.setOppgavetype(oppgave.getOppgavetype().getKode());
                 dto.setSaksnummer(oppgave.getSaksnummer());
             } else if (oppgave.erJournalFøring()) {
                 dto.setOppgavetype(Oppgavetyper.JFR.getKode());
