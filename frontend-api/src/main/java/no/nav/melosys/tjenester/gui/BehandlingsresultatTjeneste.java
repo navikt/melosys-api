@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = { "behandlingsresultat" })
-@Path("/behandlingsresultat")
+@Path("/behandlingsresultater")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsresultatTjeneste extends RestTjeneste {

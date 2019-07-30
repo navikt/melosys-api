@@ -10,6 +10,9 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
+import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
+import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1;
+
 @Entity
 @Table(name = "lovvalg_periode")
 public class Lovvalgsperiode implements ErPeriode {
@@ -204,5 +207,10 @@ public class Lovvalgsperiode implements ErPeriode {
             ", dekning=" + dekning +
             ", medlPeriodeID=" + medlPeriodeID +
             '}';
+    }
+
+    public boolean harGyldigBestemmelse() {
+        return bestemmelse == FO_883_2004_ART11_3A || bestemmelse == FO_883_2004_ART11_3B || bestemmelse == FO_883_2004_ART11_4_2
+            || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1;
     }
 }

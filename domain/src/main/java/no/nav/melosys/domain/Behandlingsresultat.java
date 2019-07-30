@@ -4,12 +4,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
@@ -19,7 +17,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "behandlingsresultat")
 @EntityListeners(AuditingEntityListener.class)
 public class Behandlingsresultat extends RegistreringsInfo {
-
     // Populeres av Hibernate med behandling.id
     @Id
     private Long id;
@@ -170,12 +167,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.behandlingsresultatBegrunnelser = behandlingsresultatBegrunnelser;
     }
 
-    public Optional<Avklartefakta> finnAvklartFaktum(Avklartefaktatype type) {
-        return getAvklartefakta().stream()
-            .filter(f -> f.getType() == type && f.getFakta().equals("TRUE"))
-            .findFirst();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -194,4 +185,42 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return Objects.hash(type, behandling);
     }
 
+    public boolean erAvslag() {
+        if (type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+            return true;
+        }
+        Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode();
+        return type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
+            && lovvalgsperiode.getLovvalgsland() != Landkoder.NO
+            && lovvalgsperiode.harGyldigBestemmelse();
+    }
+
+    public boolean erInnvilgelse() {
+        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
+            Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode();
+            return lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
+                && lovvalgsperiode.getLovvalgsland() == Landkoder.NO
+                && lovvalgsperiode.harGyldigBestemmelse();
+        } else {
+            return false;
+        }
+    }
+
+    // Medl skal ikke oppdateres ved avslag.
+    public boolean medlOppdateres() {
+        return !erAvslag();
+    }
+
+    public boolean sedSkalSendes() {
+        return erInnvilgelse();
+    }
+
+    private Lovvalgsperiode validerLovvalgsperiode() {
+        if (lovvalgsperioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en"
+                + " lovvalgsperiode er ikke støttet i første leveranse");
+        }
+        return lovvalgsperioder.iterator().next();
+    }
 }

@@ -2,15 +2,16 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktAvklarArbeidsgiveraktoer;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.iv.validering.SendBrevValidator;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.AktoerService;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.*;
 import static no.nav.melosys.domain.ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE;
-import static no.nav.melosys.saksflyt.steg.iv.validering.SendBrevValidator.validerLovvalgsperiode;
 
 /**
  * Oppdaterer aktør med avklart arbeidsgiver i saken.
@@ -65,7 +65,7 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
         }
 
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
-        if (medlOppdateres(resultat.getType(), validerLovvalgsperiode(resultat.getLovvalgsperioder()))) {
+        if (resultat.medlOppdateres()) {
             prosessinstans.setSteg(IV_OPPDATER_MEDL);
         } else {
             prosessinstans.setSteg(IV_SEND_BREV);
@@ -75,10 +75,5 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
     // Ved forkortet periode har allerede arbeidsgiver blitt avklart
     private static boolean arbeidsgiverAvklares(ProsessType prosessType) {
         return prosessType != IVERKSETT_VEDTAK_FORKORT_PERIODE;
-    }
-
-    // Medl skal ikke oppdateres ved avslag. Hopper rett til utsendelse av brev
-    private static boolean medlOppdateres(Behandlingsresultattyper behandlingsresultatType, Lovvalgsperiode lovvalgsperiode) {
-        return !SendBrevValidator.avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode);
     }
 }

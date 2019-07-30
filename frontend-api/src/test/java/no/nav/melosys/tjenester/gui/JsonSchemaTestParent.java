@@ -63,14 +63,18 @@ public class JsonSchemaTestParent {
         return schemaNavn;
     }
 
+    protected static EasyRandomParameters defaultEasyRandomParameters() {
+        return new EasyRandomParameters()
+            .collectionSizeRange(1, 4)
+            .overrideDefaultInitialization(true)
+            .stringLengthRange(2, 10)
+            .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
+            .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9));
+    }
+
     protected static EasyRandom defaultEasyRandom() {
         if (easyRandom == null) {
-            easyRandom = new EasyRandom(new EasyRandomParameters()
-                .collectionSizeRange(1, 4)
-                .overrideDefaultInitialization(true)
-                .stringLengthRange(2, 10)
-                .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
-                .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9)));
+            easyRandom = new EasyRandom(defaultEasyRandomParameters());
         }
         return easyRandom;
     }
@@ -117,6 +121,10 @@ public class JsonSchemaTestParent {
 
     protected void valider(Object o) throws IOException {
         valider(o, getLogger());
+    }
+
+    protected void valider(String s) throws IOException {
+        valider(s, getLogger());
     }
 
     protected void valider(Object o, Logger log) throws IOException {

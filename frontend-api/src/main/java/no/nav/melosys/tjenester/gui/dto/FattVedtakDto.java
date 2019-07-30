@@ -3,14 +3,13 @@ package no.nav.melosys.tjenester.gui.dto;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 
 public class FattVedtakDto {
+    private Behandlingsresultattyper behandlingsresultatTypeKode;
 
-    private Behandlingsresultattyper behandlingsresultattype;
-
-    public Behandlingsresultattyper getBehandlingsresultattype() {
-        return behandlingsresultattype;
+    public Behandlingsresultattyper getBehandlingsresultatTypeKode() {
+        return behandlingsresultatTypeKode;
     }
 
-    public void setBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype) {
-        this.behandlingsresultattype = behandlingsresultattype;
+    public void setBehandlingsresultatTypeKode(Behandlingsresultattyper behandlingsresultatTypeKode) {
+        this.behandlingsresultatTypeKode = behandlingsresultatTypeKode;
     }
 }
