@@ -18,10 +18,10 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.oppgave.dto.*;
+import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,25 +33,24 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
 @Service
 public class OppgaveService {
-
     private static final Logger log = LoggerFactory.getLogger(OppgaveService.class);
 
     private final GsakFasade gsakFasade;
-    private final FagsakRepository fagsakRepository;
-    private final BehandlingRepository behandlingRepository;
+    private final FagsakService fagsakService;
+    private final BehandlingService behandlingService;
     private final TpsFasade tpsFasade;
     private final SaksopplysningerService saksopplysningerService;
     private static final String UKJENT = "UKJENT";
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
-                          FagsakRepository fagsakRepository,
-                          BehandlingRepository behandlingRepository,
+                          FagsakService fagsakService,
+                          BehandlingService behandlingService,
                           TpsFasade tpsFasade,
                           SaksopplysningerService saksopplysningerService) {
         this.gsakFasade = gsakFasade;
-        this.fagsakRepository = fagsakRepository;
-        this.behandlingRepository = behandlingRepository;
+        this.fagsakService = fagsakService;
+        this.behandlingService = behandlingService;
         this.tpsFasade = tpsFasade;
         this.saksopplysningerService = saksopplysningerService;
     }
@@ -97,9 +96,8 @@ public class OppgaveService {
         return gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
     }
 
-    public Long hentAktivBehandlingId(String saksnummer) throws TekniskException {
-        Fagsak fagsak = Optional.ofNullable(fagsakRepository.findBySaksnummer(saksnummer))
-            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " ikke funnet"));
+    public Long hentAktivBehandlingId(String saksnummer) throws IkkeFunnetException, TekniskException {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         return Optional.ofNullable(fagsak.getAktivBehandling())
             .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"))
             .getId();
@@ -132,11 +130,7 @@ public class OppgaveService {
             }
         } else if (oppgave.erBehandling() || oppgave.erVurderDokument()) {
             BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
-            Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
-            if (fagsak == null) {
-                throw new TekniskException("Fagsak med saksnummer " + oppgave.getSaksnummer() + " ikke funnet!");
-            }
-
+            Fagsak fagsak = fagsakService.hentFagsak(oppgave.getSaksnummer());
             behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
             behOppgaveDto.setSakstype(fagsak.getType());
 
@@ -145,8 +139,7 @@ public class OppgaveService {
                 throw new TekniskException("Det finnes ingen aktiv behandling for " + fagsak.getSaksnummer() + ".");
             }
             // Henter saksopplysninger
-            behandling = behandlingRepository.findWithSaksopplysningerById(behandling.getId());
-
+            behandling = behandlingService.hentBehandling(behandling.getId());
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
             hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {

@@ -76,11 +76,14 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
 
     private AnmodningsperiodeSvarType hentSvarTypeFraBeslutning(final SvarAnmodningUnntak.Beslutning beslutning) {
         switch (beslutning) {
-            case INNVILGELSE: return AnmodningsperiodeSvarType.INNVILGELSE;
-            case DELVIS_INNVILGELSE: return AnmodningsperiodeSvarType.DELVIS_INNVILGELSE;
-            case AVSLAG: return AnmodningsperiodeSvarType.AVSLAG;
+            case INNVILGELSE:
+                return AnmodningsperiodeSvarType.INNVILGELSE;
+            case DELVIS_INNVILGELSE:
+                return AnmodningsperiodeSvarType.DELVIS_INNVILGELSE;
+            case AVSLAG:
+                return AnmodningsperiodeSvarType.AVSLAG;
+            default:
+                throw new IllegalArgumentException("Ukjent beslutning-kode mottatt: " + beslutning);
         }
-
-        throw new IllegalArgumentException("Ukjent beslutning-kode mottatt: " + beslutning);
     }
 }
