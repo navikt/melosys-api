@@ -1,11 +1,13 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.math.BigInteger;
+import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import no.nav.dok.melosysbrev._000108.*;
-import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
-import no.nav.dok.melosysbrev._000108.ObjectFactory;
+import no.nav.dok.melosysbrev._000083.*;
+import no.nav.dok.melosysbrev._000083.LovvalgsperiodeType;
+import no.nav.dok.melosysbrev._000083.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
@@ -20,11 +22,11 @@ import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
 
-public final class InnvilgelsesbrevMapper implements BrevDataMapper {
+public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
-    static final String JA = "true";
+    private static final String JA = "true";
 
-    private static final String XSD_LOCATION = "melosysbrev/melosys_000108.xsd";
+    private static final String XSD_LOCATION = "melosysbrev/melosys_000083.xsd";
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException, TekniskException {
@@ -46,18 +48,26 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
         AvklartVirksomhet avklartVirksomhet = brevdata.norskeVirksomheter.iterator().next();
         fag.setArbeidsgiver(avklartVirksomhet.navn);
+
+        fag.setArbeidsgiverListe(mapArbeidsgiverListe(brevdata.norskeVirksomheter));
+        fag.setAntallArbeidsgivere(BigInteger.valueOf(brevdata.norskeVirksomheter.size()));
+
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(avklartVirksomhet.yrkesaktivitet.getKode()));
 
         fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
 
-        fag.setArbeidsland(brevdata.arbeidsland);
-        fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
-
         fag.setFlaggland(brevdata.arbeidsland);
+
+        fag.setArbeidsland(brevdata.arbeidsland);
+        fag.setArbeidslandListe(mapArbeidslandListe(brevdata.alleArbeidsland));
+        fag.setAntallArbeidsland(BigInteger.valueOf(brevdata.alleArbeidsland.size()));
+
+        fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
 
         if (brevdata.fartsområdeErInnenriks.isPresent()) {
             fag.setArbeidPåTerritorialfarvann(JA);
         }
+
         if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
             fag.setArbeidPåSkip(JA);
         }
@@ -80,6 +90,26 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         }
 
         return fag;
+    }
+
+    private ArbeidslandListeType mapArbeidslandListe(List<String> alleArbeidsland) {
+        ArbeidslandListeType arbeidslandListeType = new ArbeidslandListeType();
+        for (String arbeidsland : alleArbeidsland) {
+            ArbeidslandType arbeidslandType = new ArbeidslandType();
+            arbeidslandType.setArbeidsland(arbeidsland);
+            arbeidslandListeType.getLand().add(arbeidslandType);
+        }
+        return arbeidslandListeType;
+    }
+
+    private ArbeidsgiverListeType mapArbeidsgiverListe(List<AvklartVirksomhet> norskeVirksomheter) {
+        ArbeidsgiverListeType arbeidsgiverListeType = new ArbeidsgiverListeType();
+        for (AvklartVirksomhet avklartVirksomhet : norskeVirksomheter) {
+            ArbeidsgiverType arbeidsgiverType = new ArbeidsgiverType();
+            arbeidsgiverType.setArbeidsgiver(avklartVirksomhet.navn);
+            arbeidsgiverListeType.getVirksomhet().add(arbeidsgiverType);
+        }
+        return arbeidsgiverListeType;
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {

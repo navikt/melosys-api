@@ -31,12 +31,12 @@ import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPerson
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-public class InnvilgelsesbrevMapperTest {
+public class InnvilgelsesbrevFlereLandMapperTest {
 
-    private final InnvilgelsesbrevMapper instans;
+    private final InnvilgelsesbrevFlereLandMapper instans;
 
-    public InnvilgelsesbrevMapperTest() {
-        instans = new InnvilgelsesbrevMapper();
+    public InnvilgelsesbrevFlereLandMapperTest() {
+        instans = new InnvilgelsesbrevFlereLandMapper();
     }
 
     @Test
@@ -73,7 +73,7 @@ public class InnvilgelsesbrevMapperTest {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
         BrevDataA1 brevdataA1 = new BrevDataA1();
-        AvklartVirksomhet virksomhet = new AvklartVirksomhet("Virker ikke", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
+        AvklartVirksomhet virksomhet = new AvklartVirksomhet("Telenor", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevdataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet, virksomhet));
         brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
@@ -86,14 +86,11 @@ public class InnvilgelsesbrevMapperTest {
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.fartsområdeErInnenriks = Optional.of(true);
         brevdataInnvilgelse.norskeVirksomheter = brevdataA1.norskeVirksomheter;
-        brevdataInnvilgelse.arbeidsland = "Sverige";
+        brevdataInnvilgelse.alleArbeidsland = Arrays.asList("Sverige", "Danmark");
         brevdataInnvilgelse.trygdemyndighetsland = "Sverige";
 
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
-        // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
-        // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 
@@ -110,7 +107,8 @@ public class InnvilgelsesbrevMapperTest {
     private static Behandlingsresultat lagBehandlingsresultat() {
         Set<Avklartefakta> fakta = new HashSet<>(Arrays.asList(
                 lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789"),
-                lagAvklarteFakta(Avklartefaktatype.ARBEIDSLAND, "SE")));
+                lagAvklarteFakta(Avklartefaktatype.ARBEIDSLAND, "SE"),
+                lagAvklarteFakta(Avklartefaktatype.ARBEIDSLAND, "DK")));
         return lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()), fakta);
     }
 

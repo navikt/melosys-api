@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -39,6 +40,13 @@ public class LandvelgerService {
         Optional<Landkoder> arbeidslandOpt = avklartefaktaService.hentArbeidsland(behandling.getId());
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         return arbeidslandOpt.orElseGet(() -> hentSøknadslandkoder(søknad).get(0));
+    }
+
+    public Set<Landkoder> hentAlleArbeidsland(Behandling behandling) throws TekniskException {
+        Set<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleArbeidsland(behandling.getId());
+        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
+        return alleArbeidsland;
     }
 
     public Landkoder hentTrygdemyndighetsland(Behandling behandling) throws TekniskException {

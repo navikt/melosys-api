@@ -1,10 +1,13 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -44,7 +47,9 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
         this.behandling = behandling;
+        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
 
+        // Bruker skal ha A1 som vedlegg - Arbeidsgiver skal ikke
         BrevDataInnvilgelse brevdata;
         if (brevbyggerA1 != null) {
             brevdata = lagInnvilgelseBrevdataMedA1(behandling, saksbehandler);
@@ -53,13 +58,23 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
             brevdata = new BrevDataInnvilgelse(saksbehandler, brevbestillingDto);
         }
 
-        Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode();
-        brevdata.lovvalgsperiode = lovvalgsperiode;
-        brevdata.arbeidsland = landVelgerService.hentArbeidsland(behandling).getBeskrivelse();
+        brevdata.lovvalgsperiode = hentLovvalgsperiode();
+        brevdata.alleArbeidsland = landVelgerService.hentAlleArbeidsland(behandling).stream()
+            .map(Landkoder::getBeskrivelse)
+            .collect(Collectors.toList());
+
+        brevdata.arbeidsland = brevdata.alleArbeidsland.iterator().next();
+
         brevdata.trygdemyndighetsland = landVelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
+
+        brevdata.fartsområdeErInnenriks = søknad.maritimtArbeid.stream()
+            .map(ma -> ma.fartsomradeKode)
+            .findFirst()
+            .map(fo -> fo.equalsIgnoreCase(Fartsomraade.INNENRIKS.getKode()))
+            .filter(fo -> !fo);
 
         return brevdata;
     }

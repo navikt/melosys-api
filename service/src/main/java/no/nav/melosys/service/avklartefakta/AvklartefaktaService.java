@@ -7,7 +7,10 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -43,14 +46,21 @@ public class AvklartefaktaService {
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-    public Set<Avklartefakta> hentAlleAvklarteArbeidsland(long behandlingsid) {
-        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
+    public Set<Landkoder> hentAlleArbeidsland(long behandlingsid) {
+        Set<Avklartefakta> avklarteArbeidsland =
+            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
+
+        return avklarteArbeidsland.stream()
+            .map(af -> Landkoder.valueOf(af.getFakta()))
+            .collect(Collectors.toSet());
     }
 
-    public Optional<Landkoder> hentArbeidsland(long behandlingsid) {
-        return hentAlleAvklarteArbeidsland(behandlingsid).stream()
-            .map(af -> Landkoder.valueOf(af.getFakta()))
-            .findFirst();
+    public Optional<Landkoder> hentArbeidsland(long behandlingsid) throws TekniskException {
+        Set<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingsid);
+        if (alleArbeidsland.size() != 1) {
+            throw new TekniskException("Mer enn ett arbeidsland er registrert");
+        }
+        return alleArbeidsland.stream().findFirst();
     }
 
     public Optional<Landkoder> hentBostedland(long behandlingsid) {
