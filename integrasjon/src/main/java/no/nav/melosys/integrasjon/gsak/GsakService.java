@@ -38,9 +38,6 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 public class GsakService implements GsakFasade {
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
-    private static final int FRIST_JFR_DAGER = 1;
-    private static final int FRIST_VUR_DAGER = 1;
-    private static final int FRIST_BEH_UKER = 12;
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
@@ -131,7 +128,7 @@ public class GsakService implements GsakFasade {
         if (oppgave.getBehandlingstema() != null) {
             oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode());
         }
-        oppgaveDto.setFristFerdigstillelse(hentFristForOppgave(oppgave));
+        oppgaveDto.setFristFerdigstillelse(oppgave.lagFristFerdigstillelse(idag));
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
         oppgaveDto.setPrioritet(PrioritetType.NORM.toString());
@@ -281,19 +278,6 @@ public class GsakService implements GsakFasade {
             case UTL_MYND_UTPEKT_SEG_SELV: return "ae0113";
             case REGISTRERING_UNNTAK_NORSK_TRYGD: return "ae0111"; //TODO: avklar om korrekt kode eller trenger ny
             default: throw new IllegalArgumentException(this + " er ikke implementert i felleskodeverk.");
-        }
-    }
-
-    private static LocalDate hentFristForOppgave(Oppgave oppgave) throws FunksjonellException {
-        LocalDate idag = LocalDate.now();
-        if (oppgave.erJournalFøring()) {
-            return idag.plusDays(FRIST_JFR_DAGER);
-        } else if (oppgave.erBehandling() || oppgave.erSedBehandling()) {
-            return idag.plusWeeks(FRIST_BEH_UKER);
-        } else if (oppgave.erVurderDokument()) {
-            return idag.plusWeeks(FRIST_VUR_DAGER);
-        } else {
-            throw new FunksjonellException("Type " + oppgave.getOppgavetype().getKode() + " støttes ikke.");
         }
     }
 }
