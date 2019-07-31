@@ -12,7 +12,11 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
+import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -39,12 +43,12 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, BrevDataInnvilgelse brevdata) {
+    private Fag mapFag(Behandling behandling, BrevDataInnvilgelse brevdata) throws TekniskException {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
-        AvklartVirksomhet avklartVirksomhet = brevdata.norskeVirksomheter.get(0);
+        AvklartVirksomhet avklartVirksomhet = brevdata.norskeVirksomheter.iterator().next();
         fag.setArbeidsgiver(avklartVirksomhet.navn);
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(avklartVirksomhet.yrkesaktivitet.getKode()));
 
@@ -53,11 +57,15 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setArbeidsland(brevdata.arbeidsland);
         fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
 
+        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         fag.setFlaggland(brevdata.arbeidsland);
-
-        if (brevdata.fartsområdeErInnenriks.isPresent()) {
-            fag.setArbeidPåTerritorialfarvann(JA);
+        if (!søknad.maritimtArbeid.isEmpty()) {
+            MaritimtArbeid maritimtArbeid = søknad.maritimtArbeid.iterator().next();
+            if (maritimtArbeid.fartsomradeKode == Fartsomraade.INNENRIKS.getKode().toUpperCase()) {
+                fag.setArbeidPåTerritorialfarvann(JA);
+            }
         }
+
         if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
             fag.setArbeidPåSkip(JA);
         }

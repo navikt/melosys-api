@@ -20,7 +20,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -29,7 +28,6 @@ import org.junit.Test;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class InnvilgelsesbrevFlereLandMapperTest {
 
@@ -48,17 +46,6 @@ public class InnvilgelsesbrevFlereLandMapperTest {
     public void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
                 Collections.singleton(lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789"))));
-    }
-
-    @Test
-    public void mapTilBrevXmlUtenArbeidslandISøknadGirUnntak() {
-        Behandling behandlingUtenSaksopplysninger = lagBehandling(lagFagsak(), Collections.emptySet());
-        Behandlingsresultat behandlingsresultatUtenAvklartArbeidsland = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789")));
-        Throwable unntak = catchThrowable(() -> testMapTilBrevXml(behandlingUtenSaksopplysninger,
-                behandlingsresultatUtenAvklartArbeidsland));
-        assertThat(unntak).isInstanceOf(TekniskException.class)
-            .hasMessageContaining("Finner ikke søknaddokument");
     }
 
     private void testMapTilBrevXml() throws Exception {

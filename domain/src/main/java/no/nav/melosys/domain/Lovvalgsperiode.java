@@ -24,7 +24,7 @@ public class Lovvalgsperiode implements ErPeriode {
     @ManyToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
-    
+
     @Column(name = "fom_dato", nullable = false, updatable = false)
     private LocalDate fom;
 
@@ -184,7 +184,7 @@ public class Lovvalgsperiode implements ErPeriode {
         return Objects.equals(this.behandlingsresultat, that.behandlingsresultat)
             && Objects.equals(this.fom, that.fom);
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(behandlingsresultat, fom);
@@ -211,6 +211,7 @@ public class Lovvalgsperiode implements ErPeriode {
 
     public boolean harGyldigBestemmelse() {
         return bestemmelse == FO_883_2004_ART11_3A || bestemmelse == FO_883_2004_ART11_3B || bestemmelse == FO_883_2004_ART11_4_2
-            || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1;
+            || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1
+            || bestemmelse == FO_883_2004_ART13_1A;
     }
 }

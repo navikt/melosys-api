@@ -86,7 +86,6 @@ public class InnvilgelsesbrevMapperTest {
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.fartsområdeErInnenriks = Optional.of(true);
         brevdataInnvilgelse.norskeVirksomheter = brevdataA1.norskeVirksomheter;
         brevdataInnvilgelse.arbeidsland = "Sverige";
         brevdataInnvilgelse.trygdemyndighetsland = "Sverige";

@@ -17,10 +17,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
-import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -94,7 +91,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
         when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.of(maritimType));
 
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
+        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
         assertThat(brevData.avklartMaritimType).isEqualTo(Maritimtyper.SOKKEL);
     }
@@ -103,7 +100,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
         when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.empty());
 
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
+        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
         assertThat(brevData.avklartMaritimType).isNull();
     }
 

@@ -5,10 +5,7 @@ import java.util.Map;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -28,6 +25,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.HELFO;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
@@ -86,7 +84,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
         } else if (resultat.erInnvilgelse()) {
-            sendInnvilgelsesbrev(prosessinstans, behandling, saksbehandler);
+            sendInnvilgelsesbrev(prosessinstans, behandling, resultat, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
@@ -116,7 +114,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         brevBestiller.bestill(avslagType, saksbehandler, FastMottaker.av(SKATT), behandling);
     }
 
-    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, String saksbehandler)
+    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, Behandlingsresultat resultat, String saksbehandler)
         throws FunksjonellException, TekniskException {
         Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
         String begrunnelseKode = null;
@@ -124,7 +122,10 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
         }
 
-        Brevbestilling.Builder innvilgelseBuilder = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
+        Produserbaredokumenter innvilgelseType = (erInnvilgelseFlereLand(resultat))
+            ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
+
+        Brevbestilling.Builder innvilgelseBuilder = new Brevbestilling.Builder().medDokumentType(innvilgelseType)
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode);
@@ -145,6 +146,15 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 .medBegrunnelseKode(begrunnelseKode).build();
             brevBestiller.bestill(A1_Myndighet);
         }
+    }
+
+    private boolean erInnvilgelseFlereLand(Behandlingsresultat resultat) {
+        LovvalgBestemmelse bestemmelse = resultat.hentValidertLovvalgsperiode().getBestemmelse();
+        return bestemmelse == FO_883_2004_ART13_1A
+            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1_B2 || bestemmelse == FO_883_2004_ART13_1_B3 || bestemmelse == FO_883_2004_ART13_1_B4
+            || bestemmelse == FO_883_2004_ART13_2A || bestemmelse == FO_883_2004_ART13_2B
+            || bestemmelse == FO_883_2004_ART13_3
+            || bestemmelse == FO_883_2004_ART13_4;
     }
 
     private boolean myndighetØnskerInnvilgelsesbrev(Landkoder landkode) throws TekniskException {

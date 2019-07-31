@@ -179,7 +179,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return Objects.equals(this.type, that.type)
             && Objects.equals(this.behandling, that.behandling);
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(type, behandling);
@@ -189,7 +189,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         if (type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return true;
         }
-        Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
         return type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
             && lovvalgsperiode.getLovvalgsland() != Landkoder.NO
@@ -198,7 +198,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean erInnvilgelse() {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
-            Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode();
+            Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
             return lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
                 && lovvalgsperiode.getLovvalgsland() == Landkoder.NO
                 && lovvalgsperiode.harGyldigBestemmelse();
@@ -216,7 +216,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return erInnvilgelse();
     }
 
-    private Lovvalgsperiode validerLovvalgsperiode() {
+    public Lovvalgsperiode hentValidertLovvalgsperiode() {
         if (lovvalgsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en"
                 + " lovvalgsperiode er ikke støttet i første leveranse");

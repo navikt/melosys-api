@@ -22,8 +22,8 @@ import no.nav.melosys.service.dokument.brev.*;
 public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygger implements BrevDataBygger {
     private final LandvelgerService landVelgerService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private BrevbestillingDto brevbestillingDto;
-    private BrevDataByggerA1 brevbyggerA1;
+    private final BrevbestillingDto brevbestillingDto;
+    private final BrevDataByggerA1 brevbyggerA1;
 
     public BrevDataByggerInnvilgelseFlereLand(AvklartefaktaService avklartefaktaService,
                                               AvklarteVirksomheterService avklarteVirksomheterService,
@@ -34,6 +34,7 @@ public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygg
         this.landVelgerService = landVelgerService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.brevbestillingDto = brevbestillingDto;
+        this.brevbyggerA1 = null;
     }
 
     public BrevDataByggerInnvilgelseFlereLand(AvklartefaktaService avklartefaktaService,
