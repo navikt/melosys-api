@@ -22,6 +22,7 @@ import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,17 +30,18 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 public class BehandlingService {
-
     private final BehandlingRepository behandlingRepository;
-
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
-    private BehandlingsresultatService behandlingsresultatService;
-    private OppgaveService oppgaveService;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final OppgaveService oppgaveService;
 
     @Autowired
-    public BehandlingService(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository, BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService) {
+    public BehandlingService(BehandlingRepository behandlingRepository,
+                             BehandlingsresultatRepository behandlingsresultatRepository,
+                             TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
+                             BehandlingsresultatService behandlingsresultatService,
+                             @Lazy OppgaveService oppgaveService) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
