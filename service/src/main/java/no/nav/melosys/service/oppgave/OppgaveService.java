@@ -129,7 +129,7 @@ public class OppgaveService {
                 dest.setFnr(UKJENT);
                 dest.setSammensattNavn(UKJENT);
             }
-        } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSed()) {
+        } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling()) {
             BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
             Fagsak fagsak = fagsakService.hentFagsak(oppgave.getSaksnummer());
             behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());

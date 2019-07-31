@@ -178,7 +178,7 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.VUR;
     }
 
-    public boolean erSed() {
+    public boolean erSedBehandling() {
         return oppgavetype == Oppgavetyper.BEH_SED;
     }
 

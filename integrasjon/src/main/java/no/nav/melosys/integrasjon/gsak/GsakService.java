@@ -128,18 +128,10 @@ public class GsakService implements GsakFasade {
         if (oppgave.getBehandlingstype() != null) {
             oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstype()));
         }
-        if (oppgave.erJournalFøring()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusDays(FRIST_JFR_DAGER));
-        } else if (oppgave.erBehandling()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_BEH_UKER)); // TODO: frist sed
-        } else if (oppgave.erVurderDokument()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_VUR_DAGER));
-        } else {
-            throw new FunksjonellException("Type " + oppgave.getOppgavetype().getKode() + " støttes ikke.");
-        }
         if (oppgave.getBehandlingstema() != null) {
             oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode());
         }
+        oppgaveDto.setFristFerdigstillelse(hentFristForOppgave(oppgave));
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
         oppgaveDto.setPrioritet(PrioritetType.NORM.toString());
@@ -289,6 +281,19 @@ public class GsakService implements GsakFasade {
             case UTL_MYND_UTPEKT_SEG_SELV: return "ae0113";
             case REGISTRERING_UNNTAK_NORSK_TRYGD: return "ae0111"; //TODO: avklar om korrekt kode eller trenger ny
             default: throw new IllegalArgumentException(this + " er ikke implementert i felleskodeverk.");
+        }
+    }
+
+    private static LocalDate hentFristForOppgave(Oppgave oppgave) throws FunksjonellException {
+        LocalDate idag = LocalDate.now();
+        if (oppgave.erJournalFøring()) {
+            return idag.plusDays(FRIST_JFR_DAGER);
+        } else if (oppgave.erBehandling() || oppgave.erSedBehandling()) {
+            return idag.plusWeeks(FRIST_BEH_UKER);
+        } else if (oppgave.erVurderDokument()) {
+            return idag.plusWeeks(FRIST_VUR_DAGER);
+        } else {
+            throw new FunksjonellException("Type " + oppgave.getOppgavetype().getKode() + " støttes ikke.");
         }
     }
 }
