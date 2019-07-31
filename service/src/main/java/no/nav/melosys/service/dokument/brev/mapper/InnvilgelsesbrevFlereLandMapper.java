@@ -1,6 +1,8 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -17,7 +19,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
@@ -30,7 +32,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException, TekniskException {
-        BrevDataInnvilgelse brevDataInnvilgelse = (BrevDataInnvilgelse) brevdata;
+        BrevDataInnvilgelseFlereLand brevDataInnvilgelse = (BrevDataInnvilgelseFlereLand) brevdata;
 
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
         vedleggMapper.map(brevDataInnvilgelse.vedleggA1);
@@ -41,38 +43,50 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, BrevDataInnvilgelse brevdata) {
+    private Fag mapFag(Behandling behandling, BrevDataInnvilgelseFlereLand brevdata) {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
-        AvklartVirksomhet avklartVirksomhet = brevdata.norskeVirksomheter.iterator().next();
-        fag.setArbeidsgiver(avklartVirksomhet.navn);
+        // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
+        int antallArbeidsgivere = brevdata.norskeArbeidsgivere.size();
+        fag.setAntallArbeidsgivere(BigInteger.valueOf(antallArbeidsgivere));
+        if (antallArbeidsgivere == 1) {
+            AvklartVirksomhet avklartVirksomhet = brevdata.norskeArbeidsgivere.iterator().next();
+            fag.setArbeidsgiver(avklartVirksomhet.navn);
+        }
+        fag.setArbeidsgiverListe(mapArbeidsgiverListe(brevdata.norskeArbeidsgivere));
 
-        fag.setArbeidsgiverListe(mapArbeidsgiverListe(brevdata.norskeVirksomheter));
-        fag.setAntallArbeidsgivere(BigInteger.valueOf(brevdata.norskeVirksomheter.size()));
-
-        fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(avklartVirksomhet.yrkesaktivitet.getKode()));
-
-        fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
-
-        fag.setFlaggland(brevdata.arbeidsland);
-
-        fag.setArbeidsland(brevdata.arbeidsland);
+        // AntallArbeidsland avgjør om brevet bruker arbeidsland eller arbeidslandListe
+        int antallArbeidsland = brevdata.alleArbeidsland.size();
+        fag.setAntallArbeidsland(BigInteger.valueOf(antallArbeidsland));
+        if (antallArbeidsland == 1) {
+            String arbeidsland = brevdata.alleArbeidsland.iterator().next();
+            fag.setArbeidsland(arbeidsland);
+        }
         fag.setArbeidslandListe(mapArbeidslandListe(brevdata.alleArbeidsland));
-        fag.setAntallArbeidsland(BigInteger.valueOf(brevdata.alleArbeidsland.size()));
 
+        fag.setBostedsland(brevdata.bostedsland);
         fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
 
-        if (brevdata.fartsområdeErInnenriks.isPresent()) {
-            fag.setArbeidPåTerritorialfarvann(JA);
-        }
+        // Virksomhetsland er arbeidsland for selvstenig næringsdrivende
+        fag.setAntallVirksomhetsland(BigInteger.ZERO);
+        fag.setVirksomhetslandListe(mapVirksomhetsListe(Collections.emptyList()));
+        //fag.setVirksomhetsland("DUMMY");
 
         if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
             fag.setArbeidPåSkip(JA);
         }
         if (brevdata.avklartMaritimType == Maritimtyper.SOKKEL) {
             fag.setArbeidPåSokkel(JA);
+        }
+
+        if (brevdata.erBegrensetPeriode) {
+            fag.setBegrensetPeriode(JA);
+        }
+
+        if (brevdata.erMarginaltArbeid) {
+            fag.setMarginaltArbeid(JA);
         }
 
         Lovvalgsperiode periode = brevdata.lovvalgsperiode;
@@ -92,7 +106,17 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         return fag;
     }
 
-    private ArbeidslandListeType mapArbeidslandListe(List<String> alleArbeidsland) {
+    private VirksomhetslandListeType mapVirksomhetsListe(List<String> næringsdrivendeILand) {
+        VirksomhetslandListeType virksomhetslandListeType = new VirksomhetslandListeType();
+        for (String land : næringsdrivendeILand) {
+            VirksomhetslandType virksomhetslandType = new VirksomhetslandType();
+            virksomhetslandType.setVirksomhetsland(land);
+            virksomhetslandListeType.getLand().add(virksomhetslandType);
+        }
+        return virksomhetslandListeType;
+    }
+
+    private ArbeidslandListeType mapArbeidslandListe(Collection<String> alleArbeidsland) {
         ArbeidslandListeType arbeidslandListeType = new ArbeidslandListeType();
         for (String arbeidsland : alleArbeidsland) {
             ArbeidslandType arbeidslandType = new ArbeidslandType();
@@ -102,7 +126,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         return arbeidslandListeType;
     }
 
-    private ArbeidsgiverListeType mapArbeidsgiverListe(List<AvklartVirksomhet> norskeVirksomheter) {
+    private ArbeidsgiverListeType mapArbeidsgiverListe(Collection<AvklartVirksomhet> norskeVirksomheter) {
         ArbeidsgiverListeType arbeidsgiverListeType = new ArbeidsgiverListeType();
         for (AvklartVirksomhet avklartVirksomhet : norskeVirksomheter) {
             ArbeidsgiverType arbeidsgiverType = new ArbeidsgiverType();

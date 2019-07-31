@@ -22,7 +22,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
@@ -82,13 +82,14 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         brevdataA1.person = lagPersonDokument();
         brevdataA1.hovedvirksomhet = virksomhet;
         brevdataA1.arbeidssteder = new ArrayList<>();
-        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse("SAKSBEHANDLER", new BrevbestillingDto());
+        BrevDataInnvilgelseFlereLand brevdataInnvilgelse = new BrevDataInnvilgelseFlereLand("SAKSBEHANDLER", new BrevbestillingDto());
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.norskeVirksomheter = brevdataA1.norskeVirksomheter;
-        brevdataInnvilgelse.alleArbeidsland = Arrays.asList("Sverige", "Danmark");
-        brevdataInnvilgelse.trygdemyndighetsland = "Sverige";
+        brevdataInnvilgelse.norskeArbeidsgivere = Collections.singleton(new AvklartVirksomhet("Telenor","1234", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
+        brevdataInnvilgelse.bostedsland = "Norge";
+        brevdataInnvilgelse.trygdemyndighetsland = "Norge";
+        brevdataInnvilgelse.alleArbeidsland = Arrays.asList("Sverige");
 
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");

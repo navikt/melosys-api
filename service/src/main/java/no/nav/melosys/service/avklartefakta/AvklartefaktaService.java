@@ -87,6 +87,12 @@ public class AvklartefaktaService {
         return aktivitetType.tilYrkesgruppeType();
     }
 
+    public boolean harMarginaltArbeid(long behandlingsid) {
+        Collection<Avklartefakta> marginaltArbeid =
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatype.MARGINALT_ARBEID, VALGT_FAKTA);
+        return !marginaltArbeid.isEmpty();
+    }
+
     public Optional<Maritimtyper> hentMaritimType(long behandlingsid) {
         Optional<Avklartefakta> avklartefaktaOpt =
             avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.SOKKEL_ELLER_SKIP);

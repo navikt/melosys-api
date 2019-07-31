@@ -25,7 +25,6 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadslandkoder;
 @Service
 public class LandvelgerService {
 
-
     private AvklartefaktaService avklartefaktaService;
     private VilkaarsresultatRepository vilkaarsresultatRepository;
 
@@ -67,7 +66,7 @@ public class LandvelgerService {
             .collect(Collectors.toList());
     }
 
-    private Landkoder hentBostedsland(Behandling behandling, SoeknadDokument søknad) {
+    public Landkoder hentBostedsland(Behandling behandling, SoeknadDokument søknad) {
         Optional<Landkoder> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandling, søknad);
         return bostedslandOppgittAvSaksbehandler.orElse(Landkoder.NO);
     }

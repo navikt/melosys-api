@@ -1,0 +1,88 @@
+package no.nav.melosys.service.dokument.brev.bygger;
+
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.dokument.felles.Adresse;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
+import no.nav.melosys.service.dokument.LandvelgerService;
+import no.nav.melosys.service.dokument.brev.*;
+
+public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygger implements BrevDataBygger {
+    private final LandvelgerService landVelgerService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private BrevbestillingDto brevbestillingDto;
+    private BrevDataByggerA1 brevbyggerA1;
+
+    public BrevDataByggerInnvilgelseFlereLand(AvklartefaktaService avklartefaktaService,
+                                              AvklarteVirksomheterService avklarteVirksomheterService,
+                                              LandvelgerService landVelgerService,
+                                              LovvalgsperiodeService lovvalgsperiodeService,
+                                              BrevbestillingDto brevbestillingDto) {
+        super(null, lovvalgsperiodeService, avklartefaktaService);
+        this.landVelgerService = landVelgerService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.brevbestillingDto = brevbestillingDto;
+    }
+
+    public BrevDataByggerInnvilgelseFlereLand(AvklartefaktaService avklartefaktaService,
+                                              AvklarteVirksomheterService avklarteVirksomheterService,
+                                              LandvelgerService landVelgerService,
+                                              LovvalgsperiodeService lovvalgsperiodeService,
+                                              BrevbestillingDto brevbestillingDto,
+                                              BrevDataByggerA1 brevbyggerA1) {
+        super(null, lovvalgsperiodeService, avklartefaktaService);
+        this.landVelgerService = landVelgerService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.brevbestillingDto = brevbestillingDto;
+        this.brevbyggerA1 = brevbyggerA1;
+    }
+
+    private Function<OrganisasjonDokument, Adresse> utenAdresse = org -> null;
+
+    @Override
+    public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
+        this.behandling = behandling;
+        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+
+        BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(behandling, saksbehandler);
+
+        brevdata.norskeArbeidsgivere = avklarteVirksomheterService.hentArbeidsgivere(behandling, utenAdresse);
+        brevdata.norskeSelvstendigVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, utenAdresse);
+
+        brevdata.lovvalgsperiode = hentLovvalgsperiode();
+        brevdata.alleArbeidsland = landVelgerService.hentAlleArbeidsland(behandling).stream()
+            .map(Landkoder::getBeskrivelse)
+            .collect(Collectors.toList());
+
+        brevdata.trygdemyndighetsland = landVelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
+        brevdata.bostedsland = landVelgerService.hentBostedsland(behandling, søknad).getBeskrivelse();
+
+        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
+        maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
+
+        brevdata.erMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(behandling.getId());
+        brevdata.erBegrensetPeriode = true;
+
+        return brevdata;
+    }
+
+    private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
+        BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(saksbehandler, brevbestillingDto);
+
+        BrevDataA1 vedleggA1 = (BrevDataA1) brevbyggerA1.lag(behandling, saksbehandler);
+        brevdata.vedleggA1 = vedleggA1;
+        return brevdata;
+    }
+}

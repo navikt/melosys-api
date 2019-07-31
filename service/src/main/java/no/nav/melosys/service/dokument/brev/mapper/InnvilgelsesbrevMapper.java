@@ -44,7 +44,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
-        AvklartVirksomhet avklartVirksomhet = brevdata.norskeVirksomheter.iterator().next();
+        AvklartVirksomhet avklartVirksomhet = brevdata.norskeVirksomheter.get(0);
         fag.setArbeidsgiver(avklartVirksomhet.navn);
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(avklartVirksomhet.yrkesaktivitet.getKode()));
 

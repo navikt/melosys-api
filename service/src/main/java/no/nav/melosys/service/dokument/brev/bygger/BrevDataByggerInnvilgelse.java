@@ -1,11 +1,9 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
@@ -20,7 +18,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 
 public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implements BrevDataBygger {
-    private LandvelgerService landVelgerService;
+    private final LandvelgerService landVelgerService;
     private BrevbestillingDto brevbestillingDto;
     private BrevDataByggerA1 brevbyggerA1;
 
@@ -59,11 +57,7 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
         }
 
         brevdata.lovvalgsperiode = hentLovvalgsperiode();
-        brevdata.alleArbeidsland = landVelgerService.hentAlleArbeidsland(behandling).stream()
-            .map(Landkoder::getBeskrivelse)
-            .collect(Collectors.toList());
-
-        brevdata.arbeidsland = brevdata.alleArbeidsland.iterator().next();
+        brevdata.arbeidsland = landVelgerService.hentArbeidsland(behandling).getBeskrivelse();
 
         brevdata.trygdemyndighetsland = landVelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
 

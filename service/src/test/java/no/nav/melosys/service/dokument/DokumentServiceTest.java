@@ -181,7 +181,6 @@ public final class DokumentServiceTest {
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.arbeidsland = "Norway";
-        brevdataInnvilgelse.alleArbeidsland = Collections.singletonList("Norway");
         brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
 
         return brevdataInnvilgelse;
