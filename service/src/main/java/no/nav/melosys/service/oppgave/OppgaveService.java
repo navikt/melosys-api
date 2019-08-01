@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
@@ -128,7 +129,7 @@ public class OppgaveService {
                 dest.setFnr(UKJENT);
                 dest.setSammensattNavn(UKJENT);
             }
-        } else if (oppgave.erBehandling() || oppgave.erVurderDokument()) {
+        } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling()) {
             BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
             Fagsak fagsak = fagsakService.hentFagsak(oppgave.getSaksnummer());
             behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
