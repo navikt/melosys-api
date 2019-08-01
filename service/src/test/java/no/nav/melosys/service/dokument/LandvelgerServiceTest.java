@@ -80,9 +80,20 @@ public class LandvelgerServiceTest {
     @Test
     public void hentArbeidsland_medAvklartArbeidsland_girAvklartArbeidsland() throws TekniskException {
         when(avklartefaktaService.hentArbeidsland(anyLong())).thenReturn(Optional.of(avklartArbeidsland));
+        søknad.soeknadsland.landkoder.add(avklartArbeidsland.getKode());
 
         String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
         assertThat(land).isEqualTo(avklartArbeidsland.getBeskrivelse());
+    }
+
+    @Test
+    public void hentAlleArbeidsland_medAvklartArbeidslandOgSøknadsland_girAlleUnikeArbeidsland() throws TekniskException {
+        when(avklartefaktaService.hentAlleArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
+        søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
+
+        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandling);
+        assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK, Landkoder.SE);
+        assertThat(arbeidsland).containsOnlyOnce(Landkoder.DK);
     }
 
     @Test

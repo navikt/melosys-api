@@ -144,6 +144,25 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
+    public void hentMarginaltArbeid_medEttLandMedMarginaltArbeid_girMarginaltArbeid() {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("MARGINALT_ARBEID");
+        Set<Avklartefakta> avklartefaktaFraDb = Collections.singleton(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), eq(Avklartefaktatype.MARGINALT_ARBEID), eq("TRUE"))).thenReturn(avklartefaktaFraDb);
+
+        boolean harMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(1L);
+        assertThat(harMarginaltArbeid).isTrue();
+    }
+
+    @Test
+    public void hentMarginaltArbeid_ingenLandMedMarginaltArbeid_girIkkeMarginaltArbeid() {
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), any(), any())).thenReturn(Collections.emptySet());
+
+        boolean harMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(1L);
+        assertThat(harMarginaltArbeid).isFalse();
+    }
+
+    @Test
     public void hentMaritimType_medSokkelTekst_foventerSokkelType() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL");
