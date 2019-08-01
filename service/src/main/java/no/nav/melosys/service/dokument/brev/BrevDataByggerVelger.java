@@ -66,6 +66,8 @@ public class BrevDataByggerVelger {
                 return lagBrevDataByggerA001(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV:
                 return lagBrevDataByggerInnvilgelse(brevbestillingDto);
+            case INNVILGELSE_YRKESAKTIV_FLERE_LAND:
+                return lagBrevDataByggerInnvilgelseFlereLand(brevbestillingDto);
             case INNVILGELSE_ARBEIDSGIVER:
                 return new BrevDataByggerInnvilgelse(avklartefaktaService,
                                                     landvelgerService,
@@ -105,6 +107,18 @@ public class BrevDataByggerVelger {
             new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
 
         return new BrevDataByggerInnvilgelse(avklartefaktaService,
+            landvelgerService,
+            lovvalgsperiodeService,
+            brevbestillingDto,
+            brevbyggerA1);
+    }
+
+    private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingDto brevbestillingDto) {
+        BrevDataByggerA1 brevbyggerA1 =
+            new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
+
+        return new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
+            avklarteVirksomheterService,
             landvelgerService,
             lovvalgsperiodeService,
             brevbestillingDto,

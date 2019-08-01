@@ -52,6 +52,11 @@ public class BrevDataByggerVelgerTest {
     }
 
     @Test
+    public final void hent_medDokumentTypeINNVILGELSE_YRKESAKTIV_FLERE_LAND_girBrevDataByggerInnvilgelseFlereLand() {
+        testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV_FLERE_LAND, BrevDataByggerInnvilgelseFlereLand.class);
+    }
+
+    @Test
     public final void hent_InnvilgelsesArbeidsgiver_girInnvilgelseBygger() {
         testHent(Produserbaredokumenter.INNVILGELSE_ARBEIDSGIVER, BrevDataByggerInnvilgelse.class);
     }

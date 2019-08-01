@@ -57,7 +57,7 @@ public class AvklartefaktaService {
 
     public Optional<Landkoder> hentArbeidsland(long behandlingsid) throws TekniskException {
         Set<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingsid);
-        if (alleArbeidsland.size() != 1) {
+        if (alleArbeidsland.size() > 1) {
             throw new TekniskException("Mer enn ett arbeidsland er registrert");
         }
         return alleArbeidsland.stream().findFirst();

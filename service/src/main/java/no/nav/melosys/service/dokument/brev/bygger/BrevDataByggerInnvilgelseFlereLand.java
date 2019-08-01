@@ -29,18 +29,6 @@ public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygg
                                               AvklarteVirksomheterService avklarteVirksomheterService,
                                               LandvelgerService landVelgerService,
                                               LovvalgsperiodeService lovvalgsperiodeService,
-                                              BrevbestillingDto brevbestillingDto) {
-        super(null, lovvalgsperiodeService, avklartefaktaService);
-        this.landVelgerService = landVelgerService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.brevbestillingDto = brevbestillingDto;
-        this.brevbyggerA1 = null;
-    }
-
-    public BrevDataByggerInnvilgelseFlereLand(AvklartefaktaService avklartefaktaService,
-                                              AvklarteVirksomheterService avklarteVirksomheterService,
-                                              LandvelgerService landVelgerService,
-                                              LovvalgsperiodeService lovvalgsperiodeService,
                                               BrevbestillingDto brevbestillingDto,
                                               BrevDataByggerA1 brevbyggerA1) {
         super(null, lovvalgsperiodeService, avklartefaktaService);

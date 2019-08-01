@@ -15,6 +15,8 @@ public enum DokumenttypeIdMapper {
                 return "000116";
             case INNVILGELSE_YRKESAKTIV:
                 return "000108";
+            case INNVILGELSE_YRKESAKTIV_FLERE_LAND:
+                return "000083";
             case AVSLAG_ARBEIDSGIVER:
                 return "000109";
             case INNVILGELSE_ARBEIDSGIVER:
