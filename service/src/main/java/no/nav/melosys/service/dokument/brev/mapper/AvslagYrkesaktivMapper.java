@@ -78,6 +78,7 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
         return Art161AvslagBegrunnelse.builder().withIngenSpesielleForhold("")
             .withOver5Aar("")
             .withSaerligAvslagsgrunn("")
+            .withUtlAvslaarAvtale("")
             .withSoektForSent("").build();
     }
 
