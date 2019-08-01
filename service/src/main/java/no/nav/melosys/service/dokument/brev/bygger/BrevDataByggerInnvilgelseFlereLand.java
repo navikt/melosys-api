@@ -69,9 +69,7 @@ public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygg
 
     private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(saksbehandler, brevbestillingDto);
-
-        BrevDataA1 vedleggA1 = (BrevDataA1) brevbyggerA1.lag(behandling, saksbehandler);
-        brevdata.vedleggA1 = vedleggA1;
+        brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(behandling, saksbehandler);
         return brevdata;
     }
 }
