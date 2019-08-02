@@ -56,7 +56,7 @@ public class Anmodningsperiode implements ErPeriode {
     }
 
     public Anmodningsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse,
-                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse, AnmodningsperiodeSvar anmodningsperiodeSvar) {
+                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse) {
         this.fom = fom;
         this.tom = tom;
         this.lovvalgsland = lovvalgsland;
@@ -64,7 +64,6 @@ public class Anmodningsperiode implements ErPeriode {
         this.tilleggsbestemmelse = tilleggsbestemmelse;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland;
         this.unntakFraBestemmelse = unntakFraBestemmelse;
-        this.anmodningsperiodeSvar = anmodningsperiodeSvar;
     }
 
     public Long getId() {
@@ -105,8 +104,16 @@ public class Anmodningsperiode implements ErPeriode {
         return unntakFraLovvalgsland;
     }
 
+    public void setUnntakFraLovvalgsland(Landkoder unntakFraLovvalgsland) {
+        this.unntakFraLovvalgsland = unntakFraLovvalgsland;
+    }
+
     public LovvalgBestemmelse getUnntakFraBestemmelse() {
         return unntakFraBestemmelse;
+    }
+
+    public void setUnntakFraBestemmelse(LovvalgBestemmelse unntakFraBestemmelse) {
+        this.unntakFraBestemmelse = unntakFraBestemmelse;
     }
 
     public Long getMedlPeriodeID() {
@@ -141,5 +148,11 @@ public class Anmodningsperiode implements ErPeriode {
     @Override
     public int hashCode() {
         return Objects.hash(behandlingsresultat, fom);
+    }
+
+    public boolean gjelderSammeLandOgUnntakSom(Anmodningsperiode periode2) {
+        return lovvalgsland == periode2.getLovvalgsland() &&
+            unntakFraBestemmelse == periode2.getUnntakFraBestemmelse() &&
+            unntakFraLovvalgsland == periode2.getUnntakFraLovvalgsland();
     }
 }

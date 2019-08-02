@@ -14,9 +14,11 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -25,31 +27,41 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SedDataByggerTest {
+    @Mock
+    KodeverkService kodeverkService;
+    @Mock
+    RegisterOppslagService registerOppslagService;
+    @Mock
+    LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    AnmodningsperiodeService anmodningsperiodeService;
+    @Mock
+    AvklartefaktaService avklartefaktaService;
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
+    private Behandlingsresultat behandlingsresultat;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setup()
         throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        KodeverkService kodeverkService = mock(KodeverkService.class);
-        RegisterOppslagService registerOppslagService = mock(RegisterOppslagService.class);
-        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
-        AvklartefaktaService avklartefaktaService = mock(AvklartefaktaService.class);
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.SE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1L));
         lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setUnntakFraLovvalgsland(Landkoder.SE);
+        anmodningsperiode.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
+        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
+
+        behandlingsresultat = new Behandlingsresultat();
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode("SOEKT_FOR_SENT");
@@ -60,13 +72,13 @@ public class SedDataByggerTest {
         behandling = DataByggerStubs.hentBehandlingStub();
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        dataBygger = new SedDataBygger(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
+        dataBygger = new SedDataBygger(kodeverkService, lovvalgsperiodeService, avklartefaktaService, anmodningsperiodeService, avklarteVirksomheterService);
     }
 
     @Test
     public void testHentAvklarteSelvstendigeForetak()
         throws FunksjonellException, TekniskException {
-        SedDataDto sedData = dataBygger.lag(behandling);
+        SedDataDto sedData = dataBygger.lag(behandling, behandlingsresultat);
 
         assertNotNull(sedData);
         assertNotNull(sedData.getArbeidsgivendeVirksomheter());

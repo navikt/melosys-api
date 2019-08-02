@@ -72,8 +72,7 @@ public final class AnmodningsperiodeDto {
             konverterer.convertToEntityAttribute(lovvalgBestemmelse),
             konverterer.convertToEntityAttribute(tilleggBestemmelse),
             enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland),
-            konverterer.convertToEntityAttribute(unntakFraBestemmelse),
-            null);
+            konverterer.convertToEntityAttribute(unntakFraBestemmelse));
         anmodningsperiode.setMedlPeriodeID(medlemskapsperiodeID != null ? Long.valueOf(medlemskapsperiodeID) : null);
         return anmodningsperiode;
     }

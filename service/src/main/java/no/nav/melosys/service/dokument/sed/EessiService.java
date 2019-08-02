@@ -45,7 +45,7 @@ public class EessiService {
                 LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
                 Fagsak fagsak = behandling.getFagsak();
 
-                SedDataDto sedData = sedDataBygger.lag(behandling);
+                SedDataDto sedData = sedDataBygger.lag(behandling, behandlingsresultat);
                 sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
                 log.info("Oppretter buc og sed med artikkel {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());

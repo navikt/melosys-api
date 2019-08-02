@@ -10,10 +10,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import no.nav.dok.melosysbrev._000115.*;
 import no.nav.dok.melosysbrev._000115.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
@@ -28,7 +25,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
-public class A001Mapper {
+class A001Mapper {
 
     SEDA001 mapSEDA001(BrevDataA001 brevData) throws TekniskException {
         SEDA001 seda001 = new SEDA001();
@@ -56,10 +53,10 @@ public class A001Mapper {
 
         seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.arbeidssteder));
 
-        seda001.setLovvalgsPeriodeListe(mapLovvalgsperioder(brevData.lovvalgsperioder));
+        seda001.setLovvalgsPeriodeListe(mapAnmodningsperioder(brevData.anmodningsperioder));
 
         // Alle lovvalgsperiodene må ha samme landkode
-        Lovvalgsperiode lovvalgsperiode = brevData.lovvalgsperioder.iterator().next();
+        Anmodningsperiode lovvalgsperiode = brevData.anmodningsperioder.iterator().next();
         seda001.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getUnntakFraBestemmelse().getKode()));
         seda001.setLovvalgsLand(hentIso3Landkode(lovvalgsperiode.getLovvalgsland().getKode()));  // Alltid Norge
 
@@ -89,7 +86,8 @@ public class A001Mapper {
         return ansettelsesperiodeType;
     }
 
-    private TidligereLovvalgsperiodeListeType mapTidligereLovvalgsperioder(Collection<Lovvalgsperiode> tidligerePerioder) throws TekniskException {
+    private TidligereLovvalgsperiodeListeType mapTidligereLovvalgsperioder(Collection<Lovvalgsperiode> tidligerePerioder)
+        throws TekniskException {
         TidligereLovvalgsperiodeListeType tidligereLovvalgsperiodeListeType = new TidligereLovvalgsperiodeListeType();
         for (Lovvalgsperiode lovvalgsperiode : tidligerePerioder) {
             PeriodeType periode = new PeriodeType();
@@ -97,7 +95,7 @@ public class A001Mapper {
                 periode.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
                 periode.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
             } catch (DatatypeConfigurationException e) {
-                throw new TekniskException("Feil ved konvertering av dato for tidligere lovvalgsperiode");
+                throw new TekniskException("Feil ved konvertering av dato for tidligere lovvalgsperiode", e);
             }
 
             LovvalgsbestemmelseKode bestemmelse = LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode());
@@ -114,7 +112,7 @@ public class A001Mapper {
             try {
                 tidligereAnmodningType.setTidligereAnmodningsDato(convertToXMLGregorianCalendarRemoveTimezone(dato));
             } catch (DatatypeConfigurationException e) {
-                throw new TekniskException("Feil ved konvertering av dato for tidligere anmodning");
+                throw new TekniskException("Feil ved konvertering av dato for tidligere anmodning", e);
             }
             tidligereAnmodningListeType.getTidligereAnmodning().add(tidligereAnmodningType);
         }
@@ -137,7 +135,8 @@ public class A001Mapper {
         return trygdemyndighet;
     }
 
-    private PersonType mapPerson(PersonDokument personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent) throws TekniskException {
+    private PersonType mapPerson(PersonDokument personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent)
+        throws TekniskException {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
@@ -260,7 +259,8 @@ public class A001Mapper {
         return foretakListe;
     }
 
-    private SelvstendigNaeringsvirksomhetListeType mapSelvstendigvirksometliste(List<AvklartVirksomhet> virksomheter) throws TekniskException {
+    private SelvstendigNaeringsvirksomhetListeType mapSelvstendigvirksometliste(List<AvklartVirksomhet> virksomheter)
+        throws TekniskException {
         SelvstendigNaeringsvirksomhetListeType selvstendigeVirksomheter = new SelvstendigNaeringsvirksomhetListeType();
         for (AvklartVirksomhet virksomhet : virksomheter) {
             SelvstendigNaeringsvirksomhetType selvstendigVirksomhet = new SelvstendigNaeringsvirksomhetType();
@@ -281,19 +281,19 @@ public class A001Mapper {
         return selvstendigeVirksomheter;
     }
 
-    private LovvalgsPeriodeListeType mapLovvalgsperioder(Collection<Lovvalgsperiode> lovvalgsperioder) throws TekniskException {
-        LovvalgsPeriodeListeType lovvalgsperioderBrev = new LovvalgsPeriodeListeType();
-        for (Lovvalgsperiode periode : lovvalgsperioder) {
-            LovvalgsPeriodeType lovvalgsperiodeBrev = mapLovvalgsperiode(periode);
-            lovvalgsperioderBrev.getLovvalgsPeriode().add(lovvalgsperiodeBrev);
+    private LovvalgsPeriodeListeType mapAnmodningsperioder(Collection<Anmodningsperiode> anmodningsperioder) throws TekniskException {
+        LovvalgsPeriodeListeType anmodningsperoderBrev = new LovvalgsPeriodeListeType();
+        for (Anmodningsperiode periode : anmodningsperioder) {
+            LovvalgsPeriodeType lovvalgsperiodeBrev = mapAnmodningsperiode(periode);
+            anmodningsperoderBrev.getLovvalgsPeriode().add(lovvalgsperiodeBrev);
 
             UnntakFraLovvalgslandType unntakFraLovvalgslandType = mapUnntaksland(periode);
-            lovvalgsperioderBrev.getUnntakFraLovvalgsland().add(unntakFraLovvalgslandType);
+            anmodningsperoderBrev.getUnntakFraLovvalgsland().add(unntakFraLovvalgslandType);
         }
-        return lovvalgsperioderBrev;
+        return anmodningsperoderBrev;
     }
 
-    private LovvalgsPeriodeType mapLovvalgsperiode(Lovvalgsperiode periode) throws TekniskException {
+    private LovvalgsPeriodeType mapAnmodningsperiode(Anmodningsperiode periode) throws TekniskException {
         LovvalgsPeriodeType lovvalgsperiodeBrev = new LovvalgsPeriodeType();
         try {
             lovvalgsperiodeBrev.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(periode.getFom()));
@@ -304,7 +304,7 @@ public class A001Mapper {
         return lovvalgsperiodeBrev;
     }
 
-    private UnntakFraLovvalgslandType mapUnntaksland(Lovvalgsperiode periode) throws TekniskException {
+    private UnntakFraLovvalgslandType mapUnntaksland(Anmodningsperiode periode) throws TekniskException {
         UnntakFraLovvalgslandType unntakFraLovvalgslandType = new UnntakFraLovvalgslandType();
         String land = periode.getUnntakFraLovvalgsland().getKode();
         unntakFraLovvalgslandType.getUnntakFraLovvalgsland().add(hentIso3Landkode(land));

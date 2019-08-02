@@ -60,19 +60,12 @@ public class A001MapperTest {
         mapper = new A001Mapper();
         easyRandom = EasyRandomConfigurer.randomForDokProd();
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2);
-        lovvalgsperiode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_5);
-        lovvalgsperiode.setFom(LocalDate.now());
-        lovvalgsperiode.setTom(LocalDate.now());
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
-        lovvalgsperiode.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
+            LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2, TilleggsBestemmelser_883_2004.FO_883_2004_ART11_5,
+            Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
 
         behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
-        when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Arrays.asList(lovvalgsperiode)));
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
         boAdresse.gatenavn = "Gatenavn";
@@ -141,7 +134,7 @@ public class A001MapperTest {
         brevData.personDokument = person;
         brevData.bostedsadresse = boAdresse;
         brevData.utenlandskMyndighet = myndighet;
-        brevData.lovvalgsperioder = Arrays.asList(lovvalgsperiode);
+        brevData.anmodningsperioder = Arrays.asList(anmodningsperiode);
         brevData.vilkårsresultat161 = vilkår;
         brevData.utenlandskIdent = Optional.empty();
         brevData.ansettelsesperiode = Optional.empty();

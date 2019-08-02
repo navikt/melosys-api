@@ -31,8 +31,6 @@ public final class LovvalgsperiodeDto {
             LovvalgBestemmelse lovvalgsbestemmelse,
             LovvalgBestemmelse tilleggBestemmelse,
             Landkoder lovvalgsland,
-            LovvalgBestemmelse unntakFraBestemmelse,
-            Landkoder unntakFraLovvalgsland,
             InnvilgelsesResultat innvilgelsesResultat,
             Trygdedekninger trygdeDekning,
             Medlemskapstyper medlemskapstype,
@@ -48,14 +46,12 @@ public final class LovvalgsperiodeDto {
     }
 
     @JsonCreator
-    public LovvalgsperiodeDto(Map<String, String> json) {
+    LovvalgsperiodeDto(Map<String, String> json) {
         this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 LocalDate.parse(json.get("tomDato"))),
                 konverterLovvalgsBestemmelse(json.get("lovvalgsbestemmelse")),
                 konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
                 enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
-                konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
-                enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
                 InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
                 enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
                 enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
@@ -75,8 +71,6 @@ public final class LovvalgsperiodeDto {
             lovvalgsperiode.getBestemmelse(),
             lovvalgsperiode.getTilleggsbestemmelse(),
             lovvalgsperiode.getLovvalgsland(),
-            lovvalgsperiode.getUnntakFraBestemmelse(),
-            lovvalgsperiode.getUnntakFraLovvalgsland(),
             lovvalgsperiode.getInnvilgelsesresultat(),
             lovvalgsperiode.getDekning(),
             lovvalgsperiode.getMedlemskapstype(),

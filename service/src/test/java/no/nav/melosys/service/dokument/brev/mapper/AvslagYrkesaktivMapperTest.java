@@ -61,10 +61,12 @@ public class AvslagYrkesaktivMapperTest {
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
 
         resultat.setVilkaarsresultater(new HashSet<>());
 
@@ -97,8 +99,9 @@ public class AvslagYrkesaktivMapperTest {
         resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
-        brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
+        brevData.anmodningsperioder = Collections.singleton(anmodningsperiode);
+        brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);

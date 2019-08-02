@@ -15,7 +15,6 @@ import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
 @Entity
 @Table(name = "lovvalg_periode")
 public class Lovvalgsperiode implements ErPeriode {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,14 +40,6 @@ public class Lovvalgsperiode implements ErPeriode {
     @Column(name = "tillegg_bestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse tilleggsbestemmelse;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "unntak_fra_lovvalgsland", updatable = false)
-    private Landkoder unntakFraLovvalgsland;
-
-    @Column(name = "unntak_fra_bestemmelse", updatable = false)
-    @Convert(converter = LovvalgBestemmelsekonverterer.class)
-    private LovvalgBestemmelse unntakFraBestemmelse;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "innvilgelse_resultat", nullable = false, updatable = false)
@@ -123,22 +114,6 @@ public class Lovvalgsperiode implements ErPeriode {
         this.tilleggsbestemmelse = tilleggsbestemmelse;
     }
 
-    public Landkoder getUnntakFraLovvalgsland() {
-        return unntakFraLovvalgsland;
-    }
-
-    public void setUnntakFraLovvalgsland(Landkoder unntakFraLovvalgsland) {
-        this.unntakFraLovvalgsland = unntakFraLovvalgsland;
-    }
-
-    public LovvalgBestemmelse getUnntakFraBestemmelse() {
-        return unntakFraBestemmelse;
-    }
-
-    public void setUnntakFraBestemmelse(LovvalgBestemmelse unntakFraBestemmelse) {
-        this.unntakFraBestemmelse = unntakFraBestemmelse;
-    }
-
     public InnvilgelsesResultat getInnvilgelsesresultat() {
         return innvilgelsesresultat;
     }
@@ -199,8 +174,6 @@ public class Lovvalgsperiode implements ErPeriode {
             ", lovvalgsland=" + lovvalgsland +
             ", bestemmelse=" + bestemmelse +
             ", tilleggsbestemmelse=" + tilleggsbestemmelse +
-            ", unntakFraLovvalgsland=" + unntakFraLovvalgsland +
-            ", unntakFraBestemmelse=" + unntakFraBestemmelse +
             ", innvilgelsesresultat=" + innvilgelsesresultat +
             ", medlemskapstype=" + medlemskapstype +
             ", dekning=" + dekning +

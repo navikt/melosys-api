@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.Vilkaarsresultat;
@@ -35,7 +36,7 @@ public class BrevDataA001 extends BrevData {
     // Kommer fra Joark. Kun relevant når purring er implementer
     public List<LocalDate> tidligereAnmodninger = new ArrayList<>();
 
-    public Collection<Lovvalgsperiode> lovvalgsperioder;
+    public Collection<Anmodningsperiode> anmodningsperioder;
 
     public Collection<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();
 

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
         }
 
         fag.setArbeidsland(brevData.arbeidsland);
-        fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
+        fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat, brevData.anmodningsperioder));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
@@ -87,16 +88,17 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             .findFirst();
     }
 
-    private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
+    private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat, Collection<Anmodningsperiode> anmodningsperioder)
+        throws TekniskException {
         Lovvalgsperiode lovvalgsperiode = resultat.getLovvalgsperioder()
-            .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat" + resultat.getId()));
+            .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat " + resultat.getId()));
 
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
 
-        Landkoder unntakFraLovvalgsland = lovvalgsperiode.getUnntakFraLovvalgsland();
-        if (unntakFraLovvalgsland != null) {
-            lovvalgsperiodeType.setUnntakFraLovvalgsland(unntakFraLovvalgsland.getBeskrivelse());
-        }
+        String unntakFraLovvalgslandTekst = anmodningsperioder.stream().findFirst()
+            .map(Anmodningsperiode::getUnntakFraLovvalgsland).map(Landkoder::getBeskrivelse).orElse(null);
+        lovvalgsperiodeType.setUnntakFraLovvalgsland(unntakFraLovvalgslandTekst);
+
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
             lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));

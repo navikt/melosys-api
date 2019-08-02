@@ -61,10 +61,8 @@ public class AnmodningUnntakMapperTest {
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
         Behandlingsresultat resultat = new Behandlingsresultat();
-
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
@@ -90,6 +88,11 @@ public class AnmodningUnntakMapperTest {
         resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
+        Anmodningsperiode anmodningsperiode =
+            new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO, null, null, Landkoder.DE,
+                null);
+        brevData.anmodningsperioder = Collections.singletonList(anmodningsperiode);
+
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
 

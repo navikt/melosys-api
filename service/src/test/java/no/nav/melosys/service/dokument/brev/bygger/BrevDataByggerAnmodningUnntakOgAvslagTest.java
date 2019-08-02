@@ -16,6 +16,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,11 +31,11 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     @Mock
+    AnmodningsperiodeService anmodningsperiodeService;
+    @Mock
     AvklartefaktaService avklartefaktaService;
-
     @Mock
     RegisterOppslagService registerOppslagService;
-
     @Mock
     LandvelgerService landvelgerService;
 
@@ -43,7 +44,8 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     @Before
     public void setUp() {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, landvelgerService);
+        brevDataByggerAnmodningUnntakOgAvslag =
+            new BrevDataByggerAnmodningUnntakOgAvslag(anmodningsperiodeService, avklartefaktaService, avklarteVirksomheterService, landvelgerService);
     }
 
     @Test

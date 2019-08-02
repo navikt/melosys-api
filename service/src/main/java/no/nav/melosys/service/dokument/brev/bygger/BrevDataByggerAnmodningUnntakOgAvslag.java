@@ -16,21 +16,24 @@ import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 
 public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataBygger implements BrevDataBygger {
-
+    private AnmodningsperiodeService anmodningsperiodeService;
     private AvklarteVirksomheterService avklarteVirksomheterService;
     private LandvelgerService landvelgerService;
 
-    public BrevDataByggerAnmodningUnntakOgAvslag(AvklartefaktaService avklartefaktaService,
+    private static final Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
+
+    public BrevDataByggerAnmodningUnntakOgAvslag(AnmodningsperiodeService anmodningsperiodeService,
+                                                 AvklartefaktaService avklartefaktaService,
                                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                                  LandvelgerService landvelgerService) {
         super(null, null, avklartefaktaService);
+        this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.landvelgerService = landvelgerService;
     }
-
-    Function<OrganisasjonDokument, Adresse> ingenAdresse = org -> null;
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
@@ -39,13 +42,14 @@ public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataB
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
 
-        List<AvklartVirksomhet> avklarteVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse);
+        List<AvklartVirksomhet> avklarteVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE);
         if (avklarteVirksomheter.size() != 1) {
             throw new TekniskException("Trenger minst en norsk virksomhet for avslag og ART16.1");
         }
 
         brevData.hovedvirksomhet = avklarteVirksomheter.iterator().next();
         brevData.arbeidsland = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
+        brevData.anmodningsperioder = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId());
 
         return brevData;
     }

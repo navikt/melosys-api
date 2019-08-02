@@ -33,7 +33,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiServiceTest {
-
     @Mock
     private SedDataBygger sedDataBygger;
     @Mock
@@ -64,7 +63,7 @@ public class EessiServiceTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.SK);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
 
-        when(sedDataBygger.lag(any(Behandling.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lag(any(Behandling.class), any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
         when(sedDataBygger.lagUtkast(any(Behandling.class))).thenReturn(new SedDataDto());
     }
 

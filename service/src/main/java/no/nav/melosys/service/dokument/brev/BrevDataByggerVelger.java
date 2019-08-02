@@ -11,12 +11,13 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BrevDataByggerVelger {
-
+    private final AnmodningsperiodeService anmodningsperiodeService;
     private final AvklartefaktaService avklartefaktaService;
     private final KodeverkService kodeverkService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -27,13 +28,15 @@ public class BrevDataByggerVelger {
     private final LandvelgerService landvelgerService;
 
     @Autowired
-    public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
+    public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
+                                AvklartefaktaService avklartefaktaService,
                                 AvklarteVirksomheterSystemService avklarteVirksomheterService,
                                 KodeverkService kodeverkService,
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
                                 JoarkService joarkService) {
+        this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -61,7 +64,8 @@ public class BrevDataByggerVelger {
                                                             vilkaarsresultatRepository);
             case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK:
-                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, landvelgerService);
+                return new BrevDataByggerAnmodningUnntakOgAvslag(anmodningsperiodeService,
+                    avklartefaktaService, avklarteVirksomheterService, landvelgerService);
             case ANMODNING_UNNTAK:
                 return lagBrevDataByggerA001(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV:
@@ -93,7 +97,8 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerA001(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA001 a001Bygger =
-            new BrevDataByggerA001(avklartefaktaService,
+            new BrevDataByggerA001(anmodningsperiodeService,
+                avklartefaktaService,
                 avklarteVirksomheterService,
                 kodeverkService,
                 lovvalgsperiodeService,

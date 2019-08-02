@@ -115,7 +115,6 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getId() == null);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
-        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getUnntakFraLovvalgsland().equals(Landkoder.BE));
 
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
@@ -157,7 +156,6 @@ public class BehandlingsresultatServiceTest {
         lovvalgsperiode.setId(32L);
         lovvalgsperiode.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.BE);
         return lovvalgsperiode;
     }
 

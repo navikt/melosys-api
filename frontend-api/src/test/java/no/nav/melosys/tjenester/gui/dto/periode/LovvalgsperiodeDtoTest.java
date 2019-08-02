@@ -59,8 +59,6 @@ public class LovvalgsperiodeDtoTest {
             enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("lovvalgsbestemmelse")),
             TilleggsBestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
-            enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("unntakFraBestemmelse")),
-            enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
             InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
             enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
             enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),

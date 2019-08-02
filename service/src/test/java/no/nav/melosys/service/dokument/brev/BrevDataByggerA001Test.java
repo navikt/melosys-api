@@ -21,10 +21,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
@@ -35,6 +32,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA001;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,16 +46,14 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataByggerA001Test {
-
+    @Mock
+    private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
     private AvklartefaktaService avklartefaktaService;
-
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
-
     @Mock
     private UtenlandskMyndighetRepository myndighetsRepo;
-
     @Mock
     private VilkaarsresultatRepository vilkårRepo;
 
@@ -86,10 +82,10 @@ public class BrevDataByggerA001Test {
         when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(avklarteOrganisasjoner);
 
         Landkoder unntakFraLovvalgsland = Landkoder.SE;
-        Lovvalgsperiode periode = new Lovvalgsperiode();
+        Anmodningsperiode periode = new Anmodningsperiode();
         periode.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setUnntakFraLovvalgsland(unntakFraLovvalgsland);
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Arrays.asList(periode));
+        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Arrays.asList(periode));
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         when(myndighetsRepo.findByLandkode(any())).thenReturn(Optional.of(utenlandskMyndighet));
@@ -152,7 +148,8 @@ public class BrevDataByggerA001Test {
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        brevDataByggerA001 = new BrevDataByggerA001(avklartefaktaService, avklarteVirksomheterService, kodeverkService, lovvalgsperiodeService, myndighetsRepo, vilkårRepo);
+        brevDataByggerA001 = new BrevDataByggerA001(anmodningsperiodeService, avklartefaktaService, avklarteVirksomheterService,
+            kodeverkService, lovvalgsperiodeService, myndighetsRepo, vilkårRepo);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
@@ -176,7 +173,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testHentAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testHentAvklarteSelvstendigeForetak() throws MelosysException {
         avklarteOrganisasjoner.add("12345678910");
 
         SelvstendigForetak foretak = new SelvstendigForetak();
@@ -193,7 +190,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testHentAvklarteNorskeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testHentAvklarteNorskeForetak() throws MelosysException {
         avklarteOrganisasjoner.add(orgnr1);
 
         SelvstendigForetak foretak = new SelvstendigForetak();
@@ -210,7 +207,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test(expected = TekniskException.class)
-    public void testIngenAvklarteforetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testIngenAvklarteforetak() throws MelosysException {
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
@@ -220,7 +217,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testAnsettelsesperiode() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testAnsettelsesperiode() throws MelosysException {
         avklarteOrganisasjoner.add(orgnr1);
 
         lagArbeidsforhold(orgnr1,
@@ -241,7 +238,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testIngenAnsettelsePeriode() throws NoSuchFieldException, TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testIngenAnsettelsePeriode() throws MelosysException {
         avklarteOrganisasjoner.add(orgnr1);
 
         BrevData brevDataA001 = brevDataByggerA001.lag(behandling, "Z12345");

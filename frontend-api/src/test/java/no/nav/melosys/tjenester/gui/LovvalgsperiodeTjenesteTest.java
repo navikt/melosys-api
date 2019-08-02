@@ -40,8 +40,6 @@ public final class LovvalgsperiodeTjenesteTest {
             LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2,
             TilleggsBestemmelser_883_2004.FO_883_2004_ART13_4,
             Landkoder.SK,
-            null,
-            null,
             InnvilgelsesResultat.AVSLAATT,
             null,
             Medlemskapstyper.FRIVILLIG,

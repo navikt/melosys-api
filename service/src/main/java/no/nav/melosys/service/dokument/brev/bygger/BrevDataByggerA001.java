@@ -6,17 +6,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
@@ -27,33 +23,37 @@ import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import org.apache.commons.collections4.CollectionUtils;
 
 public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements BrevDataBygger {
-
+    private final AnmodningsperiodeService anmodningsperiodeService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
-    public BrevDataByggerA001(AvklartefaktaService avklartefaktaService,
+    public BrevDataByggerA001(AnmodningsperiodeService anmodningsperiodeService,
+                              AvklartefaktaService avklartefaktaService,
                               AvklarteVirksomheterService avklarteVirksomheterService,
                               KodeverkService kodeverkService,
                               LovvalgsperiodeService lovvalgsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
         super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
+        this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
     @Override
-    public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
 
-        Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder();
-        Landkoder landkode = lovvalgsperioder.iterator().next().getUnntakFraLovvalgsland();
+        Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder();
+        Landkoder landkode = anmodningsperioder.iterator().next().getUnntakFraLovvalgsland();
 
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = this.person;
@@ -66,7 +66,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
 
         brevData.vilkårsresultat161 = hentVilkårsresultat();
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
-        brevData.lovvalgsperioder = lovvalgsperioder;
+        brevData.anmodningsperioder = anmodningsperioder;
         brevData.tidligereLovvalgsperioder = lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
         brevData.ansettelsesperiode = hentAnsettelsesperiode();
 
@@ -96,26 +96,23 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
             .findFirst();
     }
 
-    @Override
-    protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {
-        Collection<Lovvalgsperiode> lovvalgsperioder = super.hentLovvalgsperioder();
-
-        Lovvalgsperiode valgtLovvalgsperiode = lovvalgsperioder.iterator().next();
-        boolean lovvalgsperiodeIkkeGyldig = lovvalgsperioder.stream()
-            .anyMatch(periode -> !validerPeriode(periode, valgtLovvalgsperiode));
-        if (lovvalgsperiodeIkkeGyldig) {
-            throw new TekniskException("Flere lovvalgsperioder støttes, men ikke med ulike Land eller unntak");
-        }
-
-        return lovvalgsperioder;
+    private Collection<Anmodningsperiode> hentAnmodningsperioder() throws FunksjonellException {
+        Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId());
+        return validerAnmodningsperioder(anmodningsperioder);
     }
 
-    private boolean validerPeriode(Lovvalgsperiode p1, Lovvalgsperiode p2) {
-        return p1.getLovvalgsland() == p2.getLovvalgsland() &&
-            p1.getUnntakFraBestemmelse() != null &&
-            p1.getUnntakFraBestemmelse() == p2.getUnntakFraBestemmelse() &&
-            p1.getUnntakFraLovvalgsland() != null &&
-            p1.getUnntakFraLovvalgsland() == p2.getUnntakFraLovvalgsland();
+    private Collection<Anmodningsperiode> validerAnmodningsperioder(Collection<Anmodningsperiode> anmodningsperioder)
+        throws FunksjonellException {
+        if (CollectionUtils.isEmpty(anmodningsperioder)) {
+            throw new FunksjonellException("Minst en anmodningsperiode trengs for å kunne sende A001.");
+        }
+        final Anmodningsperiode referansePeriode = anmodningsperioder.iterator().next();
+        boolean lovvalgsperiodeIkkeGyldig = anmodningsperioder.stream()
+            .anyMatch(periode -> !referansePeriode.gjelderSammeLandOgUnntakSom(periode));
+        if (lovvalgsperiodeIkkeGyldig) {
+            throw new FunksjonellException("Flere anmodningsperioder støttes, men ikke med ulike land eller unntak.");
+        }
+        return anmodningsperioder;
     }
 
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
