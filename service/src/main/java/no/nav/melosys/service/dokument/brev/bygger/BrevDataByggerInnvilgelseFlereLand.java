@@ -38,7 +38,7 @@ public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygg
         this.brevbyggerA1 = brevbyggerA1;
     }
 
-    private Function<OrganisasjonDokument, Adresse> utenAdresse = org -> null;
+    private final Function<OrganisasjonDokument, Adresse> utenAdresse = org -> null;
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
@@ -68,7 +68,7 @@ public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygg
     }
 
     private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
-        BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(saksbehandler, brevbestillingDto);
+        BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(brevbestillingDto, saksbehandler);
         brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(behandling, saksbehandler);
         return brevdata;
     }

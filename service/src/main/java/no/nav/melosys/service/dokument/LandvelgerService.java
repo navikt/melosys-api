@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -35,7 +36,7 @@ public class LandvelgerService {
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
-    public Landkoder hentArbeidsland(Behandling behandling) throws TekniskException {
+    public Landkoder hentArbeidsland(Behandling behandling) throws TekniskException, FunksjonellException {
         Optional<Landkoder> arbeidslandOpt = avklartefaktaService.hentArbeidsland(behandling.getId());
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         return arbeidslandOpt.orElseGet(() -> hentSøknadslandkoder(søknad).get(0));
@@ -48,7 +49,7 @@ public class LandvelgerService {
         return alleArbeidsland;
     }
 
-    public Landkoder hentTrygdemyndighetsland(Behandling behandling) throws TekniskException {
+    public Landkoder hentTrygdemyndighetsland(Behandling behandling) throws FunksjonellException, TekniskException {
         List<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandling);
 
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);

@@ -51,7 +51,7 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
             brevdata = lagInnvilgelseBrevdataMedA1(behandling, saksbehandler);
         }
         else {
-            brevdata = new BrevDataInnvilgelse(saksbehandler, brevbestillingDto);
+            brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
         }
 
         brevdata.lovvalgsperiode = hentLovvalgsperiode();
@@ -66,7 +66,7 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
     }
 
     private BrevDataInnvilgelse lagInnvilgelseBrevdataMedA1(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
-        BrevDataInnvilgelse brevdata = new BrevDataInnvilgelse(saksbehandler, brevbestillingDto);
+        BrevDataInnvilgelse brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
 
         BrevDataA1 vedleggA1 = (BrevDataA1) brevbyggerA1.lag(behandling, saksbehandler);
         brevdata.vedleggA1 = vedleggA1;

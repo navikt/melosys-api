@@ -5,7 +5,10 @@ import java.util.Map;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -25,7 +28,6 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.HELFO;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
@@ -122,7 +124,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
         }
 
-        Produserbaredokumenter innvilgelseType = (erInnvilgelseFlereLand(resultat))
+        Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
         Brevbestilling.Builder innvilgelseBuilder = new Brevbestilling.Builder().medDokumentType(innvilgelseType)
@@ -146,15 +148,6 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 .medBegrunnelseKode(begrunnelseKode).build();
             brevBestiller.bestill(A1_Myndighet);
         }
-    }
-
-    private boolean erInnvilgelseFlereLand(Behandlingsresultat resultat) {
-        LovvalgBestemmelse bestemmelse = resultat.hentValidertLovvalgsperiode().getBestemmelse();
-        return bestemmelse == FO_883_2004_ART13_1A
-            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1_B2 || bestemmelse == FO_883_2004_ART13_1_B3 || bestemmelse == FO_883_2004_ART13_1_B4
-            || bestemmelse == FO_883_2004_ART13_2A || bestemmelse == FO_883_2004_ART13_2B
-            || bestemmelse == FO_883_2004_ART13_3
-            || bestemmelse == FO_883_2004_ART13_4;
     }
 
     private boolean myndighetØnskerInnvilgelsesbrev(Landkoder landkode) throws TekniskException {

@@ -175,7 +175,7 @@ public final class DokumentServiceTest {
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
         brevDataA1.hovedvirksomhet = arbeidsgiver;
-        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse("SAKSBEHANDLER", new BrevbestillingDto());
+        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevDataA1;
         brevdataInnvilgelse.norskeVirksomheter = brevDataA1.norskeVirksomheter;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();

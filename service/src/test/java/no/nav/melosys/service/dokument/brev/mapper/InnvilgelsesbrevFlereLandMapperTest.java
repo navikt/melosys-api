@@ -48,7 +48,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
     private BrevDataInnvilgelseFlereLand lagBrevdataInnvilgelse() {
         List<AvklartVirksomhet> norskeVirksomheter = Collections.singletonList(new AvklartVirksomhet("Telenor","1234", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
 
-        BrevDataInnvilgelseFlereLand brevdataInnvilgelse = new BrevDataInnvilgelseFlereLand("SAKSBEHANDLER", new BrevbestillingDto());
+        BrevDataInnvilgelseFlereLand brevdataInnvilgelse = new BrevDataInnvilgelseFlereLand(new BrevbestillingDto(), "SAKSBEHANDLER");
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.norskeArbeidsgivere = norskeVirksomheter;

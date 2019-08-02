@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -55,10 +56,10 @@ public class AvklartefaktaService {
             .collect(Collectors.toSet());
     }
 
-    public Optional<Landkoder> hentArbeidsland(long behandlingsid) throws TekniskException {
+    public Optional<Landkoder> hentArbeidsland(long behandlingsid) throws FunksjonellException {
         Set<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingsid);
         if (alleArbeidsland.size() > 1) {
-            throw new TekniskException("Mer enn ett arbeidsland er registrert");
+            throw new FunksjonellException("Mer enn ett arbeidsland er registrert");
         }
         return alleArbeidsland.stream().findFirst();
     }

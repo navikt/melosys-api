@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -32,7 +33,7 @@ public class AvklarMyndighetService {
         this.fagsakService = fagsakService;
     }
 
-    public void avklarUtenlandskMyndighetOgLagre(Behandling behandling) throws TekniskException {
+    public void avklarUtenlandskMyndighetOgLagre(Behandling behandling) throws TekniskException, FunksjonellException {
         String saksnummer = behandling.getFagsak().getSaksnummer();
         Landkoder landkode = landvelgerService.hentTrygdemyndighetsland(behandling);
         if (Landkoder.NO.equals(landkode)) {
@@ -47,7 +48,7 @@ public class AvklarMyndighetService {
     /**
      * Brukes til forhåndsvisning fordi myndigheter lagres ikke på behandlingen før saksflyt kalles.
      */
-    public Optional<Aktoer> lagUtenlandskMyndighetFraBehandling(Behandling behandling) throws TekniskException {
+    public Optional<Aktoer> lagUtenlandskMyndighetFraBehandling(Behandling behandling) throws TekniskException, FunksjonellException {
         Landkoder landkode = landvelgerService.hentTrygdemyndighetsland(behandling);
         if (Landkoder.NO.equals(landkode)) {
             return Optional.empty();

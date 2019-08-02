@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
-import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1;
 
 @Entity
 @Table(name = "lovvalg_periode")
@@ -213,5 +212,25 @@ public class Lovvalgsperiode implements ErPeriode {
         return bestemmelse == FO_883_2004_ART11_3A || bestemmelse == FO_883_2004_ART11_3B || bestemmelse == FO_883_2004_ART11_4_2
             || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1
             || bestemmelse == FO_883_2004_ART13_1A;
+    }
+
+    public boolean erArtikkel13() {
+        return bestemmelse == FO_883_2004_ART13_1A
+            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1_B2 || bestemmelse == FO_883_2004_ART13_1_B3 || bestemmelse == FO_883_2004_ART13_1_B4
+            || bestemmelse == FO_883_2004_ART13_2A || bestemmelse == FO_883_2004_ART13_2B
+            || bestemmelse == FO_883_2004_ART13_3
+            || bestemmelse == FO_883_2004_ART13_4;
+    }
+
+    public boolean erInvilget() {
+        return getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
+            && getLovvalgsland() == Landkoder.NO
+            && harGyldigBestemmelse();
+    }
+
+    public boolean erAvslått() {
+        return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
+            && getLovvalgsland() != Landkoder.NO
+            && harGyldigBestemmelse();
     }
 }

@@ -191,20 +191,26 @@ public class Behandlingsresultat extends RegistreringsInfo {
         }
         Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
         return type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
-            && lovvalgsperiode.getLovvalgsland() != Landkoder.NO
-            && lovvalgsperiode.harGyldigBestemmelse();
+            && lovvalgsperiode.erAvslått();
     }
 
     public boolean erInnvilgelse() {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
             Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
-            return lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
-                && lovvalgsperiode.getLovvalgsland() == Landkoder.NO
-                && lovvalgsperiode.harGyldigBestemmelse();
+            return lovvalgsperiode.erInvilget();
         } else {
             return false;
         }
+    }
+
+    public boolean erInnvilgelseFlereLand() {
+        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
+            Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
+            return lovvalgsperiode.erInvilget() && lovvalgsperiode.erArtikkel13();
+        } else {
+            return false;
+        }
+
     }
 
     // Medl skal ikke oppdateres ved avslag.

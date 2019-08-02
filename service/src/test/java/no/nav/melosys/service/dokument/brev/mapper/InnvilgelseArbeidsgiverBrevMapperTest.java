@@ -43,7 +43,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
     private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = lagNAVFelles();
-        BrevDataInnvilgelse brevDataInnvilgelse = new BrevDataInnvilgelse("Z123456", new BrevbestillingDto());
+        BrevDataInnvilgelse brevDataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "Z123456");
         brevDataInnvilgelse.arbeidsland = "Sverige";
         brevDataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse);
