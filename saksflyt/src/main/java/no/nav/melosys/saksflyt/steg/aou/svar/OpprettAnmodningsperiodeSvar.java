@@ -67,8 +67,8 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
         anmodningsperiodeSvar.setBegrunnelseFritekst(svar.getBegrunnelse());
 
         if (svarType == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE) {
-            anmodningsperiodeSvar.setInnvilgetFom(LocalDate.parse(svar.getDelvisInnvilgetPeriode().getFom(), dateTimeFormatter));
-            anmodningsperiodeSvar.setInnvilgetTom(LocalDate.parse(svar.getDelvisInnvilgetPeriode().getTom(), dateTimeFormatter));
+            anmodningsperiodeSvar.setInnvilgetFom(svar.getDelvisInnvilgetPeriode().getFom());
+            anmodningsperiodeSvar.setInnvilgetTom(svar.getDelvisInnvilgetPeriode().getTom());
         }
 
         return anmodningsperiodeSvar;

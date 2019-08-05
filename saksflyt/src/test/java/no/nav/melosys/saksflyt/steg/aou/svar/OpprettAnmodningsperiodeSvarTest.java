@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.aou.svar;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
@@ -83,8 +85,8 @@ public class OpprettAnmodningsperiodeSvarTest {
             svarAnmodningUnntak.setBeslutning(SvarAnmodningUnntak.Beslutning.INNVILGELSE);
         } else {
             svarAnmodningUnntak.setDelvisInnvilgetPeriode(new Periode());
-            svarAnmodningUnntak.getDelvisInnvilgetPeriode().setFom("2012-12-12");
-            svarAnmodningUnntak.getDelvisInnvilgetPeriode().setTom("2012-12-12");
+            svarAnmodningUnntak.getDelvisInnvilgetPeriode().setFom(LocalDate.of(2012, 12, 12));
+            svarAnmodningUnntak.getDelvisInnvilgetPeriode().setTom(LocalDate.of(2012, 12, 12));
             svarAnmodningUnntak.setBeslutning(SvarAnmodningUnntak.Beslutning.DELVIS_INNVILGELSE);
         }
         melosysEessiMelding.setSvarAnmodningUnntak(svarAnmodningUnntak);
