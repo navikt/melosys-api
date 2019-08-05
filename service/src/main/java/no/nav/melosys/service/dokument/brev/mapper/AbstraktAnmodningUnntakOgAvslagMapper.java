@@ -88,10 +88,8 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             .findFirst();
     }
 
-    private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat, Collection<Anmodningsperiode> anmodningsperioder)
-        throws TekniskException {
-        Lovvalgsperiode lovvalgsperiode = resultat.getLovvalgsperioder()
-            .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat " + resultat.getId()));
+    private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat, Collection<Anmodningsperiode> anmodningsperioder) {
+        Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
 
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
 
