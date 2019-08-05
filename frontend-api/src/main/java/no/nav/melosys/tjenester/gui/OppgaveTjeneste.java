@@ -84,7 +84,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     @GET
     @Path("/oversikt")
     @ApiOperation(
-        value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.",
+        value = "Henter alle oppgaver som er tildelt en gitt saksbeh andler.",
         response = OppgaveOversiktDto.class)
     public Response mineOppgaver() throws TekniskException, FunksjonellException {
         String ident = SubjectHandler.getInstance().getUserID();

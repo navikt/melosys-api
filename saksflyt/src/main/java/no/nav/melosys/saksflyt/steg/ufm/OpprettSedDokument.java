@@ -95,11 +95,10 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         return sedDokument;
     }
 
-
     private Periode tilPeriode(no.nav.melosys.service.kafka.model.Periode periode) {
         return new Periode(
-            LocalDate.parse(periode.getFom(), dateTimeFormatter),
-            periode.getTom() != null ? LocalDate.parse(periode.getTom(), dateTimeFormatter) : null
+                periode.getFom(),
+                periode.getTom()
         );
     }
 }

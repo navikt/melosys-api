@@ -3,6 +3,7 @@ package no.nav.melosys.service.kafka;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -30,13 +31,12 @@ public class KafkaConfig {
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MelosysEessiMelding>> eessiMeldingListenerContainerFactory(
-        KafkaProperties kafkaProperties) {
+        KafkaProperties kafkaProperties, ErrorHandlingDeserializer2<MelosysEessiMelding> errorHandlingDeserializer) {
 
         Map<String, Object> props = kafkaProperties.buildConsumerProperties();
         props.putAll(consumerConfig());
-        ErrorHandlingDeserializer2<MelosysEessiMelding> deserializer = valueDeserializer(MelosysEessiMelding.class);
         DefaultKafkaConsumerFactory<String, MelosysEessiMelding> defaultKafkaConsumerFactory = new DefaultKafkaConsumerFactory<>(
-            props, new StringDeserializer(), deserializer);
+            props, new StringDeserializer(), errorHandlingDeserializer);
         ConcurrentKafkaListenerContainerFactory<String, MelosysEessiMelding> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(defaultKafkaConsumerFactory);
 
@@ -45,7 +45,6 @@ public class KafkaConfig {
 
     private Map<String, Object> consumerConfig() {
         Map<String, Object> props = new HashMap<>();
-        //Without this, the consumer will receive GenericData records.
         props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
@@ -57,8 +56,14 @@ public class KafkaConfig {
 
         return props;
     }
+    
+    @Bean
+    public ErrorHandlingDeserializer2<MelosysEessiMelding> valueDeserializer(JsonDeserializer<MelosysEessiMelding> jsonDeserializer) {
+        return new ErrorHandlingDeserializer2<>(jsonDeserializer);
+    }
 
-    private <T> ErrorHandlingDeserializer2<T> valueDeserializer(Class<T> targetType) {
-        return new ErrorHandlingDeserializer2<>(new JsonDeserializer<>(targetType,false ));
+    @Bean
+    public JsonDeserializer<MelosysEessiMelding> jsonDeserializer(ObjectMapper objectMapper) {
+        return new JsonDeserializer<>(MelosysEessiMelding.class, objectMapper, false);
     }
 }

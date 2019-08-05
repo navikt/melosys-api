@@ -125,8 +125,8 @@ public class UnntaksperiodeMottakInitialisererTest {
         melding.setLovvalgsland("SE");
 
         Periode periode = new Periode();
-        periode.setFom(dateTimeFormatter.format(fom));
-        periode.setTom(tom != null ? dateTimeFormatter.format(tom) : null);
+        periode.setFom(fom);
+        periode.setTom(tom);
         melding.setPeriode(periode);
 
         Statsborgerskap statsborgerskap = new Statsborgerskap();
