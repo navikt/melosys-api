@@ -93,19 +93,6 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_nySakSøknadsperiodeMedLikFomOgTom_feiler() throws FunksjonellException, TekniskException {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.JFR_NY_SAK);
-        prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
-        prosessinstans.setData(lagProsessData_nySak());
-        prosessinstans.setData(SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now()));
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("lik");
-        agent.utfør(prosessinstans);
-    }
-
-    @Test
     public void utførSteg_nySakSøknadsperiodeMedFomEtterTom_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
