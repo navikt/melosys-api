@@ -2,12 +2,17 @@ package no.nav.melosys.service.eessi;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.repository.AvklarteFaktaRepository;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kafka.model.Periode;
@@ -21,27 +26,32 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnntaksperiodeMottakInitialisererTest {
 
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     @Mock
     private FagsakService fagsakService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
-    
+    @Mock
+    private GsakFasade gsakFasade;
+    @Mock
+    private SaksopplysningRepository saksopplysningRepository;
+    @Mock
+    private AvklarteFaktaRepository avklarteFaktaRepository;
+
     private UnntaksperiodeMottakInitialiserer unntaksperiodeMottakInitialiserer;
-    
+
     @Before
     public void setup() {
-        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, lovvalgsperiodeService);
+        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, lovvalgsperiodeService, gsakFasade, saksopplysningRepository, avklarteFaktaRepository);
     }
 
     @Test
-    public void initialiserProsessinstans_ikkeEndring_skalBehandlesVidere() {
+    public void initialiserProsessinstans_ikkeEndring_skalBehandlesVidere() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = hentProsessinstans(false, LocalDate.now(), LocalDate.now().plusYears(1));
 
         unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans);
@@ -50,7 +60,7 @@ public class UnntaksperiodeMottakInitialisererTest {
 
     @Test
     public void initialiserProsessinstans_erEndringIkkeEndretPeriode_skalIkkeBehandles() throws Exception {
-        
+
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusYears(1);
         Prosessinstans prosessinstans = hentProsessinstans(true, fom, tom);
@@ -97,6 +107,31 @@ public class UnntaksperiodeMottakInitialisererTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SAK_OG_BEH);
     }
 
+    @Test
+    public void behandling_medNøyaktigEnAktivBehandling_skalBehandlesMedEksisterendeBehandling() throws FunksjonellException, TekniskException {
+        LocalDate fom = LocalDate.now();
+        LocalDate tom = LocalDate.now().plusYears(1);
+        Prosessinstans prosessinstans = hentProsessinstans(true, fom, tom);
+
+        Fagsak fagsak = hentFagsak();
+        Behandling behandling = fagsak.getBehandlinger().get(0);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(fom.minusYears(2L));
+        lovvalgsperiode.setTom(tom.minusYears(1L));
+
+        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
+        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).thenReturn(new Oppgave.Builder().setOppgaveId("321").build());
+
+        unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans);
+
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
+        assertThat(prosessinstans.getBehandling()).isNotNull();
+    }
+
     private Fagsak hentFagsak() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -104,16 +139,18 @@ public class UnntaksperiodeMottakInitialisererTest {
         behandling.setRegistrertDato(Instant.now());
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("123");
+        behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         return fagsak;
     }
-    
+
     private Prosessinstans hentProsessinstans(boolean erEndring, LocalDate fom, LocalDate tom) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(erEndring, fom, tom));
         return prosessinstans;
     }
-    
+
     private MelosysEessiMelding hentMelosysEessiMelding(boolean erEndring, LocalDate fom, LocalDate tom) {
         MelosysEessiMelding melding = new MelosysEessiMelding();
         melding.setAktoerId("123");

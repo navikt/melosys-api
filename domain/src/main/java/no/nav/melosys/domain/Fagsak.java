@@ -108,6 +108,15 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     /**
+     * Returnerer den sist oppdaterte behandlingen knyttet til saken eller {@code null} hvis den ikke finnes
+     */
+    public Behandling getSistOppdaterteBehandling() {
+        return getBehandlinger().stream()
+            .max(Comparator.comparing(Behandling::getEndretDato))
+            .orElse(null);
+    }
+
+    /**
      * Returnerer en aktør med angitt {@link Aktoersroller} knyttet til saken eller {@code null} hvis ingen finnes.
      */
     public Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
