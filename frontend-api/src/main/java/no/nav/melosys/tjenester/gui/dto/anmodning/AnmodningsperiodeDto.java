@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.periode;
+package no.nav.melosys.tjenester.gui.dto.anmodning;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -9,9 +9,9 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
-public final class AnmodningsperiodeDto {
-
+public class AnmodningsperiodeDto {
     private static final LovvalgBestemmelsekonverterer konverterer = new LovvalgBestemmelsekonverterer();
 
     public final String id;
@@ -22,16 +22,15 @@ public final class AnmodningsperiodeDto {
     public final String lovvalgsland;
     public final String unntakFraBestemmelse;
     public final String unntakFraLovvalgsland;
-    public final String medlemskapsperiodeID;
 
-    private AnmodningsperiodeDto(String id,
-                              PeriodeDto periode,
-                              LovvalgBestemmelse lovvalgBestemmelse,
-                              LovvalgBestemmelse tilleggBestemmelse,
-                              Landkoder lovvalgsland,
-                              LovvalgBestemmelse unntakFraBestemmelse,
-                              Landkoder unntakFraLovvalgsland,
-                              String medlemskapsperiodeID) {
+
+    protected AnmodningsperiodeDto(String id,
+                                   PeriodeDto periode,
+                                   LovvalgBestemmelse lovvalgBestemmelse,
+                                   LovvalgBestemmelse tilleggBestemmelse,
+                                   Landkoder lovvalgsland,
+                                   LovvalgBestemmelse unntakFraBestemmelse,
+                                   Landkoder unntakFraLovvalgsland) {
         this.id = id;
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
@@ -39,7 +38,6 @@ public final class AnmodningsperiodeDto {
         this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
-        this.medlemskapsperiodeID = medlemskapsperiodeID;
     }
 
     @JsonCreator
@@ -51,19 +49,7 @@ public final class AnmodningsperiodeDto {
             konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
             konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
-            enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
-            json.get("medlemskapsperiodeID"));
-    }
-
-    public static AnmodningsperiodeDto av(Anmodningsperiode anmodningsperiode) {
-        return new AnmodningsperiodeDto(anmodningsperiode.getId().toString(),
-            new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
-            anmodningsperiode.getBestemmelse(),
-            anmodningsperiode.getTilleggsbestemmelse(),
-            anmodningsperiode.getLovvalgsland(),
-            anmodningsperiode.getUnntakFraBestemmelse(),
-            anmodningsperiode.getUnntakFraLovvalgsland(),
-            anmodningsperiode.getMedlPeriodeID() != null ? anmodningsperiode.getMedlPeriodeID().toString() : null);
+            enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")));
     }
 
     public final Anmodningsperiode til() {
@@ -73,7 +59,6 @@ public final class AnmodningsperiodeDto {
             konverterer.convertToEntityAttribute(tilleggBestemmelse),
             enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland),
             konverterer.convertToEntityAttribute(unntakFraBestemmelse));
-        anmodningsperiode.setMedlPeriodeID(medlemskapsperiodeID != null ? Long.valueOf(medlemskapsperiodeID) : null);
         return anmodningsperiode;
     }
 

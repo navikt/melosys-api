@@ -17,8 +17,9 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.tjenester.gui.dto.periode.AnmodningsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.periode.AnmodningsperiodeSvarDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeListeDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Path("/")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningsperiodeTjeneste extends RestTjeneste {
-
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final TilgangService tilgangService;
 
@@ -44,27 +44,26 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     @Path("anmodningsperioder/{behandlingID}")
     @ApiOperation(value = "Henter en anmodningsperiode for en gitt behandling", response = AnmodningsperiodeDto.class)
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
-    public Collection<AnmodningsperiodeDto> hentAnmodningsperioder(@PathParam("behandlingID") long behandlingID) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public AnmodningsperiodeListeDto hentAnmodningsperioder(@PathParam("behandlingID") long behandlingID)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
-        return anmodningsperiodeService
-            .hentAnmodningsperioder(behandlingID)
-            .stream()
-            .map(AnmodningsperiodeDto::av)
-            .collect(Collectors.toList());
+        return AnmodningsperiodeListeDto.av(anmodningsperiodeService.hentAnmodningsperioder(behandlingID));
     }
 
     @POST
     @Path("anmodningsperioder/{behandlingID}")
     @ApiOperation("Lagrer en anmodningsperiode for en gitt behandling.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
-    public Collection<AnmodningsperiodeDto> lagreAnmodningsperioder(@PathParam("behandlingID") long behandlingID,
-                                                                @ApiParam(value = "En liste av anmodningsperioder å lagre.") Collection<AnmodningsperiodeDto> anmodningsperiodeDtoer)
+    public AnmodningsperiodeListeDto lagreAnmodningsperioder(@PathParam("behandlingID") long behandlingID,
+                                                                        @ApiParam(value = "En liste av anmodningsperioder å lagre.")
+                                                                            AnmodningsperiodeListeDto anmodningsperiodeListeDto)
         throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
-            behandlingID, anmodningsperiodeDtoer.stream().map(AnmodningsperiodeDto::til).collect(Collectors.toList())
+            behandlingID, anmodningsperiodeListeDto.getAnmodningsperioder().stream().map(AnmodningsperiodeDto::til)
+                .collect(Collectors.toList())
         );
-        return anmodningsperioder.stream().map(AnmodningsperiodeDto::av).collect(Collectors.toList());
+        return AnmodningsperiodeListeDto.av(anmodningsperioder);
     }
 
     @GET
@@ -91,7 +90,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     @ApiOperation("Lagrer svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
     public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathParam("anmodningperiodeID") long anmodningperiodeID,
-                                                                                     @ApiParam(value = "Svar på anmodningsperiode som skal lagres.") AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
+                                                               @ApiParam(value = "Svar på anmodningsperiode som skal lagres.") AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
         throws FunksjonellException, TekniskException {
 
         long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)

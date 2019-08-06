@@ -1,9 +1,10 @@
-package no.nav.melosys.tjenester.gui.dto.periode;
+package no.nav.melosys.tjenester.gui.dto.anmodning;
 
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
 public class AnmodningsperiodeSvarDto {
 
