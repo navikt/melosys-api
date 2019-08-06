@@ -94,7 +94,8 @@ public class AvklartefaktaServiceTest {
         HashSet<AvklartefaktaDto> avklartefaktaDtoer = new HashSet<>();
         avklartefaktaDtoer.add(new AvklartefaktaDto(avklartefakta));
         avklartefaktaService.lagreAvklarteFakta(123L, avklartefaktaDtoer);
-        verify(avklarteFaktaRepository).deleteByBehandlingsresultat(any());
+        verify(avklarteFaktaRepository).deleteByBehandlingsresultatId(anyLong());
+        verify(avklarteFaktaRepository).flush();
         verify(avklartefaktaDtoKonverterer).opprettAvklartefaktaFraDto(any(), any());
         verify(avklarteFaktaRepository).saveAll(any());
 
