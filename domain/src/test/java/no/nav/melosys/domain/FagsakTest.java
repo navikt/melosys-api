@@ -148,7 +148,7 @@ public class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer bruker = fagsak.hentAktørForBruker();
 
         assertThat(bruker).isEqualTo(a1);
     }
@@ -162,7 +162,7 @@ public class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer bruker = fagsak.hentAktørForBruker();
 
         assertThat(bruker).isNull();
     }
@@ -180,7 +180,7 @@ public class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer bruker = fagsak.hentAktørForBruker();
 
         assertThat(bruker).isEqualTo(a1);
     }

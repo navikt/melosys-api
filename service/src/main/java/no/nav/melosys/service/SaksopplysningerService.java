@@ -8,7 +8,6 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -92,7 +91,7 @@ public class SaksopplysningerService {
     }
 
     private void opprettOppfriskningsprosess(Behandling behandling, SoeknadDokument søknadDokument) throws IkkeFunnetException, TekniskException {
-        String aktørID = behandling.getFagsak().hentAktørMedRolleType(Aktoersroller.BRUKER).getAktørId();
+        String aktørID = behandling.getFagsak().hentAktørForBruker().getAktørId();
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
         prosessinstansService.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID, søknadDokument);
     }

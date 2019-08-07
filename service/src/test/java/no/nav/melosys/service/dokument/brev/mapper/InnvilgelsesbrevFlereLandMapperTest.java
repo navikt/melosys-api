@@ -53,7 +53,6 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.norskeArbeidsgivere = norskeVirksomheter;
         brevdataInnvilgelse.bostedsland = "Norge";
-        brevdataInnvilgelse.trygdemyndighetsland = "Norge";
         brevdataInnvilgelse.alleArbeidsland = Collections.singletonList("Sverige");
         brevdataInnvilgelse.erMarginaltArbeid = true;
         brevdataInnvilgelse.erBegrensetPeriode = true;

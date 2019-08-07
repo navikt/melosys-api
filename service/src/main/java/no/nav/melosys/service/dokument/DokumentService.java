@@ -147,7 +147,7 @@ public class DokumentService {
         } else if (mottakerRolle == ARBEIDSGIVER) {
             mottakere = avklarMottakereForArbeidsgiver(behandling);
         } else if (mottakerRolle == MYNDIGHET) {
-            mottakere = avklarMottakereForMyndighet(mottaker, behandling);
+            mottakere = avklarMottakereForMyndigheter(mottaker, behandling);
         } else {
             throw new FunksjonellException(mottakerRolle + " støttes ikke.");
         }
@@ -157,7 +157,7 @@ public class DokumentService {
     private List<Aktoer> avklarMottakereForBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, boolean forhåndsvisning)
         throws FunksjonellException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer bruker = fagsak.hentAktørMedRolleType(BRUKER);
+        Aktoer bruker = fagsak.hentAktørForBruker();
         if (bruker == null) {
             throw new FunksjonellException("Bruker er ikke registrert.");
         }
@@ -196,7 +196,7 @@ public class DokumentService {
     }
 
     private Aktoer avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
-        Aktoer arbeidsgiver = behandling.getFagsak().hentAktørMedRolleType(ARBEIDSGIVER);
+        Aktoer arbeidsgiver = behandling.getFagsak().hentAktørForArbeidsgiver();
         if (arbeidsgiver != null) {
             return arbeidsgiver;
         } else {
@@ -215,20 +215,22 @@ public class DokumentService {
         }
     }
 
-    private List<Aktoer> avklarMottakereForMyndighet(Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
-        List<Aktoer> mottakere = new ArrayList<>();
+    private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
+        List<Aktoer> mottakere;
         if (mottaker.getAktør().getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
-            mottakere.add(mottaker.getAktør());
+            mottakere = Collections.singletonList(mottaker.getAktør());
         } else {
-            // Utenlandsk myndighet.
-            Aktoer myndighet = behandling.getFagsak().hentAktørMedRolleType(mottaker.getRolle());
-            if (myndighet == null) {
+            // Utenlandsk myndighet
+            mottakere = behandling.getFagsak().hentAktørerForMyndigheter();
+            if (mottakere.isEmpty()) {
                 // Myndighet er ikke lagret og lagres ikke før kjøring i saksflyt
-                myndighet = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling)
-                    .orElseThrow(() -> new FunksjonellException("Brev sendes ikke til utenlandske myndigheter for Norge."));
+                mottakere = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
             }
-            mottakere.add(myndighet);
+        }
+
+        if (mottakere.isEmpty()) {
+            throw new FunksjonellException("Fant ingen aktører for utenlandske myndigheter.");
         }
         return mottakere;
     }

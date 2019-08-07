@@ -1,12 +1,14 @@
 package no.nav.melosys.service.aktoer;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -14,6 +16,8 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -32,6 +36,8 @@ public class AvklarMyndighetServiceTest {
     private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     @Mock
     private FagsakService fagsakService;
+    @Mock
+    private AktoerService aktoerService;
 
     private AvklarMyndighetService avklarMyndighetService;
 
@@ -39,9 +45,12 @@ public class AvklarMyndighetServiceTest {
 
     private String forventetInstitusjonId;
 
+    @Captor
+    ArgumentCaptor<List<String>> stringListArgumentCaptor;
+
     @Before
     public void setUp() throws Exception {
-        avklarMyndighetService = new AvklarMyndighetService(utenlandskMyndighetRepository, landvelgerService, fagsakService);
+        avklarMyndighetService = new AvklarMyndighetService(utenlandskMyndighetRepository, landvelgerService, fagsakService, aktoerService);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("123");
@@ -53,22 +62,25 @@ public class AvklarMyndighetServiceTest {
         utenlandskMyndighet.institusjonskode = "IT123";
         utenlandskMyndighet.land = "IT";
 
+        when(fagsakService.hentFagsak(eq("123"))).thenReturn(fagsak);
         when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.IT))).thenReturn(Optional.of(utenlandskMyndighet));
-        when(landvelgerService.hentTrygdemyndighetsland(any(Behandling.class))).thenReturn(Landkoder.IT);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(any(Behandling.class))).thenReturn(Collections.singletonList(Landkoder.IT));
 
         forventetInstitusjonId = Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode;
     }
 
     @Test
     public void lagUtenlandskMyndighetFraBehandling_forventAktoerMedGyldigInstitusjonsId() throws Exception {
-        Optional<Aktoer> aktoer = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
-        assertThat(aktoer).isNotEmpty();
-        assertThat(aktoer.get().getInstitusjonId()).isEqualTo(forventetInstitusjonId);
+        Collection<Aktoer> aktoerer = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
+        assertThat(aktoerer).isNotEmpty();
+        assertThat(aktoerer.iterator().next().getInstitusjonId()).isEqualTo(forventetInstitusjonId);
     }
 
     @Test
     public void avklarMyndighetOgLagre_forventkorrektInstitusjonsId() throws Exception {
         avklarMyndighetService.avklarUtenlandskMyndighetOgLagre(behandling);
-        verify(fagsakService).leggTilAktør(eq(behandling.getFagsak().getSaksnummer()), eq(Aktoersroller.MYNDIGHET), eq(forventetInstitusjonId));
+
+        verify(aktoerService).erstattEksisterendeMyndighetsaktører(eq(behandling.getFagsak()), stringListArgumentCaptor.capture());
+        assertThat(stringListArgumentCaptor.getValue()).containsExactly(forventetInstitusjonId);
     }
 }

@@ -2,9 +2,7 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.*;
 
 public interface TpsFasade {
@@ -24,8 +22,6 @@ public interface TpsFasade {
      * @return Antall personer som bor på samme bostedsadresse inkludert ident det spørres på.
      */
     int hentAntallPersonerSomBorPåBostedsadresse(String aktørId) throws IntegrasjonException, IkkeFunnetException, SikkerhetsbegrensningException;
-
-    String hentFagsakIdentMedRolleType(Fagsak fagsak, Aktoersroller rolleType) throws TekniskException;
 
     String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException;
 }

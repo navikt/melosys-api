@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 /**
  * Steget sørger for å skrive til Sak og Behandling når en behandling avsluttes
@@ -42,7 +41,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
 
-        Aktoer aktør = fagsak.hentAktørMedRolleType(BRUKER);
+        Aktoer aktør = fagsak.hentAktørForBruker();
         String aktørID = null;
         if (aktør != null) {
             aktørID = aktør.getAktørId();

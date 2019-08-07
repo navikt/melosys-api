@@ -311,7 +311,7 @@ public class IverksettVedtakSendBrevTest {
     @Test
     public final void utførStegPåInnvilgelsesBrevBestemtAv12_1_vedtakSendIkkeA1() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
-        prosessinstans.getBehandling().getFagsak().hentAktørMedRolleType(Aktoersroller.MYNDIGHET).setInstitusjonId("CZ:1e1");
+        prosessinstans.getBehandling().getFagsak().hentAktørerForMyndigheter().iterator().next().setInstitusjonId("CZ:1e1");
 
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);

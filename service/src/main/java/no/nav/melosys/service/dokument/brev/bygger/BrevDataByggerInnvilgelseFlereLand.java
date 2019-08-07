@@ -55,7 +55,6 @@ public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygg
             .map(Landkoder::getBeskrivelse)
             .collect(Collectors.toList());
 
-        brevdata.trygdemyndighetsland = landVelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
         brevdata.bostedsland = landVelgerService.hentBostedsland(behandling, søknad).getBeskrivelse();
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());

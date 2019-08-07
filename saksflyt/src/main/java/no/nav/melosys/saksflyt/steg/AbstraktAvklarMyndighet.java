@@ -1,7 +1,8 @@
 package no.nav.melosys.saksflyt.steg;
 
+import java.util.List;
+
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -41,11 +42,11 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
 
             Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
             String saksnummer = fagsak.getSaksnummer();
-            Aktoer myndighetPart = fagsak.hentAktørMedRolleType(Aktoersroller.MYNDIGHET);
-            if (myndighetPart == null) {
+            List<Aktoer> myndighetPart = fagsak.hentAktørerForMyndigheter();
+            if (myndighetPart.isEmpty()) {
                 avklarMyndighetService.avklarUtenlandskMyndighetOgLagre(behandling);
             } else {
-                log.debug("Sak {} har allerede en myndighet med kode {}", saksnummer, myndighetPart.getInstitusjonId());
+                log.debug("Sak {} har allerede en myndighet", saksnummer);
             }
         }
     }

@@ -54,7 +54,7 @@ public class TilgangServiceTest {
 
         fagsakMocked = mock(Fagsak.class);
         behandlingMocked = mock(Behandling.class);
-        when(fagsakMocked.hentAktørMedRolleType(any())).thenReturn(new Aktoer());
+        when(fagsakMocked.hentAktørForBruker()).thenReturn(new Aktoer());
         when(behandlingMocked.getFagsak()).thenReturn(fagsakMocked);
 
         tilgangService = new TilgangService(behandlingService, pep);
