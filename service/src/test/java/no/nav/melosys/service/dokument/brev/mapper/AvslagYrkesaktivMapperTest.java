@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.xml.bind.JAXBException;
 
+import com.google.common.collect.Sets;
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
@@ -100,7 +101,7 @@ public class AvslagYrkesaktivMapperTest {
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
-        brevData.anmodningsperioder = Collections.singleton(anmodningsperiode);
+        resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());

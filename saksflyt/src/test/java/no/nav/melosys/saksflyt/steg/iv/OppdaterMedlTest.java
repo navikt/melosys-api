@@ -11,6 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
@@ -45,13 +46,16 @@ public class OppdaterMedlTest {
     @Mock
     private LovvalgsperiodeRepository lovvalgsperiodeRepository;
 
+    @Mock
+    private AnmodningsperiodeRepository anmodningsperiodeRepository;
+
     private Prosessinstans p;
     private Behandlingsresultat behandlingsresultat;
     private Lovvalgsperiode lovvalgsperiode;
 
     @Before
     public void setUp() {
-        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository);
+        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository, anmodningsperiodeRepository);
         agent = new OppdaterMedl(medlFasade, felles);
 
         p = new Prosessinstans();

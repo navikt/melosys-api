@@ -70,6 +70,12 @@ public class AnmodningsperiodeService {
         lagreAnmodningsperiodeSvar(hentFørsteAnmodningsperiode(behandlingID), anmodningsperiodeSvar);
     }
 
+    public void oppdaterAnmodningsperiodeSendtForBehandling(long behandlingID) throws FunksjonellException {
+        Anmodningsperiode anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
+        anmodningsperiode.setSendt(true);
+        anmodningsperiodeRepository.save(anmodningsperiode);
+    }
+
     private AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
         validerSvar(anmodningsperiodeSvar);
 
@@ -85,7 +91,7 @@ public class AnmodningsperiodeService {
         Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder(behandlingID);
 
         if (anmodningsperioder.size() != 1) {
-            throw new FunksjonellException("Forventet èn anmodningsperiode, fant " + anmodningsperioder.size());
+            throw new FunksjonellException("Forventet èn anmodningsperiode på behandling" + behandlingID + ", fant " + anmodningsperioder.size());
         }
 
         return anmodningsperioder.iterator().next();
