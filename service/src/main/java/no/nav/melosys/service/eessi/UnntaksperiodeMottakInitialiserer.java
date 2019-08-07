@@ -137,8 +137,8 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
     }
 
     private boolean skalBehandlesPåEksisterendeBehandling(MelosysEessiMelding melosysEessiMelding) {
-        return (sisteOppdaterteBehandlingErAktiv(melosysEessiMelding) && !melosysEessiMelding.getErEndring())
-            || (sisteOppdaterteBehandlingErAktiv(melosysEessiMelding) && periodeErEndret(melosysEessiMelding));
+        return sisteOppdaterteBehandlingErAktiv(melosysEessiMelding) &&
+            (!melosysEessiMelding.getErEndring() || periodeErEndret(melosysEessiMelding));
     }
 
     private boolean sisteOppdaterteBehandlingErAktiv(MelosysEessiMelding melosysEessiMelding) {
