@@ -7,10 +7,11 @@ import javax.persistence.*;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 @Entity
 @Table(name = "anmodningsperiode")
-public class Anmodningsperiode implements ErPeriode {
+public class Anmodningsperiode implements ErPeriodeMedBestemmelse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -44,6 +45,10 @@ public class Anmodningsperiode implements ErPeriode {
     @Column(name = "unntak_fra_bestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse unntakFraBestemmelse;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trygde_dekning")
+    private Trygdedekninger dekning;
 
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
@@ -117,6 +122,14 @@ public class Anmodningsperiode implements ErPeriode {
 
     public void setUnntakFraBestemmelse(LovvalgBestemmelse unntakFraBestemmelse) {
         this.unntakFraBestemmelse = unntakFraBestemmelse;
+    }
+
+    public Trygdedekninger getDekning() {
+        return dekning;
+    }
+
+    public void setDekning(Trygdedekninger dekning) {
+        this.dekning = dekning;
     }
 
     public Long getMedlPeriodeID() {
