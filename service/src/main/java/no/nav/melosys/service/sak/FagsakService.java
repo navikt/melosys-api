@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FagsakService {
     private static final Logger log = LoggerFactory.getLogger(FagsakService.class);
-    private static final String FAGSAKID_PREFIX = "MEL-";
+    private static final String FAGSAKID_PREFIX = "MELTESTING-";
 
     private final FagsakRepository fagsakRepository;
     private final BehandlingService behandlingService;

@@ -18,7 +18,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VilkaarsresultatServiceTest {
@@ -68,8 +69,9 @@ public class VilkaarsresultatServiceTest {
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
 
-        verify(vilkaarsresultatRepo, times(1)).deleteByBehandlingsresultat(any());
-        verify(vilkaarsresultatRepo, times(1)).save(any(Vilkaarsresultat.class));
+        verify(vilkaarsresultatRepo).deleteByBehandlingsresultat(any());
+        verify(vilkaarsresultatRepo).flush();
+        verify(vilkaarsresultatRepo).save(any(Vilkaarsresultat.class));
     }
 
     @Test(expected = IkkeFunnetException.class)

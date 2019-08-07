@@ -124,7 +124,7 @@ public class AktoerServiceTest {
 
         aktørService.slettAktoer(10L);
 
-        verify(aktørRepository, never()).deleteById(optionalAktoer.get());
+        verify(aktørRepository, never()).deleteByAktørId(optionalAktoer.get().getAktørId());
     }
 
     @Test
@@ -136,7 +136,7 @@ public class AktoerServiceTest {
 
         aktørService.slettAktoer(10L);
 
-        verify(aktørRepository).deleteById(optionalAktoer.get());
+        verify(aktørRepository).deleteByAktørId(optionalAktoer.get().getAktørId());
     }
 
     @Test
