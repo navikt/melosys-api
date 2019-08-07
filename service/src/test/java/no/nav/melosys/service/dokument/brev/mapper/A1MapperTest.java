@@ -77,6 +77,7 @@ public class A1MapperTest {
         behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
         when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Collections.singletonList(lovvalgsperiode)));
+        when(behandlingsresultat.hentValidertLovvalgsperiode()).thenReturn(lovvalgsperiode);
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
         boAdresse.husnummer = "12B";
@@ -198,5 +199,4 @@ public class A1MapperTest {
         brevdataType.setVedlegg(vedlegg);
         return factory.createBrevdata(brevdataType);
     }
-
 }
