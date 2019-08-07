@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
@@ -49,7 +46,7 @@ public class A1Mapper {
 
         a1.setPerson(mapPerson(brevData.person));
 
-        List<LovvalgsperiodeType> lovvalgsperioder = hentLovvalgsperioderFraBehandlingsresultat();
+        List<LovvalgsperiodeType> lovvalgsperioder = Collections.singletonList(mapLovvalgsperiode(resultat.hentValidertLovvalgsperiode()));
         a1.setLovvalgsperiode(lovvalgsperioder.get(0));    // Alle lovvalgsperiodene har samme bestemmelse og land i Lev1
 
         a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));
@@ -81,19 +78,6 @@ public class A1Mapper {
 
         person.setBostedsadresse(lagBostedsadresse(brevData.bostedsadresse));
         return person;
-    }
-
-    private List<LovvalgsperiodeType> hentLovvalgsperioderFraBehandlingsresultat() throws TekniskException {
-        List<LovvalgsperiodeType> lovvalgsperiodeTyper = new ArrayList<>();
-
-        Set<Lovvalgsperiode> lovvalgsperioder = resultat.getLovvalgsperioder();
-        for (Lovvalgsperiode periode : lovvalgsperioder) {
-            lovvalgsperiodeTyper.add(mapLovvalgsperiode(periode));
-        }
-        if (lovvalgsperiodeTyper.isEmpty()) {
-            throw new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat");
-        }
-        return lovvalgsperiodeTyper;
     }
 
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) throws TekniskException {
