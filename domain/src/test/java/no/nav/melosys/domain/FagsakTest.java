@@ -1,10 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
@@ -62,6 +59,44 @@ public class FagsakTest {
         fagsak.setBehandlinger(behandlinger);
 
         assertThat(fagsak.getTidligsteInaktiveBehandling()).isEqualTo(tidligsteInaktiveBehandling);
+    }
+
+    @Test
+    public void getSistOppdaterteBehandling_medEnBehandling() {
+        Fagsak fagsak = new Fagsak();
+
+        Behandling behandling = new Behandling();
+        behandling.setEndretDato(Instant.parse("2019-01-10T10:37:30.00Z"));
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        assertThat(fagsak.getSistOppdaterteBehandling()).isEqualTo(behandling);
+    }
+
+    @Test
+    public void getSistOppdaterteBehandling_medTreBehandlinger() {
+        Fagsak fagsak = new Fagsak();
+
+        Behandling sistOppdaterteBehandling = new Behandling();
+        sistOppdaterteBehandling.setEndretDato(Instant.parse("2019-01-10T10:37:30.00Z"));
+
+        Behandling behandling1 = new Behandling();
+        behandling1.setEndretDato(Instant.parse("2019-01-10T10:36:30.00Z"));
+
+        Behandling behandling2 = new Behandling();
+        behandling2.setEndretDato(Instant.parse("2019-01-09T10:37:30.00Z"));
+
+        fagsak.setBehandlinger(Arrays.asList(
+            sistOppdaterteBehandling,
+            behandling1,
+            behandling2
+        ));
+
+        assertThat(fagsak.getSistOppdaterteBehandling()).isEqualTo(sistOppdaterteBehandling);
+    }
+
+    @Test
+    public void getSistOppdaterteBehandling_ingenBehandlinger() {
+        assertThat(new Fagsak().getSistOppdaterteBehandling()).isNull();
     }
 
     @Test
