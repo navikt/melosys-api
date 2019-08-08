@@ -45,7 +45,8 @@ public class OppdaterMedlFelles {
 
         Set<Anmodningsperiode> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
         if (anmodningsperioder.size() != 1) {
-            throw new FunksjonellException("Det er enten ingen eller for mange anmodningsperioder for behandling " + behandling.getId());
+            throw new FunksjonellException("Fant "+ anmodningsperioder.size() +
+                " anmodningsperioder, forventet 1 for behandling " + behandling.getId());
         }
         return anmodningsperioder.iterator().next();
     }
