@@ -129,7 +129,8 @@ public class AvklartefaktaService {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingsid));
 
-        avklarteFaktaRepository.deleteByBehandlingsresultat(resultat);
+        avklarteFaktaRepository.deleteByBehandlingsresultatId(behandlingsid);
+        avklarteFaktaRepository.flush();
 
         List<Avklartefakta> avklartefaktaList = avklartefaktaDtos.stream()
             .map(avklartefaktaDto -> faktaKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, resultat))

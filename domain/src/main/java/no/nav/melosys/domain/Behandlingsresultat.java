@@ -3,6 +3,7 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
@@ -231,11 +232,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return !erAvslag();
     }
 
-    public boolean sedSkalSendes() {
-        return erInnvilgelse();
-    }
-
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
+        if (lovvalgsperioder.size() == 0) {
+            throw new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id);
+        }
         if (lovvalgsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en"
                 + " lovvalgsperiode er ikke støttet i første leveranse");

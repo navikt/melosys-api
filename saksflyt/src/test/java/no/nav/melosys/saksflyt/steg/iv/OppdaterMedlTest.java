@@ -2,19 +2,19 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,18 +31,14 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
-
     private OppdaterMedl agent;
 
     @Mock
     private MedlFasade medlFasade;
-
     @Mock
     private TpsFasade tpsFasade;
-
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LovvalgsperiodeRepository lovvalgsperiodeRepository;
 
@@ -54,8 +50,8 @@ public class OppdaterMedlTest {
     private Lovvalgsperiode lovvalgsperiode;
 
     @Before
-    public void setUp() {
-        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository, anmodningsperiodeRepository);
+    public void setUp() throws IkkeFunnetException {
+        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
         agent = new OppdaterMedl(medlFasade, felles);
 
         p = new Prosessinstans();
@@ -84,7 +80,7 @@ public class OppdaterMedlTest {
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstyper.SOEKNAD);
@@ -110,9 +106,9 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() {
+    public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() throws IkkeFunnetException {
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
-        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         agent.utførSteg(p);
         assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());

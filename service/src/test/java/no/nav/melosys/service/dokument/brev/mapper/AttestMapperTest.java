@@ -68,6 +68,7 @@ public class AttestMapperTest {
         behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
         when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Collections.singletonList(lovvalgsperiode)));
+        when(behandlingsresultat.hentValidertLovvalgsperiode()).thenReturn(lovvalgsperiode);
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
         boAdresse.gatenavn = "HjemmeGata";

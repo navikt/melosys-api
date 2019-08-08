@@ -43,6 +43,6 @@ public class IverksettVedtakSendSed extends AbstraktSendSed {
 
     @Override
     protected boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.sedSkalSendes();
+        return behandlingsresultat.erInnvilgelse();
     }
 }

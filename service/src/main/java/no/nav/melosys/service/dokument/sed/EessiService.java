@@ -11,7 +11,6 @@ import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -39,9 +38,7 @@ public class EessiService {
 
         if (skalSendeSed) {
             try {
-                Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().stream()
-                    .findFirst().orElseThrow(() -> new TekniskException("Finner ingen lovvalgsperiode!")); //TODO: flere lovvalgsperioder
-
+                Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
                 LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
                 Fagsak fagsak = behandling.getFagsak();
 
