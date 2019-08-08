@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.aou.svar;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
@@ -59,10 +58,10 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
     }
 
     private AnmodningsperiodeSvar opprettAnmodningsperiodeSvar(SvarAnmodningUnntak svar) {
-        final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
         AnmodningsperiodeSvarType svarType = hentSvarTypeFraBeslutning(svar.getBeslutning());
 
+        anmodningsperiodeSvar.setRegistrertDato(LocalDate.now());
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(svarType);
         anmodningsperiodeSvar.setBegrunnelseFritekst(svar.getBegrunnelse());
 
