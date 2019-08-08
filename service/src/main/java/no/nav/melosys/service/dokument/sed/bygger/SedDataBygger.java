@@ -3,10 +3,7 @@ package no.nav.melosys.service.dokument.sed.bygger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
@@ -18,6 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -27,7 +25,6 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,17 +34,14 @@ import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 @Service
 public class SedDataBygger extends AbstraktDokumentDataBygger {
-    private final AnmodningsperiodeService anmodningsperiodeService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     @Autowired
     public SedDataBygger(KodeverkService kodeverkService,
                          LovvalgsperiodeService lovvalgsperiodeService,
                          AvklartefaktaService avklartefaktaService,
-                         AnmodningsperiodeService anmodningsperiodeService,
                          @Qualifier("system") AvklarteVirksomheterService avklarteVirksomheterService) {
         super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
-        this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
@@ -162,32 +156,35 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         return adresse;
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode,
-                                                  Anmodningsperiode anmodningsperiode,
-                                                  String unntaksBegrunnelse) {
-        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
-        lovvalgsperiodeDto.setFom(lovvalgsperiode.getFom());
-        lovvalgsperiodeDto.setTom(lovvalgsperiode.getTom());
-        lovvalgsperiodeDto.setLovvalgsland(lovvalgsperiode.getLovvalgsland() != null ? lovvalgsperiode.getLovvalgsland().getKode() : null);
-        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(lovvalgsperiode.getBestemmelse()));
-        if (anmodningsperiode != null && anmodningsperiode.getUnntakFraLovvalgsland() != null) {
-            lovvalgsperiodeDto.setUnntakFraLovvalgsland(anmodningsperiode.getUnntakFraLovvalgsland().getKode());
-        }
-        if (anmodningsperiode != null && anmodningsperiode.getUnntakFraBestemmelse() != null) {
-            lovvalgsperiodeDto.setUnntakFraBestemmelse(LovvalgTilBestemmelseDtoMapper
-                .mapMelosysLovvalgTilBestemmelseDto(anmodningsperiode.getUnntakFraBestemmelse()));
-        }
-        lovvalgsperiodeDto.setUnntaksBegrunnelse(unntaksBegrunnelse);
+    private Lovvalgsperiode lagLovvalgsperiodeDto(Behandlingsresultat behandlingsresultat) throws FunksjonellException {
 
+        if (!behandlingsresultat.getLovvalgsperioder().isEmpty()) {
+            return lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode());
+        }
+
+        Anmodningsperiode anmodningsperiode = behandlingsresultat.getAnmodningsperioder().stream().findFirst()
+            .orElseThrow(() -> new FunksjonellException("Finner ingen lovvalgsperiode eller anmodningsperiode for behandling " + behandlingsresultat.getId()));
+        return lagLovvalgsperiodeDto(anmodningsperiode, hentUnntaksBegrunnelse(behandlingsresultat));
+    }
+
+    private Lovvalgsperiode lagLovvalgsperiodeDto(ErPeriodeMedBestemmelse periodeMedBestemmelse) {
+        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
+        lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
+        lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
+        lovvalgsperiodeDto.setLovvalgsland(periodeMedBestemmelse.getLovvalgsland() != null ? periodeMedBestemmelse.getLovvalgsland().getKode() : null);
+        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(periodeMedBestemmelse.getBestemmelse()));
         return lovvalgsperiodeDto;
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(Behandlingsresultat behandlingsresultat) throws FunksjonellException, TekniskException {
-        return lagLovvalgsperiodeDto(hentLovvalgsperiode(), hentAnmodningperiode(), hentUnntaksBegrunnelse(behandlingsresultat));
-    }
+    private Lovvalgsperiode lagLovvalgsperiodeDto(Anmodningsperiode anmodningsperiode, String unntaksBegrunnelse) {
+        Lovvalgsperiode lovvalgsperiodeDto = lagLovvalgsperiodeDto(anmodningsperiode);
 
-    private Anmodningsperiode hentAnmodningperiode() {
-        return anmodningsperiodeService.hentAnmodningsperioder(behandling.getId()).stream().findFirst().orElse(null);
+        lovvalgsperiodeDto.setUnntakFraLovvalgsland(anmodningsperiode.getUnntakFraLovvalgsland().getKode());
+        lovvalgsperiodeDto.setUnntakFraBestemmelse(LovvalgTilBestemmelseDtoMapper
+            .mapMelosysLovvalgTilBestemmelseDto(anmodningsperiode.getUnntakFraBestemmelse()));
+        lovvalgsperiodeDto.setUnntaksBegrunnelse(unntaksBegrunnelse);
+
+        return lovvalgsperiodeDto;
     }
 
     private List<Lovvalgsperiode> lagTidligereLovvalgsperioderDto(Behandling behandling)
@@ -197,7 +194,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
             lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
 
         tidligereLovvalgsperioder.stream()
-            .map(lovvalgsperiode -> lagLovvalgsperiodeDto(lovvalgsperiode, null, null))
+            .map(this::lagLovvalgsperiodeDto)
             .forEach(tidligereLovvalgsperioderDto::add);
 
         return tidligereLovvalgsperioderDto;

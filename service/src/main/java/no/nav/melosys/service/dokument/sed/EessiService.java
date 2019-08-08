@@ -6,10 +6,8 @@ import java.util.Map;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
@@ -38,14 +36,12 @@ public class EessiService {
 
         if (skalSendeSed) {
             try {
-                Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-                LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
                 Fagsak fagsak = behandling.getFagsak();
 
                 SedDataDto sedData = sedDataBygger.lag(behandling, behandlingsresultat);
                 sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
-                log.info("Oppretter buc og sed med artikkel {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
+                log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
                 Map<String, String> rinaSakInfo = eessiConsumer.opprettOgSendSed(sedData);
 
                 log.info("Buc opprettet med id {} for behandling {}", rinaSakInfo.get("rinaCaseId"), behandling.getId());
