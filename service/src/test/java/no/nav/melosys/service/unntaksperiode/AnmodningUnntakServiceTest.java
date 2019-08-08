@@ -52,7 +52,7 @@ public class AnmodningUnntakServiceTest {
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID);
 
-        verify(behandlingService).oppdaterStatus(eq(behandlingID), eq(Behandlingsstatus.AVVENT_DOK_UTL));
+        verify(behandlingService).oppdaterStatus(eq(behandlingID), eq(Behandlingsstatus.ANMODNING_UNNTAK_SENDT));
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
