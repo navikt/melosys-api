@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeListeDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -69,12 +70,15 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         when(anmodningsperiodeService.lagreAnmodningsperioder(anyLong(), anyCollection()))
             .thenReturn(mockAnmodninger);
 
+        AnmodningsperiodePostDto postDto = AnmodningsperiodePostDto.av(mockAnmodninger);
+
         AnmodningsperiodeListeDto anmodningsperiodeListeDto =
-            anmodningsperiodeTjeneste.lagreAnmodningsperioder(1L, AnmodningsperiodeListeDto.av(mockAnmodninger));
+            anmodningsperiodeTjeneste.lagreAnmodningsperioder(1L, AnmodningsperiodePostDto.av(mockAnmodninger));
 
         verify(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(anyLong(), anyCollection());
-        valider(ANMODNINGSPERIODER_POST_SCHEMA, anmodningsperiodeListeDto, logger);
+        valider(ANMODNINGSPERIODER_POST_SCHEMA, postDto, logger);
+        valider(ANMODNINGSPERIODER_GET_SCHEMA, anmodningsperiodeListeDto, logger);
     }
 
     @Test

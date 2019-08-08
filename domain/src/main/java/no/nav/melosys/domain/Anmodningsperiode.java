@@ -53,8 +53,8 @@ public class Anmodningsperiode implements ErPeriodeMedBestemmelse {
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
-    @Column(name = "sendt")
-    private boolean sendt;
+    @Column(name = "sendt_utland")
+    private boolean sendtUtland;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "anmodningsperiode")
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
@@ -141,11 +141,11 @@ public class Anmodningsperiode implements ErPeriodeMedBestemmelse {
     }
 
     public boolean erSendt() {
-        return sendt;
+        return sendtUtland;
     }
 
-    public void setSendt(boolean sendt) {
-        this.sendt = sendt;
+    public void setSendtUtland(boolean sendtUtland) {
+        this.sendtUtland = sendtUtland;
     }
 
     public AnmodningsperiodeSvar getAnmodningsperiodeSvar() {

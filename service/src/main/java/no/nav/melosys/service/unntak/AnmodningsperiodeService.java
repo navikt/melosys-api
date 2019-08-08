@@ -72,7 +72,7 @@ public class AnmodningsperiodeService {
 
     public void oppdaterAnmodningsperiodeSendtForBehandling(long behandlingID) throws FunksjonellException {
         Anmodningsperiode anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
-        anmodningsperiode.setSendt(true);
+        anmodningsperiode.setSendtUtland(true);
         anmodningsperiodeRepository.save(anmodningsperiode);
     }
 

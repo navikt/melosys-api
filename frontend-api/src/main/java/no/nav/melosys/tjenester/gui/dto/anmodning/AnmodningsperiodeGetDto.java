@@ -10,9 +10,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
 public final class AnmodningsperiodeGetDto extends AnmodningsperiodeDto {
-    public final String trygdeDekning;
-    public final String medlemskapsperiodeID;
-    public final boolean anmodningSaksflytSendt;
+    public final boolean sendtUtland;
 
     private AnmodningsperiodeGetDto(String id,
                                     PeriodeDto periodeDto,
@@ -23,20 +21,17 @@ public final class AnmodningsperiodeGetDto extends AnmodningsperiodeDto {
                                     Landkoder unntakFraLovvalgsland,
                                     Trygdedekninger trygdedekning,
                                     String medlemskapsperiodeID,
-                                    boolean erSendt) {
-        super(id, periodeDto, bestemmelse, tilleggsbestemmelse, lovvalgsland, unntakFraBestemmelse, unntakFraLovvalgsland);
-        this.trygdeDekning = trygdedekning != null ? trygdedekning.getKode() : null;
-        this.medlemskapsperiodeID = medlemskapsperiodeID;
-        this.anmodningSaksflytSendt = erSendt;
+                                    boolean sendtUtland) {
+        super(id, periodeDto, bestemmelse, tilleggsbestemmelse, lovvalgsland, unntakFraBestemmelse,
+            unntakFraLovvalgsland, trygdedekning, medlemskapsperiodeID);
+        this.sendtUtland = sendtUtland;
     }
 
     @JsonCreator
     @SuppressWarnings("unused")
     public AnmodningsperiodeGetDto(Map<String, String> json) {
         super(json);
-        this.trygdeDekning = json.get("trygdeDekning");
-        this.medlemskapsperiodeID = json.get("medlemskapsperiodeID");
-        this.anmodningSaksflytSendt = json.containsKey("anmodningSaksflytSendt") && Boolean.valueOf(json.get("anmodningSaksflytSendt"));
+        this.sendtUtland = json.containsKey("sendtUtland") && Boolean.valueOf(json.get("sendtUtland"));
     }
 
     public static AnmodningsperiodeGetDto av(Anmodningsperiode anmodningsperiode) {
