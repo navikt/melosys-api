@@ -67,7 +67,7 @@ public class OppdaterMedlTest {
 
         verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
-        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(), anyLong());
+        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
@@ -114,7 +114,7 @@ public class OppdaterMedlTest {
         oppdaterMedl.utfør(prosessinstans);
 
         verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
-        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(), anyLong());
+        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 

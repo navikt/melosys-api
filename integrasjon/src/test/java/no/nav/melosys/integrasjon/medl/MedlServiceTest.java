@@ -109,11 +109,10 @@ public class MedlServiceTest {
     @Test
     public void avvisPeriode_senderRequestMedKorrektAarsak() throws Exception {
         long periodeId = 10L;
-        lovvalgsperiode.setMedlPeriodeID(periodeId);
 
         ArgumentCaptor<AvvisPeriodeRequest> captor = ArgumentCaptor.forClass(AvvisPeriodeRequest.class);
 
-        medlService.avvisPeriode(lovvalgsperiode, StatusaarsakMedl.OPPHORT);
+        medlService.avvisPeriode(periodeId, StatusaarsakMedl.OPPHORT);
         verify(behandleMedlemskapV2).avvisPeriode(captor.capture());
 
         AvvisPeriodeRequest request = captor.getValue();

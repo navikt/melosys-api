@@ -1,12 +1,15 @@
 package no.nav.melosys.saksflyt.steg.aou;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collections;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -16,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -56,9 +60,9 @@ public class SendSedTest {
     }
 
     @Test
-    public void utfør_artikkel12_verifiserSedIkkeSendt() throws Exception {
+    public void utfør_ingenBestemmelse_verifiserSedIkkeSendt() throws Exception {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
-        behandlingsresultat.getLovvalgsperioder().iterator().next().setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        behandlingsresultat.setAnmodningsperioder(Collections.singleton(new Anmodningsperiode()));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(2L))).thenReturn(behandlingsresultat);
         prosessinstans.getBehandling().setId(2L);
         Instant nå = prosessinstans.getBehandling().getDokumentasjonSvarfristDato();
@@ -72,11 +76,10 @@ public class SendSedTest {
 
     private static Behandlingsresultat hentBehandlingsresultat() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
+            LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2, TilleggsBestemmelser_883_2004.FO_883_2004_ART11_5,
+            Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        behandlingsresultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         return behandlingsresultat;
     }

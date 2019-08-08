@@ -59,7 +59,7 @@ public class AvsluttTidligerePeriodeTest {
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligerePeriode.utfør(prosessinstans);
-        verify(medlFasade).avvisPeriode(any(Lovvalgsperiode.class), any(StatusaarsakMedl.class));
+        verify(medlFasade).avvisPeriode(any(), any(StatusaarsakMedl.class));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 

@@ -49,7 +49,6 @@ public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataB
 
         brevData.hovedvirksomhet = avklarteVirksomheter.iterator().next();
         brevData.arbeidsland = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        brevData.anmodningsperioder = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId());
 
         return brevData;
     }
