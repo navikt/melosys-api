@@ -68,7 +68,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("anmodningsperiode/{anmodningperiodeID}/svar")
+    @Path("anmodningsperioder/svar/{anmodningperiodeID}")
     @ApiOperation("Henter svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
     public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathParam("anmodningperiodeID") long anmodningperiodeID)
@@ -87,7 +87,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("anmodningsperiode/{anmodningperiodeID}/svar")
+    @Path("anmodningsperioder/svar/{anmodningperiodeID}")
     @ApiOperation("Lagrer svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
     public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathParam("anmodningperiodeID") long anmodningperiodeID,

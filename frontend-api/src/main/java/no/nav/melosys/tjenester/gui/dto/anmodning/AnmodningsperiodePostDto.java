@@ -10,6 +10,9 @@ public final class AnmodningsperiodePostDto {
 
     private List<AnmodningsperiodeDto> anmodningsperioder;
 
+    public AnmodningsperiodePostDto(){
+    }
+
     public AnmodningsperiodePostDto(Collection<Anmodningsperiode> anmodningsperioder) {
         this.anmodningsperioder = anmodningsperioder.stream()
             .map(AnmodningsperiodeDto::av)
