@@ -17,11 +17,8 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -32,13 +29,10 @@ import static org.jeasy.random.FieldPredicates.named;
 import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("resource")
 public class SoeknadTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(SoeknadTjenesteTest.class);
 
     private SoeknadTjeneste soeknadTjeneste;
@@ -107,18 +101,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
 
         ObjectMapper mapper = objectMapperMedKodeverkServiceStub();
         String jsonInString = mapper.writeValueAsString(søknadDto);
-
-        try {
-            Schema schema = hentSchema();
-            schema.validate(new JSONObject(jsonInString));
-
-        } catch (ValidationException e) {
-            log.error("Feil ved validering schema for Søknad dokument");
-            e.getCausingExceptions().stream()
-                .map(ValidationException::toJSON)
-                .forEach(jsonObject -> log.error(jsonObject.toString()));
-            throw e;
-        }
+        valider(jsonInString, log);
     }
 
     @Test(expected = FunksjonellException.class)

@@ -14,16 +14,15 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SedDataByggerTest {
@@ -33,8 +32,6 @@ public class SedDataByggerTest {
     RegisterOppslagService registerOppslagService;
     @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    AnmodningsperiodeService anmodningsperiodeService;
     @Mock
     AvklartefaktaService avklartefaktaService;
 
@@ -54,12 +51,6 @@ public class SedDataByggerTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1L));
         lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
-
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setUnntakFraLovvalgsland(Landkoder.SE);
-        anmodningsperiode.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
-        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
 
         behandlingsresultat = new Behandlingsresultat();
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
@@ -69,10 +60,14 @@ public class SedDataByggerTest {
         behandlingsresultat.setVilkaarsresultater(Collections.singleton(vilkaarsresultat));
         lovvalgsperiode.setBehandlingsresultat(behandlingsresultat);
 
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
+            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A);
+        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
+
         behandling = DataByggerStubs.hentBehandlingStub();
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        dataBygger = new SedDataBygger(kodeverkService, lovvalgsperiodeService, avklartefaktaService, anmodningsperiodeService, avklarteVirksomheterService);
+        dataBygger = new SedDataBygger(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
     }
 
     @Test

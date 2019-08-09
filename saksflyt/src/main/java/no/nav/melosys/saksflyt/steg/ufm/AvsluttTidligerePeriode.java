@@ -8,10 +8,10 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
+import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
         if (tidligereBehandling != null) {
             log.info("Avslutter tidligere periode for fagsak {}", fagsak.getSaksnummer());
             Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(tidligereBehandling);
-            medlFasade.avvisPeriode(lovvalgsperiode, StatusaarsakMedl.AVVIST);
+            medlFasade.avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
         }
     }
 }

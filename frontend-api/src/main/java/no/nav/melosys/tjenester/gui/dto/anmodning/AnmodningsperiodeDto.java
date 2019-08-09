@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.periode;
+package no.nav.melosys.tjenester.gui.dto.anmodning;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -9,9 +9,10 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
-public final class AnmodningsperiodeDto {
-
+public class AnmodningsperiodeDto {
     private static final LovvalgBestemmelsekonverterer konverterer = new LovvalgBestemmelsekonverterer();
 
     public final String id;
@@ -22,16 +23,19 @@ public final class AnmodningsperiodeDto {
     public final String lovvalgsland;
     public final String unntakFraBestemmelse;
     public final String unntakFraLovvalgsland;
+    public final String trygdeDekning;
     public final String medlemskapsperiodeID;
 
-    private AnmodningsperiodeDto(String id,
-                              PeriodeDto periode,
-                              LovvalgBestemmelse lovvalgBestemmelse,
-                              LovvalgBestemmelse tilleggBestemmelse,
-                              Landkoder lovvalgsland,
-                              LovvalgBestemmelse unntakFraBestemmelse,
-                              Landkoder unntakFraLovvalgsland,
-                              String medlemskapsperiodeID) {
+
+    protected AnmodningsperiodeDto(String id,
+                                   PeriodeDto periode,
+                                   LovvalgBestemmelse lovvalgBestemmelse,
+                                   LovvalgBestemmelse tilleggBestemmelse,
+                                   Landkoder lovvalgsland,
+                                   LovvalgBestemmelse unntakFraBestemmelse,
+                                   Landkoder unntakFraLovvalgsland,
+                                   Trygdedekninger trygdeDekning,
+                                   String medlemskapsperiodeID) {
         this.id = id;
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
@@ -39,6 +43,7 @@ public final class AnmodningsperiodeDto {
         this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
+        this.trygdeDekning = trygdeDekning != null ? trygdeDekning.name() : null;
         this.medlemskapsperiodeID = medlemskapsperiodeID;
     }
 
@@ -52,6 +57,7 @@ public final class AnmodningsperiodeDto {
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
             konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
+            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
             json.get("medlemskapsperiodeID"));
     }
 
@@ -63,18 +69,17 @@ public final class AnmodningsperiodeDto {
             anmodningsperiode.getLovvalgsland(),
             anmodningsperiode.getUnntakFraBestemmelse(),
             anmodningsperiode.getUnntakFraLovvalgsland(),
+            anmodningsperiode.getDekning(),
             anmodningsperiode.getMedlPeriodeID() != null ? anmodningsperiode.getMedlPeriodeID().toString() : null);
     }
 
     public final Anmodningsperiode til() {
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(periode.getFom(), periode.getTom(),
+        return new Anmodningsperiode(periode.getFom(), periode.getTom(),
             enumVerdiEllerNull(Landkoder.class, lovvalgsland),
             konverterer.convertToEntityAttribute(lovvalgBestemmelse),
             konverterer.convertToEntityAttribute(tilleggBestemmelse),
             enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland),
             konverterer.convertToEntityAttribute(unntakFraBestemmelse));
-        anmodningsperiode.setMedlPeriodeID(medlemskapsperiodeID != null ? Long.valueOf(medlemskapsperiodeID) : null);
-        return anmodningsperiode;
     }
 
     private static LovvalgBestemmelse konverterLovvalgsBestemmelse(String bestemmelsesnavn) {

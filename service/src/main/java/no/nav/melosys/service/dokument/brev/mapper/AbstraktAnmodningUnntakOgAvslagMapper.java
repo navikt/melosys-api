@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,7 +10,6 @@ import no.nav.dok.melosysbrev._000081.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.TekniskException;
@@ -50,7 +48,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
         }
 
         fag.setArbeidsland(brevData.arbeidsland);
-        fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat, brevData.anmodningsperioder));
+        fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
@@ -88,14 +86,11 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             .findFirst();
     }
 
-    private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat, Collection<Anmodningsperiode> anmodningsperioder) {
+    LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
+
         Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
 
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
-
-        String unntakFraLovvalgslandTekst = anmodningsperioder.stream().findFirst()
-            .map(Anmodningsperiode::getUnntakFraLovvalgsland).map(Landkoder::getBeskrivelse).orElse(null);
-        lovvalgsperiodeType.setUnntakFraLovvalgsland(unntakFraLovvalgslandTekst);
 
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));

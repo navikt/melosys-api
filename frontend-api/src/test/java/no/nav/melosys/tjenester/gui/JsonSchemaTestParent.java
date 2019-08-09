@@ -34,10 +34,9 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 public class JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(JsonSchemaTestParent.class);
 
-    protected static final String FEILMELDING = "Schemavalidering feilet for schema {}";
+    private static final String FEILMELDING = "Schemavalidering feilet for schema {}";
 
     private static ObjectMapper objectMapper;
 
@@ -77,10 +76,6 @@ public class JsonSchemaTestParent {
             easyRandom = new EasyRandom(defaultEasyRandomParameters());
         }
         return easyRandom;
-    }
-
-    protected Schema hentSchema() throws IOException, JSONException {
-        return hentSchema(schemaNavn());
     }
 
     protected Schema hentSchema(String schemaNavn) throws IOException, JSONException {
@@ -123,21 +118,29 @@ public class JsonSchemaTestParent {
         valider(o, getLogger());
     }
 
-    protected void valider(String s) throws IOException {
-        valider(s, getLogger());
+    protected void valider(String json) throws IOException {
+        valider(schemaNavn(), json, getLogger());
     }
 
-    protected void valider(Object o, Logger log) throws IOException {
-        String jsonInString = objectMapper().writeValueAsString(o);
-        valider(jsonInString, log);
+    protected void valider(Object o, Logger logger) throws IOException {
+        valider(schemaNavn(), o, logger);
     }
 
-    protected void valider(String s, Logger log) throws IOException {
+    protected void valider(String json, Logger logger) throws IOException {
+        valider(schemaNavn(), json, logger);
+    }
+
+    protected void valider(String schemaNavn, Object o, Logger logger) throws IOException {
+        String jsonString = objectMapper().writeValueAsString(o);
+        valider(schemaNavn, jsonString, logger);
+    }
+
+    protected void valider(String schemaNavn, String json, Logger logger) throws IOException {
         try {
-            Schema schema = hentSchema();
-            schema.validate(new JSONObject(s));
+            Schema schema = hentSchema(schemaNavn);
+            schema.validate(new JSONObject(json));
         } catch (ValidationException e) {
-            formaterFeil(e, log);
+            formaterFeil(e, logger);
         }
     }
 
@@ -148,7 +151,7 @@ public class JsonSchemaTestParent {
     protected void validerListe(Collection liste, Logger log) throws IOException {
         String json = objectMapper().writeValueAsString(liste);
         try {
-            Schema schema = hentSchema();
+            Schema schema = hentSchema(schemaNavn());
             schema.validate(new JSONArray(json));
         } catch (ValidationException e) {
             formaterFeil(e, log);

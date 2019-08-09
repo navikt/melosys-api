@@ -26,8 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AnmodningsperiodeServiceTest {
@@ -145,5 +144,15 @@ public class AnmodningsperiodeServiceTest {
         expectedException.expectMessage("Begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
+    }
+
+    @Test
+    public void oppdaterAnmodningsperiodeSendtForBehandling_verifiserOppdatert() throws FunksjonellException {
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        when(anmodningsperiodeRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
+        anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(1L);
+
+        assertThat(anmodningsperiode.erSendt()).isTrue();
+        verify(anmodningsperiodeRepository).save(anmodningsperiode);
     }
 }

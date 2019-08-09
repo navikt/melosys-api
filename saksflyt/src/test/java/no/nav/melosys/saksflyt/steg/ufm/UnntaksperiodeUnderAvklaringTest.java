@@ -63,7 +63,7 @@ public class UnntaksperiodeUnderAvklaringTest {
         unntaksperiodeUnderAvklaring.utfør(prosessinstans);
 
         verify(medlFasade).opprettPeriodeUnderAvklaring(any(), any(Lovvalgsperiode.class), any());
-        verify(felles).lagreMedlPeriodeId(anyLong(), any(), anyLong());
+        verify(felles).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class UnntaksperiodeUnderAvklaringTest {
         unntaksperiodeUnderAvklaring.utfør(prosessinstans);
 
         verify(medlFasade).opprettPeriodeUnderAvklaring(any(), any(Lovvalgsperiode.class), any());
-        verify(felles).lagreMedlPeriodeId(anyLong(), any(), anyLong());
+        verify(felles).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class UnntaksperiodeUnderAvklaringTest {
         unntaksperiodeUnderAvklaring.utfør(prosessinstans);
 
         verify(medlFasade, never()).opprettPeriodeUnderAvklaring(any(), any(Lovvalgsperiode.class), any());
-        verify(felles, never()).lagreMedlPeriodeId(anyLong(), any(), anyLong());
+        verify(felles, never()).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
     }
 
     private Saksopplysning hentSedSaksopplysning(LocalDate fom, LocalDate tom) {

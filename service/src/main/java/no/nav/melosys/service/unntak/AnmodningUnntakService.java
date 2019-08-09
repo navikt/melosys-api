@@ -30,7 +30,7 @@ public class AnmodningUnntakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void anmodningOmUnntak(long behandlingID) throws FunksjonellException, TekniskException {
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_UTL);
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);

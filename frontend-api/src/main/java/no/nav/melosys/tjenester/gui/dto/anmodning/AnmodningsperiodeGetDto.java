@@ -1,0 +1,49 @@
+package no.nav.melosys.tjenester.gui.dto.anmodning;
+
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
+
+public final class AnmodningsperiodeGetDto extends AnmodningsperiodeDto {
+    public final boolean sendtUtland;
+
+    private AnmodningsperiodeGetDto(String id,
+                                    PeriodeDto periodeDto,
+                                    LovvalgBestemmelse bestemmelse,
+                                    LovvalgBestemmelse tilleggsbestemmelse,
+                                    Landkoder lovvalgsland,
+                                    LovvalgBestemmelse unntakFraBestemmelse,
+                                    Landkoder unntakFraLovvalgsland,
+                                    Trygdedekninger trygdedekning,
+                                    String medlemskapsperiodeID,
+                                    boolean sendtUtland) {
+        super(id, periodeDto, bestemmelse, tilleggsbestemmelse, lovvalgsland, unntakFraBestemmelse,
+            unntakFraLovvalgsland, trygdedekning, medlemskapsperiodeID);
+        this.sendtUtland = sendtUtland;
+    }
+
+    @JsonCreator
+    @SuppressWarnings("unused")
+    public AnmodningsperiodeGetDto(Map<String, String> json) {
+        super(json);
+        this.sendtUtland = json.containsKey("sendtUtland") && Boolean.valueOf(json.get("sendtUtland"));
+    }
+
+    public static AnmodningsperiodeGetDto av(Anmodningsperiode anmodningsperiode) {
+        return new AnmodningsperiodeGetDto(anmodningsperiode.getId().toString(),
+            new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
+            anmodningsperiode.getBestemmelse(),
+            anmodningsperiode.getTilleggsbestemmelse(),
+            anmodningsperiode.getLovvalgsland(),
+            anmodningsperiode.getUnntakFraBestemmelse(),
+            anmodningsperiode.getUnntakFraLovvalgsland(),
+            anmodningsperiode.getDekning(),
+            anmodningsperiode.getMedlPeriodeID() != null ? anmodningsperiode.getMedlPeriodeID().toString() : null,
+            anmodningsperiode.erSendt());
+    }
+}

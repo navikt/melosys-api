@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000084.BrevdataType;
 import no.nav.dok.melosysbrev._000084.Fag;
@@ -10,17 +11,20 @@ import no.nav.dok.melosysbrev._000084.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AnmodningBegrunnelseKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
+
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 
 public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper {
+
+    private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakMapper.class);
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000084.xsd";
 
@@ -78,6 +82,24 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
         lovvalgsperiodeType.setFomDato(lovvalgsperiodeType000081.getFomDato());
         lovvalgsperiodeType.setTomDato(lovvalgsperiodeType000081.getTomDato());
         lovvalgsperiodeType.setUnntakFraLovvalgsland(lovvalgsperiodeType000081.getUnntakFraLovvalgsland());
+        return lovvalgsperiodeType;
+    }
+
+    no.nav.dok.melosysbrev._000081.LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
+
+        Anmodningsperiode anmodningsperiode = resultat.getAnmodningsperioder()
+            .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen anmodningsperiode funnet for behandlingsresultat " + resultat.getId()));
+
+        no.nav.dok.melosysbrev._000081.LovvalgsperiodeType lovvalgsperiodeType = new no.nav.dok.melosysbrev._000081.LovvalgsperiodeType();
+
+        lovvalgsperiodeType.setUnntakFraLovvalgsland(anmodningsperiode.getUnntakFraLovvalgsland().getKode());
+
+        try {
+            lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(anmodningsperiode.getFom()));
+            lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(anmodningsperiode.getTom()));
+        } catch (DatatypeConfigurationException e) {
+            log.error("", e);
+        }
         return lovvalgsperiodeType;
     }
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import com.google.common.collect.Sets;
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
@@ -91,7 +92,7 @@ public class AnmodningUnntakMapperTest {
         Anmodningsperiode anmodningsperiode =
             new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO, null, null, Landkoder.DE,
                 null);
-        brevData.anmodningsperioder = Collections.singletonList(anmodningsperiode);
+        resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
 
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();

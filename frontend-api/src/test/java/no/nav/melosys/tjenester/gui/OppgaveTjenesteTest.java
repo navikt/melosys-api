@@ -21,9 +21,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
-import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +37,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppgaveTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 
     private static final String OPPGAVER_OVERSIKT_SCHEMA = "oppgaver-oversikt-schema.json";
@@ -80,16 +77,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         Response response = tjeneste.mineOppgaver();
 
         OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getEntity();
-
-        String jsonString = objectMapper().writeValueAsString(oppgaveOversikt);
-
-        try {
-            schemaType = OPPGAVER_OVERSIKT_SCHEMA;
-            hentSchema().validate(new JSONObject(jsonString));
-        } catch (ValidationException e) {
-            logger.error(e.toJSON().toString());
-            throw e;
-        }
+        valider(OPPGAVER_OVERSIKT_SCHEMA, oppgaveOversikt, logger);
     }
 
     @Test

@@ -52,13 +52,24 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "utfall_registrering_unntak")
     private UtfallRegistreringUnntak utfallRegistreringUnntak;
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandlingsresultat",
+        cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE},
+        orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandlingsresultat",
+        cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE},
+        fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Lovvalgsperiode> lovvalgsperioder = new HashSet<>(1);
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandlingsresultat",
+        cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE},
+        fetch = FetchType.EAGER)
+    private Set<Anmodningsperiode> anmodningsperioder = new HashSet<>(1);
+
+    @OneToMany(mappedBy = "behandlingsresultat",
+        cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE},
+        fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -142,6 +153,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setLovvalgsperioder(Set<Lovvalgsperiode> lovvalgsperioder) {
         this.lovvalgsperioder = lovvalgsperioder;
+    }
+
+    public Set<Anmodningsperiode> getAnmodningsperioder() {
+        return anmodningsperioder;
+    }
+
+    public void setAnmodningsperioder(Set<Anmodningsperiode> anmodningsperioder) {
+        this.anmodningsperioder = anmodningsperioder;
     }
 
     public Set<Vilkaarsresultat> getVilkaarsresultater() {
