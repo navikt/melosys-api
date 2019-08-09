@@ -27,6 +27,8 @@ public class SedDataDto {
     private String mottakerLand;
     private String mottakerId;
 
+    private boolean erUtkast;
+
     public List<Ident> getUtenlandskIdent() {
         return utenlandskIdent;
     }
@@ -129,5 +131,13 @@ public class SedDataDto {
 
     public void setMottakerId(String mottakerId) {
         this.mottakerId = mottakerId;
+    }
+
+    public boolean isErUtkast() {
+        return erUtkast;
+    }
+
+    public void setErUtkast(boolean erUtkast) {
+        this.erUtkast = erUtkast;
     }
 }

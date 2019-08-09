@@ -61,12 +61,20 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         return sedDataDto;
     }
 
-    public SedDataDto lagUtkast(Behandling behandling) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public SedDataDto lagUtkast(Behandling behandling) throws TekniskException, FunksjonellException {
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
 
-        return lagPersonopplysninger(behandling);
+        SedDataDto sedDataDto = lagPersonopplysninger(behandling);
+        sedDataDto.setErUtkast(true);
+
+        try {
+            sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(hentLovvalgsperiode())));
+        } catch (TekniskException e) {
+            sedDataDto.setLovvalgsperioder(Collections.emptyList());
+        }
+        return sedDataDto;
     }
 
     private SedDataDto lagPersonopplysninger(Behandling behandling) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
