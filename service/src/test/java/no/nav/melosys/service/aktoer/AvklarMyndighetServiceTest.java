@@ -36,8 +36,6 @@ public class AvklarMyndighetServiceTest {
     private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     @Mock
     private FagsakService fagsakService;
-    @Mock
-    private AktoerService aktoerService;
 
     private AvklarMyndighetService avklarMyndighetService;
 
@@ -50,7 +48,7 @@ public class AvklarMyndighetServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        avklarMyndighetService = new AvklarMyndighetService(utenlandskMyndighetRepository, landvelgerService, fagsakService, aktoerService);
+        avklarMyndighetService = new AvklarMyndighetService(utenlandskMyndighetRepository, landvelgerService, fagsakService);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("123");
@@ -62,7 +60,6 @@ public class AvklarMyndighetServiceTest {
         utenlandskMyndighet.institusjonskode = "IT123";
         utenlandskMyndighet.land = "IT";
 
-        when(fagsakService.hentFagsak(eq("123"))).thenReturn(fagsak);
         when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.IT))).thenReturn(Optional.of(utenlandskMyndighet));
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(any(Behandling.class))).thenReturn(Collections.singletonList(Landkoder.IT));
 
@@ -80,7 +77,7 @@ public class AvklarMyndighetServiceTest {
     public void avklarMyndighetOgLagre_forventkorrektInstitusjonsId() throws Exception {
         avklarMyndighetService.avklarUtenlandskMyndighetOgLagre(behandling);
 
-        verify(aktoerService).erstattEksisterendeMyndighetsaktører(eq(behandling.getFagsak()), stringListArgumentCaptor.capture());
+        verify(fagsakService).leggTilFjernAktørerForMyndighet(eq(behandling.getFagsak().getSaksnummer()), stringListArgumentCaptor.capture());
         assertThat(stringListArgumentCaptor.getValue()).containsExactly(forventetInstitusjonId);
     }
 }

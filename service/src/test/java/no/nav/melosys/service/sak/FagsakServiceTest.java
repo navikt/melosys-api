@@ -3,13 +3,15 @@ package no.nav.melosys.service.sak;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -24,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -79,11 +82,7 @@ public class FagsakServiceTest {
 
     @Test
     public void lagre() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setRegistrertDato(Instant.now());
+        Fagsak fagsak = lagFagsak("12345");
         fagsakService.lagre(fagsak);
         verify(fagsakRepo).save(fagsak);
         assertThat(fagsak).isNotNull();
@@ -192,10 +191,8 @@ public class FagsakServiceTest {
 
     @Test
     public void avsluttSakSomBortfalt_harFagsakMedFlereBehandlinger_AvslutterAlleBehandlingerOgSetterFagsakstatusTilHENLAGT_BORTFALT() throws FunksjonellException, TekniskException {
-        Fagsak fagsak = new Fagsak();
         String saksnummer = "saksnummer";
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        Fagsak fagsak = lagFagsak(saksnummer);
         Behandling førsteBehandling = new Behandling();
         førsteBehandling.setId(1L);
         førsteBehandling.setStatus(Behandlingsstatus.OPPRETTET);
@@ -211,5 +208,44 @@ public class FagsakServiceTest {
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT_BORTFALT);
         assertThat(fagsak.getBehandlinger()).allSatisfy(behandling -> assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
+    }
+
+    @Test
+    public void leggTilFjernAktørerForMyndighet() {
+        String saksnummer = "1234";
+        Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(eksisterendeFagsak);
+
+        List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
+        fagsakService.leggTilFjernAktørerForMyndighet(saksnummer, nyeInstitusjonsIder);
+
+        ArgumentCaptor<Fagsak> captor = ArgumentCaptor.forClass(Fagsak.class);
+        verify(fagsakRepo).save(captor.capture());
+        Fagsak oppdaterFagsak = captor.getValue();
+        assertThat(oppdaterFagsak.getAktører().stream()
+            .map(Aktoer::getInstitusjonId)
+            .collect(Collectors.toList())).containsOnlyElementsOf(nyeInstitusjonsIder);
+    }
+
+    private Fagsak lagFagsakMedAktørforMyndighet(String saksnummer, String id) {
+        Fagsak fagsak = lagFagsak(saksnummer);
+
+        Aktoer aktoer = new Aktoer();
+        aktoer.setInstitusjonId(id);
+        aktoer.setFagsak(fagsak);
+        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));
+        return fagsak;
+    }
+
+    private Fagsak lagFagsak(String saksnummer) {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(123L);
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setRegistrertDato(Instant.now());
+        fagsak.setEndretDato(Instant.now());
+        return fagsak;
     }
 }

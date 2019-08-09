@@ -92,19 +92,4 @@ public class AktoerService {
 
         aktørRepository.save(aktør);
     }
-
-    @Transactional
-    public void erstattEksisterendeMyndighetsaktører(Fagsak fagsak, Collection<String> idnumre) {
-        aktørRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.MYNDIGHET);
-        for (String idnummer : idnumre) {
-            lagMyndighetsAktør(fagsak, idnummer);
-        }
-    }
-
-    private void lagMyndighetsAktør(Fagsak fagsak, String idNummer) {
-        Aktoer aktør = new Aktoer();
-        aktør.setFagsak(fagsak);
-        aktør.setRolle(Aktoersroller.MYNDIGHET);
-        aktør.setInstitusjonId(idNummer);
-    }
 }

@@ -131,6 +131,14 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Returnerer en aktør med angitt {@link Aktoersroller} knyttet til saken eller {@code null} hvis ingen finnes.
      */
+    private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
+        Collection<Aktoer> kandidater = hentAktørerMedRolleType(rolleType);
+        if (kandidater.size() > 1) {
+            throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
+        }
+        return kandidater.stream().findFirst().orElse(null);
+    }
+
     private List<Aktoer> hentAktørerMedRolleType(Aktoersroller rolleType) {
         if (rolleType == null) {
             return Collections.emptyList();
@@ -138,14 +146,6 @@ public class Fagsak extends RegistreringsInfo {
         return aktører.stream()
             .filter(a -> rolleType.equals(a.getRolle()))
             .collect(Collectors.toList());
-    }
-
-    private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
-        Collection<Aktoer> kandidater = hentAktørerMedRolleType(rolleType);
-        if (kandidater.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
-        }
-        return kandidater.stream().findFirst().orElse(null);
     }
 
     public boolean harAktørMedRolleType(Aktoersroller rolleType) {

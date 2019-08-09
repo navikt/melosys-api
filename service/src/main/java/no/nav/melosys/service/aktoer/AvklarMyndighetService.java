@@ -6,7 +6,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -23,15 +22,12 @@ public class AvklarMyndighetService {
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
-    private final AktoerService aktoerService;
 
     public AvklarMyndighetService(UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                                  LandvelgerService landvelgerService, FagsakService fagsakService,
-                                  AktoerService aktoerService) {
+                                  LandvelgerService landvelgerService, FagsakService fagsakService) {
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.landvelgerService = landvelgerService;
         this.fagsakService = fagsakService;
-        this.aktoerService = aktoerService;
     }
 
     public void avklarUtenlandskMyndighetOgLagre(Behandling behandling) throws TekniskException, IkkeFunnetException {
@@ -41,9 +37,8 @@ public class AvklarMyndighetService {
             throw new TekniskException("Mangler myndighetsland for sak " + saksnummer);
         }
 
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
-        aktoerService.erstattEksisterendeMyndighetsaktører(fagsak, institusjonsIder);
+        fagsakService.leggTilFjernAktørerForMyndighet(saksnummer, institusjonsIder);
     }
 
     private Collection<String> konverterLandkodeTilInstitusjonsId(Collection<Landkoder> landkoder) throws TekniskException {
