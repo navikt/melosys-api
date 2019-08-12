@@ -61,10 +61,7 @@ public class SendSed extends AbstraktSendSed {
 
     @Override
     protected boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
-        if (behandlingsresultat.getAnmodningsperioder().size() > 1) {
-            throw new UnsupportedOperationException("Flere enn en anmodningsperiode er ikke støttet");
-        }
-        Anmodningsperiode anmodningsperiode = behandlingsresultat.getAnmodningsperioder().iterator().next();
+        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
         return behandlingsresultat.getType() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK
             && (anmodningsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1
             || anmodningsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2);

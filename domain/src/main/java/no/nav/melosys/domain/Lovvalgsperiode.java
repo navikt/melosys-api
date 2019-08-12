@@ -14,7 +14,7 @@ import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
 
 @Entity
 @Table(name = "lovvalg_periode")
-public class Lovvalgsperiode implements ErPeriodeMedBestemmelse {
+public class Lovvalgsperiode implements Medlemskapsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

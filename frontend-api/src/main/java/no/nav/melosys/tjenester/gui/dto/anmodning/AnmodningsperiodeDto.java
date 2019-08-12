@@ -79,7 +79,8 @@ public class AnmodningsperiodeDto {
             konverterer.convertToEntityAttribute(lovvalgBestemmelse),
             konverterer.convertToEntityAttribute(tilleggBestemmelse),
             enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland),
-            konverterer.convertToEntityAttribute(unntakFraBestemmelse));
+            konverterer.convertToEntityAttribute(unntakFraBestemmelse),
+            enumVerdiEllerNull(Trygdedekninger.class, trygdeDekning));
     }
 
     private static LovvalgBestemmelse konverterLovvalgsBestemmelse(String bestemmelsesnavn) {

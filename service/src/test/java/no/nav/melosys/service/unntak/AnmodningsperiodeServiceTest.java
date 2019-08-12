@@ -5,21 +5,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -36,6 +35,8 @@ public class AnmodningsperiodeServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
+    @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
     private AnmodningsperiodeService anmodningsperiodeService;
 
     @Rule
@@ -43,7 +44,7 @@ public class AnmodningsperiodeServiceTest {
 
     @Before
     public void setUp() {
-        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository, behandlingsresultatService, anmodningsperiodeSvarRepository);
+        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository, behandlingsresultatService, anmodningsperiodeSvarRepository, lovvalgsperiodeService);
     }
 
     @Test
@@ -64,7 +65,7 @@ public class AnmodningsperiodeServiceTest {
     public void lagreAnmodningsperioder_ingenSvarRegistrert_mottarLagredePerioder() throws FunksjonellException {
         long behandlingID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A);
+            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
         Collection<Anmodningsperiode> anmodningperioder = Collections.singleton(anmodningsperiode);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(anmodningsperiodeRepository.findByBehandlingsresultatId(2)).thenReturn(Collections.singletonList(anmodningsperiode));
@@ -78,7 +79,7 @@ public class AnmodningsperiodeServiceTest {
     public void lagreAnmodningsperioder_svarErRegistrert_forventFunksjonellException() throws FunksjonellException {
         long behandlingID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A);
+            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
 
         expectedException.expect(FunksjonellException.class);
@@ -90,7 +91,7 @@ public class AnmodningsperiodeServiceTest {
     public void lagreAnmodningsperiodeSvar_svarErInnvilgelse_lagrerAnmodningsperiodeSvar() throws FunksjonellException {
         long anmodningsperiodeID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A);
+            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.INNVILGELSE);
@@ -105,43 +106,42 @@ public class AnmodningsperiodeServiceTest {
     public void lagreAnmodningsperiodeSvar_svarErDelvisInnvilgelseIngenPeriode_forventFunksjonellException() throws FunksjonellException {
         long anmodningsperiodeID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A);
+            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
         when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Periode og begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
+        expectedException.expectMessage("Periode må være fyllt ut ved " + AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
     }
 
     @Test
-    public void lagreAnmodningsperiodeSvar_svarErAvslagIngenBegrunnelse_forventFunksjonellException() throws FunksjonellException {
+    public void lagreAnmodningsperiodeSvar_svarErAvslag_ingenFeil() throws FunksjonellException {
         long anmodningsperiodeID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A);
+            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.AVSLAG);
         when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
+
+        verify(anmodningsperiodeSvarRepository).save(svar);
     }
 
     @Test
     public void lagreAnmodningsperiodeSvar_svarManglerType_forventFunksjonellException() throws FunksjonellException {
         long anmodningsperiodeID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A);
+            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
-        svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.AVSLAG);
         when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
+        expectedException.expectMessage("Må spesifiseres svarType for svar på anmodningsperiode");
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
     }
@@ -152,7 +152,79 @@ public class AnmodningsperiodeServiceTest {
         when(anmodningsperiodeRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(1L);
 
-        assertThat(anmodningsperiode.erSendt()).isTrue();
+        assertThat(anmodningsperiode.erSendtUtland()).isTrue();
         verify(anmodningsperiodeRepository).save(anmodningsperiode);
+    }
+
+    @Test
+    public void opprettLovvalgsperiodeFraAnmodningsperiode_innvilgelse_verifiserLovvalgsperiodeLagret() throws FunksjonellException, TekniskException {
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(1L);
+
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setBehandlingsresultat(behandlingsresultat);
+        AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
+        svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.INNVILGELSE);
+        anmodningsperiode.setAnmodningsperiodeSvar(svar);
+        when(anmodningsperiodeRepository.findByBehandlingsresultatId(1L)).thenReturn(Collections.singletonList(anmodningsperiode));
+
+        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(1L , Medlemskapstyper.PLIKTIG);
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), anyCollection());
+    }
+
+    @Test
+    public void opprettLovvalgsperiodeFraAnmodningsperiode_delvisInnvilgelse_verifiserLovvalgsperiodeLagret() throws FunksjonellException, TekniskException {
+
+        LocalDate nå = LocalDate.now();
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
+        anmodningsperiodeSvar.setInnvilgetFom(nå);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(1L);
+
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
+        anmodningsperiode.setBehandlingsresultat(behandlingsresultat);
+        when(anmodningsperiodeRepository.findByBehandlingsresultatId(1L)).thenReturn(Collections.singletonList(anmodningsperiode));
+
+        ArgumentCaptor<Collection<Lovvalgsperiode>> captor = ArgumentCaptor.forClass(Collection.class);
+
+        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(1L, Medlemskapstyper.PLIKTIG);
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), captor.capture());
+
+        Lovvalgsperiode lovvalgsperiode = captor.getValue().stream().findFirst()
+            .orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode registrert"));
+
+        assertThat(lovvalgsperiode.getFom()).isEqualTo(anmodningsperiodeSvar.getInnvilgetFom());
+    }
+
+    @Test
+    public void opprettLovvalgsperiode_avslag_verifiserLovvalgsperiodeLagretMedResultatAvslaatt() throws FunksjonellException, TekniskException {
+        LocalDate nå = LocalDate.now();
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.AVSLAG);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(1L);
+
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(nå, nå.plusYears(1), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
+            null, Landkoder.SE, null, null);
+        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
+        anmodningsperiode.setBehandlingsresultat(behandlingsresultat);
+
+        when(anmodningsperiodeRepository.findByBehandlingsresultatId(1L)).thenReturn(Collections.singletonList(anmodningsperiode));
+
+        ArgumentCaptor<Collection<Lovvalgsperiode>> captor = ArgumentCaptor.forClass(Collection.class);
+
+        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(1L, Medlemskapstyper.PLIKTIG);
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), captor.capture());
+
+        Lovvalgsperiode lovvalgsperiode = captor.getValue().stream().findFirst()
+            .orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode registrert"));
+
+        assertThat(lovvalgsperiode.getFom()).isEqualTo(anmodningsperiode.getFom());
+        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.AVSLAATT);
     }
 }

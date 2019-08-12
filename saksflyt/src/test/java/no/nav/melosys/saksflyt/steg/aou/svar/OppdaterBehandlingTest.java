@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
@@ -17,8 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,13 +32,15 @@ public class OppdaterBehandlingTest {
     private BehandlingService behandlingService;
     @Mock
     private VedtakService vedtakService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
 
     private Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
 
     @Before
     public void setUp() {
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
-        oppdaterBehandling = new OppdaterBehandling(anmodningsperiodeService, behandlingService, vedtakService);
+        oppdaterBehandling = new OppdaterBehandling(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
     }
 
@@ -78,6 +80,7 @@ public class OppdaterBehandlingTest {
         oppdaterBehandling.utfør(prosessinstans);
 
         verify(vedtakService).fattVedtak(eq(behandling.getId()), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
+        verify(behandlingsresultatService).oppdaterBehandlingsMaate(anyLong(), any());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 

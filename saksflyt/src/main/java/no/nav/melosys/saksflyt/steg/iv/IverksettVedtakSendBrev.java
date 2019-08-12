@@ -20,6 +20,7 @@ import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
-        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
 
         if (resultat.erAvslag()) {
             sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler);
@@ -155,5 +156,16 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."))
             .preferanser.stream().map(Preferanse::getPreferanse)
             .noneMatch(p -> p.equals(Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
+    }
+
+    private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {
+
+        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        if (StringUtils.isEmpty(saksbehandler) && (behandlingsresultat.getBehandlingsmåte() == Behandlingsmaate.AUTOMATISERT
+            || behandlingsresultat.getBehandlingsmåte() == Behandlingsmaate.DELVIS_AUTOMATISERT)) {
+            saksbehandler = prosessinstans.getBehandling().getFagsak().getRegistrertAv();
+        }
+
+        return saksbehandler;
     }
 }

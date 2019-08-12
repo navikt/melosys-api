@@ -11,6 +11,7 @@ import javax.ws.rs.PathParam;
 import io.swagger.annotations.*;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -100,6 +101,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
         AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningperiodeID, anmodningsperiodeSvarDto.til());
+        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(behandlingID, Medlemskapstyper.PLIKTIG);
         return AnmodningsperiodeSvarDto.fra(svar);
     }
 }

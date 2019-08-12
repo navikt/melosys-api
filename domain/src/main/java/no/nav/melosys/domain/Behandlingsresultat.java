@@ -233,7 +233,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
-        if (lovvalgsperioder.size() == 0) {
+        if (lovvalgsperioder.isEmpty()) {
             throw new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id);
         }
         if (lovvalgsperioder.size() > 1) {
@@ -241,5 +241,16 @@ public class Behandlingsresultat extends RegistreringsInfo {
                 + " lovvalgsperiode er ikke støttet i første leveranse");
         }
         return lovvalgsperioder.iterator().next();
+    }
+
+    public Anmodningsperiode hentValidertAnmodningsperiode() {
+        if (anmodningsperioder.isEmpty()) {
+            throw new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id);
+        }
+        if (anmodningsperioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en"
+                + " anmodningsperiode er ikke støttet i første leveranse");
+        }
+        return anmodningsperioder.iterator().next();
     }
 }

@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import static no.nav.melosys.domain.ProsessDataKey.BEHANDLINGSRESULTATTYPE;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
@@ -76,7 +77,7 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         }
 
         String saksbehandlerID = prosessinstans.getData(SAKSBEHANDLER);
-        if (saksbehandlerID == null) {
+        if (StringUtils.isEmpty(saksbehandlerID) && behandlingErIkkeAutomatisert(behandlingsresultat)) {
             throw new FunksjonellException("SaksbehandlerID er ikke oppgitt.");
         }
 
@@ -86,6 +87,11 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         }
 
         prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
+    }
+
+    private boolean behandlingErIkkeAutomatisert(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.DELVIS_AUTOMATISERT
+            && behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.AUTOMATISERT;
     }
 
     private void validerBehandlingsResultatType(Prosessinstans prosessinstans) throws FunksjonellException {

@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.felles;
 
-import java.util.Set;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
@@ -41,14 +39,7 @@ public class OppdaterMedlFelles {
     }
 
     public Anmodningsperiode hentAnmodningsperiode(Behandling behandling) throws FunksjonellException {
-        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandling);
-
-        Set<Anmodningsperiode> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
-        if (anmodningsperioder.size() != 1) {
-            throw new FunksjonellException("Fant "+ anmodningsperioder.size() +
-                " anmodningsperioder, forventet 1 for behandling " + behandling.getId());
-        }
-        return anmodningsperioder.iterator().next();
+        return hentBehandlingsresultat(behandling).hentValidertAnmodningsperiode();
     }
 
     public Behandlingsresultat hentBehandlingsresultat(Behandling behandling) throws IkkeFunnetException {

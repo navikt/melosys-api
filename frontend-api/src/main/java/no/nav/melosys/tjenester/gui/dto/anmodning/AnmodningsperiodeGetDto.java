@@ -44,6 +44,6 @@ public final class AnmodningsperiodeGetDto extends AnmodningsperiodeDto {
             anmodningsperiode.getUnntakFraLovvalgsland(),
             anmodningsperiode.getDekning(),
             anmodningsperiode.getMedlPeriodeID() != null ? anmodningsperiode.getMedlPeriodeID().toString() : null,
-            anmodningsperiode.erSendt());
+            anmodningsperiode.erSendtUtland());
     }
 }

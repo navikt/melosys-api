@@ -6,6 +6,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -13,6 +14,7 @@ import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
@@ -20,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,14 +31,17 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
 
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final VedtakService vedtakService;
 
     @Autowired
     public OppdaterBehandling(AnmodningsperiodeService anmodningsperiodeService,
                               BehandlingService behandlingService,
-                              VedtakService vedtakService) {
+                              BehandlingsresultatService behandlingsresultatService,
+                              @Qualifier("system") VedtakService vedtakService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.vedtakService = vedtakService;
     }
 
@@ -58,13 +64,26 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Finner ingen anmodningsperiode for behandling " + prosessinstans.getBehandling().getId()));
         boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.INNVILGELSE;
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(prosessinstans.getBehandling().getId(), Medlemskapstyper.PLIKTIG);
+
 
         if (erInnvilgelse && !inneholderYtterligereInformasjon(melosysEessiMelding)) {
-            vedtakService.fattVedtak(prosessinstans.getBehandling().getId(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+            log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Iverksetter vedtak",
+                AnmodningsperiodeSvarType.INNVILGELSE  , prosessinstans.getBehandling().getId());
+            fattVedtak(prosessinstans.getBehandling().getId());
         } else {
+            log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Endrer behandlingsstatus til {}",
+                anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType(),
+                prosessinstans.getBehandling().getId(),
+                Behandlingsstatus.VURDER_DOKUMENT);
             oppdaterBehandlingsstatusVurderDokument(prosessinstans);
         }
         prosessinstans.setSteg(ProsessSteg.FERDIG);
+    }
+
+    private void fattVedtak(long behandlingID) throws FunksjonellException, TekniskException {
+        behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
+        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
     private void oppdaterBehandlingsstatusVurderDokument(Prosessinstans prosessinstans) throws FunksjonellException {
