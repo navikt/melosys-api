@@ -44,7 +44,6 @@ public class BehandlingstatusClientImpl implements BehandlingstatusClient {
         try {
             jaxbContext = JAXBContext.newInstance(BehandlingStatus.class);
         } catch (JAXBException e) {
-            log.error("Feilet ved instansiering av konsument", e);
             throw new IntegrasjonException(e);
         }
         this.objectFactory = new ObjectFactory();

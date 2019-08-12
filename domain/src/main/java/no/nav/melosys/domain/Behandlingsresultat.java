@@ -239,7 +239,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
-        if (lovvalgsperioder.size() == 0) {
+        if (lovvalgsperioder.isEmpty()) {
             throw new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id);
         }
         if (lovvalgsperioder.size() > 1) {

@@ -38,7 +38,7 @@ public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygg
         this.brevbyggerA1 = brevbyggerA1;
     }
 
-    private final Function<OrganisasjonDokument, Adresse> utenAdresse = org -> null;
+    private static final Function<OrganisasjonDokument, Adresse> UTEN_ADRESSE = org -> null;
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
@@ -47,8 +47,8 @@ public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygg
 
         BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(behandling, saksbehandler);
 
-        brevdata.norskeArbeidsgivere = avklarteVirksomheterService.hentArbeidsgivere(behandling, utenAdresse);
-        brevdata.norskeSelvstendigVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, utenAdresse);
+        brevdata.norskeArbeidsgivere = avklarteVirksomheterService.hentArbeidsgivere(behandling, UTEN_ADRESSE);
+        brevdata.norskeSelvstendigVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, UTEN_ADRESSE);
 
         brevdata.lovvalgsperiode = hentLovvalgsperiode();
         brevdata.alleArbeidsland = landVelgerService.hentAlleArbeidsland(behandling).stream()

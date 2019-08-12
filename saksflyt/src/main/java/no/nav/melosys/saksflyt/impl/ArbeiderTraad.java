@@ -40,9 +40,9 @@ public class ArbeiderTraad implements Runnable {
 
     private List<StegBehandler> stegBehandlere;
 
-    private volatile StegBehandler aktivStegBehandler; // Brukes kun for logging
+    private StegBehandler aktivStegBehandler; // Brukes kun for logging
 
-    private volatile Prosessinstans aktivProsessinstans;
+    private Prosessinstans aktivProsessinstans;
 
     @Autowired
     ArbeiderTraad(Binge binge,
