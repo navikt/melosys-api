@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-//A003,A009,A010
+//A001,A003,A009,A010
 @Service
 public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInitialiserer {
 
@@ -85,6 +85,7 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 
+    // TODO: Flytt til GsakFasade/evt. OppgaveService (med systemtilgang)
     private void ferdigstillOppgaveMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
         if (oppgave == null) {
@@ -95,19 +96,24 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
         gsakFasade.ferdigstillOppgave(oppgave.getOppgaveId());
     }
 
-    private Behandlingstyper hentBehandlingstypeForSedType(SedType sedType) {
-        if (sedType == SedType.A009 || sedType == SedType.A010) {
-            return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD;
-        } else if (sedType == SedType.A003) {
-            return Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV;
+    private static Behandlingstyper hentBehandlingstypeForSedType(SedType sedType) {
+        switch (sedType) {
+            case A001:
+                return Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL;
+            case A003:
+                return Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV;
+            case A009:
+            case A010:
+                return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD;
+            default:
+                throw new IllegalArgumentException("UnntaksperiodeMottakInitialiserer støtter ikke sedtype " + sedType);
         }
-
-        throw new IllegalArgumentException("UnntaksperiodeMottakInitialiserer støtter ikke sedtype " + sedType);
     }
 
     @Override
     public boolean gjelderSedType(SedType sedType) {
-        return sedType == SedType.A003
+        return sedType == SedType.A001
+            || sedType == SedType.A003
             || sedType == SedType.A009
             || sedType == SedType.A010;
     }
