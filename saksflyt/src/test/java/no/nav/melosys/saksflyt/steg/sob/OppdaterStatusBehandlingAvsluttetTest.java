@@ -69,7 +69,7 @@ public class OppdaterStatusBehandlingAvsluttetTest {
     public void utførSteg_ingenAktørID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Behandling b = lagBehandling();
-        b.getFagsak().hentAktørForBruker().setAktørId(null);
+        b.getFagsak().hentBruker().setAktørId(null);
         p.setBehandling(b);
 
         expectedException.expect(FunksjonellException.class);

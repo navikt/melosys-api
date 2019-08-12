@@ -19,13 +19,13 @@ import org.springframework.stereotype.Service;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 
 @Service
-public class AvklarMyndighetService {
+public class UtenlandskMyndighetService {
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
 
-    public AvklarMyndighetService(UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                                  LandvelgerService landvelgerService, FagsakService fagsakService) {
+    public UtenlandskMyndighetService(UtenlandskMyndighetRepository utenlandskMyndighetRepository,
+                                      LandvelgerService landvelgerService, FagsakService fagsakService) {
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.landvelgerService = landvelgerService;
         this.fagsakService = fagsakService;
@@ -39,7 +39,7 @@ public class AvklarMyndighetService {
         }
 
         Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
-        fagsakService.leggTilFjernAktørerForMyndighet(saksnummer, institusjonsIder);
+        fagsakService.oppdaterMyndigheter(saksnummer, institusjonsIder);
     }
 
     private Collection<String> konverterLandkodeTilInstitusjonsId(Collection<Landkoder> landkoder) throws TekniskException {
@@ -71,7 +71,7 @@ public class AvklarMyndighetService {
         return utenlandskMyndighetRepository.findByLandkode(landkode)
             .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."))
             .preferanser.stream().map(Preferanse::getPreferanse)
-            .noneMatch(p -> p.equals(Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
+            .noneMatch(p -> p == Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
     }
 
     private String lagInstitusjonsId(Landkoder landkode) throws TekniskException {

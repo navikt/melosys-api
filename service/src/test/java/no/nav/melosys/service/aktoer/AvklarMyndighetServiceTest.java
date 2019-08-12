@@ -31,7 +31,7 @@ public class AvklarMyndighetServiceTest {
     @Mock
     private FagsakService fagsakService;
 
-    private AvklarMyndighetService avklarMyndighetService;
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private Behandling behandling;
 
@@ -43,7 +43,7 @@ public class AvklarMyndighetServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        avklarMyndighetService = new AvklarMyndighetService(utenlandskMyndighetRepository, landvelgerService, fagsakService);
+        utenlandskMyndighetService = new UtenlandskMyndighetService(utenlandskMyndighetRepository, landvelgerService, fagsakService);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("123");
@@ -74,22 +74,22 @@ public class AvklarMyndighetServiceTest {
 
     @Test
     public void lagUtenlandskMyndighetFraBehandling_forventAktoerMedGyldigInstitusjonsId() throws Exception {
-        Collection<Aktoer> aktoerer = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
+        Collection<Aktoer> aktoerer = utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
         assertThat(aktoerer).isNotEmpty();
         assertThat(aktoerer.iterator().next().getInstitusjonId()).isEqualTo(forventetInstitusjonIdIT);
     }
 
     @Test
     public void lagUtenlandskMyndighetFraBehandling_CZerReservertFraA1_forventerIkkeAktør() throws TekniskException {
-        List<Aktoer> myndigheter = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
+        List<Aktoer> myndigheter = utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
         assertThat(myndigheter.stream().map(Aktoer::getInstitusjonId)).containsOnly(forventetInstitusjonIdIT);
     }
 
     @Test
     public void avklarMyndighetSomAktørOgLagre_forventkorrektInstitusjonsId() throws Exception {
-        avklarMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
+        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
 
-        verify(fagsakService).leggTilFjernAktørerForMyndighet(eq(behandling.getFagsak().getSaksnummer()), stringListArgumentCaptor.capture());
+        verify(fagsakService).oppdaterMyndigheter(eq(behandling.getFagsak().getSaksnummer()), stringListArgumentCaptor.capture());
         assertThat(stringListArgumentCaptor.getValue()).containsExactlyInAnyOrder(forventetInstitusjonIdIT, forventetInstitusjonIdCZ);
     }
 }

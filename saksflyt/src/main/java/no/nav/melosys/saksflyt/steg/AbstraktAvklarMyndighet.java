@@ -5,7 +5,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,14 +14,14 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
 
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-    private final AvklarMyndighetService avklarMyndighetService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     public AbstraktAvklarMyndighet(BehandlingRepository behandlingRepository,
                                    BehandlingsresultatRepository behandlingsresultatRepository,
-                                   AvklarMyndighetService avklarMyndighetService) {
+                                   UtenlandskMyndighetService utenlandskMyndighetService) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.avklarMyndighetService = avklarMyndighetService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
     @Override
@@ -37,7 +37,7 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
             || behandlingsresultat.erInnvilgelse();
 
         if (innvilgelseEllerAnmodningUnntakSkalSendes) {
-            avklarMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
+            utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
         }
     }
 }

@@ -104,10 +104,10 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
-    // Sletter aktører som ikke ligger i liste og legger til de som mangler.
+    // Sletter aktører som ikke ligger i oppgitt liste og legger til de som mangler.
     // Oppdaterer IKKE de som allerede finnes i database
     @Transactional
-    public void leggTilFjernAktørerForMyndighet(String saksnummer, Collection<String> ider) {
+    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId()));
 

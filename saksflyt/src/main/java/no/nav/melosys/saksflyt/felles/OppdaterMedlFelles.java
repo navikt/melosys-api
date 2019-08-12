@@ -31,7 +31,7 @@ public class OppdaterMedlFelles {
 
     public String hentFnr(Behandling behandling) throws TekniskException, IkkeFunnetException {
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer bruker = fagsak.hentAktørForBruker();
+        Aktoer bruker = fagsak.hentBruker();
         return tpsFasade.hentIdentForAktørId(bruker.getAktørId());
     }
 

@@ -91,7 +91,7 @@ public class SaksopplysningerService {
     }
 
     private void opprettOppfriskningsprosess(Behandling behandling, SoeknadDokument søknadDokument) throws IkkeFunnetException, TekniskException {
-        String aktørID = behandling.getFagsak().hentAktørForBruker().getAktørId();
+        String aktørID = behandling.getFagsak().hentBruker().getAktørId();
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
         prosessinstansService.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID, søknadDokument);
     }

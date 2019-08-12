@@ -16,7 +16,7 @@ import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.DokumentSystemService;
@@ -113,10 +113,10 @@ public class IverksettVedtakSendBrevTest {
         BehandlingRepository behandlingRepository = mockBehandlingRepository();
         BrevDataService brevDataService = mock(BrevDataService.class);
         DoksysFasade dokSysFasade = mock(DoksysFasade.class);
-        AvklarMyndighetService avklarMyndighetService = mock(AvklarMyndighetService.class);
-        when(avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(any())).thenReturn(Collections.singletonList(new Aktoer()));
+        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
+        when(utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(any())).thenReturn(Collections.singletonList(new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
-        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, kontaktopplysningService, brevDataByggerVelger, avklarteVirksomheterService, avklarMyndighetService));
+        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, kontaktopplysningService, brevDataByggerVelger, avklarteVirksomheterService, utenlandskMyndighetService));
     }
 
     private static BehandlingsresultatService mockBehandlingsresultatService() throws IkkeFunnetException {
@@ -303,7 +303,7 @@ public class IverksettVedtakSendBrevTest {
     @Test
     public final void utførStegPåInnvilgelsesBrevBestemtAv12_1_vedtakSendIkkeA1() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
-        prosessinstans.getBehandling().getFagsak().hentAktørerForMyndigheter().iterator().next().setInstitusjonId("CZ:1e1");
+        prosessinstans.getBehandling().getFagsak().hentMyndigheter().iterator().next().setInstitusjonId("CZ:1e1");
 
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);

@@ -11,7 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.iv.AvklarMyndighet;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +33,7 @@ public class AvklarMyndighetTest {
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Mock
-    private AvklarMyndighetService avklarMyndighetService;
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private AvklarMyndighet steg;
 
@@ -41,7 +41,7 @@ public class AvklarMyndighetTest {
 
     @Before
     public void setUp() {
-        steg = new AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, avklarMyndighetService);
+        steg = new AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, utenlandskMyndighetService);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -80,7 +80,7 @@ public class AvklarMyndighetTest {
 
         steg.utfør(p);
 
-        verify(avklarMyndighetService).avklarUtenlandskMyndighetSomAktørOgLagre(any(Behandling.class));
+        verify(utenlandskMyndighetService).avklarUtenlandskMyndighetSomAktørOgLagre(any(Behandling.class));
     }
 
     private static Behandlingsresultat lagBehandlingResultat() {
@@ -108,7 +108,7 @@ public class AvklarMyndighetTest {
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
         when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
         no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet steg =
-            new no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, avklarMyndighetService);
+            new no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, utenlandskMyndighetService);
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_MEDL);
     }

@@ -107,15 +107,15 @@ public class Fagsak extends RegistreringsInfo {
             .orElse(null);
     }
 
-    public Aktoer hentAktørForBruker() throws TekniskException {
+    public Aktoer hentBruker() throws TekniskException {
         return hentAktørMedRolleType(Aktoersroller.BRUKER);
     }
 
-    public Aktoer hentAktørForArbeidsgiver() throws TekniskException {
+    public Aktoer hentArbeidsgiver() throws TekniskException {
         return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
     }
 
-    public List<Aktoer> hentAktørerForMyndigheter() {
+    public List<Aktoer> hentMyndigheter() {
         return hentAktørerMedRolleType(MYNDIGHET);
     }
 
@@ -128,9 +128,6 @@ public class Fagsak extends RegistreringsInfo {
             .orElse(null);
     }
 
-    /**
-     * Returnerer en aktør med angitt {@link Aktoersroller} knyttet til saken eller {@code null} hvis ingen finnes.
-     */
     private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
         Collection<Aktoer> kandidater = hentAktørerMedRolleType(rolleType);
         if (kandidater.size() > 1) {
@@ -144,7 +141,7 @@ public class Fagsak extends RegistreringsInfo {
             return Collections.emptyList();
         }
         return aktører.stream()
-            .filter(a -> rolleType.equals(a.getRolle()))
+            .filter(a -> rolleType == a.getRolle())
             .collect(Collectors.toList());
     }
 
@@ -156,7 +153,7 @@ public class Fagsak extends RegistreringsInfo {
      * Henter myndighetens landkode fra institusjonsID som har format landkode:institusjonskode.
      */
     public Landkoder hentMyndighetLandkode() throws TekniskException {
-        List<Aktoer> myndigheter = hentAktørerForMyndigheter();
+        List<Aktoer> myndigheter = hentMyndigheter();
         if (myndigheter.isEmpty()) {
             throw new TekniskException("Finner ingen aktør med rolle " + MYNDIGHET + " for fagsak " + saksnummer);
         }

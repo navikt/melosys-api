@@ -42,7 +42,7 @@ public class TilgangService {
 
     private void sjekkTilgang(Behandling behandling) throws SikkerhetsbegrensningException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer aktør = fagsak.hentAktørForBruker();
+        Aktoer aktør = fagsak.hentBruker();
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }
@@ -50,7 +50,7 @@ public class TilgangService {
 
     // Fagsak
     public void sjekkSak(Fagsak fagsak) throws SikkerhetsbegrensningException, TekniskException {
-        Aktoer aktør = fagsak.hentAktørForBruker();
+        Aktoer aktør = fagsak.hentBruker();
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }

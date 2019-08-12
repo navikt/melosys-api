@@ -217,7 +217,7 @@ public class FagsakServiceTest {
         when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(eksisterendeFagsak);
 
         List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
-        fagsakService.leggTilFjernAktørerForMyndighet(saksnummer, nyeInstitusjonsIder);
+        fagsakService.oppdaterMyndigheter(saksnummer, nyeInstitusjonsIder);
 
         ArgumentCaptor<Fagsak> captor = ArgumentCaptor.forClass(Fagsak.class);
         verify(fagsakRepo).save(captor.capture());

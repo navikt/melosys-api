@@ -41,7 +41,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
 
-        Aktoer aktør = fagsak.hentAktørForBruker();
+        Aktoer aktør = fagsak.hentBruker();
         String aktørID = null;
         if (aktør != null) {
             aktørID = aktør.getAktørId();

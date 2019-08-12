@@ -12,7 +12,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktAvklarMyndighet;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +35,9 @@ public class AvklarMyndighet extends AbstraktAvklarMyndighet {
     @Autowired
     public AvklarMyndighet(BehandlingRepository behandlingRepository,
                            BehandlingsresultatRepository behandlingsresultatRepository,
-                           AvklarMyndighetService avklarMyndighetService) {
+                           UtenlandskMyndighetService utenlandskMyndighetService) {
         super(behandlingRepository, behandlingsresultatRepository,
-            avklarMyndighetService);
+            utenlandskMyndighetService);
         log.info("AvklarMyndighet initialisert");
     }
 
