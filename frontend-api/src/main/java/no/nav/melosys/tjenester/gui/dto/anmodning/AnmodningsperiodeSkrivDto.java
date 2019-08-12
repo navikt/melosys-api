@@ -12,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
-public class AnmodningsperiodeDto {
+public class AnmodningsperiodeSkrivDto {
     private static final LovvalgBestemmelsekonverterer konverterer = new LovvalgBestemmelsekonverterer();
 
     public final String id;
@@ -27,15 +27,15 @@ public class AnmodningsperiodeDto {
     public final String medlemskapsperiodeID;
 
 
-    protected AnmodningsperiodeDto(String id,
-                                   PeriodeDto periode,
-                                   LovvalgBestemmelse lovvalgBestemmelse,
-                                   LovvalgBestemmelse tilleggBestemmelse,
-                                   Landkoder lovvalgsland,
-                                   LovvalgBestemmelse unntakFraBestemmelse,
-                                   Landkoder unntakFraLovvalgsland,
-                                   Trygdedekninger trygdeDekning,
-                                   String medlemskapsperiodeID) {
+    protected AnmodningsperiodeSkrivDto(String id,
+                                        PeriodeDto periode,
+                                        LovvalgBestemmelse lovvalgBestemmelse,
+                                        LovvalgBestemmelse tilleggBestemmelse,
+                                        Landkoder lovvalgsland,
+                                        LovvalgBestemmelse unntakFraBestemmelse,
+                                        Landkoder unntakFraLovvalgsland,
+                                        Trygdedekninger trygdeDekning,
+                                        String medlemskapsperiodeID) {
         this.id = id;
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
@@ -49,7 +49,7 @@ public class AnmodningsperiodeDto {
 
     @JsonCreator
     @SuppressWarnings("unused")
-    public AnmodningsperiodeDto(Map<String, String> json) {
+    public AnmodningsperiodeSkrivDto(Map<String, String> json) {
         this(json.get("id"),
             new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
             konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
@@ -61,8 +61,8 @@ public class AnmodningsperiodeDto {
             json.get("medlemskapsperiodeID"));
     }
 
-    public static AnmodningsperiodeDto av(Anmodningsperiode anmodningsperiode) {
-        return new AnmodningsperiodeDto(anmodningsperiode.getId().toString(),
+    public static AnmodningsperiodeSkrivDto av(Anmodningsperiode anmodningsperiode) {
+        return new AnmodningsperiodeSkrivDto(anmodningsperiode.getId().toString(),
             new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
             anmodningsperiode.getBestemmelse(),
             anmodningsperiode.getTilleggsbestemmelse(),

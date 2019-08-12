@@ -18,9 +18,9 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeListeDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeGetDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSkrivDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -44,28 +44,28 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
 
     @GET
     @Path("anmodningsperioder/{behandlingID}")
-    @ApiOperation(value = "Henter anmodningsperioder for en gitt behandling", response = AnmodningsperiodeDto.class)
+    @ApiOperation(value = "Henter anmodningsperioder for en gitt behandling", response = AnmodningsperiodeSkrivDto.class)
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
-    public AnmodningsperiodeListeDto hentAnmodningsperioder(@PathParam("behandlingID") long behandlingID)
+    public AnmodningsperiodeGetDto hentAnmodningsperioder(@PathParam("behandlingID") long behandlingID)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
-        return AnmodningsperiodeListeDto.av(anmodningsperiodeService.hentAnmodningsperioder(behandlingID));
+        return AnmodningsperiodeGetDto.av(anmodningsperiodeService.hentAnmodningsperioder(behandlingID));
     }
 
     @POST
     @Path("anmodningsperioder/{behandlingID}")
     @ApiOperation("Lagrer anmodningsperioder for en gitt behandling.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
-    public AnmodningsperiodeListeDto lagreAnmodningsperioder(@PathParam("behandlingID") long behandlingID,
-                                                             @ApiParam(value = "En liste av anmodningsperioder å lagre.")
+    public AnmodningsperiodeGetDto lagreAnmodningsperioder(@PathParam("behandlingID") long behandlingID,
+                                                           @ApiParam(value = "En liste av anmodningsperioder å lagre.")
                                                                  AnmodningsperiodePostDto anmodningsperiodePostDto)
         throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
-            behandlingID, anmodningsperiodePostDto.getAnmodningsperioder().stream().map(AnmodningsperiodeDto::til)
+            behandlingID, anmodningsperiodePostDto.getAnmodningsperioder().stream().map(AnmodningsperiodeSkrivDto::til)
                 .collect(Collectors.toList())
         );
-        return AnmodningsperiodeListeDto.av(anmodningsperioder);
+        return AnmodningsperiodeGetDto.av(anmodningsperioder);
     }
 
     @GET

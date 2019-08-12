@@ -1,49 +1,32 @@
 package no.nav.melosys.tjenester.gui.dto.anmodning;
 
-import java.util.Map;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
-public final class AnmodningsperiodeGetDto extends AnmodningsperiodeDto {
-    public final boolean sendtUtland;
+public final class AnmodningsperiodeGetDto {
+    private List<AnmodningsperiodeLesDto> anmodningsperioder;
 
-    private AnmodningsperiodeGetDto(String id,
-                                    PeriodeDto periodeDto,
-                                    LovvalgBestemmelse bestemmelse,
-                                    LovvalgBestemmelse tilleggsbestemmelse,
-                                    Landkoder lovvalgsland,
-                                    LovvalgBestemmelse unntakFraBestemmelse,
-                                    Landkoder unntakFraLovvalgsland,
-                                    Trygdedekninger trygdedekning,
-                                    String medlemskapsperiodeID,
-                                    boolean sendtUtland) {
-        super(id, periodeDto, bestemmelse, tilleggsbestemmelse, lovvalgsland, unntakFraBestemmelse,
-            unntakFraLovvalgsland, trygdedekning, medlemskapsperiodeID);
-        this.sendtUtland = sendtUtland;
+    public AnmodningsperiodeGetDto() {
     }
 
-    @JsonCreator
-    @SuppressWarnings("unused")
-    public AnmodningsperiodeGetDto(Map<String, String> json) {
-        super(json);
-        this.sendtUtland = json.containsKey("sendtUtland") && Boolean.valueOf(json.get("sendtUtland"));
+    private AnmodningsperiodeGetDto(Collection<Anmodningsperiode> anmodningsperioder) {
+            this.anmodningsperioder = anmodningsperioder.stream()
+            .map(AnmodningsperiodeLesDto::av)
+            .collect(Collectors.toList());
     }
 
-    public static AnmodningsperiodeGetDto av(Anmodningsperiode anmodningsperiode) {
-        return new AnmodningsperiodeGetDto(anmodningsperiode.getId().toString(),
-            new PeriodeDto(anmodningsperiode.getFom(), anmodningsperiode.getTom()),
-            anmodningsperiode.getBestemmelse(),
-            anmodningsperiode.getTilleggsbestemmelse(),
-            anmodningsperiode.getLovvalgsland(),
-            anmodningsperiode.getUnntakFraBestemmelse(),
-            anmodningsperiode.getUnntakFraLovvalgsland(),
-            anmodningsperiode.getDekning(),
-            anmodningsperiode.getMedlPeriodeID() != null ? anmodningsperiode.getMedlPeriodeID().toString() : null,
-            anmodningsperiode.erSendtUtland());
+    public static AnmodningsperiodeGetDto av(Collection<Anmodningsperiode> anmodningsperioder) {
+        return new AnmodningsperiodeGetDto(anmodningsperioder);
+    }
+
+    public void setAnmodningsperioder(List<AnmodningsperiodeLesDto> anmodningsperioder) {
+        this.anmodningsperioder = anmodningsperioder;
+    }
+
+    public List<AnmodningsperiodeLesDto> getAnmodningsperioder() {
+        return anmodningsperioder;
     }
 }
