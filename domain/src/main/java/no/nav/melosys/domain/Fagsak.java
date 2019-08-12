@@ -161,7 +161,7 @@ public class Fagsak extends RegistreringsInfo {
             throw new TekniskException("Finner ingen aktør med rolle " + MYNDIGHET + " for fagsak " + saksnummer);
         }
         if (myndigheter.size() > 1) {
-            throw new TekniskException("Kan ikke hente landkode for myndighet fordi det er funnet flere myndigheter");
+            throw new TekniskException("Kan ikke hente landkode for en bestemt myndighet fordi finnes flere myndigheter");
         }
         return myndigheter.get(0).hentMyndighetLandkode();
     }

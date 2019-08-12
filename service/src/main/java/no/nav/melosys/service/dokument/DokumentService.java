@@ -215,24 +215,14 @@ public class DokumentService {
         }
     }
 
-    private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
-        List<Aktoer> mottakere;
+    private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker, Behandling behandling) throws TekniskException {
         if (mottaker.getAktør().getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
-            mottakere = Collections.singletonList(mottaker.getAktør());
+            return Collections.singletonList(mottaker.getAktør());
         } else {
             // Utenlandsk myndighet
-            mottakere = behandling.getFagsak().hentAktørerForMyndigheter();
-            if (mottakere.isEmpty()) {
-                // Myndighet er ikke lagret og lagres ikke før kjøring i saksflyt
-                mottakere = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
-            }
+            return avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
         }
-
-        if (mottakere.isEmpty()) {
-            throw new FunksjonellException("Fant ingen aktører for utenlandske myndigheter.");
-        }
-        return mottakere;
     }
 
     private Dokumentbestilling lagDokumentbestilling(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)

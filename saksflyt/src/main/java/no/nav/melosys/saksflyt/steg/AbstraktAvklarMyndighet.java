@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.steg;
 
-import java.util.List;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -39,15 +37,7 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
             || behandlingsresultat.erInnvilgelse();
 
         if (innvilgelseEllerAnmodningUnntakSkalSendes) {
-
-            Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
-            String saksnummer = fagsak.getSaksnummer();
-            List<Aktoer> myndighetPart = fagsak.hentAktørerForMyndigheter();
-            if (myndighetPart.isEmpty()) {
-                avklarMyndighetService.avklarUtenlandskMyndighetOgLagre(behandling);
-            } else {
-                log.debug("Sak {} har allerede en myndighet", saksnummer);
-            }
+            avklarMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
         }
     }
 }

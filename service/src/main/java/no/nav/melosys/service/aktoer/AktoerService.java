@@ -1,6 +1,5 @@
 package no.nav.melosys.service.aktoer;
 
-import java.util.Collection;
 import java.util.List;
 
 import no.nav.melosys.domain.Aktoer;
@@ -75,7 +74,7 @@ public class AktoerService {
     }
 
     @Transactional
-    public void erstattEksisterendeArbeidsgiveraktører(Fagsak fagsak, Collection<String> orgnumre) {
+    public void erstattEksisterendeArbeidsgiveraktører(Fagsak fagsak, List<String> orgnumre) {
         aktørRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
         aktørRepository.flush();
 

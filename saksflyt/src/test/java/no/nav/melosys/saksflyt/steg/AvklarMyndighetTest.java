@@ -52,15 +52,6 @@ public class AvklarMyndighetTest {
         p.setBehandling(behandling);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-
-        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
@@ -89,7 +80,7 @@ public class AvklarMyndighetTest {
 
         steg.utfør(p);
 
-        verify(avklarMyndighetService).avklarUtenlandskMyndighetOgLagre(any(Behandling.class));
+        verify(avklarMyndighetService).avklarUtenlandskMyndighetSomAktørOgLagre(any(Behandling.class));
     }
 
     private static Behandlingsresultat lagBehandlingResultat() {
@@ -102,20 +93,6 @@ public class AvklarMyndighetTest {
         lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         return behandlingsresultat;
-    }
-
-    @Test
-    public void utfør_medMyndighet_myndighetOpprettesIkke() throws FunksjonellException, TekniskException {
-        Fagsak fagsakMedMyndighet = new Fagsak();
-        fagsakMedMyndighet.setSaksnummer("med myndighet");
-        Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
-        fagsakMedMyndighet.getAktører().add(myndighet);
-        p.getBehandling().setFagsak(fagsakMedMyndighet);
-
-        steg.utfør(p);
-
-        verify(avklarMyndighetService, never()).avklarUtenlandskMyndighetOgLagre(any(Behandling.class));
     }
 
     @Test
