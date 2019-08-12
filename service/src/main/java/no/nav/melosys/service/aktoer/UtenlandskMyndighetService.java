@@ -14,6 +14,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
@@ -24,6 +25,7 @@ public class UtenlandskMyndighetService {
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
 
+    @Autowired
     public UtenlandskMyndighetService(UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                       LandvelgerService landvelgerService, FagsakService fagsakService) {
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
