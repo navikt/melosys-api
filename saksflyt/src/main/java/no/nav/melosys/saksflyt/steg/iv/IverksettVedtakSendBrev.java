@@ -7,12 +7,10 @@ import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
@@ -48,17 +46,14 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Autowired
     public IverksettVedtakSendBrev(BrevBestiller brevBestiller,
                                    BehandlingService behandlingService,
-                                   BehandlingsresultatService behandlingsresultatService,
-                                   UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
+                                   BehandlingsresultatService behandlingsresultatService) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
 
         log.info("IverksetteVedtakSendBrev initialisert");
     }
@@ -141,21 +136,13 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
             brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
         }
-        if (myndighetØnskerInnvilgelsesbrev(fagsak.hentMyndighetLandkode())) {
-            Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-                .medAvsender(saksbehandler)
-                .medMottaker(Mottaker.av(MYNDIGHET))
-                .medBehandling(behandling)
-                .medBegrunnelseKode(begrunnelseKode).build();
-            brevBestiller.bestill(A1_Myndighet);
-        }
-    }
 
-    private boolean myndighetØnskerInnvilgelsesbrev(Landkoder landkode) throws TekniskException {
-        return utenlandskMyndighetRepository.findByLandkode(landkode)
-            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."))
-            .preferanser.stream().map(Preferanse::getPreferanse)
-            .noneMatch(p -> p.equals(Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
+        Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
+            .medAvsender(saksbehandler)
+            .medMottaker(Mottaker.av(MYNDIGHET))
+            .medBehandling(behandling)
+            .medBegrunnelseKode(begrunnelseKode).build();
+        brevBestiller.bestill(A1_Myndighet);
     }
 
     private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {

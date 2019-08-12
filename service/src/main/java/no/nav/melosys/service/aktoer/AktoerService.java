@@ -69,12 +69,14 @@ public class AktoerService {
         if (aktoer.getRolle().equals(Aktoersroller.BRUKER)) {
             throw new FunksjonellException("Aktøren er en bruker. Det er ikke lov til å slette denne");
         }
-        aktørRepository.deleteById(aktoer);
+        aktørRepository.deleteByAktørId(aktoer.getAktørId());
+        aktørRepository.flush();
     }
 
     @Transactional
     public void erstattEksisterendeArbeidsgiveraktører(Fagsak fagsak, List<String> orgnumre) {
         aktørRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
+        aktørRepository.flush();
 
         for (String orgnummer : orgnumre) {
             lagArbeidsgiveraktør(fagsak, orgnummer);

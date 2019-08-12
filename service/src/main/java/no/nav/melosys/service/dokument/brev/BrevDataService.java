@@ -77,7 +77,7 @@ public class BrevDataService {
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
         metadata.mottaker = mottaker;
         metadata.mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
-        metadata.brukerID = tpsFasade.hentIdentForAktørId(fagsak.hentAktørMedRolleType(BRUKER).getAktørId());
+        metadata.brukerID = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
 
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
@@ -109,7 +109,6 @@ public class BrevDataService {
             } else {
                 return mottaker.getOrgnr();
             }
-
         }
 
         throw new TekniskException(mottakerRolle + " støttes ikke.");
@@ -235,7 +234,7 @@ public class BrevDataService {
 
     private Sakspart lagSakspart(Behandling behandling) throws TekniskException {
         Sakspart sakspart = new Sakspart();
-        Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(BRUKER);
+        Aktoer aktør = behandling.getFagsak().hentBruker();
 
         if (aktør == null || aktør.getAktørId() == null) {
             throw new TekniskException("Det finnes ingen bruker på sak " + behandling.getFagsak().getSaksnummer());

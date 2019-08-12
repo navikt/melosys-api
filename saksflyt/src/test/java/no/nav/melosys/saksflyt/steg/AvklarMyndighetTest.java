@@ -11,7 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.iv.AvklarMyndighet;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +33,7 @@ public class AvklarMyndighetTest {
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Mock
-    private AvklarMyndighetService avklarMyndighetService;
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private AvklarMyndighet steg;
 
@@ -41,7 +41,7 @@ public class AvklarMyndighetTest {
 
     @Before
     public void setUp() {
-        steg = new AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, avklarMyndighetService);
+        steg = new AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, utenlandskMyndighetService);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -52,15 +52,6 @@ public class AvklarMyndighetTest {
         p.setBehandling(behandling);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-
-        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
@@ -89,7 +80,7 @@ public class AvklarMyndighetTest {
 
         steg.utfør(p);
 
-        verify(avklarMyndighetService).avklarUtenlandskMyndighetOgLagre(any(Behandling.class));
+        verify(utenlandskMyndighetService).avklarUtenlandskMyndighetSomAktørOgLagre(any(Behandling.class));
     }
 
     private static Behandlingsresultat lagBehandlingResultat() {
@@ -105,20 +96,6 @@ public class AvklarMyndighetTest {
     }
 
     @Test
-    public void utfør_medMyndighet_myndighetOpprettesIkke() throws FunksjonellException, TekniskException {
-        Fagsak fagsakMedMyndighet = new Fagsak();
-        fagsakMedMyndighet.setSaksnummer("med myndighet");
-        Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
-        fagsakMedMyndighet.getAktører().add(myndighet);
-        p.getBehandling().setFagsak(fagsakMedMyndighet);
-
-        steg.utfør(p);
-
-        verify(avklarMyndighetService, never()).avklarUtenlandskMyndighetOgLagre(any(Behandling.class));
-    }
-
-    @Test
     public void utfør_iverksettVedtakSjekkSteg_forventAvklarArbeidsgiver() throws Exception {
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
         when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
@@ -131,7 +108,7 @@ public class AvklarMyndighetTest {
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
         when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
         no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet steg =
-            new no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, avklarMyndighetService);
+            new no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, utenlandskMyndighetService);
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_MEDL);
     }

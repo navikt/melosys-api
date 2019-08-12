@@ -18,7 +18,7 @@ import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -58,14 +58,14 @@ public class DokumentService {
     private final ProsessinstansService prosessinstansService;
     private final BrevDataByggerVelger brevDataByggerVelger;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final AvklarMyndighetService avklarMyndighetService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     @Autowired
     public DokumentService(BehandlingRepository behandlingRepository,
                            BrevDataService brevDataService, DoksysFasade dokSysFasade,
                            KontaktopplysningService kontaktopplysningService,
                            ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger,
-                           AvklarteVirksomheterService avklarteVirksomheterService, AvklarMyndighetService avklarMyndighetService) {
+                           AvklarteVirksomheterService avklarteVirksomheterService, UtenlandskMyndighetService utenlandskMyndighetService) {
         this.behandlingRepository = behandlingRepository;
         this.brevDataService = brevDataService;
         this.dokSysFasade = dokSysFasade;
@@ -73,7 +73,7 @@ public class DokumentService {
         this.prosessinstansService = prosessinstansService;
         this.brevDataByggerVelger = brevDataByggerVelger;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.avklarMyndighetService = avklarMyndighetService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
     /**
@@ -147,7 +147,7 @@ public class DokumentService {
         } else if (mottakerRolle == ARBEIDSGIVER) {
             mottakere = avklarMottakereForArbeidsgiver(behandling);
         } else if (mottakerRolle == MYNDIGHET) {
-            mottakere = avklarMottakereForMyndighet(mottaker, behandling);
+            mottakere = avklarMottakereForMyndigheter(mottaker, behandling);
         } else {
             throw new FunksjonellException(mottakerRolle + " støttes ikke.");
         }
@@ -157,7 +157,7 @@ public class DokumentService {
     private List<Aktoer> avklarMottakereForBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, boolean forhåndsvisning)
         throws FunksjonellException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer bruker = fagsak.hentAktørMedRolleType(BRUKER);
+        Aktoer bruker = fagsak.hentBruker();
         if (bruker == null) {
             throw new FunksjonellException("Bruker er ikke registrert.");
         }
@@ -196,7 +196,7 @@ public class DokumentService {
     }
 
     private Aktoer avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
-        Aktoer arbeidsgiver = behandling.getFagsak().hentAktørMedRolleType(ARBEIDSGIVER);
+        Aktoer arbeidsgiver = behandling.getFagsak().hentArbeidsgiver();
         if (arbeidsgiver != null) {
             return arbeidsgiver;
         } else {
@@ -215,22 +215,14 @@ public class DokumentService {
         }
     }
 
-    private List<Aktoer> avklarMottakereForMyndighet(Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
-        List<Aktoer> mottakere = new ArrayList<>();
+    private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker, Behandling behandling) throws TekniskException {
         if (mottaker.getAktør().getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
-            mottakere.add(mottaker.getAktør());
+            return Collections.singletonList(mottaker.getAktør());
         } else {
-            // Utenlandsk myndighet.
-            Aktoer myndighet = behandling.getFagsak().hentAktørMedRolleType(mottaker.getRolle());
-            if (myndighet == null) {
-                // Myndighet er ikke lagret og lagres ikke før kjøring i saksflyt
-                myndighet = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling)
-                    .orElseThrow(() -> new FunksjonellException("Brev sendes ikke til utenlandske myndigheter for Norge."));
-            }
-            mottakere.add(myndighet);
+            // Utenlandsk myndighet
+            return utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
         }
-        return mottakere;
     }
 
     private Dokumentbestilling lagDokumentbestilling(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)

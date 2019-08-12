@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AnmodningUnntakService {
-    private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeService.class);
+    private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakService.class);
 
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
