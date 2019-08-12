@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -47,21 +46,13 @@ public class AvklartefaktaService {
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-    public Set<Landkoder> hentAlleArbeidsland(long behandlingsid) {
+    public Set<Landkoder> hentAlleAvklarteArbeidsland(long behandlingsid) {
         Set<Avklartefakta> avklarteArbeidsland =
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
 
         return avklarteArbeidsland.stream()
             .map(af -> Landkoder.valueOf(af.getFakta()))
             .collect(Collectors.toSet());
-    }
-
-    public Optional<Landkoder> hentArbeidsland(long behandlingsid) throws FunksjonellException {
-        Set<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingsid);
-        if (alleArbeidsland.size() > 1) {
-            throw new FunksjonellException("Mer enn ett arbeidsland er registrert");
-        }
-        return alleArbeidsland.stream().findFirst();
     }
 
     public Optional<Landkoder> hentBostedland(long behandlingsid) {
@@ -86,6 +77,16 @@ public class AvklartefaktaService {
         AvklartYrkesgruppeType aktivitetType = AvklartYrkesgruppeType.valueOf(avklartefakta.getFakta());
 
         return aktivitetType.tilYrkesgruppeType();
+    }
+
+    public Set<Landkoder> hentLandkoderMedMarginaltArbeid(long behandlingsid) {
+        Collection<Avklartefakta> marginaltArbeid =
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatype.MARGINALT_ARBEID, VALGT_FAKTA);
+
+        return marginaltArbeid.stream()
+            .map(Avklartefakta::getSubjekt)
+            .map(Landkoder::valueOf)
+            .collect(Collectors.toSet());
     }
 
     public boolean harMarginaltArbeid(long behandlingsid) {

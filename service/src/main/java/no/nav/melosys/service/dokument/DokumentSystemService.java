@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument;
 
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
@@ -17,7 +18,7 @@ public class DokumentSystemService extends DokumentService {
     public DokumentSystemService(BehandlingRepository behandlingRepository,
                                  BrevDataService brevDataService, @Qualifier("system") DoksysFasade dokSysFasade,
                                  KontaktopplysningService kontaktopplysningService, BrevDataByggerVelger brevDataByggerVelger,
-                                 AvklarteVirksomheterService avklarteVirksomheterService) {
-        super(behandlingRepository, brevDataService, dokSysFasade, kontaktopplysningService, null, brevDataByggerVelger, avklarteVirksomheterService, null);
+                                 AvklarteVirksomheterService avklarteVirksomheterService, UtenlandskMyndighetService utenlandskMyndighetService) {
+        super(behandlingRepository, brevDataService, dokSysFasade, kontaktopplysningService, null, brevDataByggerVelger, avklarteVirksomheterService, utenlandskMyndighetService);
     }
 }

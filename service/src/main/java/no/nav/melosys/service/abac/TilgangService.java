@@ -3,7 +3,6 @@ package no.nav.melosys.service.abac;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -43,7 +42,7 @@ public class TilgangService {
 
     private void sjekkTilgang(Behandling behandling) throws SikkerhetsbegrensningException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer aktør = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer aktør = fagsak.hentBruker();
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }
@@ -51,7 +50,7 @@ public class TilgangService {
 
     // Fagsak
     public void sjekkSak(Fagsak fagsak) throws SikkerhetsbegrensningException, TekniskException {
-        Aktoer aktør = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer aktør = fagsak.hentBruker();
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }

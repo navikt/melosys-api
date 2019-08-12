@@ -34,7 +34,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
@@ -228,7 +228,7 @@ public final class DokumentServiceTest {
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
         return new DokumentService(behandlingRepository, brevDataService, dokSysFasade,
             mock(KontaktopplysningService.class), mock(ProsessinstansService.class), brevdatabyggervelger,
-            avklarteVirksomheterService, mock(AvklarMyndighetService.class));
+            avklarteVirksomheterService, mock(UtenlandskMyndighetService.class));
     }
 
     private static Behandling lagBehandling() {

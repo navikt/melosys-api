@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.felles;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -32,7 +31,7 @@ public class OppdaterMedlFelles {
 
     public String hentFnr(Behandling behandling) throws TekniskException, IkkeFunnetException {
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer bruker = fagsak.hentBruker();
         return tpsFasade.hentIdentForAktørId(bruker.getAktørId());
     }
 
