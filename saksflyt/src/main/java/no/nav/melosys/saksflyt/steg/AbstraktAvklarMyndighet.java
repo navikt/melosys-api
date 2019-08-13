@@ -1,37 +1,33 @@
 package no.nav.melosys.saksflyt.steg;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(AbstraktAvklarMyndighet.class);
-
-    private final BehandlingRepository behandlingRepository;
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
-    public AbstraktAvklarMyndighet(BehandlingRepository behandlingRepository,
-                                   BehandlingsresultatRepository behandlingsresultatRepository,
+    public AbstraktAvklarMyndighet(BehandlingService behandlingService,
+                                   BehandlingsresultatService behandlingsresultatService,
                                    UtenlandskMyndighetService utenlandskMyndighetService) {
-        this.behandlingRepository = behandlingRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-
         Long behandlingID = prosessinstans.getBehandling().getId();
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
-
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithSaksbehandlingById(behandlingID)
-            .orElseThrow(() -> new TekniskException("Behandlingsresultat " + behandlingID + " finnes ikke."));
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         boolean innvilgelseEllerAnmodningUnntakSkalSendes = prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK
             || behandlingsresultat.erInnvilgelse();

@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Preferanse;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -33,7 +32,7 @@ public class UtenlandskMyndighetService {
         this.fagsakService = fagsakService;
     }
 
-    public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) throws TekniskException, IkkeFunnetException {
+    public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) throws TekniskException {
         String saksnummer = behandling.getFagsak().getSaksnummer();
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling);
         if (landkoder.isEmpty()) {
