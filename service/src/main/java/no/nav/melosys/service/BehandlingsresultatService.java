@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.apache.commons.beanutils.BeanUtils;
@@ -127,5 +128,15 @@ public class BehandlingsresultatService {
             behandlingsresultat.setType(behandlingsresultattype);
             behandlingsresultatRepository.save(behandlingsresultat);
         }
+    }
+
+    public void oppdaterBehandlingsMaate(Long id, Behandlingsmaate behandlingsmaate) throws FunksjonellException {
+        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(id);
+        if (behandlingsresultat.getBehandlingsmåte() != null && behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.UDEFINERT) {
+            throw new FunksjonellException("Behandlingsmaate kan ikke oppdateres etter det er definert!");
+        }
+
+        behandlingsresultat.setBehandlingsmåte(behandlingsmaate);
+        behandlingsresultatRepository.save(behandlingsresultat);
     }
 }

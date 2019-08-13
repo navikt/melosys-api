@@ -2,8 +2,8 @@ package no.nav.melosys.integrasjon.medl;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.ErPeriodeMedBestemmelse;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.*;
 
@@ -13,7 +13,7 @@ public interface MedlFasade {
 
     Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 
-    Long opprettPeriodeUnderAvklaring(String fnr, ErPeriodeMedBestemmelse periodeMedBestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
+    Long opprettPeriodeUnderAvklaring(String fnr, Medlemskapsperiode periodeMedBestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 
     void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws FunksjonellException, TekniskException;
 

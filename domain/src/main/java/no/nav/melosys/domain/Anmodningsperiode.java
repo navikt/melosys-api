@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 @Entity
 @Table(name = "anmodningsperiode")
-public class Anmodningsperiode implements ErPeriodeMedBestemmelse {
+public class Anmodningsperiode implements Medlemskapsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -64,7 +64,7 @@ public class Anmodningsperiode implements ErPeriodeMedBestemmelse {
     }
 
     public Anmodningsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse,
-                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse) {
+                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse, Trygdedekninger dekning) {
         this.fom = fom;
         this.tom = tom;
         this.lovvalgsland = lovvalgsland;
@@ -72,6 +72,7 @@ public class Anmodningsperiode implements ErPeriodeMedBestemmelse {
         this.tilleggsbestemmelse = tilleggsbestemmelse;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland;
         this.unntakFraBestemmelse = unntakFraBestemmelse;
+        this.dekning = dekning;
     }
 
     public Long getId() {
@@ -140,7 +141,7 @@ public class Anmodningsperiode implements ErPeriodeMedBestemmelse {
         this.medlPeriodeID = medlPeriodeID;
     }
 
-    public boolean erSendt() {
+    public boolean erSendtUtland() {
         return sendtUtland;
     }
 

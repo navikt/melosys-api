@@ -8,11 +8,14 @@ import no.nav.melosys.domain.Anmodningsperiode;
 
 public final class AnmodningsperiodePostDto {
 
-    private List<AnmodningsperiodeDto> anmodningsperioder;
+    private List<AnmodningsperiodeSkrivDto> anmodningsperioder;
+
+    public AnmodningsperiodePostDto(){
+    }
 
     public AnmodningsperiodePostDto(Collection<Anmodningsperiode> anmodningsperioder) {
         this.anmodningsperioder = anmodningsperioder.stream()
-            .map(AnmodningsperiodeDto::av)
+            .map(AnmodningsperiodeSkrivDto::av)
             .collect(Collectors.toList());
     }
 
@@ -20,11 +23,11 @@ public final class AnmodningsperiodePostDto {
         return new AnmodningsperiodePostDto(anmodningsperioder);
     }
 
-    public List<AnmodningsperiodeDto> getAnmodningsperioder() {
+    public List<AnmodningsperiodeSkrivDto> getAnmodningsperioder() {
         return anmodningsperioder;
     }
 
-    public void setAnmodningsperioder(List<AnmodningsperiodeDto> anmodningsperioder) {
+    public void setAnmodningsperioder(List<AnmodningsperiodeSkrivDto> anmodningsperioder) {
         this.anmodningsperioder = anmodningsperioder;
     }
 }

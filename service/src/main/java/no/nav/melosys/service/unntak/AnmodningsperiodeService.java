@@ -15,7 +15,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +47,8 @@ public class AnmodningsperiodeService {
         for (Anmodningsperiode anmodningsperiode : eksisterende) {
             if (anmodningsperiode.getAnmodningsperiodeSvar() != null) {
                 throw new FunksjonellException("Kan ikke oppdatere anmodningsperiode etter at svar er registrert!");
+            } else if (anmodningsperiode.erSendtUtland()) {
+                throw new FunksjonellException("Kan ikke oppdatere anmodningsperiode etter A001 er sendt!");
             }
         }
 
@@ -112,11 +113,7 @@ public class AnmodningsperiodeService {
 
         } else if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE
                         && !anmodningsperiodeSvar.erGyldigDelvisInnvilgelse()) {
-            throw new FunksjonellException("Periode og begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
-
-        } else if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.AVSLAG
-                        && StringUtils.isEmpty(anmodningsperiodeSvar.getBegrunnelseFritekst())) {
-            throw new FunksjonellException("Begrunnelse må være fyllt ut ved " + AnmodningsperiodeSvarType.AVSLAG);
+            throw new FunksjonellException("Periode må være fyllt ut ved " + AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
         }
     }
 }

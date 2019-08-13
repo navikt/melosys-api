@@ -6,10 +6,7 @@ import java.util.Collections;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -78,7 +75,7 @@ public class SendSedTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
             LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2, TilleggsBestemmelser_883_2004.FO_883_2004_ART11_5,
-            Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+            Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
         behandlingsresultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         return behandlingsresultat;

@@ -248,4 +248,20 @@ public class Behandlingsresultat extends RegistreringsInfo {
         }
         return lovvalgsperioder.iterator().next();
     }
+
+    public Anmodningsperiode hentValidertAnmodningsperiode() {
+        if (anmodningsperioder.isEmpty()) {
+            throw new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id);
+        }
+        if (anmodningsperioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en"
+                + " anmodningsperiode er ikke støttet i første leveranse");
+        }
+        return anmodningsperioder.iterator().next();
+    }
+
+    public boolean erAutomatisert() {
+        return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
+            || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
+    }
 }

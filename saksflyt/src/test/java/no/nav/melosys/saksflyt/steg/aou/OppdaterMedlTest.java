@@ -68,7 +68,7 @@ public class OppdaterMedlTest {
         behandling.setFagsak(fagsak);
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Landkoder.CH,
-            LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, null, null, null);
+            LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, null, null, null, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);

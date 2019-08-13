@@ -156,18 +156,17 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         return adresse;
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+    private Lovvalgsperiode lagLovvalgsperiodeDto(Behandlingsresultat behandlingsresultat) {
 
         if (!behandlingsresultat.getLovvalgsperioder().isEmpty()) {
             return lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode());
         }
 
-        Anmodningsperiode anmodningsperiode = behandlingsresultat.getAnmodningsperioder().stream().findFirst()
-            .orElseThrow(() -> new FunksjonellException("Finner ingen lovvalgsperiode eller anmodningsperiode for behandling " + behandlingsresultat.getId()));
+        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
         return lagLovvalgsperiodeDto(anmodningsperiode, hentUnntaksBegrunnelse(behandlingsresultat));
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(ErPeriodeMedBestemmelse periodeMedBestemmelse) {
+    private Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode periodeMedBestemmelse) {
         Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
         lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
         lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
