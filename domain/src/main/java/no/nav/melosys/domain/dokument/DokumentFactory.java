@@ -85,8 +85,6 @@ public class DokumentFactory {
             StreamSource xmlSource = new StreamSource(new StringReader(dokumentXml));
             transformer.transform(xmlSource, outputTarget);
         } catch (TransformerException e) {
-            log.error("XSLT transformasjon feilet for type {} og versjon {} ", type , versjon);
-            log.error("Exception: ", e);
             throw new IllegalStateException(e);
         }
 
