@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.aou.svar;
 
+import java.util.Collections;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
@@ -15,6 +16,7 @@ import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
@@ -33,16 +35,18 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final VedtakService vedtakService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
 
     @Autowired
     public OppdaterBehandling(AnmodningsperiodeService anmodningsperiodeService,
                               BehandlingService behandlingService,
                               BehandlingsresultatService behandlingsresultatService,
-                              @Qualifier("system") VedtakService vedtakService) {
+                              @Qualifier("system") VedtakService vedtakService, LovvalgsperiodeService lovvalgsperiodeService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.vedtakService = vedtakService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
     @Override
@@ -59,22 +63,23 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Anmodningsperiode anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(prosessinstans.getBehandling().getId())
+        final long behandlingID = prosessinstans.getBehandling().getId();
+        Anmodningsperiode anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream().findFirst()
-            .orElseThrow(() -> new TekniskException("Finner ingen anmodningsperiode for behandling " + prosessinstans.getBehandling().getId()));
+            .orElseThrow(() -> new TekniskException("Finner ingen anmodningsperiode for behandling " + behandlingID));
         boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.INNVILGELSE;
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(prosessinstans.getBehandling().getId(), Medlemskapstyper.PLIKTIG);
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(Lovvalgsperiode.av(anmodningsperiode, Medlemskapstyper.PLIKTIG)));
 
 
         if (erInnvilgelse && !inneholderYtterligereInformasjon(melosysEessiMelding)) {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Iverksetter vedtak",
-                AnmodningsperiodeSvarType.INNVILGELSE  , prosessinstans.getBehandling().getId());
-            fattVedtak(prosessinstans.getBehandling().getId());
+                AnmodningsperiodeSvarType.INNVILGELSE  , behandlingID);
+            fattVedtak(behandlingID);
         } else {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Endrer behandlingsstatus til {}",
                 anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType(),
-                prosessinstans.getBehandling().getId(),
+                behandlingID,
                 Behandlingsstatus.VURDER_DOKUMENT);
             oppdaterBehandlingsstatusVurderDokument(prosessinstans);
         }

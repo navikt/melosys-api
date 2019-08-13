@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.aou.svar;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
@@ -8,12 +9,15 @@ import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -34,13 +38,18 @@ public class OppdaterBehandlingTest {
     private VedtakService vedtakService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
+
+    @Captor
+    private ArgumentCaptor<Collection<Lovvalgsperiode>> captor;
 
     private Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
 
     @Before
     public void setUp() {
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
-        oppdaterBehandling = new OppdaterBehandling(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService);
+        oppdaterBehandling = new OppdaterBehandling(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService, lovvalgsperiodeService);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
     }
 
@@ -61,7 +70,14 @@ public class OppdaterBehandlingTest {
         oppdaterBehandling.utfør(prosessinstans);
 
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+
+        Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
+        assertThat(lagredeLovvalgsperioder).hasSize(1);
+
+        Lovvalgsperiode lovvalgsperiode = lagredeLovvalgsperioder.iterator().next();
+        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.AVSLAATT);
     }
 
     @Test
@@ -81,7 +97,14 @@ public class OppdaterBehandlingTest {
 
         verify(vedtakService).fattVedtak(eq(behandling.getId()), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
         verify(behandlingsresultatService).oppdaterBehandlingsMaate(anyLong(), any());
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+
+        Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
+        assertThat(lagredeLovvalgsperioder).hasSize(1);
+
+        Lovvalgsperiode lovvalgsperiode = lagredeLovvalgsperioder.iterator().next();
+        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
     }
 
     @Test
@@ -101,5 +124,13 @@ public class OppdaterBehandlingTest {
         oppdaterBehandling.utfør(prosessinstans);
 
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+
+        Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
+        assertThat(lagredeLovvalgsperioder).hasSize(1);
+
+        Lovvalgsperiode lovvalgsperiode = lagredeLovvalgsperioder.iterator().next();
+        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
     }
 }

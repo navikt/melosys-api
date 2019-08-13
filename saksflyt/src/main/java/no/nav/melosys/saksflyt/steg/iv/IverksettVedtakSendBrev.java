@@ -148,8 +148,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {
 
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        if (StringUtils.isEmpty(saksbehandler) && (behandlingsresultat.getBehandlingsmåte() == Behandlingsmaate.AUTOMATISERT
-            || behandlingsresultat.getBehandlingsmåte() == Behandlingsmaate.DELVIS_AUTOMATISERT)) {
+        if (StringUtils.isEmpty(saksbehandler) && behandlingsresultat.erAutomatisert()) {
             saksbehandler = prosessinstans.getBehandling().getFagsak().getRegistrertAv();
         }
 

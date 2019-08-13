@@ -33,7 +33,7 @@ public class AnmodningsperiodeSvarDto {
         );
     }
 
-    public static AnmodningsperiodeSvarDto fra(AnmodningsperiodeSvar anmodningsperiodeSvar) {
+    public static AnmodningsperiodeSvarDto av(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         return new AnmodningsperiodeSvarDto(
             anmodningsperiodeSvar.getAnmodningsperiodeSvarType().getKode(),
             new PeriodeDto(anmodningsperiodeSvar.getInnvilgetFom(), anmodningsperiodeSvar.getInnvilgetTom()),

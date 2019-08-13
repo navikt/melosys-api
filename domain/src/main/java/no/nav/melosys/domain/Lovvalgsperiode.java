@@ -5,10 +5,8 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.exception.FunksjonellException;
 
 import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
 
@@ -205,5 +203,36 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
         return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
             && getLovvalgsland() != Landkoder.NO
             && harGyldigBestemmelse();
+    }
+
+    public static Lovvalgsperiode av(Anmodningsperiode anmodningsperiode, Medlemskapstyper medlemskapstype) throws FunksjonellException {
+        AnmodningsperiodeSvar anmodningsperiodeSvar = anmodningsperiode.getAnmodningsperiodeSvar();
+
+        if (anmodningsperiodeSvar == null) {
+            throw new FunksjonellException("Kan ikke opprette lovvalgsperiode fra anmodningsperiode " +
+                "uten at et svar er registrert!");
+        }
+
+        InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.AVSLAG ?
+            InnvilgelsesResultat.AVSLAATT : InnvilgelsesResultat.INNVILGET;
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(anmodningsperiode.getBestemmelse());
+
+        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE) {
+            lovvalgsperiode.setFom(anmodningsperiodeSvar.getInnvilgetFom());
+            lovvalgsperiode.setTom(anmodningsperiodeSvar.getInnvilgetTom());
+        } else {
+            lovvalgsperiode.setFom(anmodningsperiode.getFom());
+            lovvalgsperiode.setTom(anmodningsperiode.getTom());
+        }
+
+        lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
+        lovvalgsperiode.setMedlemskapstype(medlemskapstype);
+        lovvalgsperiode.setMedlPeriodeID(anmodningsperiode.getMedlPeriodeID());
+        lovvalgsperiode.setTilleggsbestemmelse(anmodningsperiode.getTilleggsbestemmelse());
+        lovvalgsperiode.setLovvalgsland(anmodningsperiode.getLovvalgsland());
+        lovvalgsperiode.setDekning(anmodningsperiode.getDekning());
+        return lovvalgsperiode;
     }
 }

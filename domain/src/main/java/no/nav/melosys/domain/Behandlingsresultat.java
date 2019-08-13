@@ -259,4 +259,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
         }
         return anmodningsperioder.iterator().next();
     }
+
+    public boolean erAutomatisert() {
+        return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
+            || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
+    }
 }

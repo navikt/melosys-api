@@ -5,20 +5,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.AnmodningsperiodeSvar;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -35,8 +37,7 @@ public class AnmodningsperiodeServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
+
     private AnmodningsperiodeService anmodningsperiodeService;
 
     @Rule
@@ -44,7 +45,7 @@ public class AnmodningsperiodeServiceTest {
 
     @Before
     public void setUp() {
-        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository, behandlingsresultatService, anmodningsperiodeSvarRepository, lovvalgsperiodeService);
+        anmodningsperiodeService = new AnmodningsperiodeService(anmodningsperiodeRepository, behandlingsresultatService, anmodningsperiodeSvarRepository);
     }
 
     @Test
@@ -154,77 +155,5 @@ public class AnmodningsperiodeServiceTest {
 
         assertThat(anmodningsperiode.erSendtUtland()).isTrue();
         verify(anmodningsperiodeRepository).save(anmodningsperiode);
-    }
-
-    @Test
-    public void opprettLovvalgsperiodeFraAnmodningsperiode_innvilgelse_verifiserLovvalgsperiodeLagret() throws FunksjonellException, TekniskException {
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setBehandlingsresultat(behandlingsresultat);
-        AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
-        svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.INNVILGELSE);
-        anmodningsperiode.setAnmodningsperiodeSvar(svar);
-        when(anmodningsperiodeRepository.findByBehandlingsresultatId(1L)).thenReturn(Collections.singletonList(anmodningsperiode));
-
-        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(1L , Medlemskapstyper.PLIKTIG);
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), anyCollection());
-    }
-
-    @Test
-    public void opprettLovvalgsperiodeFraAnmodningsperiode_delvisInnvilgelse_verifiserLovvalgsperiodeLagret() throws FunksjonellException, TekniskException {
-
-        LocalDate nå = LocalDate.now();
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
-        anmodningsperiodeSvar.setInnvilgetFom(nå);
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-        anmodningsperiode.setBehandlingsresultat(behandlingsresultat);
-        when(anmodningsperiodeRepository.findByBehandlingsresultatId(1L)).thenReturn(Collections.singletonList(anmodningsperiode));
-
-        ArgumentCaptor<Collection<Lovvalgsperiode>> captor = ArgumentCaptor.forClass(Collection.class);
-
-        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(1L, Medlemskapstyper.PLIKTIG);
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), captor.capture());
-
-        Lovvalgsperiode lovvalgsperiode = captor.getValue().stream().findFirst()
-            .orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode registrert"));
-
-        assertThat(lovvalgsperiode.getFom()).isEqualTo(anmodningsperiodeSvar.getInnvilgetFom());
-    }
-
-    @Test
-    public void opprettLovvalgsperiode_avslag_verifiserLovvalgsperiodeLagretMedResultatAvslaatt() throws FunksjonellException, TekniskException {
-        LocalDate nå = LocalDate.now();
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.AVSLAG);
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(nå, nå.plusYears(1), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, null, null);
-        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-        anmodningsperiode.setBehandlingsresultat(behandlingsresultat);
-
-        when(anmodningsperiodeRepository.findByBehandlingsresultatId(1L)).thenReturn(Collections.singletonList(anmodningsperiode));
-
-        ArgumentCaptor<Collection<Lovvalgsperiode>> captor = ArgumentCaptor.forClass(Collection.class);
-
-        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(1L, Medlemskapstyper.PLIKTIG);
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), captor.capture());
-
-        Lovvalgsperiode lovvalgsperiode = captor.getValue().stream().findFirst()
-            .orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode registrert"));
-
-        assertThat(lovvalgsperiode.getFom()).isEqualTo(anmodningsperiode.getFom());
-        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.AVSLAATT);
     }
 }

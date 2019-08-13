@@ -77,7 +77,7 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         }
 
         String saksbehandlerID = prosessinstans.getData(SAKSBEHANDLER);
-        if (StringUtils.isEmpty(saksbehandlerID) && behandlingErIkkeAutomatisert(behandlingsresultat)) {
+        if (StringUtils.isEmpty(saksbehandlerID) && !behandlingsresultat.erAutomatisert()) {
             throw new FunksjonellException("SaksbehandlerID er ikke oppgitt.");
         }
 
@@ -87,11 +87,6 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         }
 
         prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
-    }
-
-    private boolean behandlingErIkkeAutomatisert(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.DELVIS_AUTOMATISERT
-            && behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.AUTOMATISERT;
     }
 
     private void validerBehandlingsResultatType(Prosessinstans prosessinstans) throws FunksjonellException {

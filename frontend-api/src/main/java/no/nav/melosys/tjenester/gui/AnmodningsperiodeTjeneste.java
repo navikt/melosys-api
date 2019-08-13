@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ws.rs.GET;
@@ -11,11 +12,13 @@ import javax.ws.rs.PathParam;
 import io.swagger.annotations.*;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeGetDto;
@@ -33,12 +36,14 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningsperiodeTjeneste extends RestTjeneste {
     private final AnmodningsperiodeService anmodningsperiodeService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final TilgangService tilgangService;
 
     @Autowired
-    public AnmodningsperiodeTjeneste(AnmodningsperiodeService anmodningsperiodeService, TilgangService tilgangService) {
+    public AnmodningsperiodeTjeneste(AnmodningsperiodeService anmodningsperiodeService, LovvalgsperiodeService lovvalgsperiodeService, TilgangService tilgangService) {
         super();
         this.anmodningsperiodeService = anmodningsperiodeService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.tilgangService = tilgangService;
     }
 
@@ -84,7 +89,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
 
         Optional<AnmodningsperiodeSvar> svar = anmodningsperiodeOptional.map(Anmodningsperiode::getAnmodningsperiodeSvar);
 
-        return svar.map(AnmodningsperiodeSvarDto::fra).orElseGet(AnmodningsperiodeSvarDto::new);
+        return svar.map(AnmodningsperiodeSvarDto::av).orElseGet(AnmodningsperiodeSvarDto::new);
     }
 
     @POST
@@ -101,7 +106,10 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
         AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningperiodeID, anmodningsperiodeSvarDto.til());
-        anmodningsperiodeService.opprettLovvalgsperiodeFraAnmodningsperiode(behandlingID, Medlemskapstyper.PLIKTIG);
-        return AnmodningsperiodeSvarDto.fra(svar);
+
+        Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(svar.getAnmodningsperiode(), Medlemskapstyper.PLIKTIG);
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));
+
+        return AnmodningsperiodeSvarDto.av(svar);
     }
 }

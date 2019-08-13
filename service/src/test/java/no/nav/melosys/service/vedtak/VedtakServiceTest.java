@@ -2,8 +2,6 @@ package no.nav.melosys.service.vedtak;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
@@ -78,14 +76,6 @@ public class VedtakServiceTest {
     @Test(expected = IkkeFunnetException.class)
     public void fattVedtak_behandlingIkkeFunnet() throws FunksjonellException, TekniskException {
         long behandlingID = 0L;
-        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-    }
-
-    @Test
-    public void fattVedtak_anmodningsperiodeFinnes_verifiserOpprettLovvalgsperiode() throws FunksjonellException, TekniskException {
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
-
         vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
