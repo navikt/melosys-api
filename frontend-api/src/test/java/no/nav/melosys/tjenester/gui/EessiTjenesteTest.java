@@ -17,6 +17,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,12 +93,12 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
         BucBestillingDto nyBucDto = new BucBestillingDto("LA_BUC_01", "NAVT002", "NO");
         Response response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
-        assertThat(response.getEntity()).isExactlyInstanceOf(String.class);
-        String rinaUrl = (String) response.getEntity();
+        assertThat(response.getEntity()).isExactlyInstanceOf(OpprettBucSvarDto.class);
+        OpprettBucSvarDto opprettBucSvarDto = (OpprettBucSvarDto) response.getEntity();
 
         schemaType = OPPRETT_BUC_SCHEMA;
         valider(nyBucDto, log);
-        assertThat(rinaUrl).isEqualTo("\"" + MOCK_RINA_URL + "\"");
+        assertThat(opprettBucSvarDto.getRinaUrl()).isEqualTo(MOCK_RINA_URL);
     }
 
     @Test
