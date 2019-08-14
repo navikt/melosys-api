@@ -31,8 +31,6 @@ import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdRespon
 import no.nav.tjeneste.virksomhet.person.v3.binding.*;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -40,20 +38,13 @@ import org.springframework.stereotype.Service;
 @Service
 @Primary
 public class TpsService implements TpsFasade {
-
-    private static final Logger log = LoggerFactory.getLogger(TpsService.class);
-
     private static final String PERSON_VERSJON = "3.0";
     private static final String PERSONHISTORIKK_VERSJON = "3.4";
 
     private final AktorConsumer aktorConsumer;
-
     private final PersonConsumer personConsumer;
-
     private final DokumentFactory dokumentFactory;
-
     private final AktoerIdCache aktørIdCache;
-
     private final JAXBContext jaxbContext;
 
     @Autowired
@@ -67,7 +58,6 @@ public class TpsService implements TpsFasade {
             jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class,
                 no.nav.tjeneste.virksomhet.person.v3.HentPersonhistorikkResponse.class);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IllegalStateException(e);
         }
     }
@@ -144,7 +134,6 @@ public class TpsService implements TpsFasade {
             xmlRoot.setResponse(response);
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IntegrasjonException(e);
         }
 
@@ -214,7 +203,6 @@ public class TpsService implements TpsFasade {
             xmlRoot.setResponse(response);
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IntegrasjonException(e);
         }
 

@@ -12,8 +12,6 @@ import javax.xml.transform.stream.StreamSource;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
@@ -29,13 +27,9 @@ import org.springframework.util.Assert;
 @Component
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class DokumentFactory {
-
-    private static final Logger log = LoggerFactory.getLogger(DokumentFactory.class);
-
     // Spring JAXB 2 marshaller og unmarshaller
-    private Jaxb2Marshaller marshaller;
-
-    private XsltTemplatesFactory xsltTemplatesFactory;
+    private final Jaxb2Marshaller marshaller;
+    private final XsltTemplatesFactory xsltTemplatesFactory;
 
     @Autowired
     public DokumentFactory(Jaxb2Marshaller marshaller, XsltTemplatesFactory xsltTemplatesFactory) {

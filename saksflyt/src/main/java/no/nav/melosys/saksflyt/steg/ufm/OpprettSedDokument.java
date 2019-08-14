@@ -1,8 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -30,9 +28,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OpprettSedDokument extends AbstraktStegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(OpprettSedDokument.class);
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final SaksopplysningRepository saksopplysningRepository;
     private final DokumentFactory dokumentFactory;

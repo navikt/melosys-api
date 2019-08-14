@@ -52,9 +52,6 @@ public class Saksopplysning {
     @Transient
     private SaksopplysningDokument dokument;
 
-    public Saksopplysning() {
-    }
-
     public Long getId() {
         return id;
     }

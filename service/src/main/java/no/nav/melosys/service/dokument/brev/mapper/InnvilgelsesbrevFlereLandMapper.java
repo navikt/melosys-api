@@ -69,10 +69,9 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         fag.setBostedsland(brevdata.bostedsland);
         fag.setTrygdemyndighetsland(" "); //TODO: Kun når Norge er utpekt. XSD må tillate EmptyString
 
-        // Virksomhetsland er arbeidsland for selvstenig næringsdrivende
+        // Virksomhetsland er arbeidsland for selvstendig næringsdrivende
         fag.setAntallVirksomhetsland(BigInteger.ZERO);
         fag.setVirksomhetslandListe(mapVirksomhetsListe(Collections.emptyList()));
-        //fag.setVirksomhetsland("DUMMY");
 
         if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
             fag.setArbeidPåSkip(JA);

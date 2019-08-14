@@ -57,11 +57,9 @@ public class OnBehalfOfWithOidcCallbackHandler implements CallbackHandler {
             builder = factory.newDocumentBuilder();
             document = builder.parse(new InputSource(new StringReader(getOnBehalfOfString())));
         } catch (ParserConfigurationException e) {
-            logger.error("Exception while getting builder, aborting", e);
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Exception while getting builder, aborting", e);
         } catch (SAXException e) {
-            logger.error("Exception while getting OnBehalfOf element, aborting", e);
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Exception while getting OnBehalfOf element, aborting", e);
         }
 
         return document.getDocumentElement();
