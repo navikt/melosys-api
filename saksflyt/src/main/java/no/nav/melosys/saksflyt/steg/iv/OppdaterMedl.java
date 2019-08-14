@@ -57,7 +57,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = prosessinstans.getBehandling();
-        ProsessType prosessType = prosessinstans.getType();
 
         String fnr = felles.hentFnr(behandling);
         Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(behandling);
