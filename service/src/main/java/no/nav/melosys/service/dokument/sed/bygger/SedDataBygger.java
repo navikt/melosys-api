@@ -67,8 +67,6 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
 
         SedDataDto sedDataDto = lagPersonopplysninger(behandling);
-        sedDataDto.setErUtkast(true);
-
         if (!lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId()).isEmpty()) {
             sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(hentLovvalgsperiode())));
         } else {
