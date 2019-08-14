@@ -63,7 +63,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(behandling);
 
         Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
-        if (ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE == prosessType || lovvalgsperiode.getMedlPeriodeID() != null) {
+        if (lovvalgsperiode.getMedlPeriodeID() != null) {
             medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
         } else if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
             Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
