@@ -132,4 +132,13 @@ public class OppdaterMedlTest {
         verify(medlFasade).oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
         assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
     }
+
+    @Test
+    public void medlperiodeIDFinnes_oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
+        p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
+        agent.utfør(p);
+
+        verify(medlFasade).oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
+    }
 }
