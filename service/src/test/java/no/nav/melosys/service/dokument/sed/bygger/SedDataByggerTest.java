@@ -8,6 +8,7 @@ import java.util.List;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -64,7 +65,7 @@ public class SedDataByggerTest {
         lovvalgsperiode.setBehandlingsresultat(behandlingsresultat);
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A);
+            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
 
         behandling = DataByggerStubs.hentBehandlingStub();

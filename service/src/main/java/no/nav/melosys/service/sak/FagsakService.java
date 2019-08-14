@@ -2,6 +2,7 @@ package no.nav.melosys.service.sak;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -103,10 +104,31 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
+    // Sletter aktører som ikke ligger i oppgitt liste og legger til de som mangler.
+    // Oppdaterer IKKE de som allerede finnes i database
+    @Transactional
+    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId()));
+
+        Collection<Aktoer> nyeMyndigheter = ider.stream()
+            .map(id -> lagAktør(fagsak, Aktoersroller.MYNDIGHET, id))
+            .collect(Collectors.toList());
+
+        fagsak.getAktører().addAll(nyeMyndigheter);
+        fagsakRepository.save(fagsak);
+    }
+
     @Transactional
     public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
+        Aktoer aktør = lagAktør(fagsak, aktørsrolle, ID);
+        fagsak.getAktører().add(aktør);
+        fagsakRepository.save(fagsak);
+    }
+
+    private static Aktoer lagAktør(Fagsak fagsak, Aktoersroller aktørsrolle, String ID) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(aktørsrolle);
@@ -124,9 +146,7 @@ public class FagsakService {
             default:
                 throw new IllegalStateException(aktørsrolle + " støttes ikke.");
         }
-
-        fagsak.getAktører().add(aktør);
-        fagsakRepository.save(fagsak);
+        return aktør;
     }
 
     /**

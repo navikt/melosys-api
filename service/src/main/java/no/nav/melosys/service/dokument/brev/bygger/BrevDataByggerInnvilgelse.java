@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -57,7 +58,10 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
         brevdata.lovvalgsperiode = hentLovvalgsperiode();
         brevdata.arbeidsland = landVelgerService.hentArbeidsland(behandling).getBeskrivelse();
 
-        brevdata.trygdemyndighetsland = landVelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
+        brevdata.trygdemyndighetsland = landVelgerService.hentUtenlandskTrygdemyndighetsland(behandling).stream()
+            .findFirst()
+            .map(Landkoder::getBeskrivelse)
+            .orElse(null);
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);

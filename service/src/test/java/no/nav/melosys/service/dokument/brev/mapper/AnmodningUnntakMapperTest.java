@@ -91,7 +91,7 @@ public class AnmodningUnntakMapperTest {
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         Anmodningsperiode anmodningsperiode =
             new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO, null, null, Landkoder.DE,
-                null);
+                null, null);
         resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
 
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);

@@ -1,52 +1,39 @@
 package no.nav.melosys.saksflyt.steg;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 
 public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(AbstraktAvklarMyndighet.class);
+    private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
 
-    private final BehandlingRepository behandlingRepository;
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
-    private final AvklarMyndighetService avklarMyndighetService;
-
-    public AbstraktAvklarMyndighet(BehandlingRepository behandlingRepository,
-                                   BehandlingsresultatRepository behandlingsresultatRepository,
-                                   AvklarMyndighetService avklarMyndighetService) {
-        this.behandlingRepository = behandlingRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.avklarMyndighetService = avklarMyndighetService;
+    public AbstraktAvklarMyndighet(BehandlingService behandlingService,
+                                   BehandlingsresultatService behandlingsresultatService,
+                                   UtenlandskMyndighetService utenlandskMyndighetService) {
+        this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-
         Long behandlingID = prosessinstans.getBehandling().getId();
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
-
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithSaksbehandlingById(behandlingID)
-            .orElseThrow(() -> new TekniskException("Behandlingsresultat " + behandlingID + " finnes ikke."));
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         boolean innvilgelseEllerAnmodningUnntakSkalSendes = prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK
             || behandlingsresultat.erInnvilgelse();
 
         if (innvilgelseEllerAnmodningUnntakSkalSendes) {
-
-            Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
-            String saksnummer = fagsak.getSaksnummer();
-            Aktoer myndighetPart = fagsak.hentAktørMedRolleType(Aktoersroller.MYNDIGHET);
-            if (myndighetPart == null) {
-                avklarMyndighetService.avklarUtenlandskMyndighetOgLagre(behandling);
-            } else {
-                log.debug("Sak {} har allerede en myndighet med kode {}", saksnummer, myndighetPart.getInstitusjonId());
-            }
+            utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
         }
     }
 }

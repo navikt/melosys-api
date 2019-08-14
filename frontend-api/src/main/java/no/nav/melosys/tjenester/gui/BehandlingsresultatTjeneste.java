@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = { "behandlingsresultat" })
-@Path("/behandlingsresultater")
+@Path("/behandlinger")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsresultatTjeneste extends RestTjeneste {
@@ -34,7 +34,7 @@ public class BehandlingsresultatTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("{behandlingID}")
+    @Path("{behandlingID}/resultat")
     @ApiOperation(value = "Hent behandlingsresultat knyttet til en behandling",
         response = BehandlingsresultatDto.class)
     public Response hentBehandlingsresultat(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {

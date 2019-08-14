@@ -85,10 +85,10 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
         return lovvalgsperiodeType;
     }
 
-    no.nav.dok.melosysbrev._000081.LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
+    @Override
+    no.nav.dok.melosysbrev._000081.LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) {
 
-        Anmodningsperiode anmodningsperiode = resultat.getAnmodningsperioder()
-            .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen anmodningsperiode funnet for behandlingsresultat " + resultat.getId()));
+        Anmodningsperiode anmodningsperiode = resultat.hentValidertAnmodningsperiode();
 
         no.nav.dok.melosysbrev._000081.LovvalgsperiodeType lovvalgsperiodeType = new no.nav.dok.melosysbrev._000081.LovvalgsperiodeType();
 

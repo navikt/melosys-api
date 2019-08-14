@@ -25,19 +25,15 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadres
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
-public class A1Mapper {
-
+class A1Mapper {
     private static final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 15;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
-
-    private Behandlingsresultat resultat;
 
     private BrevDataA1 brevData;
 
     public A1 mapA1(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevData) throws TekniskException {
         this.brevData = brevData;
-        this.resultat = resultat;
 
         A1 a1 = new A1();
         a1.setSerienummer(behandling.getFagsak().getSaksnummer() + behandling.getId());
@@ -106,7 +102,9 @@ public class A1Mapper {
         hovedvirksomhetBrev.setPostnr(adresse.postnummer);
         hovedvirksomhetBrev.setPoststed(adresse.poststed);
         hovedvirksomhetBrev.setLandkode(adresse.landkode);
-        hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.valueOf(virksomhet.yrkesaktivitet.getKode()));
+        if (virksomhet.yrkesaktivitet != null) {
+            hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.valueOf(virksomhet.yrkesaktivitet.getKode()));
+        }
         return hovedvirksomhetBrev;
     }
 

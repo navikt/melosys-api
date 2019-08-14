@@ -1,8 +1,9 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -37,34 +38,41 @@ public class LandvelgerService {
     }
 
     public Landkoder hentArbeidsland(Behandling behandling) throws TekniskException, FunksjonellException {
-        Optional<Landkoder> arbeidslandOpt = avklartefaktaService.hentArbeidsland(behandling.getId());
-        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-        return arbeidslandOpt.orElseGet(() -> hentSøknadslandkoder(søknad).get(0));
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandling);
+        if (alleArbeidsland.size() != 1) {
+            throw new FunksjonellException("Fant ingen eller flere enn ett arbeidsland");
+        }
+        return alleArbeidsland.iterator().next();
     }
 
-    public Set<Landkoder> hentAlleArbeidsland(Behandling behandling) throws TekniskException {
-        Set<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleArbeidsland(behandling.getId());
+    public Collection<Landkoder> hentAlleArbeidsland(Behandling behandling) throws TekniskException {
+        Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
+
+        Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandling.getId());
+        alleArbeidsland.removeAll(landMedMarginaltArbeid);
         return alleArbeidsland;
     }
 
-    public Landkoder hentTrygdemyndighetsland(Behandling behandling) throws FunksjonellException, TekniskException {
-        List<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandling);
+    public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(Behandling behandling) throws TekniskException {
+        Collection<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandling);
 
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         if (oppfylteVilkår.contains(FO_883_2004_ART11_3A) || oppfylteVilkår.contains(FO_883_2004_ART11_4_2)) {
-            return hentBostedsland(behandling, søknad);
+            return Collections.singletonList(hentBostedsland(behandling, søknad));
         }
 
-        return hentArbeidsland(behandling);
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandling);
+        alleArbeidsland.remove(Landkoder.NO);
+        return new ArrayList<>(alleArbeidsland);
     }
 
-    private List<Vilkaar> hentOppfylteVilkår(Behandling behandling) {
+    private Collection<Vilkaar> hentOppfylteVilkår(Behandling behandling) {
         return vilkaarsresultatRepository.findByBehandlingsresultatId(behandling.getId()).stream()
             .filter(Vilkaarsresultat::isOppfylt)
             .map(Vilkaarsresultat::getVilkaar)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     }
 
     public Landkoder hentBostedsland(Behandling behandling, SoeknadDokument søknad) {
