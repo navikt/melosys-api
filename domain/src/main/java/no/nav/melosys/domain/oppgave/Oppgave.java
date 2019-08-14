@@ -115,7 +115,7 @@ public final class Oppgave {
         this.fristFerdigstillelse = builder.fristFerdigstillelse;
         this.tema = builder.tema;
         this.oppgavetype = builder.oppgavetype;
-        this.prioritet = builder.prioritet;
+        this.prioritet = builder.prioritet != null ? builder.prioritet : PrioritetType.NORM;
         this.journalpostId = builder.journalpostId;
         this.tilordnetRessurs = builder.tilordnetRessurs;
         this.versjon = builder.versjon;

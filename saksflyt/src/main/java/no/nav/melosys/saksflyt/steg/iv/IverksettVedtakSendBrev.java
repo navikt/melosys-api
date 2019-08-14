@@ -29,10 +29,6 @@ import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
 
 /**
  * Sender ulike brev basert på behandlingsresultat og lovvalgsbestemmelse.
- * <p>
- * Transisjoner:
- * ProsessType.IVERKSETT_VEDTAK
- *  IV_SEND_BREV -> IV_AVSLUTT_BEHANDLING eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class IverksettVedtakSendBrev extends AbstraktStegBehandler {

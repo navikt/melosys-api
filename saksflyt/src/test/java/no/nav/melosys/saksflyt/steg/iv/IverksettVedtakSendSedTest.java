@@ -14,8 +14,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -53,10 +53,9 @@ public class IverksettVedtakSendSedTest {
     }
 
     @Test
-    public void utførSteg_suksessfull_ingenRetur() throws Exception{
+    public void utførSteg_suksessfull_statusErAvgiftsoppgave() throws Exception{
         iverksettVedtakSendSed.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
-        assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
-        assertThat(prosessinstans.getBehandling().getDokumentasjonSvarfristDato(), is(nullValue()));
+        assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE));
     }
 }
