@@ -32,7 +32,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = {"anmodningsperioder"})
 @Service
-@Path("/")
+@Path("/anmodningsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningsperiodeTjeneste extends RestTjeneste {
     private final AnmodningsperiodeService anmodningsperiodeService;
@@ -48,7 +48,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("anmodningsperioder/{behandlingID}")
+    @Path("{behandlingID}")
     @ApiOperation(value = "Henter anmodningsperioder for en gitt behandling", response = AnmodningsperiodeSkrivDto.class)
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
     public AnmodningsperiodeGetDto hentAnmodningsperioder(@PathParam("behandlingID") long behandlingID)
@@ -58,7 +58,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("anmodningsperioder/{behandlingID}")
+    @Path("{behandlingID}")
     @ApiOperation("Lagrer anmodningsperioder for en gitt behandling.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
     public AnmodningsperiodeGetDto lagreAnmodningsperioder(@PathParam("behandlingID") long behandlingID,
@@ -74,16 +74,16 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("anmodningsperioder/svar/{anmodningperiodeID}")
+    @Path("{anmodningsperiodeID}/svar")
     @ApiOperation("Henter svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
-    public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathParam("anmodningperiodeID") long anmodningperiodeID)
+    public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathParam("anmodningsperiodeID") long anmodningsperiodeID)
         throws FunksjonellException, TekniskException {
 
-        Optional<Anmodningsperiode> anmodningsperiodeOptional = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID);
+        Optional<Anmodningsperiode> anmodningsperiodeOptional = anmodningsperiodeService.hentAnmodningsperiode(anmodningsperiodeID);
 
         long behandlingID = anmodningsperiodeOptional.map(Anmodningsperiode::getBehandlingsresultat)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningsperiodeID)).getId();
 
         tilgangService.sjekkTilgang(behandlingID);
 
@@ -93,19 +93,19 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("anmodningsperioder/svar/{anmodningperiodeID}")
+    @Path("{anmodningsperiodeID}/svar")
     @ApiOperation("Lagrer svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
-    public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathParam("anmodningperiodeID") long anmodningperiodeID,
+    public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathParam("anmodningsperiodeID") long anmodningsperiodeID,
                                                                @ApiParam(value = "Svar på anmodningsperiode som skal lagres.") AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
         throws FunksjonellException, TekniskException {
 
-        long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningperiodeID)
+        long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningsperiodeID)
             .map(Anmodningsperiode::getBehandlingsresultat)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningperiodeID)).getId();
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningsperiodeID)).getId();
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
-        AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningperiodeID, anmodningsperiodeSvarDto.til());
+        AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, anmodningsperiodeSvarDto.til());
 
         Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(svar.getAnmodningsperiode(), Medlemskapstyper.PLIKTIG);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));

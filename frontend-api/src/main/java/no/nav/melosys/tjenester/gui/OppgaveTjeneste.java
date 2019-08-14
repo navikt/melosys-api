@@ -73,7 +73,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("/tilbakelegge")
+    @Path("/tilbakelegg")
     @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
     public Response leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();

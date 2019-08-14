@@ -27,7 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = { "lovvalgsperioder" })
 @Service
-@Path("/")
+@Path("/lovvalgsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class LovvalgsperiodeTjeneste extends RestTjeneste {
 
@@ -41,10 +41,10 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("/lovvalgsperioder/{behandlingsid}")
+    @Path("{behandlingID}")
     @ApiOperation(value = "Henter en lovvalgsperiode for en gitt behandling", response = LovvalgsperiodeDto.class)
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
-    public Response hentLovvalgsperioder(@PathParam("behandlingsid") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public Response hentLovvalgsperioder(@PathParam("behandlingID") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgangService.sjekkTilgang(behandlingsid);
         Collection<LovvalgsperiodeDto> resultat = lovvalgsperiodeService
                 .hentLovvalgsperioder(behandlingsid)
@@ -55,10 +55,10 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("/lovvalgsperioder/{behandlingsid}")
+    @Path("{behandlingID}")
     @ApiOperation("Lagrer en lovvalgsperiode for en gitt behandling.")
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
-    public Collection<LovvalgsperiodeDto> lagreLovvalgsperioder(@PathParam("behandlingsid") long behandlingsid,
+    public Collection<LovvalgsperiodeDto> lagreLovvalgsperioder(@PathParam("behandlingID") long behandlingsid,
             @ApiParam(value = "En liste av lovvalgsperioder å lagre.") Collection<LovvalgsperiodeDto> lovvalgsperiodeDtoer) throws FunksjonellException, TekniskException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingsid);
         List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeDtoer.stream()
@@ -69,10 +69,10 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("/opprinneligLovvalgsperiode/{behandlingsid}")
+    @Path("{behandlingID}/opprinnelig")
     @ApiOperation(value = "Henter den opprinnelig lovvalgsperioden en replikert avsluttet behandling har", response = LovvalgsperiodeDto.class)
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
-    public Map<String, PeriodeDto> hentOpprinneligLovvalgsperiode(@PathParam("behandlingsid") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public Map<String, PeriodeDto> hentOpprinneligLovvalgsperiode(@PathParam("behandlingID") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgangService.sjekkTilgang(behandlingsid);
         Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandlingsid);
         PeriodeDto periodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());

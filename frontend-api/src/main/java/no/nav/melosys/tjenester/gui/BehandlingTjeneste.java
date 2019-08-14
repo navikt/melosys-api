@@ -54,7 +54,7 @@ public class BehandlingTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("{behandlingID}/medlemsperioder")
+    @Path("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public Response knyttMedlemsperioder(@PathParam("behandlingID") long behandlingID,
@@ -67,7 +67,7 @@ public class BehandlingTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("{behandlingID}/medlemsperioder")
+    @Path("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public Response hentMedlemsperioder(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
