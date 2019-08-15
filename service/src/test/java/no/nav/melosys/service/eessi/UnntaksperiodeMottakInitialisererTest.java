@@ -7,16 +7,15 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kafka.model.Periode;
 import no.nav.melosys.service.kafka.model.Statsborgerskap;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +25,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -37,7 +35,7 @@ public class UnntaksperiodeMottakInitialisererTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    private GsakFasade gsakFasade;
+    private OppgaveService oppgaveService;
     @Mock
     private SaksopplysningRepository saksopplysningRepository;
     @Mock
@@ -47,7 +45,7 @@ public class UnntaksperiodeMottakInitialisererTest {
 
     @Before
     public void setup() {
-        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, lovvalgsperiodeService, gsakFasade, saksopplysningRepository, avklarteFaktaRepository);
+        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, lovvalgsperiodeService, oppgaveService, saksopplysningRepository, avklarteFaktaRepository);
     }
 
     @Test
@@ -124,7 +122,6 @@ public class UnntaksperiodeMottakInitialisererTest {
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
         when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
-        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).thenReturn(new Oppgave.Builder().setOppgaveId("321").build());
 
         unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans);
 

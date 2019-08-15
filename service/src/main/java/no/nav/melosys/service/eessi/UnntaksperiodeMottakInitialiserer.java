@@ -6,16 +6,15 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,19 +31,19 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
 
     private final FagsakService fagsakService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final GsakFasade gsakFasade;
+    private final OppgaveService oppgaveService;
     private final SaksopplysningRepository saksopplysningRepository;
     private final AvklarteFaktaRepository avklarteFaktaRepository;
 
     @Autowired
     public UnntaksperiodeMottakInitialiserer(FagsakService fagsakService,
                                              LovvalgsperiodeService lovvalgsperiodeService,
-                                             @Qualifier("system") GsakFasade gsakFasade,
+                                             @Qualifier("system") OppgaveService oppgaveService,
                                              SaksopplysningRepository saksopplysningRepository,
                                              AvklarteFaktaRepository avklarteFaktaRepository) {
         this.fagsakService = fagsakService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.gsakFasade = gsakFasade;
+        this.oppgaveService = oppgaveService;
         this.saksopplysningRepository = saksopplysningRepository;
         this.avklarteFaktaRepository = avklarteFaktaRepository;
     }
@@ -75,7 +74,7 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
         }
 
         Behandling behandling = behandlingOptional.get();
-        ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         saksopplysningRepository.deleteAllByBehandling(behandling);
         avklarteFaktaRepository.deleteByBehandlingsresultatId(behandling.getId());
 
@@ -83,17 +82,6 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, hentBehandlingstypeForSedType(sedType));
         prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
-    }
-
-    // TODO: Flytt til GsakFasade/evt. OppgaveService (med systemtilgang)
-    private void ferdigstillOppgaveMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
-        if (oppgave == null) {
-            throw new TekniskException("Finner ingen oppgave med saksnummer " + saksnummer);
-        }
-
-        log.info("Ferdigstiller oppgave {} for fagsak {}", oppgave.getOppgaveId(), saksnummer);
-        gsakFasade.ferdigstillOppgave(oppgave.getOppgaveId());
     }
 
     private static Behandlingstyper hentBehandlingstypeForSedType(SedType sedType) {

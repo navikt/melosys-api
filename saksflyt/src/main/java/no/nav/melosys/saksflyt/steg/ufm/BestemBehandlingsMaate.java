@@ -12,7 +12,10 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -63,12 +66,8 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
         Set<AvklartefaktaRegistrering> registreringer = avklartFaktaUnntaksperiodeTreff
             .map(Avklartefakta::getRegistreringer).orElse(new HashSet<>());
 
-        if (registreringer.isEmpty()) {
-            behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
-            log.info("Behandling {}, type {} blir registrer automatisk",
-                prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getType());
-            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
-        } else {
+        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(prosessinstans.getBehandling());
+        if (!registreringer.isEmpty() || sedDokument.getSedType() == SedType.A001) {
             String registreringerStr = registreringer.stream()
                 .map(AvklartefaktaRegistrering::getBegrunnelseKode).collect(Collectors.joining(", "));
             log.info("Funnet treff {} for behandling {}. Flyttet til manuell behandling.",
@@ -76,6 +75,11 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
 
             behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.DELVIS_AUTOMATISERT);
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_OPPGAVE);
+        } else {
+            behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
+            log.info("Behandling {}, type {} blir registrer automatisk",
+                prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getType());
+            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
         }
 
         behandlingsresultatRepository.save(behandlingsresultat);
