@@ -1,15 +1,10 @@
 package no.nav.melosys.saksflyt.steg.aou;
 
-import java.util.Map;
-
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktAvklarMyndighet;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -43,11 +38,6 @@ public class AvklarMyndighet extends AbstraktAvklarMyndighet {
     @Override
     public ProsessSteg inngangsSteg() {
         return AOU_AVKLAR_MYNDIGHET;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import java.util.Map;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -10,12 +8,9 @@ import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import org.apache.commons.lang3.StringUtils;
@@ -61,11 +56,6 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     @Override
     public ProsessSteg inngangsSteg() {
         return IV_SEND_BREV;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

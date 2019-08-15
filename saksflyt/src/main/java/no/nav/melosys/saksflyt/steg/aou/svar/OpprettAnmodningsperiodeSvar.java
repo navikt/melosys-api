@@ -1,16 +1,12 @@
 package no.nav.melosys.saksflyt.steg.aou.svar;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kafka.model.SvarAnmodningUnntak;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -34,11 +30,6 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
     @Override
     protected ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

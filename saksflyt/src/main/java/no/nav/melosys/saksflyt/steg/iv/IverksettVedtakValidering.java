@@ -1,17 +1,13 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +46,6 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
     @Override
     public ProsessSteg inngangsSteg() {
         return IV_VALIDERING;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.time.Instant;
-import java.util.Map;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
@@ -10,12 +9,9 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +38,6 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     @Override
     protected ProsessSteg inngangsSteg() {
         return ProsessSteg.REG_UNNTAK_HENT_PERSON;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

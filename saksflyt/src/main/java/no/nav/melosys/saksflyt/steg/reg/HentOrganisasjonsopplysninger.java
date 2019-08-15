@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.reg;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,13 +13,10 @@ import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,11 +51,6 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
         return ProsessSteg.HENT_ORG_OPPL;
     }
 
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-    
     @Override
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());

@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
@@ -9,11 +8,8 @@ import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +46,6 @@ public class ReplikerBehandling extends AbstraktStegBehandler {
         return REPLIKER_BEHANDLING;
     }
 
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-    
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());

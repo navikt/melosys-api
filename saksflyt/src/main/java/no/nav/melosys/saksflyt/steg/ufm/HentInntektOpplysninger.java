@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -12,12 +11,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +39,6 @@ public class HentInntektOpplysninger extends AbstraktStegBehandler {
     @Override
     protected ProsessSteg inngangsSteg() {
         return ProsessSteg.REG_UNNTAK_HENT_YTELSER;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

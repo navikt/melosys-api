@@ -2,17 +2,13 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +40,6 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     @Override
     public ProsessSteg inngangsSteg() {
         return IV_OPPDATER_RESULTAT;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

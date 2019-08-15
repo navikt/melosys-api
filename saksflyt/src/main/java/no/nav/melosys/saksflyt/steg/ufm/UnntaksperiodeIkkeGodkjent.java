@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -11,14 +10,11 @@ import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,11 +37,6 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
     @Override
     protected ProsessSteg inngangsSteg() {
         return ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @SuppressWarnings("unchecked")

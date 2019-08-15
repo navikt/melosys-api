@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -13,15 +12,12 @@ import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,11 +44,6 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
     @Override
     protected ProsessSteg inngangsSteg() {
         return ProsessSteg.REG_UNNTAK_UNDER_AVKLARING;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override
