@@ -45,7 +45,7 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        if (prosessinstans.getData(ProsessDataKey.ER_ENDRING, Boolean.class)) {
+        if (Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_ENDRING, Boolean.class))) {
             avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
         }
 

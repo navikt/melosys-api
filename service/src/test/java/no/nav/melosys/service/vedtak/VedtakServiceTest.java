@@ -36,7 +36,6 @@ public class VedtakServiceTest {
     private OppgaveService oppgaveService;
     @Mock
     private ProsessinstansService prosessinstansService;
-
     private VedtakService vedtakService;
 
     private long behandlingID;

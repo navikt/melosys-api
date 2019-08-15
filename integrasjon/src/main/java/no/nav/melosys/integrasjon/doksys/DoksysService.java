@@ -64,7 +64,6 @@ public class DoksysService implements DoksysFasade {
             ProduserDokumentutkastResponse wsResponse = dokumentproduksjonConsumer.produserDokumentutkast(wsRequest);
             return wsResponse.getDokumentutkast();
         } catch (ProduserDokumentutkastBrevdataValideringFeilet | ProduserDokumentutkastInputValideringFeilet e) {
-            log.error("Henting av dokumentutkast feilet", e);
             throw new IntegrasjonException(e);
         }
     }
@@ -130,12 +129,10 @@ public class DoksysService implements DoksysFasade {
 
             return response;
         } catch (ProduserIkkeredigerbartDokumentSikkerhetsbegrensning e) {
-            log.error("Produksjon av dokument feilet", e);
             throw new SikkerhetsbegrensningException(e);
         } catch (ProduserIkkeredigerbartDokumentDokumentErRedigerbart | ProduserIkkeRedigerbartDokumentJoarkForretningsmessigUnntak
             | ProduserIkkeredigerbartDokumentBrevdataValideringFeilet | ProduserIkkeredigerbartDokumentDokumentErVedlegg
             | ProduserIkkeRedigerbartDokumentInputValideringFeilet e) {
-            log.error("Produksjon av dokument feilet", e);
             throw new IntegrasjonException(e);
         }
     }

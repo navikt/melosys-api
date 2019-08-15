@@ -35,6 +35,7 @@ public class IverksettVedtakValideringTest {
     public void setUp() throws IkkeFunnetException {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.getLovvalgsperioder().add(new Lovvalgsperiode());
+        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         agent = new IverksettVedtakValidering(behandlingsresultatService);
@@ -91,6 +92,26 @@ public class IverksettVedtakValideringTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Lovvalgsperiode mangler for behandlingsresultat");
 
+        agent.utfør(p);
+    }
+
+    @Test
+    public void utfør_manglerSaksbehandlerIkkeAutomatisert_feiler() throws FunksjonellException, TekniskException {
+        p.setData(ProsessDataKey.SAKSBEHANDLER, "");
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("SaksbehandlerID er ikke oppgitt.");
+        agent.utfør(p);
+    }
+
+    @Test
+    public void utfør_manglerSaksbehandlerErAutomatisert_ingenFeil() throws FunksjonellException, TekniskException {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.DELVIS_AUTOMATISERT);
+        behandlingsresultat.getLovvalgsperioder().add(new Lovvalgsperiode());
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        p.setData(ProsessDataKey.SAKSBEHANDLER, "");
         agent.utfør(p);
     }
 }

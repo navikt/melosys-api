@@ -8,8 +8,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,18 +35,12 @@ import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforhold
 
 @Service
 public class AaregService implements AaregFasade {
-
-    private static final Logger log = LoggerFactory.getLogger(AaregService.class);
-
     private static final String ARBEIDSFORHOLD_VERSJON = "3.0";
+    private static final String REGELVERK_A_ORDNINGEN = "A_ORDNINGEN";
 
     private final ArbeidsforholdConsumer arbeidsforholdConsumer;
-
     private final DokumentFactory dokumentFactory;
-
     private final JAXBContext jaxbContext;
-
-    private static final String REGELVERK_A_ORDNINGEN = "A_ORDNINGEN";
 
     @Autowired
     public AaregService(ArbeidsforholdConsumer arbeidsforholdConsumer, DokumentFactory dokumentFactory) {
@@ -60,7 +52,6 @@ public class AaregService implements AaregFasade {
             return JAXBContext.newInstance(no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse.class,
                     no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse.class);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IllegalStateException(e);
         }
     }
@@ -117,7 +108,6 @@ public class AaregService implements AaregFasade {
             xmlRoot.setParameters(response);
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IllegalStateException(e);
         }
 

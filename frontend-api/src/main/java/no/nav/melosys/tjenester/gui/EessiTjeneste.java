@@ -25,11 +25,9 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class EessiTjeneste extends RestTjeneste {
-
     private static final Logger log = LoggerFactory.getLogger(EessiTjeneste.class);
 
     private final EessiService eessiService;
-
     private final BehandlingService behandlingService;
 
     @Autowired
@@ -58,17 +56,11 @@ public class EessiTjeneste extends RestTjeneste {
     )
     public Response opprettBuc(@ApiParam BucBestillingDto nyBucDto, @PathParam("behandlingID") long behandlingID) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        try {
-            String rinaUrl = eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(),
-                nyBucDto.getMottakerLand(), nyBucDto.getMottakerId());
+        String rinaUrl = eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(),
+            nyBucDto.getMottakerLand(), nyBucDto.getMottakerId());
 
-            // String må wrappes for å være gyldig JSON
-            return Response.ok("\"" + rinaUrl + "\"").build();
-        } catch (MelosysException e) {
-            log.error("Feil ved opprettelse av SED for behandling {}, fagsak {}",
-                behandling.getId(), behandling.getFagsak().getSaksnummer(), e);
-            throw e;
-        }
+        // String må wrappes for å være gyldig JSON
+        return Response.ok("\"" + rinaUrl + "\"").build();
     }
 
     @GET

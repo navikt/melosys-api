@@ -14,8 +14,6 @@ import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelse
 import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelseshandtererbehandlingsstatus.ObjectFactory;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -26,25 +24,18 @@ import static no.nav.melosys.integrasjon.felles.jms.JmsConfig.HENDELSESKØ;
 
 @Component
 public class BehandlingstatusClientImpl implements BehandlingstatusClient {
-
     public static final long DEFAULT_TIMEOUT = 5000;
 
-    private static final Logger log = LoggerFactory.getLogger(BehandlingstatusClientImpl.class);
-
     private final JAXBContext jaxbContext;
-
     private final ObjectFactory objectFactory;
-
-    private JmsTemplate jmsTemplate;
-
-    private Queue hendelseshåndterer;
+    private final JmsTemplate jmsTemplate;
+    private final Queue hendelseshåndterer;
 
     @Autowired
     public BehandlingstatusClientImpl(JmsTemplate jmsTemplate, @Qualifier(HENDELSESKØ) Queue hendelseshåndterer) throws IntegrasjonException {
         try {
             jaxbContext = JAXBContext.newInstance(BehandlingStatus.class);
         } catch (JAXBException e) {
-            log.error("Feilet ved instansiering av konsument", e);
             throw new IntegrasjonException(e);
         }
         this.objectFactory = new ObjectFactory();

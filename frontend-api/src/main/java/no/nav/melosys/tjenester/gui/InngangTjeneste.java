@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = {"inngangsvilkår"})
-@Path("/inngang")
+@Path("/inngangsvilkaar")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class InngangTjeneste extends RestTjeneste {

@@ -5,8 +5,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import no.nav.melosys.domain.ErPeriodeMedBestemmelse;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
@@ -92,7 +92,7 @@ public final class MedlPeriodeKonverter {
     }
 
     public static OpprettPeriodeRequest konverterTilOpprettPeriodRequest(String fnr,
-                                                                         ErPeriodeMedBestemmelse periodeMedBestemmelse,
+                                                                         Medlemskapsperiode periodeMedBestemmelse,
                                                                          PeriodestatusMedl periodestatusMedl,
                                                                          LovvalgMedl lovvalgMedl,
                                                                          KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
@@ -126,7 +126,7 @@ public final class MedlPeriodeKonverter {
         return request;
     }
 
-    private static Medlemsperiode opprettPeriode(ErPeriodeMedBestemmelse periodeMedBestemmelse, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+    private static Medlemsperiode opprettPeriode(Medlemskapsperiode periodeMedBestemmelse, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
         Medlemsperiode periode = new Medlemsperiode();
         try {
             periode.setFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(periodeMedBestemmelse.getFom()));
@@ -165,7 +165,7 @@ public final class MedlPeriodeKonverter {
         return periode;
     }
 
-    private static LovvalgBestemmelse hentLovvalgBestemmelse(ErPeriodeMedBestemmelse lovvalgsperiode) {
+    private static LovvalgBestemmelse hentLovvalgBestemmelse(Medlemskapsperiode lovvalgsperiode) {
         final boolean harTilleggsbestemmelseART11_4_1 = lovvalgsperiode.getTilleggsbestemmelse() != null && lovvalgsperiode.getTilleggsbestemmelse().equals(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
 
         LovvalgBestemmelse bestemmelse;

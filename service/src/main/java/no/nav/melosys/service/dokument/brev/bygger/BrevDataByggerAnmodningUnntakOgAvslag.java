@@ -16,21 +16,17 @@ import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 
 public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataBygger implements BrevDataBygger {
-    private AnmodningsperiodeService anmodningsperiodeService;
     private AvklarteVirksomheterService avklarteVirksomheterService;
     private LandvelgerService landvelgerService;
 
     private static final Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
 
-    public BrevDataByggerAnmodningUnntakOgAvslag(AnmodningsperiodeService anmodningsperiodeService,
-                                                 AvklartefaktaService avklartefaktaService,
+    public BrevDataByggerAnmodningUnntakOgAvslag(AvklartefaktaService avklartefaktaService,
                                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                                  LandvelgerService landvelgerService) {
         super(null, null, avklartefaktaService);
-        this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.landvelgerService = landvelgerService;
     }

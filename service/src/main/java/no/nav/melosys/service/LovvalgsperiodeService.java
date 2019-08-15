@@ -52,6 +52,7 @@ public class LovvalgsperiodeService {
             .orElseThrow(() -> new IllegalStateException(String.format("Behandling %s fins ikke.", behandlingsid)));
 
         lovvalgsperiodeRepo.deleteByBehandlingsresultat(behandlingsresultat);
+        lovvalgsperiodeRepo.flush();
         List<Lovvalgsperiode> perioderMedBehandling = lovvalgsperioder.stream()
                 .map(l -> kopierLovvalgsperiodeMedBehandlingsResultat(l, behandlingsresultat))
                 .collect(Collectors.toList());

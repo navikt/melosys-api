@@ -73,11 +73,11 @@ public class SendBrev extends AbstraktStegBehandler {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
         }
 
-        anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
-
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         brevBestiller.bestill(ORIENTERING_ANMODNING_UNNTAK, saksbehandler, Mottaker.av(BRUKER), behandling);
         brevBestiller.bestill(ANMODNING_UNNTAK, saksbehandler, Mottaker.av(MYNDIGHET), behandling);
+
+        anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
 
         log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
         prosessinstans.setSteg(ProsessSteg.AOU_SEND_SED);

@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -52,6 +54,7 @@ public class VilkaarsresultatService {
             .orElseThrow(() -> new IkkeFunnetException("Registrering av vilkår feilet fordi behandlingsresulat med ID " + behandlingID + " er ikke funnet."));
 
         vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
+        vilkaarsresultatRepo.flush();
 
         for (VilkaarDto vilkaarDto :  vilkaarDtoer) {
             Vilkaarsresultat vilkaarsresultat = lagNyVilkaarResultat(behandlingsresultat, vilkaarDto);

@@ -62,7 +62,7 @@ public class DokumentTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("utkast/pdf/{behandlingID}/{produserbartDokument}")
+    @Path("pdf/utkast/{behandlingID}/{produserbartDokument}")
     @Produces({ "application/pdf", MediaType.APPLICATION_JSON + "; charset=UTF-8" })
     public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
                                    @PathParam("produserbartDokument") Produserbaredokumenter produserbartDokument,
