@@ -24,9 +24,9 @@ import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
+import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -73,19 +73,18 @@ public class InnvilgelsesbrevMapperTest {
         MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataA1 brevdataA1 = new BrevDataA1();
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("Virker ikke", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevdataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet, virksomhet));
+        brevdataA1.hovedvirksomhet = virksomhet;
+        brevdataA1.bivirksomheter = Collections.singletonList(virksomhet);
         brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
         brevdataA1.selvstendigeForetak = Collections.emptySet();
-        brevdataA1.utenlandskeVirksomheter = Collections.emptyList();
         brevdataA1.person = lagPersonDokument();
-        brevdataA1.hovedvirksomhet = virksomhet;
         brevdataA1.arbeidssteder = new ArrayList<>();
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(),"SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.norskeVirksomheter = brevdataA1.norskeVirksomheter;
+        brevdataInnvilgelse.hovedvirksomhet = virksomhet;
         brevdataInnvilgelse.arbeidsland = "Sverige";
         brevdataInnvilgelse.trygdemyndighetsland = "Sverige";
 
@@ -93,16 +92,6 @@ public class InnvilgelsesbrevMapperTest {
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
-    }
-
-    private static StrukturertAdresse lagStrukturertAdresse() {
-        StrukturertAdresse vadr = new StrukturertAdresse();
-        vadr.gatenavn = "Gate";
-        vadr.husnummer = "12B";
-        vadr.poststed = "Sted";
-        vadr.postnummer = "4321";
-        vadr.landkode = Landkoder.BG.getKode();
-        return vadr;
     }
 
     private static Behandlingsresultat lagBehandlingsresultat() {

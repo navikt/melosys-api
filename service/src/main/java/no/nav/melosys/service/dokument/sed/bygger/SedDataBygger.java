@@ -34,15 +34,13 @@ import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 @Service
 public class SedDataBygger extends AbstraktDokumentDataBygger {
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     @Autowired
     public SedDataBygger(KodeverkService kodeverkService,
                          LovvalgsperiodeService lovvalgsperiodeService,
                          AvklartefaktaService avklartefaktaService,
                          @Qualifier("system") AvklarteVirksomheterService avklarteVirksomheterService) {
-        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
     }
 
     public SedDataDto lag(Behandling behandling, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {

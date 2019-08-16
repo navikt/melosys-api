@@ -20,14 +20,10 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
 
 public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements BrevDataBygger {
-
-    private AvklarteVirksomheterService avklarteVirksomheterService;
-
     public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
                             AvklarteVirksomheterService avklarteVirksomheterService,
                             KodeverkService kodeverkService) {
-        super(kodeverkService, null, avklartefaktaService);
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        super(kodeverkService, null, avklartefaktaService, avklarteVirksomheterService);
     }
 
     @Override
@@ -36,10 +32,15 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
 
+        List<AvklartVirksomhet> utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
+        List<AvklartVirksomhet> norskeVirksomheter = hentAlleNorskeVirksomheterMedAdresse();
+        if (norskeVirksomheter.isEmpty() && utenlandskeVirksomheter.isEmpty()) {
+            throw new TekniskException("Trenger minst en valgt norsk virksomhet for ART12.1");
+        }
+
         BrevDataA1 brevData = new BrevDataA1();
+        brevData.person = person;
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
-        brevData.utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
-        brevData.norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
         brevData.selvstendigeForetak = avklarteVirksomheterService.hentSelvstendigeForetakOrgnumre(behandling);
         brevData.bostedsadresse = hentBostedsadresse();
 
@@ -47,20 +48,17 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         // Oppdragsgiver defineres nå for arbeidsstedet, og må utledes derfra
         List<Arbeidssted> arbeidssteder = hentArbeidssteder();
         brevData.arbeidssteder = arbeidssteder;
-        brevData.utenlandskeVirksomheter.addAll(hentOppdragsgiverFraArbeidssteder(arbeidssteder));
-
-        brevData.person = person;
-
-        if (brevData.norskeVirksomheter.isEmpty()) {
-            throw new TekniskException("Trenger minst en valgt norsk virksomhet for ART12.1");
-        }
 
         // Lev1 kun norske virksomheter som hovedvirksomhet (og kun én)
-        brevData.hovedvirksomhet = brevData.norskeVirksomheter.get(0);
+        brevData.hovedvirksomhet = hentHovedvirksomhet();
+        brevData.bivirksomheter = hentBivirksomheter();
+        brevData.bivirksomheter.addAll(hentForetakFraArbeidssteder(arbeidssteder));
         return brevData;
     }
 
-    private List<AvklartVirksomhet> hentOppdragsgiverFraArbeidssteder(List<Arbeidssted> arbeidssteder) {
+    // Oppdragsgiver kan oppgis rett på det fysiske arbeidsstedet,
+    // men skal vises i listen (5.1) sammen med andre utenlandske foretak (utenlandske arbeidsgivere/selvstendig næringsdrivende)
+    private List<AvklartVirksomhet> hentForetakFraArbeidssteder(List<Arbeidssted> arbeidssteder) {
         return arbeidssteder.stream()
             .filter(this::erFysiskArbeidsstedHosOppdragsgiver)
             .map(FysiskArbeidssted.class::cast)

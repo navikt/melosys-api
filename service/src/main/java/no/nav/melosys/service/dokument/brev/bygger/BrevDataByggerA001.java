@@ -39,7 +39,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
                               LovvalgsperiodeService lovvalgsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
-        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
@@ -58,7 +58,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = this.person;
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
+        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentArbeidsgivere(behandling, this::utfyllManglendeAdressefelter);
         brevData.selvstendigeVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter);
 
         brevData.bostedsadresse = hentBostedsadresse();

@@ -1,13 +1,16 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
+import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -22,21 +25,23 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
     private final BrevDataByggerA1 brevbyggerA1;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
+                                     AvklarteVirksomheterService avklarteVirksomheterService,
                                      LandvelgerService landVelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      BrevbestillingDto brevbestillingDto) {
-        super(null, lovvalgsperiodeService, avklartefaktaService);
+        super(null, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
         this.landVelgerService = landVelgerService;
         this.brevbestillingDto = brevbestillingDto;
         this.brevbyggerA1 = null;
     }
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
+                                     AvklarteVirksomheterService avklarteVirksomheterService,
                                      LandvelgerService landVelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
                                      BrevDataByggerA1 brevbyggerA1) {
-        super(null, lovvalgsperiodeService, avklartefaktaService);
+        super(null, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
         this.landVelgerService = landVelgerService;
         this.brevbestillingDto = brevbestillingDto;
         this.brevbyggerA1 = brevbyggerA1;
@@ -63,6 +68,9 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
             .map(Landkoder::getBeskrivelse)
             .orElse(null);
 
+        List<AvklartVirksomhet> norskeVirksomheter = hentAlleNorskeVirksomheterMedAdresse();
+        brevdata.hovedvirksomhet = norskeVirksomheter.iterator().next();
+
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
 
@@ -74,7 +82,6 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
 
         BrevDataA1 vedleggA1 = (BrevDataA1) brevbyggerA1.lag(behandling, saksbehandler);
         brevdata.vedleggA1 = vedleggA1;
-        brevdata.norskeVirksomheter = vedleggA1.norskeVirksomheter;
         return brevdata;
     }
 }

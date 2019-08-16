@@ -171,17 +171,16 @@ public final class DokumentServiceTest {
     private static BrevData lagBrevDataInnvilgelse() {
         BrevDataA1 brevDataA1 = new BrevDataA1();
         AvklartVirksomhet arbeidsgiver = new AvklartVirksomhet("Virker av og til", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevDataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(arbeidsgiver, arbeidsgiver));
+        brevDataA1.hovedvirksomhet = arbeidsgiver;
         brevDataA1.bostedsadresse = lagStrukturertAdresse();
         brevDataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
         brevDataA1.selvstendigeForetak = Collections.emptySet();
-        brevDataA1.utenlandskeVirksomheter = Collections.emptyList();
+        brevDataA1.bivirksomheter = Collections.emptyList();
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
-        brevDataA1.hovedvirksomhet = arbeidsgiver;
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevDataA1;
-        brevdataInnvilgelse.norskeVirksomheter = brevDataA1.norskeVirksomheter;
+        brevdataInnvilgelse.hovedvirksomhet = arbeidsgiver;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.arbeidsland = "Norway";

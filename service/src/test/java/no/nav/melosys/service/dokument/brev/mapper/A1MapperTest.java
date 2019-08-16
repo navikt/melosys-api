@@ -123,13 +123,12 @@ public class A1MapperTest {
 
         brevData = new BrevDataA1();
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        brevData.norskeVirksomheter = new ArrayList<>(Collections.singletonList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeForetak = new HashSet<>();
-        brevData.utenlandskeVirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
         brevData.bostedsadresse = boAdresse;
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
         brevData.person = lagPersonDokument();
         brevData.hovedvirksomhet = virksomhet;
+        brevData.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
     }
 
     protected static PersonDokument lagPersonDokument() {

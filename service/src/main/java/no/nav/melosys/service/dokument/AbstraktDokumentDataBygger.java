@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,7 +9,6 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -17,8 +17,12 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
@@ -30,18 +34,32 @@ public abstract class AbstraktDokumentDataBygger {
     protected final KodeverkService kodeverkService;
     protected final LovvalgsperiodeService lovvalgsperiodeService;
     protected final AvklartefaktaService avklartefaktaService;
+    protected final AvklarteVirksomheterService avklarteVirksomheterService;
 
     protected PersonDokument person;
     protected SoeknadDokument søknad;
 
     protected Behandling behandling;
 
+    private List<AvklartVirksomhet> norskeVirksomheter;
+    private List<AvklartVirksomhet> utenlandskeVirksomheter;
+
     protected AbstraktDokumentDataBygger(KodeverkService kodeverkService,
                                          LovvalgsperiodeService lovvalgsperiodeService,
-                                         AvklartefaktaService avklartefaktaService) {
+                                         AvklartefaktaService avklartefaktaService,
+                                         AvklarteVirksomheterService avklarteVirksomheterService) {
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
+    }
+
+    protected Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Collection<AvklartVirksomhet> bivirksomheter = new ArrayList<>();
+        bivirksomheter.addAll(hentAlleNorskeVirksomheterMedAdresse());
+        bivirksomheter.addAll(hentUtenlandskeVirksomheter());
+        bivirksomheter.remove(hentHovedvirksomhet());
+        return bivirksomheter;
     }
 
     protected StrukturertAdresse hentBostedsadresse() throws TekniskException {
@@ -61,27 +79,10 @@ public abstract class AbstraktDokumentDataBygger {
         return StrukturertAdresse.av(bostedsadresse);
     }
 
-    protected StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
-        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
-        if (StringUtils.isEmpty(adresse.gatenavn) || StringUtils.isEmpty(adresse.postnummer)) {
-            adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
-        }
-        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
-        return adresse;
-    }
-
     protected List<Arbeidssted> hentArbeidssteder() {
         List<Arbeidssted> arbeidssteder = hentFysiskearbeidssteder();
         arbeidssteder.addAll(hentIkkeFysiskeArbeidssteder());
         return arbeidssteder;
-    }
-
-    protected List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
-        // For nå har alltid kun et utenlandsk foretak.
-        // Det er derfor ikke nødvendig med filtrering av avklarte foretak
-        return søknad.foretakUtland.stream()
-            .map(AvklartVirksomhet::new)
-            .collect(Collectors.toList());
     }
 
     private List<Arbeidssted> hentFysiskearbeidssteder() {
@@ -91,7 +92,7 @@ public abstract class AbstraktDokumentDataBygger {
 
         if (fysiskeArbeidssteder.isEmpty()) {
             hentUtenlandskeVirksomheter().stream()
-                .filter(uv -> StringUtils.isNotEmpty(uv.adresse.landkode))
+                .filter(uv -> Boolean.TRUE.equals(uv.adresseErOgsåArbeidssted))
                 .forEach(uv -> fysiskeArbeidssteder.add(utledArbeidsstedFraVirksomhet(uv)));
         }
         return fysiskeArbeidssteder;
@@ -108,6 +109,41 @@ public abstract class AbstraktDokumentDataBygger {
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(AvklartVirksomhet virksomhet) {
         return new FysiskArbeidssted(virksomhet.navn, virksomhet.orgnr, (StrukturertAdresse)virksomhet.adresse);
+    }
+
+    protected List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
+        if (utenlandskeVirksomheter == null) {
+            // For nå har alltid kun et utenlandsk foretak.
+            // Det er derfor ikke nødvendig med filtrering av avklarte foretak
+            utenlandskeVirksomheter = søknad.foretakUtland.stream()
+                .map(AvklartVirksomhet::new)
+                .collect(Collectors.toList());
+        }
+        return utenlandskeVirksomheter;
+    }
+
+    protected List<AvklartVirksomhet> hentAlleNorskeVirksomheterMedAdresse() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        if (norskeVirksomheter == null) {
+            norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
+        }
+        return norskeVirksomheter;
+    }
+
+    protected StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
+        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
+        if (StringUtils.isEmpty(adresse.gatenavn) || StringUtils.isEmpty(adresse.postnummer)) {
+            adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
+        }
+        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        return adresse;
+    }
+
+    protected AvklartVirksomhet hentHovedvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        if (!hentAlleNorskeVirksomheterMedAdresse().isEmpty()) {
+            return hentAlleNorskeVirksomheterMedAdresse().iterator().next();
+        } else {
+            return hentUtenlandskeVirksomheter().iterator().next();
+        }
     }
 
     protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {

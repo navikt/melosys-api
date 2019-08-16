@@ -113,7 +113,7 @@ public class AttestMapperTest {
                                                             strukturertAdresse,
                                                             Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        AvklartVirksomhet utenlandksVirksomhet = new AvklartVirksomhet("Jarlsberg",
+        AvklartVirksomhet utenlandskVirksomhet = new AvklartVirksomhet("Jarlsberg",
                                                                         "123456789",
                                                                         strukturertAdresse,
                                                                         Yrkesaktivitetstyper.LOENNET_ARBEID);
@@ -128,13 +128,12 @@ public class AttestMapperTest {
 
         BrevDataA1 a1Data = new BrevDataA1();
         a1Data.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        a1Data.norskeVirksomheter = new ArrayList<>(Collections.singletonList(virksomhet));   // Hovedvirksomhet
         a1Data.selvstendigeForetak = new HashSet<>();
-        a1Data.utenlandskeVirksomheter = new ArrayList<>(Collections.singletonList(utenlandksVirksomhet));
         a1Data.bostedsadresse = boAdresse;
         a1Data.arbeidssteder = Arrays.asList(fysiskArbeidssted, ikkeFysiskArbeidssted);
         a1Data.person = person;
         a1Data.hovedvirksomhet = virksomhet;
+        a1Data.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
 
         brevData = new BrevDataVedlegg("Z1234567");
         brevData.brevDataA1 = a1Data;

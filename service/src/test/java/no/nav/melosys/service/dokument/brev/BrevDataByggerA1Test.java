@@ -177,7 +177,7 @@ public class BrevDataByggerA1Test {
         søknad.arbeidUtland.add(arbeidUtland);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
-        assertThat(brevDataDto.utenlandskeVirksomheter.stream().map(uv -> uv.navn)).contains(arbeidUtland.foretakNavn);
+        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(arbeidUtland.foretakNavn);
         assertThat(brevDataDto.arbeidssteder.stream()
             .filter(Arbeidssted::erFysisk)
             .map(FysiskArbeidssted.class::cast)
