@@ -3,6 +3,7 @@ package no.nav.melosys.domain.oppgave;
 import java.time.LocalDate;
 import java.util.Comparator;
 
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -12,45 +13,58 @@ import no.nav.melosys.exception.FunksjonellException;
  * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
  */
 public final class Oppgave {
-
     private static final int FRIST_JFR_DAGER = 1;
     private static final int FRIST_VUR_DAGER = 1;
     private static final int FRIST_BEH_UKER = 12;
 
-    private final String oppgaveId;
-    private final String saksnummer;
+    private final String aktørId;
+    private final Behandlingstema behandlingstema;
+    private final Behandlingstyper behandlingstype;
+    private final String beskrivelse;
+    private final Fagsystem behandlesAvApplikasjon;
     private final LocalDate fristFerdigstillelse;
-    private final Tema tema;
+    private final String journalpostId;
+    private final String oppgaveId;
     private final Oppgavetyper oppgavetype;
     private final PrioritetType prioritet;
-    private final String journalpostId;
+    private final String saksnummer;
+    private final Tema tema;
     private final String tilordnetRessurs;
     private final int versjon;
-    private final String aktørId;
-    private final Behandlingstyper behandlingstype;
-    private final Behandlingstema behandlingstema;
 
     public static class Builder {
-        private String oppgaveId;
-        private String saksnummer;
+        private String aktørId;
+        private Fagsystem behandlesAvApplikasjon;
+        private Behandlingstema behandlingstema;
+        private Behandlingstyper behandlingstype;
+        private String beskrivelse;
         private LocalDate fristFerdigstillelse;
-        private Tema tema;
+        private String journalpostId;
+        private String oppgaveId;
         private Oppgavetyper oppgavetype;
         private PrioritetType prioritet;
-        private String journalpostId;
+        private String saksnummer;
+        private Tema tema;
         private String tilordnetRessurs;
         private int versjon;
-        private String aktørId;
-        private Behandlingstyper behandlingstype;
-        private Behandlingstema behandlingstema;
 
         public Builder setOppgaveId(String oppgaveId) {
             this.oppgaveId = oppgaveId;
             return this;
         }
 
+        public Builder setBehandlesAvApplikasjon(Fagsystem fagsystem) {
+            this.behandlesAvApplikasjon = fagsystem;
+            return this;
+        }
+
         public Builder setSaksnummer(String saksnummer) {
             this.saksnummer = saksnummer;
+            return this;
+        }
+
+        public Builder setBeskrivelse(String beskrivelse) {
+            this.beskrivelse = beskrivelse;
             return this;
         }
 
@@ -111,6 +125,7 @@ public final class Oppgave {
 
     private Oppgave(Builder builder) {
         this.oppgaveId = builder.oppgaveId;
+        this.behandlesAvApplikasjon = builder.behandlesAvApplikasjon != null ? builder.behandlesAvApplikasjon : Fagsystem.MELOSYS;
         this.saksnummer = builder.saksnummer;
         this.fristFerdigstillelse = builder.fristFerdigstillelse;
         this.tema = builder.tema;
@@ -122,22 +137,39 @@ public final class Oppgave {
         this.aktørId = builder.aktørId;
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
+        this.beskrivelse = builder.beskrivelse;
     }
 
-    public String getOppgaveId() {
-        return oppgaveId;
+    public String getAktørId() {
+        return aktørId;
     }
 
-    public String getSaksnummer() {
-        return saksnummer;
+    public Fagsystem getBehandlesAvApplikasjon() {
+        return behandlesAvApplikasjon;
+    }
+
+    public Behandlingstema getBehandlingstema() {
+        return behandlingstema;
+    }
+
+    public Behandlingstyper getBehandlingstype() {
+        return behandlingstype;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     public LocalDate getFristFerdigstillelse() {
         return fristFerdigstillelse;
     }
 
-    public Tema getTema() {
-        return tema;
+    public String getJournalpostId() {
+        return journalpostId;
+    }
+
+    public String getOppgaveId() {
+        return oppgaveId;
     }
 
     public Oppgavetyper getOppgavetype() {
@@ -148,8 +180,12 @@ public final class Oppgave {
         return prioritet;
     }
 
-    public String getJournalpostId() {
-        return journalpostId;
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public Tema getTema() {
+        return tema;
     }
 
     public String getTilordnetRessurs() {
@@ -158,18 +194,6 @@ public final class Oppgave {
 
     public int getVersjon() {
         return versjon;
-    }
-
-    public String getAktørId() {
-        return aktørId;
-    }
-
-    public Behandlingstyper getBehandlingstype() {
-        return behandlingstype;
-    }
-
-    public Behandlingstema getBehandlingstema() {
-        return behandlingstema;
     }
 
     public boolean erBehandling() {

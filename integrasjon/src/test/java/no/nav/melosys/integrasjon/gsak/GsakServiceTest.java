@@ -10,7 +10,7 @@ import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -89,6 +89,7 @@ public final class GsakServiceTest {
         assertThat(oppgaveDto.getAktørId()).isEqualTo(oppgave.getAktørId());
         assertThat(oppgaveDto.getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
         assertThat(oppgaveDto.getBehandlingstype()).isEqualTo("ae0034");
+        assertThat(oppgaveDto.getBeskrivelse()).isEqualTo("bla bla");
         assertThat(oppgaveDto.getOppgavetype()).isEqualTo(oppgave.getOppgavetype().getKode());
         assertThat(oppgaveDto.getPrioritet()).isEqualTo(PrioritetType.NORM.toString());
         assertThat(oppgaveDto.getTema()).isEqualTo(oppgave.getTema().getKode());
@@ -116,6 +117,7 @@ public final class GsakServiceTest {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setAktørId("aktoer123");
         oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
+        oppgaveBuilder.setBeskrivelse("bla bla");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgaveBuilder.setJournalpostId("journalpost123");
         oppgaveBuilder.setSaksnummer("sak123");

@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.sob;
 import java.time.LocalDateTime;
 
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;

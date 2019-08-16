@@ -44,7 +44,9 @@ public class OpprettAvgiftsoppgaveTest {
         verify(gsakFasade).opprettOppgave(oppgave.capture());
         assertThat(oppgave.getValue().getTema()).isEqualTo(Tema.TRY);
         assertThat(oppgave.getValue().getOppgavetype()).isEqualTo(Oppgavetyper.VUR);
+        assertThat(oppgave.getValue().getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.INTET);
         assertThat(oppgave.getValue().getAktørId()).isEqualTo(DUMM_ID);
+        assertThat(oppgave.getValue().getBeskrivelse()).isEqualTo(OpprettAvgiftsoppgave.AVGIFTSVURDERING_BESKRIVELSE);
     }
 
     @Test

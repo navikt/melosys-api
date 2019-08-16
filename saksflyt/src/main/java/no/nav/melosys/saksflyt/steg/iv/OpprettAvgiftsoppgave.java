@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -19,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
     private static final long FRIST_AVGIFTSVURDERING_MD = 1;
-    private static final String AVGIFTSVURDERING_BESKRIVELSE = "Vurderes for innregistrering i Avgiftssystemet";
+    static final String AVGIFTSVURDERING_BESKRIVELSE = "Vurderes for innregistrering i Avgiftssystemet";
 
     private final GsakFasade gsakFasade;
 
@@ -38,10 +35,11 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
         Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setTema(Tema.TRY).setOppgavetype(Oppgavetyper.VUR);
+        oppgaveBuilder.setBehandlesAvApplikasjon(Fagsystem.INTET);
         oppgaveBuilder.setAktørId(fagsak.hentBruker().getAktørId());
+        oppgaveBuilder.setBeskrivelse(AVGIFTSVURDERING_BESKRIVELSE);
         oppgaveBuilder.setFristFerdigstillelse(LocalDate.now().plusMonths(FRIST_AVGIFTSVURDERING_MD));
         oppgaveBuilder.setSaksnummer(fagsak.getSaksnummer());
-        // TODO Mangler beskrivelse
 
         gsakFasade.opprettOppgave(oppgaveBuilder.build());
 

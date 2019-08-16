@@ -9,26 +9,26 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 public class OpprettOppgaveDto {
-    @JsonProperty("aktoerId")
-    private String aktørId;
-    private String tilordnetRessurs;
-    private String tema;
-    private String oppgavetype;
-    private String journalpostId;
     @JsonSerialize(using = ToStringSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate aktivDato;
+    @JsonProperty("aktoerId")
+    private String aktørId;
+    private String behandlesAvApplikasjon;
+    private String behandlingstema;
+    private String behandlingstype;
+    private String beskrivelse;
     @JsonSerialize(using = ToStringSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate fristFerdigstillelse;
+    private String journalpostId;
+    private String oppgavetype;
     private String prioritet;
     private String saksreferanse;
-    private String behandlingstype;
-    private String behandlingstema;
+    private String tema;
     private String temagruppe;
     private String tildeltEnhetsnr;
-    private String behandlesAvApplikasjon;
-
+    private String tilordnetRessurs;
 
     public LocalDate getAktivDato() {
         return aktivDato;
@@ -36,30 +36,6 @@ public class OpprettOppgaveDto {
 
     public void setAktivDato(LocalDate aktivDato) {
         this.aktivDato = aktivDato;
-    }
-
-    public String getTildeltEnhetsnr() {
-        return tildeltEnhetsnr;
-    }
-
-    public void setTildeltEnhetsnr(String tildeltEnhetsnr) {
-        this.tildeltEnhetsnr = tildeltEnhetsnr;
-    }
-
-    public String getJournalpostId() {
-        return journalpostId;
-    }
-
-    public void setJournalpostId(String journalpostId) {
-        this.journalpostId = journalpostId;
-    }
-
-    public String getSaksreferanse() {
-        return saksreferanse;
-    }
-
-    public void setSaksreferanse(String saksreferanse) {
-        this.saksreferanse = saksreferanse;
     }
 
     public String getAktørId() {
@@ -70,28 +46,12 @@ public class OpprettOppgaveDto {
         this.aktørId = aktørId;
     }
 
-    public String getTilordnetRessurs() {
-        return tilordnetRessurs;
+    public String getBehandlesAvApplikasjon() {
+        return behandlesAvApplikasjon;
     }
 
-    public void setTilordnetRessurs(String tilordnetRessurs) {
-        this.tilordnetRessurs = tilordnetRessurs;
-    }
-
-    public String getTemagruppe() {
-        return temagruppe;
-    }
-
-    public void setTemagruppe(String temagruppe) {
-        this.temagruppe = temagruppe;
-    }
-
-    public String getTema() {
-        return tema;
-    }
-
-    public void setTema(String tema) {
-        this.tema = tema;
+    public void setBehandlesAvApplikasjon(String behandlesAvApplikasjon) {
+        this.behandlesAvApplikasjon = behandlesAvApplikasjon;
     }
 
     public String getBehandlingstema() {
@@ -102,12 +62,20 @@ public class OpprettOppgaveDto {
         this.behandlingstema = behandlingstema;
     }
 
-    public String getOppgavetype() {
-        return oppgavetype;
+    public String getBehandlingstype() {
+        return behandlingstype;
     }
 
-    public void setOppgavetype(String oppgavetype) {
-        this.oppgavetype = oppgavetype;
+    public void setBehandlingstype(String behandlingstype) {
+        this.behandlingstype = behandlingstype;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+
+    public void setBeskrivelse(String beskrivelse) {
+        this.beskrivelse = beskrivelse;
     }
 
     public LocalDate getFristFerdigstillelse() {
@@ -118,12 +86,20 @@ public class OpprettOppgaveDto {
         this.fristFerdigstillelse = fristFerdigstillelse;
     }
 
-    public void setBehandlingstype(String behandlingstype) {
-        this.behandlingstype = behandlingstype;
+    public String getJournalpostId() {
+        return journalpostId;
     }
 
-    public String getBehandlingstype() {
-        return behandlingstype;
+    public void setJournalpostId(String journalpostId) {
+        this.journalpostId = journalpostId;
+    }
+
+    public String getOppgavetype() {
+        return oppgavetype;
+    }
+
+    public void setOppgavetype(String oppgavetype) {
+        this.oppgavetype = oppgavetype;
     }
 
     public String getPrioritet() {
@@ -134,30 +110,64 @@ public class OpprettOppgaveDto {
         this.prioritet = prioritet;
     }
 
-    public String getBehandlesAvApplikasjon() {
-        return behandlesAvApplikasjon;
+    public String getSaksreferanse() {
+        return saksreferanse;
     }
 
-    public void setBehandlesAvApplikasjon(String behandlesAvApplikasjon) {
-        this.behandlesAvApplikasjon = behandlesAvApplikasjon;
+    public void setSaksreferanse(String saksreferanse) {
+        this.saksreferanse = saksreferanse;
+    }
+
+    public String getTema() {
+        return tema;
+    }
+
+    public void setTema(String tema) {
+        this.tema = tema;
+    }
+
+    public String getTemagruppe() {
+        return temagruppe;
+    }
+
+    public void setTemagruppe(String temagruppe) {
+        this.temagruppe = temagruppe;
+    }
+
+    public String getTildeltEnhetsnr() {
+        return tildeltEnhetsnr;
+    }
+
+    public void setTildeltEnhetsnr(String tildeltEnhetsnr) {
+        this.tildeltEnhetsnr = tildeltEnhetsnr;
+    }
+
+    public String getTilordnetRessurs() {
+        return tilordnetRessurs;
+    }
+
+    public void setTilordnetRessurs(String tilordnetRessurs) {
+        this.tilordnetRessurs = tilordnetRessurs;
     }
 
     @Override
     public String toString() {
         return "OpprettOppgaveDto{" +
-            "aktørId='" + aktørId + '\'' +
-            ", tilordnetRessurs='" + tilordnetRessurs + '\'' +
-            ", tema='" + tema + '\'' +
-            ", oppgavetype='" + oppgavetype + '\'' +
-            ", journalpostId='" + journalpostId + '\'' +
-            ", aktivDato=" + aktivDato +
+            "aktivDato=" + aktivDato +
+            ", aktørId='" + aktørId + '\'' +
+            ", behandlesAvApplikasjon='" + behandlesAvApplikasjon + '\'' +
+            ", behandlingstema='" + behandlingstema + '\'' +
+            ", behandlingstype='" + behandlingstype + '\'' +
+            ", beskrivelse='" + beskrivelse + '\'' +
             ", fristFerdigstillelse=" + fristFerdigstillelse +
+            ", journalpostId='" + journalpostId + '\'' +
+            ", oppgavetype='" + oppgavetype + '\'' +
             ", prioritet='" + prioritet + '\'' +
             ", saksreferanse='" + saksreferanse + '\'' +
-            ", behandlingstype='" + behandlingstype + '\'' +
-            ", behandlingstema='" + behandlingstema + '\'' +
+            ", tema='" + tema + '\'' +
             ", temagruppe='" + temagruppe + '\'' +
             ", tildeltEnhetsnr='" + tildeltEnhetsnr + '\'' +
+            ", tilordnetRessurs='" + tilordnetRessurs + '\'' +
             '}';
     }
 }
