@@ -31,10 +31,8 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatTjenesteTest.class);
-
-    private static final String BEHANDLINGSRESULTAT_SCHEMA = "behandlingsresultater-schema.json";
+    private static final String BEHANDLINGSRESULTAT_SCHEMA = "behandlinger-resultat-schema.json";
 
     private BehandlingsresultatTjeneste behandlingsresultatTjeneste;
 
@@ -46,11 +44,6 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         behandlingsresultatTjeneste = new BehandlingsresultatTjeneste(behandlingsresultatService, mock(TilgangService.class));
     }
 
-    @Override
-    public String schemaNavn() {
-        return BEHANDLINGSRESULTAT_SCHEMA;
-    }
-
     @Test
     public void validerBehandlingsresultat() throws IOException {
         EasyRandomParameters easyRandomParameters = defaultEasyRandomParameters()
@@ -58,7 +51,7 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         BehandlingsresultatDto behandlingsresultat = new EasyRandom(easyRandomParameters).nextObject(BehandlingsresultatDto.class);
         String jsonString = objectMapper().writeValueAsString(behandlingsresultat);
         assertThat(jsonString).isNotEmpty();
-        valider(jsonString, log);
+        valider(jsonString, BEHANDLINGSRESULTAT_SCHEMA, log);
     }
 
     @Test
@@ -74,6 +67,6 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         Response response = behandlingsresultatTjeneste.hentBehandlingsresultat(4L);
         String jsonString = objectMapper().writeValueAsString(response.getEntity());
         assertThat(jsonString).isNotEmpty();
-        valider(jsonString, log);
+        valider(jsonString, BEHANDLINGSRESULTAT_SCHEMA, log);
     }
 }

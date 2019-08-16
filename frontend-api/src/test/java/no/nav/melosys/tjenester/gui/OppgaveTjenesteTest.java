@@ -40,23 +40,16 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 
     private static final String OPPGAVER_OVERSIKT_SCHEMA = "oppgaver-oversikt-schema.json";
-    private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegge-schema.json";
+    private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegg-post-schema.json";
     private static final String OPPGAVER_SOK_SCHEMA = "oppgaver-sok-schema.json";
-    private static final String OPPGAVER_PLUKK_POST_RESPONSE_SCHEMA = "oppgaver-plukk-post-response-schema.json";
+    private static final String OPPGAVER_PLUKK_SCHEMA = "oppgaver-plukk-schema.json";
     private static final String OPPGAVER_PLUKK_POST_SCHEMA = "oppgaver-plukk-post-schema.json";
-
-    private String schemaType;
 
     private OppgaveTjeneste tjeneste;
     @Mock
     private Oppgaveplukker oppgaveplukker;
     @Mock
     private OppgaveService oppgaveService;
-
-    @Override
-    public String schemaNavn() {
-        return schemaType;
-    }
 
     @Before
     public void setUp() {
@@ -77,7 +70,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         Response response = tjeneste.mineOppgaver();
 
         OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getEntity();
-        valider(OPPGAVER_OVERSIKT_SCHEMA, oppgaveOversikt, logger);
+        valider(oppgaveOversikt, OPPGAVER_OVERSIKT_SCHEMA, logger);
     }
 
     @Test
@@ -104,16 +97,14 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
         when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);
 
-        schemaType = OPPGAVER_PLUKK_POST_SCHEMA;
-        valider(innData);
+        valider(innData, OPPGAVER_PLUKK_POST_SCHEMA, logger);
 
         Response response = tjeneste.plukkOppgave(innData);
 
         assertThat(response.getEntity()).isExactlyInstanceOf(PlukketOppgaveDto.class);
 
         PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getEntity();
-        schemaType = OPPGAVER_PLUKK_POST_RESPONSE_SCHEMA;
-        valider(entity);
+        valider(entity, OPPGAVER_PLUKK_SCHEMA, logger);
 
         assertThat(entity.getOppgaveID()).isEqualTo("1");
     }
@@ -124,8 +115,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(tilbakelegging).isNotNull();
 
-        schemaType = OPPGAVER_TILBAKELEGGE_SCHEMA;
-        valider(tilbakelegging);
+        valider(tilbakelegging, OPPGAVER_TILBAKELEGGE_SCHEMA, logger);
     }
 
     @Test
@@ -135,10 +125,8 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
         when(oppgaveService.hentBehandlingsoppgaverMedBruker(anyString())).thenReturn(oppgaver);
 
-        schemaType = OPPGAVER_SOK_SCHEMA;
-
         List<BehandlingsoppgaveDto> oppgave = (List<BehandlingsoppgaveDto>) tjeneste.hentOppgaver("").getEntity();
         assertThat(oppgave).isNotNull();
-        validerListe(oppgave);
+        validerArray(oppgave, OPPGAVER_SOK_SCHEMA, logger);
     }
 }

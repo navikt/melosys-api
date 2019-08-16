@@ -26,32 +26,18 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("resource")
 public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringTjenesteTest.class);
-
     private static final String JOURNALFOERING_SCHEMA = "journalforing-schema.json";
-    private static final String JOURNALFOERING_TILORDNE_SCHEMA = "journalforing-tilordne-schema.json";
-    private static final String JOURNALFOERING_OPPRETT_SCHEMA = "journalforing-opprett-schema.json";
+    private static final String JOURNALFOERING_TILORDNE_SCHEMA = "journalforing-tilordne-post-schema.json";
+    private static final String JOURNALFOERING_OPPRETT_SCHEMA = "journalforing-opprett-post-schema.json";
     private static final String SAMPLE_ORGNR = "899655123";
     private static final String SAMPLE_FNR = "77777777772";
 
     private EasyRandom random;
 
-    private String schemaType;
-
     private JournalfoeringTjeneste tjeneste;
     @Mock
     private JournalfoeringService journalføringService;
-
-    @Override
-    public Logger getLogger() {
-        return log;
-    }
-
-    @Override
-    public String schemaNavn() {
-        return schemaType;
-    }
 
     @Before
     public void setUp() {
@@ -70,15 +56,13 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         Response response = tjeneste.hentJournalpostOpplysninger(anyString());
         JournalpostDto journalpostDto = (JournalpostDto) response.getEntity();
 
-        schemaType = JOURNALFOERING_SCHEMA;
-        valider(journalpostDto);
+        valider(journalpostDto, JOURNALFOERING_SCHEMA, log);
     }
 
     @Test
     public void journalføringTilordneSchemaValidering() throws IOException, JSONException {
         JournalfoeringTilordneDto journalfoeringDto = random.nextObject(JournalfoeringTilordneDto.class);
-        schemaType = JOURNALFOERING_TILORDNE_SCHEMA;
-        valider(journalfoeringDto);
+        valider(journalfoeringDto, JOURNALFOERING_TILORDNE_SCHEMA, log);
     }
 
     @Test
@@ -86,8 +70,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalfoeringDto.setRepresentantID(SAMPLE_ORGNR);
-        schemaType = JOURNALFOERING_OPPRETT_SCHEMA;
-        valider(journalfoeringDto);
+        valider(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
     }
 
     @Test
@@ -95,8 +78,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalfoeringDto.setRepresentantID(null);
-        schemaType = JOURNALFOERING_OPPRETT_SCHEMA;
-        valider(journalfoeringDto);
+        valider(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
     }
 
 }
