@@ -6,10 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandlingsmaate;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -24,6 +21,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
+import no.nav.melosys.service.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +33,15 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(BestemBehandlingsMaate.class);
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final BehandlingService behandlingService;
     private final AvklarteFaktaRepository avklarteFaktaRepository;
 
     @Autowired
-    public BestemBehandlingsMaate(BehandlingsresultatRepository behandlingsresultatRepository, AvklarteFaktaRepository avklarteFaktaRepository) {
+    public BestemBehandlingsMaate(BehandlingsresultatRepository behandlingsresultatRepository,
+                                  BehandlingService behandlingService,
+                                  AvklarteFaktaRepository avklarteFaktaRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.behandlingService = behandlingService;
         this.avklarteFaktaRepository = avklarteFaktaRepository;
     }
 
@@ -66,7 +68,9 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
         Set<AvklartefaktaRegistrering> registreringer = avklartFaktaUnntaksperiodeTreff
             .map(Avklartefakta::getRegistreringer).orElse(new HashSet<>());
 
-        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(prosessinstans.getBehandling());
+        // Må hente behandling med saksopplysninger, siden disse er lazy-loadet i prosessinstans.
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
         if (!registreringer.isEmpty() || sedDokument.getSedType() == SedType.A001) {
             String registreringerStr = registreringer.stream()
                 .map(AvklartefaktaRegistrering::getBegrunnelseKode).collect(Collectors.joining(", "));

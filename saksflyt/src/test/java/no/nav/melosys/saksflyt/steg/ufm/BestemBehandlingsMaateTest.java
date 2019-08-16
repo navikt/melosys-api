@@ -14,6 +14,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,13 +32,15 @@ public class BestemBehandlingsMaateTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
     @Mock
+    private BehandlingService behandlingService;
+    @Mock
     private AvklarteFaktaRepository avklarteFaktaRepository;
 
     private BestemBehandlingsMaate bestemBehandlingsMaate;
 
     @Before
     public void setUp() {
-        bestemBehandlingsMaate = new BestemBehandlingsMaate(behandlingsresultatRepository, avklarteFaktaRepository);
+        bestemBehandlingsMaate = new BestemBehandlingsMaate(behandlingsresultatRepository, behandlingService, avklarteFaktaRepository);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
