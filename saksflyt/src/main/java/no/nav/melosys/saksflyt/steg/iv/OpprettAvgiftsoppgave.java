@@ -33,13 +33,13 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setTema(Tema.TRY).setOppgavetype(Oppgavetyper.VUR);
-        oppgaveBuilder.setBehandlesAvApplikasjon(Fagsystem.INTET);
-        oppgaveBuilder.setAktørId(fagsak.hentBruker().getAktørId());
-        oppgaveBuilder.setBeskrivelse(AVGIFTSVURDERING_BESKRIVELSE);
-        oppgaveBuilder.setFristFerdigstillelse(LocalDate.now().plusMonths(FRIST_AVGIFTSVURDERING_MD));
-        oppgaveBuilder.setSaksnummer(fagsak.getSaksnummer());
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder()
+            .setTema(Tema.TRY).setOppgavetype(Oppgavetyper.VUR)
+            .setBehandlesAvApplikasjon(Fagsystem.INTET)
+            .setAktørId(fagsak.hentBruker().getAktørId())
+            .setBeskrivelse(AVGIFTSVURDERING_BESKRIVELSE)
+            .setFristFerdigstillelse(LocalDate.now().plusMonths(FRIST_AVGIFTSVURDERING_MD))
+            .setSaksnummer(fagsak.getSaksnummer());
 
         gsakFasade.opprettOppgave(oppgaveBuilder.build());
 
