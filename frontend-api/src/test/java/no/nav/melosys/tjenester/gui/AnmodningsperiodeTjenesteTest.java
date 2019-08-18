@@ -36,9 +36,9 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     private static final Logger logger = LoggerFactory.getLogger(AnmodningsperiodeTjenesteTest.class);
-    private static final String ANMODNINGSPERIODER_GET_SCHEMA = "anmodningsperioder-get-schema.json";
+    private static final String ANMODNINGSPERIODER_GET_SCHEMA = "anmodningsperioder-schema.json";
     private static final String ANMODNINGSPERIODER_POST_SCHEMA = "anmodningsperioder-post-schema.json";
-    private static final String ANMODNINGSPERIODER_SVAR_SCHEMA = "anmodningsperiodersvar-schema.json";
+    private static final String ANMODNINGSPERIODER_SVAR_SCHEMA = "anmodningsperioder-svar-schema.json";
 
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
@@ -64,7 +64,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         AnmodningsperiodeGetDto anmodningsperiodeGetDto = anmodningsperiodeTjeneste.hentAnmodningsperioder(1L);
         assertThat(anmodningsperiodeGetDto.getAnmodningsperioder()).isNotEmpty();
-        valider(ANMODNINGSPERIODER_GET_SCHEMA, anmodningsperiodeGetDto, logger);
+        valider(anmodningsperiodeGetDto, ANMODNINGSPERIODER_GET_SCHEMA, logger);
     }
 
     @Test
@@ -80,8 +80,8 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         verify(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(anyLong(), anyCollection());
-        valider(ANMODNINGSPERIODER_POST_SCHEMA, postDto, logger);
-        valider(ANMODNINGSPERIODER_GET_SCHEMA, anmodningsperiodeGetDto, logger);
+        valider(postDto, ANMODNINGSPERIODER_POST_SCHEMA, logger);
+        valider(anmodningsperiodeGetDto, ANMODNINGSPERIODER_GET_SCHEMA, logger);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         assertThat(svarDto).isNotNull();
         assertThat(svarDto.begrunnelseFritekst).isNotEmpty();
         assertThat(svarDto.anmodningsperiodeSvarType).isEqualTo(AnmodningsperiodeSvarType.INNVILGELSE.name());
-        valider(ANMODNINGSPERIODER_SVAR_SCHEMA, svarDto, logger);
+        valider(svarDto, ANMODNINGSPERIODER_SVAR_SCHEMA, logger);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         assertThat(svarDto).isNotNull();
         assertThat(svarDto.anmodningsperiodeSvarType).isEqualTo(AnmodningsperiodeSvarType.INNVILGELSE.name());
         verify(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
-        valider(ANMODNINGSPERIODER_SVAR_SCHEMA, svarDto, logger);
+        valider(svarDto, ANMODNINGSPERIODER_SVAR_SCHEMA, logger);
     }
 
     private Set<Anmodningsperiode> mockAnmodningsperioder() {

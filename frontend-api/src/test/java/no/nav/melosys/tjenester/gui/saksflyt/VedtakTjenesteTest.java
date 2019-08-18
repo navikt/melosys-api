@@ -26,8 +26,8 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VedtakTjenesteTest extends JsonSchemaTestParent {
-    private static final String FATT_VEDTAK_SCHEMA = "saksflyt-vedtak-post-schema.json";
-    private static final String ENDRE_PERIODE_SCHEMA = "saksflyt-vedtak-endre-periode-schema.json";
+    private static final String FATT_VEDTAK_SCHEMA = "saksflyt-vedtak-fatt-post-schema.json";
+    private static final String ENDRE_PERIODE_SCHEMA = "saksflyt-vedtak-endreperiode-post-schema.json";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -41,16 +41,10 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     private EndreVedtakDto endreVedtakDto;
 
     private long behandlingID;
-    private String schemaType;
 
     @Override
     protected ObjectMapper objectMapper() {
         return new ObjectMapper();
-    }
-
-    @Override
-    public String schemaNavn() {
-        return schemaType;
     }
 
     @Before
@@ -63,44 +57,40 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void fattVedtak_henleggelse_fungerer() throws FunksjonellException, TekniskException, IOException {
-        schemaType = FATT_VEDTAK_SCHEMA;
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
         verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode());
 
-        valider(fattVedtakDto);
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test(expected = BadRequestException.class)
     public void fattVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
-        schemaType = FATT_VEDTAK_SCHEMA;
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        valider(fattVedtakDto);
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
-        schemaType = ENDRE_PERIODE_SCHEMA;
         endreVedtakDto.setBegrunnelseKode(Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
         verify(vedtakService).endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
 
-        valider(endreVedtakDto);
+        valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }
 
     @Test
     public void endreVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
-        schemaType = ENDRE_PERIODE_SCHEMA;
         expectedException.expect(BadRequestException.class);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgangService, never()).sjekkTilgang(behandlingID);
-        valider(endreVedtakDto);
+        valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }
 }

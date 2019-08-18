@@ -14,8 +14,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.cxf.ws.security.trust.delegation.DelegationCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -25,8 +23,6 @@ import org.xml.sax.SAXException;
  * Inserts the OIDC token string into the xml message under wsse:BinarySecurityToken
  */
 public class OnBehalfOfWithOidcCallbackHandler implements CallbackHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(OnBehalfOfWithOidcCallbackHandler.class);
 
     @Override
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {

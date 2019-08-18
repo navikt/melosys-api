@@ -29,24 +29,14 @@ import static org.mockito.BDDMockito.given;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DokumentTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(DokumentTjenesteTest.class);
 
     private DokumentTjeneste dokumentTjeneste;
 
-    private String schema;
-
-    @Override
-    public String schemaNavn() {
-        return schema;
-    }
-
     @Mock
     private DokumentService dokumentService;
-
     @Mock
     private DokumentVisningService dokumentVisningService;
-
     @Mock
     private TilgangService tilgangService;
 
@@ -65,8 +55,6 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         boolean inOrder = Comparators.isInOrder(dtos, Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
         assertThat(inOrder).isTrue();
 
-
-        schema = "dokumenter-oversikt-schema.json";
-        validerListe(dtos);
+        validerArray(dtos, "dokumenter-oversikt-schema.json", log);
     }
 }

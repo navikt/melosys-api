@@ -9,10 +9,10 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,13 +57,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = prosessinstans.getBehandling();
-        ProsessType prosessType = prosessinstans.getType();
 
         String fnr = felles.hentFnr(behandling);
         Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(behandling);
 
         Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
-        if (ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE == prosessType) {
+        if (lovvalgsperiode.getMedlPeriodeID() != null) {
             medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
         } else if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
             Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);

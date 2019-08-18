@@ -33,16 +33,13 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 
-    private static final String MOTTAKERINSTITUSJONER_SCHEMA = "mottakerinstitusjoner-schema.json";
-    private static final String OPPRETT_BUC_SCHEMA = "opprettbuc-post-schema.json";
-    private static final String BUCER_UNDER_ARBEID_SCHEMA = "bucerunderarbeid-schema.json";
+    private static final String MOTTAKERINSTITUSJONER_SCHEMA = "eessi-mottakerinstitusjoner-schema.json";
+    private static final String OPPRETT_BUC_SCHEMA = "eessi-bucer-post-schema.json";
+    private static final String BUCER_UNDER_ARBEID_SCHEMA = "eessi-bucer-schema.json";
 
     private static final String MOCK_RINA_URL = "http://rina-url.local/";
-
-    private String schemaType;
 
     @Mock
     private EessiService eessiService;
@@ -52,11 +49,6 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @InjectMocks
     private EessiTjeneste eessiTjeneste;
-
-    @Override
-    public String schemaNavn() {
-        return schemaType;
-    }
 
     @Before
     public void setup() throws IkkeFunnetException {
@@ -83,8 +75,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
         List<Institusjon> institusjoner = (List<Institusjon>) response.getEntity();
         assertThat(institusjoner).isNotEmpty();
-        schemaType = MOTTAKERINSTITUSJONER_SCHEMA;
-        validerListe(institusjoner, log);
+        validerArray(institusjoner, MOTTAKERINSTITUSJONER_SCHEMA, log);
     }
 
     @Test
@@ -96,8 +87,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         assertThat(response.getEntity()).isExactlyInstanceOf(OpprettBucSvarDto.class);
         OpprettBucSvarDto opprettBucSvarDto = (OpprettBucSvarDto) response.getEntity();
 
-        schemaType = OPPRETT_BUC_SCHEMA;
-        valider(nyBucDto, log);
+        valider(nyBucDto, OPPRETT_BUC_SCHEMA, log);
         assertThat(opprettBucSvarDto.getRinaUrl()).isEqualTo(MOCK_RINA_URL);
     }
 
@@ -116,8 +106,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto)  response.getEntity();
         assertThat(dto.getBucer()).hasOnlyElementsOfType(BucInformasjon.class);
 
-        schemaType = BUCER_UNDER_ARBEID_SCHEMA;
-        valider(dto, log);
+        valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);
     }
 
     private BucInformasjon bucInformasjon() {

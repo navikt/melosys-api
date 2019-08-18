@@ -47,7 +47,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JoarkServiceTest {
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -237,11 +236,24 @@ public class JoarkServiceTest {
         getJournalpostResponse.setAvsender(avsender);
         getJournalpostResponse.setForsendelseMottatt(forsendelseMottatt);
 
+        List<Dokument> dokumentListe = new ArrayList<>();
         String dokumentTittel = "titteldok", dokumentId = "123dok";
-        Dokument dokument = new Dokument();
-        dokument.setTittel(dokumentTittel);
-        dokument.setDokumentId(dokumentId);
-        getJournalpostResponse.setDokumentListe(Collections.singletonList(dokument));
+        Dokument hoveddokument = new Dokument();
+        hoveddokument.setTittel(dokumentTittel);
+        hoveddokument.setDokumentId(dokumentId);
+        dokumentListe.add(hoveddokument);
+
+        Dokument vedlegg1 = new Dokument();
+        vedlegg1.setTittel(dokumentTittel);
+        vedlegg1.setDokumentId(dokumentId);
+        dokumentListe.add(vedlegg1);
+
+        Dokument vedlegg2 = new Dokument();
+        vedlegg2.setTittel(dokumentTittel);
+        vedlegg2.setDokumentId(dokumentId);
+        dokumentListe.add(vedlegg2);
+
+        getJournalpostResponse.setDokumentListe(dokumentListe);
 
         when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(getJournalpostResponse);
 
@@ -254,6 +266,7 @@ public class JoarkServiceTest {
         assertThat(journalpost.getHoveddokument().getDokumentId()).isEqualTo(dokumentId);
         assertThat(journalpost.getHoveddokument().getTittel()).isEqualTo(dokumentTittel);
         assertThat(journalpost.getArkivSakId()).isEqualTo(arkivsakId);
+        assertThat(journalpost.getVedleggListe().size()).isEqualTo(2);
     }
 
     @Test
