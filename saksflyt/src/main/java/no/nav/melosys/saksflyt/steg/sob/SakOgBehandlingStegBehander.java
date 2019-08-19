@@ -1,16 +1,12 @@
 package no.nav.melosys.saksflyt.steg.sob;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 
 import static no.nav.melosys.domain.Tema.MED;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
@@ -22,11 +18,6 @@ public abstract class SakOgBehandlingStegBehander extends AbstraktStegBehandler 
 
     protected SakOgBehandlingStegBehander(SakOgBehandlingFasade sakOgBehandlingFasade) {
         this.sakOgBehandlingFasade = sakOgBehandlingFasade;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     private static BehandlingStatusMapper lagBehandlingStatusMapper(String saksnummer, Long behandlingID, String aktørID) {

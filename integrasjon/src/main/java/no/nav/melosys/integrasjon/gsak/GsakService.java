@@ -16,7 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
@@ -128,14 +128,17 @@ public class GsakService implements GsakFasade {
         if (oppgave.getBehandlingstema() != null) {
             oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode());
         }
+        oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
         oppgaveDto.setFristFerdigstillelse(oppgave.lagFristFerdigstillelse(idag));
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
-        oppgaveDto.setPrioritet(PrioritetType.NORM.toString());
+        oppgaveDto.setPrioritet(oppgave.getPrioritet().toString());
         oppgaveDto.setSaksreferanse(oppgave.getSaksnummer());
         oppgaveDto.setTema(oppgave.getTema().getKode());
         oppgaveDto.setTildeltEnhetsnr(Integer.toString(MELOSYS_ENHET_ID));
-        oppgaveDto.setBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
+        if (oppgave.getBehandlesAvApplikasjon() != Fagsystem.INTET) {
+            oppgaveDto.setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon().getKode());
+        }
 
         oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
 

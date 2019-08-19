@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.util.List;
-import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
@@ -11,10 +10,7 @@ import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.unntaksperiode.kontroll.RegisterkontrollService;
@@ -42,11 +38,6 @@ public class RegisterKontroll extends AbstraktStegBehandler {
     @Override
     protected ProsessSteg inngangsSteg() {
         return ProsessSteg.REG_UNNTAK_REGISTERKONTROLL;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

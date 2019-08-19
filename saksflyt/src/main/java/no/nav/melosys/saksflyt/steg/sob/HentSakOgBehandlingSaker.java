@@ -1,19 +1,15 @@
 package no.nav.melosys.saksflyt.steg.sob;
 
 import java.time.Instant;
-import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +45,6 @@ public class HentSakOgBehandlingSaker extends AbstraktStegBehandler {
     @Override
     protected ProsessSteg inngangsSteg() {
         return HENT_SOB_SAKER;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

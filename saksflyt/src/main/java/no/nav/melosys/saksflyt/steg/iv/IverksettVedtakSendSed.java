@@ -35,7 +35,7 @@ public class IverksettVedtakSendSed extends AbstraktSendSed {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException {
         try {
             super.utfør(prosessinstans);
-            prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+            prosessinstans.setSteg(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
         } catch (Exception ex) {
             log.error("Kan ikke opprette og sende sed for behandling {}", prosessinstans.getBehandling().getId(), ex);
             prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
