@@ -107,7 +107,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
 
         AnmodningsperiodeSvar svar = anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, anmodningsperiodeSvarDto.til());
 
-        Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(svar.getAnmodningsperiode(), svar, Medlemskapstyper.PLIKTIG);
+        Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(svar, Medlemskapstyper.PLIKTIG);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));
 
         return AnmodningsperiodeSvarDto.av(svar);

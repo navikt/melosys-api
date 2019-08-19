@@ -70,9 +70,8 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
         boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.INNVILGELSE;
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID,
-            Collections.singleton(Lovvalgsperiode.av(anmodningsperiode, anmodningsperiode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG))
+            Collections.singleton(Lovvalgsperiode.av(anmodningsperiode, Medlemskapstyper.PLIKTIG))
         );
-
 
         if (erInnvilgelse && !inneholderYtterligereInformasjon(melosysEessiMelding)) {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Iverksetter vedtak",
