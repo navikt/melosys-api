@@ -69,7 +69,9 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Finner ingen anmodningsperiode for behandling " + behandlingID));
         boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.INNVILGELSE;
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(Lovvalgsperiode.av(anmodningsperiode, Medlemskapstyper.PLIKTIG)));
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID,
+            Collections.singleton(Lovvalgsperiode.av(anmodningsperiode, anmodningsperiode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG))
+        );
 
 
         if (erInnvilgelse && !inneholderYtterligereInformasjon(melosysEessiMelding)) {

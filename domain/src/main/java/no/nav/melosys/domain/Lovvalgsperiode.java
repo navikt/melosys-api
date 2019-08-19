@@ -205,8 +205,9 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
             && harGyldigBestemmelse();
     }
 
-    public static Lovvalgsperiode av(Anmodningsperiode anmodningsperiode, Medlemskapstyper medlemskapstype) throws FunksjonellException {
-        AnmodningsperiodeSvar anmodningsperiodeSvar = anmodningsperiode.getAnmodningsperiodeSvar();
+    public static Lovvalgsperiode av(Anmodningsperiode anmodningsperiode,
+                                     AnmodningsperiodeSvar anmodningsperiodeSvar,
+                                     Medlemskapstyper medlemskapstype) throws FunksjonellException {
 
         if (anmodningsperiodeSvar == null) {
             throw new FunksjonellException("Kan ikke opprette lovvalgsperiode fra anmodningsperiode " +
