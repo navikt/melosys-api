@@ -3,7 +3,7 @@ package no.nav.melosys.domain.util;
 import java.util.Arrays;
 import java.util.List;
 
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import org.junit.Test;

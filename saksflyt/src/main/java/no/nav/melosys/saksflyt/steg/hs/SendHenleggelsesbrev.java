@@ -6,7 +6,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.HS_SEND_BREV;
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_HENLAGT_SAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_HENLAGT_SAK;
 
 /**
  * Sender henleggelsesbrev til bruker og arbeidsgiver

@@ -22,8 +22,8 @@ public class Saksopplysning {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "opplysning_type", nullable = false, updatable = false)
-    @Convert(converter = SaksopplysningType.DbConverter.class)
     private SaksopplysningType type;
 
     @Column(name="versjon", nullable = false, updatable = false)

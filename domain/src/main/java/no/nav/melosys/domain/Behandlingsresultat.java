@@ -9,9 +9,9 @@ import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -50,7 +50,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "utfall_registrering_unntak")
-    private UtfallRegistreringUnntak utfallRegistreringUnntak;
+    private Utfallregistreringunntak utfallRegistreringUnntak;
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
@@ -131,11 +131,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.vedtakKlagefrist = vedtakKlagefrist;
     }
 
-    public UtfallRegistreringUnntak getUtfallRegistreringUnntak() {
+    public Utfallregistreringunntak getUtfallRegistreringUnntak() {
         return utfallRegistreringUnntak;
     }
 
-    public void setUtfallRegistreringUnntak(UtfallRegistreringUnntak utfallRegistreringUnntak) {
+    public void setUtfallRegistreringUnntak(Utfallregistreringunntak utfallRegistreringUnntak) {
         this.utfallRegistreringUnntak = utfallRegistreringUnntak;
     }
 

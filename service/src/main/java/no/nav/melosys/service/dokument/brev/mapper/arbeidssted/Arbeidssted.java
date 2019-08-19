@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper.arbeidssted;
 
-import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 
 public interface Arbeidssted {
 

@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
-import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
@@ -51,7 +51,7 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Ingen behandlingsresultat for behandling " + behandling.getId()));
 
         behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        behandlingsresultat.setUtfallRegistreringUnntak(UtfallRegistreringUnntak.IKKE_GODKJENT);
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.IKKE_GODKJENT);
 
         List<String> begrunnelser = prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, List.class);
         if (begrunnelser == null || begrunnelser.isEmpty()) {
@@ -63,7 +63,7 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
             behandlingsresultatBegrunnelse.setBehandlingsresultat(behandlingsresultat);
             behandlingsresultat.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelse);
         });
-        if (begrunnelser.contains(IkkeGodkjentBegrunnelser.ANNET.getKode())) {
+        if (begrunnelser.contains(Ikke_godkjent_begrunnelser.ANNET.getKode())) {
             behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST));
         }
 

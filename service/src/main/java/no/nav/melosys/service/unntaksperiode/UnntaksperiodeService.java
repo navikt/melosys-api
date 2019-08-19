@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -38,7 +38,7 @@ public class UnntaksperiodeService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void ikkeGodkjennPeriode(Behandling behandling, Set<String> begrunnelser, String fritekst) throws FunksjonellException, TekniskException {
-        Set<IkkeGodkjentBegrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);
+        Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);
         validerBegrunnelser(ikkeGodkjentBegrunnelser, fritekst);
         prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, ikkeGodkjentBegrunnelser, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
@@ -50,20 +50,20 @@ public class UnntaksperiodeService {
         behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.AVVENT_DOK_UTL);
     }
 
-    private Set<IkkeGodkjentBegrunnelser> tilIkkeGodkjentBegrunnelser(Set<String> begrunnelser) {
-        Set<IkkeGodkjentBegrunnelser> ikkeGodkjentBegrunnelser = new HashSet<>();
+    private Set<Ikke_godkjent_begrunnelser> tilIkkeGodkjentBegrunnelser(Set<String> begrunnelser) {
+        Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = new HashSet<>();
         for (String b : begrunnelser) {
-            ikkeGodkjentBegrunnelser.add(IkkeGodkjentBegrunnelser.valueOf(b));
+            ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.valueOf(b));
         }
         return ikkeGodkjentBegrunnelser;
     }
 
-    private void validerBegrunnelser(Set<IkkeGodkjentBegrunnelser> begrunnelser, String fritekst) throws FunksjonellException {
+    private void validerBegrunnelser(Set<Ikke_godkjent_begrunnelser> begrunnelser, String fritekst) throws FunksjonellException {
 
         if (begrunnelser.isEmpty()) {
             throw new FunksjonellException("Ingen begrunnelser for avlag av periode");
-        } else if (begrunnelser.contains(IkkeGodkjentBegrunnelser.ANNET) && StringUtils.isEmpty(fritekst)) {
-            throw new FunksjonellException("Begrunnelse " + IkkeGodkjentBegrunnelser.ANNET + " krever fritekst!");
+        } else if (begrunnelser.contains(Ikke_godkjent_begrunnelser.ANNET) && StringUtils.isEmpty(fritekst)) {
+            throw new FunksjonellException("Begrunnelse " + Ikke_godkjent_begrunnelser.ANNET + " krever fritekst!");
         }
     }
 }

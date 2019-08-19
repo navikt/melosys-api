@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 
 /**
  * Sender forvaltningsmelding til søker

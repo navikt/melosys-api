@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -23,12 +23,12 @@ public class Behandling extends RegistreringsInfo {
     @JoinColumn(name = "saksnummer", nullable = false, updatable = false)
     private Fagsak fagsak;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    @Convert(converter = Behandlingsstatus.DbKonverterer.class)
     private Behandlingsstatus status;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "beh_type", nullable = false, updatable = false)
-    @Convert(converter = Behandlingstyper.DbKonverterer.class)
     private Behandlingstyper type;
 
     @Column(name = "siste_opplysninger_hentet_dato")
@@ -169,7 +169,7 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.AVVENT_DOK_UTL
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
-
+    
     public boolean isAktiv() {
         return status != Behandlingsstatus.AVSLUTTET;
     }

@@ -11,7 +11,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -49,7 +49,7 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat for behandling " + prosessinstans.getBehandling().getId()));
 
         Optional<Avklartefakta> avklartFaktaUnntaksperiodeTreff = avklarteFaktaRepository
-            .findByBehandlingsresultatIdAndType(behandlingsresultat.getId(), Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
+            .findByBehandlingsresultatIdAndType(behandlingsresultat.getId(), Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
 
         Set<AvklartefaktaRegistrering> registreringer = avklartFaktaUnntaksperiodeTreff
             .map(Avklartefakta::getRegistreringer).orElse(new HashSet<>());

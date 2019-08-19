@@ -2,7 +2,7 @@ package no.nav.melosys.service.eessi;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedType;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;

@@ -1,6 +1,6 @@
 package no.nav.melosys.service.sak;
 
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 
 public class OpprettSakRequest {

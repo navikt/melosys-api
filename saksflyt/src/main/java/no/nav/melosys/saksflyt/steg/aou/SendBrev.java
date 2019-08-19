@@ -19,8 +19,8 @@ import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.ANMODNING_UNNTAK;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ANMODNING_UNNTAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.

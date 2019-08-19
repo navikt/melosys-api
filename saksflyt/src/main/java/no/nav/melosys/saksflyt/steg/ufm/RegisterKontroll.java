@@ -5,8 +5,8 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
-import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -53,13 +53,13 @@ public class RegisterKontroll extends AbstraktStegBehandler {
 
         boolean funnetTreff = !registrerteTreff.isEmpty();
         avklartefaktaService.leggTilAvklarteFakta(prosessinstans.getBehandling().getId(),
-            Avklartefaktatype.VURDERING_UNNTAK_PERIODE, Avklartefaktatype.VURDERING_UNNTAK_PERIODE.name(),
+            Avklartefaktatyper.VURDERING_UNNTAK_PERIODE, Avklartefaktatyper.VURDERING_UNNTAK_PERIODE.name(),
             null, funnetTreff ? "TRUE" : "FALSE");
 
         long behandlingsId = prosessinstans.getBehandling().getId();
         log.info("Treff ved validering av periode for behandling {}. Treffbegrunnelse: {}", behandlingsId, registrerteTreff);
         for (Unntak_periode_begrunnelser begrunnelse : registrerteTreff) {
-            avklartefaktaService.leggTilRegistrering(behandlingsId, Avklartefaktatype.VURDERING_UNNTAK_PERIODE, begrunnelse.getKode());
+            avklartefaktaService.leggTilRegistrering(behandlingsId, Avklartefaktatyper.VURDERING_UNNTAK_PERIODE, begrunnelse.getKode());
         }
     }
 }
