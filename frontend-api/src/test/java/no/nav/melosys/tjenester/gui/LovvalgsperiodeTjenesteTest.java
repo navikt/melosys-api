@@ -11,9 +11,9 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -30,15 +30,14 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
     private static final String LOVVALGSPERIODER_SCHEMA = "lovvalgsperioder-schema.json";
     private static final LocalDate FOM = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
-            LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2,
-            TilleggsBestemmelser_883_2004.FO_883_2004_ART13_4,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
+            Tilleggsbestemmelser_883_2004.FO_883_2004_ART13_4,
             Landkoder.SK,
             InnvilgelsesResultat.AVSLAATT,
             null,
@@ -138,8 +137,8 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
         lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET.lovvalgsland));
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.valueOf(FORVENTET.lovvalgsbestemmelse));
-        lovvalgsperiode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET.lovvalgsbestemmelse));
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
         lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET.medlemskapsperiodeID));

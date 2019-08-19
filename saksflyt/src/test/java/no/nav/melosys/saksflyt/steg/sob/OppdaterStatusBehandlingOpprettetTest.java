@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;

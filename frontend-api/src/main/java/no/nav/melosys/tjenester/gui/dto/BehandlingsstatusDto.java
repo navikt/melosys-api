@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 
 public class BehandlingsstatusDto {
 

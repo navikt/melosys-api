@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -63,7 +63,7 @@ public class SendSed extends AbstraktSendSed {
     protected boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
         Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
         return behandlingsresultat.getType() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK
-            && (anmodningsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1
-            || anmodningsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2);
+            && (anmodningsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+            || anmodningsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2);
     }
 }

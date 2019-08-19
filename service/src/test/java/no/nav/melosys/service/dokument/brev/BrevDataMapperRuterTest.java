@@ -6,7 +6,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.*;
 import org.junit.Test;

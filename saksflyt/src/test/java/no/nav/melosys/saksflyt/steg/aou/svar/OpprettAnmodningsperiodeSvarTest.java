@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.aou.svar;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kafka.model.Periode;
 import no.nav.melosys.service.kafka.model.SvarAnmodningUnntak;
@@ -47,7 +47,7 @@ public class OpprettAnmodningsperiodeSvarTest {
         verify(anmodningsperiodeService).lagreAnmodningsperiodeSvarForBehandling(anyLong(), captor.capture());
 
         AnmodningsperiodeSvar anmodningsperiodeSvar = captor.getValue();
-        assertThat(anmodningsperiodeSvar.getAnmodningsperiodeSvarType()).isEqualTo(AnmodningsperiodeSvarType.INNVILGELSE);
+        assertThat(anmodningsperiodeSvar.getAnmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE);
         assertThat(anmodningsperiodeSvar.getAnmodningsperiode()).isNull();
     }
 
@@ -59,7 +59,7 @@ public class OpprettAnmodningsperiodeSvarTest {
         verify(anmodningsperiodeService).lagreAnmodningsperiodeSvarForBehandling(anyLong(), captor.capture());
 
         AnmodningsperiodeSvar anmodningsperiodeSvar = captor.getValue();
-        assertThat(anmodningsperiodeSvar.getAnmodningsperiodeSvarType()).isEqualTo(AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
+        assertThat(anmodningsperiodeSvar.getAnmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
         assertThat(anmodningsperiodeSvar.getBegrunnelseFritekst()).isNotNull();
         assertThat(anmodningsperiodeSvar.getInnvilgetFom()).isNotNull();
         assertThat(anmodningsperiodeSvar.getInnvilgetTom()).isNotNull();

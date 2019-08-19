@@ -8,7 +8,7 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.sed.BucType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.sed.SedType;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kafka.model.Periode;
@@ -43,7 +43,7 @@ public class OpprettSedDokumentTest {
     public void utfoerSteg() throws Exception {
 
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        sedDokument.setLovvalgBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         sedDokument.setBucType(BucType.LA_BUC_04);
         sedDokument.setSedType(SedType.A009);
 

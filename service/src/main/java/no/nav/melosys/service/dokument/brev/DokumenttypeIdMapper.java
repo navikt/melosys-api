@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
 
 /**

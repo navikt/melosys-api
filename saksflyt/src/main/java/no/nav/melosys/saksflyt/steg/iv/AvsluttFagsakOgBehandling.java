@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.iv;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;

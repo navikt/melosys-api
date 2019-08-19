@@ -21,7 +21,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -109,7 +109,7 @@ public class DokumentFactoryTest {
         SedDokument sedDokument = new SedDokument();
         sedDokument.setStatsborgerskapKoder(Collections.singletonList("NO"));
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now()));
-        sedDokument.setLovvalgBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        sedDokument.setLovvalgBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         sedDokument.setErEndring(false);
         sedDokument.setRinaDokumentID("123");
         sedDokument.setRinaSaksnummer("saksnummer123");

@@ -19,8 +19,8 @@ import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -83,7 +83,7 @@ public class BrevDataByggerA001Test {
 
         Landkoder unntakFraLovvalgsland = Landkoder.SE;
         Anmodningsperiode periode = new Anmodningsperiode();
-        periode.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        periode.setUnntakFraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setUnntakFraLovvalgsland(unntakFraLovvalgsland);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Arrays.asList(periode));
 

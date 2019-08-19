@@ -7,7 +7,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
@@ -54,7 +54,7 @@ public class SedDataByggerTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1L));
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
         behandlingsresultat = new Behandlingsresultat();
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
@@ -64,8 +64,8 @@ public class SedDataByggerTest {
         behandlingsresultat.setVilkaarsresultater(Collections.singleton(vilkaarsresultat));
         lovvalgsperiode.setBehandlingsresultat(behandlingsresultat);
 
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
+            null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
 
         behandling = DataByggerStubs.hentBehandlingStub();
@@ -130,7 +130,7 @@ public class SedDataByggerTest {
 
     private List<Lovvalgsperiode> lagLovvalgsperioder() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
         return Collections.singletonList(lovvalgsperiode);
     }
 }

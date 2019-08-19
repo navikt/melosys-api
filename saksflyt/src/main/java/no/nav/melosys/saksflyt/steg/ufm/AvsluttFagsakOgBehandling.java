@@ -4,10 +4,10 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -48,7 +48,7 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat for behandling " + behandling.getId()));
 
         behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        behandlingsresultat.setUtfallRegistreringUnntak(UtfallRegistreringUnntak.GODKJENT);
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
         behandlingsresultatRepository.save(behandlingsresultat);
 
         log.info("Periode regisrert og behandling avsluttet for fagsak {}, behandling {}", behandling.getFagsak().getSaksnummer(), behandling.getId());

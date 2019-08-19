@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.kodeverk.Art16_1_Anmodning_Begrunnelser;
-import no.nav.melosys.domain.kodeverk.Art16_1_Anmodning_Begrunnelser_Engelsk;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_engelsk;
 
 public final class VilkaarsresultatTilBegrunnelseMapper {
 
@@ -26,14 +26,14 @@ public final class VilkaarsresultatTilBegrunnelseMapper {
 
     private static String getEngelskBeskrivelse(String kode) {
         if (isArt16_1_Anmodning_Begrunnelse(kode)) {
-            return Art16_1_Anmodning_Begrunnelser_Engelsk.valueOf(kode).getBeskrivelse();
+            return Art16_1_anmodning_engelsk.valueOf(kode).getBeskrivelse();
         }
         return null;
     }
 
     private static String tilFritekst(String begrunnelse, String fritekst) {
-        if (Art16_1_Anmodning_Begrunnelser.SAERLIG_GRUNN.getBeskrivelse().equals(begrunnelse)
-            || Art16_1_Anmodning_Begrunnelser_Engelsk.SAERLIG_GRUNN.getBeskrivelse().equals(begrunnelse)) {
+        if (Art16_1_anmodning.SAERLIG_GRUNN.getBeskrivelse().equals(begrunnelse)
+            || Art16_1_anmodning_engelsk.SAERLIG_GRUNN.getBeskrivelse().equals(begrunnelse)) {
             return fritekst;
         }
 
@@ -41,7 +41,7 @@ public final class VilkaarsresultatTilBegrunnelseMapper {
     }
 
     private static boolean isArt16_1_Anmodning_Begrunnelse(String kode) {
-        return Arrays.stream(Art16_1_Anmodning_Begrunnelser.values())
+        return Arrays.stream(Art16_1_anmodning.values())
             .anyMatch(begrunnelse -> begrunnelse.getKode().equals(kode));
     }
 }

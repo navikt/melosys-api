@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.aou.svar;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
@@ -50,13 +50,13 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
 
     private AnmodningsperiodeSvar opprettAnmodningsperiodeSvar(SvarAnmodningUnntak svar) {
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        AnmodningsperiodeSvarType svarType = hentSvarTypeFraBeslutning(svar.getBeslutning());
+        Anmodningsperiodesvartyper svarType = hentSvarTypeFraBeslutning(svar.getBeslutning());
 
         anmodningsperiodeSvar.setRegistrertDato(LocalDate.now());
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(svarType);
         anmodningsperiodeSvar.setBegrunnelseFritekst(svar.getBegrunnelse());
 
-        if (svarType == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE) {
+        if (svarType == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE) {
             anmodningsperiodeSvar.setInnvilgetFom(svar.getDelvisInnvilgetPeriode().getFom());
             anmodningsperiodeSvar.setInnvilgetTom(svar.getDelvisInnvilgetPeriode().getTom());
         }
@@ -64,14 +64,14 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
         return anmodningsperiodeSvar;
     }
 
-    private AnmodningsperiodeSvarType hentSvarTypeFraBeslutning(final SvarAnmodningUnntak.Beslutning beslutning) {
+    private Anmodningsperiodesvartyper hentSvarTypeFraBeslutning(final SvarAnmodningUnntak.Beslutning beslutning) {
         switch (beslutning) {
             case INNVILGELSE:
-                return AnmodningsperiodeSvarType.INNVILGELSE;
+                return Anmodningsperiodesvartyper.INNVILGELSE;
             case DELVIS_INNVILGELSE:
-                return AnmodningsperiodeSvarType.DELVIS_INNVILGELSE;
+                return Anmodningsperiodesvartyper.DELVIS_INNVILGELSE;
             case AVSLAG:
-                return AnmodningsperiodeSvarType.AVSLAG;
+                return Anmodningsperiodesvartyper.AVSLAG;
             default:
                 throw new IllegalArgumentException("Ukjent beslutning-kode mottatt: " + beslutning);
         }

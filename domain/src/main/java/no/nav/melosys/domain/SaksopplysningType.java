@@ -1,10 +1,8 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Converter;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
-import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
-
-public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningType> {
+public enum SaksopplysningType implements Kodeverk {
 
     ARBFORH("ARBFORH", "Arbeidsforhold"),
     INNTK("INNTK", "Inntekt"),
@@ -33,14 +31,5 @@ public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningTy
     public String getBeskrivelse() {
         return beskrivelse;
     }
-
-    @Converter
-    public static class DbConverter extends InterntKodeverkTabell.DbKonverterer<SaksopplysningType> {
-        @Override
-        protected SaksopplysningType[] getLovligeVerdier() {
-            return SaksopplysningType.values();
-        }
-    }
-
 }
 

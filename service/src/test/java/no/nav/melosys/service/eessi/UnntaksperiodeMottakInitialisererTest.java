@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;

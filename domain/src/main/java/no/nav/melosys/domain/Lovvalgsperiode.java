@@ -8,7 +8,7 @@ import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 
-import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 
 @Entity
 @Table(name = "lovvalg_periode")
@@ -213,13 +213,13 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
                 "uten at et svar er registrert!");
         }
 
-        InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.AVSLAG ?
+        InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.AVSLAG ?
             InnvilgelsesResultat.AVSLAATT : InnvilgelsesResultat.INNVILGET;
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(anmodningsperiode.getBestemmelse());
 
-        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE) {
+        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE) {
             lovvalgsperiode.setFom(anmodningsperiodeSvar.getInnvilgetFom());
             lovvalgsperiode.setTom(anmodningsperiodeSvar.getInnvilgetTom());
         } else {

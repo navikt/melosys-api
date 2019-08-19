@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.aou;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;

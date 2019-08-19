@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -65,7 +65,7 @@ public class AvklartefaktaTest {
 
     @Test
     public void equalSammeAvklartefaktaKodeOgReferanse() {
-        Avklartefaktatype fellesType = Avklartefaktatype.ARBEIDSLAND;
+        Avklartefaktatyper fellesType = Avklartefaktatyper.ARBEIDSLAND;
         String fellesReferanse = "ARBEIDSLAND";
 
         Avklartefakta valg1 = new Avklartefakta();
@@ -87,7 +87,7 @@ public class AvklartefaktaTest {
 
     @Test
     public void equalSammeAvklartefaktaKodeUlikReferanse() {
-        Avklartefaktatype fellesType = Avklartefaktatype.ARBEIDSLAND;
+        Avklartefaktatyper fellesType = Avklartefaktatyper.ARBEIDSLAND;
 
         Avklartefakta valg1 = new Avklartefakta();
         valg1.setReferanse("ValgSteg1");

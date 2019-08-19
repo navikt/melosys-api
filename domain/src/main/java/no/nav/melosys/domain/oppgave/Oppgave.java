@@ -5,7 +5,7 @@ import java.util.Comparator;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.exception.FunksjonellException;
 

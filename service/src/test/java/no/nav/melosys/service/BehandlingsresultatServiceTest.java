@@ -9,9 +9,9 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -24,7 +24,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -123,7 +122,7 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getFakta().equals("fakta"));
-        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getType().equals(Avklartefaktatype.ARBEIDSLAND));
+        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getType().equals(Avklartefaktatyper.ARBEIDSLAND));
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getId() == null);
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBegrunnelseFritekst().equals("fritekst"));
@@ -178,7 +177,7 @@ public class BehandlingsresultatServiceTest {
         avklartefakta.setId(32L);
         avklartefakta.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
         avklartefakta.setFakta("fakta");
-        avklartefakta.setType(Avklartefaktatype.ARBEIDSLAND);
+        avklartefakta.setType(Avklartefaktatyper.ARBEIDSLAND);
         return avklartefakta;
     }
 

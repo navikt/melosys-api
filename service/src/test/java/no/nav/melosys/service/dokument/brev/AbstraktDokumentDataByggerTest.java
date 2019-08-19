@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -13,9 +15,7 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -150,7 +150,7 @@ public class AbstraktDokumentDataByggerTest {
         this.søknad.foretakUtland.add(foretakUtland);
 
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatype.ARBEIDSLAND);
+        avklartefakta.setType(Avklartefaktatyper.ARBEIDSLAND);
         avklartefakta.setFakta("BG");
         avklartefakta.setReferanse("INSTALLASJON_ARBEIDSLAND");
         avklartefakta.setSubjekt("Dunfjæder");

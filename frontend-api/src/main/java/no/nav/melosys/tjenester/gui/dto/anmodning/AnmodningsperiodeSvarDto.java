@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto.anmodning;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
 public class AnmodningsperiodeSvarDto {
@@ -25,7 +25,7 @@ public class AnmodningsperiodeSvarDto {
     public final AnmodningsperiodeSvar til() {
         return new AnmodningsperiodeSvar(
             null,
-            enumVerdiEllerNull(AnmodningsperiodeSvarType.class, anmodningsperiodeSvarType),
+            enumVerdiEllerNull(Anmodningsperiodesvartyper.class, anmodningsperiodeSvarType),
             LocalDate.now(),
             begrunnelseFritekst,
             endretPeriode != null ? endretPeriode.getFom() : null,

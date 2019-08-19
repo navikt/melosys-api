@@ -14,6 +14,8 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
@@ -67,7 +69,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
 
     private static Lovvalgsperiode lagLovvalgsperiode(LocalDate fom) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(fom);
         periode.setTom(LocalDate.now());
         periode.setLovvalgsland(Landkoder.AT);
@@ -76,7 +78,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
 
     private static Avklartefakta lagAvklarteFakta() {
         Avklartefakta faktum = new Avklartefakta();
-        faktum.setType(Avklartefaktatype.VIRKSOMHET);
+        faktum.setType(Avklartefaktatyper.VIRKSOMHET);
         faktum.setFakta("TRUE");
         faktum.setSubjekt("123456789");
         return faktum;

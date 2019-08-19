@@ -6,9 +6,9 @@ import javax.ws.rs.BadRequestException;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -92,7 +92,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         VurderUnntaksperiodeDto dto = new VurderUnntaksperiodeDto(
-            Sets.newHashSet(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name()), null
+            Sets.newHashSet(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name()), null
         );
 
         unntakTjeneste.ikkeGodkjennUnntaksperiode(1L, dto);

@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;

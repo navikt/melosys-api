@@ -4,9 +4,18 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
@@ -20,7 +29,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import static no.nav.melosys.domain.ProsessSteg.HS_OPPDATER_RESULTAT;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
@@ -112,7 +120,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.FRITEKST, fritekst);
         }
 
-        prosessinstans.setSteg(HS_OPPDATER_RESULTAT);
+        prosessinstans.setSteg(no.nav.melosys.domain.ProsessSteg.HS_OPPDATER_RESULTAT);
 
         lagre(prosessinstans);
     }
@@ -154,7 +162,7 @@ public class ProsessinstansService {
         lagre(nyprosessinstans);
     }
 
-    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperioder endretperiode) {
+    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode) {
         Prosessinstans nyprosessinstans = new Prosessinstans();
         nyprosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiode);
         nyprosessinstans.setBehandling(behandling);
@@ -172,7 +180,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, Collection<IkkeGodkjentBegrunnelser> begrunnelser, String begrunnelseFritekst) {
+    public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, Collection<Ikke_godkjent_begrunnelser> begrunnelser, String begrunnelseFritekst) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT);

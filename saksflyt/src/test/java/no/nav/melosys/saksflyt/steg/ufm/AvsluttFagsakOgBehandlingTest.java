@@ -3,10 +3,10 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.junit.Before;
@@ -53,7 +53,7 @@ public class AvsluttFagsakOgBehandlingTest {
         verify(felles).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART), eq(Behandlingsstatus.AVSLUTTET));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
         assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isEqualTo(UtfallRegistreringUnntak.GODKJENT);
+        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isEqualTo(Utfallregistreringunntak.GODKJENT);
     }
 
 }

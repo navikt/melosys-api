@@ -2,7 +2,7 @@ package no.nav.melosys.domain.avklartefakta;
 
 import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.kodeverk.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 
 public class AvklartVirksomhet {
 

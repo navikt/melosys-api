@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.iv;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -30,7 +30,7 @@ public class ForkortPeriodeTest {
     @Test
     public void utfør() throws FunksjonellException, TekniskException {
         long behandlingId = 34L;
-        Endretperioder endretperiodeKode = Endretperioder.ARBEIDSFORHOLD_AVSLUTTET;
+        Endretperiode endretperiodeKode = Endretperiode.ARBEIDSFORHOLD_AVSLUTTET;
 
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
@@ -40,7 +40,7 @@ public class ForkortPeriodeTest {
 
         forkortPeriode.utfør(p);
 
-        verify(avklartefaktaService).leggTilBegrunnelse(behandlingId, Avklartefaktatype.AARSAK_ENDRING_PERIODE, endretperiodeKode.getKode());
+        verify(avklartefaktaService).leggTilBegrunnelse(behandlingId, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiodeKode.getKode());
         assertThat(p.getSteg()).isEqualTo(IV_VALIDERING);
     }
 }

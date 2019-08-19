@@ -16,7 +16,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.kodeverk.Art16_1_Avslag__Begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
@@ -49,7 +49,7 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
         Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet());
         Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagArt161AvslagBegrunnelse();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : art161Begrunnelser) {
-            Art16_1_Avslag__Begrunnelser artikkel161AvslagKode = Art16_1_Avslag__Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
+            Art16_1_avslag artikkel161AvslagKode = Art16_1_avslag.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel161AvslagKode) {
                 case OVER_12_MD_UTL_ARBEIDSGIVER:
                 case OVER_5_AAR:

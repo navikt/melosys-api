@@ -19,6 +19,7 @@ import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.TilgangService;
@@ -44,7 +45,6 @@ import static no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory.fagsakMe
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.jeasy.random.FieldPredicates.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -41,7 +41,7 @@
         <melosys.frontend.version>1.0.1-SNAPSHOT</melosys.frontend.version>
         <melosys.jsonschema.version>1.28.0-19</melosys.jsonschema.version>
         <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
-        <melosys.internt.kodeverk.version>1.2.26</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.11.3-458</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -90,7 +90,6 @@
         <spring-security-pac4j.version>4.1.0</spring-security-pac4j.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
-
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det

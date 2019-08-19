@@ -23,6 +23,11 @@ import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
@@ -52,12 +57,10 @@ import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToke
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatype.*;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public final class DokumentServiceTest {
@@ -378,11 +381,11 @@ public final class DokumentServiceTest {
 
     private static Lovvalgsperiode lagLovvalgsperiode() {
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(LocalDate.now());
         periode.setTom(LocalDate.now());
         periode.setLovvalgsland(Landkoder.NO);
-        periode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
     }
 
@@ -413,11 +416,11 @@ public final class DokumentServiceTest {
         return søknad;
     }
 
-    private static Avklartefakta lagAvklarteFakta(Avklartefaktatype type, String subjekt) {
+    private static Avklartefakta lagAvklarteFakta(Avklartefaktatyper type, String subjekt) {
         return lagAvklarteFakta(type, "TRUE", subjekt);
     }
 
-    private static Avklartefakta lagAvklarteFakta(Avklartefaktatype type, String fakta, String subjekt) {
+    private static Avklartefakta lagAvklarteFakta(Avklartefaktatyper type, String fakta, String subjekt) {
         Avklartefakta arbeidsgiverFaktum = new Avklartefakta();
         arbeidsgiverFaktum.setSubjekt(subjekt);
         arbeidsgiverFaktum.setType(type);

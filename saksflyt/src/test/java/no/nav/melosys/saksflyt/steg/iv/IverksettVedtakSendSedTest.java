@@ -2,9 +2,9 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -17,7 +17,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,7 +43,7 @@ public class IverksettVedtakSendSedTest {
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
