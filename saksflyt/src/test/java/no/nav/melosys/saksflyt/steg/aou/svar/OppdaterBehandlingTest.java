@@ -48,7 +48,9 @@ public class OppdaterBehandlingTest {
 
     @Before
     public void setUp() {
-        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
+        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
         oppdaterBehandling = new OppdaterBehandling(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService, lovvalgsperiodeService);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
     }
