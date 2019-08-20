@@ -101,7 +101,7 @@ public class AvklartefaktaService {
         return avklartefaktaOpt.map(af -> Maritimtyper.valueOf(af.getFakta()));
     }
 
-    public Collection<AvklartMaritimtArbeid> hentMaritimeAvklartfakta(long behandlingsid) {
+    public Map<String, AvklartMaritimtArbeid> hentAlleMaritimeAvklartfakta(long behandlingsid) {
         Collection<Avklartefaktatyper> maritimeFaktatyper = Arrays.asList(
             Avklartefaktatyper.SOKKEL_ELLER_SKIP,
             Avklartefaktatyper.ARBEIDSLAND);
@@ -118,7 +118,7 @@ public class AvklartefaktaService {
             maritimeFaktaGruppert.get(navn).leggTilFakta(avklartefakta);
         }
 
-        return maritimeFaktaGruppert.values();
+        return maritimeFaktaGruppert;
     }
 
     public Optional<Avklartefakta> hentVurderingUnntakPeriode(long behandlingsid) {

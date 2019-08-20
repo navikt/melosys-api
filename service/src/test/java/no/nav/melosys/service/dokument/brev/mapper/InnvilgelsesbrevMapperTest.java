@@ -8,7 +8,6 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -24,9 +23,11 @@ import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagSoeknadssaksopplysning;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.*;
+import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
+import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -137,12 +138,8 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
-        Saksopplysning søknad = lagSoeknadssaksopplysning();
+        Saksopplysning søknad = lagSoeknadssaksopplysning(lagSoeknadDokument());
         return lagBehandling(fagsak, Collections.singleton(søknad));
-    }
-
-    private static Saksopplysning lagSoeknadssaksopplysning() {
-        return lagSaksopplysning(SaksopplysningType.SØKNAD, lagSoeknadDokument());
     }
 
     private static SoeknadDokument lagSoeknadDokument() {
@@ -152,13 +149,6 @@ public class InnvilgelsesbrevMapperTest {
         arbeidUtland.adresse.landkode = Landkoder.AT.getKode();
         dokument.arbeidUtland = Collections.singletonList(arbeidUtland);
         return dokument;
-    }
-
-    private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
-        Saksopplysning søknad = new Saksopplysning();
-        søknad.setType(type);
-        søknad.setDokument(dokument);
-        return søknad;
     }
 
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {

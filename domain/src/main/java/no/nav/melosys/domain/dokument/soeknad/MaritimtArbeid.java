@@ -1,6 +1,9 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
 public class MaritimtArbeid {
+    public String foretakNavn;
+    public String foretakOrgnr;
+
     public String navn;
     public String fartsomradeKode;
     public String flaggLandkode;

@@ -1,9 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -14,7 +12,9 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -54,14 +54,6 @@ public abstract class AbstraktDokumentDataBygger {
         this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
-    protected Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Collection<AvklartVirksomhet> bivirksomheter = new ArrayList<>();
-        bivirksomheter.addAll(hentAlleNorskeVirksomheterMedAdresse());
-        bivirksomheter.addAll(hentUtenlandskeVirksomheter());
-        bivirksomheter.remove(hentHovedvirksomhet());
-        return bivirksomheter;
-    }
-
     protected StrukturertAdresse hentBostedsadresse() throws TekniskException {
         StrukturertAdresse bostedsadresse = SoeknadUtils.hentBostedsadresse(søknad);
         if (bostedsadresse == null) {
@@ -79,9 +71,9 @@ public abstract class AbstraktDokumentDataBygger {
         return StrukturertAdresse.av(bostedsadresse);
     }
 
-    protected List<Arbeidssted> hentArbeidssteder() {
+    protected List<Arbeidssted> hentArbeidssteder() throws TekniskException {
         List<Arbeidssted> arbeidssteder = hentFysiskearbeidssteder();
-        arbeidssteder.addAll(hentIkkeFysiskeArbeidssteder());
+        arbeidssteder.addAll(hentMaritimeArbeidssteder());
         return arbeidssteder;
     }
 
@@ -98,13 +90,24 @@ public abstract class AbstraktDokumentDataBygger {
         return fysiskeArbeidssteder;
     }
 
-    private List<Arbeidssted> hentIkkeFysiskeArbeidssteder() {
-        Collection<AvklartMaritimtArbeid> avklartMaritimtArbeid =
-            avklartefaktaService.hentMaritimeAvklartfakta(behandling.getId());
+    private List<MaritimtArbeidssted> hentMaritimeArbeidssteder() throws TekniskException {
+        Map<String, AvklartMaritimtArbeid> avklartMaritimtArbeid =
+            avklartefaktaService.hentAlleMaritimeAvklartfakta(behandling.getId());
 
-        return avklartMaritimtArbeid.stream()
-            .map(MaritimtArbeidssted::new)
+        // Arbeidssted for maritimt arbeid benytter foretakNavn og foretakOrgnr fra søknad, og arbeidsland fra avklartfakta
+        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        return søknad.maritimtArbeid.stream()
+            .map(ma -> lagMaritimtArbeidssted(ma, avklartMaritimtArbeid))
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
+
+    private MaritimtArbeidssted lagMaritimtArbeidssted(MaritimtArbeid maritimtArbeid, Map<String, AvklartMaritimtArbeid> alleAvklarteMaritimeArbeid) {
+            AvklartMaritimtArbeid avklartMaritimtArbeid = alleAvklarteMaritimeArbeid.get(maritimtArbeid.navn);
+            if (avklartMaritimtArbeid != null) {
+                return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);
+            }
+            return null;
     }
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(AvklartVirksomhet virksomhet) {
@@ -146,22 +149,27 @@ public abstract class AbstraktDokumentDataBygger {
         }
     }
 
+    protected Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Collection<AvklartVirksomhet> bivirksomheter = new ArrayList<>();
+        bivirksomheter.addAll(hentAlleNorskeVirksomheterMedAdresse());
+        bivirksomheter.addAll(hentUtenlandskeVirksomheter());
+        bivirksomheter.remove(hentHovedvirksomhet());
+        return bivirksomheter;
+    }
+
     protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
         if (lovvalgsperioder.isEmpty()) {
             throw new TekniskException("Trenger minst en lovvalgsperiode");
         }
-
         return lovvalgsperioder;
     }
 
     protected Lovvalgsperiode hentLovvalgsperiode() throws FunksjonellException, TekniskException {
         Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder();
-
         if (lovvalgsperioder.size() > 1) {
             throw new FunksjonellException("Forventer kun en lovvalgsperiode!");
         }
-
         return lovvalgsperioder.iterator().next();
     }
 }

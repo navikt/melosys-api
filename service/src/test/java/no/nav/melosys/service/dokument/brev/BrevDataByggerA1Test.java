@@ -17,10 +17,7 @@ import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -131,7 +128,7 @@ public class BrevDataByggerA1Test {
     }
 
     @Test
-    public void testHentAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testHentAvklarteSelvstendigeForetak() throws FunksjonellException, TekniskException {
         avklarteOrganisasjoner.add("12345678910");
 
         SelvstendigForetak foretak = new SelvstendigForetak();
@@ -148,7 +145,7 @@ public class BrevDataByggerA1Test {
 
 
     @Test
-    public void testIngenAvklarteforetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testIngenAvklarteforetak() throws FunksjonellException, TekniskException {
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
@@ -170,7 +167,7 @@ public class BrevDataByggerA1Test {
     }
 
     @Test
-    public void testArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws FunksjonellException, TekniskException {
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.foretakNavn = "Utenlandsk Oppdragsgiver LTD";
         arbeidUtland.adresse = lagStrukturertAdresse();

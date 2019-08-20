@@ -10,7 +10,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.domain.kodeverk.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -21,6 +21,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +41,9 @@ public class BrevDataByggerInnvilgelseTest {
 
     @Mock
     AvklarteVirksomheterService avklarteVirksomheterService;
+
+    @Mock
+    KodeverkService kodeverkService;
 
     @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
@@ -76,6 +80,7 @@ public class BrevDataByggerInnvilgelseTest {
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
             avklarteVirksomheterService,
+            kodeverkService,
             landVelgerService,
             lovvalgsperiodeService,
             brevbestillingDto,
@@ -108,7 +113,7 @@ public class BrevDataByggerInnvilgelseTest {
         brevbestillingDto.fritekst = "FRITEKST";
 
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(avklartefaktaService, avklarteVirksomheterService, landVelgerService, lovvalgsperiodeService, brevbestillingDto, brevDataByggerA1);
+            new BrevDataByggerInnvilgelse(avklartefaktaService, avklarteVirksomheterService, kodeverkService, landVelgerService, lovvalgsperiodeService, brevbestillingDto, brevDataByggerA1);
 
         BrevData brevData = brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");

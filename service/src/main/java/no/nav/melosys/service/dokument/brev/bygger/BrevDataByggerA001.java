@@ -118,11 +118,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 
-        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
-        if (avklarteOrgnumre.size() != 1) {
-            throw new TekniskException("Kan ikke avgjøre ansettelsesperiode ved flere arbeidsforhold");
-        }
-
+        Set<String> avklarteOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
         Stream<Periode> avklarteAnsettelsesPerioder =
             arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrgnumre).stream();
 

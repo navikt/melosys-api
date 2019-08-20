@@ -6,19 +6,17 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
+import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -33,8 +31,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagForetakUtland;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagNorskVirksomhet;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -60,7 +57,7 @@ public class AbstraktDokumentDataByggerTest {
             super(kodeverkService, mock(LovvalgsperiodeService.class), avklartefaktaService, avklarteVirksomheterService);
             this.person = person;
             this.søknad = søknad;
-            this.behandling = mock(Behandling.class);
+            this.behandling = lagBehandling(søknad);
         }
 
         public StrukturertAdresse hentBostedsadresse() throws TekniskException {
@@ -74,13 +71,20 @@ public class AbstraktDokumentDataByggerTest {
         public AvklartVirksomhet hentHovedvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException { return super.hentHovedvirksomhet(); }
         public Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException { return super.hentBivirksomheter(); }
 
-        public List<Arbeidssted> hentArbeidssteder() {
+        public List<Arbeidssted> hentArbeidssteder() throws TekniskException {
             return super.hentArbeidssteder();
         }
 
         public List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
             return super.hentUtenlandskeVirksomheter();
         }
+    }
+
+    private Behandling lagBehandling(SoeknadDokument søknad) {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(søknad));
+        return behandling;
     }
 
     @Before
@@ -147,40 +151,51 @@ public class AbstraktDokumentDataByggerTest {
     }
 
     @Test
-    public void hentArbeidssteder_medArbeidsstedPåUtenlandskForetaksAdresse() {
-        ForetakUtland foretakUtland = lagForetakUtland();
-        foretakUtland.adresseErOgsåArbeidssted = true;
-        søknad.foretakUtland.add(foretakUtland);
+    public void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() throws FunksjonellException, TekniskException {
+        MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
+        this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
+
+        AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
+        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
 
         List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
-        assertThat(arbeidssteder.get(0).getNavn()).isEqualTo(foretakUtland.navn);
-        assertThat(arbeidssteder.get(0).getLandkode()).isEqualTo(foretakUtland.adresse.landkode);
+        assertThat(arbeidssteder.size()).isEqualTo(1);
+
+        MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
+        assertThat(arbeidssted.getNavn()).isEqualTo(maritimtArbeidISøknad.foretakNavn);
+        assertThat(arbeidssted.getIdnummer()).isEqualTo(maritimtArbeidISøknad.foretakOrgnr);
+        assertThat(arbeidssted.getOmråde()).isEqualTo(avklartMaritimtArbeid.getLand());
+        assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() {
-        ForetakUtland foretakUtland = lagForetakUtland();
-        foretakUtland.adresse.landkode = null;
-        this.søknad.foretakUtland.add(foretakUtland);
+    public void hentArbeidssteder_medMaritimtArbeidUtenForetak_girMaritimeArbeidssteder() throws FunksjonellException, TekniskException {
+        MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
+        maritimtArbeidISøknad.foretakOrgnr = null;
+        maritimtArbeidISøknad.foretakNavn = null;
+        this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatyper.ARBEIDSLAND);
-        avklartefakta.setFakta("BG");
-        avklartefakta.setReferanse("INSTALLASJON_ARBEIDSLAND");
-        avklartefakta.setSubjekt("Dunfjæder");
-
-        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("Dunfjæder");
-        avklartMaritimtArbeid.leggTilFakta(avklartefakta);
-
-        when(avklartefaktaService.hentMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonList(avklartMaritimtArbeid));
+        AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
+        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
 
         List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
-
         assertThat(arbeidssteder.size()).isEqualTo(1);
+
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getNavn()).isEqualTo("Dunfjæder");
-        assertThat(arbeidssted.getOmråde()).isEqualTo("BG");
-        assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
+        assertThat(arbeidssted.getNavn()).isNullOrEmpty();
+        assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
+        assertThat(arbeidssted.getOmråde()).isEqualTo("GB");
+    }
+
+    @Test
+    public void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() throws FunksjonellException, TekniskException {
+        MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
+        this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
+
+        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.emptyMap());
+
+        Collection<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
+        assertThat(arbeidssteder).isEmpty();
     }
 
     @Test

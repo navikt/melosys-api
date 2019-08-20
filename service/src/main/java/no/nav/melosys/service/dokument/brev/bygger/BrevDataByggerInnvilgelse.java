@@ -18,6 +18,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implements BrevDataBygger {
     private final LandvelgerService landVelgerService;
@@ -26,10 +27,11 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      AvklarteVirksomheterService avklarteVirksomheterService,
+                                     KodeverkService kodeverkService,
                                      LandvelgerService landVelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      BrevbestillingDto brevbestillingDto) {
-        super(null, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
         this.landVelgerService = landVelgerService;
         this.brevbestillingDto = brevbestillingDto;
         this.brevbyggerA1 = null;
@@ -37,11 +39,12 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      AvklarteVirksomheterService avklarteVirksomheterService,
+                                     KodeverkService kodeverkService,
                                      LandvelgerService landVelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
                                      BrevDataByggerA1 brevbyggerA1) {
-        super(null, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
         this.landVelgerService = landVelgerService;
         this.brevbestillingDto = brevbestillingDto;
         this.brevbyggerA1 = brevbyggerA1;

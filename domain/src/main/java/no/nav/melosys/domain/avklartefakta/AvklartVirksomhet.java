@@ -16,7 +16,7 @@ public class AvklartVirksomhet {
         this.navn = foretak.navn;
         this.orgnr = foretak.orgnr;
         this.adresse = foretak.adresse;
-        this.adresseErOgsåArbeidssted = foretak.adresseErOgsåArbeidssted;
+        this.adresseErOgsåArbeidssted = false;
         this.yrkesaktivitet = null;
     }
 

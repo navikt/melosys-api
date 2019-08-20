@@ -7,17 +7,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import org.jeasy.random.EasyRandom;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
@@ -25,17 +20,21 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagMaritimtArbeidssted;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -120,11 +119,7 @@ public class AttestMapperTest {
 
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
 
-        AvklartMaritimtArbeid avklartMaritimtArbeid = mock(AvklartMaritimtArbeid.class);
-        when(avklartMaritimtArbeid.getMaritimtype()).thenReturn(Maritimtyper.SKIP);
-        when(avklartMaritimtArbeid.getLand()).thenReturn(Landkoder.GB.getKode());
-        when(avklartMaritimtArbeid.getNavn()).thenReturn("Seven Kestrel");
-        Arbeidssted ikkeFysiskArbeidssted = new MaritimtArbeidssted(avklartMaritimtArbeid);
+        Arbeidssted ikkeFysiskArbeidssted = lagMaritimtArbeidssted();
 
         BrevDataA1 a1Data = new BrevDataA1();
         a1Data.yrkesgruppe = Yrkesgrupper.ORDINAER;

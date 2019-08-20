@@ -31,12 +31,10 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,6 +42,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagMaritimtArbeidssted;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,31 +95,21 @@ public class A1MapperTest {
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummer = "25";
-        strukturertAdresse.gatenavn = "Gatenavn";
-        strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.poststed = "Poststed";
-        strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = Landkoder.NO.getKode();;
+        StrukturertAdresse strukturertAdresse = lagStrukturertAdresse();
 
-        AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
+        AvklartVirksomhet virksomhet = new AvklartVirksomhet("Jarlsberg",
                                                            "123456789",
                                                             strukturertAdresse,
                                                             Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        AvklartVirksomhet utenlandskVirksomhet = new AvklartVirksomhet("Jarlsberg",
+        AvklartVirksomhet utenlandskVirksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
                                                                         "123456789",
                                                                         strukturertAdresse,
                                                                         Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
 
-        AvklartMaritimtArbeid avklartMaritimtArbeid = mock(AvklartMaritimtArbeid.class);
-        when(avklartMaritimtArbeid.getMaritimtype()).thenReturn(Maritimtyper.SOKKEL);
-        when(avklartMaritimtArbeid.getLand()).thenReturn(Landkoder.GB.getKode());
-        when(avklartMaritimtArbeid.getNavn()).thenReturn("Dunfjæder");
-        Arbeidssted maritimtArbeidssted = new MaritimtArbeidssted(avklartMaritimtArbeid);
+        Arbeidssted maritimtArbeidssted = lagMaritimtArbeidssted();
 
         brevData = new BrevDataA1();
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
