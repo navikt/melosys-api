@@ -37,13 +37,23 @@ public class AvklarteVirksomheterService {
         this.registerOppslagService = registerOppslagService;
     }
 
+    public List<AvklartVirksomhet> hentUtenlandskeVirksomheter(Behandling behandling) throws TekniskException {
+        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
+
+        return søknad.foretakUtland.stream()
+            .filter(uf -> avklarteOrgnumreOgUuider.contains(uf.uuid))
+            .map(AvklartVirksomhet::new)
+            .collect(Collectors.toList());
+    }
+
     public Set<String> hentSelvstendigeForetakOrgnumre(Behandling behandling) throws TekniskException {
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         Set<String> organisasjonsnumre = søknad.selvstendigArbeid.hentAlleOrganisasjonsnumre()
             .collect(Collectors.toSet());
 
-        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
-        organisasjonsnumre.retainAll(avklarteOrgnumre);
+        Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
+        organisasjonsnumre.retainAll(avklarteOrgnumreOgUuider);
         return organisasjonsnumre;
     }
 
@@ -53,8 +63,8 @@ public class AvklarteVirksomheterService {
         SoeknadDokument søknad = hentSøknadDokument(behandling);
         arbeidsgivendeOrgnumre.addAll(søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
 
-        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
-        arbeidsgivendeOrgnumre.retainAll(avklarteOrgnumre);
+        Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
+        arbeidsgivendeOrgnumre.retainAll(avklarteOrgnumreOgUuider);
         return arbeidsgivendeOrgnumre;
     }
 

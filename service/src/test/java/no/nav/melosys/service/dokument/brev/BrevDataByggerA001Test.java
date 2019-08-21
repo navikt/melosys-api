@@ -80,7 +80,7 @@ public class BrevDataByggerA001Test {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
 
         avklarteOrganisasjoner = new HashSet<>();
-        when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(avklarteOrganisasjoner);
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
 
         Landkoder unntakFraLovvalgsland = Landkoder.SE;
         Anmodningsperiode periode = new Anmodningsperiode();

@@ -76,7 +76,7 @@ public abstract class AbstraktDokumentDataBygger {
         return arbeidssteder;
     }
 
-    private List<Arbeidssted> hentFysiskearbeidssteder() {
+    private List<Arbeidssted> hentFysiskearbeidssteder() throws TekniskException {
         List<Arbeidssted> fysiskeArbeidssteder = søknad.arbeidUtland.stream()
             .map(au -> new FysiskArbeidssted(au.foretakNavn, au.foretakOrgnr, au.adresse))
             .collect(Collectors.toList());
@@ -112,13 +112,9 @@ public abstract class AbstraktDokumentDataBygger {
         return new FysiskArbeidssted(virksomhet.navn, virksomhet.orgnr, (StrukturertAdresse)virksomhet.adresse);
     }
 
-    protected List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
+    protected List<AvklartVirksomhet> hentUtenlandskeVirksomheter() throws TekniskException {
         if (utenlandskeVirksomheter == null) {
-            // For nå har alltid kun et utenlandsk foretak.
-            // Det er derfor ikke nødvendig med filtrering av avklarte foretak
-            utenlandskeVirksomheter = søknad.foretakUtland.stream()
-                .map(AvklartVirksomhet::new)
-                .collect(Collectors.toList());
+            utenlandskeVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
         }
         return utenlandskeVirksomheter;
     }

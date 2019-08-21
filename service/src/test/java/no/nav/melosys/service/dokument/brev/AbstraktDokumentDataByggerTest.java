@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -37,63 +36,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-public class AbstraktDokumentDataByggerTest {
-
-    private SoeknadDokument søknad;
-    private PersonDokument person;
-
-    private BrevDatabyggerbaseImpl brevDatabyggerbase;
-
-    private AvklartefaktaService avklartefaktaService;
-    private AvklarteVirksomheterService avklarteVirksomheterService;
-
-    class BrevDatabyggerbaseImpl extends AbstraktDokumentDataBygger {
-
-        BrevDatabyggerbaseImpl(KodeverkService kodeverkService,
-                                         AvklartefaktaService avklartefaktaService,
-                                         AvklarteVirksomheterService avklarteVirksomheterService,
-                                         PersonDokument person,
-                                         SoeknadDokument søknad) {
-            super(kodeverkService, mock(LovvalgsperiodeService.class), avklartefaktaService, avklarteVirksomheterService);
-            this.person = person;
-            this.søknad = søknad;
-            this.behandling = lagBehandling(søknad);
-        }
-
-        public StrukturertAdresse hentBostedsadresse() throws TekniskException {
-            return super.hentBostedsadresse();
-        }
-
-        public List<AvklartVirksomhet> hentAlleNorskeVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-            return super.hentAlleNorskeVirksomheterMedAdresse();
-        }
-
-        public AvklartVirksomhet hentHovedvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException { return super.hentHovedvirksomhet(); }
-        public Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException { return super.hentBivirksomheter(); }
-
-        public List<Arbeidssted> hentArbeidssteder() {
-            return super.hentArbeidssteder();
-        }
-
-        public List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
-            return super.hentUtenlandskeVirksomheter();
-        }
-    }
-
-    private Behandling lagBehandling(SoeknadDokument søknad) {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(søknad));
-        return behandling;
+public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
+    public AbstraktDokumentDataByggerTest() {
+        super(mock(KodeverkService.class), mock(LovvalgsperiodeService.class), mock(AvklartefaktaService.class), mock(AvklarteVirksomheterService.class));
     }
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-
-        avklartefaktaService = mock(AvklartefaktaService.class);
-        avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
 
         AvklartVirksomhet arbeidsgiver = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Arrays.asList(arbeidsgiver));
@@ -109,20 +59,26 @@ public class AbstraktDokumentDataByggerTest {
         person.bostedsadresse = boAdresseFraRegister;
 
         søknad = new SoeknadDokument();
+        behandling = lagBehandling(søknad);
+    }
 
-        brevDatabyggerbase = new BrevDatabyggerbaseImpl(kodeverkService, avklartefaktaService, avklarteVirksomheterService, person, søknad);
+    private Behandling lagBehandling(SoeknadDokument søknad) {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(søknad));
+        return behandling;
     }
 
     @Test(expected = TekniskException.class)
     public void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws TekniskException {
         person.bostedsadresse = new Bostedsadresse();
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        brevDatabyggerbase.hentBostedsadresse();
+        hentBostedsadresse();
     }
 
     @Test
     public void hentBostedsadresse_brukerBostedFraPersonDokument() throws TekniskException {
-        StrukturertAdresse bostedsadresse = brevDatabyggerbase.hentBostedsadresse();
+        StrukturertAdresse bostedsadresse = hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
         assertThat(bostedsadresse.husnummer).isEqualTo("23");
         assertThat(bostedsadresse.postnummer).isEqualTo("0165");
@@ -141,7 +97,7 @@ public class AbstraktDokumentDataByggerTest {
         oppgittBosted.landkode = "NO";
         søknad.bosted.oppgittAdresse = oppgittBosted;
 
-        StrukturertAdresse bostedsadresse = brevDatabyggerbase.hentBostedsadresse();
+        StrukturertAdresse bostedsadresse = hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("HerBorJegGata");
         assertThat(bostedsadresse.husnummer).isEqualTo("123");
         assertThat(bostedsadresse.postnummer).isEqualTo("0166");
@@ -158,7 +114,7 @@ public class AbstraktDokumentDataByggerTest {
         AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
 
-        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = hentArbeidssteder();
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
@@ -178,7 +134,7 @@ public class AbstraktDokumentDataByggerTest {
         AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
 
-        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = hentArbeidssteder();
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
@@ -194,15 +150,15 @@ public class AbstraktDokumentDataByggerTest {
 
         when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.emptyMap());
 
-        Collection<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
+        Collection<Arbeidssted> arbeidssteder = hentArbeidssteder();
         assertThat(arbeidssteder).isEmpty();
     }
 
     @Test
-    public void hentAlleNorskeVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        List<AvklartVirksomhet> norskeVirksomheter = brevDatabyggerbase.hentAlleNorskeVirksomheter();
+    public void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Collection<AvklartVirksomhet> norskeVirksomheter = hentAlleNorskeVirksomheterMedAdresse();
         assertThat(norskeVirksomheter).hasSize(1);
-        brevDatabyggerbase.hentAlleNorskeVirksomheter();
+        hentAlleNorskeVirksomheterMedAdresse();
         verify(avklarteVirksomheterService, times(1)).hentAlleNorskeVirksomheter(any(), any());
     }
 
@@ -211,28 +167,30 @@ public class AbstraktDokumentDataByggerTest {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
-        AvklartVirksomhet avklartVirksomhet = brevDatabyggerbase.hentHovedvirksomhet();
+        AvklartVirksomhet avklartVirksomhet = hentHovedvirksomhet();
         assertThat(avklartVirksomhet).isEqualTo(norskVirksomhet);
     }
 
     @Test
     public void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        søknad.foretakUtland = Collections.singletonList(lagForetakUtland());
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
-        AvklartVirksomhet hovedvirksomhet = brevDatabyggerbase.hentHovedvirksomhet();
+        AvklartVirksomhet utenlandskAvklartVirksomhet = new AvklartVirksomhet(lagForetakUtland());
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(utenlandskAvklartVirksomhet));
+
+        AvklartVirksomhet hovedvirksomhet = hentHovedvirksomhet();
         assertThat(hovedvirksomhet).isEqualTo(norskVirksomhet);
     }
 
     @Test
     public void hentHovedvirksomhet_medKunUtenlandskVirksomhet_girUtenlandskVirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        ForetakUtland utenlandskVirksomhet = lagForetakUtland();
-        søknad.foretakUtland = Collections.singletonList(utenlandskVirksomhet);
+        AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland());
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
+
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.emptyList());
 
-        AvklartVirksomhet hovedvirksomhet = brevDatabyggerbase.hentHovedvirksomhet();
-        AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(utenlandskVirksomhet);
+        AvklartVirksomhet hovedvirksomhet = hentHovedvirksomhet();
         assertThat(hovedvirksomhet).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
     }
 
@@ -241,17 +199,18 @@ public class AbstraktDokumentDataByggerTest {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = brevDatabyggerbase.hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = hentBivirksomheter();
         assertThat(bivirksomheter).isEmpty();
     }
 
     @Test
     public void hentBivirksomheter_medEnUtenlandskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.emptyList());
-        ForetakUtland utenlandskVirksomhet = lagForetakUtland();
-        søknad.foretakUtland = Collections.singletonList(utenlandskVirksomhet);
 
-        Collection<AvklartVirksomhet> bivirksomheter = brevDatabyggerbase.hentBivirksomheter();
+        AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland());
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
+
+        Collection<AvklartVirksomhet> bivirksomheter = hentBivirksomheter();
         assertThat(bivirksomheter).isEmpty();
     }
 
@@ -260,22 +219,21 @@ public class AbstraktDokumentDataByggerTest {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = brevDatabyggerbase.hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = hentBivirksomheter();
         assertThat(bivirksomheter).containsExactly(norskVirksomhet);
     }
 
     @Test
     public void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girUtenlandskBivirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        ForetakUtland utenlandskVirksomhet = lagForetakUtland();
-        søknad.foretakUtland = Collections.singletonList(utenlandskVirksomhet);
+        AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland());
 
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = brevDatabyggerbase.hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = hentBivirksomheter();
         assertThat(bivirksomheter).hasSize(1);
 
-        AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(utenlandskVirksomhet);
         assertThat(bivirksomheter.iterator().next()).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
     }
 }

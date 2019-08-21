@@ -6,8 +6,10 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -42,21 +44,54 @@ public class AvklarteVirksomheterServiceTest {
     String orgnr1 = "111111111";
     String orgnr2 = "222222222";
     String orgnr3 = "333333333";
+    String uuid1 = "a2k2jf-a3khs";
+    String uuid2 = "0dkf93-kj701";
 
     Function<OrganisasjonDokument, Adresse> ingenAdresse = org -> null;
 
     @Before
     public void setUp() {
         when(behandling.getId()).thenReturn(1L);
-        when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1)));
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, uuid1)));
 
         avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
     }
 
     @Test
+    public void hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() throws TekniskException {
+        ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, null);
+        ForetakUtland foretak2 = lagForetakUtland("Utland2", uuid2, "SE-123456789");
+
+        Saksopplysning søknad = lagSøknadOpplysning(Collections.emptyList(), Arrays.asList(foretak1, foretak2), Collections.emptyList());
+        when(behandling.getSaksopplysninger()).thenReturn(Collections.singleton(søknad));
+
+        List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+        assertThat(avklarteSelvstendigeOrgnumre.stream().map(av -> av.navn)).containsOnly("Utland1");
+    }
+
+    @Test
+    public void hentUtenlandskeVirksomheter_girListeAvklartVirksomhetMedOrgnrIkkeUuid() throws TekniskException {
+        ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, "SE-123456789");
+
+        Saksopplysning søknad = lagSøknadOpplysning(Collections.emptyList(), Collections.singletonList(foretak1), Collections.emptyList());
+        when(behandling.getSaksopplysninger()).thenReturn(Collections.singleton(søknad));
+
+        List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+        assertThat(avklarteSelvstendigeOrgnumre.stream().map(av -> av.orgnr)).containsOnly("SE-123456789");
+    }
+
+    private ForetakUtland lagForetakUtland(String navn, String uuid, String orgnr) {
+        ForetakUtland foretakUtland = new ForetakUtland();
+        foretakUtland.navn = navn;
+        foretakUtland.uuid = uuid;
+        foretakUtland.orgnr = orgnr;
+        return foretakUtland;
+    }
+
+    @Test
     public void hentSelvstendigeForetakOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
         List<String> selvstendigeForetak = Arrays.asList(orgnr1, orgnr2);
-        Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, Collections.emptyList());
+        Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, Collections.emptyList(), Collections.emptyList());
         when(behandling.getSaksopplysninger()).thenReturn(Collections.singleton(søknad));
 
         Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentSelvstendigeForetakOrgnumre(behandling);
@@ -98,7 +133,7 @@ public class AvklarteVirksomheterServiceTest {
         when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
 
         Set<String> avklarteOrganisasjoner = new HashSet<>(Arrays.asList(orgnr2, orgnr3));
-        when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(avklarteOrganisasjoner);
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
 
         leggTilIRegisterOppslag(Arrays.asList(orgnr2, orgnr3));
 
@@ -120,7 +155,7 @@ public class AvklarteVirksomheterServiceTest {
         when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
 
         Set<String> avklarteOrganisasjoner = new HashSet<>(selvstendigeForetak);
-        when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(avklarteOrganisasjoner);
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
 
         leggTilIRegisterOppslag(selvstendigeForetak);
 

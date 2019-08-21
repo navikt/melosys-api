@@ -91,7 +91,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         when(lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId())).thenReturn(Collections.singletonList(lovvalgsperiode));
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
-        when(avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId())).thenReturn(orgSet);
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setOrgnummer("987654321");

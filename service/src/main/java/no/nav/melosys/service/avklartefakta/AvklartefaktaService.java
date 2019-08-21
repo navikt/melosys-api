@@ -65,7 +65,8 @@ public class AvklartefaktaService {
             .findFirst();
     }
 
-    public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
+    // Denne leverer enten norske orgnr eller uuid for identifikasjon av utenlandske foretak
+    public Set<String> hentAvklarteOrgnrOgUuid(long behandlingsid) {
         Set<Avklartefakta> avklartefakta =
                 avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatyper.VIRKSOMHET, VALGT_FAKTA);
         return avklartefakta.stream()
