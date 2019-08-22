@@ -6,9 +6,9 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
-import no.nav.melosys.service.kafka.model.Periode;
-import no.nav.melosys.service.kafka.model.Statsborgerskap;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.Periode;
+import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
