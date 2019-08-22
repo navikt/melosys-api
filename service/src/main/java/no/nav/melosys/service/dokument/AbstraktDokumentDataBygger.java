@@ -14,7 +14,6 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -84,18 +83,17 @@ public abstract class AbstraktDokumentDataBygger {
 
         if (fysiskeArbeidssteder.isEmpty()) {
             hentUtenlandskeVirksomheter().stream()
-                .filter(uv -> Boolean.TRUE.equals(uv.adresseErOgsåArbeidssted))
+                .filter(uv -> uv.adresseErOgsåArbeidssted)
                 .forEach(uv -> fysiskeArbeidssteder.add(utledArbeidsstedFraVirksomhet(uv)));
         }
         return fysiskeArbeidssteder;
     }
 
-    private List<MaritimtArbeidssted> hentMaritimeArbeidssteder() throws TekniskException {
+    private List<MaritimtArbeidssted> hentMaritimeArbeidssteder() {
         Map<String, AvklartMaritimtArbeid> avklartMaritimtArbeid =
             avklartefaktaService.hentAlleMaritimeAvklartfakta(behandling.getId());
 
         // Arbeidssted for maritimt arbeid benytter foretakNavn og foretakOrgnr fra søknad, og arbeidsland fra avklartfakta
-        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         return søknad.maritimtArbeid.stream()
             .map(ma -> lagMaritimtArbeidssted(ma, avklartMaritimtArbeid))
             .filter(Objects::nonNull)
@@ -103,7 +101,7 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private MaritimtArbeidssted lagMaritimtArbeidssted(MaritimtArbeid maritimtArbeid, Map<String, AvklartMaritimtArbeid> alleAvklarteMaritimeArbeid) {
-            AvklartMaritimtArbeid avklartMaritimtArbeid = alleAvklarteMaritimeArbeid.get(maritimtArbeid.navn);
+            AvklartMaritimtArbeid avklartMaritimtArbeid = alleAvklarteMaritimeArbeid.get(maritimtArbeid.enhetNavn);
             if (avklartMaritimtArbeid != null) {
                 return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);
             }

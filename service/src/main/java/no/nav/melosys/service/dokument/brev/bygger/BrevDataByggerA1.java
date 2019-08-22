@@ -33,7 +33,7 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         List<AvklartVirksomhet> utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
         List<AvklartVirksomhet> norskeVirksomheter = hentAlleNorskeVirksomheterMedAdresse();
         if (norskeVirksomheter.isEmpty() && utenlandskeVirksomheter.isEmpty()) {
-            throw new TekniskException("Trenger minst en avklart virksomhet - utenlandsk eller norsk");
+            throw new FunksjonellException("Trenger minst en avklart virksomhet - utenlandsk eller norsk");
         }
 
         BrevDataA1 brevData = new BrevDataA1();

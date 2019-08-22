@@ -9,7 +9,7 @@ public class AvklartVirksomhet {
     public final String navn;
     public final String orgnr;
     public final Adresse adresse;
-    public final Boolean adresseErOgsåArbeidssted;
+    public final boolean adresseErOgsåArbeidssted;
     public final Yrkesaktivitetstyper yrkesaktivitet;
 
     public AvklartVirksomhet(ForetakUtland foretak) {

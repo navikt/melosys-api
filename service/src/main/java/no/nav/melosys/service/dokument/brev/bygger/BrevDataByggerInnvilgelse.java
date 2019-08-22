@@ -72,7 +72,7 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
             .orElse(null);
 
         List<AvklartVirksomhet> norskeVirksomheter = hentAlleNorskeVirksomheterMedAdresse();
-        brevdata.hovedvirksomhet = norskeVirksomheter.iterator().next();
+        brevdata.hovedvirksomhet = norskeVirksomheter.get(0);
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
@@ -82,9 +82,7 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
 
     private BrevDataInnvilgelse lagInnvilgelseBrevdataMedA1(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataInnvilgelse brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
-
-        BrevDataA1 vedleggA1 = (BrevDataA1) brevbyggerA1.lag(behandling, saksbehandler);
-        brevdata.vedleggA1 = vedleggA1;
+        brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(behandling, saksbehandler);
         return brevdata;
     }
 }

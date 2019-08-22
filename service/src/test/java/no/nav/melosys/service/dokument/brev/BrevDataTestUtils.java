@@ -72,7 +72,7 @@ public class BrevDataTestUtils {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.foretakOrgnr = "123456789";
         maritimtArbeid.foretakNavn = "Equinor GB";
-        maritimtArbeid.navn = "Dunfjæder";
+        maritimtArbeid.enhetNavn = "Dunfjæder";
         maritimtArbeid.flaggLandkode = Landkoder.GB.getKode();
         return maritimtArbeid;
     }

@@ -28,7 +28,6 @@ import org.apache.commons.collections4.CollectionUtils;
 
 public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements BrevDataBygger {
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
@@ -41,7 +40,6 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
         super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }

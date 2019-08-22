@@ -4,7 +4,7 @@ public class MaritimtArbeid {
     public String foretakNavn;
     public String foretakOrgnr;
 
-    public String navn;
+    public String enhetNavn;
     public String fartsomradeKode;
     public String flaggLandkode;
     public String installasjonsLandkode;
