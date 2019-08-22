@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.BucinfoDto;
 import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
@@ -46,6 +47,20 @@ public class EessiConsumerImpl implements EessiConsumer {
             .map(institusjonDto -> new Institusjon(
                 institusjonDto.getId(), institusjonDto.getNavn(), institusjonDto.getLandkode()))
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public MelosysEessiMelding hentSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
+        return exchange(String.format("/journalpost/%s/eessimelding", journalpostID), HttpMethod.GET,
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<MelosysEessiMelding>(){
+            });
+    }
+
+    @Override
+    public Object hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
+        return exchange(String.format("/sak?rinaSaksnummer=%s", rinaSaksnummer), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders()),
+            new ParameterizedTypeReference<Object>() {
+        });
     }
 
     @Override

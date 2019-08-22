@@ -3,12 +3,12 @@ package no.nav.melosys.saksflyt.steg.aou.svar;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.SvarAnmodningUnntak;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
-import no.nav.melosys.service.kafka.model.SvarAnmodningUnntak;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,13 +1,17 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
@@ -76,5 +80,23 @@ public class EessiService {
 
     public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException {
         return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, status);
+    }
+
+    public boolean stotterAutomatiskBehandling(String sedType) {
+        return sedType != null
+            && Arrays.stream(SedType.values()).map(SedType::name).anyMatch(s -> s.equals(sedType))
+            && stotterAutomatiskBehandling(SedType.valueOf(sedType));
+    }
+
+    private boolean stotterAutomatiskBehandling(SedType sedType) {
+        return Arrays.asList(SedType.A001, SedType.A003, SedType.A009, SedType.A010).contains(sedType);
+    }
+
+    public MelosysEessiMelding hentSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
+        return eessiConsumer.hentSedTilknyttetJournalpost(journalpostID);
+    }
+
+    public Optional<String> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
+        return Optional.ofNullable((String)eessiConsumer.hentSakForRinasaksnummer(rinaSaksnummer));
     }
 }

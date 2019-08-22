@@ -5,6 +5,7 @@ import java.util.Map;
 
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 
@@ -17,4 +18,8 @@ public interface EessiConsumer {
     List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException;
 
     List<Institusjon> hentMottakerinstitusjoner(String bucType) throws MelosysException;
+
+    MelosysEessiMelding hentSedTilknyttetJournalpost(String journalpostID) throws MelosysException;
+
+    Object hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException;
 }

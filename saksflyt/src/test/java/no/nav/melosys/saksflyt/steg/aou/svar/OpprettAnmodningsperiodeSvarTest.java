@@ -3,10 +3,10 @@ package no.nav.melosys.saksflyt.steg.aou.svar;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.Periode;
+import no.nav.melosys.domain.eessi.melding.SvarAnmodningUnntak;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
-import no.nav.melosys.service.kafka.model.Periode;
-import no.nav.melosys.service.kafka.model.SvarAnmodningUnntak;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
