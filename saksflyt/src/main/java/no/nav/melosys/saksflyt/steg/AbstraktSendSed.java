@@ -17,7 +17,7 @@ public abstract class AbstraktSendSed extends AbstraktStegBehandler {
 
     protected final BehandlingRepository behandlingRepository;
     private final EessiService eessiService;
-    private final BehandlingsresultatService behandlingsresultatService;
+    protected final BehandlingsresultatService behandlingsresultatService;
 
     protected AbstraktSendSed(BehandlingRepository behandlingRepository, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
         this.behandlingRepository = behandlingRepository;
