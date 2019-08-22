@@ -20,6 +20,7 @@ public class Journalpost {
     private String innhold;
     private Journalposttype journalposttype;
     private List<ArkivDokument> vedleggListe;
+    private String mottaksKanal;
 
     public Journalpost(String journalpostId) {
         this.journalpostId = journalpostId;
@@ -112,5 +113,17 @@ public class Journalpost {
 
     public List<ArkivDokument> getVedleggListe() {
         return vedleggListe;
+    }
+
+    public String getMottaksKanal() {
+        return mottaksKanal;
+    }
+
+    public void setMottaksKanal(String mottaksKanal) {
+        this.mottaksKanal = mottaksKanal;
+    }
+
+    public boolean mottaksKanalErEessi() {
+        return "EESSI".equals(mottaksKanal);
     }
 }
