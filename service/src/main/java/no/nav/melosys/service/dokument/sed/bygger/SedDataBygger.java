@@ -12,8 +12,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
@@ -34,15 +32,13 @@ import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 @Service
 public class SedDataBygger extends AbstraktDokumentDataBygger {
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     @Autowired
     public SedDataBygger(KodeverkService kodeverkService,
                          LovvalgsperiodeService lovvalgsperiodeService,
                          AvklartefaktaService avklartefaktaService,
                          @Qualifier("system") AvklarteVirksomheterService avklarteVirksomheterService) {
-        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
     }
 
     public SedDataDto lag(Behandling behandling, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
@@ -75,7 +71,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         return sedDataDto;
     }
 
-    private SedDataDto lagPersonopplysninger(Behandling behandling) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
+    private SedDataDto lagPersonopplysninger(Behandling behandling) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = new SedDataDto();
 
         sedDataDto.setArbeidsgivendeVirksomheter(map(avklarteVirksomheterService.hentArbeidsgivere(behandling, this::utfyllManglendeAdressefelter)));

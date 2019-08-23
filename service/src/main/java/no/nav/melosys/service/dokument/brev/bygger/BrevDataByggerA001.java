@@ -28,7 +28,6 @@ import org.apache.commons.collections4.CollectionUtils;
 
 public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements BrevDataBygger {
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
@@ -39,9 +38,8 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
                               LovvalgsperiodeService lovvalgsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
-        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
@@ -58,7 +56,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = this.person;
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
+        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentArbeidsgivere(behandling, this::utfyllManglendeAdressefelter);
         brevData.selvstendigeVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter);
 
         brevData.bostedsadresse = hentBostedsadresse();
@@ -118,11 +116,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 
-        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
-        if (avklarteOrgnumre.size() != 1) {
-            throw new TekniskException("Kan ikke avgjøre ansettelsesperiode ved flere arbeidsforhold");
-        }
-
+        Set<String> avklarteOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
         Stream<Periode> avklarteAnsettelsesPerioder =
             arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrgnumre).stream();
 

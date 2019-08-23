@@ -9,12 +9,14 @@ public class AvklartVirksomhet {
     public final String navn;
     public final String orgnr;
     public final Adresse adresse;
+    public final boolean adresseErOgsåArbeidssted;
     public final Yrkesaktivitetstyper yrkesaktivitet;
 
     public AvklartVirksomhet(ForetakUtland foretak) {
         this.navn = foretak.navn;
         this.orgnr = foretak.orgnr;
         this.adresse = foretak.adresse;
+        this.adresseErOgsåArbeidssted = false;
         this.yrkesaktivitet = null;
     }
 
@@ -22,6 +24,7 @@ public class AvklartVirksomhet {
         this.navn = navn;
         this.orgnr = orgnr;
         this.adresse = adresse;
+        this.adresseErOgsåArbeidssted = false;
         this.yrkesaktivitet = yrkesaktivitet;
     }
 

@@ -5,7 +5,6 @@ import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
@@ -71,15 +70,5 @@ class BrevMappingTestUtils {
         return FellesType.builder()
             .withFagsaksnummer("MELTEST-1")
             .build();
-    }
-
-    public static StrukturertAdresse lagStrukturertAdresse() {
-        StrukturertAdresse addr = new StrukturertAdresse();
-        addr.gatenavn = "Strukturert Gate";
-        addr.husnummer = "12B";
-        addr.poststed = "Poststed";
-        addr.postnummer = "4321";
-        addr.landkode = Landkoder.BG.getKode();
-        return addr;
     }
 }
