@@ -14,6 +14,7 @@ import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
@@ -93,10 +94,15 @@ public class EessiService {
     }
 
     public MelosysEessiMelding hentSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
-        return eessiConsumer.hentSedTilknyttetJournalpost(journalpostID);
+        return eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID);
     }
 
-    public Optional<String> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
-        return Optional.ofNullable((String)eessiConsumer.hentSakForRinasaksnummer(rinaSaksnummer));
+    public Optional<Long> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
+        return eessiConsumer.hentSakForRinasaksnummer(rinaSaksnummer).stream()
+            .findFirst().map(SaksrelasjonDto::getGsakSaksnummer);
+    }
+
+    public void lagreSaksrelasjon(Long gsakSaksnummer, String rinaSaksnummer, String bucType) throws MelosysException {
+        eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(gsakSaksnummer, rinaSaksnummer, bucType));
     }
 }

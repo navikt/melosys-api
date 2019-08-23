@@ -1,13 +1,16 @@
 package no.nav.melosys.service.dokument.sed;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -15,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.jeasy.random.EasyRandom;
@@ -128,5 +132,58 @@ public class EessiServiceTest {
     public void hentTilknyttedeBucer_medFeilIConsumer_forventException() throws MelosysException {
         when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyString())).thenThrow(new IntegrasjonException("Error!"));
         eessiService.hentTilknyttedeBucer(123L, "utkast");
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_verifiserA001A003A009A010støtterAutomatiskBehandling() {
+        List<String> sedTyperAutomatiskBehandling = Arrays.asList(
+            SedType.A001.name(),
+            SedType.A003.name(),
+            SedType.A009.name(),
+            SedType.A010.name()
+        );
+
+        assertThat(sedTyperAutomatiskBehandling.stream().map(eessiService::stotterAutomatiskBehandling))
+            .allMatch(b -> b);
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_verifiserStøtterIkkeAutomatiskBehandling() {
+        List<String> sedTyperAutomatiskBehandling = Arrays.asList(
+            "H001",
+            SedType.A002.name(),
+            SedType.A004.name(),
+            SedType.A005.name(),
+            SedType.A006.name(),
+            SedType.A007.name(),
+            SedType.A008.name(),
+            SedType.A011.name(),
+            SedType.A012.name()
+        );
+
+        assertThat(sedTyperAutomatiskBehandling.stream().map(eessiService::stotterAutomatiskBehandling))
+            .allMatch(b -> !b);
+    }
+
+    @Test
+    public void hentSakForRinaSaksnummer_forventOptionalIkkePresent() throws MelosysException {
+        when(eessiConsumer.hentSakForRinasaksnummer(anyString()))
+            .thenReturn(Collections.emptyList());
+        Optional<Long> res = eessiService.hentSakForRinasaksnummer("123");
+        assertThat(res).isNotPresent();
+    }
+
+    @Test
+    public void hentSakForRinaSaksnummer_forventOptionalPresent() throws MelosysException {
+        when(eessiConsumer.hentSakForRinasaksnummer(anyString()))
+            .thenReturn(Collections.singletonList(new SaksrelasjonDto(123L, "123", "123")));
+        Optional<Long> res = eessiService.hentSakForRinasaksnummer("123");
+        assertThat(res).isPresent();
+    }
+
+    @Test
+    public void lagreSaksrelasjon_validerInput() throws MelosysException {
+        eessiService.lagreSaksrelasjon(123L, "123", "312");
+        verify(eessiConsumer).lagreSaksrelasjon(any());
     }
 }

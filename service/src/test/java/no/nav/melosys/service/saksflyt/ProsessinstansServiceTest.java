@@ -232,11 +232,11 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void behandleMottatMelding() {
+    public void behandleMottattMelding() {
         MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(LocalDate.now(), LocalDate.now().plusYears(1));
         service.opprettProsessinstansSedMottak(eessiMelding);
 
-        verify(service).lagre(piCaptor.capture());
+        verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans).isNotNull();
