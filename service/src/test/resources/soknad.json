@@ -99,7 +99,9 @@
   },
   "maritimtArbeid": [
     {
-      "navn": "Navn på skipet",
+      "foretakNavn": "Equiesou",
+      "foretakOrgnr": null,
+      "enhetNavn": "Navn på skipet",
       "fartsomradeKode": "INNENRIKS",
       "flaggLandkode": "GB",
       "installasjonsLandkode": "GB"
