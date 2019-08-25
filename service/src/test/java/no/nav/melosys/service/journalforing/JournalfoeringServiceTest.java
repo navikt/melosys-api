@@ -89,7 +89,7 @@ public class JournalfoeringServiceTest {
         fagsakDto.setSoknadsperiode(periode);
         fagsakDto.setLand(Arrays.asList("DK"));
         opprettDto.setFagsak(fagsakDto);
-        journalfoeringService.journalfoer(opprettDto);
+        journalfoeringService.opprettOgJournalfør(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
         verify(oppgaveService).ferdigstillOppgave(anyString());
@@ -99,17 +99,17 @@ public class JournalfoeringServiceTest {
     @Test(expected = FunksjonellException.class)
     public void opprettSakOgJournalfør_oppgaveID_mangler() throws MelosysException {
         opprettDto.setOppgaveID(null);
-        journalfoeringService.journalfoer(opprettDto);
+        journalfoeringService.opprettOgJournalfør(opprettDto);
     }
 
     @Test
-    public void journalfoer_erSed_prosessinstansOpprettet() throws MelosysException {
+    public void opprettOgJournalfør_erSed_prosessinstansOpprettet() throws MelosysException {
         journalpost.setMottaksKanal("EESSI");
         journalpost.getHoveddokument().setNavSkjemaID("A009");
-        when(eessiService.stotterAutomatiskBehandling(anyString())).thenReturn(Boolean.TRUE);
+        when(eessiService.støtterAutomatiskBehandling(anyString(), anyString())).thenReturn(Boolean.TRUE);
         when(eessiService.hentSedTilknyttetJournalpost(opprettDto.getJournalpostID())).thenReturn(new MelosysEessiMelding());
 
-        journalfoeringService.journalfoer(opprettDto);
+        journalfoeringService.opprettOgJournalfør(opprettDto);
         verify(prosessinstansService).opprettProsessinstansSedMottak(any(MelosysEessiMelding.class), anyString());
     }
 

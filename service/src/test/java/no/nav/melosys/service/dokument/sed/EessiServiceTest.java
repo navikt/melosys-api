@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -135,20 +136,20 @@ public class EessiServiceTest {
     }
 
     @Test
-    public void støtterAutomatiskBehandling_verifiserA001A003A009A010støtterAutomatiskBehandling() {
+    public void støtterAutomatiskBehandling_verifiserA001A003A009A010støtterAutomatiskBehandling() throws Exception {
         List<String> sedTyperAutomatiskBehandling = Arrays.asList(
             SedType.A001.name(),
-            SedType.A003.name(),
             SedType.A009.name(),
             SedType.A010.name()
         );
 
-        assertThat(sedTyperAutomatiskBehandling.stream().map(eessiService::stotterAutomatiskBehandling))
-            .allMatch(b -> b);
+        for (String sedType : sedTyperAutomatiskBehandling) {
+            assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isTrue();
+        }
     }
 
     @Test
-    public void støtterAutomatiskBehandling_verifiserStøtterIkkeAutomatiskBehandling() {
+    public void støtterAutomatiskBehandling_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
         List<String> sedTyperAutomatiskBehandling = Arrays.asList(
             "H001",
             SedType.A002.name(),
@@ -161,8 +162,25 @@ public class EessiServiceTest {
             SedType.A012.name()
         );
 
-        assertThat(sedTyperAutomatiskBehandling.stream().map(eessiService::stotterAutomatiskBehandling))
-            .allMatch(b -> !b);
+        for (String sedType : sedTyperAutomatiskBehandling) {
+            assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isFalse();
+        }
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_a003ikkeUtpekt_verifiserStøtterAutomatiskBehandling() throws Exception {
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setLovvalgsland(Landkoder.SE.name());
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        assertThat(eessiService.støtterAutomatiskBehandling("123", "A003")).isTrue();
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_a003erUtpekt_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setLovvalgsland(Landkoder.NO.name());
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        assertThat(eessiService.støtterAutomatiskBehandling("123", "A003")).isFalse();
     }
 
     @Test

@@ -51,7 +51,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @Path("opprett")
     @ApiOperation(value = "Opprett sak og journalfør.")
     public void opprettSakOgJournalfør(@ApiParam JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
-        journalføringService.journalfoer(journalfoeringDto);
+        journalføringService.opprettOgJournalfør(journalfoeringDto);
     }
 
     @POST
