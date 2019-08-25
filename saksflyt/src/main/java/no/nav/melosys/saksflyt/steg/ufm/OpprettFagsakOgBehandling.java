@@ -3,15 +3,17 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.slf4j.Logger;
@@ -28,11 +30,13 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
+    private final EessiService eessiService;
 
     @Autowired
-    public OpprettFagsakOgBehandling(FagsakService fagsakService, BehandlingService behandlingService) {
+    public OpprettFagsakOgBehandling(FagsakService fagsakService, BehandlingService behandlingService, EessiService eessiService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
+        this.eessiService = eessiService;
     }
 
     @Override
@@ -41,7 +45,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         //Verifiser prosessType
@@ -49,14 +53,15 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             throw new TekniskException("Prosessinstans er ikke av type " + ProsessType.REGISTRERING_UNNTAK);
         }
 
-        Long gsakSaksnummer = prosessinstans.getData(GSAK_SAK_ID, Long.class);
+        Optional<Long> gsakSaksnummer = eessiService.hentSakForRinasaksnummer(
+            prosessinstans.getData(EESSI_MELDING, MelosysEessiMelding.class).getRinaSaksnummer());
         Fagsak fagsak;
         Behandling behandling;
 
-        Optional<Fagsak> eksisterendeFagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
-
-        if (eksisterendeFagsak.isPresent()) {
-            fagsak = eksisterendeFagsak.get();
+        if (gsakSaksnummer.isPresent()) {
+            fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer.get())
+                .orElseThrow(() -> new TekniskException("Finnes en kobling til gsakSaksnummer " +
+                    gsakSaksnummer + ", men finner ingen fagsak!"));
 
             if (!Saksstatuser.OPPRETTET.equals(fagsak.getStatus())) {
                 fagsak.setStatus(Saksstatuser.OPPRETTET);
@@ -66,6 +71,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD,
                 prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
             log.info("Opprettet ny behandling for fagsak {}", gsakSaksnummer);
+            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET);
         } else {
 
             OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
@@ -73,18 +79,17 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
                 .medBehandlingstype(prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class))
                 .medInitierendeJournalpostId(prosessinstans.getData(JOURNALPOST_ID))
                 .medInitierendeDokumentId(prosessinstans.getData(DOKUMENT_ID))
-                .medGsakSaksnummer(gsakSaksnummer)
                 .medSakstype(Sakstyper.EU_EOS)
                 .build();
 
             fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
             behandling = fagsak.getAktivBehandling();
             log.info("Fagsak og behandling opprettet for EESSI-sak med gsakSaksnummer {}", gsakSaksnummer);
+            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_GSAK_SAK);
         }
 
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 
     private void avsluttTidligereBehandling(Fagsak fagsak) throws TekniskException, IkkeFunnetException {

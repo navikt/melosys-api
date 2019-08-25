@@ -76,6 +76,8 @@ public enum ProsessSteg implements Kodeverk {
 
     //Unntak medlemskap
     REG_UNNTAK_OPPRETT_SAK_OG_BEH("REG_UNNTAK_OPPRETT_SAK_OG_BEH","Opprett sak og behandling"),
+    REG_UNNTAK_OPPRETT_GSAK_SAK("REG_UNNTAK_OPPRETT_GSAK_SAK","Oppretter gsak sak for ny behandling"),
+    REG_UNNTAK_OPPDATER_SAKSRELASJON("REG_UNNTAK_OPPDATER_SAKSRELASJON","Oppdaterer saksrelasjon for ny gsak-sak"),
     REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
     REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
     REG_UNNTAK_OPPRETT_SEDDOKUMENT("REG_UNNTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),

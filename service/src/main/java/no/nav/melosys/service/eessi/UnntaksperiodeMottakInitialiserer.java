@@ -87,10 +87,6 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
 
     private void ferdigstillOppgaveMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
-        if (oppgave == null) {
-            throw new TekniskException("Finner ingen oppgave med saksnummer " + saksnummer);
-        }
-
         log.info("Ferdigstiller oppgave {} for fagsak {}", oppgave.getOppgaveId(), saksnummer);
         gsakFasade.ferdigstillOppgave(oppgave.getOppgaveId());
     }

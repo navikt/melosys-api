@@ -5,10 +5,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -16,7 +17,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
@@ -45,6 +45,10 @@ public class GsakService implements GsakFasade {
     private final SakConsumer sakConsumer;
 
     private final OppgaveConsumer oppgaveConsumer;
+
+    private static final List<Behandlingstyper> gyldigeBehandlingsTyper = Arrays.asList(
+        SOEKNAD, REGISTRERING_UNNTAK_NORSK_TRYGD, ANMODNING_OM_UNNTAK_HOVEDREGEL, UTL_MYND_UTPEKT_SEG_SELV
+    );
 
     @Autowired
     public GsakService(SakConsumer sakConsumer, OppgaveConsumer oppgaveConsumer) {
