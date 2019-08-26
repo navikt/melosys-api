@@ -71,7 +71,7 @@ public class AbstraktDokumentDataByggerTest {
         public AvklartVirksomhet hentHovedvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException { return super.hentHovedvirksomhet(); }
         public Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException { return super.hentBivirksomheter(); }
 
-        public List<Arbeidssted> hentArbeidssteder() throws TekniskException {
+        public List<Arbeidssted> hentArbeidssteder() {
             return super.hentArbeidssteder();
         }
 
