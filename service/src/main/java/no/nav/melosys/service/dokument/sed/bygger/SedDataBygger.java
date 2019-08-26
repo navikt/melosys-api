@@ -74,7 +74,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
     private SedDataDto lagPersonopplysninger(Behandling behandling) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = new SedDataDto();
 
-        sedDataDto.setArbeidsgivendeVirksomheter(map(avklarteVirksomheterService.hentArbeidsgivere(behandling, this::utfyllManglendeAdressefelter)));
+        sedDataDto.setArbeidsgivendeVirksomheter(map(avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, this::utfyllManglendeAdressefelter)));
 
         sedDataDto.setArbeidssteder(hentArbeidssteder().stream()
             .map(this::mapArbeidssted).collect(Collectors.toList()));
@@ -87,7 +87,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
             .filter(f -> f.familierelasjon.equals(Familierelasjon.FARA) || f.familierelasjon.equals(Familierelasjon.MORA))
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
-        sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter)));
+        sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter)));
 
         sedDataDto.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter().stream().map(
             this::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));

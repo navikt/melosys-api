@@ -70,7 +70,7 @@ public abstract class AbstraktDokumentDataBygger {
         return StrukturertAdresse.av(bostedsadresse);
     }
 
-    protected List<Arbeidssted> hentArbeidssteder() {
+    protected List<Arbeidssted> hentArbeidssteder() throws TekniskException {
         List<Arbeidssted> arbeidssteder = hentFysiskearbeidssteder();
         arbeidssteder.addAll(hentMaritimeArbeidssteder());
         return arbeidssteder;

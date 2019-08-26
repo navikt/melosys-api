@@ -94,7 +94,7 @@ public class AvklarteVirksomheterServiceTest {
         Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, Collections.emptyList(), Collections.emptyList());
         when(behandling.getSaksopplysninger()).thenReturn(Collections.singleton(søknad));
 
-        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentSelvstendigeForetakOrgnumre(behandling);
+        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeSelvstendigeForetakOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
     }
 
@@ -105,7 +105,7 @@ public class AvklarteVirksomheterServiceTest {
             lagSøknadOgArbeidsforholdOpplysninger(Collections.emptyList(), arbeidgivendeEkstraOrgnumre, Collections.emptyList());
         when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
 
-        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
+        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
     }
 
@@ -116,7 +116,7 @@ public class AvklarteVirksomheterServiceTest {
             lagSøknadOgArbeidsforholdOpplysninger(Collections.emptyList(), Collections.emptyList(), arbeidgivendeOrgnumreEkstra);
         when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
 
-        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
+        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
     }
 

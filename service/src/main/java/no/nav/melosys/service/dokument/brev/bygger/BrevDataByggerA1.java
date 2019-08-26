@@ -39,7 +39,7 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         BrevDataA1 brevData = new BrevDataA1();
         brevData.person = person;
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
-        brevData.selvstendigeForetak = avklarteVirksomheterService.hentSelvstendigeForetakOrgnumre(behandling);
+        brevData.selvstendigeForetak = avklarteVirksomheterService.hentNorskeSelvstendigeForetakOrgnumre(behandling);
         brevData.bostedsadresse = hentBostedsadresse();
 
         List<Arbeidssted> arbeidssteder = hentArbeidssteder();

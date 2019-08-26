@@ -115,7 +115,7 @@ public class IverksettVedtakSendBrevTest {
 
     private static DokumentSystemService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger) throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
-        when(avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(any())).thenReturn(Sets.newHashSet("123456789"));
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any())).thenReturn(Sets.newHashSet("123456789"));
         BehandlingRepository behandlingRepository = mockBehandlingRepository();
         BrevDataService brevDataService = mock(BrevDataService.class);
         DoksysFasade dokSysFasade = mock(DoksysFasade.class);
