@@ -3,6 +3,7 @@ package no.nav.melosys.service.unntak;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
@@ -38,4 +39,9 @@ public class AnmodningUnntakService {
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
+    @Transactional(rollbackFor = MelosysException.class)
+    public void anmodningOmUnntakSvar(long behandlingID) throws IkkeFunnetException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling);
+    }
 }

@@ -16,6 +16,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -37,6 +38,8 @@ public class EessiServiceTest {
     private SedDataBygger sedDataBygger;
     @Mock
     private EessiConsumer eessiConsumer;
+    @Mock
+    private BehandlingService behandlingService;
 
     private EessiService eessiService;
 
@@ -50,7 +53,7 @@ public class EessiServiceTest {
 
     @Before
     public void setup() throws Exception {
-        eessiService = new EessiService(sedDataBygger, eessiConsumer, "true");
+        eessiService = new EessiService(sedDataBygger, eessiConsumer, "true", behandlingService);
 
         behandling = new Behandling();
         behandling.setFagsak(new Fagsak());

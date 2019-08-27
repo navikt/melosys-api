@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import org.junit.Before;
@@ -16,12 +17,14 @@ public class AnmodningUnntakTjenesteTest {
     private AnmodningUnntakService anmodningUnntakService;
     @Mock
     private TilgangService tilgangService;
+    @Mock
+    private BehandlingRepository behandlingRepository;
 
     private AnmodningUnntakTjeneste anmodningUnntakTjeneste;
 
     @Before
     public void setUp() {
-        anmodningUnntakTjeneste = new AnmodningUnntakTjeneste(anmodningUnntakService, tilgangService);
+        anmodningUnntakTjeneste = new AnmodningUnntakTjeneste(anmodningUnntakService, tilgangService, behandlingRepository);
     }
 
     @Test

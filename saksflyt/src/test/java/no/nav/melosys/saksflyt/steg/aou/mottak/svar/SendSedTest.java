@@ -1,0 +1,50 @@
+package no.nav.melosys.saksflyt.steg.aou.mottak.svar;
+
+import java.util.Collections;
+
+import no.nav.melosys.domain.AnmodningsperiodeSvar;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
+public class SendSedTest {
+
+    @Mock
+    private EessiService eessiService;
+    @Mock
+    private AnmodningsperiodeService anmodningsperiodeService;
+    @InjectMocks
+    private SendSed sendSed;
+
+    @Test
+    public void utfør() throws MelosysException {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong()))
+            .thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
+
+        sendSed.utfør(prosessinstans);
+
+        verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(anyLong());
+        verify(eessiService).anmodningUnntakSvar(any(AnmodningsperiodeSvar.class), anyLong());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_OPPDATER_MEDL);
+    }
+}

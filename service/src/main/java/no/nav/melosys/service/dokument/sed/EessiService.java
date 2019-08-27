@@ -3,14 +3,18 @@ package no.nav.melosys.service.dokument.sed;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.SvarAnmodningUnntakDto;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +29,16 @@ public class EessiService {
     private final SedDataBygger sedDataBygger;
     private final EessiConsumer eessiConsumer;
     private final boolean skalSendeSed;
+    private final BehandlingService behandlingService;
 
-    public EessiService(SedDataBygger sedDataBygger, EessiConsumer eessiConsumer, @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed) {
+    public EessiService(SedDataBygger sedDataBygger,
+                        EessiConsumer eessiConsumer,
+                        @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed,
+                        BehandlingService behandlingService) {
         this.sedDataBygger = sedDataBygger;
         this.eessiConsumer = eessiConsumer;
         this.skalSendeSed = Boolean.valueOf(skalSendeSed);
+        this.behandlingService = behandlingService;
     }
 
     public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) {
@@ -76,5 +85,16 @@ public class EessiService {
 
     public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException {
         return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, status);
+    }
+
+    public void anmodningUnntakSvar(AnmodningsperiodeSvar anmodningsperiodeSvar, long behandlingId) throws MelosysException {
+        if (skalSendeSed) {
+            Behandling behandling = behandlingService.hentBehandling(behandlingId);
+            String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
+            SvarAnmodningUnntakDto svarAnmodningUnntakDto = SvarAnmodningUnntakDto.av(anmodningsperiodeSvar);
+
+            log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
+            eessiConsumer.anmodningUnntakSvar(svarAnmodningUnntakDto, rinaSaksnummer);
+        }
     }
 }
