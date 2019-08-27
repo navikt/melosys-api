@@ -31,6 +31,7 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntak
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
+import no.nav.melosys.service.dokument.brev.ressurser.BrevdataInput;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -71,34 +72,34 @@ public class IverksettVedtakSendBrevTest {
         BrevDataVedlegg brevdataVedlegg = new BrevDataVedlegg(saksbehandler);
         brevdataVedlegg.brevDataA1 = brevdata;
         BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
-        when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(brevdataVedlegg);
+        when(brevDataByggerVedlegg.lag(any())).thenReturn(brevdataVedlegg);
         BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAvslagYrkesaktiv = mock(BrevDataByggerAnmodningUnntakOgAvslag.class);
         BrevDataAnmodningUnntakOgAvslag brevdataAvslag = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
-        when(brevDataByggerAvslagYrkesaktiv.lag(any(), any())).thenReturn(brevdataAvslag);
+        when(brevDataByggerAvslagYrkesaktiv.lag(any())).thenReturn(brevdataAvslag);
 
         BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver(saksbehandler);
         BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver = mock(BrevDataByggerAvslagArbeidsgiver.class);
-        when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(brevDataAvslagArbeidsgiver);
+        when(brevDataByggerAvslagArbeidsgiver.lag(any())).thenReturn(brevDataAvslagArbeidsgiver);
 
         BrevDataByggerStandard brevDataByggerStandard = mock(BrevDataByggerStandard.class);
         BrevData standardBrevData = new BrevData();
-        when(brevDataByggerStandard.lag(any(), any())).thenReturn(standardBrevData);
+        when(brevDataByggerStandard.lag(any())).thenReturn(standardBrevData);
 
         BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
-        when(byggerVelger.hent(eq(ANMODNING_UNNTAK))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(ATTEST_A1))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslagYrkesaktiv);
-        when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslagArbeidsgiver);
-        when(byggerVelger.hent(eq(INNVILGELSE_ARBEIDSGIVER))).thenReturn(brevDataByggerStandard);
-        when(byggerVelger.hent(eq(AVSLAG_MANGLENDE_OPPLYSNINGER))).thenReturn(brevDataByggerStandard);
+        when(byggerVelger.hent(eq(ANMODNING_UNNTAK), any())).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(ATTEST_A1), any())).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV), any())).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), any())).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV), any())).thenReturn(brevDataByggerAvslagYrkesaktiv);
+        when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER), any())).thenReturn(brevDataByggerAvslagArbeidsgiver);
+        when(byggerVelger.hent(eq(INNVILGELSE_ARBEIDSGIVER), any())).thenReturn(brevDataByggerStandard);
+        when(byggerVelger.hent(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), any())).thenReturn(brevDataByggerStandard);
 
         BehandlingService behandlingService = mock(BehandlingService.class);
         when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
 
         dokService = spy(lagDokumentService(byggerVelger));
-        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger);
+        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger, mock(BrevdataInput.class));
         return new IverksettVedtakSendBrev(brevBestiller, behandlingService, behandlingsresultatService);
     }
 
@@ -122,7 +123,7 @@ public class IverksettVedtakSendBrevTest {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(any())).thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService);
-        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger));
+        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger, mock(BrevdataInput.class)));
     }
 
     private static BehandlingsresultatService mockBehandlingsresultatService() throws IkkeFunnetException {

@@ -21,6 +21,8 @@ import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
+import no.nav.melosys.service.dokument.brev.ressurser.BrevdataInput;
+import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
@@ -48,19 +50,22 @@ public class DokumentService {
     private final ProsessinstansService prosessinstansService;
     private final BrevmottakerService brevmottakerService;
     private final BrevDataByggerVelger brevDataByggerVelger;
+    private final BrevdataInput brevdataInput;
 
     @Autowired
     public DokumentService(BehandlingRepository behandlingRepository,
                            BrevDataService brevDataService, DoksysFasade dokSysFasade,
                            ProsessinstansService prosessinstansService,
                            BrevmottakerService brevmottakerService,
-                           BrevDataByggerVelger brevDataByggerVelger) {
+                           BrevDataByggerVelger brevDataByggerVelger,
+                           BrevdataInput brevdataInput) {
         this.behandlingRepository = behandlingRepository;
         this.brevDataService = brevDataService;
         this.dokSysFasade = dokSysFasade;
         this.prosessinstansService = prosessinstansService;
         this.brevmottakerService = brevmottakerService;
         this.brevDataByggerVelger = brevDataByggerVelger;
+        this.brevdataInput = brevdataInput;
     }
 
     /**
@@ -78,8 +83,9 @@ public class DokumentService {
             throw new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE);
         }
 
-        BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
-        BrevData brevData = bygger.lag(behandling, SubjectHandler.getInstance().getUserID());
+        Brevressurser brevdataRessurser = brevdataInput.av(behandling);
+        BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevdataRessurser, brevbestillingDto);
+        BrevData brevData = bygger.lag(SubjectHandler.getInstance().getUserID());
 
         Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ? brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);

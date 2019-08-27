@@ -15,7 +15,6 @@ import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -23,12 +22,15 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
+import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,10 +38,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
-    public AbstraktDokumentDataByggerTest() {
-        super(mock(KodeverkService.class), mock(LovvalgsperiodeService.class), mock(AvklartefaktaService.class), mock(AvklarteVirksomheterService.class));
-    }
+@RunWith(MockitoJUnitRunner.class)
+public class AbstraktDokumentDataByggerTest {
+    @Mock
+    private KodeverkService kodeverkService;
+    @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    private AvklartefaktaService avklartefaktaService;
+    @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
+
+    private PersonDokument person;
+    private SoeknadDokument søknad;
+    private Behandling behandling;
+    private Brevressurser brevressurs;
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -59,13 +72,16 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
         person.bostedsadresse = boAdresseFraRegister;
 
         søknad = new SoeknadDokument();
-        behandling = lagBehandling(søknad);
+        behandling = lagBehandling(søknad, person);
+
+        brevressurs = new Brevressurser(behandling, kodeverkService, null, avklarteVirksomheterService, avklartefaktaService, lovvalgsperiodeService);
     }
 
-    private Behandling lagBehandling(SoeknadDokument søknad) {
+    private Behandling lagBehandling(SoeknadDokument søknad, PersonDokument person) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(søknad));
+        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(person));
         return behandling;
     }
 
@@ -73,12 +89,12 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
     public void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws TekniskException {
         person.bostedsadresse = new Bostedsadresse();
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        hentBostedsadresse();
+        brevressurs.getBosted().hentBostedsadresse();
     }
 
     @Test
     public void hentBostedsadresse_brukerBostedFraPersonDokument() throws TekniskException {
-        StrukturertAdresse bostedsadresse = hentBostedsadresse();
+        StrukturertAdresse bostedsadresse = brevressurs.getBosted().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
         assertThat(bostedsadresse.husnummer).isEqualTo("23");
         assertThat(bostedsadresse.postnummer).isEqualTo("0165");
@@ -97,7 +113,7 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
         oppgittBosted.landkode = "NO";
         søknad.bosted.oppgittAdresse = oppgittBosted;
 
-        StrukturertAdresse bostedsadresse = hentBostedsadresse();
+        StrukturertAdresse bostedsadresse = brevressurs.getBosted().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("HerBorJegGata");
         assertThat(bostedsadresse.husnummer).isEqualTo("123");
         assertThat(bostedsadresse.postnummer).isEqualTo("0166");
@@ -107,14 +123,14 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() throws FunksjonellException, TekniskException {
+    public void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() throws TekniskException {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
         AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
 
-        List<Arbeidssted> arbeidssteder = hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = brevressurs.getArbeidssteder().hentArbeidssteder();
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
@@ -125,7 +141,7 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenForetak_girMaritimeArbeidssteder() throws FunksjonellException, TekniskException {
+    public void hentArbeidssteder_medMaritimtArbeidUtenForetak_girMaritimeArbeidssteder() throws TekniskException {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         maritimtArbeidISøknad.foretakOrgnr = null;
         maritimtArbeidISøknad.foretakNavn = null;
@@ -134,7 +150,7 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
         AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
 
-        List<Arbeidssted> arbeidssteder = hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = brevressurs.getArbeidssteder().hentArbeidssteder();
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
@@ -144,21 +160,21 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() throws FunksjonellException, TekniskException {
+    public void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() throws TekniskException {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
         when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.emptyMap());
 
-        Collection<Arbeidssted> arbeidssteder = hentArbeidssteder();
+        Collection<Arbeidssted> arbeidssteder = brevressurs.getArbeidssteder().hentArbeidssteder();
         assertThat(arbeidssteder).isEmpty();
     }
 
     @Test
     public void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Collection<AvklartVirksomhet> norskeVirksomheter = hentAlleNorskeVirksomheterMedAdresse();
+        Collection<AvklartVirksomhet> norskeVirksomheter = brevressurs.getAvklarteVirksomheter().hentAlleNorskeVirksomheterMedAdresse();
         assertThat(norskeVirksomheter).hasSize(1);
-        hentAlleNorskeVirksomheterMedAdresse();
+        brevressurs.getAvklarteVirksomheter().hentAlleNorskeVirksomheterMedAdresse();
         verify(avklarteVirksomheterService, times(1)).hentAlleNorskeVirksomheter(any(), any());
     }
 
@@ -167,7 +183,7 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
-        AvklartVirksomhet avklartVirksomhet = hentHovedvirksomhet();
+        AvklartVirksomhet avklartVirksomhet = brevressurs.getAvklarteVirksomheter().hentHovedvirksomhet();
         assertThat(avklartVirksomhet).isEqualTo(norskVirksomhet);
     }
 
@@ -179,7 +195,8 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
         AvklartVirksomhet utenlandskAvklartVirksomhet = new AvklartVirksomhet(lagForetakUtland());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(utenlandskAvklartVirksomhet));
 
-        AvklartVirksomhet hovedvirksomhet = hentHovedvirksomhet();
+        AvklartVirksomhet hovedvirksomhet = brevressurs.getAvklarteVirksomheter().hentHovedvirksomhet();
+        Collection<AvklartVirksomhet> bivirksomhet = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
         assertThat(hovedvirksomhet).isEqualTo(norskVirksomhet);
     }
 
@@ -190,7 +207,7 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
 
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.emptyList());
 
-        AvklartVirksomhet hovedvirksomhet = hentHovedvirksomhet();
+        AvklartVirksomhet hovedvirksomhet = brevressurs.getAvklarteVirksomheter().hentHovedvirksomhet();
         assertThat(hovedvirksomhet).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
     }
 
@@ -199,7 +216,7 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
         assertThat(bivirksomheter).isEmpty();
     }
 
@@ -210,7 +227,7 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
         assertThat(bivirksomheter).isEmpty();
     }
 
@@ -219,7 +236,7 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
         assertThat(bivirksomheter).containsExactly(norskVirksomhet);
     }
 
@@ -231,7 +248,7 @@ public class AbstraktDokumentDataByggerTest extends AbstraktDokumentDataBygger {
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
         assertThat(bivirksomheter).hasSize(1);
 
         assertThat(bivirksomheter.iterator().next()).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);

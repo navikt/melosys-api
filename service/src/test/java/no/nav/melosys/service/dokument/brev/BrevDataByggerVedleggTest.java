@@ -1,8 +1,9 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA001;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
@@ -29,39 +30,33 @@ public class BrevDataByggerVedleggTest {
         brevDataA1 = new BrevDataA1();
         brevDataA001 = new BrevDataA001();
 
-        when(brevDatabyggerA1.lag(any(), any())).thenReturn(brevDataA1);
-        when(brevDatabyggerA001.lag(any(), any())).thenReturn(brevDataA001);
+        when(brevDatabyggerA1.lag(any())).thenReturn(brevDataA1);
+        when(brevDatabyggerA001.lag(any())).thenReturn(brevDataA001);
     }
 
     @Test
     public void testByggA1() throws FunksjonellException, TekniskException {
-        Behandling behandling = mock(Behandling.class);
-
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA1, null);
-        BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(behandling, "Z123456");
+        BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag("Z123456");
         assertThat(brevData.brevDataA1).isEqualTo(brevDataA1);
     }
 
     @Test
     public void testByggA001() throws FunksjonellException, TekniskException {
-        Behandling behandling = mock(Behandling.class);
-
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, null);
-        BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(behandling, "Z123456");
+        BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag("Z123456");
         assertThat(brevData.brevDataA001).isEqualTo(brevDataA001);
     }
 
     @Test
     public void testByggA1FraForhåndsvisning() throws FunksjonellException, TekniskException {
-        Behandling behandling = mock(Behandling.class);
-
         BrevbestillingDto brevbestilling = new BrevbestillingDto();
         brevbestilling.mottaker = Aktoersroller.BRUKER;
         brevbestilling.fritekst = "FRITEKST";
         brevbestilling.begrunnelseKode = "tom";
 
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, brevbestilling);
-        BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(behandling, "Z123456");
+        BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag("Z123456");
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestilling, "begrunnelseKode", "fritekst");
     }
 }

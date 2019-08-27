@@ -6,7 +6,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -17,13 +17,19 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
-import no.nav.melosys.service.dokument.brev.*;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataA1;
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagSoeknadssaksopplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -60,8 +66,9 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         behandling = new Behandling();
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(lagSøknadsopplysning());
+        behandling.getSaksopplysninger().add(lagPersonsopplysning());
 
-        when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
+        when(brevDataByggerA1.lag(any())).thenReturn(new BrevDataA1());
 
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(periode));
@@ -69,20 +76,25 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         when(landVelgerService.hentAlleArbeidsland(any())).thenReturn(Collections.singleton(Landkoder.AT));
         when(landVelgerService.hentBostedsland(any(), any())).thenReturn(Landkoder.DE);
 
-        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
-            avklarteVirksomheterService,
-            landVelgerService,
-            lovvalgsperiodeService,
+        Brevressurser brevdataressurser = lagBrevressurser();
+        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelseFlereLand(brevdataressurser,
+            avklartefaktaService,
             brevbestillingDto,
             brevDataByggerA1);
     }
 
+    private Brevressurser lagBrevressurser() throws TekniskException {
+        return new Brevressurser(behandling, null, landVelgerService, avklarteVirksomheterService, avklartefaktaService, lovvalgsperiodeService);
+    }
+
     private static Saksopplysning lagSøknadsopplysning() {
         SoeknadDokument søknad = new SoeknadDokument();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(søknad);
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-        return saksopplysning;
+        return lagSoeknadssaksopplysning(søknad);
+    }
+
+    private static Saksopplysning lagPersonsopplysning() {
+        PersonDokument person = new PersonDokument();
+        return lagPersonsaksopplysning(person);
     }
 
     @Test
@@ -90,7 +102,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
         when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.of(maritimType));
 
-        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
+        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
         assertThat(brevData.avklartMaritimType).isEqualTo(Maritimtyper.SOKKEL);
     }
@@ -99,7 +111,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
         when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.empty());
 
-        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
+        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(saksbehandler);
         assertThat(brevData.avklartMaritimType).isNull();
     }
 
@@ -111,9 +123,9 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         brevbestillingDto.fritekst = "FRITEKST";
 
         BrevDataBygger brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService, avklarteVirksomheterService, landVelgerService, lovvalgsperiodeService, brevbestillingDto, brevDataByggerA1);
+            new BrevDataByggerInnvilgelseFlereLand(lagBrevressurser(), avklartefaktaService, brevbestillingDto, brevDataByggerA1);
 
-        BrevData brevData = brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
+        BrevData brevData = brevDataByggerInnvilgelse.lag(saksbehandler);
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }

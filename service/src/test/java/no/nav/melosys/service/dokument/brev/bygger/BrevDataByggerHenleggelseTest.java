@@ -27,20 +27,10 @@ public class BrevDataByggerHenleggelseTest {
 
     private BrevDataByggerHenleggelse brevDataByggerHenleggelse;
 
+    String journalpostId = "998877";
 
     @Before
     public void setUp() {
-        brevDataByggerHenleggelse = new BrevDataByggerHenleggelse(joarkService, new BrevbestillingDto());
-    }
-
-    @Test
-    public void lag_henleggelseBrev_setterForendelseMottatt() throws FunksjonellException, IntegrasjonException {
-        String journalpostId = "998877";
-        Instant forsendelseMottatt = Instant.parse("2006-09-22T01:02:00Z");
-        Journalpost journalpost = new Journalpost(journalpostId);
-        doReturn(journalpost).when(joarkService).hentJournalpost(journalpostId);
-        journalpost.setForsendelseMottatt(forsendelseMottatt);
-
         Behandling førsteBehandling = new Behandling();
         førsteBehandling.setRegistrertDato(Instant.parse("2007-12-03T10:15:30.00Z"));
         førsteBehandling.setInitierendeJournalpostId(journalpostId);
@@ -51,9 +41,20 @@ public class BrevDataByggerHenleggelseTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setBehandlinger(Arrays.asList(sisteBehandling, førsteBehandling));
         sisteBehandling.setFagsak(fagsak);
+
+        brevDataByggerHenleggelse = new BrevDataByggerHenleggelse(sisteBehandling, joarkService, new BrevbestillingDto());
+    }
+
+    @Test
+    public void lag_henleggelseBrev_setterForendelseMottatt() throws FunksjonellException, IntegrasjonException {
         String saksbehandler = "saksbehandler";
 
-        BrevDataMottattDato brevData = (BrevDataMottattDato) brevDataByggerHenleggelse.lag(sisteBehandling, saksbehandler);
+        Instant forsendelseMottatt = Instant.parse("2006-09-22T01:02:00Z");
+        Journalpost journalpost = new Journalpost(journalpostId);
+        journalpost.setForsendelseMottatt(forsendelseMottatt);
+        doReturn(journalpost).when(joarkService).hentJournalpost(journalpostId);
+
+        BrevDataMottattDato brevData = (BrevDataMottattDato) brevDataByggerHenleggelse.lag(saksbehandler);
 
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
         assertThat(brevData.initierendeJournalpostForsendelseMottattTidspunkt).isEqualTo(forsendelseMottatt);

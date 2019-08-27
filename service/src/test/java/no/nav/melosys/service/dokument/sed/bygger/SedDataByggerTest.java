@@ -15,6 +15,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +47,7 @@ public class SedDataByggerTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setup()
-        throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
@@ -71,13 +72,14 @@ public class SedDataByggerTest {
         behandling = DataByggerStubs.hentBehandlingStub();
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        dataBygger = new SedDataBygger(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
+        Brevressurser brevressurser = new Brevressurser(behandling, kodeverkService, null, avklarteVirksomheterService, avklartefaktaService, lovvalgsperiodeService);
+        dataBygger = new SedDataBygger(brevressurser, lovvalgsperiodeService);
     }
 
     @Test
     public void testHentAvklarteSelvstendigeForetak()
         throws FunksjonellException, TekniskException {
-        SedDataDto sedData = dataBygger.lag(behandling, behandlingsresultat);
+        SedDataDto sedData = dataBygger.lag(behandlingsresultat);
 
         assertThat(sedData).isNotNull();
         assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotNull();
@@ -97,7 +99,7 @@ public class SedDataByggerTest {
     @Test
     public void lagUtkast_forventFelt_utenLovvalgsperioder()
         throws FunksjonellException, TekniskException {
-        SedDataDto sedData = dataBygger.lagUtkast(behandling);
+        SedDataDto sedData = dataBygger.lagUtkast();
 
         lagUtkastAssertions(sedData);
         assertThat(sedData.getLovvalgsperioder().isEmpty()).isTrue();
@@ -107,7 +109,7 @@ public class SedDataByggerTest {
     public void lagUtkast_forventFelt_medLovvalgsperioder()
         throws FunksjonellException, TekniskException {
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(lagLovvalgsperioder());
-        SedDataDto sedData = dataBygger.lagUtkast(behandling);
+        SedDataDto sedData = dataBygger.lagUtkast();
 
         lagUtkastAssertions(sedData);
         assertThat(sedData.getLovvalgsperioder().isEmpty()).isFalse();

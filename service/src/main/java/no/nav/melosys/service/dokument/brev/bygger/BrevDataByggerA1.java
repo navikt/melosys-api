@@ -3,50 +3,45 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
 import org.apache.commons.lang3.StringUtils;
 
-public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements BrevDataBygger {
-    public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
-                            AvklarteVirksomheterService avklarteVirksomheterService,
-                            KodeverkService kodeverkService) {
-        super(kodeverkService, null, avklartefaktaService, avklarteVirksomheterService);
+public class BrevDataByggerA1 implements BrevDataBygger {
+    private final AvklartefaktaService avklartefaktaService;
+    private final Brevressurser brevressurser;
+
+    public BrevDataByggerA1(Brevressurser brevressurser,
+                            AvklartefaktaService avklartefaktaService) {
+        this.avklartefaktaService = avklartefaktaService;
+        this.brevressurser = brevressurser;
     }
 
     @Override
-    public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
-        this.behandling = behandling;
-        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-        this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
-
-        List<AvklartVirksomhet> utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
-        List<AvklartVirksomhet> norskeVirksomheter = hentAlleNorskeVirksomheterMedAdresse();
+    public BrevData lag(String saksbehandler) throws FunksjonellException, TekniskException {
+        List<AvklartVirksomhet> utenlandskeVirksomheter = brevressurser.getAvklarteVirksomheter().hentUtenlandskeVirksomheter();
+        List<AvklartVirksomhet> norskeVirksomheter = brevressurser.getAvklarteVirksomheter().hentAlleNorskeVirksomheterMedAdresse();
         if (norskeVirksomheter.isEmpty() && utenlandskeVirksomheter.isEmpty()) {
             throw new FunksjonellException("Trenger minst en avklart virksomhet - utenlandsk eller norsk");
         }
 
         BrevDataA1 brevData = new BrevDataA1();
-        brevData.person = person;
-        brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
-        brevData.selvstendigeForetak = avklarteVirksomheterService.hentNorskeSelvstendigeForetakOrgnumre(behandling);
-        brevData.bostedsadresse = hentBostedsadresse();
+        brevData.person = brevressurser.getPerson();
+        brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(brevressurser.getBehandling().getId());
+        brevData.selvstendigeForetak = brevressurser.getAvklarteVirksomheter().hentNorskeSelvstendigeForetakOrgnumre();
+        brevData.bostedsadresse = brevressurser.getBosted().hentBostedsadresse();
 
-        List<Arbeidssted> arbeidssteder = hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = brevressurser.getArbeidssteder().hentArbeidssteder();
         brevData.arbeidssteder = arbeidssteder;
 
-        brevData.hovedvirksomhet = hentHovedvirksomhet();
-        brevData.bivirksomheter = hentBivirksomheter();
+        brevData.hovedvirksomhet = brevressurser.getAvklarteVirksomheter().hentHovedvirksomhet();
+        brevData.bivirksomheter = brevressurser.getAvklarteVirksomheter().hentBivirksomheter();
 
         // Feltet 5.1 i A1 fletter arbeidsgivere og oppdragsgivere.
         // Oppdragsgiver defineres for arbeidsstedet og må utledes derfra

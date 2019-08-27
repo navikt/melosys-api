@@ -5,6 +5,7 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -48,6 +49,11 @@ public class BrevDataTestUtils {
         return lagSaksopplysning(SaksopplysningType.SØKNAD, søknad);
     }
 
+    public static Saksopplysning lagPersonsaksopplysning(PersonDokument person) {
+        return lagSaksopplysning(SaksopplysningType.PERSOPL, person);
+    }
+
+
     private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(type);
@@ -65,7 +71,6 @@ public class BrevDataTestUtils {
         AvklartMaritimtArbeid avklartMaritimtArbeid = mock(AvklartMaritimtArbeid.class);
         when(avklartMaritimtArbeid.getMaritimtype()).thenReturn(Maritimtyper.SKIP);
         when(avklartMaritimtArbeid.getLand()).thenReturn(Landkoder.GB.getKode());
-        when(avklartMaritimtArbeid.getNavn()).thenReturn("Dunfjæder");
         return avklartMaritimtArbeid;
     }
 

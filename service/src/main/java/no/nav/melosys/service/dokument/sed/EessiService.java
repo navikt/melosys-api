@@ -28,7 +28,8 @@ public class EessiService {
 
     private static final Logger log = LoggerFactory.getLogger(EessiService.class);
 
-    private final SedDataBygger sedDataBygger;
+    private final SedDataByggerService sedDataBygger;
+    private final BrevdataInput brevdataInput;
     private final EessiConsumer eessiConsumer;
     private final boolean skalSendeSed;
 
@@ -37,8 +38,9 @@ public class EessiService {
     );
 
 
-    public EessiService(SedDataBygger sedDataBygger, EessiConsumer eessiConsumer, @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed) {
+    public EessiService(SedDataByggerService sedDataBygger, BrevdataInput brevdataInput, EessiConsumer eessiConsumer, @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed) {
         this.sedDataBygger = sedDataBygger;
+        this.brevdataInput = brevdataInput;
         this.eessiConsumer = eessiConsumer;
         this.skalSendeSed = Boolean.valueOf(skalSendeSed);
     }
@@ -49,7 +51,8 @@ public class EessiService {
             try {
                 Fagsak fagsak = behandling.getFagsak();
 
-                SedDataDto sedData = sedDataBygger.lag(behandling, behandlingsresultat);
+                Brevressurser brevressurser = brevdataInput.av(behandling);
+                SedDataDto sedData = sedDataBygger.hent(brevressurser).lag(behandlingsresultat);
                 sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
                 log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
@@ -73,7 +76,8 @@ public class EessiService {
 
     public String opprettBucOgSed(Behandling behandling, String bucType, String mottakerLand, String mottakerId) throws MelosysException {
         if (skalSendeSed) {
-            SedDataDto sedDataDto = sedDataBygger.lagUtkast(behandling);
+            Brevressurser brevressurser = brevdataInput.av(behandling);
+            SedDataDto sedDataDto = sedDataBygger.hent(brevressurser).lagUtkast();
             sedDataDto.setMottakerLand(mottakerLand);
             sedDataDto.setMottakerId(mottakerId);
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());

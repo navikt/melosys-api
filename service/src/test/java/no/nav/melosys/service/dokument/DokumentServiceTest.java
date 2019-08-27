@@ -48,6 +48,8 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
+import no.nav.melosys.service.dokument.brev.ressurser.BrevdataInput;
+import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -222,15 +224,32 @@ public final class DokumentServiceTest {
             yrkesgruppeFaktum));
         BehandlingsresultatRepository behandlingsresultatRepository = mockBehandlingsresultatRepo(behandlingsresultat);
         AvklarteFaktaRepository avklarteFaktaRepository = mockAvklarteFaktaRepository(arbeidsgiverFaktum, yrkesgruppeFaktum);
+        AvklartefaktaDtoKonverterer faktaKonverterer = new AvklartefaktaDtoKonverterer();
+        AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, faktaKonverterer);
+
         if (brevdatabyggervelger == null) {
-            brevdatabyggervelger = lagBrevdataByggerVelger(tpsFasade, avklarteFaktaRepository, behandlingsresultatRepository);
+            brevdatabyggervelger = lagBrevdataByggerVelger(avklartefaktaService);
         }
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
         BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class), avklarteVirksomheterService, mock(UtenlandskMyndighetService.class));
         return new DokumentService(behandlingRepository, brevDataService, dokSysFasade,
-            mock(ProsessinstansService.class), brevmottakerService, brevdatabyggervelger);
+            mock(ProsessinstansService.class), brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
+    }
+
+    public BrevdataInput lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        KodeverkRegister kodeverkRegister = mockKodeverkRegister();
+        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
+        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
+
+        EregFasade eregFasade = mockEregFasade();
+        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
+        AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
+        Brevressurser brevressurser = new Brevressurser(lagBehandling(), kodeverkService, null, avklarteVirksomheterSystemService, avklartefaktaService, lovvalgsperiodeService);
+        BrevdataInput brevdataInput = mock(BrevdataInput.class);
+        when(brevdataInput.av(any())).thenReturn(brevressurser);
+        return brevdataInput;
     }
 
     private static Behandling lagBehandling() {
@@ -304,21 +323,13 @@ public final class DokumentServiceTest {
         return avklarteFaktaRepository;
     }
 
-    private static BrevDataByggerVelger lagBrevdataByggerVelger(TpsFasade tpsFasade, AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        AvklartefaktaDtoKonverterer faktaKonverterer = new AvklartefaktaDtoKonverterer();
-        AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, faktaKonverterer);
-        EregFasade eregFasade = mockEregFasade();
-        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
-        KodeverkRegister kodeverkRegister = mockKodeverkRegister();
-        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
+    private static BrevDataByggerVelger lagBrevdataByggerVelger(AvklartefaktaService avklartefaktaService) {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         JoarkService joarkService = mock(JoarkService.class);
-        AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
-        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, avklarteVirksomheterSystemService, kodeverkService, lovvalgsperiodeService,
+        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
             utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService);
     }
 
@@ -329,16 +340,16 @@ public final class DokumentServiceTest {
         BrevDataByggerVelger brevdatabyggervelger = mock(BrevDataByggerVelger.class);
         if (bestillingDto != null) {
             if (bestillingDto.mottaker == ARBEIDSGIVER) {
-                when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerAvslagArbeidsgiver);
-                when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
+                when(brevdatabyggervelger.hent(any(), any(), eq(bestillingDto))).thenReturn(brevDataByggerAvslagArbeidsgiver);
+                when(brevDataByggerAvslagArbeidsgiver.lag(any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
 
             } else {
-                when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
-                when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerVedlegg);
+                when(brevDataByggerVedlegg.lag(any())).thenReturn(lagBrevDataInnvilgelse());
+                when(brevdatabyggervelger.hent(any(), any(), eq(bestillingDto))).thenReturn(brevDataByggerVedlegg);
             }
         } else {
-            when(brevdatabyggervelger.hent(any())).thenReturn(brevDataByggerVedlegg);
-            when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
+            when(brevdatabyggervelger.hent(any(), any())).thenReturn(brevDataByggerVedlegg);
+            when(brevDataByggerVedlegg.lag(any())).thenReturn(lagBrevDataInnvilgelse());
         }
 
         return brevdatabyggervelger;
