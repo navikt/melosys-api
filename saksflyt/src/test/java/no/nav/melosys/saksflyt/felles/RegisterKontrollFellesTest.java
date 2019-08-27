@@ -2,8 +2,8 @@ package no.nav.melosys.saksflyt.felles;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
-import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.unntaksperiode.kontroll.RegisterkontrollService;
@@ -51,8 +51,8 @@ public class RegisterKontrollFellesTest {
 
         verify(behandlingService).hentBehandling(anyLong());
         verify(registerkontrollService).utførKontroller(any(Behandling.class));
-        verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), eq(Avklartefaktatype.VURDERING_UNNTAK_PERIODE), anyString(), any(), eq("TRUE"));
-        verify(avklartefaktaService, times(2)).leggTilRegistrering(anyLong(), eq(Avklartefaktatype.VURDERING_UNNTAK_PERIODE), captor.capture());
+        verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE), anyString(), any(), eq("TRUE"));
+        verify(avklartefaktaService, times(2)).leggTilRegistrering(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE), captor.capture());
 
         assertThat(captor.getAllValues()).containsExactly(
             Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode(),

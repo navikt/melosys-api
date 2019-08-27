@@ -19,8 +19,6 @@ import static org.mockito.Mockito.when;
 public class PersonTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(PersonTjenesteTest.class);
 
-    private static final String schemaType = "person-schema.json";
-
     @Mock
     private PersonTjeneste personTjeneste;
 
@@ -30,16 +28,11 @@ public class PersonTjenesteTest extends JsonSchemaTestParent {
         when(personTjeneste.getPerson(anyString())).thenReturn(Response.ok(person).build());
     }
 
-    @Override
-    public String schemaNavn() {
-        return schemaType;
-    }
-
     @Test
     public void personSchemaValidering() throws Exception {
         Response person = personTjeneste.getPerson("12345678910");
         ObjectMapper mapper = objectMapperMedKodeverkServiceStub();
         String jsonInString = mapper.writeValueAsString(person.getEntity());
-        valider(jsonInString, log);
+        valider(jsonInString, "personer-schema.json", log);
     }
 }

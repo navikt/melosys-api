@@ -1,18 +1,14 @@
 package no.nav.melosys.saksflyt.steg.aou.svar;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.SvarAnmodningUnntak;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
-import no.nav.melosys.service.kafka.model.SvarAnmodningUnntak;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,11 +33,6 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
     }
 
     @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
-    @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
@@ -59,13 +50,13 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
 
     private AnmodningsperiodeSvar opprettAnmodningsperiodeSvar(SvarAnmodningUnntak svar) {
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        AnmodningsperiodeSvarType svarType = hentSvarTypeFraBeslutning(svar.getBeslutning());
+        Anmodningsperiodesvartyper svarType = hentSvarTypeFraBeslutning(svar.getBeslutning());
 
         anmodningsperiodeSvar.setRegistrertDato(LocalDate.now());
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(svarType);
         anmodningsperiodeSvar.setBegrunnelseFritekst(svar.getBegrunnelse());
 
-        if (svarType == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE) {
+        if (svarType == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE) {
             anmodningsperiodeSvar.setInnvilgetFom(svar.getDelvisInnvilgetPeriode().getFom());
             anmodningsperiodeSvar.setInnvilgetTom(svar.getDelvisInnvilgetPeriode().getTom());
         }
@@ -73,14 +64,14 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
         return anmodningsperiodeSvar;
     }
 
-    private AnmodningsperiodeSvarType hentSvarTypeFraBeslutning(final SvarAnmodningUnntak.Beslutning beslutning) {
+    private Anmodningsperiodesvartyper hentSvarTypeFraBeslutning(final SvarAnmodningUnntak.Beslutning beslutning) {
         switch (beslutning) {
             case INNVILGELSE:
-                return AnmodningsperiodeSvarType.INNVILGELSE;
+                return Anmodningsperiodesvartyper.INNVILGELSE;
             case DELVIS_INNVILGELSE:
-                return AnmodningsperiodeSvarType.DELVIS_INNVILGELSE;
+                return Anmodningsperiodesvartyper.DELVIS_INNVILGELSE;
             case AVSLAG:
-                return AnmodningsperiodeSvarType.AVSLAG;
+                return Anmodningsperiodesvartyper.AVSLAG;
             default:
                 throw new IllegalArgumentException("Ukjent beslutning-kode mottatt: " + beslutning);
         }

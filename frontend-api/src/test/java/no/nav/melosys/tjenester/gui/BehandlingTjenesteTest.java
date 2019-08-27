@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjenesteTest.class);
-    private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-medlemsperioder-post-schema.json";
+    private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-tidligeremedlemsperioder-post-schema.json";
     private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
 
     private BehandlingTjeneste behandlingTjeneste;
@@ -68,7 +68,7 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
     public void behandlingerPerioderValidering() throws IOException {
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = Arrays.asList(2L, 3L, 5L);
-        valider(TIDLIGERE_MEDLEMSPERIODER_SCHEMA, tidligereMedlemsperioderDto, log);
+        valider(tidligereMedlemsperioderDto, TIDLIGERE_MEDLEMSPERIODER_SCHEMA, log);
     }
 
     @Test
@@ -76,7 +76,7 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
         behandlingDto.getSaksopplysninger().setSed(null);
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(behandlingDto);
-        valider(BEHANDLINGER_SCHEMA, jsonString, log);
+        valider(jsonString, BEHANDLINGER_SCHEMA, log);
     }
 
     @Test

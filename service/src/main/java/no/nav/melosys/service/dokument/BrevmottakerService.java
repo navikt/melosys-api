@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -8,7 +9,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -19,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Service
 public class BrevmottakerService {
@@ -103,35 +104,31 @@ public class BrevmottakerService {
 
     // Dokumenter til arbeidsgiver sendes bare til representant når representant finnes.
     private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
-        List<Aktoer> mottakere = new ArrayList<>();
         Fagsak fagsak = behandling.getFagsak();
         Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
         if (representant.isPresent()) {
-            mottakere.add(representant.get());
+            return Collections.singletonList(representant.get());
         } else {
-            mottakere.add(avklarArbeidsgiver(behandling));
+            return avklarArbeidsgiver(behandling);
         }
-        return mottakere;
     }
 
-    private Aktoer avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
-        Aktoer arbeidsgiver = behandling.getFagsak().hentArbeidsgiver();
-        if (arbeidsgiver != null) {
-            return arbeidsgiver;
+    private List<Aktoer> avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
+        Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
+        if (arbeidsgivendeOrgnumre.isEmpty()) {
+            throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
         } else {
-            Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
-            if (arbeidsgivendeOrgnumre.isEmpty()) {
-                throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
-            } else if (arbeidsgivendeOrgnumre.size() > 1) {
-                throw new FunksjonellException("Flere arbeidsgivere er avklart.");
-            } else {
-                String orgnr = arbeidsgivendeOrgnumre.iterator().next();
-                Aktoer avklartArbeidsgiver = new Aktoer();
-                avklartArbeidsgiver.setRolle(ARBEIDSGIVER);
-                avklartArbeidsgiver.setOrgnr(orgnr);
-                return avklartArbeidsgiver;
-            }
+            return arbeidsgivendeOrgnumre.stream()
+                .map(BrevmottakerService::lagAktoerForArbeidsgiver)
+                .collect(Collectors.toList());
         }
+    }
+
+    private static Aktoer lagAktoerForArbeidsgiver(String orgnr) {
+        Aktoer arbeidsgiver = new Aktoer();
+        arbeidsgiver.setRolle(ARBEIDSGIVER);
+        arbeidsgiver.setOrgnr(orgnr);
+        return arbeidsgiver;
     }
 
     private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker, Behandling behandling) throws TekniskException {

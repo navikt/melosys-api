@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 
 @Entity
 @Table(name = "anmodningsperiode_svar")
@@ -20,7 +20,7 @@ public class AnmodningsperiodeSvar {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "svar_type")
-    private AnmodningsperiodeSvarType anmodningsperiodeSvarType;
+    private Anmodningsperiodesvartyper anmodningsperiodeSvarType;
 
     @Column(name = "registrert_dato")
     private LocalDate registrertDato;
@@ -38,7 +38,7 @@ public class AnmodningsperiodeSvar {
     public AnmodningsperiodeSvar() {
     }
 
-    public AnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvarType anmodningsperiodeSvarType, LocalDate registrertDato, String begrunnelseFritekst, LocalDate innvilgetFom, LocalDate innvilgetTom) {
+    public AnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, Anmodningsperiodesvartyper anmodningsperiodeSvarType, LocalDate registrertDato, String begrunnelseFritekst, LocalDate innvilgetFom, LocalDate innvilgetTom) {
         this.anmodningsperiode = anmodningsperiode;
         this.anmodningsperiodeSvarType = anmodningsperiodeSvarType;
         this.registrertDato = registrertDato;
@@ -63,11 +63,11 @@ public class AnmodningsperiodeSvar {
         this.anmodningsperiode = anmodningsperiode;
     }
 
-    public AnmodningsperiodeSvarType getAnmodningsperiodeSvarType() {
+    public Anmodningsperiodesvartyper getAnmodningsperiodeSvarType() {
         return anmodningsperiodeSvarType;
     }
 
-    public void setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType anmodningsperiodeSvarType) {
+    public void setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper anmodningsperiodeSvarType) {
         this.anmodningsperiodeSvarType = anmodningsperiodeSvarType;
     }
 
@@ -135,7 +135,7 @@ public class AnmodningsperiodeSvar {
     }
 
     public boolean erGyldigDelvisInnvilgelse() {
-        return AnmodningsperiodeSvarType.DELVIS_INNVILGELSE == getAnmodningsperiodeSvarType()
+        return Anmodningsperiodesvartyper.DELVIS_INNVILGELSE == getAnmodningsperiodeSvarType()
             && getInnvilgetFom() != null && getInnvilgetTom() != null;
     }
 }

@@ -4,13 +4,13 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -27,7 +27,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -89,6 +88,7 @@ public final class GsakServiceTest {
         assertThat(oppgaveDto.getAktørId()).isEqualTo(oppgave.getAktørId());
         assertThat(oppgaveDto.getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
         assertThat(oppgaveDto.getBehandlingstype()).isEqualTo("ae0034");
+        assertThat(oppgaveDto.getBeskrivelse()).isEqualTo("bla bla");
         assertThat(oppgaveDto.getOppgavetype()).isEqualTo(oppgave.getOppgavetype().getKode());
         assertThat(oppgaveDto.getPrioritet()).isEqualTo(PrioritetType.NORM.toString());
         assertThat(oppgaveDto.getTema()).isEqualTo(oppgave.getTema().getKode());
@@ -116,6 +116,7 @@ public final class GsakServiceTest {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setAktørId("aktoer123");
         oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
+        oppgaveBuilder.setBeskrivelse("bla bla");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgaveBuilder.setJournalpostId("journalpost123");
         oppgaveBuilder.setSaksnummer("sak123");

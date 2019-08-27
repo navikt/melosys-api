@@ -14,11 +14,17 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,15 +66,16 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         return brevdataInnvilgelse;
     }
 
-    private static BrevDataA1 lagBrevdataA1(List<AvklartVirksomhet> norskeVirksomheter) {
+    private static BrevDataA1 lagBrevdataA1(List<AvklartVirksomhet> virksomheter) {
         BrevDataA1 brevdataA1 = new BrevDataA1();
         brevdataA1.person = lagPersonDokument();
         brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        brevdataA1.norskeVirksomheter = norskeVirksomheter;
-        brevdataA1.hovedvirksomhet = norskeVirksomheter.iterator().next();
+        brevdataA1.hovedvirksomhet = virksomheter.get(0);
+        brevdataA1.bivirksomheter = new ArrayList<>(virksomheter);
+        brevdataA1.bivirksomheter.remove(0);
+
         brevdataA1.selvstendigeForetak = Collections.emptySet();
-        brevdataA1.utenlandskeVirksomheter = Collections.emptyList();
         brevdataA1.arbeidssteder = new ArrayList<>();
         return brevdataA1;
     }
@@ -85,11 +92,11 @@ public class InnvilgelsesbrevFlereLandMapperTest {
 
     private static Lovvalgsperiode lagLovvalgsperiode(LocalDate fom) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A);
+        periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         periode.setFom(fom);
         periode.setTom(LocalDate.now());
         periode.setLovvalgsland(Landkoder.AT);
-        periode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
     }
 

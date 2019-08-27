@@ -34,11 +34,6 @@ public class RegisterKontroll extends AbstraktStegBehandler {
     }
 
     @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
-    @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         registerKontrollFelles.utførKontrollerOgRegistrerFeil(prosessinstans.getBehandling().getId());

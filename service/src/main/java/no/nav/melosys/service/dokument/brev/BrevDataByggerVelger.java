@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
@@ -73,6 +73,8 @@ public class BrevDataByggerVelger {
                 return lagBrevDataByggerInnvilgelseFlereLand(brevbestillingDto);
             case INNVILGELSE_ARBEIDSGIVER:
                 return new BrevDataByggerInnvilgelse(avklartefaktaService,
+                                                    avklarteVirksomheterService,
+                                                    kodeverkService,
                                                     landvelgerService,
                                                     lovvalgsperiodeService,
                                                     brevbestillingDto);
@@ -111,6 +113,8 @@ public class BrevDataByggerVelger {
             new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
 
         return new BrevDataByggerInnvilgelse(avklartefaktaService,
+            avklarteVirksomheterService,
+            kodeverkService,
             landvelgerService,
             lovvalgsperiodeService,
             brevbestillingDto,

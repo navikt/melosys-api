@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.aou;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

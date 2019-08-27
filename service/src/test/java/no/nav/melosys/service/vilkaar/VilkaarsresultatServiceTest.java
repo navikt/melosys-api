@@ -5,7 +5,7 @@ import java.util.*;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.kodeverk.Art12_1_Begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -65,7 +65,7 @@ public class VilkaarsresultatServiceTest {
         VilkaarDto vilkaarDto = new VilkaarDto();
         vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
         List<String> koder = new ArrayList<>();
-        koder.add(Art12_1_Begrunnelser.ERSTATTER_ANNEN.getKode());
+        koder.add(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
 
@@ -82,7 +82,7 @@ public class VilkaarsresultatServiceTest {
         VilkaarDto vilkaarDto = new VilkaarDto();
         vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
         List<String> koder = new ArrayList<>();
-        koder.add(Art12_1_Begrunnelser.ERSTATTER_ANNEN.getKode());
+        koder.add(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
     }

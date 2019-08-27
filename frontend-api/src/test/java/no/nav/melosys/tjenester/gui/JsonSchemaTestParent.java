@@ -39,28 +39,8 @@ public class JsonSchemaTestParent {
     private static final String FEILMELDING = "Schemavalidering feilet for schema {}";
 
     private static ObjectMapper objectMapper;
-
     private static ObjectMapper objectMapperMedKodeverkServiceStub;
-
     private static EasyRandom easyRandom;
-
-    private final String schemaNavn;
-
-    protected JsonSchemaTestParent() {
-        this(null);
-    }
-
-    public JsonSchemaTestParent(String schemaNavn) {
-        this.schemaNavn = schemaNavn;
-    }
-
-    public Logger getLogger() {
-        return log;
-    }
-
-    public String schemaNavn() {
-        return schemaNavn;
-    }
 
     protected static EasyRandomParameters defaultEasyRandomParameters() {
         return new EasyRandomParameters()
@@ -114,55 +94,42 @@ public class JsonSchemaTestParent {
         return objectMapperMedKodeverkServiceStub;
     }
 
-    protected void valider(Object o) throws IOException {
-        valider(o, getLogger());
-    }
-
-    protected void valider(String json) throws IOException {
-        valider(schemaNavn(), json, getLogger());
-    }
-
-    protected void valider(Object o, Logger logger) throws IOException {
-        valider(schemaNavn(), o, logger);
-    }
-
-    protected void valider(String json, Logger logger) throws IOException {
-        valider(schemaNavn(), json, logger);
-    }
-
-    protected void valider(String schemaNavn, Object o, Logger logger) throws IOException {
+    protected void valider(Object o, String schemaNavn) throws IOException {
         String jsonString = objectMapper().writeValueAsString(o);
-        valider(schemaNavn, jsonString, logger);
+        valider(jsonString, schemaNavn, log);
     }
 
-    protected void valider(String schemaNavn, String json, Logger logger) throws IOException {
-        try {
-            Schema schema = hentSchema(schemaNavn);
-            schema.validate(new JSONObject(json));
-        } catch (ValidationException e) {
-            formaterFeil(e, logger);
-        }
+    protected void valider(Object o, String schemaNavn, Logger logger) throws IOException {
+        String jsonString = objectMapper().writeValueAsString(o);
+        valider(jsonString, schemaNavn, logger);
     }
 
-    protected void validerListe(Collection liste) throws IOException {
-        validerListe(liste, getLogger());
+    protected void valider(String json, String schemaNavn, Logger logger) throws IOException {
+        valider(new JSONObject(json), hentSchema(schemaNavn), logger);
     }
 
-    protected void validerListe(Collection liste, Logger log) throws IOException {
+    protected void validerArray(Collection liste, String schemaNavn) throws IOException {
+        validerArray(liste, schemaNavn, log);
+    }
+
+    protected void validerArray(Collection liste, String schemaNavn, Logger logger) throws IOException {
         String json = objectMapper().writeValueAsString(liste);
+        valider(new JSONArray(json), hentSchema(schemaNavn), logger);
+    }
+
+    private void valider(Object jsonObject, Schema schema, Logger logger) {
         try {
-            Schema schema = hentSchema(schemaNavn());
-            schema.validate(new JSONArray(json));
+            schema.validate(jsonObject);
         } catch (ValidationException e) {
-            formaterFeil(e, log);
+            formaterFeil(e, schema, logger);
         }
     }
 
-    private void formaterFeil(ValidationException e, Logger log) {
-        log.error(FEILMELDING, schemaNavn());
+    private void formaterFeil(ValidationException e, Schema schema, Logger logger) {
+        logger.error(FEILMELDING, schema.getTitle());
         e.getCausingExceptions().stream()
             .map(ValidationException::toJSON)
-            .forEach(jsonObject -> log.error(jsonObject.toString()));
+            .forEach(jsonObject -> logger.error(jsonObject.toString()));
         throw e;
     }
 

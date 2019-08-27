@@ -4,8 +4,8 @@ import java.util.Collections;
 
 import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.BehandlingService;
@@ -22,8 +22,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static no.nav.melosys.domain.ProsessDataKey.DOKUMENT_ID;
 import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(AvklartefaktaTjenesteTest.class);
 
     private static final String AVKLARTEFAKTA_SCHEMA = "avklartefakta-schema.json";
@@ -34,14 +33,8 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private AvklartefaktaService avklartefaktaService;
-
     @Mock
     private TilgangService tilgangService;
-
-    @Override
-    public String schemaNavn() {
-        return AVKLARTEFAKTA_SCHEMA;
-    }
 
     @Before
     public void setUp() {
@@ -54,7 +47,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
         when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(mockliste);
 
         Set<AvklartefaktaDto> avklartefaktaDtoSet = avklartefaktaTjeneste.hentAvklarteFakta(1L);
-        validerListe(avklartefaktaDtoSet);
+        validerArray(avklartefaktaDtoSet, AVKLARTEFAKTA_SCHEMA, log);
     }
 
     @Test

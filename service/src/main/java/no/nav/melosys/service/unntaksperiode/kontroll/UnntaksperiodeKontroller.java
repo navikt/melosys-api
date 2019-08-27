@@ -2,7 +2,7 @@ package no.nav.melosys.service.unntaksperiode.kontroll;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.service.kontroll.InntektKontroller;
 import no.nav.melosys.service.kontroll.MedlemskapKontroller;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;

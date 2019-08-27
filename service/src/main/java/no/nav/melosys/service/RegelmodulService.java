@@ -11,6 +11,7 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,7 +48,6 @@ import org.xml.sax.SAXException;
 @Service
 public class RegelmodulService {
     private static final Logger log = LoggerFactory.getLogger(RegelmodulService.class);
-
     private static final String ARBEIDSFORHOLDDOKUMENTER = "arbeidsforholdDokumenter";
     private static final String INNTEKTDOKUMENTER = "inntektDokumenter";
     private static final String MEDLEMSKAPDOKUMENTER = "medlemskapDokumenter";
@@ -59,11 +59,14 @@ public class RegelmodulService {
     private final TransformerFactory transformerFactory;
 
     @Autowired
-    public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl, BehandlingRepository repository) {
+    public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl, BehandlingRepository repository) throws ParserConfigurationException {
         this.regelmodulUrl = regelmodulUrl;
         this.behandlingRepo = repository;
         this.transformerFactory = TransformerFactory.newInstance();
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
     }
 
     /**
@@ -71,7 +74,7 @@ public class RegelmodulService {
      *
      * @param behandlingID Database ID til den behandlingen som brukes for å konstruere requesten til regelmodulen.
      */
-    public FastsettLovvalgReply fastsettLovvalg(long behandlingID) {
+    FastsettLovvalgReply fastsettLovvalg(long behandlingID) {
         Behandling behandling = behandlingRepo.findWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
             // Ikke funnet

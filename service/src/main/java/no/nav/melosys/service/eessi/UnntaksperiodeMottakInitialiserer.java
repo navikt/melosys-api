@@ -5,14 +5,14 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedType;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -147,7 +147,7 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
         return Optional.empty();
     }
 
-    private static Periode tilPeriode(no.nav.melosys.service.kafka.model.Periode periode) {
+    private static Periode tilPeriode(no.nav.melosys.domain.eessi.melding.Periode periode) {
         return new Periode(
             periode.getFom(),
             periode.getTom()

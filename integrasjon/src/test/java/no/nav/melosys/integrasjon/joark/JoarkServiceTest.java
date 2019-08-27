@@ -47,7 +47,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JoarkServiceTest {
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -224,6 +223,9 @@ public class JoarkServiceTest {
         getJournalpostResponse.setArkivSak(new ArkivSakNoArkivsakSystemEnum());
         getJournalpostResponse.getArkivSak().setArkivSakId(arkivsakId);
 
+        String mottaksKanal = "EESSI eller NETS";
+        getJournalpostResponse.setMottaksKanal(mottaksKanal);
+
         String brukerId = "123b";
         Bruker bruker = new Bruker();
         bruker.setBrukerType(Bruker.BrukerType.PERSON);
@@ -237,11 +239,25 @@ public class JoarkServiceTest {
         getJournalpostResponse.setAvsender(avsender);
         getJournalpostResponse.setForsendelseMottatt(forsendelseMottatt);
 
-        String dokumentTittel = "titteldok", dokumentId = "123dok";
-        Dokument dokument = new Dokument();
-        dokument.setTittel(dokumentTittel);
-        dokument.setDokumentId(dokumentId);
-        getJournalpostResponse.setDokumentListe(Collections.singletonList(dokument));
+        List<Dokument> dokumentListe = new ArrayList<>();
+        String dokumentTittel = "titteldok", dokumentId = "123dok", navSkjemaID = "123skjemaID";
+        Dokument hoveddokument = new Dokument();
+        hoveddokument.setTittel(dokumentTittel);
+        hoveddokument.setDokumentId(dokumentId);
+        hoveddokument.setNavSkjemaId(navSkjemaID);
+        dokumentListe.add(hoveddokument);
+
+        Dokument vedlegg1 = new Dokument();
+        vedlegg1.setTittel(dokumentTittel);
+        vedlegg1.setDokumentId(dokumentId);
+        dokumentListe.add(vedlegg1);
+
+        Dokument vedlegg2 = new Dokument();
+        vedlegg2.setTittel(dokumentTittel);
+        vedlegg2.setDokumentId(dokumentId);
+        dokumentListe.add(vedlegg2);
+
+        getJournalpostResponse.setDokumentListe(dokumentListe);
 
         when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(getJournalpostResponse);
 
@@ -253,7 +269,10 @@ public class JoarkServiceTest {
         assertThat(journalpost.getForsendelseMottatt()).isEqualTo(forsendelseMottatt.toInstant());
         assertThat(journalpost.getHoveddokument().getDokumentId()).isEqualTo(dokumentId);
         assertThat(journalpost.getHoveddokument().getTittel()).isEqualTo(dokumentTittel);
+        assertThat(journalpost.getHoveddokument().getNavSkjemaID()).isEqualTo(navSkjemaID);
         assertThat(journalpost.getArkivSakId()).isEqualTo(arkivsakId);
+        assertThat(journalpost.getVedleggListe().size()).isEqualTo(2);
+        assertThat(journalpost.getMottaksKanal()).isEqualTo(mottaksKanal);
     }
 
     @Test

@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.avklartefakta;
 
-import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.TekniskException;
 
 public enum AvklartYrkesgruppeType {

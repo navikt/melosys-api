@@ -6,9 +6,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
-import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -49,9 +49,9 @@ public class UnntaksperiodeIkkeGodkjentTest {
     @Test
     public void utfør_medBegrunnelser_blirLagret() throws Exception {
 
-        List<IkkeGodkjentBegrunnelser> ikkeGodkjentBegrunnelser = new ArrayList<>();
-        ikkeGodkjentBegrunnelser.add(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
-        ikkeGodkjentBegrunnelser.add(IkkeGodkjentBegrunnelser.ANNET);
+        List<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = new ArrayList<>();
+        ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
+        ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.ANNET);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.getBehandling().setFagsak(new Fagsak());
@@ -62,10 +62,10 @@ public class UnntaksperiodeIkkeGodkjentTest {
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
-        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isEqualTo(UtfallRegistreringUnntak.IKKE_GODKJENT);
+        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isEqualTo(Utfallregistreringunntak.IKKE_GODKJENT);
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isEqualTo("fritekst");
         assertThat(behandlingsresultat.getBehandlingsresultatBegrunnelser().stream().map(BehandlingsresultatBegrunnelse::getKode).collect(Collectors.toList()))
-            .containsExactlyInAnyOrder(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name(), IkkeGodkjentBegrunnelser.ANNET.name());
+            .containsExactlyInAnyOrder(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name(), Ikke_godkjent_begrunnelser.ANNET.name());
     }
 
     @Test(expected = TekniskException.class)

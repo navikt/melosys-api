@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public final class Brevbestilling {
     private final Produserbaredokumenter dokumentType;

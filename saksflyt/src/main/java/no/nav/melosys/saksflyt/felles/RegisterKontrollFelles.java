@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.felles;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
-import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -39,12 +39,12 @@ public class RegisterKontrollFelles {
 
     private void registrerFeil(long behandlingId, List<Unntak_periode_begrunnelser> registrerteTreff) throws IkkeFunnetException {
         boolean funnetTreff = !registrerteTreff.isEmpty();
-        avklartefaktaService.leggTilAvklarteFakta(behandlingId, Avklartefaktatype.VURDERING_UNNTAK_PERIODE,
-            Avklartefaktatype.VURDERING_UNNTAK_PERIODE.name(), null, funnetTreff ? "TRUE" : "FALSE");
+        avklartefaktaService.leggTilAvklarteFakta(behandlingId, Avklartefaktatyper.VURDERING_UNNTAK_PERIODE,
+            Avklartefaktatyper.VURDERING_UNNTAK_PERIODE.name(), null, funnetTreff ? "TRUE" : "FALSE");
 
         log.info("Treff ved validering av periode for behandling {}. Treffbegrunnelse: {}", behandlingId, registrerteTreff);
         for (Unntak_periode_begrunnelser begrunnelse : registrerteTreff) {
-            avklartefaktaService.leggTilRegistrering(behandlingId, Avklartefaktatype.VURDERING_UNNTAK_PERIODE, begrunnelse.getKode());
+            avklartefaktaService.leggTilRegistrering(behandlingId, Avklartefaktatyper.VURDERING_UNNTAK_PERIODE, begrunnelse.getKode());
         }
     }
 }

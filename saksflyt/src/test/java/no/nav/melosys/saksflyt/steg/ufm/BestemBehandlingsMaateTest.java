@@ -5,8 +5,8 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
-import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
@@ -50,12 +50,12 @@ public class BestemBehandlingsMaateTest {
     public void utførSteg_treffIRegister_verifiserNesteSteg() throws Exception {
 
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
+        avklartefakta.setType(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
         AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
         registrering.setBegrunnelseKode(Unntak_periode_begrunnelser.FEIL_I_PERIODEN.getKode());
         avklartefakta.getRegistreringer().add(registrering);
 
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatype.VURDERING_UNNTAK_PERIODE)))
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE)))
             .thenReturn(Optional.of(avklartefakta));
 
         Prosessinstans prosessinstans = hentProsessinstans();
