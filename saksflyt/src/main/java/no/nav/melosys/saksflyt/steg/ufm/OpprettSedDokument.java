@@ -9,14 +9,14 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.BucType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
-import no.nav.melosys.service.kafka.model.Statsborgerskap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +82,7 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         return sedDokument;
     }
 
-    private Periode tilPeriode(no.nav.melosys.service.kafka.model.Periode periode) {
+    private Periode tilPeriode(no.nav.melosys.domain.eessi.melding.Periode periode) {
         return new Periode(
                 periode.getFom(),
                 periode.getTom()

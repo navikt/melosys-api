@@ -6,12 +6,12 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.eessi.BehandleMottattSedInitialiserer;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

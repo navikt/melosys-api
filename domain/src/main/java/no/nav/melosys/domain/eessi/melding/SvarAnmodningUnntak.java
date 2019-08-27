@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kafka.model;
+package no.nav.melosys.domain.eessi.melding;
 
 public class SvarAnmodningUnntak {
 

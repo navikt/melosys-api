@@ -1,17 +1,18 @@
 package no.nav.melosys.service.saksflyt;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.Periode;
+import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
@@ -228,6 +229,49 @@ public class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, List.class))
             .contains(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name());
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isEqualTo("fritekst");
+    }
+
+    @Test
+    public void behandleMottattMelding() {
+        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(LocalDate.now(), LocalDate.now().plusYears(1));
+        service.opprettProsessinstansSedMottak(eessiMelding);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans).isNotNull();
+        assertThat(prosessinstans.getData()).isNotEmpty();
+
+        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isNotEmpty();
+        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotEmpty();
+        assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isNotEmpty();
+        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING)).isNotEmpty();
+    }
+
+    private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom) {
+        MelosysEessiMelding melding = new MelosysEessiMelding();
+        melding.setAktoerId("123");
+        melding.setArtikkel("12_1");
+        melding.setDokumentId("123321");
+        melding.setGsakSaksnummer(432432L);
+        melding.setJournalpostId("j123");
+        melding.setLovvalgsland("SE");
+
+        Periode periode = new Periode();
+        periode.setFom(fom);
+        periode.setTom(tom);
+        melding.setPeriode(periode);
+
+        Statsborgerskap statsborgerskap = new Statsborgerskap();
+        statsborgerskap.setLandkode("SE");
+
+        melding.setRinaSaksnummer("r123");
+        melding.setSedId("s123");
+        melding.setStatsborgerskap(
+            Collections.singletonList(statsborgerskap));
+        melding.setSedType("A009");
+        melding.setBucType("LA_BUC_04");
+        return melding;
     }
 
     private static JournalfoeringDto lagJournalfoeringDTO() {
