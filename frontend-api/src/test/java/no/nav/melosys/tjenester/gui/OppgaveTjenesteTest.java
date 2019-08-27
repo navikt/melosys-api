@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
 
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -21,9 +21,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
-import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,25 +37,19 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppgaveTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 
     private static final String OPPGAVER_OVERSIKT_SCHEMA = "oppgaver-oversikt-schema.json";
-    private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegge-schema.json";
+    private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegg-post-schema.json";
     private static final String OPPGAVER_SOK_SCHEMA = "oppgaver-sok-schema.json";
-
-    private String schemaType;
+    private static final String OPPGAVER_PLUKK_SCHEMA = "oppgaver-plukk-schema.json";
+    private static final String OPPGAVER_PLUKK_POST_SCHEMA = "oppgaver-plukk-post-schema.json";
 
     private OppgaveTjeneste tjeneste;
     @Mock
     private Oppgaveplukker oppgaveplukker;
     @Mock
     private OppgaveService oppgaveService;
-
-    @Override
-    public String schemaNavn() {
-        return schemaType;
-    }
 
     @Before
     public void setUp() {
@@ -68,30 +60,21 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void mineOppgaver() throws MelosysException, IOException, JSONException {
         List<OppgaveDto> oppgaver = new ArrayList<>();
-        int oppgaveNr = 1 + defaultEnhancedRandom().nextInt(2);
+        int oppgaveNr = 1 + defaultEasyRandom().nextInt(2);
         for (int i = 0; i < oppgaveNr; i++) {
-            oppgaver.add(defaultEnhancedRandom().nextObject(BehandlingsoppgaveDto.class));
-            oppgaver.add(defaultEnhancedRandom().nextObject(JournalfoeringsoppgaveDto.class));
+            oppgaver.add(defaultEasyRandom().nextObject(BehandlingsoppgaveDto.class));
+            oppgaver.add(defaultEasyRandom().nextObject(JournalfoeringsoppgaveDto.class));
         }
 
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
         Response response = tjeneste.mineOppgaver();
 
         OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getEntity();
-
-        String jsonString = objectMapper().writeValueAsString(oppgaveOversikt);
-
-        try {
-            schemaType = OPPGAVER_OVERSIKT_SCHEMA;
-            hentSchema().validate(new JSONObject(jsonString));
-        } catch (ValidationException e) {
-            logger.error(e.toJSON().toString());
-            throw e;
-        }
+        valider(oppgaveOversikt, OPPGAVER_OVERSIKT_SCHEMA, logger);
     }
 
     @Test
-    public void plukkOppgave() throws FunksjonellException, TekniskException {
+    public void plukkOppgave() throws FunksjonellException, TekniskException, IOException {
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
         innData.setOppgavetype("BEH_SAK_MK");
@@ -104,42 +87,46 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
         innData.setBehandlingstyper(behandlingstyper);
 
-        Oppgave oppgave = new Oppgave();
-        oppgave.setOppgaveId("1");
-        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        Optional<Oppgave> plukket = Optional.of(oppgave);
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgaveId("1");
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgaveBuilder.setSaksnummer("MEl-1");
+        oppgaveBuilder.setJournalpostId("123");
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        Optional<Oppgave> plukket = Optional.of(oppgaveBuilder.build());
 
         when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);
+
+        valider(innData, OPPGAVER_PLUKK_POST_SCHEMA, logger);
 
         Response response = tjeneste.plukkOppgave(innData);
 
         assertThat(response.getEntity()).isExactlyInstanceOf(PlukketOppgaveDto.class);
 
         PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getEntity();
+        valider(entity, OPPGAVER_PLUKK_SCHEMA, logger);
+
         assertThat(entity.getOppgaveID()).isEqualTo("1");
     }
 
     @Test
     public void tilbakeleggOppgave() throws IOException {
-        TilbakeleggingDto tilbakelegging = defaultEnhancedRandom().nextObject(TilbakeleggingDto.class);
+        TilbakeleggingDto tilbakelegging = defaultEasyRandom().nextObject(TilbakeleggingDto.class);
 
         assertThat(tilbakelegging).isNotNull();
 
-        schemaType = OPPGAVER_TILBAKELEGGE_SCHEMA;
-        valider(tilbakelegging);
+        valider(tilbakelegging, OPPGAVER_TILBAKELEGGE_SCHEMA, logger);
     }
 
     @Test
     public void sokEtterBehandlingsoppgave() throws FunksjonellException, TekniskException, IOException {
-        BehandlingsoppgaveDto behandlingsoppgaveDto = defaultEnhancedRandom().nextObject(BehandlingsoppgaveDto.class);
+        BehandlingsoppgaveDto behandlingsoppgaveDto = defaultEasyRandom().nextObject(BehandlingsoppgaveDto.class);
         List<BehandlingsoppgaveDto> oppgaver = Arrays.asList(behandlingsoppgaveDto);
 
         when(oppgaveService.hentBehandlingsoppgaverMedBruker(anyString())).thenReturn(oppgaver);
 
-        schemaType = OPPGAVER_SOK_SCHEMA;
-
         List<BehandlingsoppgaveDto> oppgave = (List<BehandlingsoppgaveDto>) tjeneste.hentOppgaver("").getEntity();
         assertThat(oppgave).isNotNull();
-        validerListe(oppgave);
+        validerArray(oppgave, OPPGAVER_SOK_SCHEMA, logger);
     }
 }

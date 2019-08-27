@@ -10,12 +10,12 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.dto.MedlemsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
+import no.nav.melosys.tjenester.gui.dto.periode.MedlemsperiodeDto;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
 public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
 
-    private KodeverkService kodeverkService;
+    private transient KodeverkService kodeverkService;
 
     public MedlemsperiodeSerializer(KodeverkService kodeverkService) {
         super(Medlemsperiode.class);

@@ -3,33 +3,31 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.nav.dok.brevdata.felles.v1.navfelles.*;
-import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
-import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
-import no.nav.melosys.domain.dokument.person.KjoennsType;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagSoeknadssaksopplysning;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
+import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
+import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -49,14 +47,14 @@ public class InnvilgelsesbrevMapperTest {
     @Test
     public void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789"))));
+                Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))));
     }
 
     @Test
     public void mapTilBrevXmlUtenArbeidslandISøknadGirUnntak() {
         Behandling behandlingUtenSaksopplysninger = lagBehandling(lagFagsak(), Collections.emptySet());
         Behandlingsresultat behandlingsresultatUtenAvklartArbeidsland = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789")));
+                Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789")));
         Throwable unntak = catchThrowable(() -> testMapTilBrevXml(behandlingUtenSaksopplysninger,
                 behandlingsresultatUtenAvklartArbeidsland));
         assertThat(unntak).isInstanceOf(TekniskException.class)
@@ -73,22 +71,21 @@ public class InnvilgelsesbrevMapperTest {
 
     private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
         FellesType fellesType = lagFellesType();
-        MelosysNAVFelles navFelles = LagMelosysNAVFelles();
+        MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataA1 brevdataA1 = new BrevDataA1();
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("Virker ikke", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevdataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet, virksomhet));
-        brevdataA1.bostedsadresse = lagBostedsadresse();
+        brevdataA1.hovedvirksomhet = virksomhet;
+        brevdataA1.bivirksomheter = Collections.singletonList(virksomhet);
+        brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
         brevdataA1.selvstendigeForetak = Collections.emptySet();
-        brevdataA1.utenlandskeVirksomheter = Collections.emptyList();
         brevdataA1.person = lagPersonDokument();
-        brevdataA1.hovedvirksomhet = virksomhet;
         brevdataA1.arbeidssteder = new ArrayList<>();
-        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse("SAKSBEHANDLER", new BrevbestillingDto());
+        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(),"SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.norskeVirksomheter = brevdataA1.norskeVirksomheter;
+        brevdataInnvilgelse.hovedvirksomhet = virksomhet;
         brevdataInnvilgelse.arbeidsland = "Sverige";
         brevdataInnvilgelse.trygdemyndighetsland = "Sverige";
 
@@ -98,30 +95,10 @@ public class InnvilgelsesbrevMapperTest {
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 
-    private static Bostedsadresse lagBostedsadresse() {
-        Bostedsadresse adresse = new Bostedsadresse();
-        Gateadresse gateadresse = new Gateadresse();
-        gateadresse.setGatenavn("Gate");
-        adresse.setGateadresse(gateadresse);
-        adresse.setPostnr("1234");
-        adresse.setPoststed("Sted");
-        adresse.setLand(new Land(Land.BULGARIA));
-        return adresse;
-    }
-
-    private static StrukturertAdresse lagStrukturertAdresse() {
-        StrukturertAdresse vadr = new StrukturertAdresse();
-        vadr.gatenavn = "Gate";
-        vadr.landkode = Land.BULGARIA;
-        vadr.poststed = "Sted";
-        vadr.postnummer = "4321";
-        return vadr;
-    }
-
     private static Behandlingsresultat lagBehandlingsresultat() {
         Set<Avklartefakta> fakta = new HashSet<>(Arrays.asList(
-                lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789"),
-                lagAvklarteFakta(Avklartefaktatype.ARBEIDSLAND, "SE")));
+                lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"),
+                lagAvklarteFakta(Avklartefaktatyper.ARBEIDSLAND, "SE")));
         return lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()), fakta);
     }
 
@@ -138,15 +115,15 @@ public class InnvilgelsesbrevMapperTest {
 
     private static Lovvalgsperiode lagLovvalgsperiode(LocalDate fom) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(fom);
         periode.setTom(LocalDate.now());
         periode.setLovvalgsland(Landkoder.AT);
-        periode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
     }
 
-    private static Avklartefakta lagAvklarteFakta(Avklartefaktatype type, String verdi) {
+    private static Avklartefakta lagAvklarteFakta(Avklartefaktatyper type, String verdi) {
         Avklartefakta faktum = new Avklartefakta();
         faktum.setType(type);
         faktum.setFakta("TRUE");
@@ -161,19 +138,8 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
-        PersonDokument pdok = new PersonDokument();
-        pdok.kjønn = new KjoennsType();
-        pdok.kjønn.setKode(KjoennKode.U.name());
-        pdok.fornavn = "For";
-        pdok.etternavn = "Etter";
-        pdok.statsborgerskap = new Land(Land.BELGIA);
-        pdok.fødselsdato = LocalDate.ofYearDay(1900, 1);
-        Saksopplysning søknad = lagSoeknadssaksopplysning();
-        return lagBehandling(fagsak, new HashSet<>(Arrays.asList(søknad, lagSaksopplysning(SaksopplysningType.PERSONOPPLYSNING, pdok))));
-    }
-
-    private static Saksopplysning lagSoeknadssaksopplysning() {
-        return lagSaksopplysning(SaksopplysningType.SØKNAD, lagSoeknadDokument());
+        Saksopplysning søknad = lagSoeknadssaksopplysning(lagSoeknadDokument());
+        return lagBehandling(fagsak, Collections.singleton(søknad));
     }
 
     private static SoeknadDokument lagSoeknadDokument() {
@@ -185,71 +151,11 @@ public class InnvilgelsesbrevMapperTest {
         return dokument;
     }
 
-    private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
-        Saksopplysning søknad = new Saksopplysning();
-        søknad.setType(type);
-        søknad.setDokument(dokument);
-        return søknad;
-    }
-
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.KLAGE);
         behandling.setFagsak(fagsak);
         behandling.setSaksopplysninger(saksopplysninger);
         return behandling;
-    }
-
-    private static FellesType lagFellesType() {
-        return FellesType.builder()
-            .withFagsaksnummer("Sak 1")
-            .build();
-    }
-
-    private static MelosysNAVFelles LagMelosysNAVFelles() {
-        NavEnhet navEnhet = NavEnhet.builder()
-            .withEnhetsId("Enhetsid")
-            .withEnhetsNavn("Behandlende Enhet")
-            .build();
-        Saksbehandler saksbehandler = lagSaksbehandler(navEnhet);
-        Person person = lagPerson();
-        MelosysNAVFelles navFelles = MelosysNAVFelles.builder()
-            .withSakspart(Sakspart.builder()
-                .withId("123")
-                .withTypeKode(AktoerType.INSTITUSJON)
-                .withNavn("Institutten Tei")
-                .build())
-            .withMottaker(person)
-            .withBehandlendeEnhet(navEnhet)
-            .withSignerendeSaksbehandler(saksbehandler)
-            .withSignerendeBeslutter(saksbehandler)
-            .build();
-        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
-        return navFelles;
-    }
-
-    private static Saksbehandler lagSaksbehandler(NavEnhet navEnhet) {
-        return Saksbehandler.builder()
-            .withNavAnsatt(NavAnsatt.builder()
-                .withAnsattId("Saksbehandler 1")
-                .withNavn("Saksbehandler En")
-                .build())
-            .withNavEnhet(navEnhet)
-            .build();
-    }
-
-    private static Person lagPerson() {
-        return Person.builder()
-            .withId("2")
-            .withTypeKode(AktoerType.PERSON)
-            .withNavn("Nevn Navnet")
-            .withKortNavn("NN")
-            .withSpraakkode(Spraakkode.NB)
-            .withMottakeradresse(NorskPostadresse.builder()
-                .withAdresselinje1("Gate 1")
-                .withPostnummer("1234")
-                .withPoststed("Poststed")
-                .build())
-            .build();
     }
 }

@@ -63,41 +63,39 @@
         </postadresse>
     </xsl:template>
 
-    <xsl:template match="midlertidigPostadresse">
+    <xsl:template match="midlertidigPostadresse[@xsi:type='ns3:MidlertidigPostadresseUtland']">
         <midlertidigPostadresse>
-            <xsl:attribute name="xsi:type">
-                <xsl:value-of select="substring-after(@xsi:type, ':')" />
-            </xsl:attribute>
-            <xsl:choose>
-                <xsl:when test="@xsi:type='a:MidlertidigPostadresseUtland'">
-                    <adresselinje1><xsl:value-of select="ustrukturertAdresse/adresselinje1" /></adresselinje1>
-                    <adresselinje2><xsl:value-of select="ustrukturertAdresse/adresselinje2" /></adresselinje2>
-                    <adresselinje3><xsl:value-of select="ustrukturertAdresse/adresselinje3" /></adresselinje3>
-                    <adresselinje4><xsl:value-of select="ustrukturertAdresse/adresselinje4" /></adresselinje4>
-                    <land>
-                        <kode><xsl:value-of select="ustrukturertAdresse/landkode"/></kode>
-                    </land>
-                </xsl:when>
-                <xsl:when test="@xsi:type='a:MidlertidigPostadresseNorge'">
-                    <!-- FIXME: MidlertidigPostadresseNorge kan også være en matrikkeladresse - trenger testdata -->
-                    <tilleggsadresse><xsl:value-of select="strukturertAdresse/tilleggsadresse" /></tilleggsadresse>
-                    <tilleggsadresseType><xsl:value-of select="strukturertAdresse/tilleggsadresseType" /></tilleggsadresseType>
-                    <gateadresse>
-                        <gatenavn><xsl:value-of select="strukturertAdresse/gatenavn"/></gatenavn>
-                        <xsl:if test="not(string(strukturertAdresse/gatenummer) = '')">
-                            <gatenummer><xsl:value-of select="strukturertAdresse/gatenummer"/></gatenummer>
-                        </xsl:if>
-                        <xsl:if test="not(string(strukturertAdresse/husnummer) = '')">
-                            <husnummer><xsl:value-of select="strukturertAdresse/husnummer"/></husnummer>
-                        </xsl:if>
-                        <husbokstav><xsl:value-of select="strukturertAdresse/husbokstav"/></husbokstav>
-                    </gateadresse>
-                    <poststed><xsl:value-of select="strukturertAdresse/poststed"/></poststed>
-                    <land>
-                        <kode><xsl:value-of select="strukturertAdresse/landkode"/></kode>
-                    </land>
-                </xsl:when>
-            </xsl:choose>
+            <xsl:attribute name="xsi:type"><xsl:value-of select="substring-after(@xsi:type, ':')" /></xsl:attribute>
+            <adresselinje1><xsl:value-of select="ustrukturertAdresse/adresselinje1" /></adresselinje1>
+            <adresselinje2><xsl:value-of select="ustrukturertAdresse/adresselinje2" /></adresselinje2>
+            <adresselinje3><xsl:value-of select="ustrukturertAdresse/adresselinje3" /></adresselinje3>
+            <adresselinje4><xsl:value-of select="ustrukturertAdresse/adresselinje4" /></adresselinje4>
+            <land>
+                <kode><xsl:value-of select="ustrukturertAdresse/landkode"/></kode>
+            </land>
+        </midlertidigPostadresse>
+    </xsl:template>
+
+    <xsl:template match="midlertidigPostadresse[@xsi:type='ns3:MidlertidigPostadresseNorge']">
+        <midlertidigPostadresse>
+            <xsl:attribute name="xsi:type"><xsl:value-of select="substring-after(@xsi:type, ':')" /></xsl:attribute>
+            <!-- FIXME: MidlertidigPostadresseNorge kan også være en matrikkeladresse - trenger testdata -->
+            <tilleggsadresse><xsl:value-of select="strukturertAdresse/tilleggsadresse" /></tilleggsadresse>
+            <tilleggsadresseType><xsl:value-of select="strukturertAdresse/tilleggsadresseType" /></tilleggsadresseType>
+            <gateadresse>
+                <gatenavn><xsl:value-of select="strukturertAdresse/gatenavn"/></gatenavn>
+                <xsl:if test="not(string(strukturertAdresse/gatenummer) = '')">
+                    <gatenummer><xsl:value-of select="strukturertAdresse/gatenummer"/></gatenummer>
+                </xsl:if>
+                <xsl:if test="not(string(strukturertAdresse/husnummer) = '')">
+                    <husnummer><xsl:value-of select="strukturertAdresse/husnummer"/></husnummer>
+                </xsl:if>
+                <husbokstav><xsl:value-of select="strukturertAdresse/husbokstav"/></husbokstav>
+            </gateadresse>
+            <poststed><xsl:value-of select="strukturertAdresse/poststed"/></poststed>
+            <land>
+                <kode><xsl:value-of select="strukturertAdresse/landkode"/></kode>
+            </land>
         </midlertidigPostadresse>
     </xsl:template>
 
@@ -108,5 +106,7 @@
             <familierelasjon><xsl:value-of select="tilRolle" /></familierelasjon>
         </familiemedlemmer>
     </xsl:template>
+
+    <xsl:template match="text()"/>
 
 </xsl:transform>

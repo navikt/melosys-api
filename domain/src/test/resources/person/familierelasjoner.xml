@@ -1,0 +1,98 @@
+<b:hentPersonResponse xmlns:b="http://nav.no/tjeneste/virksomhet/person/v3" xmlns:a="http://nav.no/tjeneste/virksomhet/person/v3/informasjon">
+    <response>
+        <person c:type="a:Bruker" xmlns:c="http://www.w3.org/2001/XMLSchema-instance">
+            <bostedsadresse>
+                <strukturertAdresse c:type="a:Gateadresse">
+                    <landkode>NOR</landkode>
+                    <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>
+                    <poststed>3333</poststed>
+                    <bolignummer>H0809</bolignummer>
+                    <kommunenummer>1203</kommunenummer>
+                    <gatenavn>A00VEIEN</gatenavn>
+                    <husnummer>12</husnummer>
+                </strukturertAdresse>
+            </bostedsadresse>
+            <sivilstand fomGyldighetsperiode="2004-06-18T00:00:00.000+02:00">
+                <sivilstand>GIFT</sivilstand>
+            </sivilstand>
+            <statsborgerskap>
+                <land>NOR</land>
+            </statsborgerskap>
+            <harFraRolleI>
+                <harSammeBosted>true</harSammeBosted>
+                <tilRolle>EKTE</tilRolle>
+                <tilPerson>
+                    <aktoer c:type="a:PersonIdent">
+                        <ident>
+                            <ident>11111111111</ident>
+                            <type>FNR</type>
+                        </ident>
+                    </aktoer>
+                    <personnavn>
+                        <etternavn>BROS</etternavn>
+                        <fornavn>MARIO</fornavn>
+                        <sammensattNavn>BROS MARIO</sammensattNavn>
+                    </personnavn>
+                </tilPerson>
+            </harFraRolleI>
+            <harFraRolleI>
+                <harSammeBosted>true</harSammeBosted>
+                <tilRolle>BARN</tilRolle>
+                <tilPerson>
+                    <aktoer c:type="a:PersonIdent">
+                        <ident>
+                            <ident>11111111112</ident>
+                            <type>FNR</type>
+                        </ident>
+                    </aktoer>
+                    <personnavn>
+                        <etternavn>BROS</etternavn>
+                        <fornavn>PEACH</fornavn>
+                        <sammensattNavn>BROS PEACH</sammensattNavn>
+                    </personnavn>
+                </tilPerson>
+            </harFraRolleI>
+            <harFraRolleI>
+                <harSammeBosted>true</harSammeBosted>
+                <tilRolle>BARN</tilRolle>
+                <tilPerson>
+                    <aktoer c:type="a:PersonIdent">
+                        <ident>
+                            <ident>11111111113</ident>
+                            <type>FNR</type>
+                        </ident>
+                    </aktoer>
+                    <personnavn>
+                        <etternavn>BROS</etternavn>
+                        <fornavn>LUIGI</fornavn>
+                        <sammensattNavn>BROS LUIGI</sammensattNavn>
+                    </personnavn>
+                </tilPerson>
+            </harFraRolleI>
+            <aktoer c:type="a:PersonIdent">
+                <ident>
+                    <ident>11111111114</ident>
+                    <type>FNR</type>
+                </ident>
+            </aktoer>
+            <kjoenn>
+                <kjoenn>K</kjoenn>
+            </kjoenn>
+            <personnavn>
+                <etternavn>BROS</etternavn>
+                <fornavn>JON</fornavn>
+                <sammensattNavn>BROS JON</sammensattNavn>
+            </personnavn>
+            <personstatus>
+                <personstatus>BOSA</personstatus>
+            </personstatus>
+            <foedselsdato>
+                <foedselsdato>1984-05-25+02:00</foedselsdato>
+            </foedselsdato>
+            <gjeldendePostadressetype>BOSTEDSADRESSE</gjeldendePostadressetype>
+            <geografiskTilknytning c:type="a:Bydel">
+                <geografiskTilknytning>100007</geografiskTilknytning>
+            </geografiskTilknytning>
+        </person>
+    </response>
+</b:hentPersonResponse>

@@ -12,17 +12,18 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,19 +66,29 @@ public class BrevDataByggerA1Test {
         when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong()))
             .thenReturn(avklarteOrganisasjoner);
 
+        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
+        oppgittAdresse.gatenavn = "HjemmeGata";
+        oppgittAdresse.husnummer = "23B";
+        oppgittAdresse.postnummer = "0165";
+        oppgittAdresse.poststed = "Oslo";
+        oppgittAdresse.landkode = Landkoder.NO.getKode();
+
         søknad = new SoeknadDokument();
+        søknad.bosted.oppgittAdresse = oppgittAdresse;
+
         Saksopplysning soeknad = new Saksopplysning();
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);
 
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.orgnr = orgnr1;
+        foretakUtland.navn = "Utenlandsk arbeidsgiver AS";
         søknad.foretakUtland.add(foretakUtland);
 
         Saksopplysning person = new Saksopplysning();
         PersonDokument personDok = new PersonDokument();
         person.setDokument(personDok);
-        person.setType(SaksopplysningType.PERSONOPPLYSNING);
+        person.setType(SaksopplysningType.PERSOPL);
 
         Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(Collections.singletonList(orgnr1));
 
@@ -111,13 +122,13 @@ public class BrevDataByggerA1Test {
         org.setOrganisasjonDetaljer(detaljer);
         org.setNavn(Collections.singletonList(navn));
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.ORGANISASJON);
+        saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setDokument(org);
         return org;
     }
 
     @Test
-    public void testHentAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testHentAvklarteSelvstendigeForetak() throws FunksjonellException, TekniskException {
         avklarteOrganisasjoner.add("12345678910");
 
         SelvstendigForetak foretak = new SelvstendigForetak();
@@ -134,7 +145,7 @@ public class BrevDataByggerA1Test {
 
 
     @Test
-    public void testIngenAvklarteforetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testIngenAvklarteforetak() throws FunksjonellException, TekniskException {
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
@@ -143,5 +154,30 @@ public class BrevDataByggerA1Test {
         assertThat(brevDataDto.selvstendigeForetak).isEmpty();
         // TODO: Orgnr ikke obligatorisk registrert for utenlandske foretak
         //assertThat(brevDataDto.utenlandskeVirksomheter).isEmpty();
+    }
+
+    private StrukturertAdresse lagStrukturertAdresse() {
+        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
+        oppgittAdresse.gatenavn = "HjemmeGata";
+        oppgittAdresse.husnummer = "23B";
+        oppgittAdresse.postnummer = "0165";
+        oppgittAdresse.poststed = "Oslo";
+        oppgittAdresse.landkode = Landkoder.NO.getKode();
+        return oppgittAdresse;
+    }
+
+    @Test
+    public void testArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws FunksjonellException, TekniskException {
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.foretakNavn = "Utenlandsk Oppdragsgiver LTD";
+        arbeidUtland.adresse = lagStrukturertAdresse();
+        søknad.arbeidUtland.add(arbeidUtland);
+
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
+        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(arbeidUtland.foretakNavn);
+        assertThat(brevDataDto.arbeidssteder.stream()
+            .filter(Arbeidssted::erFysisk)
+            .map(FysiskArbeidssted.class::cast)
+            .map(uv -> uv.getAdresse())).contains(arbeidUtland.adresse);
     }
 }

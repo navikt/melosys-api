@@ -11,7 +11,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement
-public class SoeknadDokument extends SaksopplysningDokument {
+public class SoeknadDokument implements SaksopplysningDokument {
 
     public Periode periode = new Periode();
 

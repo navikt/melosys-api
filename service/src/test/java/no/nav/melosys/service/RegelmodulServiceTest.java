@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
@@ -36,7 +37,7 @@ public class RegelmodulServiceTest {
     private RegelmodulService regelmodulService;
 
     @Before
-    public void setUp() {
+    public void setUp() throws ParserConfigurationException {
         behandlingRepository = Mockito.mock(BehandlingRepository.class);
         regelmodulService = new RegelmodulService("", behandlingRepository);
     }
@@ -56,31 +57,31 @@ public class RegelmodulServiceTest {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
 
         Saksopplysning arbeidsforhold = new Saksopplysning();
-        arbeidsforhold.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        arbeidsforhold.setType(SaksopplysningType.ARBFORH);
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
         arbeidsforhold.setDokument(arbeidsforholdDokument);
         saksopplysninger.add(arbeidsforhold);
 
         Saksopplysning inntekt = new Saksopplysning();
-        inntekt.setType(SaksopplysningType.INNTEKT);
+        inntekt.setType(SaksopplysningType.INNTK);
         InntektDokument inntektDokument = new InntektDokument();
         inntekt.setDokument(inntektDokument);
         saksopplysninger.add(inntekt);
 
         Saksopplysning medl = new Saksopplysning();
-        medl.setType(SaksopplysningType.MEDLEMSKAP);
+        medl.setType(SaksopplysningType.MEDL);
         MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
         medl.setDokument(medlemskapDokument);
         saksopplysninger.add(medl);
 
         Saksopplysning org = new Saksopplysning();
-        org.setType(SaksopplysningType.ORGANISASJON);
+        org.setType(SaksopplysningType.ORG);
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         org.setDokument(organisasjonDokument);
         saksopplysninger.add(org);
 
         Saksopplysning person = new Saksopplysning();
-        person.setType(SaksopplysningType.PERSONOPPLYSNING);
+        person.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
         person.setDokument(personDokument);
         saksopplysninger.add(person);
@@ -115,19 +116,19 @@ public class RegelmodulServiceTest {
             SaksopplysningDokument dokument = saksopplysning.getDokument();
 
             switch (type) {
-                case ARBEIDSFORHOLD:
+                case ARBFORH:
                     fastsettLovvalgRequest.arbeidsforholdDokumenter.add((ArbeidsforholdDokument)dokument);
                     break;
-                case INNTEKT:
+                case INNTK:
                     fastsettLovvalgRequest.inntektDokumenter.add((InntektDokument)dokument);
                     break;
-                case MEDLEMSKAP:
+                case MEDL:
                     fastsettLovvalgRequest.medlemskapDokumenter.add((MedlemskapDokument)dokument);
                     break;
-                case ORGANISASJON:
+                case ORG:
                     fastsettLovvalgRequest.organisasjonDokumenter.add((OrganisasjonDokument)dokument);
                     break;
-                case PERSONOPPLYSNING:
+                case PERSOPL:
                     fastsettLovvalgRequest.personopplysningDokument = (PersonDokument) dokument;
                     break;
                 case SØKNAD:

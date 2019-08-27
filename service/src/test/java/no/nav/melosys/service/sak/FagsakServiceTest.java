@@ -3,23 +3,29 @@ package no.nav.melosys.service.sak;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,8 +36,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -57,16 +61,11 @@ public class FagsakServiceTest {
     @Mock
     private ProsessinstansService prosessinstansService;
 
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+
     @InjectMocks
     private FagsakService fagsakService;
-
-    private static final String SAKSBEHANDLER = "Z990007";
-
-
-    @Before
-    public void setUp() {
-        fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, tps, prosessinstansService);
-    }
 
     @Test
     public void hentFagsak() throws IkkeFunnetException {
@@ -85,11 +84,7 @@ public class FagsakServiceTest {
 
     @Test
     public void lagre() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setRegistrertDato(Instant.now());
+        Fagsak fagsak = lagFagsak("12345");
         fagsakService.lagre(fagsak);
         verify(fagsakRepo).save(fagsak);
         assertThat(fagsak).isNotNull();
@@ -197,36 +192,62 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public final void testErBehandlingRedigerBar() throws FunksjonellException, TekniskException {
+    public void avsluttSakSomBortfalt_harFagsakMedFlereBehandlinger_AvslutterAlleBehandlingerOgSetterFagsakstatusTilHENLAGT_BORTFALT() throws FunksjonellException, TekniskException {
+        String saksnummer = "saksnummer";
+        Fagsak fagsak = lagFagsak(saksnummer);
+        Behandling førsteBehandling = new Behandling();
+        førsteBehandling.setId(1L);
+        førsteBehandling.setStatus(Behandlingsstatus.OPPRETTET);
+        Behandling andreBehandling = new Behandling();
+        andreBehandling.setId(2L);
+        andreBehandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
+        fagsakService.avsluttSakSomBortfalt(fagsak);
+
+        verify(fagsakRepo).save(fagsak);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(2L, Behandlingsresultattyper.HENLEGGELSE);
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT_BORTFALT);
+        assertThat(fagsak.getBehandlinger()).allSatisfy(behandling -> assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
+    }
+
+    @Test
+    public void leggTilFjernAktørerForMyndighet() {
+        String saksnummer = "1234";
+        Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(eksisterendeFagsak);
+
+        List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
+        fagsakService.oppdaterMyndigheter(saksnummer, nyeInstitusjonsIder);
+
+        ArgumentCaptor<Fagsak> captor = ArgumentCaptor.forClass(Fagsak.class);
+        verify(fagsakRepo).save(captor.capture());
+        Fagsak oppdaterFagsak = captor.getValue();
+        assertThat(oppdaterFagsak.getAktører().stream()
+            .map(Aktoer::getInstitusjonId)
+            .collect(Collectors.toList())).containsOnlyElementsOf(nyeInstitusjonsIder);
+    }
+
+    private Fagsak lagFagsakMedAktørforMyndighet(String saksnummer, String id) {
+        Fagsak fagsak = lagFagsak(saksnummer);
+
+        Aktoer aktoer = new Aktoer();
+        aktoer.setInstitusjonId(id);
+        aktoer.setFagsak(fagsak);
+        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));
+        return fagsak;
+    }
+
+    private Fagsak lagFagsak(String saksnummer) {
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("12345678901");
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-
-        Oppgave oppgave = new Oppgave();
-        oppgave.setTilordnetRessurs(SAKSBEHANDLER);
-
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgave));
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak).filter(behandling1 -> behandling1 == behandling).isPresent())
-            .isEqualTo(true);
-
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        assertThat(fagsakService.finnRedigerbarBehandling("", fagsak)).isEqualTo(Optional.empty());
-
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.empty());
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-        fagsak.setBehandlinger(null);
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-
+        fagsak.setGsakSaksnummer(123L);
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setRegistrertDato(Instant.now());
+        fagsak.setEndretDato(Instant.now());
+        return fagsak;
     }
 }

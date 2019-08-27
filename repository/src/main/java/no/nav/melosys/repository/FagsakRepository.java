@@ -8,9 +8,11 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.Nullable;
 
 public interface FagsakRepository extends CrudRepository<Fagsak, Long> {
 
+    @Nullable
     Fagsak findBySaksnummer(String saksnummer);
 
     Optional<Fagsak> findByGsakSaksnummer(Long gsakSaksnummer);

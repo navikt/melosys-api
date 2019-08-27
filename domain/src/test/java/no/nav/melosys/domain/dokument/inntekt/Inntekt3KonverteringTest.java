@@ -1,7 +1,5 @@
 package no.nav.melosys.domain.dokument.inntekt;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,24 +8,25 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Inntekt3KonverteringTest {
 
-    public static final String INNTEKT_3_2_MOCK = "inntekt/99999999992.xml";
+    private static final String INNTEKT_3_2_MOCK = "inntekt/99999999992.xml";
     private static final String INNTEKT_3_2_MOCK_BOLK = "inntekt/99999999992_mock_bolk.xml";
     private static final String INNTEKT_3_2_MOCK_TILLEGGSINFO = "inntekt/99999999992_mock_tilleggsinformasjon.xml";
 
-    DokumentFactory factory;
+    private DokumentFactory factory;
 
     @Before
     public void setUp() {
@@ -42,15 +41,14 @@ public class Inntekt3KonverteringTest {
 
         InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK);
         StringBuilder stringBuilder = new StringBuilder();
-        try (Reader reader = new BufferedReader(new InputStreamReader
-                (kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c = 0;
+        try (Reader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
+            int c;
             while ((c = reader.read()) != -1) {
                 stringBuilder.append((char) c);
             }
         }
         test.setDokumentXml(stringBuilder.toString());
-        test.setType(SaksopplysningType.INNTEKT);
+        test.setType(SaksopplysningType.INNTK);
         test.setVersjon("3.2");
 
         factory.lagDokument(test);
@@ -69,7 +67,7 @@ public class Inntekt3KonverteringTest {
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
             saksopplysning.setDokumentXml(xmlStr);
-            saksopplysning.setType(SaksopplysningType.INNTEKT);
+            saksopplysning.setType(SaksopplysningType.INNTK);
             saksopplysning.setVersjon("3.2");
 
             factory.lagDokument(saksopplysning);
@@ -103,7 +101,7 @@ public class Inntekt3KonverteringTest {
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
             saksopplysning.setDokumentXml(xmlStr);
-            saksopplysning.setType(SaksopplysningType.INNTEKT);
+            saksopplysning.setType(SaksopplysningType.INNTK);
             saksopplysning.setVersjon("3.2");
 
             factory.lagDokument(saksopplysning);
@@ -113,12 +111,10 @@ public class Inntekt3KonverteringTest {
             assertThat(dokument.getArbeidsInntektMaanedListe()).isNotEmpty();
 
             for (ArbeidsInntektMaaned arbeidsInntektMaaned : dokument.getArbeidsInntektMaanedListe()) {
-
                 for (Inntekt inntekt : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe()) {
                     assertThat(inntekt.getTilleggsinformasjon()).isNotNull();
                     Tilleggsinformasjon tilleggsinformasjon = inntekt.getTilleggsinformasjon();
-                    assertThat(tilleggsinformasjon.kategori).isNotBlank();
-                    assertThat(tilleggsinformasjon.tilleggsinformasjonDetaljer).isNotNull();
+                    assertThat(tilleggsinformasjon.kategori).isNotEmpty();
                 }
             }
         }

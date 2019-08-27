@@ -1,0 +1,1 @@
+INSERT INTO behandlingsresultat_type (kode, navn) VALUES('AVSLAG_MANGLENDE_OPPL', 'avslått pga manglende opplysninger');

@@ -1,13 +1,12 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.TekniskException;
 import org.assertj.core.util.Sets;
 import org.junit.Test;
@@ -63,6 +62,44 @@ public class FagsakTest {
     }
 
     @Test
+    public void getSistOppdaterteBehandling_medEnBehandling() {
+        Fagsak fagsak = new Fagsak();
+
+        Behandling behandling = new Behandling();
+        behandling.setEndretDato(Instant.parse("2019-01-10T10:37:30.00Z"));
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        assertThat(fagsak.getSistOppdaterteBehandling()).isEqualTo(behandling);
+    }
+
+    @Test
+    public void getSistOppdaterteBehandling_medTreBehandlinger() {
+        Fagsak fagsak = new Fagsak();
+
+        Behandling sistOppdaterteBehandling = new Behandling();
+        sistOppdaterteBehandling.setEndretDato(Instant.parse("2019-01-10T10:37:30.00Z"));
+
+        Behandling behandling1 = new Behandling();
+        behandling1.setEndretDato(Instant.parse("2019-01-10T10:36:30.00Z"));
+
+        Behandling behandling2 = new Behandling();
+        behandling2.setEndretDato(Instant.parse("2019-01-09T10:37:30.00Z"));
+
+        fagsak.setBehandlinger(Arrays.asList(
+            sistOppdaterteBehandling,
+            behandling1,
+            behandling2
+        ));
+
+        assertThat(fagsak.getSistOppdaterteBehandling()).isEqualTo(sistOppdaterteBehandling);
+    }
+
+    @Test
+    public void getSistOppdaterteBehandling_ingenBehandlinger() {
+        assertThat(new Fagsak().getSistOppdaterteBehandling()).isNull();
+    }
+
+    @Test
     public void getAktivBehandling_ingenAktive() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
@@ -111,7 +148,7 @@ public class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer bruker = fagsak.hentBruker();
 
         assertThat(bruker).isEqualTo(a1);
     }
@@ -125,7 +162,7 @@ public class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer bruker = fagsak.hentBruker();
 
         assertThat(bruker).isNull();
     }
@@ -143,9 +180,49 @@ public class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer bruker = fagsak.hentBruker();
 
         assertThat(bruker).isEqualTo(a1);
+    }
+
+    @Test
+    public void hentRepresentant_arbeidsgiver_funker() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(new HashSet<>());
+        Aktoer a1 = new Aktoer();
+        a1.setRolle(Aktoersroller.REPRESENTANT);
+        a1.setRepresenterer(Representerer.BRUKER);
+        a1.setAktørId("123");
+        fagsak.getAktører().add(a1);
+        Aktoer a2 = new Aktoer();
+        a2.setRolle(Aktoersroller.REPRESENTANT);
+        a2.setRepresenterer(Representerer.ARBEIDSGIVER);
+        a2.setAktørId("456");
+        fagsak.getAktører().add(a2);
+
+        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
+
+        assertThat(representant).isEqualTo(Optional.of(a2));
+    }
+
+    @Test
+    public void hentRepresentant_begge_funker() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(new HashSet<>());
+        Aktoer a1 = new Aktoer();
+        a1.setRolle(Aktoersroller.REPRESENTANT);
+        a1.setRepresenterer(Representerer.ARBEIDSGIVER);
+        a1.setAktørId("123");
+        fagsak.getAktører().add(a1);
+        Aktoer a2 = new Aktoer();
+        a2.setRolle(Aktoersroller.REPRESENTANT);
+        a2.setRepresenterer(Representerer.BEGGE);
+        a2.setAktørId("456");
+        fagsak.getAktører().add(a2);
+
+        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
+
+        assertThat(representant).isEqualTo(Optional.of(a2));
     }
 
     @Test

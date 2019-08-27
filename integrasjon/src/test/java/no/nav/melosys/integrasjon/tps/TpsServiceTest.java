@@ -123,10 +123,10 @@ public class TpsServiceTest {
         assertEquals(Long.toString(AKTØRID_1), aktørId);
 
         String fnr = service.hentIdentForAktørId(aktørId);
-        assertEquals(fnr, FNR_1);
+        assertThat(fnr).isEqualTo(FNR_1);
 
-        verify(aktorConsumer, times(1)).hentAktørIdForIdent(any());
-        verify(aktorConsumer, times(0)).hentIdentForAktoerId(any());
+        verify(aktorConsumer).hentAktørIdForIdent(any());
+        verify(aktorConsumer, never()).hentIdentForAktoerId(any());
     }
 
     @Test
@@ -139,10 +139,10 @@ public class TpsServiceTest {
         sleep(1500);
 
         String fnr = service.hentIdentForAktørId(aktørId);
-        assertEquals(fnr, FNR_1);
+        assertThat(fnr).isEqualTo(FNR_1);
 
-        verify(aktorConsumer, times(1)).hentAktørIdForIdent(any());
-        verify(aktorConsumer, times(1)).hentIdentForAktoerId(any());
+        verify(aktorConsumer).hentAktørIdForIdent(any());
+        verify(aktorConsumer).hentIdentForAktoerId(any());
     }
 
     @Test

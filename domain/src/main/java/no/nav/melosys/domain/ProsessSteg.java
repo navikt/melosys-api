@@ -1,13 +1,11 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Converter;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
-import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
-
-public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
+public enum ProsessSteg implements Kodeverk {
 
     // NB! Disse skal være i logisk rekkefølge
-    MOT_VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
+    MOT_VURDER_AUTOMATISK_JFR("MOT_VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
 
     // Journalføring
     JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
@@ -21,6 +19,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     JFR_OPPDATER_JOURNALPOST("JFR_OPPDATER_JOURNALPOST", "Oppdaterer journalposten i Joark"),
     JFR_FERDIGSTILL_JOURNALPOST("JFR_FERDIGSTILL_JOURNALPOST", "Ferdigstiller journalposten i Joark"),
     JFR_SETT_VURDER_DOKUMENT("JFR_SETT_VURDER_DOKUMENT", "Setter status til VURDER_DOKUMENT"),
+    JFR_TILDEL_BEHANDLINGSOPPGAVE("JFR_TILDEL_BEHANDLINGSOPPGAVE", "Tildeler behandlingsoppgave for gjeldende fagsak til en saksbehandler"),
     JFR_HENT_PERS_OPPL("JFR_HENT_PERS_OPPL", "Hent personopplysninger fra TPS"),
     JFR_VURDER_INNGANGSVILKÅR("JFR_VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår"),
 
@@ -42,10 +41,14 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     //Anmodning om unntak
     AOU_VALIDERING("AOU_VALIDERING", "Validering av data for anmodning om unntak"),
     AOU_OPPDATER_RESULTAT("AOU_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat for anmodning om unntak"),
-    AOU_AVKLAR_MYNDIGHET("IV_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
+    AOU_AVKLAR_MYNDIGHET("AOU_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AOU_OPPDATER_MEDL("AOU_OPPDATER_MEDL", "Oppdatering av medlemskap med anmodning om unntak"),
     AOU_SEND_BREV("AOU_SEND_BREV", "Send orienteringsbrev og A001 for anmodning om unntak"),
     AOU_SEND_SED("AOU_SEND_SED","Send elektronisk SED A001"),
+
+    //Svar anmodning om unntak
+    AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR("AOU_OPPRETT_ANMODNINGSPERIODESVAR","Oppretter svar for en anmodningsperiode"),
+    AOU_SVAR_OPPDATER_BEHANDLING("AOU_OPPDATER_BEHANDLING","Oppdater behandling"),
 
     //Iverksett Vedtak
     IV_FORKORT_PERIODE("IV_FORKORT_PERIODE", "Legger til endringsgrunn i AVKLARTEFAKTA for hvorfor perioden er forkortet"),
@@ -55,7 +58,8 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     IV_AVKLAR_ARBEIDSGIVER("IV_AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
     IV_OPPDATER_MEDL("IV_OPPDATER_MEDL", "Oppdatering av medlemskap"),
     IV_SEND_BREV("IV_SEND_BREV", "Send brev etter iverksett vedtak"),
-    IV_SEND_SED("IV_SEND_SED", "Send SED etter et eller annet"),
+    IV_SEND_SED("IV_SEND_SED", "Send SED etter iverksett vedtak"),
+    IV_OPPRETT_AVGIFTSOPPGAVE("IV_OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),
     IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
     IV_STATUS_BEH_AVSL("IV_STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling"),
 
@@ -66,20 +70,26 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     HS_HENLEGG_SAK("HS_HENLEGG_SAK", "Henlegg en sak"),
     HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
 
+    //Mottak av SED
+    SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
+    SED_MOTTAK_RUTING("SED_MOTTAK_RUTING", "Bestemmer videre behandling for innkommende SED"),
+
     //Unntak medlemskap
     REG_UNNTAK_OPPRETT_SAK_OG_BEH("REG_UNNTAK_OPPRETT_SAK_OG_BEH","Opprett sak og behandling"),
-    REG_UNNTAK_FERDIGSTILL_JOURNALPOST("REG_UNNTAK_FERDIGSTILL_JOURNALPOST","Ferdigstiller journalpost"),
-    REG_UNNTAK_HENT_PERSON("REG_UNNTAK_HENT_PERSON","Henter person tilknyttet SED"),
+    REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
+    REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
     REG_UNNTAK_OPPRETT_SEDDOKUMENT("REG_UNNTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
-    REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL("REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL", "Oppdaterer behandling og setter lovvalgsperiode"),
-    REG_UNNTAK_VALIDER_PERIODE("REG_UNNTAK_VALIDER_PERIODE", "Validerer periode mottatt i søknad"),
-    REG_UNNTAK_VALIDER_MEDLEMSKAP("REG_UNNTAK_VALIDER_MEDLEMSKAP", "Validerer tidligere medlemskap mot MEDL"),
-    REG_UNNTAK_VALIDER_YTELSER("REG_UNNTAK_VALIDER_YTELSER", "Sjekker offentlige ytelser for en person"),
-    REG_UNNTAK_VALIDER_STATSBORGERSKAP("REG_UNNTAK_VALIDER_STATSBORGERSKAP", "Validerer om person har gyldig statsborgerskap for unntaksregel"),
+    REG_UNNTAK_HENT_PERSON("REG_UNNTAK_HENT_PERSON","Henter person tilknyttet SED"),
+    REG_UNNTAK_HENT_MEDLEMSKAP("REG_UNNTAK_HENT_REGISTEROPPLYSNINGER", "Henter opplysninger om medlemskap"),
+    REG_UNNTAK_HENT_YTELSER("REG_UNNTAK_HENT_YTELSER", "Henter opplysninger om ytelser"),
+    REG_UNNTAK_REGISTERKONTROLL("REG_UNNTAK_REGISTERKONTROLL", "Validerer informasjon om en unntaksperiode"),
     REG_UNNTAK_BESTEM_BEHANDLINGSMAATE("REG_UNNTAK_BESTEM_BEHANDLINGSMAATE", "Bestem om søknad skal registreres automatisk eller behandles manuelt"),
     REG_UNNTAK_OPPDATER_MEDL("REG_UNNTAK_OPPDATER_MEDL", "Sett periode endelig i MEDL"),
     REG_UNNTAK_OPPRETT_OPPGAVE("REG_UNNTAK_OPPRETT_OPPGAVE","Opprett oppgave for manuell behandling"),
     REG_UNNTAK_AVSLUTT_BEHANDLING("REG_UNNTAK_AVSLUTT_BEHANDLING", "Avslutt behandling"),
+    REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET("REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET", "Oppdaterer status på sak i sob til avsluttet"),
+    REG_UNNTAK_PERIODE_IKKE_GODKJENT("REG_UNNTAK_PERIODE_IKKE_GODKJENT", "Unntaksperiode avvist av saksbehandler"),
+    REG_UNNTAK_UNDER_AVKLARING("REG_UNNTAK_UNDER_AVKLARING", "Unntaksperiode under avklaring"),
 
     FERDIG("FERDIG", "Prosessen er ferdig");
 
@@ -91,7 +101,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
-    
+
     @Override
     public String getKode() {
         return kode;
@@ -101,13 +111,4 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     public String getBeskrivelse() {
         return beskrivelse;
     }
-
-    @Converter
-    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<ProsessSteg> {
-        @Override
-        protected ProsessSteg[] getLovligeVerdier() {
-            return ProsessSteg.values();
-        }
-    }
-
 }

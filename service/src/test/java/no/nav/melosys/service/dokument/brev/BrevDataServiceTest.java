@@ -9,6 +9,8 @@ import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -24,9 +26,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
 import static java.util.Arrays.asList;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -67,7 +68,7 @@ public class BrevDataServiceTest {
         myndighet.navn = "navn";
         myndighet.gateadresse = "gateadresse 123";
         myndighet.land = "HR";
-        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(myndighet);
+        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(Optional.of(myndighet));
 
         String sammensattNavn = "ALTFOR SAMMENSATT";
         when(tpsFasade.hentSammensattNavn(anyString())).thenReturn(sammensattNavn);
@@ -97,7 +98,7 @@ public class BrevDataServiceTest {
         aktoer.setInstitusjonId("DE:TEST");
         UtenlandskMyndighet tyskMyndighet = new UtenlandskMyndighet();
         tyskMyndighet.institusjonskode = "TEST";
-        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.DE)).thenReturn(tyskMyndighet);
+        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.DE)).thenReturn(Optional.of(tyskMyndighet));
 
         UtenlandskMyndighet utenlandskMyndighet = service.hentMyndighetFraAktoer(aktoer);
 
@@ -107,7 +108,8 @@ public class BrevDataServiceTest {
     @Test
     public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
-        BrevData brevData = new BrevData("Z123456");
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling, brevData);
@@ -139,7 +141,9 @@ public class BrevDataServiceTest {
         Behandling behandling = lagBehandling();
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
 
-        BrevData brevData = new BrevData("Z123456");
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+
         Aktoer mottaker = lagAktør(Aktoersroller.REPRESENTANT);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling, brevData);
@@ -155,7 +159,9 @@ public class BrevDataServiceTest {
     @Test
     public void lagMangelbrevXml_mottakerErbrukerID() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
-        BrevData brevData = new BrevData("Z123456");
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+
         Aktoer mottakerAktør = lagAktør(Aktoersroller.BRUKER);
         brevData.fritekst = "Test";
 
@@ -179,7 +185,9 @@ public class BrevDataServiceTest {
     @Test
     public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
-        BrevData brevData = new BrevData("Z123456");
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+
         Aktoer mottakerAktør = lagAktør(Aktoersroller.ARBEIDSGIVER);
         brevData.fritekst = "Test";
 

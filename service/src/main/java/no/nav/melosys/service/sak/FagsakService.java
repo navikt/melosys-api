@@ -2,13 +2,17 @@ package no.nav.melosys.service.sak;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -16,60 +20,45 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FagsakService {
-
+    private static final Logger log = LoggerFactory.getLogger(FagsakService.class);
     private static final String FAGSAKID_PREFIX = "MEL-";
 
     private final FagsakRepository fagsakRepository;
-
     private final BehandlingService behandlingService;
-
     private final KontaktopplysningService kontaktopplysningService;
-
     private final OppgaveService oppgaveService;
-
     private final TpsFasade tpsFasade;
-
     private final ProsessinstansService prosessinstansService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService,
-                         OppgaveService oppgaveService,
+                         @Lazy OppgaveService oppgaveService,
                          TpsFasade tpsFasade,
-                         ProsessinstansService prosessinstansService) {
+                         ProsessinstansService prosessinstansService,
+                         BehandlingsresultatService behandlingsresultatService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
-    }
-
-    public Optional<Behandling> finnRedigerbarBehandling(String ident, Fagsak fagsak) throws FunksjonellException, TekniskException {
-        Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling == null) {
-            return Optional.empty();
-        }
-
-        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
-
-        if (oppgave.isPresent()
-            && oppgave.filter(oppgave1 -> ident.equalsIgnoreCase(oppgave1.getTilordnetRessurs())).isPresent()
-            && behandling.erRedigerbar()) {
-            return Optional.of(behandling);
-        } else {
-            return Optional.empty();
-        }
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -102,10 +91,8 @@ public class FagsakService {
         return fagsak;
     }
 
-    public Fagsak hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) throws IkkeFunnetException {
-        return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer).orElseThrow(
-            () -> new IkkeFunnetException("Finner ikke fagsak med gsak-saksnummer " + gsakSaksnummer)
-        );
+    public Optional<Fagsak> hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) {
+        return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer);
     }
 
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {
@@ -121,10 +108,31 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
+    // Sletter aktører som ikke ligger i oppgitt liste og legger til de som mangler.
+    // Oppdaterer IKKE de som allerede finnes i database
+    @Transactional
+    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId()));
+
+        Collection<Aktoer> nyeMyndigheter = ider.stream()
+            .map(id -> lagAktør(fagsak, Aktoersroller.MYNDIGHET, id))
+            .collect(Collectors.toList());
+
+        fagsak.getAktører().addAll(nyeMyndigheter);
+        fagsakRepository.save(fagsak);
+    }
+
     @Transactional
     public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
+        Aktoer aktør = lagAktør(fagsak, aktørsrolle, ID);
+        fagsak.getAktører().add(aktør);
+        fagsakRepository.save(fagsak);
+    }
+
+    private static Aktoer lagAktør(Fagsak fagsak, Aktoersroller aktørsrolle, String ID) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(aktørsrolle);
@@ -142,9 +150,7 @@ public class FagsakService {
             default:
                 throw new IllegalStateException(aktørsrolle + " støttes ikke.");
         }
-
-        fagsak.getAktører().add(aktør);
-        fagsakRepository.save(fagsak);
+        return aktør;
     }
 
     /**
@@ -187,6 +193,7 @@ public class FagsakService {
 
         Instant nå = Instant.now();
 
+        fagsak.setType(opprettSakRequest.getSakstype());
         fagsak.setGsakSaksnummer(opprettSakRequest.getGsakSaksnummer());
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
@@ -223,5 +230,19 @@ public class FagsakService {
             .filter(behandling -> behandling.getStatus() != Behandlingsstatus.AVSLUTTET)
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .orElseThrow(() -> new IllegalStateException("Sak " + fagsak.getSaksnummer() + " har ingen behandlinger eller bare avsluttede behandlinger."));
+    }
+
+    @Transactional(rollbackFor=MelosysException.class)
+    public void avsluttSakSomBortfalt(Fagsak fagsak) throws FunksjonellException, TekniskException {
+        fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
+
+        fagsak.getBehandlinger().forEach(behandling -> {
+            log.info("Setter behandling {} til {}", behandling.getId(), Behandlingsstatus.AVSLUTTET);
+            behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        });
+        log.info("Setter status på fagsak {} til {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT);
+        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
+        fagsakRepository.save(fagsak);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 }

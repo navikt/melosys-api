@@ -16,5 +16,6 @@ import javax.xml.bind.annotation.XmlType;
         Svalbardinntekt.class,
         ReiseKostOgLosji.class
 })
+@SuppressWarnings("squid:S1610")
 public abstract class TilleggsinformasjonDetaljer {
 }

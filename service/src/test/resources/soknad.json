@@ -39,15 +39,12 @@
       "tom": "2018-06-01"
     },
     "ektefelleEllerBarnINorge": true,
-    "sammeAdresseSomArbeidsgiver": true,
     "studentFinansieringKode": "LAANEKASSEN",
     "studentSemester": "2018/2019"
   },
   "bosted": {
     "intensjonOmRetur": true,
-    "familiesBostedLandkode": "SE",
     "antallMaanederINorge": 8,
-    "adresseIUtlandet": true,
     "oppgittAdresse": {
       "gatenavn": "Gateadressen",
       "postnummer": "12345",
@@ -102,7 +99,9 @@
   },
   "maritimtArbeid": [
     {
-      "navn": "Navn på skipet",
+      "foretakNavn": "Equiesou",
+      "foretakOrgnr": null,
+      "enhetNavn": "Navn på skipet",
       "fartsomradeKode": "INNENRIKS",
       "flaggLandkode": "GB",
       "installasjonsLandkode": "GB"

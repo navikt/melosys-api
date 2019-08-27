@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -60,13 +59,12 @@ public class OppgaveTjeneste extends RestTjeneste {
             PlukketOppgaveDto dto = new PlukketOppgaveDto();
 
             dto.setOppgaveID(oppgave.getOppgaveId());
-            if (oppgave.erBehandling()) {
-                dto.setOppgavetype(Oppgavetyper.BEH_SAK_MK.getKode());
+            if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling()) {
                 dto.setSaksnummer(oppgave.getSaksnummer());
-            } else if (oppgave.erJournalFøring()) {
-                dto.setOppgavetype(Oppgavetyper.JFR.getKode());
             }
+            dto.setOppgavetype(oppgave.getOppgavetype().getKode());
             dto.setJournalpostID(oppgave.getJournalpostId());
+            dto.setBehandlingID(oppgaveService.hentAktivBehandlingId(oppgave.getSaksnummer()));
 
             return Response.ok(dto).build();
         } else {
@@ -75,7 +73,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("/tilbakelegge")
+    @Path("/tilbakelegg")
     @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
     public Response leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();

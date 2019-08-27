@@ -13,13 +13,10 @@ import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.SoeknadService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +34,13 @@ public class SoeknadTjeneste extends RestTjeneste {
 
     private final RegisterOppslagService registerOppslagService;
 
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public SoeknadTjeneste(SoeknadService soeknadService, RegisterOppslagService registerOppslagService, Tilgang tilgang) {
+    public SoeknadTjeneste(SoeknadService soeknadService, RegisterOppslagService registerOppslagService, TilgangService tilgangService) {
         this.soeknadService = soeknadService;
         this.registerOppslagService = registerOppslagService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @GET
@@ -54,7 +51,7 @@ public class SoeknadTjeneste extends RestTjeneste {
         response = SoeknadDto.class)
     public Response hentSøknad(@ApiParam @PathParam("behandlingID") long behandlingID) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
         SoeknadDokument soeknadDokument;
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         soeknadDokument = soeknadService.hentSoeknad(behandlingID);
         SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         SoeknadDto soeknadDto;
@@ -67,10 +64,10 @@ public class SoeknadTjeneste extends RestTjeneste {
     @ApiOperation(
         value = "Tjeneste for å registrere opplysninger fra papirsøknaden manuelt.",
         response = SoeknadDto.class)
-    public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) throws FunksjonellException, TekniskException {
         long behandlingID = soeknadInnDto.getBehandlingID();
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoeknadDokument();
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
         SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         return new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);

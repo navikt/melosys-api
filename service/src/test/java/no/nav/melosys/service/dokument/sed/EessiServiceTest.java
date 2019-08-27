@@ -1,0 +1,207 @@
+package no.nav.melosys.service.dokument.sed;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import com.google.common.collect.Sets;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.eessi.BucInformasjon;
+import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
+import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
+import org.jeasy.random.EasyRandom;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
+public class EessiServiceTest {
+    @Mock
+    private SedDataBygger sedDataBygger;
+    @Mock
+    private EessiConsumer eessiConsumer;
+
+    private EessiService eessiService;
+
+    private Behandling behandling;
+    private Behandlingsresultat behandlingsresultat;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    private EasyRandom easyRandom = new EasyRandom();
+
+    @Before
+    public void setup() throws Exception {
+        eessiService = new EessiService(sedDataBygger, eessiConsumer, "true");
+
+        behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setSaksnummer("123");
+
+        behandlingsresultat = new Behandlingsresultat();
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setLovvalgsland(Landkoder.SK);
+        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
+
+        when(sedDataBygger.lag(any(Behandling.class), any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lagUtkast(any(Behandling.class))).thenReturn(new SedDataDto());
+    }
+
+    @Test
+    public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
+        eessiService.opprettOgSendSed(behandling, behandlingsresultat);
+        verify(eessiConsumer).opprettOgSendSed(any(SedDataDto.class));
+    }
+
+//    @Test
+//    public void opprettOgSendSed_ingenLovvalgsperiode_forventException() throws Exception {
+//        expectedException.expect(TekniskException.class);
+//        expectedException.expectMessage("Finner ingen lovvalgsperiode!");
+//        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet());
+//        eessiService.opprettOgSendSed(behandling, behandlingsresultat);
+//    } TODO kommenter inn når sed-feilmeldinger blir kastet fra service igjen
+
+    @Test
+    public void opprettBucOgSed_verifiserKorrektSedType() throws Exception {
+        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), anyString())).thenReturn("localhost:3000");
+
+        eessiService.opprettBucOgSed(behandling, "LA_BUC_01", "SE", "SE:001");
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), eq("LA_BUC_01"));
+    }
+
+    @Test
+    public void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
+        when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenReturn(Arrays.asList(
+            easyRandom.nextObject(Institusjon.class),
+            easyRandom.nextObject(Institusjon.class)
+        ));
+
+        List<Institusjon> mottakerinstitusjoner = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
+
+        verify(eessiConsumer).hentMottakerinstitusjoner(anyString());
+        assertThat(mottakerinstitusjoner).hasSize(2);
+        assertThat(mottakerinstitusjoner).hasOnlyElementsOfType(Institusjon.class);
+    }
+
+    @Test(expected = MelosysException.class)
+    public void hentMottakerinstitusjoner_medFeilIConsumer_forventTomListe() throws MelosysException {
+        when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenThrow(new IntegrasjonException("Error!"));
+        List<Institusjon> institusjon = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
+    }
+
+    @Test
+    public void hentTilknyttedeBucer_forventListeMedRettType() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyString())).thenReturn(Arrays.asList(
+            easyRandom.nextObject(BucInformasjon.class),
+            easyRandom.nextObject(BucInformasjon.class),
+            easyRandom.nextObject(BucInformasjon.class)
+        ));
+
+        List<BucInformasjon> tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, "utkast");
+
+        verify(eessiConsumer).hentTilknyttedeBucer(anyLong(), anyString());
+        assertThat(tilknyttedeBucer).hasSize(3);
+        assertThat(tilknyttedeBucer).hasOnlyElementsOfType(BucInformasjon.class);
+    }
+
+    @Test(expected = MelosysException.class)
+    public void hentTilknyttedeBucer_medFeilIConsumer_forventException() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyString())).thenThrow(new IntegrasjonException("Error!"));
+        eessiService.hentTilknyttedeBucer(123L, "utkast");
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_verifiserA001A003A009A010støtterAutomatiskBehandling() throws Exception {
+        List<String> sedTyperAutomatiskBehandling = Arrays.asList(
+            SedType.A001.name(),
+            SedType.A009.name(),
+            SedType.A010.name()
+        );
+
+        for (String sedType : sedTyperAutomatiskBehandling) {
+            assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isTrue();
+        }
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
+        List<String> sedTyperAutomatiskBehandling = Arrays.asList(
+            "H001",
+            SedType.A002.name(),
+            SedType.A004.name(),
+            SedType.A005.name(),
+            SedType.A006.name(),
+            SedType.A007.name(),
+            SedType.A008.name(),
+            SedType.A011.name(),
+            SedType.A012.name()
+        );
+
+        for (String sedType : sedTyperAutomatiskBehandling) {
+            assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isFalse();
+        }
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_a003ikkeUtpekt_verifiserStøtterAutomatiskBehandling() throws Exception {
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setLovvalgsland(Landkoder.SE.name());
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        assertThat(eessiService.støtterAutomatiskBehandling("123", "A003")).isTrue();
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_a003erUtpekt_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setLovvalgsland(Landkoder.NO.name());
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        assertThat(eessiService.støtterAutomatiskBehandling("123", "A003")).isFalse();
+    }
+
+    @Test
+    public void hentSakForRinaSaksnummer_forventOptionalIkkePresent() throws MelosysException {
+        when(eessiConsumer.hentSakForRinasaksnummer(anyString()))
+            .thenReturn(Collections.emptyList());
+        Optional<Long> res = eessiService.hentSakForRinasaksnummer("123");
+        assertThat(res).isNotPresent();
+    }
+
+    @Test
+    public void hentSakForRinaSaksnummer_forventOptionalPresent() throws MelosysException {
+        when(eessiConsumer.hentSakForRinasaksnummer(anyString()))
+            .thenReturn(Collections.singletonList(new SaksrelasjonDto(123L, "123", "123")));
+        Optional<Long> res = eessiService.hentSakForRinasaksnummer("123");
+        assertThat(res).isPresent();
+    }
+
+    @Test
+    public void lagreSaksrelasjon_validerInput() throws MelosysException {
+        eessiService.lagreSaksrelasjon(123L, "123", "312");
+        verify(eessiConsumer).lagreSaksrelasjon(any());
+    }
+}

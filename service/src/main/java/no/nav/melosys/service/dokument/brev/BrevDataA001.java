@@ -6,14 +6,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 
 /*
  * Alle feltene er resultatverdier fra funksjoner i brevbygger, som brukes direkte i mapper.
@@ -24,7 +25,7 @@ public class BrevDataA001 extends BrevData {
     public UtenlandskMyndighet utenlandskMyndighet;
 
     public PersonDokument personDokument;
-    public Bostedsadresse bostedsadresse;
+    public StrukturertAdresse bostedsadresse;
     public Optional<String> utenlandskIdent;
 
     public List<AvklartVirksomhet> arbeidsgivendeVirkomsheter;
@@ -35,7 +36,7 @@ public class BrevDataA001 extends BrevData {
     // Kommer fra Joark. Kun relevant når purring er implementer
     public List<LocalDate> tidligereAnmodninger = new ArrayList<>();
 
-    public Collection<Lovvalgsperiode> lovvalgsperioder;
+    public Collection<Anmodningsperiode> anmodningsperioder;
 
     public Collection<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();
 

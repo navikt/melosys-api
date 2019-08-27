@@ -9,6 +9,9 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -71,7 +74,7 @@ public class AvklartefaktaServiceIT {
         rad.setBehandlingsresultat(behandlingsresultat);
         rad.setFakta("test test");
         rad.setReferanse("referanse");
-        rad.setType(Avklartefaktatype.ARBEIDSLAND);
+        rad.setType(Avklartefaktatyper.ARBEIDSLAND);
         return rad;
     }
 

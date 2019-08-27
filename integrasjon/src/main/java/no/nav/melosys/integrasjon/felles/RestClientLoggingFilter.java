@@ -13,9 +13,11 @@ public class RestClientLoggingFilter implements ClientRequestFilter {
     public void filter(ClientRequestContext requestContext) {
         StringBuilder sb = new StringBuilder();
         sb.append(" - Path: ").append(requestContext.getUri().toString());
-        sb.append(" - Headers: ").append(requestContext.getHeaders());
+        if (LOGGER.isTraceEnabled()) {
+            sb.append(" - Headers: ").append(requestContext.getHeaders());
+        }
         sb.append(" - Entity: ").append(requestContext.getEntity());
-        LOGGER.debug("HTTP REQUEST : " + sb.toString());
+        LOGGER.debug("HTTP REQUEST : {}", sb);
     }
 
 }

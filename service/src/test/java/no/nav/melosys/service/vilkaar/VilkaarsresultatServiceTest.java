@@ -5,7 +5,7 @@ import java.util.*;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.kodeverk.Art12_1_Begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -18,7 +18,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VilkaarsresultatServiceTest {
@@ -64,12 +65,13 @@ public class VilkaarsresultatServiceTest {
         VilkaarDto vilkaarDto = new VilkaarDto();
         vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
         List<String> koder = new ArrayList<>();
-        koder.add(Art12_1_Begrunnelser.ERSTATTER_ANNEN.getKode());
+        koder.add(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
 
-        verify(vilkaarsresultatRepo, times(1)).deleteByBehandlingsresultat(any());
-        verify(vilkaarsresultatRepo, times(1)).save(any(Vilkaarsresultat.class));
+        verify(vilkaarsresultatRepo).deleteByBehandlingsresultat(any());
+        verify(vilkaarsresultatRepo).flush();
+        verify(vilkaarsresultatRepo).save(any(Vilkaarsresultat.class));
     }
 
     @Test(expected = IkkeFunnetException.class)
@@ -80,7 +82,7 @@ public class VilkaarsresultatServiceTest {
         VilkaarDto vilkaarDto = new VilkaarDto();
         vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
         List<String> koder = new ArrayList<>();
-        koder.add(Art12_1_Begrunnelser.ERSTATTER_ANNEN.getKode());
+        koder.add(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
     }

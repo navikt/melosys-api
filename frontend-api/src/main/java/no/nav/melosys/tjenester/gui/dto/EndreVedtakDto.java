@@ -1,15 +1,15 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import no.nav.melosys.domain.kodeverk.Endretperioder;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 
 public class EndreVedtakDto {
-    private Endretperioder begrunnelseKode;
+    private Endretperiode begrunnelseKode;
 
-    public Endretperioder getBegrunnelseKode() {
+    public Endretperiode getBegrunnelseKode() {
         return begrunnelseKode;
     }
 
-    public void setBegrunnelseKode(Endretperioder begrunnelseKode) {
+    public void setBegrunnelseKode(Endretperiode begrunnelseKode) {
         this.begrunnelseKode = begrunnelseKode;
     }
 }

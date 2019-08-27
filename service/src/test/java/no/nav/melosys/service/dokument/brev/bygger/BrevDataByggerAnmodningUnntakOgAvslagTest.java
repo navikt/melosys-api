@@ -31,10 +31,8 @@ import static org.mockito.Mockito.when;
 public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
-
     @Mock
     RegisterOppslagService registerOppslagService;
-
     @Mock
     LandvelgerService landvelgerService;
 
@@ -43,7 +41,8 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     @Before
     public void setUp() {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, landvelgerService);
+        brevDataByggerAnmodningUnntakOgAvslag =
+            new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, landvelgerService);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.gsak.sak;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
@@ -24,13 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SakConsumerImpl implements RestConsumer, SakConsumer {
-
     private static final Logger log = LoggerFactory.getLogger(SakConsumerImpl.class);
 
     private static final GenericType<List<SakDto>> sakDtoListType = new GenericType<List<SakDto>>() {};
+    private static final String X_CORRELATION_ID = "X-Correlation-ID";
 
     private final boolean erSystem;
-
     private final WebTarget target;
 
     SakConsumerImpl(String endpointUrl, boolean erSystem) throws IntegrasjonException {
@@ -51,13 +51,13 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public SakDto hentSak(Long id) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException {
+    public SakDto hentSak(Long id) throws FunksjonellException, TekniskException {
         try {
             return target
                 .path(Long.toString(id))
                 .request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header("X-Correlation-ID", getCallID())
+                .header(X_CORRELATION_ID, getCallID())
                 .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(SakDto.class);
         } catch (RuntimeException e) {
@@ -67,8 +67,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public List<SakDto> finnSaker(SakSearchRequest sakSearchRequest) 
-        throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException {
+    public List<SakDto> finnSaker(SakSearchRequest sakSearchRequest) throws FunksjonellException, TekniskException {
         try {
             return target
                 .queryParam("aktoerId", sakSearchRequest.getAktørId())
@@ -78,22 +77,22 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
                 .queryParam("fagsakNr", sakSearchRequest.getFagsakNr())
                 .request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header("X-Correlation-ID", getCallID())
+                .header(X_CORRELATION_ID, getCallID())
                 .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(sakDtoListType);
         } catch (RuntimeException e) {
             ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
-            return null; // Død kode
+            return Collections.emptyList(); // Død kode
         }
     }
 
     @Override
-    public SakDto opprettSak(SakDto sakDto) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public SakDto opprettSak(SakDto sakDto) throws FunksjonellException, TekniskException {
         sakDto.setOpprettetAv(getUserID());
         try (Response response = target
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-            .header("X-Correlation-ID", getCallID())
+            .header(X_CORRELATION_ID, getCallID())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
             .post(Entity.json(sakDto))) {
             håndterEvFeil(response);
@@ -102,7 +101,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public void håndterEvFeil(Response response) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException {
+    public void håndterEvFeil(Response response) throws FunksjonellException, TekniskException {
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) return;
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());

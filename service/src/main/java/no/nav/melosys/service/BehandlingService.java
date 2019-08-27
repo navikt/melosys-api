@@ -2,23 +2,27 @@ package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,20 +30,23 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 public class BehandlingService {
-
     private final BehandlingRepository behandlingRepository;
-
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
-    private BehandlingsresultatService behandlingsresultatService;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final OppgaveService oppgaveService;
 
     @Autowired
-    public BehandlingService(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository, BehandlingsresultatService behandlingsresultatService) {
+    public BehandlingService(BehandlingRepository behandlingRepository,
+                             BehandlingsresultatRepository behandlingsresultatRepository,
+                             TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
+                             BehandlingsresultatService behandlingsresultatService,
+                             @Lazy OppgaveService oppgaveService) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.oppgaveService = oppgaveService;
     }
 
     /**
@@ -64,17 +71,22 @@ public class BehandlingService {
      * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
      */
     public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException {
-        if (!erLovligNesteStatusEtterDokumentVurdering(status)) {
-            throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
-        }
-
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
-        if (!behandling.erAktiv()) {
+
+        if (behandling.getStatus() == Behandlingsstatus.VURDER_DOKUMENT && !erLovligNesteStatusEtterDokumentVurdering(status)) {
+            throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
+        } else if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
         }
         behandling.setStatus(status);
         behandlingRepository.save(behandling);
+    }
+
+    private boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
+        return (behandlingsstatus == Behandlingsstatus.UNDER_BEHANDLING)
+            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART)
+            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL);
     }
 
     /**
@@ -108,19 +120,10 @@ public class BehandlingService {
 
     public List<Long> hentMedlemsperioder(long behandlingID) {
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandlingID);
-        if (tidligereMedlemsperioder == null) {
-            return new ArrayList<>();
-        }
         return tidligereMedlemsperioder.stream()
             .map(TidligereMedlemsperiode::getId)
             .map(TidligereMedlemsperiodeId::getPeriodeId)
             .collect(toList());
-    }
-
-    public boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
-        return (behandlingsstatus == Behandlingsstatus.UNDER_BEHANDLING)
-            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART)
-            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -146,5 +149,36 @@ public class BehandlingService {
         }
         behandlingRepository.save(behandlingsreplika);
         return behandlingsreplika;
+    }
+
+    public void avsluttBehandling(long behandlingId) throws IkkeFunnetException {
+        Behandling behandling = behandlingRepository.findById(behandlingId)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandlingRepository.save(behandling);
+    }
+
+    public Behandling hentBehandling(long behandlingId) throws IkkeFunnetException {
+        return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+    }
+
+    public void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {
+        if (aktivBehandling.getStatus() == Behandlingsstatus.OPPRETTET) {
+            aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+            behandlingRepository.save(aktivBehandling);
+        }
+    }
+
+    public boolean erBehandlingRedigerbarOgTilordnetSaksbehandler(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
+        if (!behandling.erRedigerbar()) {
+            return false;
+        }
+
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+
+        String tilordnetRessurs = oppgave.getTilordnetRessurs();
+        return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);
     }
 }

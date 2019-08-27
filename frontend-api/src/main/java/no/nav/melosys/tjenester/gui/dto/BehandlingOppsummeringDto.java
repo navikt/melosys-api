@@ -2,25 +2,16 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class BehandlingOppsummeringDto {
 
-    private Long behandlingID;
     private Behandlingsstatus behandlingsstatus;
     private Behandlingstyper behandlingstype;
     private Instant registrertDato;
     private Instant endretDato;
     private Instant sisteOpplysningerHentetDato;
-
-    public Long getBehandlingID() {
-        return behandlingID;
-    }
-
-    public void setBehandlingID(Long behandlingID) {
-        this.behandlingID = behandlingID;
-    }
 
     public Behandlingsstatus getBehandlingsstatus() {
         return behandlingsstatus;

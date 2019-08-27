@@ -9,9 +9,9 @@ import javax.ws.rs.core.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.DokumentVisningService;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -29,13 +29,13 @@ import org.springframework.web.context.WebApplicationContext;
 public class DokumentTjeneste extends RestTjeneste {
     private final DokumentService dokumentService;
     private final DokumentVisningService dokumentVisningService;
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public DokumentTjeneste(DokumentService dokumentService, DokumentVisningService dokumentVisningService, Tilgang tilgang) {
+    public DokumentTjeneste(DokumentService dokumentService, DokumentVisningService dokumentVisningService, TilgangService tilgangService) {
         this.dokumentService = dokumentService;
         this.dokumentVisningService = dokumentVisningService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @GET
@@ -62,13 +62,13 @@ public class DokumentTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("utkast/pdf/{behandlingID}/{produserbartDokument}")
+    @Path("pdf/utkast/{behandlingID}/{produserbartDokument}")
     @Produces({ "application/pdf", MediaType.APPLICATION_JSON + "; charset=UTF-8" })
     public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
                                    @PathParam("produserbartDokument") Produserbaredokumenter produserbartDokument,
             BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
         byte[] dokument;
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
@@ -82,7 +82,7 @@ public class DokumentTjeneste extends RestTjeneste {
         if (brevBestillingDto.mottaker == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         dokumentService.produserDokumentISaksflyt(produserbartDokument, brevBestillingDto.mottaker, behandlingID, new BrevData(brevBestillingDto));
         return Response.noContent().build();
     }

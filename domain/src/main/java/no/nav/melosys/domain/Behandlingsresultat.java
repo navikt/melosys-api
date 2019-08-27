@@ -3,30 +3,28 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "behandlingsresultat")
 @EntityListeners(AuditingEntityListener.class)
 public class Behandlingsresultat extends RegistreringsInfo {
-
     // Populeres av Hibernate med behandling.id
     @Id
     private Long id;
 
     @MapsId
-    @OneToOne(fetch=FetchType.EAGER, optional = false)
-    @JoinColumn(name="behandling_id")
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "behandling_id")
     private Behandling behandling;
 
     @Enumerated(EnumType.STRING)
@@ -41,27 +39,33 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "fastsatt_av_land")
     private Landkoder fastsattAvLand;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "henleggelse_grunn")
-    private Henleggelsesgrunner henleggelsesgrunn;
+    @Column(name = "begrunnelse_fritekst")
+    private String begrunnelseFritekst;
 
-    @Column(name = "henleggelse_fritekst")
-    private String henleggelseFritekst;
-    
     @Column(name = "vedtak_dato")
     private Instant vedtaksdato;
 
     @Column(name = "vedtak_klagefrist")
     private LocalDate vedtakKlagefrist;
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "utfall_registrering_unntak")
+    private Utfallregistreringunntak utfallRegistreringUnntak;
+
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Lovvalgsperiode> lovvalgsperioder = new HashSet<>(1);
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Anmodningsperiode> anmodningsperioder = new HashSet<>(1);
+
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>(1);
+
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
 
     public Long getId() {
         return id;
@@ -103,20 +107,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.fastsattAvLand = fastsattAvLand;
     }
 
-    public Henleggelsesgrunner getHenleggelsesgrunn() {
-        return henleggelsesgrunn;
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
     }
 
-    public void setHenleggelsesgrunn(Henleggelsesgrunner henleggelsesgrunn) {
-        this.henleggelsesgrunn = henleggelsesgrunn;
-    }
-
-    public String getHenleggelseFritekst() {
-        return henleggelseFritekst;
-    }
-
-    public void setHenleggelseFritekst(String henleggelseFritekst) {
-        this.henleggelseFritekst = henleggelseFritekst;
+    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
+        this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
     public Instant getVedtaksdato() {
@@ -135,12 +131,28 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.vedtakKlagefrist = vedtakKlagefrist;
     }
 
+    public Utfallregistreringunntak getUtfallRegistreringUnntak() {
+        return utfallRegistreringUnntak;
+    }
+
+    public void setUtfallRegistreringUnntak(Utfallregistreringunntak utfallRegistreringUnntak) {
+        this.utfallRegistreringUnntak = utfallRegistreringUnntak;
+    }
+
     public Set<Lovvalgsperiode> getLovvalgsperioder() {
         return lovvalgsperioder;
     }
 
     public void setLovvalgsperioder(Set<Lovvalgsperiode> lovvalgsperioder) {
         this.lovvalgsperioder = lovvalgsperioder;
+    }
+
+    public Set<Anmodningsperiode> getAnmodningsperioder() {
+        return anmodningsperioder;
+    }
+
+    public void setAnmodningsperioder(Set<Anmodningsperiode> anmodningsperioder) {
+        this.anmodningsperioder = anmodningsperioder;
     }
 
     public Set<Vilkaarsresultat> getVilkaarsresultater() {
@@ -159,10 +171,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.avklartefakta = avklartefakta;
     }
 
-    public Optional<Avklartefakta> finnAvklartFaktum(Avklartefaktatype type) {
-        return getAvklartefakta().stream()
-            .filter(f -> f.getType() == type && f.getFakta().equals("TRUE"))
-            .findFirst();
+    public Set<BehandlingsresultatBegrunnelse> getBehandlingsresultatBegrunnelser() {
+        return behandlingsresultatBegrunnelser;
+    }
+
+    public void setBehandlingsresultatBegrunnelser(Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser) {
+        this.behandlingsresultatBegrunnelser = behandlingsresultatBegrunnelser;
     }
 
     @Override
@@ -177,10 +191,69 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return Objects.equals(this.type, that.type)
             && Objects.equals(this.behandling, that.behandling);
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(type, behandling);
     }
 
+    public boolean erAvslag() {
+        if (type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+            return true;
+        }
+        Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
+        return type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            && lovvalgsperiode.erAvslått();
+    }
+
+    public boolean erInnvilgelse() {
+        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
+            Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
+            return lovvalgsperiode.erInvilget();
+        } else {
+            return false;
+        }
+    }
+
+    public boolean erInnvilgelseFlereLand() {
+        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
+            Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
+            return lovvalgsperiode.erInvilget() && lovvalgsperiode.erArtikkel13();
+        } else {
+            return false;
+        }
+
+    }
+
+    // Medl skal ikke oppdateres ved avslag.
+    public boolean medlOppdateres() {
+        return !erAvslag();
+    }
+
+    public Lovvalgsperiode hentValidertLovvalgsperiode() {
+        if (lovvalgsperioder.isEmpty()) {
+            throw new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id);
+        }
+        if (lovvalgsperioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en"
+                + " lovvalgsperiode er ikke støttet i første leveranse");
+        }
+        return lovvalgsperioder.iterator().next();
+    }
+
+    public Anmodningsperiode hentValidertAnmodningsperiode() {
+        if (anmodningsperioder.isEmpty()) {
+            throw new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id);
+        }
+        if (anmodningsperioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en"
+                + " anmodningsperiode er ikke støttet i første leveranse");
+        }
+        return anmodningsperioder.iterator().next();
+    }
+
+    public boolean erAutomatisert() {
+        return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
+            || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
+    }
 }

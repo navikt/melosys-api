@@ -12,8 +12,9 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public class FagsakBehandlingFactory {
     public static Fagsak fagsakMedBehandlinger(Behandlingsstatus behandlingsstatusFørst,
@@ -56,7 +57,7 @@ public class FagsakBehandlingFactory {
 
     private static Saksopplysning lagPersonSaksopplysning() {
         Saksopplysning saksopplysningPerson = new Saksopplysning();
-        saksopplysningPerson.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysningPerson.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
         personDokument.sammensattNavn = "Joe Moe";
         saksopplysningPerson.setDokument(personDokument);
@@ -66,9 +67,11 @@ public class FagsakBehandlingFactory {
     private static Saksopplysning lagSøknadOpplysning() {
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landkode = "NO";
+        arbeidUtland.adresse.landkode = "SE";
+        soeknadDokument.soeknadsland.landkoder.add(Landkoder.DK.getKode());
         soeknadDokument.arbeidUtland = new ArrayList<>();
         soeknadDokument.arbeidUtland.add(arbeidUtland);
+        soeknadDokument.oppholdUtland.oppholdslandkoder.add("FI");
         soeknadDokument.periode = new no.nav.melosys.domain.dokument.soeknad.Periode(
             LocalDate.of(2019,1,1), LocalDate.of(2019,2,1));
         Saksopplysning saksopplysningSøknad = new Saksopplysning();

@@ -69,26 +69,21 @@
     <xsl:template match="tilleggsinformasjon">
         <tilleggsinformasjon>
             <kategori><xsl:value-of select="kategori" /></kategori>
-            <xsl:element name="tilleggsinformasjonDetaljer">
-                <xsl:attribute name="xsi:type">
-                    <xsl:apply-templates select="tilleggsinformasjonDetaljer/@xsi:type"/>
-                </xsl:attribute>
-                <xsl:apply-templates select="tilleggsinformasjonDetaljer" />
-            </xsl:element>
+            <xsl:apply-templates select="tilleggsinformasjonDetaljer" />
         </tilleggsinformasjon>
     </xsl:template>
 
-    <xsl:template match="tilleggsinformasjonDetaljer[*]">
-        <!-- Kopier verdier under tilleggsinformasjonDetaljer -->
-        <xsl:apply-templates />
+    <xsl:template match="tilleggsinformasjonDetaljer">
+        <xsl:element name="tilleggsinformasjonDetaljer">
+            <xsl:attribute name="xsi:type">
+                <xsl:apply-templates select="@xsi:type"/>
+            </xsl:attribute>
+            <xsl:apply-templates/>
+        </xsl:element>
     </xsl:template>
 
-    <xsl:template match="tilleggsinformasjonDetaljer">
-        <xsl:element name="{name()}">
-            <xsl:value-of select="."/>
-        </xsl:element>
-        <!-- Kopier datoverdier (tidsrom og etterbetalingsperiode) -->
-        <xsl:apply-templates select="tidsrom|etterbetalingsperiode" />
+    <xsl:template match="forskuddstrekkListe|fradragListe">
+        <!-- Ignoreres -->
     </xsl:template>
 
     <xsl:template match="ident"/>

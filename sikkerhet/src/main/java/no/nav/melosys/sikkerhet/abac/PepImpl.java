@@ -1,5 +1,8 @@
 package no.nav.melosys.sikkerhet.abac;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import no.nav.abac.xacml.NavAttributter;
 import no.nav.freg.abac.core.annotation.Abac;
 import no.nav.freg.abac.core.annotation.context.AbacContext;
@@ -15,19 +18,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
 
 @Service
 public class PepImpl implements Pep {
-
     private static final Logger abacLog = LoggerFactory.getLogger(PepImpl.class);
 
     public static final String READ = "read";
-    public static final String WRITE = "write";
-    public static final String IKKE_TILGANG = "ABAC: Brukeren har ikke tilgang til ressurs";
+    private static final String IKKE_TILGANG = "ABAC: Brukeren har ikke tilgang til ressurs";
 
     private AbacService abacService;
     private AbacContext abacContext;
@@ -56,10 +54,15 @@ public class PepImpl implements Pep {
         XacmlResponse accessResponse = abacService.evaluate(request);
 
         if (accessResponse.getDecision() != Decision.PERMIT) {
-            abacLog.warn(createLogString(id, accessResponse));
+            if (abacLog.isWarnEnabled()) {
+                abacLog.warn(createLogString(id, accessResponse));
+            }
             throw new SikkerhetsbegrensningException(IKKE_TILGANG);
         }
-        abacLog.info(createLogString(id, accessResponse));
+
+        if (abacLog.isInfoEnabled()) {
+            abacLog.info(createLogString(id, accessResponse));
+        }
     }
 
     private String createLogString(String fnr, XacmlResponse response){

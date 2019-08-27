@@ -12,18 +12,10 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
@@ -35,6 +27,12 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -98,7 +96,7 @@ public class SoeknadServiceTest {
         Saksopplysning saksopplysning_1 = lagSøknadssaksopplysning(SaksopplysningType.SØKNAD);
 
         Saksopplysning saksopplysning_2 = new Saksopplysning();
-        saksopplysning_2.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysning_2.setType(SaksopplysningType.PERSOPL);
         saksopplysning_2.setRegistrertDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
         saksopplysning_2.setEndretDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
         saksopplysning_2.setKilde(SaksopplysningKilde.TPS);

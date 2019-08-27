@@ -1,13 +1,20 @@
 package no.nav.melosys.service.saksflyt;
 
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
 
+import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
-import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.Periode;
+import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -21,7 +28,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -143,7 +149,7 @@ public class ProsessinstansServiceTest {
         String saksbehandler = settInnloggetSaksbehandler();
 
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansForkortPeriode(behandling, Endretperioder.RETURNERT_NORGE);
+        service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -151,7 +157,7 @@ public class ProsessinstansServiceTest {
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_FORKORT_PERIODE);
         assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
-        assertThat(lagretInstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class)).isEqualTo(Endretperioder.RETURNERT_NORGE);
+        assertThat(lagretInstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class)).isEqualTo(Endretperiode.RETURNERT_NORGE);
     }
 
     @Test
@@ -178,7 +184,97 @@ public class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isFalse();
     }
 
-    private JournalfoeringDto lagJournalfoeringDTO() {
+    @Test
+    public void opprettProsessinstansJournalføring_medVedlegg_setterVedleggOgTitler() {
+        settInnloggetSaksbehandler();
+        JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
+        journalfoeringDto.setDokumentID("hovedDokumentID");
+        List<DokumentDto> vedlegg = new ArrayList<>();
+        DokumentDto fysiskVedlegg = new DokumentDto("ID_F_01", "Fysisk");
+        vedlegg.add(fysiskVedlegg);
+        DokumentDto logiskVedlegg_1 = new DokumentDto(null, "Logisk");
+        vedlegg.add(logiskVedlegg_1);
+        DokumentDto logiskVedlegg_2 = new DokumentDto("hovedDokumentID", "Logisk ??");
+        vedlegg.add(logiskVedlegg_2);
+        journalfoeringDto.setVedlegg(vedlegg);
+
+        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+
+        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_1.getTittel());
+        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_2.getTittel());
+
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsOnlyKeys(fysiskVedlegg.getDokumentID());
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsValues(fysiskVedlegg.getTittel());
+    }
+
+    @Test
+    public void opprettProsessinstansGodkjennUnntaksperiode() {
+        service.opprettProsessinstansGodkjennUnntaksperiode(new Behandling());
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
+    }
+
+    @Test
+    public void opprettProsessinstansIkkeGodkjennUnntaksperiode() {
+        service.opprettProsessinstansUnntaksperiodeAvvist(new Behandling(),
+            Lists.newArrayList(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND), "fritekst");
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, List.class))
+            .contains(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name());
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isEqualTo("fritekst");
+    }
+
+    @Test
+    public void behandleMottattMelding() {
+        MelosysEessiMelding eessiMelding = hentMelosysEessiMelding(LocalDate.now(), LocalDate.now().plusYears(1));
+        service.opprettProsessinstansSedMottak(eessiMelding);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans).isNotNull();
+        assertThat(prosessinstans.getData()).isNotEmpty();
+
+        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isNotEmpty();
+        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotEmpty();
+        assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isNotEmpty();
+        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING)).isNotEmpty();
+    }
+
+    private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom) {
+        MelosysEessiMelding melding = new MelosysEessiMelding();
+        melding.setAktoerId("123");
+        melding.setArtikkel("12_1");
+        melding.setDokumentId("123321");
+        melding.setGsakSaksnummer(432432L);
+        melding.setJournalpostId("j123");
+        melding.setLovvalgsland("SE");
+
+        Periode periode = new Periode();
+        periode.setFom(fom);
+        periode.setTom(tom);
+        melding.setPeriode(periode);
+
+        Statsborgerskap statsborgerskap = new Statsborgerskap();
+        statsborgerskap.setLandkode("SE");
+
+        melding.setRinaSaksnummer("r123");
+        melding.setSedId("s123");
+        melding.setStatsborgerskap(
+            Collections.singletonList(statsborgerskap));
+        melding.setSedType("A009");
+        melding.setBucType("LA_BUC_04");
+        return melding;
+    }
+
+    private static JournalfoeringDto lagJournalfoeringDTO() {
         JournalfoeringDto journalfoeringDto = new JournalfoeringDto();
         journalfoeringDto.setJournalpostID("journalpostid");
         journalfoeringDto.setDokumentID("dokumentid");

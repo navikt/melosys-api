@@ -7,9 +7,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
@@ -26,6 +24,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +33,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class Oppgaveplukker {
-
     private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
+    static final List<Oppgavetyper> KJENTE_OPPGAVETYPER = Arrays.asList(Oppgavetyper.BEH_SAK_MK, Oppgavetyper.VUR, Oppgavetyper.BEH_SED);
+
     private final GsakFasade gsakFasade;
-
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
-
     private final FagsakRepository fagsakRepository;
-
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
@@ -55,80 +52,84 @@ public class Oppgaveplukker {
     }
 
     /**
-     * 1) Input valideres
-     * 2) Oppgaveplukker henter i GSAK en liste over alle aktive, ikke tildelte oppgaver med oppgitt parametre.
+     * 1) Input valideres og behandlingstema og oppgavetyper beregnes.
+     * 2) Oppgaveplukker henter i Oppgave en liste over alle aktive, ikke tildelte oppgaver med oppgitt parametre.
      * 3) Neste oppgave velges basert på prioritet (først) og frist.
      * 4) Oppgaven tildeles til saksbehandleren.
-     * 5) Behandlingen endrer status hvis oppgaven er en behandlingsoppgave.
      */
     @Transactional(rollbackFor = MelosysException.class)
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String type = plukkDto.getOppgavetype();
-        Oppgavetyper oppgavetype = KodeverkUtils.dekod(Oppgavetyper.class, type);
+        Oppgavetyper oppgavetype = type == null ? null : KodeverkUtils.dekod(Oppgavetyper.class, type);
 
-        Tema fagområde = null;
+        Set<Sakstyper> sakstyper = new HashSet<>();
+        Set<Behandlingstema> behandlingstemaer = new HashSet<>();
+        Set<Behandlingstyper> behandlingstyper = new HashSet<>();
+        Set<Oppgavetyper> oppgavetyper = new HashSet<>();
         if (oppgavetype == Oppgavetyper.JFR) {
-            String fagområdeKode = plukkDto.getFagomrade();
-            fagområde = KodeverkUtils.dekod(Tema.class, fagområdeKode);
-        }
-
-        List<Sakstyper> fagsakstypeListe = new ArrayList<>();
-        List<Behandlingstyper> behandlingstypeListe = new ArrayList<>();
-        List<Behandlingstema> behandlingstemaListe = new ArrayList<>();
-        if (oppgavetype == Oppgavetyper.BEH_SAK_MK) {
-
-            List<String> sakstyper = plukkDto.getSakstyper();
-            for (String s : sakstyper) {
-                fagsakstypeListe.add(KodeverkUtils.dekod(Sakstyper.class, s));
+            oppgavetyper = Collections.singleton(Oppgavetyper.JFR);
+        } else {
+            List<String> sakstypeKoder = plukkDto.getSakstyper();
+            for (String s : sakstypeKoder) {
+                sakstyper.add(KodeverkUtils.dekod(Sakstyper.class, s));
             }
+            behandlingstemaer.addAll(hentBehandlingstema(sakstyper));
 
-            List<String> behandlingstyper = plukkDto.getBehandlingstyper();
-            if (behandlingstyper != null) {
-                for (String behandlingstype : behandlingstyper) {
-                    behandlingstypeListe.add(KodeverkUtils.dekod(Behandlingstyper.class, behandlingstype));
+            List<String> behandlingstypeKoder = plukkDto.getBehandlingstyper();
+            if (CollectionUtils.isNotEmpty(behandlingstypeKoder)) {
+                for (String behandlingstype : behandlingstypeKoder) {
+                    behandlingstyper.add(KodeverkUtils.dekod(Behandlingstyper.class, behandlingstype));
                 }
+                oppgavetyper.addAll(hentOppgavetyper(behandlingstyper));
+            } else {
+                // Når behandlingstype ikke velges skal alle behandlingsoppgaver klare til behandling plukkes uansett behandlingstype.
+                oppgavetyper.addAll(KJENTE_OPPGAVETYPER);
             }
-            behandlingstemaListe.addAll(hentBehandlingstema(fagsakstypeListe));
         }
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe, behandlingstemaListe);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, sakstyper, Collections.emptySet(), behandlingstemaer);
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
-        
+
         if (valg.isPresent()) {
-            Oppgave oppgave = valg.get();
-
-            if (oppgave.erBehandling() || oppgave.erVurderDokument()) {
-                settBehandlingsstatusUnderBehandling(oppgave.getSaksnummer());
-            }
-
             // Tildeler oppgaven
-            gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
+            gsakFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
         }
         return valg;
     }
 
-    List<Behandlingstema> hentBehandlingstema(List<Sakstyper> fagsakstypeListe) {
+    Set<Behandlingstema> hentBehandlingstema(Set<Sakstyper> fagsakstypeListe) {
         return fagsakstypeListe.stream()
             .map(sakstyper -> Behandlingstema.valueOf(sakstyper.name()))
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
+    }
+
+    Set<Oppgavetyper> hentOppgavetyper(Set<Behandlingstyper> behandlingstypeListe) {
+        return behandlingstypeListe.stream()
+            .map(Oppgave::hentOppgavetype)
+            .collect(Collectors.toSet());
     }
 
     private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException {
         Iterator<Oppgave> iter = oppgaver.iterator();
         while (iter.hasNext()) {
             Oppgave oppgave = iter.next();
-            Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
+            String saksnummer = oppgave.getSaksnummer();
+            Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
             if (fagsak == null) {
-                log.error("Fant ikke fagsak {} for oppgave {}", oppgave.getSaksnummer(), oppgave.getOppgaveId());
-                throw new TekniskException("Fant ikke fagsak " + oppgave.getSaksnummer());
+                log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
+                throw new TekniskException("Fant ikke fagsak " + saksnummer);
             }
             Behandling behandling = fagsak.getAktivBehandling();
+            if (behandling == null) {
+                throw new TekniskException("Fant ingen aktiv behandling på fagsak " + saksnummer);
+            }
 
-            if (behandling.erVenterForDokumentasjon()
-                && behandling.getDokumentasjonSvarfristDato() != null
-                && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
+            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato() == null) {
+                throw new TekniskException("Behandling " + behandling.getId() + " tilhørende " + saksnummer + " avventer dokumentasjon, men har ingen svarfristdato");
+            }
+            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
                 iter.remove();
             }
         }
@@ -140,8 +141,7 @@ public class Oppgaveplukker {
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID()));
 
         Fagsak fagsak = behandling.getFagsak();
-        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer())
-            .orElseThrow(() -> new IkkeFunnetException("Fant ingen oppgave for fagsak " + fagsak.getSaksnummer()));
+        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer());
 
         String oppgaveId = oppgave.getOppgaveId();
         if (!tilbakelegging.isVenterPåDokumentasjon()) {
@@ -176,20 +176,5 @@ public class Oppgaveplukker {
     private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
         List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();
-    }
-
-    private void settBehandlingsstatusUnderBehandling(String saksnummer) throws TekniskException {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        if (fagsak == null) {
-            throw new TekniskException("Fagsak med saksnummer " + saksnummer + " finnes ikke.");
-        }
-        Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling == null) {
-            throw new TekniskException("En behandlingsoppgave eksisterer i GSAK for sak " + saksnummer + " men ingen aktive behandlinger finnes.");
-        }
-        if (behandling.getStatus() == Behandlingsstatus.OPPRETTET) {
-            behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-            behandlingRepository.save(behandling);
-        }
     }
 }

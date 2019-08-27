@@ -9,8 +9,10 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.service.kodeverk.KodeDto;
 
 /**
- * Alle klasser som implementerer {@code Kodeverk} serialiseres med kode og term.
+ * Alle klasser som implementerer {@code Kodeverk} skulle serialiseres med kode og term.
+ * @deprecated TODO schema må endres til å bruke bare kode og ikke kode + term.
  */
+@Deprecated
 public class KodeSerializer extends StdSerializer<Kodeverk> {
 
     public KodeSerializer() {

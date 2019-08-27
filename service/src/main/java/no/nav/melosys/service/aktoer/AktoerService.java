@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
@@ -34,29 +35,31 @@ public class AktoerService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void lagEllerOppdaterAktoer(Fagsak fagsak, AktoerDto aktoerDto) throws FunksjonellException {
+    public Long lagEllerOppdaterAktoer(Fagsak fagsak, AktoerDto aktoerDto) throws FunksjonellException {
         if (aktoerDto.getRolleKode() == null) {
             throw new FunksjonellException("Kan ikke lagre aktør uten rolle. Saksnummer: " + fagsak.getSaksnummer());
         }
 
-        Aktoer aktørFraDto = new Aktoer();
-        aktørFraDto.setAktørId(aktoerDto.getAktoerID());
-        aktørFraDto.setInstitusjonId(aktoerDto.getInstitusjonsID());
-        aktørFraDto.setUtenlandskPersonId(aktoerDto.getUtenlandskPersonID());
-        aktørFraDto.setOrgnr(aktoerDto.getOrgnr());
-        aktørFraDto.setRolle(Aktoersroller.valueOf(aktoerDto.getRolleKode()));
-
-        if (aktoerDto.getRepresentererKode() != null) {
-            aktørFraDto.setRepresenterer(Representerer.valueOf(aktoerDto.getRepresentererKode()));
+        Aktoer aktoer;
+        if (aktoerDto.getDatabaseID() == null) {
+            aktoer = new Aktoer();
+        }
+        else {
+            aktoer = aktørRepository.findById(aktoerDto.getDatabaseID())
+                .orElseThrow(() -> new IkkeFunnetException("Finner ikke aktør med id " + aktoerDto.getDatabaseID()));
         }
 
-        aktørFraDto.setFagsak(fagsak);
+        aktoer.setFagsak(fagsak);
+        aktoer.setInstitusjonId(aktoerDto.getInstitusjonsID());
+        aktoer.setUtenlandskPersonId(aktoerDto.getUtenlandskPersonID());
+        aktoer.setOrgnr(aktoerDto.getOrgnr());
+        aktoer.setRolle(Aktoersroller.valueOf(aktoerDto.getRolleKode()));
 
-        aktørRepository.findByFagsakAndRolleAndRepresenterer(fagsak, aktørFraDto.getRolle(), aktørFraDto.getRepresenterer())
-            .ifPresent(aktørRepository::deleteById);
+        if (aktoerDto.getRepresentererKode() != null) {
+            aktoer.setRepresenterer(Representerer.valueOf(aktoerDto.getRepresentererKode()));
+        }
 
-        Aktoer aktoer = aktørRepository.save(aktørFraDto);
-        aktoerDto.setDatabaseID(aktoer.getId());
+        return aktørRepository.save(aktoer).getId();
     }
 
     public void slettAktoer(long databaseID) throws TekniskException, FunksjonellException {
@@ -66,12 +69,14 @@ public class AktoerService {
         if (aktoer.getRolle().equals(Aktoersroller.BRUKER)) {
             throw new FunksjonellException("Aktøren er en bruker. Det er ikke lov til å slette denne");
         }
-        aktørRepository.deleteById(aktoer);
+        aktørRepository.deleteByAktørId(aktoer.getAktørId());
+        aktørRepository.flush();
     }
 
     @Transactional
     public void erstattEksisterendeArbeidsgiveraktører(Fagsak fagsak, List<String> orgnumre) {
         aktørRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
+        aktørRepository.flush();
 
         for (String orgnummer : orgnumre) {
             lagArbeidsgiveraktør(fagsak, orgnummer);

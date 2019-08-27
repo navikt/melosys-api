@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -51,10 +50,6 @@ public class SaksopplysningerServiceTest {
     @Before
     public void setUp() {
         saksopplysningerService = new SaksopplysningerService(tpsFasade, aaregFasade, prosessinstansService, behandlingRepo, behandlingsresultatService);
-
-        ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
-        ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
-        ReflectionTestUtils.setField(saksopplysningerService, "medlemskaphistorikkAntallÅr", 5);
     }
 
     @Test
@@ -81,7 +76,7 @@ public class SaksopplysningerServiceTest {
         HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
 
         Saksopplysning saksopplysningPerson = new Saksopplysning();
-        saksopplysningPerson.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysningPerson.setType(SaksopplysningType.PERSOPL);
         saksopplysninger.add(saksopplysningPerson);
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();

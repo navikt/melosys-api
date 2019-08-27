@@ -2,13 +2,14 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 
-import io.github.benas.randombeans.api.EnhancedRandom;
+import org.jeasy.random.EasyRandom;
 import no.nav.dok.melosysbrev._000074.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,12 +26,12 @@ public class MangelbrevMapperTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private EnhancedRandom enhancedRandom;
+    private EasyRandom easyRandom;
 
     @Before
     public void setUp() {
         mapper = new MangelbrevMapper();
-        enhancedRandom = EnhancedRandomConfigurer.randomForDokProd();
+        easyRandom = EasyRandomConfigurer.randomForDokProd();
     }
 
     @Test
@@ -38,29 +39,30 @@ public class MangelbrevMapperTest {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-1");
 
-        MelosysNAVFelles navFelles = enhancedRandom.nextObject(MelosysNAVFelles.class);
+        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
         Behandling behandling = new Behandling();
-        behandling.setRegistrertDato(Instant.now());
 
-        BrevData BrevData = new BrevData("Z123456");
-        BrevData.fritekst = "Test";
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, BrevData);
+        brevData.fritekst = "Test";
+
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData);
 
         assertThat(xml).isNotNull();
     }
 
     @Test
     public void mapFag() throws Exception {
-        Behandling behandling = new Behandling();
-        behandling.setRegistrertDato(Instant.now());
-        BrevData BrevData = new BrevData("Z123456");
-        BrevData.fritekst = "Test";
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-        Fag fag = mapper.mapFag(behandling, BrevData);
+        brevData.fritekst = "Test";
+
+        Fag fag = mapper.mapFag(brevData);
 
         assertThat(fag).isNotNull();
         assertThat(fag.getDatoMottatt()).isNotNull();
@@ -73,12 +75,12 @@ public class MangelbrevMapperTest {
 
     @Test
     public void mapFag_manglerFritekst() throws Exception {
-        Behandling behandling = new Behandling();
-        behandling.setRegistrertDato(Instant.now());
-        BrevData BrevData = new BrevData("Z123456");
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+
 
         expectedException.expect(IntegrasjonException.class);
 
-        mapper.mapFag(behandling, BrevData);
+        mapper.mapFag(brevData);
     }
 }

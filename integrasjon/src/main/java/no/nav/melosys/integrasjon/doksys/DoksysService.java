@@ -24,8 +24,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import static no.nav.melosys.integrasjon.Fagsystem.GSAK_I_JOARK;
-import static no.nav.melosys.integrasjon.Fagsystem.MELOSYS;
+import static no.nav.melosys.domain.Fagsystem.GSAK_I_JOARK;
+import static no.nav.melosys.domain.Fagsystem.MELOSYS;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
@@ -64,7 +64,6 @@ public class DoksysService implements DoksysFasade {
             ProduserDokumentutkastResponse wsResponse = dokumentproduksjonConsumer.produserDokumentutkast(wsRequest);
             return wsResponse.getDokumentutkast();
         } catch (ProduserDokumentutkastBrevdataValideringFeilet | ProduserDokumentutkastInputValideringFeilet e) {
-            log.error("Henting av dokumentutkast feilet", e);
             throw new IntegrasjonException(e);
         }
     }
@@ -130,12 +129,10 @@ public class DoksysService implements DoksysFasade {
 
             return response;
         } catch (ProduserIkkeredigerbartDokumentSikkerhetsbegrensning e) {
-            log.error("Produksjon av dokument feilet", e);
             throw new SikkerhetsbegrensningException(e);
         } catch (ProduserIkkeredigerbartDokumentDokumentErRedigerbart | ProduserIkkeRedigerbartDokumentJoarkForretningsmessigUnntak
             | ProduserIkkeredigerbartDokumentBrevdataValideringFeilet | ProduserIkkeredigerbartDokumentDokumentErVedlegg
             | ProduserIkkeRedigerbartDokumentInputValideringFeilet e) {
-            log.error("Produksjon av dokument feilet", e);
             throw new IntegrasjonException(e);
         }
     }

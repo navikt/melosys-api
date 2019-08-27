@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -23,7 +23,6 @@ import org.junit.rules.ExpectedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class LovvalgsperiodeServiceTest {
@@ -135,7 +134,7 @@ public class LovvalgsperiodeServiceTest {
         Collection<Lovvalgsperiode> lovvalgsperioder = instanse.hentTidligereLovvalgsperioder(behandling);
         AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(lp -> lp.getMedlPeriodeID())).containsOnly(medlemsperiode.id);
         AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream()
-                .map(lp -> lp.getBestemmelse())).containsOnly(LovvalgsBestemmelser_883_2004.FO_883_2004_ANNET);
+                .map(lp -> lp.getBestemmelse())).containsOnly(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET);
     }
 
     @Test
@@ -189,7 +188,7 @@ public class LovvalgsperiodeServiceTest {
     private Behandling lagBehandlingMedMedlOpplysning(MedlemskapDokument medlDokument) {
         Saksopplysning medl = new Saksopplysning();
         medl.setDokument(medlDokument);
-        medl.setType(SaksopplysningType.MEDLEMSKAP);
+        medl.setType(SaksopplysningType.MEDL);
 
         Behandling behandling = mock(Behandling.class);
         when(behandling.getId()).thenReturn(1L);

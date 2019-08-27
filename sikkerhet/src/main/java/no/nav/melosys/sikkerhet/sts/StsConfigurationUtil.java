@@ -1,5 +1,8 @@
 package no.nav.melosys.sikkerhet.sts;
 
+import java.util.HashMap;
+import javax.xml.namespace.QName;
+
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusException;
@@ -19,12 +22,9 @@ import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyEngine;
 import org.apache.cxf.ws.policy.attachment.reference.ReferenceResolver;
 import org.apache.cxf.ws.policy.attachment.reference.RemoteReferenceResolver;
-import org.apache.cxf.ws.security.SecurityConstants;
+import org.apache.cxf.rt.security.SecurityConstants;
 import org.apache.cxf.ws.security.trust.STSClient;
 import org.apache.neethi.Policy;
-
-import javax.xml.namespace.QName;
-import java.util.HashMap;
 
 public class StsConfigurationUtil {
 

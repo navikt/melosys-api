@@ -13,7 +13,6 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OrganisasjonsDetaljer {
@@ -41,7 +40,7 @@ public class OrganisasjonsDetaljer {
         return navn;
     }
 
-    public List<GeografiskAdresse> getForretningsadresser() {
+    List<GeografiskAdresse> getForretningsadresser() {
         return forretningsadresse;
     }
 
@@ -55,16 +54,16 @@ public class OrganisasjonsDetaljer {
         return konverterTilStrukturertAdresse(adresse);
     }
 
-    public UstrukturertAdresse hentUstrukturertForretningsadresse() {
+    UstrukturertAdresse hentUstrukturertForretningsadresse() {
         GeografiskAdresse adresse = hentFørsteGyldigeForretningsadresse();
         return konverterTilUstrukturertAdresse(adresse);
     }
 
-    public GeografiskAdresse hentFørsteGyldigeForretningsadresse() {
+    private GeografiskAdresse hentFørsteGyldigeForretningsadresse() {
         return hentFørsteGyldigeAdresse(forretningsadresse);
     }
 
-    public GeografiskAdresse hentFørsteGyldigePostadresse() {
+    private GeografiskAdresse hentFørsteGyldigePostadresse() {
         return hentFørsteGyldigeAdresse(postadresse);
     }
 
@@ -99,25 +98,10 @@ public class OrganisasjonsDetaljer {
             return null;
         }
 
-        UstrukturertAdresse ustrukturertAdresse = new UstrukturertAdresse();
+        UstrukturertAdresse ustrukturertAdresse;
         if (adresse instanceof SemistrukturertAdresse) {
             SemistrukturertAdresse sAdresse = (SemistrukturertAdresse) adresse;
-            if (sAdresse.getAdresselinje1() != null) {
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje1());
-            }
-            if (sAdresse.getAdresselinje2() != null) {
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje2());
-            }
-            if (sAdresse.getAdresselinje3() != null) {
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje3());
-            }
-            ustrukturertAdresse.landkode = sAdresse.getLandkode();
-
-            if (!sAdresse.getLandkode().equals(Landkoder.NO.getKode())) {
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getPoststedUtland());
-            } else {
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getPostnr());
-            }
+            ustrukturertAdresse = new UstrukturertAdresse(sAdresse);
         }
         else {
             // Enhetsregistret har bare SemistrukturertAdresser
@@ -152,12 +136,12 @@ public class OrganisasjonsDetaljer {
             strukturertAdresse.gatenavn = adresseLinje.replaceAll("\\s+", " ");
             strukturertAdresse.landkode = sAdresse.getLandkode();
 
-            if (!strukturertAdresse.landkode.equals(Landkoder.NO.getKode())) {
+            if (sAdresse.erUtenlandsk()) {
                 strukturertAdresse.postnummer = "";
                 strukturertAdresse.poststed = sAdresse.getPoststedUtland();
             } else {
                 strukturertAdresse.postnummer = sAdresse.getPostnr();
-                strukturertAdresse.poststed = "";
+                strukturertAdresse.poststed = sAdresse.getPoststed() == null ? "" : sAdresse.getPoststed();
             }
         }
         else {

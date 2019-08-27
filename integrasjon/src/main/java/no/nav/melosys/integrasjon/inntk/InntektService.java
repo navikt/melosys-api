@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.inntk;
 
 import java.io.StringWriter;
 import java.time.YearMonth;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -23,24 +22,16 @@ import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkUgyldig
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.*;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class InntektService implements InntektFasade {
-
-    private static final Logger log = LoggerFactory.getLogger(InntektService.class);
-
     private static final String INNTEKT_VERSJON = "3.2";
 
-    private InntektConsumer inntektConsumer;
-
-    private DokumentFactory dokumentFactory;
-
-    private ObjectFactory objectFactory;
-
+    private final InntektConsumer inntektConsumer;
+    private final DokumentFactory dokumentFactory;
+    private final ObjectFactory objectFactory;
     private final JAXBContext jaxbContext;
 
     public static final String FILTER = "MedlemskapA-inntekt";
@@ -59,7 +50,6 @@ public class InntektService implements InntektFasade {
         try {
             jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse.class);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IllegalStateException(e);
         }
     }
@@ -78,7 +68,6 @@ public class InntektService implements InntektFasade {
             uttrekksperiode.setMaanedFom(convertToXMLGregorianCalendar(fom));
             uttrekksperiode.setMaanedTom(convertToXMLGregorianCalendar(tom));
         } catch (DatatypeConfigurationException e) {
-            log.error("Fatal feil ved konvertering", e);
             throw new IllegalStateException(e);
         }
         request.setUttrekksperiode(uttrekksperiode);
@@ -112,14 +101,13 @@ public class InntektService implements InntektFasade {
             xmlRoot.setResponse(response);
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IntegrasjonException(e);
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
         saksopplysning.setKilde(SaksopplysningKilde.INNTK);
-        saksopplysning.setType(SaksopplysningType.INNTEKT);
+        saksopplysning.setType(SaksopplysningType.INNTK);
         saksopplysning.setVersjon(INNTEKT_VERSJON);
 
         // xml -> java objekter
@@ -144,5 +132,4 @@ public class InntektService implements InntektFasade {
                 DatatypeConstants.FIELD_UNDEFINED
         );
     }
-
 }

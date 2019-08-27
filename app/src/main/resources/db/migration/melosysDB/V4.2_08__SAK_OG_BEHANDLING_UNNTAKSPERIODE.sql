@@ -1,0 +1,2 @@
+INSERT INTO PROSESS_STEG(KODE, NAVN) VALUES ('REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET', 'Oppdaterer status på sak i sob til opprettet');
+INSERT INTO PROSESS_STEG(KODE, NAVN) VALUES ('REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET', 'Oppdaterer status på sak i sob til avsluttet');

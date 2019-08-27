@@ -22,15 +22,15 @@ public class Saksopplysning {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "opplysning_type", nullable = false, updatable = false)
-    @Convert(converter = SaksopplysningType.DbKonverterer.class)
     private SaksopplysningType type;
 
     @Column(name="versjon", nullable = false, updatable = false)
     private String versjon;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "kilde", nullable = false, updatable = false)
-    @Convert(converter = SaksopplysningKilde.DbKonverterer.class)
     private SaksopplysningKilde kilde;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
@@ -51,9 +51,6 @@ public class Saksopplysning {
 
     @Transient
     private SaksopplysningDokument dokument;
-
-    public Saksopplysning() {
-    }
 
     public Long getId() {
         return id;

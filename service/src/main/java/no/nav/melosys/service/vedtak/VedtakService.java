@@ -1,9 +1,9 @@
 package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -35,19 +35,6 @@ public class VedtakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntak(long behandlingID) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke sende andmodning om unntak fordi behandling " + behandlingID + IKKE_FINNES));
-        log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
-
-        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
-        behandlingRepository.save(behandling);
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling);
-
-        oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + IKKE_FINNES));
@@ -60,7 +47,7 @@ public class VedtakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void endreVedtak(Long behandlingID, Endretperioder endretperiode) throws FunksjonellException, TekniskException {
+    public void endreVedtak(Long behandlingID, Endretperiode endretperiode) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke endre vedtak fordi behandling " + behandlingID + IKKE_FINNES));
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);

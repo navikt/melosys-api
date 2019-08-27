@@ -7,31 +7,27 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000115.BostedsadresseType;
 import no.nav.dok.melosysbrev._000115.*;
+import no.nav.dok.melosysbrev._000115.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
-public class A001Mapper {
+class A001Mapper {
 
-    public SEDA001 mapSEDA001(BrevDataA001 brevData) throws TekniskException {
+    SEDA001 mapSEDA001(BrevDataA001 brevData) throws TekniskException {
         SEDA001 seda001 = new SEDA001();
 
         seda001.setAntallVedlegg("0");
@@ -51,16 +47,15 @@ public class A001Mapper {
             seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(selvstendigeVirksomheter));
         } else {
             // Foretakliste = Identifikasjon av arbeidsgiver (Kun arbeidsgivere)
-            List<AvklartVirksomhet> arbeidsgivendeVirksomheter = brevData.arbeidsgivendeVirkomsheter;
-            seda001.setForetakListe(mapForetakliste(arbeidsgivendeVirksomheter));
+            seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirkomsheter));
         }
 
         seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.arbeidssteder));
 
-        seda001.setLovvalgsPeriodeListe(mapLovvalgsperioder(brevData.lovvalgsperioder));
+        seda001.setLovvalgsPeriodeListe(mapAnmodningsperioder(brevData.anmodningsperioder));
 
         // Alle lovvalgsperiodene må ha samme landkode
-        Lovvalgsperiode lovvalgsperiode = brevData.lovvalgsperioder.iterator().next();
+        Anmodningsperiode lovvalgsperiode = brevData.anmodningsperioder.iterator().next();
         seda001.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getUnntakFraBestemmelse().getKode()));
         seda001.setLovvalgsLand(hentIso3Landkode(lovvalgsperiode.getLovvalgsland().getKode()));  // Alltid Norge
 
@@ -84,13 +79,14 @@ public class A001Mapper {
         return seda001;
     }
 
-    public AnsettelsesPeriodeType mapAnsettelsesperiode(Periode ansettelsesperiode) {
+    private AnsettelsesPeriodeType mapAnsettelsesperiode(Periode ansettelsesperiode) {
         AnsettelsesPeriodeType ansettelsesperiodeType = new AnsettelsesPeriodeType();
         ansettelsesperiodeType.setFomDato(ansettelsesperiode.getFom().toString());
         return ansettelsesperiodeType;
     }
 
-    private TidligereLovvalgsperiodeListeType mapTidligereLovvalgsperioder(Collection<Lovvalgsperiode> tidligerePerioder) throws TekniskException {
+    private TidligereLovvalgsperiodeListeType mapTidligereLovvalgsperioder(Collection<Lovvalgsperiode> tidligerePerioder)
+        throws TekniskException {
         TidligereLovvalgsperiodeListeType tidligereLovvalgsperiodeListeType = new TidligereLovvalgsperiodeListeType();
         for (Lovvalgsperiode lovvalgsperiode : tidligerePerioder) {
             PeriodeType periode = new PeriodeType();
@@ -98,7 +94,7 @@ public class A001Mapper {
                 periode.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
                 periode.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
             } catch (DatatypeConfigurationException e) {
-                throw new TekniskException("Feil ved konvertering av dato for tidligere lovvalgsperiode");
+                throw new TekniskException("Feil ved konvertering av dato for tidligere lovvalgsperiode", e);
             }
 
             LovvalgsbestemmelseKode bestemmelse = LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode());
@@ -115,7 +111,7 @@ public class A001Mapper {
             try {
                 tidligereAnmodningType.setTidligereAnmodningsDato(convertToXMLGregorianCalendarRemoveTimezone(dato));
             } catch (DatatypeConfigurationException e) {
-                throw new TekniskException("Feil ved konvertering av dato for tidligere anmodning");
+                throw new TekniskException("Feil ved konvertering av dato for tidligere anmodning", e);
             }
             tidligereAnmodningListeType.getTidligereAnmodning().add(tidligereAnmodningType);
         }
@@ -138,12 +134,13 @@ public class A001Mapper {
         return trygdemyndighet;
     }
 
-    private PersonType mapPerson(PersonDokument personDok, Bostedsadresse adresse, Optional<String> utenlandskIdent) throws TekniskException {
+    private PersonType mapPerson(PersonDokument personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent)
+        throws TekniskException {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
         person.setKjønn(KjoennKode.fromValue(personDok.kjønn.getKode()));
-        person.setBostedsadresse(mapBostedAdresse(adresse));
+        person.setBostedsadresse(mapBostedAdresse(bostedsadresse));
         person.setFødselsnummer(personDok.fnr);
         //Fødeland og Fødested skal ikke fylles ut
         utenlandskIdent.ifPresent(person::setUtenlandskID);
@@ -184,7 +181,7 @@ public class A001Mapper {
 
             ArbeidsstedType arbeidsstedBrev;
             if (arbeidssted.erFysisk()) {
-                arbeidsstedBrev = mapFysiskArbeidssted(arbeidssted);
+                arbeidsstedBrev = mapFysiskArbeidssted((FysiskArbeidssted)arbeidssted);
             }
             else {
                 arbeidsstedBrev = mapIkkeFysiskArbeidssted(arbeidssted);
@@ -194,18 +191,18 @@ public class A001Mapper {
         return arbeidsstedListe;
     }
 
-    private ArbeidsstedType mapFysiskArbeidssted(Arbeidssted arbeidssted) throws TekniskException {
+    private ArbeidsstedType mapFysiskArbeidssted(FysiskArbeidssted arbeidssted) throws TekniskException {
         ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
-        arbeidsstedBrev.setNavn(arbeidssted.navn);
+        arbeidsstedBrev.setNavn(arbeidssted.getNavn());
         arbeidsstedBrev.setIkkeFysiskArbeidssted("false");
         arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.ORDINAER);
 
-        StrukturertAdresse adresse = arbeidssted.adresse;
+        StrukturertAdresse adresse = arbeidssted.getAdresse();
         AdresseType3 adresseBrev = new AdresseType3();
         adresseBrev.setGatenavn(adresse.gatenavn);
         adresseBrev.setHusnummer(adresse.husnummer);
         adresseBrev.setPostnummer(adresse.postnummer);
-        adresseBrev.setPossted(adresse.poststed);
+        adresseBrev.setPoststed(adresse.poststed);
         adresseBrev.setRegion(adresse.region);
         adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
         arbeidsstedBrev.setAdresse(adresseBrev);
@@ -215,25 +212,24 @@ public class A001Mapper {
 
     private ArbeidsstedType mapIkkeFysiskArbeidssted(Arbeidssted arbeidssted) throws TekniskException {
         ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
-        arbeidsstedBrev.setNavn(arbeidssted.navn);
+        arbeidsstedBrev.setNavn(arbeidssted.getNavn());
         arbeidsstedBrev.setIkkeFysiskArbeidssted("true");
-        arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.fromValue(arbeidssted.yrkesgruppe.getKode()));
+        arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.fromValue(arbeidssted.getYrkesgruppe().getKode()));
 
         AdresseType3 adresseBrev = new AdresseType3();
-        adresseBrev.setLand(hentIso3Landkode(arbeidssted.landkode));
+        adresseBrev.setLand(hentIso3Landkode(arbeidssted.getLandkode()));
         arbeidsstedBrev.setAdresse(adresseBrev);
         return arbeidsstedBrev;
     }
 
-    private BostedsadresseType mapBostedAdresse(Bostedsadresse bosted) throws TekniskException {
-        Gateadresse gateadresse = bosted.getGateadresse();
-
+    private BostedsadresseType mapBostedAdresse(StrukturertAdresse bosted) throws TekniskException {
         BostedsadresseType bostedsadresse = new BostedsadresseType();
-        bostedsadresse.setGatenavn(gateadresse.getGatenavn());
-        bostedsadresse.setHusnummer(gateadresse.getHusnummer() + " " + gateadresse.getHusbokstav());
-        bostedsadresse.setPostnummer(bosted.getPostnr());
-        bostedsadresse.setPoststed(bosted.getPoststed());
-        bostedsadresse.setLand(hentIso3Landkode(bosted.getLand().getKode()));
+        bostedsadresse.setGatenavn(bosted.gatenavn);
+        bostedsadresse.setHusnummer(bosted.husnummer);
+        bostedsadresse.setPostnummer(bosted.postnummer);
+        bostedsadresse.setPoststed(bosted.poststed);
+        bostedsadresse.setRegion(bosted.region);
+        bostedsadresse.setLand(hentIso3Landkode(bosted.landkode));
         bostedsadresse.setAdresseType(BostedsadresseTypeKode.BOSTEDSLAND); // Lev1 kun bostedsland
         return bostedsadresse;
     }
@@ -262,7 +258,8 @@ public class A001Mapper {
         return foretakListe;
     }
 
-    private SelvstendigNaeringsvirksomhetListeType mapSelvstendigvirksometliste(List<AvklartVirksomhet> virksomheter) throws TekniskException {
+    private SelvstendigNaeringsvirksomhetListeType mapSelvstendigvirksometliste(List<AvklartVirksomhet> virksomheter)
+        throws TekniskException {
         SelvstendigNaeringsvirksomhetListeType selvstendigeVirksomheter = new SelvstendigNaeringsvirksomhetListeType();
         for (AvklartVirksomhet virksomhet : virksomheter) {
             SelvstendigNaeringsvirksomhetType selvstendigVirksomhet = new SelvstendigNaeringsvirksomhetType();
@@ -283,19 +280,19 @@ public class A001Mapper {
         return selvstendigeVirksomheter;
     }
 
-    private LovvalgsPeriodeListeType mapLovvalgsperioder(Collection<Lovvalgsperiode> lovvalgsperioder) throws TekniskException {
-        LovvalgsPeriodeListeType lovvalgsperioderBrev = new LovvalgsPeriodeListeType();
-        for (Lovvalgsperiode periode : lovvalgsperioder) {
-            LovvalgsPeriodeType lovvalgsperiodeBrev = mapLovvalgsperiode(periode);
-            lovvalgsperioderBrev.getLovvalgsPeriode().add(lovvalgsperiodeBrev);
+    private LovvalgsPeriodeListeType mapAnmodningsperioder(Collection<Anmodningsperiode> anmodningsperioder) throws TekniskException {
+        LovvalgsPeriodeListeType anmodningsperoderBrev = new LovvalgsPeriodeListeType();
+        for (Anmodningsperiode periode : anmodningsperioder) {
+            LovvalgsPeriodeType lovvalgsperiodeBrev = mapAnmodningsperiode(periode);
+            anmodningsperoderBrev.getLovvalgsPeriode().add(lovvalgsperiodeBrev);
 
             UnntakFraLovvalgslandType unntakFraLovvalgslandType = mapUnntaksland(periode);
-            lovvalgsperioderBrev.getUnntakFraLovvalgsland().add(unntakFraLovvalgslandType);
+            anmodningsperoderBrev.getUnntakFraLovvalgsland().add(unntakFraLovvalgslandType);
         }
-        return lovvalgsperioderBrev;
+        return anmodningsperoderBrev;
     }
 
-    private LovvalgsPeriodeType mapLovvalgsperiode(Lovvalgsperiode periode) throws TekniskException {
+    private LovvalgsPeriodeType mapAnmodningsperiode(Anmodningsperiode periode) throws TekniskException {
         LovvalgsPeriodeType lovvalgsperiodeBrev = new LovvalgsPeriodeType();
         try {
             lovvalgsperiodeBrev.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(periode.getFom()));
@@ -306,7 +303,7 @@ public class A001Mapper {
         return lovvalgsperiodeBrev;
     }
 
-    private UnntakFraLovvalgslandType mapUnntaksland(Lovvalgsperiode periode) throws TekniskException {
+    private UnntakFraLovvalgslandType mapUnntaksland(Anmodningsperiode periode) throws TekniskException {
         UnntakFraLovvalgslandType unntakFraLovvalgslandType = new UnntakFraLovvalgslandType();
         String land = periode.getUnntakFraLovvalgsland().getKode();
         unntakFraLovvalgslandType.getUnntakFraLovvalgsland().add(hentIso3Landkode(land));

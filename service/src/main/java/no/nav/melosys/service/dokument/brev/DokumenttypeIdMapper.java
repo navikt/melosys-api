@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
 
 /**
@@ -15,13 +15,18 @@ public enum DokumenttypeIdMapper {
                 return "000116";
             case INNVILGELSE_YRKESAKTIV:
                 return "000108";
+            case INNVILGELSE_YRKESAKTIV_FLERE_LAND:
+                return "000083";
             case AVSLAG_ARBEIDSGIVER:
                 return "000109";
             case INNVILGELSE_ARBEIDSGIVER:
                 return "000127";
             case AVSLAG_YRKESAKTIV:
-            case ORIENTERING_ANMODNING_UNNTAK:
                 return "000081";
+            case AVSLAG_MANGLENDE_OPPLYSNINGER:
+                return "000125";
+            case ORIENTERING_ANMODNING_UNNTAK:
+                return "000084";
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
                 return "000082";
             case MELDING_HENLAGT_SAK:

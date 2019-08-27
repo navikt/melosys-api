@@ -3,133 +3,197 @@ package no.nav.melosys.domain.oppgave;
 import java.time.LocalDate;
 import java.util.Comparator;
 
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.exception.FunksjonellException;
 
 /**
  * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
  */
-public class Oppgave {
-    private String oppgaveId;
-    private String saksnummer;
-    private LocalDate fristFerdigstillelse;
-    private Tema tema;
-    private Oppgavetyper oppgavetype;
-    private PrioritetType prioritet;
-    private String journalpostId;
-    private String tilordnetRessurs;
-    private int versjon;
-    private String aktørId;
-    private Behandlingstyper behandlingstype;
-    private Behandlingstema behandlingstema;
-    private String behandlesAvApplikasjon;
+public final class Oppgave {
+    private static final int FRIST_JFR_DAGER = 1;
+    private static final int FRIST_VUR_DAGER = 1;
+    private static final int FRIST_BEH_UKER = 12;
 
-    public Oppgave() {
+    private final String aktørId;
+    private final Behandlingstema behandlingstema;
+    private final Behandlingstyper behandlingstype;
+    private final String beskrivelse;
+    private final Fagsystem behandlesAvApplikasjon;
+    private final LocalDate fristFerdigstillelse;
+    private final String journalpostId;
+    private final String oppgaveId;
+    private final Oppgavetyper oppgavetype;
+    private final PrioritetType prioritet;
+    private final String saksnummer;
+    private final Tema tema;
+    private final String tilordnetRessurs;
+    private final int versjon;
+
+    public static class Builder {
+        private String aktørId;
+        private Fagsystem behandlesAvApplikasjon;
+        private Behandlingstema behandlingstema;
+        private Behandlingstyper behandlingstype;
+        private String beskrivelse;
+        private LocalDate fristFerdigstillelse;
+        private String journalpostId;
+        private String oppgaveId;
+        private Oppgavetyper oppgavetype;
+        private PrioritetType prioritet;
+        private String saksnummer;
+        private Tema tema;
+        private String tilordnetRessurs;
+        private int versjon;
+
+        public Builder setOppgaveId(String oppgaveId) {
+            this.oppgaveId = oppgaveId;
+            return this;
+        }
+
+        public Builder setBehandlesAvApplikasjon(Fagsystem fagsystem) {
+            this.behandlesAvApplikasjon = fagsystem;
+            return this;
+        }
+
+        public Builder setSaksnummer(String saksnummer) {
+            this.saksnummer = saksnummer;
+            return this;
+        }
+
+        public Builder setBeskrivelse(String beskrivelse) {
+            this.beskrivelse = beskrivelse;
+            return this;
+        }
+
+        public Builder setFristFerdigstillelse(LocalDate fristFerdigstillelse) {
+            this.fristFerdigstillelse = fristFerdigstillelse;
+            return this;
+        }
+
+        public Builder setTema(Tema tema) {
+            this.tema = tema;
+            return this;
+        }
+
+        public Builder setOppgavetype(Oppgavetyper oppgavetype) {
+            this.oppgavetype = oppgavetype;
+            return this;
+        }
+
+        public Builder setPrioritet(PrioritetType prioritet) {
+            this.prioritet = prioritet;
+            return this;
+        }
+
+        public Builder setJournalpostId(String journalpostId) {
+            this.journalpostId = journalpostId;
+            return this;
+        }
+
+        public Builder setTilordnetRessurs(String tilordnetRessurs) {
+            this.tilordnetRessurs = tilordnetRessurs;
+            return this;
+        }
+
+        public Builder setVersjon(int versjon) {
+            this.versjon = versjon;
+            return this;
+        }
+
+        public Builder setAktørId(String aktørId) {
+            this.aktørId = aktørId;
+            return this;
+        }
+
+        public Builder setBehandlingstype(Behandlingstyper behandlingstype) {
+            this.behandlingstype = behandlingstype;
+            return this;
+        }
+
+        public Builder setBehandlingstema(Behandlingstema behandlingstema) {
+            this.behandlingstema = behandlingstema;
+            return this;
+        }
+
+        public Oppgave build() {
+            return new Oppgave(this);
+        }
     }
 
-    public Behandlingstyper getBehandlingstype() {
-        return behandlingstype;
-    }
-
-    public void setBehandlingstype(Behandlingstyper behandlingstype) {
-        this.behandlingstype = behandlingstype;
-    }
-
-    public Behandlingstema getBehandlingstema() {
-        return behandlingstema;
-    }
-
-    public void setBehandlingstema(Behandlingstema behandlingstema) {
-        this.behandlingstema = behandlingstema;
+    private Oppgave(Builder builder) {
+        this.oppgaveId = builder.oppgaveId;
+        this.behandlesAvApplikasjon = builder.behandlesAvApplikasjon != null ? builder.behandlesAvApplikasjon : Fagsystem.MELOSYS;
+        this.saksnummer = builder.saksnummer;
+        this.fristFerdigstillelse = builder.fristFerdigstillelse;
+        this.tema = builder.tema;
+        this.oppgavetype = builder.oppgavetype;
+        this.prioritet = builder.prioritet != null ? builder.prioritet : PrioritetType.NORM;
+        this.journalpostId = builder.journalpostId;
+        this.tilordnetRessurs = builder.tilordnetRessurs;
+        this.versjon = builder.versjon;
+        this.aktørId = builder.aktørId;
+        this.behandlingstype = builder.behandlingstype;
+        this.behandlingstema = builder.behandlingstema;
+        this.beskrivelse = builder.beskrivelse;
     }
 
     public String getAktørId() {
         return aktørId;
     }
 
-    public void setAktørId(String aktørId) {
-        this.aktørId = aktørId;
+    public Fagsystem getBehandlesAvApplikasjon() {
+        return behandlesAvApplikasjon;
     }
 
-    public String getTilordnetRessurs() {
-        return tilordnetRessurs;
+    public Behandlingstema getBehandlingstema() {
+        return behandlingstema;
     }
 
-    public void setTilordnetRessurs(String tilordnetRessurs) {
-        this.tilordnetRessurs = tilordnetRessurs;
+    public Behandlingstyper getBehandlingstype() {
+        return behandlingstype;
     }
 
-    public String getOppgaveId() {
-        return oppgaveId;
-    }
-
-    public void setOppgaveId(String oppgaveId) {
-        this.oppgaveId = oppgaveId;
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     public LocalDate getFristFerdigstillelse() {
         return fristFerdigstillelse;
     }
 
-    public void setFristFerdigstillelse(LocalDate fristFerdigstillelse) {
-        this.fristFerdigstillelse = fristFerdigstillelse;
+    public String getJournalpostId() {
+        return journalpostId;
+    }
+
+    public String getOppgaveId() {
+        return oppgaveId;
     }
 
     public Oppgavetyper getOppgavetype() {
         return oppgavetype;
     }
 
-    public void setOppgavetype(Oppgavetyper oppgavetype) {
-        this.oppgavetype = oppgavetype;
-    }
-
     public PrioritetType getPrioritet() {
         return prioritet;
-    }
-
-    public void setPrioritet(PrioritetType prioritet) {
-        this.prioritet = prioritet;
-    }
-
-    public String getJournalpostId() {
-        return journalpostId;
-    }
-
-    public void setJournalpostId(String journalpostId) {
-        this.journalpostId = journalpostId;
     }
 
     public String getSaksnummer() {
         return saksnummer;
     }
 
-    public void setSaksnummer(String saksnummer) {
-        this.saksnummer = saksnummer;
-    }
-
     public Tema getTema() {
         return tema;
     }
 
-    public void setTema(Tema tema) {
-        this.tema = tema;
+    public String getTilordnetRessurs() {
+        return tilordnetRessurs;
     }
 
     public int getVersjon() {
         return versjon;
-    }
-
-    public void setVersjon(int versjon) {
-        this.versjon = versjon;
-    }
-
-    public String getBehandlesAvApplikasjon() {
-        return behandlesAvApplikasjon;
-    }
-
-    public void setBehandlesAvApplikasjon(String behandlesAvApplikasjon) {
-        this.behandlesAvApplikasjon = behandlesAvApplikasjon;
     }
 
     public boolean erBehandling() {
@@ -142,6 +206,30 @@ public class Oppgave {
 
     public boolean erVurderDokument() {
         return oppgavetype == Oppgavetyper.VUR;
+    }
+
+    public boolean erSedBehandling() {
+        return oppgavetype == Oppgavetyper.BEH_SED;
+    }
+
+    public static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
+        switch (behandlingstype) {
+            case SOEKNAD:
+                return Oppgavetyper.BEH_SAK_MK;
+            case ENDRET_PERIODE:
+                return Oppgavetyper.VUR;
+            case UTL_MYND_UTPEKT_SEG_SELV:
+            case REGISTRERING_UNNTAK_NORSK_TRYGD:
+                return Oppgavetyper.BEH_SED;
+            case ANKE:
+            case KLAGE:
+            case UTL_MYND_UTPEKT_NORGE:
+            case NY_VURDERING:
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
+            case ØVRIGE_SED:
+            default:
+                throw new UnsupportedOperationException();
+        }
     }
 
     /**
@@ -167,4 +255,16 @@ public class Oppgave {
         }
         return res;
     };
+
+    public LocalDate lagFristFerdigstillelse(LocalDate fraDato) throws FunksjonellException {
+        if (erJournalFøring()) {
+            return fraDato.plusDays(FRIST_JFR_DAGER);
+        } else if (erBehandling() || erSedBehandling()) {
+            return fraDato.plusWeeks(FRIST_BEH_UKER);
+        } else if (erVurderDokument()) {
+            return fraDato.plusWeeks(FRIST_VUR_DAGER);
+        } else {
+            throw new FunksjonellException("Type " + oppgavetype.getKode() + " støttes ikke.");
+        }
+    }
 }

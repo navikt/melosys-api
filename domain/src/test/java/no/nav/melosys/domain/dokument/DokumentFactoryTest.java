@@ -21,7 +21,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -55,7 +55,7 @@ public class DokumentFactoryTest {
         }
         test.setDokumentXml(stringBuilder.toString());
 
-        test.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        test.setType(SaksopplysningType.ARBFORH);
         test.setVersjon("3.0");
 
         factory.lagDokument(test);
@@ -81,7 +81,7 @@ public class DokumentFactoryTest {
         }
         test.setDokumentXml(stringBuilder.toString());
 
-        test.setType(SaksopplysningType.ORGANISASJON);
+        test.setType(SaksopplysningType.ORG);
         test.setVersjon("4.0");
 
         factory.lagDokument(test);
@@ -107,14 +107,14 @@ public class DokumentFactoryTest {
     @Test
     public void lagSedDokument_xmlBlirProdusert() {
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setStatsborgerskap(Collections.singletonList("NO"));
-        sedDokument.setPeriode(new Periode(LocalDate.now(), LocalDate.now()));
-        sedDokument.setLovvalgBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        sedDokument.setStatsborgerskapKoder(Collections.singletonList("NO"));
+        sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now()));
+        sedDokument.setLovvalgBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         sedDokument.setErEndring(false);
-        sedDokument.setRinaDokumentId("123");
+        sedDokument.setRinaDokumentID("123");
         sedDokument.setRinaSaksnummer("saksnummer123");
         sedDokument.setFnr("333");
-        sedDokument.setLovvalgsland(Landkoder.DE);
+        sedDokument.setLovvalgslandKode(Landkoder.DE);
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);

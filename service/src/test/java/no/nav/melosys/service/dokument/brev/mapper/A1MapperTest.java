@@ -9,7 +9,6 @@ import java.util.HashSet;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.dok.melosysbrev._000067.A1;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
@@ -24,20 +23,27 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagMaritimtArbeidssted;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +57,7 @@ public class A1MapperTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private EnhancedRandom enhancedRandom;
+    private EasyRandom easyRandom;
 
     private Behandlingsresultat behandlingsresultat;
     private Behandling behandling;
@@ -61,13 +67,13 @@ public class A1MapperTest {
     @Before
     public void setUp() {
         mapper = new A1Mapper();
-        enhancedRandom = EnhancedRandomConfigurer.randomForDokProd();
+        easyRandom = EasyRandomConfigurer.randomForDokProd();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
 
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2);
-        lovvalgsperiode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_5);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2);
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
@@ -75,48 +81,44 @@ public class A1MapperTest {
         behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
         when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Collections.singletonList(lovvalgsperiode)));
+        when(behandlingsresultat.hentValidertLovvalgsperiode()).thenReturn(lovvalgsperiode);
 
-        Bostedsadresse boAdresse = new Bostedsadresse();
-        boAdresse.getGateadresse().setGatenavn("Gatenavn");
-        boAdresse.getGateadresse().setHusnummer(23);
-        boAdresse.setPostnr("0165");
-        boAdresse.setPoststed("Oslo");
-        boAdresse.setLand(new Land(Land.NORGE));
+        StrukturertAdresse boAdresse = new StrukturertAdresse();
+        boAdresse.husnummer = "12B";
+        boAdresse.gatenavn = "Bogata";
+        boAdresse.postnummer = "0165";
+        boAdresse.poststed = "Poststed";
+        boAdresse.region = "Region";
+        boAdresse.landkode = Landkoder.NO.getKode();
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummer = "25";
-        strukturertAdresse.gatenavn = "Gatenavn";
-        strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.poststed = "Poststed";
-        strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = "Land";
+        StrukturertAdresse strukturertAdresse = lagStrukturertAdresse();
 
-        AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
+        AvklartVirksomhet virksomhet = new AvklartVirksomhet("Jarlsberg",
                                                            "123456789",
                                                             strukturertAdresse,
                                                             Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        AvklartVirksomhet utenlandskVirksomhet = new AvklartVirksomhet("Jarlsberg",
+        AvklartVirksomhet utenlandskVirksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
                                                                         "123456789",
                                                                         strukturertAdresse,
                                                                         Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
-        Arbeidssted maritimtArbeidssted = new Arbeidssted("Dunfjæder", "GB", Yrkesgrupper.SOKKEL_ELLER_SKIP);
+        Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
+
+        Arbeidssted maritimtArbeidssted = lagMaritimtArbeidssted();
 
         brevData = new BrevDataA1();
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        brevData.norskeVirksomheter = new ArrayList<>(Collections.singletonList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeForetak = new HashSet<>();
-        brevData.utenlandskeVirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
         brevData.bostedsadresse = boAdresse;
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
         brevData.person = lagPersonDokument();
         brevData.hovedvirksomhet = virksomhet;
+        brevData.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
     }
 
     protected static PersonDokument lagPersonDokument() {
@@ -127,7 +129,7 @@ public class A1MapperTest {
         person.etternavn = "Nordmann";
         person.fødselsdato = LocalDate.now();
         person.statsborgerskap = new Land();
-        person.statsborgerskap.setKode("NO");
+        person.statsborgerskap.setKode("NOR");
         return person;
     }
 
@@ -136,7 +138,7 @@ public class A1MapperTest {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-4");
 
-        MelosysNAVFelles navFelles = enhancedRandom.nextObject(MelosysNAVFelles.class);
+        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
@@ -150,11 +152,11 @@ public class A1MapperTest {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-4");
 
-        MelosysNAVFelles navFelles = enhancedRandom.nextObject(MelosysNAVFelles.class);
+        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
-        brevData.bostedsadresse.getGateadresse().setGatenavn(null);
+        brevData.bostedsadresse.gatenavn = null;
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo(" ");
 
@@ -190,5 +192,4 @@ public class A1MapperTest {
         brevdataType.setVedlegg(vedlegg);
         return factory.createBrevdata(brevdataType);
     }
-
 }

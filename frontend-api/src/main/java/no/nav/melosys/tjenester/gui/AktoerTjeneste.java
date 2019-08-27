@@ -15,7 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -33,15 +33,15 @@ import static java.util.stream.Collectors.toList;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AktoerTjeneste extends RestTjeneste {
 
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     private final AktoerService aktoerService;
 
     private final FagsakService fagsakService;
 
     @Autowired
-    public AktoerTjeneste(Tilgang tilgang, AktoerService aktoerService, FagsakService fagsakService) {
-        this.tilgang = tilgang;
+    public AktoerTjeneste(TilgangService tilgangService, AktoerService aktoerService, FagsakService fagsakService) {
+        this.tilgangService = tilgangService;
         this.aktoerService = aktoerService;
         this.fagsakService = fagsakService;
     }
@@ -58,14 +58,14 @@ public class AktoerTjeneste extends RestTjeneste {
         throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgang.sjekkSak(fagsak);
+        tilgangService.sjekkSak(fagsak);
 
         Aktoersroller rolle = null;
         Representerer representantRepresenterer = null;
-        if (!StringUtils.isEmpty(rolleKode)) {
+        if (StringUtils.isNotEmpty(rolleKode)) {
             rolle = Aktoersroller.valueOf(rolleKode);
         }
-        if (!StringUtils.isEmpty(representerer)) {
+        if (StringUtils.isNotEmpty(representerer)) {
             representantRepresenterer = Representerer.valueOf(representerer);
         }
 
@@ -80,8 +80,9 @@ public class AktoerTjeneste extends RestTjeneste {
         response = AktoerDto.class)
     public Response lagAktoerer(@PathParam("saksnummer") String saksnummer, @ApiParam AktoerDto aktoerDto) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgang.sjekkSak(fagsak);
-        aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
+        tilgangService.sjekkSak(fagsak);
+        Long databaseId = aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
+        aktoerDto.setDatabaseID(databaseId);
         return Response.ok(aktoerDto).build();
     }
 

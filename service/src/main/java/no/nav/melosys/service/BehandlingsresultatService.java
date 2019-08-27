@@ -2,10 +2,13 @@ package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.apache.commons.beanutils.BeanUtils;
@@ -54,6 +57,7 @@ public class BehandlingsresultatService {
         replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
         replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);
         replikerVilkaarsresultat(behandlingsresultat, behandlingsresultatsreplika);
+        replikerBehandlingsresultatBegrunnelser(behandlingsresultat, behandlingsresultatsreplika);
 
         behandlingsresultatRepository.save(behandlingsresultatsreplika);
     }
@@ -87,6 +91,18 @@ public class BehandlingsresultatService {
         }
     }
 
+    private void replikerBehandlingsresultatBegrunnelser(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
+        throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+        behandlingsresultatsreplika.setBehandlingsresultatBegrunnelser(new HashSet<>());
+        for (BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelseOrig : behandlingsresultat.getBehandlingsresultatBegrunnelser()) {
+            BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelsesreplika = (BehandlingsresultatBegrunnelse) BeanUtils.cloneBean(behandlingsresultatBegrunnelseOrig);
+            behandlingsresultatBegrunnelsesreplika.setBehandlingsresultat(behandlingsresultatsreplika);
+            behandlingsresultatBegrunnelsesreplika.setId(null);
+            behandlingsresultatBegrunnelsesreplika.setKode(behandlingsresultatBegrunnelseOrig.getKode());
+            behandlingsresultatsreplika.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelsesreplika);
+        }
+    }
+
     private void replikerAvklartefakta(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
         throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         behandlingsresultatsreplika.setAvklartefakta(new HashSet<>());
@@ -104,4 +120,23 @@ public class BehandlingsresultatService {
         }
     }
 
+    public void oppdaterBehandlingsresultattype(Long id, Behandlingsresultattyper behandlingsresultattype) {
+        Optional<Behandlingsresultat> optionalBehandlingsresultat = behandlingsresultatRepository.findById(id);
+        if (optionalBehandlingsresultat.isPresent()){
+            Behandlingsresultat behandlingsresultat = optionalBehandlingsresultat.get();
+            log.info("Setter behandlingsresultattype på {} til {}", id, behandlingsresultattype);
+            behandlingsresultat.setType(behandlingsresultattype);
+            behandlingsresultatRepository.save(behandlingsresultat);
+        }
+    }
+
+    public void oppdaterBehandlingsMaate(Long id, Behandlingsmaate behandlingsmaate) throws FunksjonellException {
+        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(id);
+        if (behandlingsresultat.getBehandlingsmåte() != null && behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.UDEFINERT) {
+            throw new FunksjonellException("Behandlingsmaate kan ikke oppdateres etter det er definert!");
+        }
+
+        behandlingsresultat.setBehandlingsmåte(behandlingsmaate);
+        behandlingsresultatRepository.save(behandlingsresultat);
+    }
 }

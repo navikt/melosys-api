@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+
 @Api(tags = {"fagsaker"})
 @Path("/fagsaker")
 @Service
@@ -35,11 +37,8 @@ public class KontaktopplysningTjeneste extends RestTjeneste {
     public Response hentKontaktopplysning(@PathParam("saksnummer") String saksnummer,
                                           @PathParam("orgnr") String orgnr) {
         Optional<Kontaktopplysning> kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(saksnummer, orgnr);
-        if (kontaktopplysning.isPresent()) {
-            return Response.ok(kontaktopplysning.get()).build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
+        return kontaktopplysning.map(opp -> Response.ok(KontaktInfoDto.av(opp)))
+            .orElse(Response.status(NOT_FOUND)).build();
     }
 
     @POST

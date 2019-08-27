@@ -13,7 +13,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataHenleggelse;
+import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 
 public class BrevDataByggerHenleggelse implements BrevDataBygger {
@@ -29,7 +29,7 @@ public class BrevDataByggerHenleggelse implements BrevDataBygger {
     public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, IntegrasjonException {
         Instant forsendelseMottattTidspunkt = hentInitierendeJournalpostMottattTidspunktFraFørsteBehandling(behandling);
 
-        BrevDataHenleggelse brevData = new BrevDataHenleggelse(saksbehandler, brevbestillingDto);
+        BrevDataMottattDato brevData = new BrevDataMottattDato(saksbehandler, brevbestillingDto);
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = forsendelseMottattTidspunkt;
         return brevData;
     }

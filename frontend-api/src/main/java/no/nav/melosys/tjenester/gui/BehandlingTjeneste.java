@@ -9,13 +9,14 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.BehandlingsstatusDto;
-import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
+import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +34,12 @@ public class BehandlingTjeneste extends RestTjeneste {
 
     private final BehandlingService behandlingService;
 
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public BehandlingTjeneste(BehandlingService behandlingService, Tilgang tilgang) {
+    public BehandlingTjeneste(BehandlingService behandlingService, TilgangService tilgangService) {
         this.behandlingService = behandlingService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @POST
@@ -48,33 +49,68 @@ public class BehandlingTjeneste extends RestTjeneste {
     public void oppdaterStatus(@PathParam("behandlingID") long behandlingID,
                                @ApiParam("statusKode") BehandlingsstatusDto status) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, status.getBehandlingsstatus().getKode());
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         behandlingService.oppdaterStatus(behandlingID, status.getBehandlingsstatus());
     }
 
     @POST
-    @Path("{behandlingID}/perioder")
+    @Path("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public Response knyttMedlemsperioder(@PathParam("behandlingID") long behandlingID,
                                          TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
 
         behandlingService.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioder.periodeIder);
         return Response.ok(tidligereMedlemsperioder).build();
     }
 
     @GET
-    @Path("{behandlingID}/perioder")
+    @Path("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public Response hentMedlemsperioder(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
 
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
         return Response.ok(tidligereMedlemsperioderDto).build();
+    }
+
+    @GET
+    @Path("{behandlingID}")
+    @ApiOperation(value = "Hent en spesifikk behandling",
+        response = TidligereMedlemsperioderDto.class)
+    public Response hentBehandling(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+        String saksbehandler = SubjectHandler.getInstance().getUserID();
+        log.info("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
+
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
+        BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandler);
+        return Response.ok(behandlingDto).build();
+    }
+
+    private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
+        BehandlingDto behandlingDto = new BehandlingDto();
+        behandlingDto.setBehandlingID(behandling.getId());
+        behandlingDto.setRedigerbart(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler));
+        behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
+        SaksopplysningerDto saksopplysningerDto = SaksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
+        behandlingDto.setSaksopplysninger(saksopplysningerDto);
+        return behandlingDto;
+    }
+
+    private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
+        BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
+        behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
+        behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
+        behandlingOppsummeringDto.setEndretDato(behandling.getEndretDato());
+        behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
+        behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
+        return behandlingOppsummeringDto;
     }
 }

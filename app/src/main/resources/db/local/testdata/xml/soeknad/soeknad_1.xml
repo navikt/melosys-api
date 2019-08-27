@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone='yes'?>
+<soeknadDokument>
+    <periode>
+        <fom>2018-01-01</fom>
+        <tom>2018-12-01</tom>
+    </periode>
+    <soeknadsland>
+        <landkoder>AT</landkoder>
+    </soeknadsland>
+    <personOpplysninger>
+        <medfolgendeAndre>99999999994</medfolgendeAndre>
+    </personOpplysninger>
+    <oppholdUtland>
+        <oppholdsPeriode/>
+    </oppholdUtland>
+    <arbeidNorge/>
+    <arbeidUtland>
+        <foretakNavn>Equinor</foretakNavn>
+        <adresse>
+            <gatenavn>NEDRE VARÅSEN</gatenavn>
+            <husnummer>1</husnummer>
+            <postnummer>0666</postnummer>
+            <poststed>Oslo</poststed>
+            <region>Akershus</region>
+            <landkode>NO</landkode>
+        </adresse>
+    </arbeidUtland>
+    <foretakUtland>
+        <navn>Jarlsberg International</navn>
+        <adresse>
+            <gatenavn>NEDRE VARÅSEN</gatenavn>
+            <husnummer>1</husnummer>
+            <postnummer>0666</postnummer>
+            <poststed>Oslo</poststed>
+            <region>Akershus</region>
+            <landkode>NO</landkode>
+        </adresse>
+    </foretakUtland>
+    <selvstendigArbeid>
+        <erSelvstendig>false</erSelvstendig>
+    </selvstendigArbeid>
+    <juridiskArbeidsgiverNorge>
+        <utsendteNeste12Mnd>0</utsendteNeste12Mnd>
+        <antallAdmAnsatte>0</antallAdmAnsatte>
+        <antallAnsatte>0</antallAnsatte>
+        <arbeidstakereRekruttertILand>SE</arbeidstakereRekruttertILand>
+        <oppdragsKontrakterIHovedsakInngaattILand>NO</oppdragsKontrakterIHovedsakInngaattILand>
+        <ekstraArbeidsgivere>982683955</ekstraArbeidsgivere>
+    </juridiskArbeidsgiverNorge>
+    <arbeidsinntekt>
+        <inntektNorskIPerioden>0</inntektNorskIPerioden>
+        <inntektUtenlandskIPerioden>0</inntektUtenlandskIPerioden>
+        <inntektNaeringIPerioden>0</inntektNaeringIPerioden>
+        <inntektErInnrapporteringspliktig>false</inntektErInnrapporteringspliktig>
+        <inntektTrygdeavgiftBlirTrukket>false</inntektTrygdeavgiftBlirTrukket>
+    </arbeidsinntekt>
+    <arbeidsgiversBekreftelse>
+        <arbeidsgiverBekrefterUtsendelse>false</arbeidsgiverBekrefterUtsendelse>
+        <arbeidstakerAnsattUnderUtsendelsen>false</arbeidstakerAnsattUnderUtsendelsen>
+        <erstatterArbeidstakerenUtsendte>false</erstatterArbeidstakerenUtsendte>
+        <arbeidstakerTidligereUtsendt24Mnd>false</arbeidstakerTidligereUtsendt24Mnd>
+        <arbeidsgiverBetalerArbeidsgiveravgift>false</arbeidsgiverBetalerArbeidsgiveravgift>
+        <trygdeavgiftTrukketGjennomSkatt>false</trygdeavgiftTrukketGjennomSkatt>
+    </arbeidsgiversBekreftelse>
+    <maritimtArbeid/>
+    <bosted>
+        <intensjonOmRetur>false</intensjonOmRetur>
+        <antallMaanederINorge>0</antallMaanederINorge>
+        <adresseIUtlandet>false</adresseIUtlandet>
+        <oppgittAdresse/>
+    </bosted>
+</soeknadDokument>

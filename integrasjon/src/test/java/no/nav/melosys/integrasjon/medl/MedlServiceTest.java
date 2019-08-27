@@ -12,6 +12,7 @@ import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumerImpl;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.*;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.AvvisPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OppdaterPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeResponse;
@@ -79,29 +80,43 @@ public class MedlServiceTest {
 
     @Test
     public void opprettPeriodeSomEndelig() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        medlServiceSpy.opprettPeriodeEndelig(fnr, lovvalgsperiode);
-        verify(medlServiceSpy).opprettPeriode(same(fnr), same(lovvalgsperiode), same(PeriodestatusMedl.GYLD), same(LovvalgMedl.ENDL));
+        medlServiceSpy.opprettPeriodeEndelig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        verify(medlServiceSpy).opprettPeriode(same(fnr), same(lovvalgsperiode), same(PeriodestatusMedl.GYLD), same(LovvalgMedl.ENDL), same(KildedokumenttypeMedl.HENV_SOKNAD));
     }
 
     @Test
     public void opprettPeriodeSomUnderAvklaring() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        medlServiceSpy.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
-        verify(medlServiceSpy).opprettPeriode(same(fnr), same(lovvalgsperiode), same(PeriodestatusMedl.UAVK), same(LovvalgMedl.UAVK));
+        medlServiceSpy.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode, KildedokumenttypeMedl.SED);
+        verify(medlServiceSpy).opprettPeriode(same(fnr), same(lovvalgsperiode), same(PeriodestatusMedl.UAVK), same(LovvalgMedl.UAVK), same(KildedokumenttypeMedl.SED));
     }
 
     @Test
-    public void oppdaterPeriodeSomEndelig_lagerRequestMedRiktigInformasjon() throws FunksjonellException, TekniskException, PeriodeIkkeFunnet, PeriodeUtdatert, UgyldigInput, Sikkerhetsbegrensning, no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning {
+    public void oppdaterPeriodeSomEndelig_lagerRequestMedRiktigInformasjon() throws FunksjonellException, TekniskException, PeriodeIkkeFunnet, PeriodeUtdatert, UgyldigInput, Sikkerhetsbegrensning {
         long periodeId = 10L;
         lovvalgsperiode.setMedlPeriodeID(periodeId);
 
         ArgumentCaptor<OppdaterPeriodeRequest> captor = ArgumentCaptor.forClass(OppdaterPeriodeRequest.class);
 
-        medlServiceSpy.oppdaterPeriodeEndelig(lovvalgsperiode);
+        medlServiceSpy.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
         verify(behandleMedlemskapV2).oppdaterPeriode(captor.capture());
 
         OppdaterPeriodeRequest oppdaterPeriodeRequest = captor.getValue();
 
         assertThat(oppdaterPeriodeRequest.getPeriodeId()).isEqualTo(periodeId);
         assertThat(oppdaterPeriodeRequest.getVersjon()).isEqualTo(0);
+    }
+
+    @Test
+    public void avvisPeriode_senderRequestMedKorrektAarsak() throws Exception {
+        long periodeId = 10L;
+
+        ArgumentCaptor<AvvisPeriodeRequest> captor = ArgumentCaptor.forClass(AvvisPeriodeRequest.class);
+
+        medlService.avvisPeriode(periodeId, StatusaarsakMedl.OPPHORT);
+        verify(behandleMedlemskapV2).avvisPeriode(captor.capture());
+
+        AvvisPeriodeRequest request = captor.getValue();
+        assertThat(request.getPeriodeId()).isEqualTo(periodeId);
+        assertThat(request.getAarsak().getValue()).isEqualTo(StatusaarsakMedl.OPPHORT.getKode());
     }
 }

@@ -8,8 +8,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import org.apache.commons.lang3.StringUtils;
 
@@ -83,19 +82,18 @@ public final class BrevDataUtils {
         return adresse;
     }
 
-    public static BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
+    public static BostedsadresseType lagBostedsadresse(StrukturertAdresse bosted) {
         BostedsadresseType bostedAdresse = new BostedsadresseType();
-        Gateadresse gateadresse = bosted.getGateadresse();
-        if (gateadresse != null && !StringUtils.isEmpty(gateadresse.getGatenavn())) {
-            bostedAdresse.setGatenavn(gateadresse.getGatenavn());
-            bostedAdresse.setHusnummer(gateadresse.getHusnummer() + " " + gateadresse.getHusbokstav());
+        if (StringUtils.isNotEmpty(bosted.gatenavn)) {
+            bostedAdresse.setGatenavn(bosted.gatenavn);
         } else {
             bostedAdresse.setGatenavn(" ");
         }
-        bostedAdresse.setPostnr(bosted.getPostnr());
-        bostedAdresse.setPoststed(bosted.getPoststed());
-        bostedAdresse.setLandkode(bosted.getLand().getKode());
-        //bostedAdresse.setRegion("");       // TODO: Finnes ikke for bostedsadresse
+        bostedAdresse.setHusnummer(bosted.husnummer);
+        bostedAdresse.setPostnr(bosted.postnummer);
+        bostedAdresse.setPoststed(bosted.poststed);
+        bostedAdresse.setRegion(bosted.region);
+        bostedAdresse.setLandkode(bosted.landkode);
         return bostedAdresse;
     }
 

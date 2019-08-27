@@ -1,15 +1,12 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
@@ -19,7 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
@@ -32,19 +29,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Behandlingstyper.SOEKNAD;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
 import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
 @Primary
 public class GsakService implements GsakFasade {
-
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
-    private static final int FRIST_JFR_DAGER = 1;
-    private static final int FRIST_VUR_DAGER = 1;
-    private static final int FRIST_BEH_UKER = 12;
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
@@ -94,21 +87,18 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype, Tema tema, List<Sakstyper> sakstyper, List<Behandlingstyper> behandlingstyper, List<Behandlingstema> behandlingstemaer)
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Set<Oppgavetyper> oppgavetyper, Set<Sakstyper> sakstyper, Set<Behandlingstyper> behandlingstyper, Set<Behandlingstema> behandlingstemaer)
         throws FunksjonellException, TekniskException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medOppgaveTyper(oppgavetype.getKode())
+            .medOppgaveTyper(oppgavetyper.stream().map(Oppgavetyper::getKode).toArray(String[]::new))
             .medBehandlingsTyper(behandlingstyper.stream().map(this::hentFellesKode).toArray(String[]::new))
             .medBehandlingstema(behandlingstemaer.stream().map(Behandlingstema::getKode).toArray(String[]::new))
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTildeltRessurs(false);
 
-        if (!oppgavetype.equals(Oppgavetyper.JFR)) {
+        if (!oppgavetyper.equals(Collections.singleton(Oppgavetyper.JFR))) {
             searchRequestBuilder.medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
-        }
-        if (tema != null) {
-            searchRequestBuilder = searchRequestBuilder.medTema(new String[]{tema.getKode()});
         }
 
         List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
@@ -135,25 +125,20 @@ public class GsakService implements GsakFasade {
         if (oppgave.getBehandlingstype() != null) {
             oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstype()));
         }
-        if (oppgave.erJournalFøring()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusDays(FRIST_JFR_DAGER));
-        } else if (oppgave.erBehandling()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_BEH_UKER));
-        } else if (oppgave.erVurderDokument()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_VUR_DAGER));
-        } else {
-            throw new FunksjonellException("Type " + oppgave.getOppgavetype().getKode() + " støttes ikke.");
-        }
         if (oppgave.getBehandlingstema() != null) {
             oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode());
         }
+        oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
+        oppgaveDto.setFristFerdigstillelse(oppgave.lagFristFerdigstillelse(idag));
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
-        oppgaveDto.setPrioritet(PrioritetType.NORM.toString());
+        oppgaveDto.setPrioritet(oppgave.getPrioritet().toString());
         oppgaveDto.setSaksreferanse(oppgave.getSaksnummer());
         oppgaveDto.setTema(oppgave.getTema().getKode());
         oppgaveDto.setTildeltEnhetsnr(Integer.toString(MELOSYS_ENHET_ID));
-        oppgaveDto.setBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
+        if (oppgave.getBehandlesAvApplikasjon() != Fagsystem.INTET) {
+            oppgaveDto.setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon().getKode());
+        }
 
         oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
 
@@ -188,7 +173,7 @@ public class GsakService implements GsakFasade {
 
         // Henter journalføringsoppgaver. Disse er ikke opprettet av Melosys
         List<OppgaveDto> finnJfrOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
-            oppgaveSearchRequestBuilder.medOppgaveTyper(Oppgavetyper.JFR.getKode())
+            oppgaveSearchRequestBuilder.medOppgaveTyper(new String[]{Oppgavetyper.JFR.getKode()})
                 .medBehandlesAvApplikasjon(null).build()
         );
 
@@ -199,54 +184,43 @@ public class GsakService implements GsakFasade {
     }
 
     private static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgave) {
-        Oppgave domainOppgave = new Oppgave();
-        domainOppgave.setOppgaveId(oppgave.getId());
-        domainOppgave.setVersjon(oppgave.getVersjon());
+        Oppgave.Builder domainOppgaveBuilder = new Oppgave.Builder();
+        domainOppgaveBuilder.setOppgaveId(oppgave.getId());
+        domainOppgaveBuilder.setVersjon(oppgave.getVersjon());
         if (oppgave.getPrioritet() != null) {
-            domainOppgave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet()));
+            domainOppgaveBuilder.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet()));
         }
-        domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
-        domainOppgave.setJournalpostId(oppgave.getJournalpostId());
+        domainOppgaveBuilder.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
+        domainOppgaveBuilder.setJournalpostId(oppgave.getJournalpostId());
 
         if (oppgave.getSaksreferanse() != null) {
-            domainOppgave.setSaksnummer(oppgave.getSaksreferanse());
+            domainOppgaveBuilder.setSaksnummer(oppgave.getSaksreferanse());
         }
 
-        domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
+        domainOppgaveBuilder.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
 
         if (oppgave.getTema() != null && erGyldigKode(Tema.class, oppgave.getTema())) {
-            domainOppgave.setTema(Tema.valueOf(oppgave.getTema()));
+            domainOppgaveBuilder.setTema(Tema.valueOf(oppgave.getTema()));
         } else {
             log.error("Fikk uventet Tema: {} for OppgaveID: {}", oppgave.getTema(), oppgave.getId());
         }
 
         if (oppgave.getOppgavetype() != null && erGyldigKode(Oppgavetyper.class, oppgave.getOppgavetype())) {
-            domainOppgave.setOppgavetype(no.nav.melosys.domain.kodeverk.Oppgavetyper.valueOf(oppgave.getOppgavetype()));
+            domainOppgaveBuilder.setOppgavetype(no.nav.melosys.domain.kodeverk.Oppgavetyper.valueOf(oppgave.getOppgavetype()));
         } else {
             log.error("Fikk uventet oppgaveType: {} for OppgaveID: {}", oppgave.getOppgavetype(), oppgave.getId());
         }
-        domainOppgave.setJournalpostId(oppgave.getJournalpostId());
-        domainOppgave.setTilordnetRessurs(oppgave.getTilordnetRessurs());
-        domainOppgave.setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon());
-        domainOppgave.setAktørId(oppgave.getAktørId());
-        return domainOppgave;
-    }
-
-    @Override
-    public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws FunksjonellException, TekniskException {
-        OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medAktørId(aktørId)
-            .medSorteringsfelt(SORTERINGSFELT)
-            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN);
-
-        return hentOppgaverAlleTyper(oppgaveSearchRequestBuilder);
+        domainOppgaveBuilder.setJournalpostId(oppgave.getJournalpostId());
+        domainOppgaveBuilder.setTilordnetRessurs(oppgave.getTilordnetRessurs());
+        domainOppgaveBuilder.setAktørId(oppgave.getAktørId());
+        return domainOppgaveBuilder.build();
     }
 
     @Override
     public List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
-            .medOppgaveTyper(Oppgavetyper.BEH_SAK_MK.getKode())
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode()})
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode())
@@ -259,10 +233,10 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Optional<Oppgave> finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
+    public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
-            .medOppgaveTyper(Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode())
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
@@ -276,9 +250,9 @@ public class GsakService implements GsakFasade {
             if (oppgaver.size() > 1) {
                 throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
             }
-            return Optional.ofNullable(oppgaver.get(0));
+            return oppgaver.get(0);
         } else {
-            return Optional.empty();
+            throw new IkkeFunnetException("Det finnes ingen aktive behandlingsoppgaver for sak " + saksnummer);
         }
     }
 
@@ -302,10 +276,10 @@ public class GsakService implements GsakFasade {
             case ENDRET_PERIODE: return "ae0052";
             case ANKE: return "ae0046";
             case KLAGE: return  "ae0058";
-            case NORGE_UTPEKT: return "ae0112";
+            case UTL_MYND_UTPEKT_NORGE: return "ae0112";
             case NY_VURDERING: return "ae0028";
-            case PAASTAND_UTL: return "ae0113";
-            case UNNTAK_FRA_MEDLEMSKAP: return "ae0111"; //TODO: avklar om korrekt kode eller trenger ny
+            case UTL_MYND_UTPEKT_SEG_SELV: return "ae0113";
+            case REGISTRERING_UNNTAK_NORSK_TRYGD: return "ae0111"; //TODO: avklar om korrekt kode eller trenger ny
             default: throw new IllegalArgumentException(this + " er ikke implementert i felleskodeverk.");
         }
     }

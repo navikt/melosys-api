@@ -16,7 +16,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -76,7 +77,7 @@ public class BrevDataService {
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
         metadata.mottaker = mottaker;
         metadata.mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
-        metadata.brukerID = tpsFasade.hentIdentForAktørId(fagsak.hentAktørMedRolleType(BRUKER).getAktørId());
+        metadata.brukerID = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
 
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
@@ -108,14 +109,15 @@ public class BrevDataService {
             } else {
                 return mottaker.getOrgnr();
             }
-
         }
 
-        throw new TekniskException(mottakerRolle + " støttes ikke");
+        throw new TekniskException(mottakerRolle + " støttes ikke.");
     }
 
     UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) throws TekniskException {
-        return utenlandskMyndighetRepository.findByLandkode(aktoer.hentMyndighetLandkode());
+        Landkoder landkode = aktoer.hentMyndighetLandkode();
+        return utenlandskMyndighetRepository.findByLandkode(landkode)
+            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
     // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
@@ -130,7 +132,7 @@ public class BrevDataService {
     @Transactional(propagation = Propagation.MANDATORY, readOnly = true)
     public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
-            .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid"));
+            .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid " + behandling.getId()));
 
         Element brevXmlElement;
         try {
@@ -232,7 +234,7 @@ public class BrevDataService {
 
     private Sakspart lagSakspart(Behandling behandling) throws TekniskException {
         Sakspart sakspart = new Sakspart();
-        Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(BRUKER);
+        Aktoer aktør = behandling.getFagsak().hentBruker();
 
         if (aktør == null || aktør.getAktørId() == null) {
             throw new TekniskException("Det finnes ingen bruker på sak " + behandling.getFagsak().getSaksnummer());

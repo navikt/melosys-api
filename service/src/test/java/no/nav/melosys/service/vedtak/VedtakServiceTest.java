@@ -4,9 +4,9 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -30,20 +30,15 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VedtakServiceTest {
-
     @Mock
     private BehandlingRepository behandlingRepository;
-
     @Mock
     private OppgaveService oppgaveService;
-
     @Mock
     private ProsessinstansService prosessinstansService;
-
     private VedtakService vedtakService;
 
     private long behandlingID;
-    private Behandling behandling;
 
     @Before
     public void setUp() {
@@ -51,7 +46,7 @@ public class VedtakServiceTest {
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
-        behandling = new Behandling();
+        Behandling behandling = new Behandling();
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
@@ -62,8 +57,8 @@ public class VedtakServiceTest {
 
     @Test
     public void fattVedtak_fungerer() throws FunksjonellException, TekniskException {
-        Oppgave oppgave = new Oppgave();
-        oppgave.setOppgaveId("1");
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 
         vedtakService.fattVedtak(behandlingID, resultatType);
@@ -74,19 +69,8 @@ public class VedtakServiceTest {
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
 
         Optional<Behandling> behandling = behandlingRepository.findById(behandlingID);
+        assertThat(behandling).isPresent();
         assertThat(behandling.get().getStatus()).isEqualTo(Behandlingsstatus.IVERKSETTER_VEDTAK);
-    }
-
-    @Test
-    public void anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException {
-        vedtakService.anmodningOmUnntak(behandlingID);
-
-        verify(behandlingRepository).findById(behandlingID);
-        verify(behandlingRepository).save(behandling);
-
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class));
-
-        verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
 
     @Test(expected = IkkeFunnetException.class)
@@ -97,10 +81,10 @@ public class VedtakServiceTest {
 
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
-        vedtakService.endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
+        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
 
         verify(behandlingRepository).findById(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperioder.ENDRINGER_ARBEIDSSITUASJON));
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }

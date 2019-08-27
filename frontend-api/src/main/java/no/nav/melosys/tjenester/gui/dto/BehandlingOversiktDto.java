@@ -3,8 +3,9 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.Instant;
 import java.util.List;
 
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
 
 public class BehandlingOversiktDto {

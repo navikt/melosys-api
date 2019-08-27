@@ -95,7 +95,7 @@ public class OppgaveSearchRequest {
         private String behandlesAvApplikasjon;
         private String[] behandlingstema;
 
-        public Builder(String enhetId ) {
+        public Builder(String enhetId) {
             this.enhetId = enhetId;
         }
 
@@ -109,7 +109,7 @@ public class OppgaveSearchRequest {
             return this;
         }
 
-        public Builder medOppgaveTyper(String... oppgavetyper) {
+        public Builder medOppgaveTyper(String[] oppgavetyper) {
             this.oppgavetype = oppgavetyper;
             return this;
         }
@@ -139,7 +139,7 @@ public class OppgaveSearchRequest {
             return this;
         }
 
-        public Builder medSaksreferanse(String [] saksreferanse) {
+        public Builder medSaksreferanse(String[] saksreferanse) {
             this.saksreferanse = saksreferanse;
             return this;
         }
@@ -149,7 +149,7 @@ public class OppgaveSearchRequest {
             return this;
         }
 
-        public Builder medBehandlingstema(String [] behandlingstema) {
+        public Builder medBehandlingstema(String[] behandlingstema) {
             this.behandlingstema = behandlingstema;
             return this;
         }

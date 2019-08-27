@@ -11,9 +11,10 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -21,38 +22,30 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
+import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-public final class LovvalgsperiodeTjenesteTest {
-
+public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
+    private static final String LOVVALGSPERIODER_SCHEMA = "lovvalgsperioder-schema.json";
     private static final LocalDate FOM = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
-            LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2,
-            TilleggsBestemmelser_883_2004.FO_883_2004_ART13_4,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
+            Tilleggsbestemmelser_883_2004.FO_883_2004_ART13_4,
             Landkoder.SK,
-            null,
-            null,
             InnvilgelsesResultat.AVSLAATT,
             null,
             Medlemskapstyper.FRIVILLIG,
-            10L);
+            "10");
 
     private static final long BEHANDLING_UTEN_TILGANG = 238L;
     private static final long BEHANDLING_MED_TEKNISK_FEIL = 832L;
-    private final JsonSchemaTestParent jsonSchemaTest;
-
-    public LovvalgsperiodeTjenesteTest() {
-        jsonSchemaTest = new JsonSchemaTestParent("lovvalgsperioder-schema.json");
-    }
 
     @Test
     public void hentEksisterendeLovvalgsperiodeGir200OkOgEnForekomst() throws Exception {
@@ -65,15 +58,13 @@ public final class LovvalgsperiodeTjenesteTest {
     }
 
     @Test
-    public void hentLovvalgsperiodeUtenTilgang() throws Exception {
-        testUnntakIhentLovvalgsperiode(BEHANDLING_UTEN_TILGANG,
-                Collections.emptyList(), new SikkerhetsbegrensningException("ignorert"));
+    public void hentLovvalgsperiodeUtenTilgang() {
+        testUnntakIhentLovvalgsperiode(BEHANDLING_UTEN_TILGANG, new SikkerhetsbegrensningException("ignorert"));
     }
 
     @Test
-    public void hentLovvalgsperiodeMedTekniskFeil() throws Exception {
-        testUnntakIhentLovvalgsperiode(BEHANDLING_MED_TEKNISK_FEIL,
-                Collections.emptyList(), new TekniskException("ignorert"));
+    public void hentLovvalgsperiodeMedTekniskFeil() {
+        testUnntakIhentLovvalgsperiode(BEHANDLING_MED_TEKNISK_FEIL, new TekniskException("ignorert"));
     }
 
     @Test
@@ -85,7 +76,7 @@ public final class LovvalgsperiodeTjenesteTest {
         lovvalgsperiode.setFom(fomDato);
         lovvalgsperiode.setTom(tomDato);
         doReturn(lovvalgsperiode).when(lovvalgsperiodeService).hentOpprinneligLovvalgsperiode(5L);
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, mock(Tilgang.class));
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, mock(TilgangService.class));
 
         PeriodeDto periodeDto = instans.hentOpprinneligLovvalgsperiode(5L).get("opprinneligLovvalgsperiode");
 
@@ -93,8 +84,7 @@ public final class LovvalgsperiodeTjenesteTest {
         assertThat(periodeDto.getTom()).isEqualTo(tomDato);
     }
 
-    private void testUnntakIhentLovvalgsperiode(long behandlingsid,
-            Collection<LovvalgsperiodeDto> forventet, Throwable forventetUnntak) {
+    private void testUnntakIhentLovvalgsperiode(long behandlingsid, Throwable forventetUnntak) {
         Throwable unntak = catchThrowable(() -> testHentLovvalgsperioder(behandlingsid, Collections.emptyList()));
         assertThat(unntak).isInstanceOf(forventetUnntak.getClass());
         if (forventetUnntak.getCause() != null) {
@@ -104,18 +94,18 @@ public final class LovvalgsperiodeTjenesteTest {
 
     private void testHentLovvalgsperioder(long behandlingsid, Collection<LovvalgsperiodeDto> forventet) throws Exception {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
-        Tilgang tilgang = mock(Tilgang.class);
+        TilgangService tilgangService = mock(TilgangService.class);
         doThrow(new SikkerhetsbegrensningException("Computer says no"))
-                .when(tilgang).sjekk(eq(BEHANDLING_UTEN_TILGANG));
+                .when(tilgangService).sjekkTilgang(eq(BEHANDLING_UTEN_TILGANG));
         doThrow(new TekniskException("Det har oppstått en..."))
-                .when(tilgang).sjekk(eq(BEHANDLING_MED_TEKNISK_FEIL));
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgang);
+                .when(tilgangService).sjekkTilgang(eq(BEHANDLING_MED_TEKNISK_FEIL));
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
         Response resultat = instans.hentLovvalgsperioder(behandlingsid);
         assertEquals(Response.Status.OK.getStatusCode(), resultat.getStatus());
         @SuppressWarnings("unchecked")
         Collection<LovvalgsperiodeDto> resultatliste = (Collection<LovvalgsperiodeDto>) resultat.getEntity();
         assertThat(resultatliste.size()).isEqualTo(forventet.size());
-        jsonSchemaTest.validerListe(resultatliste);
+        validerArray(resultatliste, LOVVALGSPERIODER_SCHEMA);
     }
 
     @Test
@@ -126,16 +116,16 @@ public final class LovvalgsperiodeTjenesteTest {
     private void testLagreLovvalgsperioder(long behandlingsid,
             Collection<LovvalgsperiodeDto> perioder) throws Exception {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
-        Tilgang tilgang = mock(Tilgang.class);
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgang);
-        jsonSchemaTest.validerListe(perioder);
+        TilgangService tilgangService = mock(TilgangService.class);
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
+        validerArray(perioder, LOVVALGSPERIODER_SCHEMA);
         Collection<LovvalgsperiodeDto> resultat = instans.lagreLovvalgsperioder(behandlingsid, perioder);
         assertThat(resultat.size()).isEqualTo(perioder.size());
         if (!perioder.isEmpty()) {
             assertThat(perioder.iterator().next())
                     .isEqualToComparingFieldByFieldRecursively(resultat.iterator().next());
         }
-        jsonSchemaTest.validerListe(resultat);
+        validerArray(resultat, LOVVALGSPERIODER_SCHEMA);
     }
 
     private static LovvalgsperiodeService lagLovvalgsperiodeService() {
@@ -147,11 +137,11 @@ public final class LovvalgsperiodeTjenesteTest {
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
         lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET.lovvalgsland));
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.valueOf(FORVENTET.lovvalgBestemmelse));
-        lovvalgsperiode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET.lovvalgsbestemmelse));
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
-        lovvalgsperiode.setMedlPeriodeID(FORVENTET.medlemskapsperiodeID);
+        lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET.medlemskapsperiodeID));
         when(behandlingsresultatRepo.findById(eq(42L))).thenReturn(Optional.of(lagBehandlingsresultat()));
         List<Lovvalgsperiode> ingenPerioder = Collections.<Lovvalgsperiode> emptyList();
         List<Lovvalgsperiode> enPeriode = Collections.singletonList(lovvalgsperiode);
@@ -171,4 +161,21 @@ public final class LovvalgsperiodeTjenesteTest {
         return resultat;
     }
 
+    @Test(expected = FunksjonellException.class)
+    public void lagreLovvalgsperioder_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
+        TilgangService tilgangService = mock(TilgangService.class);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgangService);
+
+        instans.lagreLovvalgsperioder(42L, Collections.emptyList());
+    }
+
+    @Test(expected = SikkerhetsbegrensningException.class)
+    public void hentLovvalgsperioder_ikketilgang_girFeil() throws FunksjonellException, TekniskException {
+        TilgangService tilgangService = mock(TilgangService.class);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkTilgang(anyLong());
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lagLovvalgsperiodeService(), tilgangService);
+
+        instans.hentLovvalgsperioder(42L);
+    }
 }

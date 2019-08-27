@@ -24,7 +24,7 @@ public class SaksopplysningerUtilsTest {
         Behandling behandling = new Behandling();
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
         Saksopplysning saksopplysning_1 = new Saksopplysning();
-        saksopplysning_1.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        saksopplysning_1.setType(SaksopplysningType.ARBFORH);
         saksopplysninger.add(saksopplysning_1);
         Saksopplysning saksopplysning_2 = new Saksopplysning();
         saksopplysning_2.setType(SaksopplysningType.SØKNAD);
@@ -32,7 +32,7 @@ public class SaksopplysningerUtilsTest {
         saksopplysning_2.setDokument(soeknadDokument);
         saksopplysninger.add(saksopplysning_2);
         Saksopplysning saksopplysning_3 = new Saksopplysning();
-        saksopplysning_3.setType(SaksopplysningType.MEDLEMSKAP);
+        saksopplysning_3.setType(SaksopplysningType.MEDL);
         saksopplysninger.add(saksopplysning_3);
 
         behandling.setSaksopplysninger(saksopplysninger);
@@ -51,7 +51,7 @@ public class SaksopplysningerUtilsTest {
         ArbeidsforholdDokument arbDok = new ArbeidsforholdDokument();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(arbDok);
-        saksopplysning.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysninger.add(saksopplysning);
 
         SaksopplysningDokument saksopplysningdokument = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
@@ -65,7 +65,7 @@ public class SaksopplysningerUtilsTest {
         behandling.setSaksopplysninger(saksopplysninger);
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysninger.add(saksopplysning);
 
         SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
@@ -80,7 +80,7 @@ public class SaksopplysningerUtilsTest {
         PersonDokument personDok = new PersonDokument();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(personDok);
-        saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysninger.add(saksopplysning);
 
         SaksopplysningDokument saksopplysningdokument = SaksopplysningerUtils.hentPersonDokument(behandling);
@@ -97,7 +97,7 @@ public class SaksopplysningerUtilsTest {
         personDok.sammensattNavn = "FØRST SISTE";
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(personDok);
-        saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysninger.add(saksopplysning);
 
         assertThat(SaksopplysningerUtils.hentSammensattNavn(behandling)).isEqualTo("FØRST SISTE");
@@ -112,7 +112,7 @@ public class SaksopplysningerUtilsTest {
         MedlemskapDokument medlDok = new MedlemskapDokument();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(medlDok);
-        saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
+        saksopplysning.setType(SaksopplysningType.MEDL);
         saksopplysninger.add(saksopplysning);
 
         SaksopplysningDokument saksopplysningdokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
@@ -144,7 +144,7 @@ public class SaksopplysningerUtilsTest {
         MedlemskapDokument medlDok = new MedlemskapDokument();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(medlDok);
-        saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
+        saksopplysning.setType(SaksopplysningType.MEDL);
         saksopplysninger.add(saksopplysning);
 
         SaksopplysningDokument saksopplysningdokument = SaksopplysningerUtils.hentSøknadDokument(behandling);

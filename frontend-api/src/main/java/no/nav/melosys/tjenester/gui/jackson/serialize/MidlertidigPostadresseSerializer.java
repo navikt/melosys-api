@@ -20,7 +20,7 @@ import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
 public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melosys.domain.dokument.person.MidlertidigPostadresse> {
 
-    private KodeverkService kodeverkService;
+    private transient KodeverkService kodeverkService;
 
     public MidlertidigPostadresseSerializer(KodeverkService kodeverkService) {
         super(no.nav.melosys.domain.dokument.person.MidlertidigPostadresse.class);
@@ -51,23 +51,7 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
 
         } else if (midlertidigPostadresse instanceof MidlertidigPostadresseUtland) {
             MidlertidigPostadresseUtland adresse = (MidlertidigPostadresseUtland) midlertidigPostadresse;
-            dto.ustrukturertAdresse = new UstrukturertAdresse();
-
-            if (adresse.adresselinje1 != null) {
-                dto.ustrukturertAdresse.adresselinjer.add(adresse.adresselinje1);
-            }
-            if (adresse.adresselinje2 != null) {
-                dto.ustrukturertAdresse.adresselinjer.add(adresse.adresselinje2);
-            }
-            if (adresse.adresselinje3 != null) {
-                dto.ustrukturertAdresse.adresselinjer.add(adresse.adresselinje3);
-            }
-            if (adresse.adresselinje4 != null) {
-                dto.ustrukturertAdresse.adresselinjer.add(adresse.adresselinje4);
-            }
-            if (midlertidigPostadresse.land != null) {
-                dto.ustrukturertAdresse.landkode = midlertidigPostadresse.land.getKode();
-            }
+            dto.ustrukturertAdresse = new UstrukturertAdresse(adresse);
             dto.adressetype = MidlertidigPostadresse.Adressetype.USTRUKTURERT;
         }
         generator.writeObject(dto);

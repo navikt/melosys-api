@@ -3,6 +3,9 @@ package no.nav.melosys.tjenester.gui.config;
 import javax.ws.rs.ApplicationPath;
 
 import no.nav.melosys.tjenester.gui.*;
+import no.nav.melosys.tjenester.gui.saksflyt.AnmodningUnntakTjeneste;
+import no.nav.melosys.tjenester.gui.saksflyt.UnntakTjeneste;
+import no.nav.melosys.tjenester.gui.saksflyt.VedtakTjeneste;
 import no.nav.melosys.tjenester.gui.unntakshandtering.FunksjonellExceptionMapper;
 import no.nav.melosys.tjenester.gui.unntakshandtering.IkkeFunnetExceptionMapper;
 import no.nav.melosys.tjenester.gui.unntakshandtering.SikkerhetsbegrensningExceptionMapper;
@@ -23,6 +26,8 @@ public class JerseyConfig extends ResourceConfig {
         // N.B. alfabetisk rekkefølge
         register(AdresseTjeneste.class);
         register(AktoerTjeneste.class);
+        register(AnmodningsperiodeTjeneste.class);
+        register(AnmodningUnntakTjeneste.class);
         register(ArbeidsforholdHistorikkTjeneste.class);
         register(AvklartefaktaTjeneste.class);
         register(BehandlingTjeneste.class);
@@ -37,10 +42,12 @@ public class JerseyConfig extends ResourceConfig {
         register(OppgaveTjeneste.class);
         register(OrganisasjonTjeneste.class);
         register(PersonTjeneste.class);
-        register(RyddOppgaverTjeneste.class);
         register(SaksbehandlerTjeneste.class);
         register(SaksopplysningTjeneste.class);
+        register(EessiTjeneste.class);
+        register(ServerinfoTjeneste.class);
         register(SoeknadTjeneste.class);
+        register(UnntakTjeneste.class);
         register(VedtakTjeneste.class);
         register(VilkaarTjeneste.class);
 

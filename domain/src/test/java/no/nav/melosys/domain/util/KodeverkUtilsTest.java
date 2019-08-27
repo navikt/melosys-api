@@ -3,7 +3,7 @@ package no.nav.melosys.domain.util;
 import java.util.Arrays;
 import java.util.List;
 
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import org.junit.Test;
@@ -39,6 +39,6 @@ public class KodeverkUtilsTest {
         String[] strings = KodeverkUtils.hentAlleKoder(Oppgavetyper.class);
         List<String> list = Arrays.asList(strings);
         assertThat(list).contains("JFR");
-        assertThat(list).size().isEqualTo(3);
+        assertThat(list).size().isEqualTo(4);
     }
 }

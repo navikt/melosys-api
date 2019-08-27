@@ -9,6 +9,10 @@ import java.util.Iterator;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
@@ -43,7 +47,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
         LovvalgsperiodeRepository.class }, includeFilters = @Filter(type = FilterType.REGEX, pattern = { "no.nav.melosys.service.LovvalgsperiodeService",
                 "no.nav.melosys.repository.LovvalgsperiodeRepository" }))
 public class LovvalgsperiodeServiceIT {
-
     @SpringBootConfiguration
     static class Config {
     }
@@ -94,10 +97,8 @@ public class LovvalgsperiodeServiceIT {
         rad.setFom(LocalDate.now());
         rad.setTom(LocalDate.now());
         rad.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
-        rad.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_1);
+        rad.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1);
         rad.setLovvalgsland(Landkoder.SK);
-        rad.setUnntakFraLovvalgsland(Landkoder.SI);
-        rad.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3A);
         rad.setMedlemskapstype(Medlemskapstyper.UNNTATT);
         return rad;
     }

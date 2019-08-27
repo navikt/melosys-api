@@ -24,6 +24,9 @@ public class SedDataDto {
     private List<Lovvalgsperiode> lovvalgsperioder;
     private List<Lovvalgsperiode> tidligereLovvalgsperioder;
 
+    private String mottakerLand;
+    private String mottakerId;
+
     public List<Ident> getUtenlandskIdent() {
         return utenlandskIdent;
     }
@@ -110,5 +113,21 @@ public class SedDataDto {
 
     public void setTidligereLovvalgsperioder(List<Lovvalgsperiode> tidligereLovvalgsperioder) {
         this.tidligereLovvalgsperioder = tidligereLovvalgsperioder;
+    }
+
+    public String getMottakerLand() {
+        return mottakerLand;
+    }
+
+    public void setMottakerLand(String mottakerLand) {
+        this.mottakerLand = mottakerLand;
+    }
+
+    public String getMottakerId() {
+        return mottakerId;
+    }
+
+    public void setMottakerId(String mottakerId) {
+        this.mottakerId = mottakerId;
     }
 }

@@ -39,10 +39,10 @@ public class OidcConfig {
         oidcConfiguration.setMaxClockSkew(30);
         oidcConfiguration.setPreferredJwsAlgorithm(JWSAlgorithm.RS256);
         oidcConfiguration.setExpireSessionWithToken(true);
-        //brukes som "fattigmanns refresh", dvs. session går ut 5 min før token går ut,
+        //brukes som "fattigmanns refresh", dvs. session går ut 30 min før token går ut,
         //det vil da gå en redirect til openam hvor sesjonen er gyldig og brukeren får nytt token uten å
         //måtte logge inn.
-        oidcConfiguration.setTokenExpirationAdvance(60 * 5);
+        oidcConfiguration.setTokenExpirationAdvance(60 * 30);
 
         OidcClient<OidcProfile, OidcConfiguration> oidcClient = new OidcClient<>(oidcConfiguration);
         oidcClient.setCallbackUrlResolver(new NoParameterCallbackUrlResolver());

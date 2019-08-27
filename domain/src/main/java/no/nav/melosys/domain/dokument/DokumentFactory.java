@@ -12,8 +12,6 @@ import javax.xml.transform.stream.StreamSource;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
@@ -29,13 +27,9 @@ import org.springframework.util.Assert;
 @Component
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class DokumentFactory {
-
-    private static final Logger log = LoggerFactory.getLogger(DokumentFactory.class);
-
     // Spring JAXB 2 marshaller og unmarshaller
-    private Jaxb2Marshaller marshaller;
-
-    private XsltTemplatesFactory xsltTemplatesFactory;
+    private final Jaxb2Marshaller marshaller;
+    private final XsltTemplatesFactory xsltTemplatesFactory;
 
     @Autowired
     public DokumentFactory(Jaxb2Marshaller marshaller, XsltTemplatesFactory xsltTemplatesFactory) {
@@ -69,10 +63,7 @@ public class DokumentFactory {
 
         SaksopplysningType type = saksopplysning.getType();
         String versjon = saksopplysning.getVersjon();
-
-        if (saksopplysning.getInternXml() == null) {
-            saksopplysning.setInternXml(transformer(dokumentXml, type, versjon));
-        }
+        saksopplysning.setInternXml(transformer(dokumentXml, type, versjon));
 
         return saksopplysning.getInternXml();
     }
@@ -88,8 +79,6 @@ public class DokumentFactory {
             StreamSource xmlSource = new StreamSource(new StringReader(dokumentXml));
             transformer.transform(xmlSource, outputTarget);
         } catch (TransformerException e) {
-            log.error("XSLT transformasjon feilet for type {} og versjon {} ", type , versjon);
-            log.error("Exception: ", e);
             throw new IllegalStateException(e);
         }
 
@@ -109,15 +98,30 @@ public class DokumentFactory {
             return null;
         }
 
-        // JAXB brukes til å opprette et SaksopplysningDokument
-        String internXml = saksopplysning.getInternXml() == null ? lagInternXml(saksopplysning) : saksopplysning.getInternXml();
+        String internXml = hentInternXml(saksopplysning);
         StringReader reader = new StringReader(internXml);
 
+        // JAXB brukes til å opprette et SaksopplysningDokument
         SaksopplysningDokument dokument = (SaksopplysningDokument) marshaller.unmarshal(new StreamSource(reader));
         saksopplysning.setDokument(dokument);
 
         return dokument;
     }
 
-}
+    /**
+     *  InternXml lages hvis det ikke eksisterer fra før av. (eksterne saksopplysninger)
+     *  Interne saksopplysninger (saksopplysninger som lages av melosys) må generere internXml
+     *  hver gang de lastes fordi de er redigerbare og versjonerte
+     */
+    private String hentInternXml(Saksopplysning saksopplysning) {
+        if (saksopplysning.getType() == SaksopplysningType.SØKNAD) {
+            return lagInternXml(saksopplysning);
+        }
 
+        if (saksopplysning.getInternXml() == null) {
+            return lagInternXml(saksopplysning);
+        }
+
+        return saksopplysning.getInternXml();
+    }
+}

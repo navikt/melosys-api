@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import com.google.common.collect.Sets;
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
@@ -14,6 +15,9 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,10 +65,8 @@ public class AnmodningUnntakMapperTest {
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
         Behandlingsresultat resultat = new Behandlingsresultat();
-
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
@@ -74,7 +76,7 @@ public class AnmodningUnntakMapperTest {
         Vilkaarsresultat vilkaarsresultat12_1 = new Vilkaarsresultat();
         vilkaarsresultat12_1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
         VilkaarBegrunnelse begrunnelse12_1 = new VilkaarBegrunnelse();
-        begrunnelse12_1.setKode(Art12_1_Begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
+        begrunnelse12_1.setKode(Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
         vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
         resultat.getVilkaarsresultater().add(vilkaarsresultat12_1);
 
@@ -85,11 +87,16 @@ public class AnmodningUnntakMapperTest {
         Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
         vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
         VilkaarBegrunnelse begrunnelse_16_1 = new VilkaarBegrunnelse();
-        begrunnelse_16_1.setKode(Art16_1_Anmodning_Begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode());
+        begrunnelse_16_1.setKode(Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode());
         vilkaarsresultat16_1.setBegrunnelser(Collections.singleton(begrunnelse_16_1));
         resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
+        Anmodningsperiode anmodningsperiode =
+            new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO, null, null, Landkoder.DE,
+                null, null);
+        resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
+
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
 

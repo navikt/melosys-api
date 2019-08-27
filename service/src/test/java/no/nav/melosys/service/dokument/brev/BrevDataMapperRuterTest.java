@@ -6,7 +6,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.*;
 import org.junit.Test;
@@ -46,6 +46,14 @@ public class BrevDataMapperRuterTest {
         assertThat(resultat).isInstanceOf(AvslagArbeidsgiverMapper.class);
     }
 
+
+    @Test
+    public void oppslagAvAvslagManglendeOpplysningerGirAvslagManglendeOpplysningerMapper() throws Exception {
+        BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);
+        assertThat(resultat).isInstanceOf(AvslagManglendeOpplysningerMapper.class);
+    }
+
+
     @Test
     public void oppslagAvUkjentDoktypeKasterUnntak() {
         BrevDataMapperRuter.mappere.remove(Produserbaredokumenter.MELDING_HENLAGT_SAK); //Fjerner mapperen for å kunne teste på mapper ikke funnet
@@ -60,6 +68,6 @@ public class BrevDataMapperRuterTest {
     public void oppslagAvIkkeInstansierbarMapperKasterUnntak() {
         BrevDataMapperRuter.mappere.put(Produserbaredokumenter.MELDING_HENLAGT_SAK, IkkeInstansierbarMapper.class);
         Throwable unntak = catchThrowable(() -> BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.MELDING_HENLAGT_SAK));
-        assertThat(unntak).isInstanceOf(TekniskException.class).hasCauseInstanceOf(InstantiationException.class);
+        assertThat(unntak).isInstanceOf(TekniskException.class).hasCauseInstanceOf(NoSuchMethodException.class);
     }
 }

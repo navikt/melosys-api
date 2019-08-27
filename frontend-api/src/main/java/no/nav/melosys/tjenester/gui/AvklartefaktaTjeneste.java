@@ -10,10 +10,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,12 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
 
     private AvklartefaktaService avklartefaktaService;
 
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService, Tilgang tilgang) {
+    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService, TilgangService tilgangService) {
         this.avklartefaktaService = avklartefaktaService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @GET
@@ -43,16 +44,17 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
                   response = Avklartefakta.class,
                   responseContainer = "Set")
     public Set<AvklartefaktaDto> hentAvklarteFakta(@ApiParam("BehandlingsID") @PathParam("behandlingID") long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
     }
 
     @POST
     @Path("{behandlingID}")
     @ApiOperation(value = "Lagre avklartefakta")
-    public Set<AvklartefaktaDto> lagraAvklarteFakta(@PathParam("behandlingID") long behandlingID,
-            @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
-        tilgang.sjekk(behandlingID);
+    public Set<AvklartefaktaDto> lagreAvklarteFakta(@PathParam("behandlingID") long behandlingID,
+                                                    @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) throws TekniskException, FunksjonellException {
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+
         avklartefaktaService.lagreAvklarteFakta(behandlingID, avklartefaktaDtoer);
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
     }

@@ -1,0 +1,1 @@
+INSERT INTO fagsak_status (kode, navn) VALUES ('HENLAGT_BORTFALT', 'Saken er henlagt som bortfalt i Melosys');

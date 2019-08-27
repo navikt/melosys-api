@@ -11,10 +11,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 
@@ -31,12 +32,12 @@ public class VilkaarTjeneste extends RestTjeneste {
 
     private final VilkaarsresultatService vilkaarsresultatService;
 
-    private final Tilgang tilgang;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public VilkaarTjeneste(VilkaarsresultatService vilkaarsresultatService, Tilgang tilgang) {
+    public VilkaarTjeneste(VilkaarsresultatService vilkaarsresultatService, TilgangService tilgangService) {
         this.vilkaarsresultatService = vilkaarsresultatService;
-        this.tilgang = tilgang;
+        this.tilgangService = tilgangService;
     }
 
     @GET
@@ -44,7 +45,7 @@ public class VilkaarTjeneste extends RestTjeneste {
     public List<VilkaarDto> hentVilkår(@PathParam("behandlingID") long behandlingID) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         List<VilkaarDto> vilkaarDtoListe;
 
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
         vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
 
         return vilkaarDtoListe;
@@ -54,9 +55,9 @@ public class VilkaarTjeneste extends RestTjeneste {
     @Path("{behandlingID}")
     @ApiOperation(value = "Lagre vilkår")
     public List<VilkaarDto> registrerVilkår(@PathParam("behandlingID") long behandlingID,
-            @ApiParam("VilkaarData") List<VilkaarDto> vilkaarDtoer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+            @ApiParam("VilkaarData") List<VilkaarDto> vilkaarDtoer) throws FunksjonellException, TekniskException {
         List<VilkaarDto> vilkaarDtoListe;
-        tilgang.sjekk(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);
         vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
 

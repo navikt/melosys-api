@@ -2,10 +2,7 @@ package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA001;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
@@ -25,7 +22,7 @@ public class BrevDataByggerVedleggTest {
     private BrevDataA1 brevDataA1;
     private BrevDataA001 brevDataA001;
 
-    public BrevDataByggerVedleggTest() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public BrevDataByggerVedleggTest() throws MelosysException {
         brevDatabyggerA1 = mock(BrevDataByggerA1.class);
         brevDatabyggerA001 = mock(BrevDataByggerA001.class);
 

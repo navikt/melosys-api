@@ -4,13 +4,13 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -27,7 +27,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,7 +49,7 @@ public final class GsakServiceTest {
     }
 
     @Test
-    public final void tildelIkkeEksisterendeOppgaveGirIkkeFunnetException() throws Exception {
+    public final void tildelIkkeEksisterendeOppgaveGirIkkeFunnetException() {
         Throwable unntak = catchThrowable(() -> instans.tildelOppgave("1", "2"));
         assertThat(unntak)
                 .isInstanceOf(IkkeFunnetException.class)
@@ -60,11 +59,11 @@ public final class GsakServiceTest {
 
     @Test
     public void opprettOppgave_vurderDokument_setterData() throws Exception {
-        Oppgave oppgave = new Oppgave();
-        oppgave.setOppgavetype(Oppgavetyper.VUR);
-        oppgave.setTema(Tema.MED);
-        oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
-        instans.opprettOppgave(oppgave);
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.VUR);
+        oppgaveBuilder.setTema(Tema.MED);
+        oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
+        instans.opprettOppgave(oppgaveBuilder.build());
 
         ArgumentCaptor<OpprettOppgaveDto> captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
         verify(oppgaveConsumer).opprettOppgave(captor.capture());
@@ -89,6 +88,7 @@ public final class GsakServiceTest {
         assertThat(oppgaveDto.getAktørId()).isEqualTo(oppgave.getAktørId());
         assertThat(oppgaveDto.getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
         assertThat(oppgaveDto.getBehandlingstype()).isEqualTo("ae0034");
+        assertThat(oppgaveDto.getBeskrivelse()).isEqualTo("bla bla");
         assertThat(oppgaveDto.getOppgavetype()).isEqualTo(oppgave.getOppgavetype().getKode());
         assertThat(oppgaveDto.getPrioritet()).isEqualTo(PrioritetType.NORM.toString());
         assertThat(oppgaveDto.getTema()).isEqualTo(oppgave.getTema().getKode());
@@ -113,15 +113,16 @@ public final class GsakServiceTest {
     }
 
     private Oppgave lagOppgave() {
-        Oppgave oppgave = new Oppgave();
-        oppgave.setAktørId("aktoer123");
-        oppgave.setBehandlingstype(Behandlingstyper.SOEKNAD);
-        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgave.setJournalpostId("journalpost123");
-        oppgave.setSaksnummer("sak123");
-        oppgave.setTema(Tema.MED);
-        oppgave.setTilordnetRessurs("ressurs123");
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setAktørId("aktoer123");
+        oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
+        oppgaveBuilder.setBeskrivelse("bla bla");
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgaveBuilder.setJournalpostId("journalpost123");
+        oppgaveBuilder.setSaksnummer("sak123");
+        oppgaveBuilder.setTema(Tema.MED);
+        oppgaveBuilder.setTilordnetRessurs("ressurs123");
 
-        return oppgave;
+        return oppgaveBuilder.build();
     }
 }

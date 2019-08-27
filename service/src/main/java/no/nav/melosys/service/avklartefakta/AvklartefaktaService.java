@@ -1,15 +1,16 @@
 package no.nav.melosys.service.avklartefakta;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -29,6 +30,11 @@ public class AvklartefaktaService {
     private final AvklartefaktaDtoKonverterer faktaKonverterer;
 
     private static final String VALGT_FAKTA = "TRUE";
+    private static final String FANT_IKKE_RESULTAT = "Fant ikke behandlingsresultat for behandlingsid: ";
+
+    private static final EnumSet<Avklartefaktatyper> maritimeFaktatyper = EnumSet.of(
+        Avklartefaktatyper.SOKKEL_ELLER_SKIP,
+        Avklartefaktatyper.ARBEIDSLAND);
 
     @Autowired
     public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer) {
@@ -44,25 +50,24 @@ public class AvklartefaktaService {
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-    public Set<Avklartefakta> hentAlleAvklarteArbeidsland(long behandlingsid) {
-        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
-    }
+    public Set<Landkoder> hentAlleAvklarteArbeidsland(long behandlingsid) {
+        Set<Avklartefakta> avklarteArbeidsland =
+            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.ARBEIDSLAND);
 
-    public Optional<Landkoder> hentArbeidsland(long behandlingsid) {
-        return hentAlleAvklarteArbeidsland(behandlingsid).stream()
+        return avklarteArbeidsland.stream()
             .map(af -> Landkoder.valueOf(af.getFakta()))
-            .findFirst();
+            .collect(Collectors.toSet());
     }
 
     public Optional<Landkoder> hentBostedland(long behandlingsid) {
-        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.BOSTEDSLAND).stream()
+        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.BOSTEDSLAND).stream()
             .map(af -> Landkoder.valueOf(af.getFakta()))
             .findFirst();
     }
 
     public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
         Set<Avklartefakta> avklartefakta =
-                avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatype.VIRKSOMHET, VALGT_FAKTA);
+                avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatyper.VIRKSOMHET, VALGT_FAKTA);
         return avklartefakta.stream()
                 .map(Avklartefakta::getSubjekt)
                 .collect(Collectors.toSet());
@@ -70,7 +75,7 @@ public class AvklartefaktaService {
 
     public Yrkesgrupper hentYrkesGruppe(long behandlingsid) throws TekniskException {
         Optional<Avklartefakta> avklartefaktaOpt =
-                avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.YRKESGRUPPE);
+                avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.YRKESGRUPPE);
 
         Avklartefakta avklartefakta = avklartefaktaOpt.orElseThrow(() -> new TekniskException("Finner ingen avklartefakta for YRKESGRUPPE"));
         AvklartYrkesgruppeType aktivitetType = AvklartYrkesgruppeType.valueOf(avklartefakta.getFakta());
@@ -78,22 +83,51 @@ public class AvklartefaktaService {
         return aktivitetType.tilYrkesgruppeType();
     }
 
+    public Set<Landkoder> hentLandkoderMedMarginaltArbeid(long behandlingsid) {
+        Collection<Avklartefakta> marginaltArbeid =
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatyper.MARGINALT_ARBEID, VALGT_FAKTA);
+
+        return marginaltArbeid.stream()
+            .map(Avklartefakta::getSubjekt)
+            .map(Landkoder::valueOf)
+            .collect(Collectors.toSet());
+    }
+
+    public boolean harMarginaltArbeid(long behandlingsid) {
+        Collection<Avklartefakta> marginaltArbeid =
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatyper.MARGINALT_ARBEID, VALGT_FAKTA);
+        return !marginaltArbeid.isEmpty();
+    }
+
     public Optional<Maritimtyper> hentMaritimType(long behandlingsid) {
         Optional<Avklartefakta> avklartefaktaOpt =
-            avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.SOKKEL_ELLER_SKIP);
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.SOKKEL_ELLER_SKIP);
         return avklartefaktaOpt.map(af -> Maritimtyper.valueOf(af.getFakta()));
     }
 
+    public Map<String, AvklartMaritimtArbeid> hentAlleMaritimeAvklartfakta(long behandlingsid) {
+        Set<Avklartefakta> maritimeAvklartefakta =
+            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(behandlingsid, maritimeFaktatyper);
+
+        HashMap<String, AvklartMaritimtArbeid> maritimeFaktaGruppert = new HashMap<>();
+        maritimeAvklartefakta.forEach(avklartefakta ->
+            maritimeFaktaGruppert.computeIfAbsent(avklartefakta.getSubjekt(), v -> new AvklartMaritimtArbeid(avklartefakta.getSubjekt()))
+                .leggTilFakta(avklartefakta)
+        );
+        return maritimeFaktaGruppert;
+    }
+
     public Optional<Avklartefakta> hentVurderingUnntakPeriode(long behandlingsid) {
-        return avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
+        return avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
     public void lagreAvklarteFakta(long behandlingsid, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));
+            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingsid));
 
-        avklarteFaktaRepository.deleteByBehandlingsresultat(resultat);
+        avklarteFaktaRepository.deleteByBehandlingsresultatId(behandlingsid);
+        avklarteFaktaRepository.flush();
 
         List<Avklartefakta> avklartefaktaList = avklartefaktaDtos.stream()
             .map(avklartefaktaDto -> faktaKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, resultat))
@@ -102,10 +136,10 @@ public class AvklartefaktaService {
         avklarteFaktaRepository.saveAll(avklartefaktaList);
     }
 
-    @Transactional
-    public void leggTilAvklarteFakta(long behandlingsid, Avklartefaktatype type, String referanse, String subjekt, String fakta) throws IkkeFunnetException {
+    @Transactional(rollbackFor = MelosysException.class)
+    public void leggTilAvklarteFakta(long behandlingsid, Avklartefaktatyper type, String referanse, String subjekt, String fakta) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));
+            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingsid));
 
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setType(type);
@@ -118,29 +152,19 @@ public class AvklartefaktaService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilÅrsakEndringPeriode(long behandlingsid, Endretperioder endretperiode) throws IkkeFunnetException {
-        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));
-
-        Set<Avklartefakta> avklartefaktaSet = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setBehandlingsresultat(resultat);
-        avklartefakta.setType(Avklartefaktatype.AARSAK_ENDRING_PERIODE);
-        avklartefakta.setFakta(endretperiode.getKode());
-        avklartefakta.setReferanse(Avklartefaktatype.AARSAK_ENDRING_PERIODE.getKode());
-        avklartefaktaSet.add(avklartefakta);
-        avklarteFaktaRepository.saveAll(avklartefaktaSet);
+    public void leggTilBegrunnelse(long behandlingsid, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
+        leggTilAvklarteFakta(behandlingsid, avklartefaktatype, avklartefaktatype.getKode(), null, begrunnelseKode);
     }
 
-    public void leggTilRegistrering(long behandlingsid, Avklartefaktatype avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
-
+    @Transactional(rollbackFor = MelosysException.class)
+    public void leggTilRegistrering(long behandlingsid, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
         Avklartefakta avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, avklartefaktatype)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke avklarte fakta av type " + avklartefaktatype.name() + "for behandling " + behandlingsid));
 
         AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
         registrering.setBegrunnelseKode(begrunnelseKode);
         registrering.setAvklartefakta(avklartefakta);
-        
+
         avklartefakta.getRegistreringer().add(registrering);
 
         avklarteFaktaRepository.save(avklartefakta);
