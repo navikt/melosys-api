@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.exception.TekniskException;
 
 public class SvarAnmodningUnntakDto {
@@ -31,7 +31,7 @@ public class SvarAnmodningUnntakDto {
         );
     }
 
-    private static Beslutning hentBeslutningForSvartype(AnmodningsperiodeSvarType anmodningsperiodeSvarType) throws TekniskException {
+    private static Beslutning hentBeslutningForSvartype(Anmodningsperiodesvartyper anmodningsperiodeSvarType) throws TekniskException {
         switch (anmodningsperiodeSvarType) {
             case INNVILGELSE:
                 return Beslutning.INNVILGELSE;

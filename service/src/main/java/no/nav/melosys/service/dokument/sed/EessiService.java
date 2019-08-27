@@ -42,7 +42,6 @@ public class EessiService {
     );
 
 
-    public EessiService(SedDataBygger sedDataBygger, EessiConsumer eessiConsumer, @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed) {
     public EessiService(SedDataBygger sedDataBygger,
                         EessiConsumer eessiConsumer,
                         @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed,
