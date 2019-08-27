@@ -8,5 +8,5 @@ import no.nav.melosys.exception.TekniskException;
 
 public interface UtbetaldataFasade {
 
-    Saksopplysning hentUtbetalingsinformasjon(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, FunksjonellException;
+    Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, FunksjonellException;
 }

@@ -7,7 +7,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class UtbetalingDokument extends SaksopplysningDokument {
+public class UtbetalingDokument implements SaksopplysningDokument {
 
     @XmlElementWrapper(name = "utbetalinger")
     @XmlElement(name = "utbetaling")

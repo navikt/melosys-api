@@ -19,21 +19,16 @@ import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasj
 import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.*;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonRequest;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UtbetaldataService implements UtbetaldataFasade {
-
-    private static final Logger log = LoggerFactory.getLogger(UtbetaldataService.class);
-
     private static final String UTBETAL_VERSJON = "1.0";
 
-    private static final String RETTIGHETSHAVER = "Rettighetshaver";
+    private static final String BARNETRYGD = "BARNETRYGD";
 
-    private static final String UTBETALINGSPERIODE = "Utbetalingsperiode";
+    private static final String RETTIGHETSHAVER = "Rettighetshaver";
 
     private static final String YTELSESPERIODE = "Ytelsesperiode";
 
@@ -51,24 +46,27 @@ public class UtbetaldataService implements UtbetaldataFasade {
         try {
             jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse.class);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IllegalStateException(e);
         }
     }
 
-    @Override
-    public Saksopplysning hentUtbetalingsinformasjon(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, FunksjonellException {
+    @Override // TODO: Må teste om filteret for ytelser faktisk fungerer, hvis ikke må vi filtrere her selv.
+    public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, FunksjonellException {
+        HentUtbetalingsinformasjonRequest request = lagRequest(fnr, fom, tom);
+        request.getYtelsestypeListe().add(ytelsestypeBarnetrygd());
+        return hentUtbetalingsinformasjon(request);
+    }
+
+    private Saksopplysning hentUtbetalingsinformasjon(HentUtbetalingsinformasjonRequest request) throws TekniskException, FunksjonellException {
         HentUtbetalingsinformasjonResponse response;
         try {
-            response = utbetalingConsumer.hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom));
+            response = utbetalingConsumer.hentUtbetalingsinformasjon(request);
         } catch (HentUtbetalingsinformasjonPersonIkkeFunnet hentUtbetalingsinformasjonPersonIkkeFunnet) {
             throw new IkkeFunnetException("Oppgitt person ble ikke funnet");
         } catch (HentUtbetalingsinformasjonPeriodeIkkeGyldig hentUtbetalingsinformasjonPeriodeIkkeGyldig) {
             throw new FunksjonellException("Oppgitt periode er ikke gyldig", hentUtbetalingsinformasjonPeriodeIkkeGyldig);
         } catch (HentUtbetalingsinformasjonIkkeTilgang hentUtbetalingsinformasjonIkkeTilgang) {
             throw new SikkerhetsbegrensningException("Har ikke tilgang til å hente data for person", hentUtbetalingsinformasjonIkkeTilgang);
-        } catch (DatatypeConfigurationException e) {
-            throw new TekniskException(e);
         }
 
         // Response -> xml
@@ -89,14 +87,13 @@ public class UtbetaldataService implements UtbetaldataFasade {
             xmlRoot.setHentUtbetalingsinformasjonResponse(response);
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IntegrasjonException(e);
         }
 
         return xmlWriter;
     }
 
-    private Saksopplysning lagSaksopplysning(StringWriter xmlWriter) {
+    private static Saksopplysning lagSaksopplysning(StringWriter xmlWriter) {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
         saksopplysning.setKilde(SaksopplysningKilde.UTBETALDATA);
@@ -105,19 +102,14 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return saksopplysning;
     }
 
-    private HentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) throws DatatypeConfigurationException {
+    private static HentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) throws TekniskException {
         HentUtbetalingsinformasjonRequest request = new HentUtbetalingsinformasjonRequest();
         request.setId(lagIdent(fnr));
-        //request.setPeriode(lagPeriode(fom, tom));
-
-        Ytelsestyper ytelsestype = new Ytelsestyper();
-        ytelsestype.setValue("Barnetrygd");
-        request.getYtelsestypeListe().add(ytelsestype);
-
+        request.setPeriode(lagPeriode(fom, tom));
         return request;
     }
 
-    private Ident lagIdent(String fnr) {
+    private static Ident lagIdent(String fnr) {
         Ident ident = new Ident();
         Identroller identrolle = new Identroller();
         identrolle.setValue(RETTIGHETSHAVER);
@@ -126,13 +118,25 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return ident;
     }
 
-    private ForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) throws DatatypeConfigurationException {
+    private static ForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) throws TekniskException {
         ForespurtPeriode periode = new ForespurtPeriode();
         Periodetyper periodetype = new Periodetyper();
-        periodetype.setKodeRef(YTELSESPERIODE);
+        periodetype.setValue(YTELSESPERIODE);
         periode.setPeriodeType(periodetype);
-        periode.setFom(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
-        periode.setTom(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
+
+        try {
+            periode.setFom(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
+            periode.setTom(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
+        } catch (DatatypeConfigurationException e) {
+            throw new TekniskException(e);
+        }
+
         return periode;
+    }
+
+    private static Ytelsestyper ytelsestypeBarnetrygd() {
+        Ytelsestyper ytelsestype = new Ytelsestyper();
+        ytelsestype.setValue(BARNETRYGD);
+        return ytelsestype;
     }
 }
