@@ -30,35 +30,23 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AktoerTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(AktoerTjenesteTest.class);
-
-    private static final String AKTOER_SCHEMA = "aktoer-schema.json";
-
-    private static final String AKTOER_POST_SCHEMA = "aktoer-post-schema.json";
-
-    private String schemaType;
-
-    private AktoerTjeneste aktoerTjeneste;
+    private static final String AKTOER_SCHEMA = "fagsaker-aktoerer-schema.json";
+    private static final String AKTOER_POST_SCHEMA = "fagsaker-aktoerer-post-schema.json";
 
     @Mock
     private TilgangService tilgangService;
-
     @Mock
     private AktoerService aktoerService;
-
     @Mock
     private FagsakService fagsakService;
+
+    private AktoerTjeneste aktoerTjeneste;
 
     @Before
     public void setUp() throws IkkeFunnetException {
         aktoerTjeneste = new AktoerTjeneste(tilgangService, aktoerService, fagsakService);
         when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
-    }
-
-    @Override
-    public String schemaNavn() {
-        return schemaType;
     }
 
     @Test
@@ -70,12 +58,9 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
         aktoerDto.setOrgnr("123456789");
         aktoerDto.setDatabaseID(2L);
 
-        schemaType = AKTOER_SCHEMA;
-        validerListe(Collections.singletonList(aktoerDto), log);
+        validerArray(Collections.singletonList(aktoerDto), AKTOER_SCHEMA, log);
 
-        schemaType =  AKTOER_POST_SCHEMA;
-        valider(aktoerDto, log);
-
+        valider(aktoerDto, AKTOER_POST_SCHEMA, log);
     }
 
     @Test
@@ -93,7 +78,6 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
 
         aktoerTjeneste.lagAktoerer("MELTEST-1", aktoerDtoBruker);
         verify(aktoerService).lagEllerOppdaterAktoer(lagFagsak(), aktoerDtoBruker);
-
     }
 
     @Test
@@ -128,8 +112,6 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
         assertThat(aktoerDto.getRolleKode()).isEqualTo("MYNDIGHET");
         assertThat(aktoerDto.getOrgnr()).isEqualTo("100");
         assertThat(aktoerDto.getRepresentererKode()).isNull();
-
-
     }
 
     private static Fagsak lagFagsak() {

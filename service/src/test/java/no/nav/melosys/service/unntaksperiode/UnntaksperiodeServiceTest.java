@@ -5,7 +5,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -44,7 +44,7 @@ public class UnntaksperiodeServiceTest {
     @Test
     public void ikkeGodkjennPeriode_medBegrunnelser_ingenFeil() throws Exception {
         Set<String> begrunnelser = new HashSet<>();
-        begrunnelser.add(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
+        begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
         unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), begrunnelser, null);
         verify(prosessinstansService).opprettProsessinstansUnntaksperiodeAvvist(any(), anySet(), any());
     }
@@ -59,11 +59,11 @@ public class UnntaksperiodeServiceTest {
     @Test
     public void ikkeGodkjennPeriode_begrunnelseAnnetIngenFritekst_forventException() throws Exception {
         Set<String> begrunnelser = new HashSet<>();
-        begrunnelser.add(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
-        begrunnelser.add(IkkeGodkjentBegrunnelser.ANNET.getKode());
+        begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
+        begrunnelser.add(Ikke_godkjent_begrunnelser.ANNET.getKode());
 
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Begrunnelse " + IkkeGodkjentBegrunnelser.ANNET + " krever fritekst!");
+        expectedException.expectMessage("Begrunnelse " + Ikke_godkjent_begrunnelser.ANNET + " krever fritekst!");
         unntaksperiodeService.ikkeGodkjennPeriode(hentBehandling(), begrunnelser, null);
     }
 

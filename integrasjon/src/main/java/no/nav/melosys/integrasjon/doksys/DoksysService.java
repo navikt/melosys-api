@@ -24,8 +24,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import static no.nav.melosys.integrasjon.Fagsystem.GSAK_I_JOARK;
-import static no.nav.melosys.integrasjon.Fagsystem.MELOSYS;
+import static no.nav.melosys.domain.Fagsystem.GSAK_I_JOARK;
+import static no.nav.melosys.domain.Fagsystem.MELOSYS;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service

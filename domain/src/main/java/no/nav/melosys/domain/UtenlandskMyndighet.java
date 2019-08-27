@@ -35,7 +35,7 @@ public class UtenlandskMyndighet {
     )
     public Set<Preferanse> preferanser = new HashSet<>();
 
-    @Convert(converter = Landkoder.DbKonverterer.class)
+    @Enumerated(EnumType.STRING)
     public Landkoder landkode;
 
     @Override

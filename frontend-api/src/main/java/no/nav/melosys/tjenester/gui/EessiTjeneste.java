@@ -13,6 +13,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,11 +57,11 @@ public class EessiTjeneste extends RestTjeneste {
     )
     public Response opprettBuc(@ApiParam BucBestillingDto nyBucDto, @PathParam("behandlingID") long behandlingID) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        String rinaUrl = eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(),
-            nyBucDto.getMottakerLand(), nyBucDto.getMottakerId());
+        OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
+            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), nyBucDto.getMottakerLand(), nyBucDto.getMottakerId())
+        );
 
-        // String må wrappes for å være gyldig JSON
-        return Response.ok("\"" + rinaUrl + "\"").build();
+        return Response.ok(opprettBucSvarDto).build();
     }
 
     @GET

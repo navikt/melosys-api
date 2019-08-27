@@ -4,13 +4,13 @@ import java.util.Collection;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import org.junit.Before;
@@ -55,7 +55,7 @@ public class OppdaterBehandlingTest {
 
     @Test
     public void utfør_anmodningsperiodeIkkeInnvilget_statusVurderDokument() throws Exception {
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.AVSLAG);
+        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setYtterligereInformasjon("hei");
 
@@ -82,7 +82,7 @@ public class OppdaterBehandlingTest {
 
     @Test
     public void utfør_anmodningsperiodeInnvilget_fattVedtak() throws Exception {
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.INNVILGELSE);
+        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -109,7 +109,7 @@ public class OppdaterBehandlingTest {
 
     @Test
     public void utfør_anmodningsperiodeInnvilgetMedYtteligereInfo_statusVurderDokument() throws Exception {
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.INNVILGELSE);
+        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setYtterligereInformasjon("hei");
 

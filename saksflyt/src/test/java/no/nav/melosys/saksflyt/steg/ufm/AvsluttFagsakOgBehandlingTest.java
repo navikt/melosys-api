@@ -1,5 +1,14 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
+import java.util.Optional;
+
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;

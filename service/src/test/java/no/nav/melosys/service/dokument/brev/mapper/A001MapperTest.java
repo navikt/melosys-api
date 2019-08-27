@@ -21,13 +21,14 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,6 +36,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagMaritimtArbeidssted;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,8 +63,8 @@ public class A001MapperTest {
         easyRandom = EasyRandomConfigurer.randomForDokProd();
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
-            LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2, TilleggsBestemmelser_883_2004.FO_883_2004_ART11_5,
-            Landkoder.NO, LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
+            Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
@@ -106,11 +108,7 @@ public class A001MapperTest {
 
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
 
-        AvklartMaritimtArbeid avklartMaritimtArbeid = mock(AvklartMaritimtArbeid.class);
-        when(avklartMaritimtArbeid.getMaritimtype()).thenReturn(Maritimtyper.SOKKEL);
-        when(avklartMaritimtArbeid.getLand()).thenReturn(Landkoder.GB.getKode());
-        when(avklartMaritimtArbeid.getNavn()).thenReturn("Seven Kestrel");
-        Arbeidssted maritimtArbeidssted = new MaritimtArbeidssted(avklartMaritimtArbeid);
+        Arbeidssted maritimtArbeidssted = lagMaritimtArbeidssted();
 
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
         myndighet.navn = "SAV";

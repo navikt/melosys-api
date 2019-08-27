@@ -8,11 +8,9 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.eessi.dto.BucinfoDto;
-import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -26,7 +24,7 @@ public class EessiConsumerImpl implements EessiConsumer {
 
     private final RestTemplate restTemplate;
 
-    public EessiConsumerImpl(RestTemplate restTemplate) {
+    EessiConsumerImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
@@ -49,10 +47,30 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
+    public MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) throws MelosysException {
+        return exchange(String.format("/journalpost/%s/eessimelding", journalpostID), HttpMethod.GET,
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<MelosysEessiMelding>(){
+        });
+    }
+
+    @Override
+    public void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) throws MelosysException {
+        exchange("/sak", HttpMethod.POST, new HttpEntity<>(getDefaultHeaders()),
+            new ParameterizedTypeReference<Void>() {});
+    }
+
+    @Override
+    public List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
+        return exchange(String.format("/sak?rinaSaksnummer=%s", rinaSaksnummer), HttpMethod.GET,
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SaksrelasjonDto>>() {
+        });
+    }
+
+    @Override
     public String opprettBucOgSed(SedDataDto sedDataDto, String bucType) throws MelosysException {
         OpprettSedDto opprettSedDto = exchange("/sed/create/" + bucType, HttpMethod.POST,
             new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<OpprettSedDto>() {
-            });
+        });
 
         return opprettSedDto.getRinaUrl();
     }
@@ -63,7 +81,7 @@ public class EessiConsumerImpl implements EessiConsumer {
 
         List<BucinfoDto> bucinfoDtoList = exchange(String.format("/sak/%s/bucer/?status=%s", gsakSaksnummer, status), HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucinfoDto>>() {
-            });
+        });
 
         return bucinfoDtoList.stream().map(BucinfoDto::tilDomene).collect(Collectors.toList());
     }

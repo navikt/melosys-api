@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.gsak;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -21,7 +21,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static no.nav.melosys.domain.ProsessSteg.*;
 import static no.nav.melosys.domain.oppgave.Behandlingstema.EU_EOS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

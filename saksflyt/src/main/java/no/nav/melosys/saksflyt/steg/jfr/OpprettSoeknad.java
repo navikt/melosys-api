@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.List;
-import java.util.Map;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
@@ -9,10 +8,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.SoeknadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +40,6 @@ public class OpprettSoeknad extends AbstraktStegBehandler {
     @Override
     public ProsessSteg inngangsSteg() {
         return JFR_OPPRETT_SØKNAD;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

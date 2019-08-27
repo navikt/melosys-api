@@ -9,12 +9,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 
 public class AvklartefaktaDto {
     private String subjektID;
 
-    private Avklartefaktatype avklartefaktaType;
+    private Avklartefaktatyper avklartefaktaType;
 
     private String referanse;
 
@@ -32,7 +32,7 @@ public class AvklartefaktaDto {
         this.subjektID = subjektID;
     }
 
-    public Avklartefaktatype getAvklartefaktaType() {
+    public Avklartefaktatyper getAvklartefaktaType() {
         return avklartefaktaType;
     }
 
@@ -42,7 +42,7 @@ public class AvklartefaktaDto {
     }
 
     @JsonProperty("avklartefaktaKode")
-    public void setAvklartefaktaType(Avklartefaktatype avklartefakta) {
+    public void setAvklartefaktaType(Avklartefaktatyper avklartefakta) {
         this.avklartefaktaType = avklartefakta;
     }
 

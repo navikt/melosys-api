@@ -36,13 +36,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(SoeknadTjenesteTest.class);
 
     private SoeknadTjeneste soeknadTjeneste;
-
     private SoeknadDokument soeknadDokument;
-
-    @Override
-    public String schemaNavn() {
-        return "soknad-schema.json";
-    }
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
@@ -101,7 +95,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
 
         ObjectMapper mapper = objectMapperMedKodeverkServiceStub();
         String jsonInString = mapper.writeValueAsString(søknadDto);
-        valider(jsonInString, log);
+        valider(jsonInString, "soknader-schema.json", log);
     }
 
     @Test(expected = FunksjonellException.class)

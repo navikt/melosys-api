@@ -7,8 +7,8 @@ import java.util.Properties;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;

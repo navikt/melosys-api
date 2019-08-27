@@ -1,23 +1,19 @@
 package no.nav.melosys.saksflyt.steg.aou.svar;
 
 import java.util.Collections;
-import java.util.Map;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import org.apache.commons.lang3.StringUtils;
@@ -55,11 +51,6 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
-    @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
@@ -67,14 +58,14 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
         Anmodningsperiode anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream().findFirst()
             .orElseThrow(() -> new TekniskException("Finner ingen anmodningsperiode for behandling " + behandlingID));
-        boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.INNVILGELSE;
+        boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.INNVILGELSE;
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(Lovvalgsperiode.av(anmodningsperiode, Medlemskapstyper.PLIKTIG)));
 
 
         if (erInnvilgelse && !inneholderYtterligereInformasjon(melosysEessiMelding)) {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Iverksetter vedtak",
-                AnmodningsperiodeSvarType.INNVILGELSE  , behandlingID);
+                Anmodningsperiodesvartyper.INNVILGELSE  , behandlingID);
             fattVedtak(behandlingID);
         } else {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Endrer behandlingsstatus til {}",

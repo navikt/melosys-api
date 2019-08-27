@@ -12,6 +12,9 @@ import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_vesentlig_virksomhet;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -55,12 +58,12 @@ public class AvslagArbeidsgiverMapperTest {
         Vilkaarsresultat vilkaarsresultat12_1 = new Vilkaarsresultat();
         vilkaarsresultat12_1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
         VilkaarBegrunnelse begrunnelse12_1 = new VilkaarBegrunnelse();
-        begrunnelse12_1.setKode(Art12_1_Begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
+        begrunnelse12_1.setKode(Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
         vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
         brevData.vilkårbegrunnelser121 = vilkaarsresultat12_1.getBegrunnelser();
 
         VilkaarBegrunnelse vesentligVirksomhetBegrunnelse = new VilkaarBegrunnelse();
-        vesentligVirksomhetBegrunnelse.setKode(Art12_1_Vesentlig_Virksomhet_Begrunnelser.FOR_LITE_KONTRAKTER_NORGE.getKode());
+        vesentligVirksomhetBegrunnelse.setKode(Art12_1_vesentlig_virksomhet.FOR_LITE_KONTRAKTER_NORGE.getKode());
         Vilkaarsresultat vesentligVirksomhet = new Vilkaarsresultat();
         vesentligVirksomhet.setVilkaar(Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET);
         vesentligVirksomhet.setBegrunnelser(Collections.singleton(vesentligVirksomhetBegrunnelse));

@@ -1,19 +1,14 @@
 package no.nav.melosys.saksflyt.steg.aou;
 
-import java.util.Map;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +19,8 @@ import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.ANMODNING_UNNTAK;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ANMODNING_UNNTAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
@@ -56,11 +51,6 @@ public class SendBrev extends AbstraktStegBehandler {
     @Override
     public ProsessSteg inngangsSteg() {
         return AOU_SEND_BREV;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
     }
 
     @Override

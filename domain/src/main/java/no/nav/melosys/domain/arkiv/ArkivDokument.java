@@ -7,6 +7,7 @@ public class ArkivDokument {
     private String dokumentId;
     private List<ArkivDokumentVedlegg> interneVedlegg; // Til sammensatte dokumenter der vedlegg er scannet inn i ett dokument.
     private String tittel;
+    private String navSkjemaID;
 
     public ArkivDokument() {
         this.interneVedlegg = new ArrayList<>();
@@ -30,5 +31,13 @@ public class ArkivDokument {
 
     public void setTittel(String tittel) {
         this.tittel = tittel;
+    }
+
+    public String getNavSkjemaID() {
+        return navSkjemaID;
+    }
+
+    public void setNavSkjemaID(String navSkjemaID) {
+        this.navSkjemaID = navSkjemaID;
     }
 }

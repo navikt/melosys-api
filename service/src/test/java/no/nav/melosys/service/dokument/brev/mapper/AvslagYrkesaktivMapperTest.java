@@ -17,6 +17,9 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import org.junit.Test;
@@ -74,7 +77,7 @@ public class AvslagYrkesaktivMapperTest {
         Vilkaarsresultat vilkaarsresultat12_1 = new Vilkaarsresultat();
         vilkaarsresultat12_1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
         VilkaarBegrunnelse begrunnelse12_1 = new VilkaarBegrunnelse();
-        begrunnelse12_1.setKode(Art12_1_Begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
+        begrunnelse12_1.setKode(Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
         vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
         resultat.getVilkaarsresultater().add(vilkaarsresultat12_1);
 
@@ -86,11 +89,11 @@ public class AvslagYrkesaktivMapperTest {
         vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
         vilkaarsresultat16_1.setBegrunnelseFritekst("Fritekst");
         VilkaarBegrunnelse a_begrunnelse_16_1 = new VilkaarBegrunnelse();
-        a_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.OVER_5_AAR.getKode());
+        a_begrunnelse_16_1.setKode(Art16_1_avslag.OVER_5_AAR.getKode());
         VilkaarBegrunnelse b_begrunnelse_16_1 = new VilkaarBegrunnelse();
-        b_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.SOEKT_FOR_SENT.getKode());
+        b_begrunnelse_16_1.setKode(Art16_1_avslag.SOEKT_FOR_SENT.getKode());
         VilkaarBegrunnelse c_begrunnelse_16_1 = new VilkaarBegrunnelse();
-        c_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.SAERLIG_AVSLAGSGRUNN.getKode());
+        c_begrunnelse_16_1.setKode(Art16_1_avslag.SAERLIG_AVSLAGSGRUNN.getKode());
 
         Set<VilkaarBegrunnelse> begrunnelser_16_1 = new HashSet<>();
         begrunnelser_16_1.add(a_begrunnelse_16_1);

@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 
 public class FattVedtakDto {
     private Behandlingsresultattyper behandlingsresultatTypeKode;

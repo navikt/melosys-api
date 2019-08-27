@@ -5,9 +5,9 @@ import java.util.*;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -23,8 +23,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,7 +53,7 @@ public class AvklartefaktaServiceTest {
         String referanse = "Referanse";
         String subjektID = "SubjektID";
         String fakta = "NO";
-        Avklartefaktatype type = Avklartefaktatype.ARBEIDSLAND;
+        Avklartefaktatyper type = Avklartefaktatyper.ARBEIDSLAND;
         String begrunnelsekode = "Begrunnelse";
         String begrunnelsefritekst = "Fritekst";
 
@@ -149,7 +147,7 @@ public class AvklartefaktaServiceTest {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("MARGINALT_ARBEID");
         Set<Avklartefakta> avklartefaktaFraDb = Collections.singleton(avklartefakta);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), eq(Avklartefaktatype.MARGINALT_ARBEID), eq("TRUE"))).thenReturn(avklartefaktaFraDb);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), eq(Avklartefaktatyper.MARGINALT_ARBEID), eq("TRUE"))).thenReturn(avklartefaktaFraDb);
 
         boolean harMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(1L);
         assertThat(harMarginaltArbeid).isTrue();
@@ -164,7 +162,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentMaritimType_medSokkelTekst_foventerSokkelType() throws TekniskException {
+    public void hentMaritimType_medSokkelTekst_foventerSokkelType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
@@ -175,7 +173,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentMaritimType_medSkipTekst_foventerSkipType() throws TekniskException {
+    public void hentMaritimType_medSkipTekst_foventerSkipType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SKIP");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
@@ -194,11 +192,11 @@ public class AvklartefaktaServiceTest {
     @Test
     public void hentAvklartMaritimeAvklartfakta_medAvklartSokkel_girAvklartMaritimtArbeid() {
         Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "GB");
-        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anyList())).thenReturn(alleMaritimeFakta);
-        Collection<AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfakta(1L);
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
+        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentAlleMaritimeAvklartfakta(1L);
         assertThat(avklarteMaritimeArbeid).hasSize(1);
 
-        avklarteMaritimeArbeid.forEach(maritimtArbeid -> {
+        avklarteMaritimeArbeid.values().forEach(maritimtArbeid -> {
             assertThat(maritimtArbeid.getNavn()).isEqualTo("Stena Don");
             assertThat(maritimtArbeid.getMaritimtype()).isEqualTo(Maritimtyper.SOKKEL);
             assertThat(maritimtArbeid.getLand()).isEqualTo("GB");
@@ -209,29 +207,29 @@ public class AvklartefaktaServiceTest {
     public void hentAvklartMaritimeAvklartfakta_medAvklartSkip_girAvklartMaritimtArbeid() {
         Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "SE");
         alleMaritimeFakta.addAll(lagAlleMaritimeAvklartefakta("Seven Kestrel", "SKIP", "GB"));
-        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anyList())).thenReturn(alleMaritimeFakta);
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
 
-        Collection<AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfakta(1L);
+        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentAlleMaritimeAvklartfakta(1L);
         assertThat(avklarteMaritimeArbeid).hasSize(2);
     }
 
     @Test
     public void hentVurderingUnntakPeriode_forventVurderingUnntakPeriodeType() {
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatype.VURDERING_UNNTAK_PERIODE)))
+        avklartefakta.setType(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE)))
             .thenReturn(Optional.of(avklartefakta));
 
         Optional<Avklartefakta> avklartefaktaOptional = avklartefaktaService.hentVurderingUnntakPeriode(2L);
         assertThat(avklartefaktaOptional.isPresent()).isTrue();
-        assertThat(avklartefaktaOptional.get().getType()).isEqualTo(Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
+        assertThat(avklartefaktaOptional.get().getType()).isEqualTo(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
     }
 
     @Test
     public void testAvklarteOrganisasjoner() {
         String orgnr1 = "12345678910";
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatype.VIRKSOMHET);
+        avklartefakta.setType(Avklartefaktatyper.VIRKSOMHET);
         avklartefakta.setFakta("TRUE");
         avklartefakta.setSubjekt(orgnr1);
 
@@ -244,10 +242,10 @@ public class AvklartefaktaServiceTest {
     @Test
     public void leggTilRegistrering_forventLagret() throws Exception {
 
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatype.class)))
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatyper.class)))
             .thenReturn(Optional.of(new Avklartefakta()));
 
-        avklartefaktaService.leggTilRegistrering(1, Avklartefaktatype.VURDERING_UNNTAK_PERIODE, "kode");
+        avklartefaktaService.leggTilRegistrering(1, Avklartefaktatyper.VURDERING_UNNTAK_PERIODE, "kode");
 
         verify(avklarteFaktaRepository).save(captor.capture());
 

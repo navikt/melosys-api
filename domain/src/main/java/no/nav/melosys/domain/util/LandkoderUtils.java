@@ -9,7 +9,7 @@ import static no.nav.melosys.domain.dokument.felles.Land.*;
 import static no.nav.melosys.domain.kodeverk.Landkoder.*;
 
 public final class LandkoderUtils {
-    private static final BiMap<Landkoder,String> LANDKODER_STRING_BI_MAP = EnumHashBiMap.create(Landkoder.class);
+    private static final BiMap<Landkoder, String> LANDKODER_STRING_BI_MAP = EnumHashBiMap.create(Landkoder.class);
 
     static {
         LANDKODER_STRING_BI_MAP.put(NO, NORGE);

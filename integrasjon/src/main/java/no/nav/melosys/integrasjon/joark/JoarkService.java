@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
@@ -30,8 +30,6 @@ import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentResponse;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -41,15 +39,14 @@ import static no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand.
 
 @Service
 public class JoarkService implements JoarkFasade {
-
-    private static Logger log = LoggerFactory.getLogger(JoarkService.class);
-
-    private InngaaendeJournalConsumer inngåendeJournalConsumer;
-    private JournalConsumer journalConsumer;
+    private final InngaaendeJournalConsumer inngåendeJournalConsumer;
+    private final JournalConsumer journalConsumer;
     private final JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
 
     @Autowired
-    public JoarkService(InngaaendeJournalConsumer inngåendeJournal, JournalConsumer journal, JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer) {
+    public JoarkService(InngaaendeJournalConsumer inngåendeJournal,
+                        JournalConsumer journal,
+                        JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer) {
         this.inngåendeJournalConsumer = inngåendeJournal;
         this.journalConsumer = journal;
         this.journalfoerInngaaendeConsumer = journalfoerInngaaendeConsumer;
@@ -107,22 +104,20 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public Journalpost hentJournalpost(String journalpostID) throws IntegrasjonException, SikkerhetsbegrensningException {
-
         GetJournalpostResponse response = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
 
         Journalpost journalpost = new Journalpost(journalpostID);
         journalpost.setBrukerId(response.getBrukerListe().stream().map(Bruker::getIdentifikator).findFirst().orElse(null));
         journalpost.setForsendelseMottatt(response.getForsendelseMottatt().toInstant());
+        journalpost.setMottaksKanal(response.getMottaksKanal());
 
-        if (response.getDokumentListe().size() > 1) {
-            log.warn("Journalpost {} inneholder flere dokumenter!", journalpostID);
+        List<Dokument> dokumentListe = response.getDokumentListe();
+        journalpost.setHoveddokument(lagArkivDokument(dokumentListe.get(0)));
+        if (dokumentListe.size() > 1) {
+            for (int i = 1; i < dokumentListe.size(); i++) {
+                journalpost.getVedleggListe().add(lagArkivDokument(dokumentListe.get(i)));
+            }
         }
-        Dokument dokument = response.getDokumentListe().get(0);
-        ArkivDokument arkivDokument = new ArkivDokument();
-        arkivDokument.setDokumentId(dokument.getDokumentId());
-        arkivDokument.setTittel(dokument.getTittel());
-
-        journalpost.setHoveddokument(arkivDokument);
 
         if (response.getAvsender() != null) {
             journalpost.setAvsenderId(response.getAvsender().getIdentifikator());
@@ -132,6 +127,14 @@ public class JoarkService implements JoarkFasade {
         }
 
         return journalpost;
+    }
+
+    private ArkivDokument lagArkivDokument(Dokument dokument) {
+        ArkivDokument arkivDokument = new ArkivDokument();
+        arkivDokument.setDokumentId(dokument.getDokumentId());
+        arkivDokument.setTittel(dokument.getTittel());
+        arkivDokument.setNavSkjemaID(dokument.getNavSkjemaId());
+        return arkivDokument;
     }
 
     @Override

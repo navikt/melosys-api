@@ -30,9 +30,9 @@ public class Aktoer extends RegistreringsInfo {
 
     @Column(name = "orgnr")
     private String orgnr;
-    
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "rolle", nullable = false, updatable = false)
-    @Convert(converter = Aktoersroller.DbKonverterer.class)
     private Aktoersroller rolle;
 
     @Column(name = "utenlandsk_person_id")

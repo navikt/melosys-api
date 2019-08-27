@@ -25,12 +25,12 @@ public class Fagsak extends RegistreringsInfo {
     @Column(name = "gsak_saksnummer")
     private Long gsakSaksnummer;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "fagsak_type")
-    @Convert(converter = Sakstyper.DbKonverterer.class)
     private Sakstyper type;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    @Convert(converter = Saksstatuser.DbKonverterer.class)
     private Saksstatuser status;
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
