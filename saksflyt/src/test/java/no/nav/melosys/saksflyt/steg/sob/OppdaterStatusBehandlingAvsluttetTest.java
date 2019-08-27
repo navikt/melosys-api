@@ -15,6 +15,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
+import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,12 +37,16 @@ public class OppdaterStatusBehandlingAvsluttetTest {
 
     @Mock
     private SakOgBehandlingFasade sakOgBehandlingFasade;
+    @Mock
+    private TpsService tpsService;
+    @Mock
+    private BehandlingService behandlingService;
 
     private OppdaterStatusBehandlingAvsluttet agent;
 
     @Before
     public void setUp() {
-        agent = new OppdaterStatusBehandlingAvsluttet(sakOgBehandlingFasade);
+        agent = new OppdaterStatusBehandlingAvsluttet(sakOgBehandlingFasade, tpsService, behandlingService);
     }
 
     @Test

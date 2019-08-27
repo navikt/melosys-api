@@ -3,13 +3,15 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.sed.BucType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kafka.model.Periode;
 import no.nav.melosys.service.kafka.model.Statsborgerskap;
@@ -22,21 +24,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettSedDokumentTest {
 
     @Mock
-    private SaksopplysningRepository saksopplysningRepository;
-    @Mock
-    private DokumentFactory dokumentFactory;
+    private OpprettSedDokumentFelles opprettSedDokumentFelles;
 
     private OpprettSedDokument opprettSedDokument;
 
     @Before
     public void setup() {
-        opprettSedDokument = new OpprettSedDokument(saksopplysningRepository, dokumentFactory);
+        opprettSedDokument = new OpprettSedDokument(opprettSedDokumentFelles);
     }
 
     @Test
@@ -53,7 +52,7 @@ public class OpprettSedDokumentTest {
 
         opprettSedDokument.utfør(prosessinstans);
 
-        verify(saksopplysningRepository, times(1)).save(any(Saksopplysning.class));
+        verify(opprettSedDokumentFelles).opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_HENT_PERSON);
     }
 

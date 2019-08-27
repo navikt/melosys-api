@@ -14,6 +14,8 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
+import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,12 +35,16 @@ public class OppdaterStatusBehandlingOpprettetTest {
 
     @Mock
     private SakOgBehandlingFasade sakOgBehandlingFasade;
+    @Mock
+    private TpsService tpsService;
+    @Mock
+    private BehandlingService behandlingService;
 
     private OppdaterStatusBehandlingOpprettet agent;
 
     @Before
     public void setUp() {
-        agent = new OppdaterStatusBehandlingOpprettet(sakOgBehandlingFasade);
+        agent = new OppdaterStatusBehandlingOpprettet(sakOgBehandlingFasade, tpsService, behandlingService);
     }
 
     @Test

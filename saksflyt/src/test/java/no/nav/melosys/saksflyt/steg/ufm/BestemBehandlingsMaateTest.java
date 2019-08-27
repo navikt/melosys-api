@@ -1,20 +1,14 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,15 +26,13 @@ public class BestemBehandlingsMaateTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
     @Mock
-    private BehandlingService behandlingService;
-    @Mock
     private AvklarteFaktaRepository avklarteFaktaRepository;
 
     private BestemBehandlingsMaate bestemBehandlingsMaate;
 
     @Before
     public void setUp() {
-        bestemBehandlingsMaate = new BestemBehandlingsMaate(behandlingsresultatRepository, behandlingService, avklarteFaktaRepository);
+        bestemBehandlingsMaate = new BestemBehandlingsMaate(behandlingsresultatRepository, avklarteFaktaRepository);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
@@ -69,21 +61,6 @@ public class BestemBehandlingsMaateTest {
         Prosessinstans prosessinstans = hentProsessinstans();
         bestemBehandlingsMaate.utfør(prosessinstans);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_OPPGAVE);
-    }
-
-    @Test
-    public void utførSteg_ingenTreffIRegisterMenErA001_verifiserNesteSteg() throws FunksjonellException, TekniskException {
-        Prosessinstans prosessinstans = hentProsessinstans();
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setSedType(SedType.A001);
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setDokument(sedDokument);
-        prosessinstans.getBehandling().setSaksopplysninger(Collections.singleton(saksopplysning));
-        prosessinstans.setData(ProsessDataKey.SED_DOKUMENT, sedDokument);
-
-        bestemBehandlingsMaate.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_OPPGAVE);
     }
 

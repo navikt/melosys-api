@@ -2,15 +2,15 @@ package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.oppgave.Behandlingstema;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.saksflyt.felles.OpprettOppgaveFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
@@ -45,21 +45,14 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
 
-        //Midlertidige verdier for oppgave satt til disse er nærmere avklart
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setPrioritet(PrioritetType.NORM);
-        oppgaveBuilder.setTema(Tema.MED);
-        oppgaveBuilder.setSaksnummer(fagsak.getSaksnummer());
-        oppgaveBuilder.setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID));
-        oppgaveBuilder.setJournalpostId(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));
-        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SED);
-        oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
+        String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
+        String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
+        String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
+        Oppgave oppgave = OpprettOppgaveFelles.lagOppgaveForManuellSedbehandling(saksnummer, aktørId, journalpostId);
 
-        String oppgaveId = gsakFasade.opprettOppgave(oppgaveBuilder.build());
-        log.info("Opprettet oppgave {} til manuell behandling for sak {}", oppgaveId, fagsak.getSaksnummer());
-
+        String oppgaveId = gsakFasade.opprettOppgave(oppgave);
+        log.info("Opprettet oppgave {} til manuell behandling for sak {}", oppgaveId, saksnummer);
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 }

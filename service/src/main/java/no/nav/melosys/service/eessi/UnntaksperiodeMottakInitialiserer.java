@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-//A001,A003,A009,A010
+//A003,A009,A010
 @Service
 public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInitialiserer {
 
@@ -86,8 +86,6 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
 
     private static Behandlingstyper hentBehandlingstypeForSedType(SedType sedType) {
         switch (sedType) {
-            case A001:
-                return Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL;
             case A003:
                 return Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV;
             case A009:
@@ -100,8 +98,7 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
 
     @Override
     public boolean gjelderSedType(SedType sedType) {
-        return sedType == SedType.A001
-            || sedType == SedType.A003
+        return sedType == SedType.A003
             || sedType == SedType.A009
             || sedType == SedType.A010;
     }

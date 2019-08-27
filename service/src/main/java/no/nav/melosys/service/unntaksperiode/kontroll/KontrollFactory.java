@@ -25,7 +25,6 @@ class KontrollFactory {
         }
     }
 
-    // TODO: Avklaringer om hvilke kontroller som trengs. Har kopiert fra A009 intill videre.
     private List<Function<KontrollData, Unntak_periode_begrunnelser>> a001Kontroller() {
         return Lists.newArrayList(
             UnntaksperiodeKontroller::periodeErÅpen,
@@ -33,9 +32,10 @@ class KontrollFactory {
             UnntaksperiodeKontroller::periodeOver24Mnd,
             UnntaksperiodeKontroller::periodeOver1ÅrFremITid,
             UnntaksperiodeKontroller::overlappendeMedlemsperiode,
-            UnntaksperiodeKontroller::lovvalgslandErNorge,
             UnntaksperiodeKontroller::statsborgerskapIkkeMedlemsland,
-            UnntaksperiodeKontroller::personDød
+            UnntaksperiodeKontroller::personDød,
+            UnntaksperiodeKontroller::personBosattINorge,
+            UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode
         );
     }
 
