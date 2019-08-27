@@ -14,7 +14,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

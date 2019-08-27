@@ -13,7 +13,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
