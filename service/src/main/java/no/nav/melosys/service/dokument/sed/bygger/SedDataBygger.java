@@ -16,71 +16,64 @@ import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
+@Service
 public class SedDataBygger {
-
-    private final Behandling behandling;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final Brevressurser brevressurser;
 
-    public SedDataBygger(Brevressurser brevressurser,
-                         LovvalgsperiodeService lovvalgsperiodeService) {
-        this.brevressurser = brevressurser;
-        this.behandling = brevressurser.getBehandling();
+    @Autowired
+    public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
-    public SedDataDto lag(Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
-
-        SedDataDto sedDataDto = lagPersonopplysninger();
-
+    public SedDataDto lag(Dokumentressurser dokumentressurser, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dokumentressurser);
         sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat)));
-
-        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto());
-
-        sedDataDto.setMottakerLand(behandling.getFagsak().hentMyndighetLandkode().getKode());
-
+        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dokumentressurser.getBehandling()));
+        sedDataDto.setMottakerLand(dokumentressurser.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
         return sedDataDto;
     }
 
-    public SedDataDto lagUtkast() throws TekniskException, FunksjonellException {
-        SedDataDto sedDataDto = lagPersonopplysninger();
-        if (!lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId()).isEmpty()) {
-            sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(brevressurser.getLovvalgsperioder().hentLovvalgsperiode())));
+    public SedDataDto lagUtkast(Dokumentressurser dokumentressurser) throws TekniskException, FunksjonellException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dokumentressurser);
+        if (!lovvalgsperiodeService.hentLovvalgsperioder(dokumentressurser.getBehandling().getId()).isEmpty()) {
+            sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(lovvalgsperiodeService.hentLovvalgsperiode(dokumentressurser.getBehandling().getId()))));
         } else {
             sedDataDto.setLovvalgsperioder(Collections.emptyList());
         }
         return sedDataDto;
     }
 
-    private SedDataDto lagPersonopplysninger() throws TekniskException, FunksjonellException {
+    private SedDataDto lagPersonopplysninger(Dokumentressurser dokumentressurser) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = new SedDataDto();
 
-        sedDataDto.setArbeidsgivendeVirksomheter(map(brevressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivere()));
+        sedDataDto.setArbeidsgivendeVirksomheter(map(dokumentressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivere()));
 
-        sedDataDto.setArbeidssteder(brevressurser.getArbeidssteder().hentArbeidssteder().stream()
+        sedDataDto.setArbeidssteder(dokumentressurser.getArbeidssteder().hentArbeidssteder().stream()
             .map(this::mapArbeidssted).collect(Collectors.toList()));
 
-        sedDataDto.setBostedsadresse(fraBostedsadresse(brevressurser.getBosted().hentBostedsadresse()));
+        sedDataDto.setBostedsadresse(fraBostedsadresse(dokumentressurser.getBosted().hentBostedsadresse()));
 
-        sedDataDto.setBruker(hentBrukerFraPersonDokument(brevressurser.getPerson()));
+        sedDataDto.setBruker(hentBrukerFraPersonDokument(dokumentressurser.getPerson()));
 
-        sedDataDto.setFamilieMedlem(brevressurser.getPerson().familiemedlemmer.stream()
+        sedDataDto.setFamilieMedlem(dokumentressurser.getPerson().familiemedlemmer.stream()
             .filter(f -> f.familierelasjon.equals(Familierelasjon.FARA) || f.familierelasjon.equals(Familierelasjon.MORA))
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
-        sedDataDto.setSelvstendigeVirksomheter(map(brevressurser.getAvklarteVirksomheter().hentNorskeSelvstendige()));
+        sedDataDto.setSelvstendigeVirksomheter(map(dokumentressurser.getAvklarteVirksomheter().hentNorskeSelvstendige()));
 
-        sedDataDto.setUtenlandskeVirksomheter(brevressurser.getAvklarteVirksomheter().hentUtenlandskeVirksomheter().stream().map(
+        sedDataDto.setUtenlandskeVirksomheter(dokumentressurser.getAvklarteVirksomheter().hentUtenlandskeVirksomheter().stream().map(
             this::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));
 
-        sedDataDto.setUtenlandskIdent(brevressurser.getSøknad().personOpplysninger.utenlandskIdent.stream()
+        sedDataDto.setUtenlandskIdent(dokumentressurser.getSøknad().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
         return sedDataDto;
@@ -176,7 +169,7 @@ public class SedDataBygger {
         return lovvalgsperiodeDto;
     }
 
-    private List<Lovvalgsperiode> lagTidligereLovvalgsperioderDto()
+    private List<Lovvalgsperiode> lagTidligereLovvalgsperioderDto(Behandling behandling)
         throws TekniskException {
         List<Lovvalgsperiode> tidligereLovvalgsperioderDto = new ArrayList<>();
         Collection<no.nav.melosys.domain.Lovvalgsperiode> tidligereLovvalgsperioder =

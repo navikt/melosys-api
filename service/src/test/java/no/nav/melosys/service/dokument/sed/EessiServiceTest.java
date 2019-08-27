@@ -21,10 +21,8 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.service.dokument.brev.ressurser.BrevdataInput;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.DokumentdataInput;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
-import no.nav.melosys.service.dokument.sed.bygger.SedDataByggerService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
@@ -41,10 +39,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class EessiServiceTest {
     @Mock
-    private SedDataByggerService sedDataByggerService;
-
-    @Mock
-    private Brevressurser brevressurser;
+    private SedDataBygger sedDataBygger;
 
     @Mock
     private EessiConsumer eessiConsumer;
@@ -61,8 +56,8 @@ public class EessiServiceTest {
 
     @Before
     public void setup() throws Exception {
-        BrevdataInput brevdataInput = mock(BrevdataInput.class);
-        eessiService = new EessiService(sedDataByggerService, brevdataInput, eessiConsumer, "true");
+        DokumentdataInput dokumentdataInput = mock(DokumentdataInput.class);
+        eessiService = new EessiService(sedDataBygger, dokumentdataInput, eessiConsumer, "true");
 
         behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
@@ -75,10 +70,8 @@ public class EessiServiceTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.SK);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
 
-        SedDataBygger sedDataBygger = mock(SedDataBygger.class);
-        when(sedDataByggerService.hent(any())).thenReturn(sedDataBygger);
-        when(sedDataBygger.lag(any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
-        when(sedDataBygger.lagUtkast()).thenReturn(new SedDataDto());
+        when(sedDataBygger.lag(any(), any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lagUtkast(any())).thenReturn(new SedDataDto());
     }
 
     @Test

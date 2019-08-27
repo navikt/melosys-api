@@ -26,9 +26,9 @@ public class AvklarteVirksomheter {
     // Microcachede verdier som kun eksisterer under brevbygging.
     // For å slippe å gjøre register- og kodeverksoppslag gjentatte ganger
     private List<AvklartVirksomhet> norskeVirksomheter;
-    private List<AvklartVirksomhet> utenlandskeVirksomheter;
     private List<AvklartVirksomhet> norskeArbeidsgivere;
     private List<AvklartVirksomhet> norskeSelvstendige;
+    private List<AvklartVirksomhet> utenlandskeVirksomheter;
 
     public AvklarteVirksomheter(Behandling behandling,
                                 AvklarteVirksomheterService avklarteVirksomheterService,

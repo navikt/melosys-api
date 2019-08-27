@@ -3,19 +3,21 @@ package no.nav.melosys.service.dokument.sed.bygger;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,15 +73,18 @@ public class SedDataByggerTest {
 
         behandling = DataByggerStubs.hentBehandlingStub();
 
+        dataBygger = new SedDataBygger(lovvalgsperiodeService);
+    }
+
+    private Dokumentressurser lagDokumentressurser() throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        Brevressurser brevressurser = new Brevressurser(behandling, kodeverkService, null, avklarteVirksomheterService, avklartefaktaService, lovvalgsperiodeService);
-        dataBygger = new SedDataBygger(brevressurser, lovvalgsperiodeService);
+        return new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test
     public void testHentAvklarteSelvstendigeForetak()
         throws FunksjonellException, TekniskException {
-        SedDataDto sedData = dataBygger.lag(behandlingsresultat);
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat);
 
         assertThat(sedData).isNotNull();
         assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotNull();
@@ -99,7 +104,7 @@ public class SedDataByggerTest {
     @Test
     public void lagUtkast_forventFelt_utenLovvalgsperioder()
         throws FunksjonellException, TekniskException {
-        SedDataDto sedData = dataBygger.lagUtkast();
+        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser());
 
         lagUtkastAssertions(sedData);
         assertThat(sedData.getLovvalgsperioder().isEmpty()).isTrue();
@@ -108,8 +113,9 @@ public class SedDataByggerTest {
     @Test
     public void lagUtkast_forventFelt_medLovvalgsperioder()
         throws FunksjonellException, TekniskException {
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(lagLovvalgsperioder());
-        SedDataDto sedData = dataBygger.lagUtkast();
+        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lagLovvalgsperiode()));
+        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser());
 
         lagUtkastAssertions(sedData);
         assertThat(sedData.getLovvalgsperioder().isEmpty()).isFalse();
@@ -130,9 +136,9 @@ public class SedDataByggerTest {
         assertThat(sedData.getArbeidsgivendeVirksomheter().isEmpty()).isFalse();
     }
 
-    private List<Lovvalgsperiode> lagLovvalgsperioder() {
+    private Lovvalgsperiode lagLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        return Collections.singletonList(lovvalgsperiode);
+        return lovvalgsperiode;
     }
 }

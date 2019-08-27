@@ -21,7 +21,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +48,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     LovvalgsperiodeService lovvalgsperiodeService;
 
     @Mock
-    LandvelgerService landVelgerService;
+    LandvelgerService landvelgerService;
 
     @Mock
     BrevDataByggerA1 brevDataByggerA1;
@@ -68,23 +68,23 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         behandling.getSaksopplysninger().add(lagSøknadsopplysning());
         behandling.getSaksopplysninger().add(lagPersonsopplysning());
 
-        when(brevDataByggerA1.lag(any())).thenReturn(new BrevDataA1());
+        when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
 
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(periode));
+        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
 
-        when(landVelgerService.hentAlleArbeidsland(any())).thenReturn(Collections.singleton(Landkoder.AT));
-        when(landVelgerService.hentBostedsland(any(), any())).thenReturn(Landkoder.DE);
+        when(landvelgerService.hentAlleArbeidsland(any())).thenReturn(Collections.singleton(Landkoder.AT));
+        when(landvelgerService.hentBostedsland(any(), any())).thenReturn(Landkoder.DE);
 
-        Brevressurser brevdataressurser = lagBrevressurser();
-        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelseFlereLand(brevdataressurser,
-            avklartefaktaService,
+        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
+            landvelgerService,
+            lovvalgsperiodeService,
             brevbestillingDto,
             brevDataByggerA1);
     }
 
-    private Brevressurser lagBrevressurser() throws TekniskException {
-        return new Brevressurser(behandling, null, landVelgerService, avklarteVirksomheterService, avklartefaktaService, lovvalgsperiodeService);
+    private Dokumentressurser lagBrevressurser() throws TekniskException {
+        return new Dokumentressurser(behandling, null, avklarteVirksomheterService, avklartefaktaService);
     }
 
     private static Saksopplysning lagSøknadsopplysning() {
@@ -102,7 +102,8 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
         when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.of(maritimType));
 
-        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(saksbehandler);
+        Dokumentressurser brevdataressurser = lagBrevressurser();
+        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
         assertThat(brevData.avklartMaritimType).isEqualTo(Maritimtyper.SOKKEL);
     }
@@ -111,7 +112,8 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
         when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.empty());
 
-        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(saksbehandler);
+        Dokumentressurser brevdataressurser = lagBrevressurser();
+        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
         assertThat(brevData.avklartMaritimType).isNull();
     }
 
@@ -123,9 +125,9 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         brevbestillingDto.fritekst = "FRITEKST";
 
         BrevDataBygger brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelseFlereLand(lagBrevressurser(), avklartefaktaService, brevbestillingDto, brevDataByggerA1);
+            new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService, landvelgerService, lovvalgsperiodeService, brevbestillingDto, brevDataByggerA1);
 
-        BrevData brevData = brevDataByggerInnvilgelse.lag(saksbehandler);
+        BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler);
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }

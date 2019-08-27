@@ -21,7 +21,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,25 +59,24 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     LovvalgsperiodeService lovvalgsperiodeService;
 
     private BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver;
-    private Behandling behandling;
 
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
-        behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(new SoeknadDokument()));
-        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
-
         when(landvelgerService.hentArbeidsland(any())).thenReturn(Landkoder.AT);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        Brevressurser brevressurser = new Brevressurser(behandling, kodeverkService, landvelgerService, avklarteVirksomheterService, avklartefaktaService, lovvalgsperiodeService);
-        brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(brevressurser, vilkaarsresultatRepository);
+        brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,
+                                                                                lovvalgsperiodeService,
+                                                                                vilkaarsresultatRepository);
     }
 
     @Test
     public void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() throws FunksjonellException, TekniskException {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(new SoeknadDokument()));
+        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
+
         PersonDokument personDokument = new PersonDokument();
         personDokument.sammensattNavn = "Navn Navnesen";
         Saksopplysning person = new Saksopplysning();
@@ -95,7 +94,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
-        when(lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId())).thenReturn(Collections.singletonList(lovvalgsperiode));
+        when(lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId())).thenReturn(lovvalgsperiode);
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
@@ -114,8 +113,10 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(FO_883_2004_ART12_1))).thenReturn(Optional.of(vilkaarsresultatArt121));
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(ART12_1_VESENTLIG_VIRKSOMHET))).thenReturn(Optional.of(vesentligVirksomhet));
 
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        Dokumentressurser dokumentressurser = new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
         String saksbehandler = "saksbehandler";
-        BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(saksbehandler);
+        BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(dokumentressurser, saksbehandler);
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("987654321");
     }
 

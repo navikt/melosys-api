@@ -11,6 +11,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataByggerHenleggelseTest {
@@ -27,10 +28,20 @@ public class BrevDataByggerHenleggelseTest {
 
     private BrevDataByggerHenleggelse brevDataByggerHenleggelse;
 
-    String journalpostId = "998877";
-
     @Before
     public void setUp() {
+        brevDataByggerHenleggelse = new BrevDataByggerHenleggelse(joarkService, new BrevbestillingDto());
+    }
+
+    @Test
+    public void lag_henleggelseBrev_setterForendelseMottatt() throws FunksjonellException, IntegrasjonException {
+        String journalpostId = "998877";
+
+        Instant forsendelseMottatt = Instant.parse("2006-09-22T01:02:00Z");
+        Journalpost journalpost = new Journalpost(journalpostId);
+        journalpost.setForsendelseMottatt(forsendelseMottatt);
+        doReturn(journalpost).when(joarkService).hentJournalpost(journalpostId);
+
         Behandling førsteBehandling = new Behandling();
         førsteBehandling.setRegistrertDato(Instant.parse("2007-12-03T10:15:30.00Z"));
         førsteBehandling.setInitierendeJournalpostId(journalpostId);
@@ -41,20 +52,11 @@ public class BrevDataByggerHenleggelseTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setBehandlinger(Arrays.asList(sisteBehandling, førsteBehandling));
         sisteBehandling.setFagsak(fagsak);
+        Dokumentressurser dokumentressurser = mock(Dokumentressurser.class);
+        when(dokumentressurser.getBehandling()).thenReturn(sisteBehandling);
 
-        brevDataByggerHenleggelse = new BrevDataByggerHenleggelse(sisteBehandling, joarkService, new BrevbestillingDto());
-    }
-
-    @Test
-    public void lag_henleggelseBrev_setterForendelseMottatt() throws FunksjonellException, IntegrasjonException {
         String saksbehandler = "saksbehandler";
-
-        Instant forsendelseMottatt = Instant.parse("2006-09-22T01:02:00Z");
-        Journalpost journalpost = new Journalpost(journalpostId);
-        journalpost.setForsendelseMottatt(forsendelseMottatt);
-        doReturn(journalpost).when(joarkService).hentJournalpost(journalpostId);
-
-        BrevDataMottattDato brevData = (BrevDataMottattDato) brevDataByggerHenleggelse.lag(saksbehandler);
+        BrevDataMottattDato brevData = (BrevDataMottattDato) brevDataByggerHenleggelse.lag(dokumentressurser, saksbehandler);
 
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
         assertThat(brevData.initierendeJournalpostForsendelseMottattTidspunkt).isEqualTo(forsendelseMottatt);

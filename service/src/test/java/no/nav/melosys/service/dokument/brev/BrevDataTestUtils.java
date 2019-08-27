@@ -53,7 +53,6 @@ public class BrevDataTestUtils {
         return lagSaksopplysning(SaksopplysningType.PERSOPL, person);
     }
 
-
     private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(type);

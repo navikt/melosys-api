@@ -31,7 +31,7 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA001;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
@@ -78,7 +78,7 @@ public class BrevDataByggerA001Test {
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
+
 
         avklarteOrganisasjoner = new HashSet<>();
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
@@ -143,11 +143,15 @@ public class BrevDataByggerA001Test {
         leggTilTestorganisasjon("navn1", orgnr1, detaljer);
         leggTilTestorganisasjon("navn2", orgnr2, detaljer);
 
+        brevDataByggerA001 = new BrevDataByggerA001(lovvalgsperiodeService, anmodningsperiodeService, myndighetsRepo, vilkårRepo);
+    }
+
+    private Dokumentressurser lagDokumentressurs() throws TekniskException {
+        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        Brevressurser brevressurser = new Brevressurser(behandling, kodeverkService, null, avklarteVirksomheterService, avklartefaktaService, lovvalgsperiodeService);
-        brevDataByggerA001 = new BrevDataByggerA001(brevressurser, lovvalgsperiodeService, anmodningsperiodeService, myndighetsRepo, vilkårRepo);
+        return new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
@@ -182,7 +186,7 @@ public class BrevDataByggerA001Test {
         foretak2.orgnr = "10987654321";
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak2);
 
-        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag("Z12345");
+        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(),"Z12345");
         assertThat(brevDataDto.selvstendigeVirksomheter.stream()
                 .map(nv -> nv.orgnr)).containsOnly(foretak.orgnr);
     }
@@ -197,7 +201,7 @@ public class BrevDataByggerA001Test {
 
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr1);
 
-        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag("Z12345");
+        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(),"Z12345");
         assertThat(brevDataDto.selvstendigeVirksomheter.stream()
                 .map(nv -> nv.orgnr)).containsOnly(orgnr1);
         assertThat(brevDataDto.arbeidsgivendeVirkomsheter.stream()
@@ -210,7 +214,7 @@ public class BrevDataByggerA001Test {
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
 
-        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag("Z12345");
+        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
         assertThat(brevDataDto.ansettelsesperiode).isEmpty();
     }
 
@@ -231,7 +235,7 @@ public class BrevDataByggerA001Test {
                 LocalDate.of(2010, 10, 23),
                 LocalDate.of(2017, 10, 23));
 
-        BrevData brevDataA001 = brevDataByggerA001.lag("Z12345");
+        BrevData brevDataA001 = brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
         assertThat(((BrevDataA001)brevDataA001).ansettelsesperiode.get()).isEqualTo(forventet.ansettelsesPeriode);
     }
 
@@ -239,7 +243,7 @@ public class BrevDataByggerA001Test {
     public void testIngenAnsettelsePeriode() throws MelosysException {
         avklarteOrganisasjoner.add(orgnr1);
 
-        BrevData brevDataA001 = brevDataByggerA001.lag("Z12345");
+        BrevData brevDataA001 = brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
         assertThat(((BrevDataA001)brevDataA001).ansettelsesperiode.isPresent()).isFalse();
     }
 }

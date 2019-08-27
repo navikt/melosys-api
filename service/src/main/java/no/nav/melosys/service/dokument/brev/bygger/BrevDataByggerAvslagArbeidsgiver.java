@@ -10,34 +10,39 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
 
 public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
-    private final Behandling behandling;
-    private final Brevressurser brevressurser;
+    private final LandvelgerService landvelgerService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
+    private Behandling behandling;
 
-    public BrevDataByggerAvslagArbeidsgiver(Brevressurser brevressurser,
+    public BrevDataByggerAvslagArbeidsgiver(LandvelgerService landvelgerService,
+                                            LovvalgsperiodeService lovvalgsperiodeService,
                                             VilkaarsresultatRepository vilkaarsresultatRepository) {
-        this.brevressurser = brevressurser;
-        this.behandling = brevressurser.getBehandling();
+        this.landvelgerService = landvelgerService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
     @Override
-    public BrevData lag(String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(Dokumentressurser dokumentressurser, String saksbehandler) throws FunksjonellException, TekniskException {
+        this.behandling = dokumentressurser.getBehandling();
 
         BrevDataAvslagArbeidsgiver brevData = new BrevDataAvslagArbeidsgiver(saksbehandler);
-        brevData.person = brevressurser.getPerson();
+        brevData.person = dokumentressurser.getPerson();
 
-        brevData.hovedvirksomhet = brevressurser.getAvklarteVirksomheter().hentHovedvirksomhet();
-        brevData.lovvalgsperiode = brevressurser.getLovvalgsperioder().hentLovvalgsperiode();
-        brevData.arbeidsland = brevressurser.getLandvelger().hentArbeidsland(behandling).getBeskrivelse();
+        brevData.hovedvirksomhet = dokumentressurser.getAvklarteVirksomheter().hentHovedvirksomhet();
+        brevData.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
+        brevData.arbeidsland = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
 
         brevData.vilkårbegrunnelser121 = hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         brevData.vilkårbegrunnelser121VesentligVirksomhet = hentVilkaarbegrunnelser(ART12_1_VESENTLIG_VIRKSOMHET);

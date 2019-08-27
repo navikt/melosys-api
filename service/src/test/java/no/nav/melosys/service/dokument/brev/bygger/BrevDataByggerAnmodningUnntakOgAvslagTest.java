@@ -11,7 +11,6 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.TekniskException;
@@ -20,7 +19,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +28,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -47,36 +47,28 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     KodeverkService kodeverkService;
 
     private BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAnmodningUnntakOgAvslag;
-    private Behandling behandling;
 
     @Before
     public void setUp() throws TekniskException {
-        behandling = new Behandling();
+        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
+        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(landvelgerService);
+    }
+
+    @Test
+    public void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws Exception {
+        Behandling behandling = new Behandling();
         behandling.setId(1L);
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
-        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(new SoeknadDokument()));
-        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
-
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(lagBrevressurser());
-    }
-
-    public Brevressurser lagBrevressurser() throws TekniskException {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        return new Brevressurser(behandling, kodeverkService, landvelgerService, avklarteVirksomheterService, avklartefaktaService, null);
-    }
-
-    @Test
-    public void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws Exception {
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
         List<String> arbeidsgivereRegister = Collections.singletonList("123456789");
 
         Set<Saksopplysning> saksopplysninger =
             lagSøknadOgArbeidsforholdOpplysninger(selvstendigeForetak, Collections.emptyList(), arbeidsgivereRegister);
         behandling.setSaksopplysninger(saksopplysninger);
+        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
@@ -92,10 +84,15 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
 
         String saksbehandler = "saksbehandler";
-        BrevDataAnmodningUnntakOgAvslag brevData = (BrevDataAnmodningUnntakOgAvslag) brevDataByggerAnmodningUnntakOgAvslag.lag(saksbehandler);
+        BrevDataAnmodningUnntakOgAvslag brevData = (BrevDataAnmodningUnntakOgAvslag) brevDataByggerAnmodningUnntakOgAvslag.lag(lagBrevressurser(behandling), saksbehandler);
 
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
         assertThat(brevData.hovedvirksomhet.isSelvstendigForetak()).isEqualTo(true);
         assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
+    }
+
+    public Dokumentressurser lagBrevressurser(Behandling behandling) throws TekniskException {
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        return new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 }

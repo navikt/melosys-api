@@ -10,8 +10,8 @@ import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
-import no.nav.melosys.service.dokument.brev.ressurser.BrevdataInput;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.DokumentdataInput;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,39 +24,40 @@ public class BrevBestiller {
 
     private final DokumentSystemService dokumentService;
     private final BrevDataByggerVelger brevDataByggerVelger;
-    private final BrevdataInput brevdataInput;
+    private final DokumentdataInput dokumentdataInput;
 
     @Autowired
-    public BrevBestiller(DokumentSystemService dokumentService, BrevDataByggerVelger brevDataByggerVelger, BrevdataInput brevdataInput) {
+    public BrevBestiller(DokumentSystemService dokumentService, BrevDataByggerVelger brevDataByggerVelger, DokumentdataInput dokumentdataInput) {
         this.dokumentService = dokumentService;
         this.brevDataByggerVelger = brevDataByggerVelger;
-        this.brevdataInput = brevdataInput;
+        this.dokumentdataInput = dokumentdataInput;
     }
 
     public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(dokumentType)
             .medAvsender(avsender)
-            .medMottaker(mottaker)
+            .medMottakere(mottaker)
             .medBehandling(behandling).build();
-        Brevressurser brevdataRessurser = brevdataInput.av(behandling);
-
-        bestill(brevbestilling, brevdataRessurser);
+        bestill(brevbestilling);
     }
 
     public void bestill(Brevbestilling brevbestilling) throws FunksjonellException, TekniskException {
-        Brevressurser brevdataRessurser = brevdataInput.av(brevbestilling.getBehandling());
+        Dokumentressurser brevdataRessurser = dokumentdataInput.av(brevbestilling.getBehandling());
         bestill(brevbestilling, brevdataRessurser);
     }
 
-    public void bestill(Brevbestilling brevbestilling, Brevressurser brevdataRessurser) throws FunksjonellException, TekniskException {
+    public void bestill(Brevbestilling brevbestilling, Dokumentressurser brevdataRessurser) throws FunksjonellException, TekniskException {
         Produserbaredokumenter dokumentType = brevbestilling.getDokumentType();
         Behandling behandling = brevbestilling.getBehandling();
 
-        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(brevbestilling.getDokumentType(), brevdataRessurser);
-        BrevData brevData = brevDataBygger.lag(brevbestilling.getAvsender());
+        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(brevbestilling.getDokumentType());
+        BrevData brevData = brevDataBygger.lag(brevdataRessurser, brevbestilling.getAvsender());
         brevData.begrunnelseKode = brevbestilling.getBegrunnelseKode();
         brevData.fritekst = brevbestilling.getFritekst();
-        dokumentService.produserDokument(dokumentType, brevbestilling.getMottaker(), behandling.getId(), brevData);
-        log.info("Brevet '{}' er bestillt for sak {} og behandling {}", dokumentType, behandling.getFagsak().getSaksnummer(), behandling.getId());
+
+        for (Mottaker mottaker : brevbestilling.getMottaker()) {
+            dokumentService.produserDokument(dokumentType, mottaker, behandling.getId(), brevData);
+            log.info("Brevet '{}' er bestillt for sak {} og behandling {}", dokumentType, behandling.getFagsak().getSaksnummer(), behandling.getId());
+        }
     }
 }

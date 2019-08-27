@@ -18,13 +18,12 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,11 +38,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AbstraktDokumentDataByggerTest {
+public class BrevressursTest {
     @Mock
     private KodeverkService kodeverkService;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private AvklartefaktaService avklartefaktaService;
     @Mock
@@ -52,7 +49,7 @@ public class AbstraktDokumentDataByggerTest {
     private PersonDokument person;
     private SoeknadDokument søknad;
     private Behandling behandling;
-    private Brevressurser brevressurs;
+    private Dokumentressurser brevressurs;
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -74,7 +71,7 @@ public class AbstraktDokumentDataByggerTest {
         søknad = new SoeknadDokument();
         behandling = lagBehandling(søknad, person);
 
-        brevressurs = new Brevressurser(behandling, kodeverkService, null, avklarteVirksomheterService, avklartefaktaService, lovvalgsperiodeService);
+        brevressurs = new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     private Behandling lagBehandling(SoeknadDokument søknad, PersonDokument person) {

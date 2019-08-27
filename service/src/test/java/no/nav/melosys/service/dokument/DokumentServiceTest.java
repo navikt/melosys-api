@@ -48,8 +48,8 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
-import no.nav.melosys.service.dokument.brev.ressurser.BrevdataInput;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.DokumentdataInput;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -238,18 +238,16 @@ public final class DokumentServiceTest {
             mock(ProsessinstansService.class), brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
     }
 
-    public BrevdataInput lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public DokumentdataInput lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
-        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
-
         EregFasade eregFasade = mockEregFasade();
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
         AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
-        Brevressurser brevressurser = new Brevressurser(lagBehandling(), kodeverkService, null, avklarteVirksomheterSystemService, avklartefaktaService, lovvalgsperiodeService);
-        BrevdataInput brevdataInput = mock(BrevdataInput.class);
-        when(brevdataInput.av(any())).thenReturn(brevressurser);
-        return brevdataInput;
+        Dokumentressurser dokumentressurser = new Dokumentressurser(lagBehandling(), kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
+        DokumentdataInput dokumentdataInput = mock(DokumentdataInput.class);
+        when(dokumentdataInput.av(any())).thenReturn(dokumentressurser);
+        return dokumentdataInput;
     }
 
     private static Behandling lagBehandling() {
@@ -340,16 +338,16 @@ public final class DokumentServiceTest {
         BrevDataByggerVelger brevdatabyggervelger = mock(BrevDataByggerVelger.class);
         if (bestillingDto != null) {
             if (bestillingDto.mottaker == ARBEIDSGIVER) {
-                when(brevdatabyggervelger.hent(any(), any(), eq(bestillingDto))).thenReturn(brevDataByggerAvslagArbeidsgiver);
-                when(brevDataByggerAvslagArbeidsgiver.lag(any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
+                when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerAvslagArbeidsgiver);
+                when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
 
             } else {
-                when(brevDataByggerVedlegg.lag(any())).thenReturn(lagBrevDataInnvilgelse());
-                when(brevdatabyggervelger.hent(any(), any(), eq(bestillingDto))).thenReturn(brevDataByggerVedlegg);
+                when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
+                when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerVedlegg);
             }
         } else {
             when(brevdatabyggervelger.hent(any(), any())).thenReturn(brevDataByggerVedlegg);
-            when(brevDataByggerVedlegg.lag(any())).thenReturn(lagBrevDataInnvilgelse());
+            when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
         }
 
         return brevdatabyggervelger;

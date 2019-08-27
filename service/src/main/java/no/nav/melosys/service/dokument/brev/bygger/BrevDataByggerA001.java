@@ -12,7 +12,6 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -23,7 +22,7 @@ import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.brev.ressurser.Brevressurser;
+import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -32,18 +31,14 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
-    private final Brevressurser brevressurser;
-    private final Behandling behandling;
-    private final SoeknadDokument søknad;
 
-    public BrevDataByggerA001(Brevressurser brevressurser,
-                              LovvalgsperiodeService lovvalgsperiodeService,
+    private Dokumentressurser dokumentressurser;
+    private Behandling behandling;
+
+    public BrevDataByggerA001(LovvalgsperiodeService lovvalgsperiodeService,
                               AnmodningsperiodeService anmodningsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
-        this.brevressurser = brevressurser;
-        this.behandling = brevressurser.getBehandling();
-        this.søknad = brevressurser.getSøknad();
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
@@ -51,18 +46,21 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(Dokumentressurser dokumentressurser, String saksbehandler) throws FunksjonellException, TekniskException {
+        this.dokumentressurser = dokumentressurser;
+        this.behandling = dokumentressurser.getBehandling();
+
         Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder();
         Landkoder landkode = anmodningsperioder.iterator().next().getUnntakFraLovvalgsland();
 
         BrevDataA001 brevData = new BrevDataA001();
-        brevData.personDokument = brevressurser.getPerson();
+        brevData.personDokument = dokumentressurser.getPerson();
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = brevressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivere();
-        brevData.selvstendigeVirksomheter = brevressurser.getAvklarteVirksomheter().hentNorskeSelvstendige();
+        brevData.arbeidsgivendeVirkomsheter = dokumentressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivere();
+        brevData.selvstendigeVirksomheter = dokumentressurser.getAvklarteVirksomheter().hentNorskeSelvstendige();
 
-        brevData.bostedsadresse = brevressurser.getBosted().hentBostedsadresse();
-        brevData.arbeidssteder = brevressurser.getArbeidssteder().hentArbeidssteder();
+        brevData.bostedsadresse = dokumentressurser.getBosted().hentBostedsadresse();
+        brevData.arbeidssteder = dokumentressurser.getArbeidssteder().hentArbeidssteder();
 
         brevData.vilkårsresultat161 = hentVilkårsresultat();
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
@@ -90,7 +88,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     private Optional<String> hentUtenlandskIdent(Landkoder landkode) {
-        return søknad.personOpplysninger.utenlandskIdent.stream()
+        return dokumentressurser.getSøknad().personOpplysninger.utenlandskIdent.stream()
             .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
             .map(utenlandskIdent -> utenlandskIdent.ident)
             .findFirst();
@@ -118,7 +116,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 
-        Set<String> avklarteOrgnumre = brevressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivendeOrgnumre();
+        Set<String> avklarteOrgnumre = dokumentressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivendeOrgnumre();
         Stream<Periode> avklarteAnsettelsesPerioder =
             arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrgnumre).stream();
 
