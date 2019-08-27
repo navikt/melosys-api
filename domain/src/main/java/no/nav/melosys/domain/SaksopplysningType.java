@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
 
 public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningType> {
-    
+
     ARBEIDSFORHOLD("ARBFORH", "Arbeidsforhold"),
     INNTEKT("INNTK", "Inntekt"),
     MEDLEMSKAP("MEDL", "Medlemskap"),
@@ -14,7 +14,8 @@ public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningTy
     PERSONOPPLYSNING("PERSOPL", "Personopplysning"),
     SED_OPPLYSNINGER("SEDOPPL", "SED-opplysninger"),
     SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
-    SØKNAD("SØKNAD", "Søknad");
+    SØKNAD("SØKNAD", "Søknad"),
+    UTBETAL("UTBETAL", "Utbetaldata");
 
     private String kode;
     private String beskrivelse;
@@ -23,7 +24,7 @@ public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningTy
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
-    
+
     @Override
     public String getKode() {
         return kode;

@@ -1,8 +1,7 @@
 package no.nav.melosys.domain.dokument;
 
-import org.springframework.util.Assert;
-
 import no.nav.melosys.domain.SaksopplysningType;
+import org.springframework.util.Assert;
 
 /**
  * XsltConfig inneholder informasjon om filstrukturen til xslt-filene som brukes til å konvertere eksterne
@@ -29,6 +28,8 @@ public final class XsltConfig {
 
     public static final String TPS_MAPPE = "tps";
 
+    public static final String UTBETAL_MAPPE = "utbetaling";
+
     /* Tjenester */
     private static final String ARBEIDSFORHOLD_TJENESTE = "arbeidsforhold";
 
@@ -45,6 +46,8 @@ public final class XsltConfig {
     private static final String SAKOGBEHANDLING_TJENESTE = "sakogbehandling";
 
     private static final String SØKNAD = "soeknad";
+
+    private static final String UTBETAL = "utbetaldata";
 
     /**
      * Returnerer en sti til xslt filen som brukes for å konvertere mot det felles domene.
@@ -70,6 +73,7 @@ public final class XsltConfig {
             case MEDLEMSKAP: return XsltConfig.MEDLEMSKAP_TJENESTE;
             case SOB_SAK: return XsltConfig.SAKOGBEHANDLING_TJENESTE;
             case SØKNAD: return XsltConfig.SØKNAD;
+            case UTBETAL: return XsltConfig.UTBETAL;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
     }
@@ -83,6 +87,7 @@ public final class XsltConfig {
             case MEDLEMSKAP: return XsltConfig.MEDL_MAPPE;
             case SOB_SAK: return XsltConfig.SOB_MAPPE;
             case SØKNAD: return XsltConfig.SØKNAD_MAPPE;
+            case UTBETAL: return XsltConfig.UTBETAL_MAPPE;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
     }

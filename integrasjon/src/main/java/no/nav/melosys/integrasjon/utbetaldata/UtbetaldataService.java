@@ -1,23 +1,22 @@
 package no.nav.melosys.integrasjon.utbetaldata;
 
 import java.io.StringWriter;
+import java.time.LocalDate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.*;
+import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumer;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.Ident;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.Identroller;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.*;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonRequest;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonResponse;
 import org.slf4j.Logger;
@@ -33,6 +32,10 @@ public class UtbetaldataService implements UtbetaldataFasade {
     private static final String UTBETAL_VERSJON = "1.0";
 
     private static final String RETTIGHETSHAVER = "Rettighetshaver";
+
+    private static final String UTBETALINGSPERIODE = "Utbetalingsperiode";
+
+    private static final String YTELSESPERIODE = "Ytelsesperiode";
 
     private UtbetalingConsumer utbetalingConsumer;
 
@@ -54,16 +57,18 @@ public class UtbetaldataService implements UtbetaldataFasade {
     }
 
     @Override
-    public Saksopplysning hentUtbetalingsinformasjon(String fnr) throws IntegrasjonException, FunksjonellException {
+    public Saksopplysning hentUtbetalingsinformasjon(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, FunksjonellException {
         HentUtbetalingsinformasjonResponse response;
         try {
-            response = utbetalingConsumer.hentUtbetalingsinformasjon(lagRequest(fnr));
+            response = utbetalingConsumer.hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom));
         } catch (HentUtbetalingsinformasjonPersonIkkeFunnet hentUtbetalingsinformasjonPersonIkkeFunnet) {
             throw new IkkeFunnetException("Oppgitt person ble ikke funnet");
         } catch (HentUtbetalingsinformasjonPeriodeIkkeGyldig hentUtbetalingsinformasjonPeriodeIkkeGyldig) {
             throw new FunksjonellException("Oppgitt periode er ikke gyldig", hentUtbetalingsinformasjonPeriodeIkkeGyldig);
         } catch (HentUtbetalingsinformasjonIkkeTilgang hentUtbetalingsinformasjonIkkeTilgang) {
             throw new SikkerhetsbegrensningException("Har ikke tilgang til å hente data for person", hentUtbetalingsinformasjonIkkeTilgang);
+        } catch (DatatypeConfigurationException e) {
+            throw new TekniskException(e);
         }
 
         // Response -> xml
@@ -100,14 +105,34 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return saksopplysning;
     }
 
-    private HentUtbetalingsinformasjonRequest lagRequest(String fnr) {
+    private HentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) throws DatatypeConfigurationException {
         HentUtbetalingsinformasjonRequest request = new HentUtbetalingsinformasjonRequest();
+        request.setId(lagIdent(fnr));
+        //request.setPeriode(lagPeriode(fom, tom));
+
+        Ytelsestyper ytelsestype = new Ytelsestyper();
+        ytelsestype.setValue("Barnetrygd");
+        request.getYtelsestypeListe().add(ytelsestype);
+
+        return request;
+    }
+
+    private Ident lagIdent(String fnr) {
         Ident ident = new Ident();
         Identroller identrolle = new Identroller();
         identrolle.setValue(RETTIGHETSHAVER);
         ident.setRolle(identrolle);
         ident.setIdent(fnr);
-        request.setId(ident);
-        return request;
+        return ident;
+    }
+
+    private ForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) throws DatatypeConfigurationException {
+        ForespurtPeriode periode = new ForespurtPeriode();
+        Periodetyper periodetype = new Periodetyper();
+        periodetype.setKodeRef(YTELSESPERIODE);
+        periode.setPeriodeType(periodetype);
+        periode.setFom(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
+        periode.setTom(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
+        return periode;
     }
 }

@@ -6,7 +6,7 @@
     <xsl:template match="/">
         <utbetalingDokument>
             <utbetalinger>
-                <xsl:apply-templates select="utbetalingListe"/>
+                <xsl:apply-templates/>
             </utbetalinger>
         </utbetalingDokument>
     </xsl:template>
