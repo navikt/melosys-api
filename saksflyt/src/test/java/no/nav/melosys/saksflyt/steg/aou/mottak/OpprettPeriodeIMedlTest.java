@@ -8,9 +8,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -26,8 +26,13 @@ public class OpprettPeriodeIMedlTest {
     private MedlFasade medlFasade;
     @Mock
     private OppdaterMedlFelles oppdaterMedlFelles;
-    @InjectMocks
+
     private OpprettPeriodeIMedl opprettPeriodeIMedl;
+
+    @Before
+    public void setup() {
+        opprettPeriodeIMedl = new OpprettPeriodeIMedl(medlFasade, oppdaterMedlFelles);
+    }
 
     @Test
     public void utfør() throws FunksjonellException, TekniskException {

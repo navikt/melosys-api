@@ -14,9 +14,9 @@ import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -30,8 +30,13 @@ public class OpprettAnmodningsperiodeTest {
 
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
-    @InjectMocks
+
     private OpprettAnmodningsperiode opprettAnmodningsperiode;
+
+    @Before
+    public void setup() {
+        opprettAnmodningsperiode = new OpprettAnmodningsperiode(anmodningsperiodeService);
+    }
 
     @Test
     public void utfør() throws FunksjonellException, TekniskException {

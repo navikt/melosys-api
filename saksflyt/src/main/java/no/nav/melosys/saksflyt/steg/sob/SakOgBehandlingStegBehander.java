@@ -1,21 +1,18 @@
 package no.nav.melosys.saksflyt.steg.sob;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 
 import static no.nav.melosys.domain.Tema.MED;

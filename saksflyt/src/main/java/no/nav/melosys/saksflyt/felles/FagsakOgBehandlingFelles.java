@@ -1,18 +1,14 @@
 package no.nav.melosys.saksflyt.felles;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -20,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FagsakOgBehandlingFelles {
@@ -28,27 +23,16 @@ public class FagsakOgBehandlingFelles {
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Autowired
     public FagsakOgBehandlingFelles(FagsakService fagsakService,
-                                    BehandlingService behandlingService,
-                                    BehandlingsresultatRepository behandlingsresultatRepository) {
+                                    BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
     }
 
-    public void avsluttFagsakOgBehandling(Behandling behandling, Behandlingsresultattyper behandlingsresultattype) throws TekniskException, FunksjonellException {
-        oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.LOVVALG_AVKLART, Behandlingsstatus.AVSLUTTET);
-
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
-            .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat for behandling " + behandling.getId()));
-
-        behandlingsresultat.setType(behandlingsresultattype);
-        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
-        behandlingsresultatRepository.save(behandlingsresultat);
-
+    public void avsluttFagsakOgBehandling(Behandling behandling, Saksstatuser saksstatuser) throws FunksjonellException {
+        oppdaterFagsakOgBehandlingStatuser(behandling, saksstatuser, Behandlingsstatus.AVSLUTTET);
         log.info("Periode regisrert og behandling avsluttet for fagsak {}, behandling {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
     }
 
@@ -71,7 +55,6 @@ public class FagsakOgBehandlingFelles {
         return fagsak;
     }
 
-    @Transactional
     public Behandling opprettBehandlingPåEksisterendeFagsak(Fagsak fagsak, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype,
                                                             String journalpostId, String dokumentId, long gsakSaksnummer)
         throws TekniskException, IkkeFunnetException {

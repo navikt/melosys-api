@@ -15,9 +15,9 @@ import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.repository.SaksopplysningRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -31,8 +31,13 @@ public class OpprettSedDokumentFellesTest {
     private DokumentFactory dokumentFactory;
     @Mock
     private SaksopplysningRepository saksopplysningRepository;
-    @InjectMocks
+
     private OpprettSedDokumentFelles opprettSedDokumentFelles;
+
+    @Before
+    public void setup() {
+        opprettSedDokumentFelles = new OpprettSedDokumentFelles(dokumentFactory, saksopplysningRepository);
+    }
 
     @Test
     public void opprettSedSaksopplysning() {
