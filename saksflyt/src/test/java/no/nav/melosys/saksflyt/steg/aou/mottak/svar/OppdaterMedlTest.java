@@ -9,9 +9,9 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -28,8 +28,13 @@ public class OppdaterMedlTest {
     private OppdaterMedlFelles oppdaterMedlFelles;
     @Mock
     private MedlFasade medlFasade;
-    @InjectMocks
+
     private OppdaterMedl oppdaterMedl;
+
+    @Before
+    public void setup() {
+        oppdaterMedl = new OppdaterMedl(oppdaterMedlFelles, medlFasade);
+    }
 
     @Test
     public void utfør() throws FunksjonellException, TekniskException {

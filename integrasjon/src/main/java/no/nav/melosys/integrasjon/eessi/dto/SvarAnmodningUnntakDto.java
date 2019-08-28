@@ -1,20 +1,17 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
+import no.nav.melosys.domain.eessi.melding.SvarAnmodningUnntak;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.exception.TekniskException;
 
 public class SvarAnmodningUnntakDto {
 
-    public enum Beslutning {
-        INNVILGELSE, DELVIS_INNVILGELSE, AVSLAG;
-    }
-
-    private Beslutning beslutning;
+    private SvarAnmodningUnntak.Beslutning beslutning;
     private String begrunnelse;
     private Periode delvisInnvilgetPeriode;
 
-    public SvarAnmodningUnntakDto(Beslutning beslutning, String begrunnelse, Periode delvisInnvilgetPeriode) {
+    public SvarAnmodningUnntakDto(SvarAnmodningUnntak.Beslutning beslutning, String begrunnelse, Periode delvisInnvilgetPeriode) {
         this.beslutning = beslutning;
         this.begrunnelse = begrunnelse;
         this.delvisInnvilgetPeriode = delvisInnvilgetPeriode;
@@ -31,24 +28,24 @@ public class SvarAnmodningUnntakDto {
         );
     }
 
-    private static Beslutning hentBeslutningForSvartype(Anmodningsperiodesvartyper anmodningsperiodeSvarType) throws TekniskException {
+    private static SvarAnmodningUnntak.Beslutning hentBeslutningForSvartype(Anmodningsperiodesvartyper anmodningsperiodeSvarType) throws TekniskException {
         switch (anmodningsperiodeSvarType) {
             case INNVILGELSE:
-                return Beslutning.INNVILGELSE;
+                return SvarAnmodningUnntak.Beslutning.INNVILGELSE;
             case DELVIS_INNVILGELSE:
-                return Beslutning.DELVIS_INNVILGELSE;
+                return SvarAnmodningUnntak.Beslutning.DELVIS_INNVILGELSE;
             case AVSLAG:
-                return Beslutning.AVSLAG;
+                return SvarAnmodningUnntak.Beslutning.AVSLAG;
             default:
                 throw new TekniskException("Ukjent AnmodningsperiodeSvarType " + anmodningsperiodeSvarType + " kan ikke mappes til Beslutning");
         }
     }
 
-    public Beslutning getBeslutning() {
+    public SvarAnmodningUnntak.Beslutning getBeslutning() {
         return beslutning;
     }
 
-    public void setBeslutning(Beslutning beslutning) {
+    public void setBeslutning(SvarAnmodningUnntak.Beslutning beslutning) {
         this.beslutning = beslutning;
     }
 

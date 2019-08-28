@@ -9,9 +9,9 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -28,8 +28,13 @@ public class SendSedTest {
     private EessiService eessiService;
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
-    @InjectMocks
+
     private SendSed sendSed;
+
+    @Before
+    public void setup() {
+        sendSed = new SendSed(eessiService, anmodningsperiodeService);
+    }
 
     @Test
     public void utfør() throws MelosysException {

@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.aou.mottak.svar;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.FagsakOgBehandlingFelles;
@@ -31,7 +31,7 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        fagsakOgBehandlingFelles.avsluttFagsakOgBehandling(prosessinstans.getBehandling(), Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        fagsakOgBehandlingFelles.avsluttFagsakOgBehandling(prosessinstans.getBehandling(), Saksstatuser.LOVVALG_AVKLART);
         prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }

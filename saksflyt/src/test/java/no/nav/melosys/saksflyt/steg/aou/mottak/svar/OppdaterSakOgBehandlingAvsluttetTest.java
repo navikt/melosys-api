@@ -8,11 +8,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.BehandlingService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -30,10 +29,13 @@ public class OppdaterSakOgBehandlingAvsluttetTest {
     private TpsService tpsService;
     @Mock
     private BehandlingService behandlingService;
-    @Mock
-    private SaksopplysningRepository saksopplysningRepository;
-    @InjectMocks
+
     private OppdaterSakOgBehandlingAvsluttet oppdaterSakOgBehandlingAvsluttet;
+
+    @Before
+    public void setup() {
+        oppdaterSakOgBehandlingAvsluttet = new OppdaterSakOgBehandlingAvsluttet(sakOgBehandlingFasade, tpsService, behandlingService);
+    }
 
     @Test
     public void utfør() throws FunksjonellException, TekniskException {
