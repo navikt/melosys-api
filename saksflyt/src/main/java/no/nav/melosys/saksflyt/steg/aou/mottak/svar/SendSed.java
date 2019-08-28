@@ -47,7 +47,7 @@ public class SendSed extends AbstraktStegBehandler {
 
         try {
             AnmodningsperiodeSvar svar = anmodningsperiodeSvar.iterator().next();
-            eessiService.anmodningUnntakSvar(svar, behandlingId);
+            eessiService.sendAnmodningUnntakSvar(svar, behandlingId);
         } catch (MelosysException e) {
             throw new TekniskException("Kunne ikke sende svar for anmodning om unntak", e);
         }

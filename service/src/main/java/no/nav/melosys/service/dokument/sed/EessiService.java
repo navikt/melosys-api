@@ -129,14 +129,12 @@ public class EessiService {
         eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(gsakSaksnummer, rinaSaksnummer, bucType));
     }
 
-    public void anmodningUnntakSvar(AnmodningsperiodeSvar anmodningsperiodeSvar, long behandlingId) throws MelosysException {
-        if (skalSendeSed) {
-            Behandling behandling = behandlingService.hentBehandling(behandlingId);
-            String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
-            SvarAnmodningUnntakDto svarAnmodningUnntakDto = SvarAnmodningUnntakDto.av(anmodningsperiodeSvar);
+    public void sendAnmodningUnntakSvar(AnmodningsperiodeSvar anmodningsperiodeSvar, long behandlingId) throws MelosysException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
+        SvarAnmodningUnntakDto svarAnmodningUnntakDto = SvarAnmodningUnntakDto.av(anmodningsperiodeSvar);
 
-            log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
-            eessiConsumer.anmodningUnntakSvar(svarAnmodningUnntakDto, rinaSaksnummer);
-        }
+        log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
+        eessiConsumer.sendAnmodningUnntakSvar(svarAnmodningUnntakDto, rinaSaksnummer);
     }
 }

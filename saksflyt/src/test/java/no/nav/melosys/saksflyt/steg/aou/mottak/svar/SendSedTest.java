@@ -1,11 +1,13 @@
 package no.nav.melosys.saksflyt.steg.aou.mottak.svar;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -49,7 +51,25 @@ public class SendSedTest {
         sendSed.utfør(prosessinstans);
 
         verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(anyLong());
-        verify(eessiService).anmodningUnntakSvar(any(AnmodningsperiodeSvar.class), anyLong());
+        verify(eessiService).sendAnmodningUnntakSvar(any(AnmodningsperiodeSvar.class), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_OPPDATER_MEDL);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void utfør_medFlereAnmodningsperiodeSvar_forventException() throws MelosysException {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong()))
+            .thenReturn(Arrays.asList(
+                new AnmodningsperiodeSvar(),
+                new AnmodningsperiodeSvar()
+            ));
+
+        sendSed.utfør(prosessinstans);
+
+        verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(anyLong());
     }
 }
