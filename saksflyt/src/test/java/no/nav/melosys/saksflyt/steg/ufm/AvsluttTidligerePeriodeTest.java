@@ -5,8 +5,6 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,22 +15,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvsluttTidligerePeriodeTest {
 
     @Mock
     private OppdaterMedlFelles oppdaterMedlFelles;
-    @Mock
-    private MedlFasade medlFasade;
 
     private AvsluttTidligerePeriode avsluttTidligerePeriode;
 
     @Before
-    public void setUp() throws Exception {
-        avsluttTidligerePeriode = new AvsluttTidligerePeriode(oppdaterMedlFelles, medlFasade);
-        when(oppdaterMedlFelles.hentLovvalgsperiode(any(Behandling.class))).thenReturn(new Lovvalgsperiode());
+    public void setUp() {
+        avsluttTidligerePeriode = new AvsluttTidligerePeriode(oppdaterMedlFelles);
     }
 
     @Test
@@ -59,7 +53,7 @@ public class AvsluttTidligerePeriodeTest {
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligerePeriode.utfør(prosessinstans);
-        verify(medlFasade).avvisPeriode(any(), any(StatusaarsakMedl.class));
+        verify(oppdaterMedlFelles).avsluttTidligerMedlPeriode(any(Fagsak.class));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 

@@ -24,6 +24,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,15 +66,16 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         return brevdataInnvilgelse;
     }
 
-    private static BrevDataA1 lagBrevdataA1(List<AvklartVirksomhet> norskeVirksomheter) {
+    private static BrevDataA1 lagBrevdataA1(List<AvklartVirksomhet> virksomheter) {
         BrevDataA1 brevdataA1 = new BrevDataA1();
         brevdataA1.person = lagPersonDokument();
         brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        brevdataA1.norskeVirksomheter = norskeVirksomheter;
-        brevdataA1.hovedvirksomhet = norskeVirksomheter.iterator().next();
+        brevdataA1.hovedvirksomhet = virksomheter.get(0);
+        brevdataA1.bivirksomheter = new ArrayList<>(virksomheter);
+        brevdataA1.bivirksomheter.remove(0);
+
         brevdataA1.selvstendigeForetak = Collections.emptySet();
-        brevdataA1.utenlandskeVirksomheter = Collections.emptyList();
         brevdataA1.arbeidssteder = new ArrayList<>();
         return brevdataA1;
     }

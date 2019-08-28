@@ -6,6 +6,7 @@ public enum ProsessType implements Kodeverk {
 
     //alfabetisk rekkefølge
     ANMODNING_OM_UNNTAK("ANMODNING_OM_UNNTAK", "Anmodning om unntak"),
+    ANMODNING_OM_UNNTAK_MOTTAK("ANMODNING_OM_UNNTAK_MOTTAK", "Mottar anmodning om unntak"),
     ANMODNING_OM_UNNTAK_SVAR("ANMODNING_OM_UNNTAK_SVAR", "Mottar svar på anmodning om unntak"),
     HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
     IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),

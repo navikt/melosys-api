@@ -6,7 +6,8 @@ import java.util.Collections;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;

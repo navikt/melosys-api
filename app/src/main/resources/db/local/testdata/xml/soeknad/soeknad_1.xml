@@ -15,11 +15,13 @@
     </oppholdUtland>
     <arbeidNorge/>
     <arbeidUtland>
+        <foretakNavn>Equinor</foretakNavn>
         <adresse>
             <gatenavn>NEDRE VARÅSEN</gatenavn>
             <husnummer>1</husnummer>
             <postnummer>0666</postnummer>
-            <region/>
+            <poststed>Oslo</poststed>
+            <region>Akershus</region>
             <landkode>NO</landkode>
         </adresse>
     </arbeidUtland>
@@ -29,7 +31,8 @@
             <gatenavn>NEDRE VARÅSEN</gatenavn>
             <husnummer>1</husnummer>
             <postnummer>0666</postnummer>
-            <region/>
+            <poststed>Oslo</poststed>
+            <region>Akershus</region>
             <landkode>NO</landkode>
         </adresse>
     </foretakUtland>

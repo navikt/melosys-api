@@ -28,8 +28,6 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHE
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
 
 public class BrevDataByggerAvslagArbeidsgiver extends AbstraktDokumentDataBygger implements BrevDataBygger {
-
-    private AvklarteVirksomheterService avklarteVirksomheterService;
     private LandvelgerService landvelgerService;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
@@ -38,8 +36,7 @@ public class BrevDataByggerAvslagArbeidsgiver extends AbstraktDokumentDataBygger
                                             LandvelgerService landvelgerService,
                                             LovvalgsperiodeService lovvalgsperiodeService,
                                             VilkaarsresultatRepository vilkaarsresultatRepository) {
-        super(null, lovvalgsperiodeService, avklartefaktaService);
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        super(null, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
         this.landvelgerService = landvelgerService;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }

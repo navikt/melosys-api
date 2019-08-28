@@ -5,11 +5,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.FunksjonellException;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -23,16 +21,6 @@ public final class SoeknadUtils {
 
     public static Periode hentPeriode(SoeknadDokument soeknadDokument) {
         return soeknadDokument.periode;
-    }
-
-    /**
-     * Benytter kun første element til å vurdere maritimt arbeid i Leveranse 1
-     */
-    public static MaritimtArbeid hentMaritimtArbeid(SoeknadDokument søknad) throws FunksjonellException {
-        if (søknad.maritimtArbeid.isEmpty()) {
-            throw new FunksjonellException("Søknad mangler detaljer om Maritimt Arbeid");
-        }
-        return søknad.maritimtArbeid.get(0);
     }
 
     /**

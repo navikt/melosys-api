@@ -49,7 +49,7 @@ class A1Mapper {
 
         a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.hovedvirksomhet));
 
-        a1.setBivirksomhetListe(mapBivirksomheter(brevData.utenlandskeVirksomheter));
+        a1.setBivirksomhetListe(mapBivirksomheter(brevData.bivirksomheter));
 
         a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder));
 
@@ -108,7 +108,7 @@ class A1Mapper {
         return hovedvirksomhetBrev;
     }
 
-    private BivirksomhetListeType mapBivirksomheter(List<AvklartVirksomhet> avklarteVirksomheter) {
+    private BivirksomhetListeType mapBivirksomheter(Collection<AvklartVirksomhet> avklarteVirksomheter) {
         avklarteVirksomheter = fyllMinimumAntallArbeidsgiverOppdragsgiverMedDummyVerdier(avklarteVirksomheter);
 
         BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
@@ -140,7 +140,7 @@ class A1Mapper {
      * Brevtjenesten trenger et fast antall enheter i listen.
      * Fyller derfor opp med tomme elementer for resterende felter
      */
-    private List<AvklartVirksomhet> fyllMinimumAntallArbeidsgiverOppdragsgiverMedDummyVerdier(List<AvklartVirksomhet> avklarteVirksomheter) {
+    private List<AvklartVirksomhet> fyllMinimumAntallArbeidsgiverOppdragsgiverMedDummyVerdier(Collection<AvklartVirksomhet> avklarteVirksomheter) {
         List<AvklartVirksomhet> utfylltListe = new ArrayList<>(avklarteVirksomheter);
         int antallAdresserIListe = avklarteVirksomheter.size();
         int gjenståendeAdresser = ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 - antallAdresserIListe;
@@ -150,7 +150,7 @@ class A1Mapper {
         return utfylltListe;
     }
 
-    private List<Arbeidssted> fyllMinimumAntallArbeidsstederMedDummyVerdier(List<Arbeidssted> arbeidssteder) {
+    private List<Arbeidssted> fyllMinimumAntallArbeidsstederMedDummyVerdier(Collection<Arbeidssted> arbeidssteder) {
         List<Arbeidssted> utfylltListe = new ArrayList<>(arbeidssteder);
         int antallAdresserIListe = arbeidssteder.size();
         int gjenståendeAdresser = ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 - antallAdresserIListe;

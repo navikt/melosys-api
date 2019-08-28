@@ -162,7 +162,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentMaritimType_medSokkelTekst_foventerSokkelType() throws TekniskException {
+    public void hentMaritimType_medSokkelTekst_foventerSokkelType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
@@ -173,7 +173,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentMaritimType_medSkipTekst_foventerSkipType() throws TekniskException {
+    public void hentMaritimType_medSkipTekst_foventerSkipType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SKIP");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
@@ -192,11 +192,11 @@ public class AvklartefaktaServiceTest {
     @Test
     public void hentAvklartMaritimeAvklartfakta_medAvklartSokkel_girAvklartMaritimtArbeid() {
         Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "GB");
-        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anyList())).thenReturn(alleMaritimeFakta);
-        Collection<AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfakta(1L);
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
+        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentAlleMaritimeAvklartfakta(1L);
         assertThat(avklarteMaritimeArbeid).hasSize(1);
 
-        avklarteMaritimeArbeid.forEach(maritimtArbeid -> {
+        avklarteMaritimeArbeid.values().forEach(maritimtArbeid -> {
             assertThat(maritimtArbeid.getNavn()).isEqualTo("Stena Don");
             assertThat(maritimtArbeid.getMaritimtype()).isEqualTo(Maritimtyper.SOKKEL);
             assertThat(maritimtArbeid.getLand()).isEqualTo("GB");
@@ -207,9 +207,9 @@ public class AvklartefaktaServiceTest {
     public void hentAvklartMaritimeAvklartfakta_medAvklartSkip_girAvklartMaritimtArbeid() {
         Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "SE");
         alleMaritimeFakta.addAll(lagAlleMaritimeAvklartefakta("Seven Kestrel", "SKIP", "GB"));
-        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anyList())).thenReturn(alleMaritimeFakta);
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
 
-        Collection<AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfakta(1L);
+        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentAlleMaritimeAvklartfakta(1L);
         assertThat(avklarteMaritimeArbeid).hasSize(2);
     }
 

@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
-import java.util.Optional;
+import java.util.Collections;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -8,7 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,8 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterSakOgBehandlingAvsluttetTest {
@@ -28,13 +27,13 @@ public class OppdaterSakOgBehandlingAvsluttetTest {
     @Mock
     private TpsService tpsService;
     @Mock
-    private SaksopplysningRepository saksopplysningRepository;
+    private BehandlingService behandlingService;
 
     private OppdaterSakOgBehandlingAvsluttet oppdaterSakOgBehandlingAvsluttet;
 
     @Before
     public void setup() {
-        oppdaterSakOgBehandlingAvsluttet = new OppdaterSakOgBehandlingAvsluttet(sakOgBehandlingFasade, tpsService, saksopplysningRepository);
+        oppdaterSakOgBehandlingAvsluttet = new OppdaterSakOgBehandlingAvsluttet(sakOgBehandlingFasade, tpsService, behandlingService);
     }
 
     @Test
@@ -52,6 +51,8 @@ public class OppdaterSakOgBehandlingAvsluttetTest {
         oppdaterSakOgBehandlingAvsluttet.utfør(prosessinstans);
 
         verify(sakOgBehandlingFasade).sendBehandlingAvsluttet(any());
+        verify(tpsService, never()).hentAktørIdForIdent(anyString());
+        verify(behandlingService, never()).hentBehandling(anyLong());
     }
 
     @Test
@@ -69,9 +70,10 @@ public class OppdaterSakOgBehandlingAvsluttetTest {
         PersonDokument personDokument = new PersonDokument();
         personDokument.fnr = "99";
         saksopplysning.setDokument(personDokument);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(), eq(SaksopplysningType.PERSOPL)))
-            .thenReturn(Optional.of(saksopplysning));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         when(tpsService.hentAktørIdForIdent(anyString())).thenReturn("333");
         oppdaterSakOgBehandlingAvsluttet.utfør(prosessinstans);

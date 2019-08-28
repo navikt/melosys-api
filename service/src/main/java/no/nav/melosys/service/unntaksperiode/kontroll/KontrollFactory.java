@@ -13,6 +13,7 @@ class KontrollFactory {
 
     List<Function<KontrollData, Unntak_periode_begrunnelser>> hentKontrollerForSedType(final SedType sedType) {
         switch (sedType) {
+            case A001:
             case A003:
                 return a003Kontroller();
             case A009:

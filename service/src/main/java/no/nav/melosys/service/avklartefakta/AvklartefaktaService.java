@@ -8,8 +8,8 @@ import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -31,6 +31,10 @@ public class AvklartefaktaService {
 
     private static final String VALGT_FAKTA = "TRUE";
     private static final String FANT_IKKE_RESULTAT = "Fant ikke behandlingsresultat for behandlingsid: ";
+
+    private static final EnumSet<Avklartefaktatyper> maritimeFaktatyper = EnumSet.of(
+        Avklartefaktatyper.SOKKEL_ELLER_SKIP,
+        Avklartefaktatyper.ARBEIDSLAND);
 
     @Autowired
     public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer) {
@@ -101,24 +105,16 @@ public class AvklartefaktaService {
         return avklartefaktaOpt.map(af -> Maritimtyper.valueOf(af.getFakta()));
     }
 
-    public Collection<AvklartMaritimtArbeid> hentMaritimeAvklartfakta(long behandlingsid) {
-        Collection<Avklartefaktatyper> maritimeFaktatyper = Arrays.asList(
-            Avklartefaktatyper.SOKKEL_ELLER_SKIP,
-            Avklartefaktatyper.ARBEIDSLAND);
-
+    public Map<String, AvklartMaritimtArbeid> hentAlleMaritimeAvklartfakta(long behandlingsid) {
         Set<Avklartefakta> maritimeAvklartefakta =
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(behandlingsid, maritimeFaktatyper);
 
         HashMap<String, AvklartMaritimtArbeid> maritimeFaktaGruppert = new HashMap<>();
-        for (Avklartefakta avklartefakta : maritimeAvklartefakta) {
-            String navn = avklartefakta.getSubjekt();
-            if (!maritimeFaktaGruppert.containsKey(navn)) {
-                maritimeFaktaGruppert.put(navn, new AvklartMaritimtArbeid(navn));
-            }
-            maritimeFaktaGruppert.get(navn).leggTilFakta(avklartefakta);
-        }
-
-        return maritimeFaktaGruppert.values();
+        maritimeAvklartefakta.forEach(avklartefakta ->
+            maritimeFaktaGruppert.computeIfAbsent(avklartefakta.getSubjekt(), v -> new AvklartMaritimtArbeid(avklartefakta.getSubjekt()))
+                .leggTilFakta(avklartefakta)
+        );
+        return maritimeFaktaGruppert;
     }
 
     public Optional<Avklartefakta> hentVurderingUnntakPeriode(long behandlingsid) {

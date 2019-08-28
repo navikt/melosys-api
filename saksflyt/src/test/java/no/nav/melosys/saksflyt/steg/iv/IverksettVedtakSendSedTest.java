@@ -33,6 +33,8 @@ public class IverksettVedtakSendSedTest {
     private IverksettVedtakSendSed iverksettVedtakSendSed;
 
     private Prosessinstans prosessinstans;
+    
+    private Lovvalgsperiode lovvalgsperiode;
 
     @Before
     public void setUp() throws Exception {
@@ -42,7 +44,7 @@ public class IverksettVedtakSendSedTest {
         when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(prosessinstans.getBehandling());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
@@ -56,5 +58,13 @@ public class IverksettVedtakSendSedTest {
         iverksettVedtakSendSed.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE));
+    }
+
+    @Test
+    public void utførStegForArtikkel11_suksessfull_statusErAvsluttBehandling() throws Exception {
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
+        iverksettVedtakSendSed.utfør(prosessinstans);
+        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
     }
 }

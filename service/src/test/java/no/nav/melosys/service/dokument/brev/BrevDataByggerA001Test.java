@@ -39,6 +39,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
@@ -135,12 +136,8 @@ public class BrevDataByggerA001Test {
         person.setType(SaksopplysningType.PERSOPL);
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(soeknad, person, medl, aareg)));
 
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.gatenavn = "gate 12";
-        strukturertAdresse.postnummer = "123";
-
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
-        when(detaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
+        when(detaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
 
         leggTilTestorganisasjon("navn1", orgnr1, detaljer);
         leggTilTestorganisasjon("navn2", orgnr2, detaljer);
@@ -206,14 +203,14 @@ public class BrevDataByggerA001Test {
                 .map(nv -> nv.orgnr)).containsOnly(orgnr1);
     }
 
-    @Test(expected = TekniskException.class)
+    @Test
     public void testIngenAvklarteforetak() throws MelosysException {
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
 
         BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(behandling, "Z12345");
-        assertThat(brevDataDto.arbeidsgivendeVirkomsheter).isEmpty();
+        assertThat(brevDataDto.ansettelsesperiode).isEmpty();
     }
 
     @Test

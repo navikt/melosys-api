@@ -6,15 +6,17 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
+import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.saksflyt.steg.sob.SakOgBehandlingStegBehander;
+import no.nav.melosys.service.BehandlingService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OppdaterSakOgBehandlingOpprettet extends SakOgBehandlingStegBehander {
 
-    protected OppdaterSakOgBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade) {
-        super(sakOgBehandlingFasade);
+    protected OppdaterSakOgBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
+        super(sakOgBehandlingFasade, tpsService, behandlingService);
     }
 
     @Override

@@ -51,11 +51,11 @@ public class JournalfoeringService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void journalfoer(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+    public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         Journalpost journalpost = hentJournalpost(journalfoeringDto.getJournalpostID());
 
-        if (journalpost.mottaksKanalErEessi() && eessiService.stotterAutomatiskBehandling(journalpost.getHoveddokument().getNavSkjemaID())) {
-            opprettJournalføringSed(journalfoeringDto);
+        if (journalpost.mottaksKanalErEessi() && eessiService.støtterAutomatiskBehandling(journalfoeringDto.getJournalpostID(), journalpost.getHoveddokument().getNavSkjemaID())) {
+            opprettProsessinstansSedMottak(journalfoeringDto);
         } else {
             opprettSakOgJournalfør(journalfoeringDto);
         }
@@ -90,7 +90,7 @@ public class JournalfoeringService {
         prosessinstansService.lagre(prosessinstans);
     }
 
-    private void opprettJournalføringSed(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+    private void opprettProsessinstansSedMottak(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         validerBrukerIDFinnes(journalfoeringDto);
         prosessinstansService.opprettProsessinstansSedMottak(journalfoeringDto.getJournalpostID(), journalfoeringDto.getBrukerID());
     }

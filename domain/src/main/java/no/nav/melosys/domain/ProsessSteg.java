@@ -51,6 +51,19 @@ public enum ProsessSteg implements Kodeverk {
     AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR("AOU_OPPRETT_ANMODNINGSPERIODESVAR","Oppretter svar for en anmodningsperiode"),
     AOU_SVAR_OPPDATER_BEHANDLING("AOU_OPPDATER_BEHANDLING","Oppdater behandling"),
 
+    //Mottak anmodning om unntak
+    AOU_MOTTAK_OPPRETT_FAGSAK_OG_BEH("AOU_MOTTAK_OPPRETT_FAGSAK_OG_BEH", "Opprett sak og behandling"),
+    AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE("AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE", "Opprett anmodningsperiode"),
+    AOU_MOTTAK_OPPRETT_PERIODE_MEDL("AOU_MOTTAK_OPPRETT_PERIODE_MEDL", "Opprett periode under avklaring i Medl"),
+    AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET("AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
+    AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE("AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode Medl hvis SED er endring"),
+    AOU_MOTTAK_OPPRETT_SEDDOKUMENT("AOU_MOTTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
+    AOU_MOTTAK_HENT_PERSON("AOU_MOTTAK_HENT_PERSON", "Henter person tilknyttet SED"),
+    AOU_MOTTAK_HENT_MEDLEMSKAP("AOU_MOTTAK_HENT_MEDLEMSKAP", "Henter opplysninger om medlemskap"),
+    AOU_MOTTAK_HENT_YTELSER("AOU_MOTTAK_HENT_YTELSER", "Henter opplysninger om ytelser"),
+    AOU_MOTTAK_REGISTERKONTROLL("AOU_MOTTAK_REGISTERKONTROLL", "Validerer informasjon om en unntaksperiode"),
+    AOU_MOTTAK_OPPRETT_OPPGAVE("AOU_MOTTAK_OPPRETT_OPPGAVE", "Opprett oppgave for manuell behandling"),
+
     //Iverksett Vedtak
     IV_FORKORT_PERIODE("IV_FORKORT_PERIODE", "Legger til endringsgrunn i AVKLARTEFAKTA for hvorfor perioden er forkortet"),
     IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),

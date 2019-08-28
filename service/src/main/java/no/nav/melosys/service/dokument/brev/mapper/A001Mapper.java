@@ -47,8 +47,7 @@ class A001Mapper {
             seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(selvstendigeVirksomheter));
         } else {
             // Foretakliste = Identifikasjon av arbeidsgiver (Kun arbeidsgivere)
-            List<AvklartVirksomhet> arbeidsgivendeVirksomheter = brevData.arbeidsgivendeVirkomsheter;
-            seda001.setForetakListe(mapForetakliste(arbeidsgivendeVirksomheter));
+            seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirkomsheter));
         }
 
         seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.arbeidssteder));
