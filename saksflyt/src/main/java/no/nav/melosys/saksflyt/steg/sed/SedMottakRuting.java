@@ -1,28 +1,50 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.BehandleMottattSedInitialiserer;
+import no.nav.melosys.service.eessi.InitialiseringResultat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/*
+ * Transisjoner:
+ * SED_MOTTAK_RUTING → SED_MOTTAK_FERDIGSTILL_JOURNALPOST
+ * eller
+ * SED_MOTTAK_RUTING → SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH om sak ikke finnes
+ * eller
+ * SED_MOTTAK_RUTING -> SED_MOTTAK_OPPRETT_NY_BEHANDLING
+ */
 @Component
 public class SedMottakRuting extends AbstraktStegBehandler {
 
     private final Collection<BehandleMottattSedInitialiserer> sedMottattInitialiserere;
+    private final EessiService eessiService;
+
+    private static final List<ProsessSteg> LOVLIGE_NESTE_STEG = Arrays.asList(
+        ProsessSteg.SED_MOTTAK_OPPRETT_SAK_OG_BEH,
+        ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+        ProsessSteg.SED_MOTTAK_OPPRETT_NY_BEHANDLING
+    );
 
     @Autowired
-    public SedMottakRuting(Collection<BehandleMottattSedInitialiserer> sedMottattInitialiserere) {
+    public SedMottakRuting(Collection<BehandleMottattSedInitialiserer> sedMottattInitialiserere, EessiService eessiService) {
         this.sedMottattInitialiserere = sedMottattInitialiserere;
+        this.eessiService = eessiService;
     }
 
     @Override
@@ -31,14 +53,63 @@ public class SedMottakRuting extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
-        BehandleMottattSedInitialiserer behandleMottattSedInitialiserer = hentInitialisererForSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
-        behandleMottattSedInitialiserer.initialiserProsessinstans(prosessinstans);
+        Optional<Long> gsakSaksnummer = eessiService.hentSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
+        gsakSaksnummer.ifPresent(g -> prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, g));
 
-        if (prosessinstans.getSteg() == inngangsSteg()) {
-            throw new TekniskException("Prosessinstans ikke oppdatert med nytt steg!");
+        BehandleMottattSedInitialiserer behandleMottattSedInitialiserer = hentInitialisererForSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
+        InitialiseringResultat resultat = behandleMottattSedInitialiserer
+            .initialiserProsessinstans(prosessinstans, gsakSaksnummer.orElse(null));
+
+        if (resultat == InitialiseringResultat.INGEN_BEHANDLING || resultat == InitialiseringResultat.OPPDATER_BEHANDLING) {
+            validerBehandlingErSatt(prosessinstans);
+            prosessinstans.setType(ProsessType.MOTTAK_SED_JOURNALFØRING);
+            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+
+        } else if (resultat == InitialiseringResultat.NY_BEHANDLING) {
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandleMottattSedInitialiserer.hentBehandlingstype(melosysEessiMelding));
+            prosessinstans.setType(behandleMottattSedInitialiserer.hentAktuellProsessType());
+            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_NY_BEHANDLING);
+
+        } else if (resultat == InitialiseringResultat.NY_SAK) {
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandleMottattSedInitialiserer.hentBehandlingstype(melosysEessiMelding));
+            prosessinstans.setType(behandleMottattSedInitialiserer.hentAktuellProsessType());
+            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_SAK_OG_BEH);
+
+        } else {
+            throw new TekniskException("Ukjent Initialiseringsresultat: " + resultat);
+        }
+
+
+        /*
+
+        Gitt at SED støtter automatisk behandling
+
+        Finnes saksrelasjon?
+
+            JA
+            Koble til korrekt sak (sett behandling i prosessinstans)
+            Hent prosesstype
+
+            NEI
+            NESTE STEG OPPRETT FAGSAK OG GSAK
+            Hent behandlingstype
+            Hent prosesstype
+
+
+        HVIS PROSESSTYPE = NULL (SED_JOURNALFØR?) -> skal kun journalføres
+        Neste steg: prosesstype =
+            SED_JOURNALFØR -> SED_MOTTAK
+            eks REGISTRERING_UNNTAK -> spesifikk første steg for behandling
+
+         */
+    }
+
+    private void validerBehandlingErSatt(Prosessinstans prosessinstans) throws TekniskException {
+        if (prosessinstans.getBehandling() == null) {
+            throw new TekniskException("Prosessinstansen må ha en fagsak knyttet til seg for å kunne journalføre SED!");
         }
     }
 

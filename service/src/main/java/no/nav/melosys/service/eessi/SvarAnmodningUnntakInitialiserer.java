@@ -4,6 +4,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.sak.FagsakService;
@@ -24,9 +25,9 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
 
     @Override
     @Transactional
-    public void initialiserProsessinstans(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public InitialiseringResultat initialiserProsessinstans(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        Behandling behandling = hentBehandling(melosysEessiMelding.getGsakSaksnummer());
+        Behandling behandling = hentBehandling(gsakSaksnummer);
 
         if (behandling.getStatus() != Behandlingsstatus.ANMODNING_UNNTAK_SENDT) {
             throw new FunksjonellException("Finner behandling " + behandling.getId() + " for sed fra rinaSak " + melosysEessiMelding.getRinaSaksnummer()
@@ -34,8 +35,7 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
         }
 
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK_SVAR);
-        prosessinstans.setSteg(ProsessSteg.AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR);
+        return InitialiseringResultat.OPPDATER_BEHANDLING;
     }
 
     private Behandling hentBehandling(Long gsakSaksnummer) throws TekniskException {
@@ -49,5 +49,15 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
     public boolean gjelderSedType(SedType sedType) {
         return sedType == SedType.A011
             || sedType == SedType.A002;
+    }
+
+    @Override
+    public Behandlingstyper hentBehandlingstype(MelosysEessiMelding melosysEessiMelding) {
+        throw new UnsupportedOperationException("Behandlingstype for svar på anmodning om unntak skal ikke endres");
+    }
+
+    @Override
+    public ProsessType hentAktuellProsessType() {
+        return ProsessType.ANMODNING_OM_UNNTAK_SVAR;
     }
 }

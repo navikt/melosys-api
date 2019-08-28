@@ -38,6 +38,13 @@ public interface JoarkFasade {
         throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
     /**
+     * Oppdaterer journalpost med gsakSaksnummer.
+     * Forsøker å ferdigstille journalpost hvis forsøkFerdigstill er satt
+     */
+    void oppdaterJournalpostMedSaksnummer(String journalpostID, String brukerID, Long gsakSaksnummer, boolean forsøkFerdigstill)
+        throws SikkerhetsbegrensningException, IntegrasjonException;
+
+    /**
      * Returnerer en liste av mangler i journalposten med den oppgitte IDen
      */
     List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws FunksjonellException;

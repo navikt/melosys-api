@@ -5,6 +5,7 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,12 +21,14 @@ public class FerdigstillJournalpostTest {
 
     @Mock
     private JoarkFasade joarkFasade;
+    @Mock
+    private TpsFasade tpsFasade;
 
     private FerdigstillJournalpost ferdigstillJournalpost;
 
     @Before
     public void setUp() {
-        ferdigstillJournalpost = new FerdigstillJournalpost(joarkFasade);
+        ferdigstillJournalpost = new FerdigstillJournalpost(joarkFasade, tpsFasade);
     }
 
     @Test

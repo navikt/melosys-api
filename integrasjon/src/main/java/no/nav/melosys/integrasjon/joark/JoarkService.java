@@ -246,6 +246,18 @@ public class JoarkService implements JoarkFasade {
         journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpost, journalpostID);
     }
 
+    @Override
+    public void oppdaterJournalpostMedSaksnummer(String journalpostID, String brukerID, Long gsakSaksnummer, boolean forsokFerdigstill) throws SikkerhetsbegrensningException, IntegrasjonException {
+        PutJournalpostRequest request = new PutJournalpostRequest();
+
+        ArkivSakWithArkivsakSystemEnum arkivsak = new ArkivSakWithArkivsakSystemEnum();
+        arkivsak.setArkivSakId(Long.toString(gsakSaksnummer));
+        request.setArkivSak(arkivsak);
+
+        request.setForsoekEndeligJF(true);
+        journalfoerInngaaendeConsumer.oppdaterJournalpost(request, journalpostID);
+    }
+
     private void oppdaterDokument(String journalpostId, String dokumentID, String tittel, boolean medDokumentkategori) throws SikkerhetsbegrensningException, IntegrasjonException {
         PutDokumentRequest dokumentRequest = new PutDokumentRequest();
         if (medDokumentkategori) {

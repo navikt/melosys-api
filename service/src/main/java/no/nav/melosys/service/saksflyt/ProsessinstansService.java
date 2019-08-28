@@ -198,27 +198,24 @@ public class ProsessinstansService {
 
     @Transactional
     public void opprettProsessinstansSedMottak(MelosysEessiMelding melosysEessiMelding) {
-        Prosessinstans prosessinstans = opprettProsessinstans(melosysEessiMelding);
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, melosysEessiMelding.getAktoerId());
-        lagre(prosessinstans);
-    }
-
-    public void opprettProsessinstansSedMottak(MelosysEessiMelding melosysEessiMelding, String brukerID) {
-        Prosessinstans prosessinstans = opprettProsessinstans(melosysEessiMelding);
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
-        lagre(prosessinstans);
-    }
-
-    private Prosessinstans opprettProsessinstans(MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.MOTTAK_SED);
-        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_RUTING);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, melosysEessiMelding.getJournalpostId());
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, melosysEessiMelding.getDokumentId());
         prosessinstans.setData(ProsessDataKey.ER_ENDRING, melosysEessiMelding.getErEndring());
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, melosysEessiMelding.getGsakSaksnummer());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, melosysEessiMelding.getAktoerId());
+        lagre(prosessinstans);
+    }
 
-        return prosessinstans;
+    public void opprettProsessinstansSedMottak(String journalpostID, String brukerID) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.MOTTAK_SED);
+        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        lagre(prosessinstans);
     }
 }

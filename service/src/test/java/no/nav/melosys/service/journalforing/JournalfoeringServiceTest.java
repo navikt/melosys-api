@@ -110,7 +110,7 @@ public class JournalfoeringServiceTest {
         when(eessiService.hentSedTilknyttetJournalpost(opprettDto.getJournalpostID())).thenReturn(new MelosysEessiMelding());
 
         journalfoeringService.journalfoer(opprettDto);
-        verify(prosessinstansService).opprettProsessinstansSedMottak(any(MelosysEessiMelding.class), anyString());
+        verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(),anyString());
     }
 
     @Test
