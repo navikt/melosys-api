@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.steg.aou;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.junit.Before;
 import org.junit.Test;

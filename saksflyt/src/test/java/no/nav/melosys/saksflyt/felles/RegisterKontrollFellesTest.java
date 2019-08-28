@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -29,7 +28,7 @@ public class RegisterKontrollFellesTest {
     private RegisterkontrollService registerkontrollService;
     @Mock
     private BehandlingService behandlingService;
-    @InjectMocks
+
     private RegisterKontrollFelles registerKontrollFelles;
 
     @Captor
@@ -37,6 +36,7 @@ public class RegisterKontrollFellesTest {
 
     @Before
     public void setup() throws Exception {
+        registerKontrollFelles = new RegisterKontrollFelles(behandlingService, registerkontrollService, avklartefaktaService);
         when(registerkontrollService.utførKontroller(any(Behandling.class)))
             .thenReturn(Lists.newArrayList(
                 Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND,

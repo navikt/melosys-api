@@ -1,10 +1,12 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import java.util.Optional;
+
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.felles.FagsakOgBehandlingFelles;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,20 +15,27 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvsluttFagsakOgBehandlingTest {
 
     @Mock
     private FagsakOgBehandlingFelles fagsakOgBehandlingFelles;
+    @Mock
+    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     private AvsluttFagsakOgBehandling avsluttFagsakOgBehandling;
 
+    private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+
     @Before
     public void setup() {
-        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakOgBehandlingFelles);
+        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakOgBehandlingFelles, behandlingsresultatRepository);
+        when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
     }
 
     @Test
@@ -34,13 +43,19 @@ public class AvsluttFagsakOgBehandlingTest {
 
         Behandling behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
+        behandling.setId(1L);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
 
-        verify(fagsakOgBehandlingFelles).avsluttFagsakOgBehandling(eq(behandling), eq(Behandlingsresultattyper.REGISTRERT_UNNTAK));
+        verify(fagsakOgBehandlingFelles).avsluttFagsakOgBehandling(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
+        verify(behandlingsresultatRepository).findById(1L);
+        verify(behandlingsresultatRepository).save(any(Behandlingsresultat.class));
+
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isEqualTo(Utfallregistreringunntak.GODKJENT);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }

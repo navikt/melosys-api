@@ -5,9 +5,9 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -20,8 +20,13 @@ public class OpprettOppgaveTest {
 
     @Mock
     private GsakFasade gsakFasade;
-    @InjectMocks
+
     private OpprettOppgave opprettOppgave;
+
+    @Before
+    public void setup() {
+        opprettOppgave = new OpprettOppgave(gsakFasade);
+    }
 
     @Test
     public void utfør() throws FunksjonellException, TekniskException {

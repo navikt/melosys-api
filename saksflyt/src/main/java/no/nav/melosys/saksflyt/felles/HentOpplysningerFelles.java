@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class HentOpplysningerFelles {
@@ -69,7 +68,6 @@ public class HentOpplysningerFelles {
         return ident;
     }
 
-    @Transactional
     public void hentOgLagreMedlemskapsopplysninger(long behandlingId, String fnr)
         throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
 
@@ -89,7 +87,6 @@ public class HentOpplysningerFelles {
         log.info("Medlemskapsdokument hentet for behandling {}", behandling.getId());
     }
 
-    @Transactional
     public void hentOgLagreInntektsopplysninger(long behandlingId, String fnr)
         throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
 

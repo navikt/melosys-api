@@ -1,20 +1,16 @@
 package no.nav.melosys.saksflyt.felles;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -24,11 +20,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FagsakOgBehandlingFellesTest {
@@ -37,17 +31,12 @@ public class FagsakOgBehandlingFellesTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     private FagsakOgBehandlingFelles fagsakOgBehandlingFelles;
 
-    private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-
     @Before
     public void setup() {
-        fagsakOgBehandlingFelles = new FagsakOgBehandlingFelles(fagsakService, behandlingService, behandlingsresultatRepository);
-        when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
+        fagsakOgBehandlingFelles = new FagsakOgBehandlingFelles(fagsakService, behandlingService);
     }
 
     @Test
@@ -57,15 +46,10 @@ public class FagsakOgBehandlingFellesTest {
         behandling.setFagsak(new Fagsak());
         behandling.setId(1L);
 
-        fagsakOgBehandlingFelles.avsluttFagsakOgBehandling(behandling, Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        fagsakOgBehandlingFelles.avsluttFagsakOgBehandling(behandling, Saksstatuser.OPPRETTET);
 
         verify(fagsakService).lagre(any(Fagsak.class));
         verify(behandlingService).oppdaterStatus(eq(1L), eq(Behandlingsstatus.AVSLUTTET));
-        verify(behandlingsresultatRepository).findById(1L);
-        verify(behandlingsresultatRepository).save(any(Behandlingsresultat.class));
-
-        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isEqualTo(Utfallregistreringunntak.GODKJENT);
     }
 
     @Test
