@@ -28,6 +28,11 @@ public class SedDokument implements SaksopplysningDokument {
 
     private Landkoder lovvalgslandKode;
 
+    @XmlJavaTypeAdapter(LovvalgBestemmelseXmlAdapter.class)
+    private LovvalgBestemmelse unntakFraLovvalgBestemmelse;
+
+    private Landkoder unntakFraLovvalgslandKode;
+
     private boolean erEndring;
 
     private SedType sedType;
@@ -83,6 +88,23 @@ public class SedDokument implements SaksopplysningDokument {
 
     public void setLovvalgslandKode(Landkoder lovvalgslandKode) {
         this.lovvalgslandKode = lovvalgslandKode;
+    }
+
+    @XmlTransient
+    public LovvalgBestemmelse getUnntakFraLovvalgBestemmelse() {
+        return unntakFraLovvalgBestemmelse;
+    }
+
+    public void setUnntakFraLovvalgBestemmelse(LovvalgBestemmelse unntakFraLovvalgBestemmelse) {
+        this.unntakFraLovvalgBestemmelse = unntakFraLovvalgBestemmelse;
+    }
+
+    public Landkoder getUnntakFraLovvalgslandKode() {
+        return unntakFraLovvalgslandKode;
+    }
+
+    public void setUnntakFraLovvalgslandKode(Landkoder unntakFraLovvalgslandKode) {
+        this.unntakFraLovvalgslandKode = unntakFraLovvalgslandKode;
     }
 
     public boolean getErEndring() {

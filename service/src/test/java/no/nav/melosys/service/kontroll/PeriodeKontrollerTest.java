@@ -22,7 +22,7 @@ public class PeriodeKontrollerTest {
     public void periodeErÅpen_ingenTilDato_registrerTreff() {
         assertThat(PeriodeKontroller.periodeErÅpen(LocalDate.now().plusMonths(6), null)).isTrue();
     }
-    
+
     @Test
     public void periodeErÅpen_ikkeÅpen_registrerTreff() {
         assertThat(PeriodeKontroller.periodeErÅpen(LocalDate.now().plusMonths(6), LocalDate.now().plusYears(1))).isFalse();
@@ -32,22 +32,42 @@ public class PeriodeKontrollerTest {
     public void periodeOver24Mnd_periodeOver24Mnd_registrerTreff() {
         assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusYears(3))).isTrue();
     }
-    
+
+    @Test
+    public void periodeoOver24Mnd_periode24Mnd_registrerTreff() {
+        assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(24))).isTrue();
+    }
+
+    @Test
+    public void periodeoOver24Mnd_periode23Mnd_registrerTreff() {
+        assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(23))).isFalse();
+    }
+
     @Test
     public void periodeOver24Mnd_periode14Mnd_registrerTreff() {
         assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(14))).isFalse();
     }
 
     @Test
+    public void periodeOver5År_periode5År_registrerTreff() {
+        assertThat(PeriodeKontroller.periodeOver5År(LocalDate.now(), LocalDate.now().plusYears(5))).isTrue();
+    }
+
+    @Test
+    public void periodeOver5År_periode4År_registrerTreff() {
+        assertThat(PeriodeKontroller.periodeOver5År(LocalDate.now(), LocalDate.now().plusYears(4))).isFalse();
+    }
+
+    @Test
     public void periodeEldreEnn5År_periodeEldreEnn5År_registrerTreff() {
         assertThat(PeriodeKontroller.datoEldreEnn5År(LocalDate.now().minusYears(6))).isTrue();
     }
-    
+
     @Test
     public void periodeEldreEnn5År_periodeFraNå_registrerTreff() {
         assertThat(PeriodeKontroller.datoEldreEnn5År(LocalDate.now())).isFalse();
     }
-    
+
     @Test
     public void periodeOver1ÅrFremITid_periodeOm2År_registrerTreff() {
         assertThat(PeriodeKontroller.datoOver1ÅrFremITid(LocalDate.now().plusYears(2))).isTrue();

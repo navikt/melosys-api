@@ -5,6 +5,8 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
+import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +30,8 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingOpprettet.class);
 
     @Autowired
-    public OppdaterStatusBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade) {
-        super(sakOgBehandlingFasade);
+    public OppdaterStatusBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
+        super(sakOgBehandlingFasade, tpsService, behandlingService);
         log.info("OppdaterStatusBehandlingOpprettet initialisert");
     }
 

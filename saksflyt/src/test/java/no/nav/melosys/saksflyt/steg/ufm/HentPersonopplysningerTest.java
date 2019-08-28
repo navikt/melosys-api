@@ -1,9 +1,10 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.SaksopplysningRepository;
-import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,8 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,19 +20,14 @@ import static org.mockito.Mockito.when;
 public class HentPersonopplysningerTest {
 
     @Mock
-    private TpsFasade tpsFasade;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private SaksopplysningRepository saksopplysningRepository;
+    private HentOpplysningerFelles hentOpplysningerFelles;
 
     private HentPersonopplysninger hentPersonopplysninger;
 
     @Before
-    public void setUp() throws Exception {
-        hentPersonopplysninger = new HentPersonopplysninger(tpsFasade, fagsakService, saksopplysningRepository);
-        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("432234");
-        when(tpsFasade.hentPerson(anyString())).thenReturn(new Saksopplysning());
+    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        hentPersonopplysninger = new HentPersonopplysninger(hentOpplysningerFelles);
+        when(hentOpplysningerFelles.hentOgLagrePersonopplysninger(anyString(), any())).thenReturn("321");
     }
 
     @Test
@@ -47,6 +42,6 @@ public class HentPersonopplysningerTest {
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "123321");
         hentPersonopplysninger.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_HENT_MEDLEMSKAP);
-        verify(saksopplysningRepository).save(any(Saksopplysning.class));
+        verify(hentOpplysningerFelles).hentOgLagrePersonopplysninger(eq("123321"), eq(behandling));
     }
 }
