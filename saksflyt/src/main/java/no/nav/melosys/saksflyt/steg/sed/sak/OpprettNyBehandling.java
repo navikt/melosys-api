@@ -65,9 +65,9 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
         }
 
         avsluttTidligereBehandling(fagsak);
-        ferdigstillOppgave(fagsak.getSaksnummer());
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, behandlingsType,
             prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
+        ferdigstillOppgave(fagsak.getSaksnummer());
         log.info("Opprettet ny behandling for fagsak {}", gsakSaksnummer);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);

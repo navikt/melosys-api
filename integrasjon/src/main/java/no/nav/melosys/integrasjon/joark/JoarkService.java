@@ -254,7 +254,7 @@ public class JoarkService implements JoarkFasade {
         arkivsak.setArkivSakId(Long.toString(gsakSaksnummer));
         request.setArkivSak(arkivsak);
 
-        request.setForsoekEndeligJF(true);
+        request.setForsoekEndeligJF(forsokFerdigstill);
         journalfoerInngaaendeConsumer.oppdaterJournalpost(request, journalpostID);
     }
 
