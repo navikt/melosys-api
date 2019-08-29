@@ -14,13 +14,13 @@
       "poststed": "Poststedet",
       "landkode": "DE"
     },
-    "uuid": "ca24c782-c7f0-11e9-a32f-2a2ae2dbcce4",
     "foretakNavn": "EQUINOR",
     "foretakOrgnr": "372384726",
     "arbeidUtlandHjemmekontor": false
   }],
   "foretakUtland": [
     {
+      "uuid": "ca24c782-c7f0-11e9-a32f-2a2ae2dbcce4",
       "navn": "Volkswagen AG",
       "orgnr": "1122334444",
       "adresse": {
