@@ -1,5 +1,7 @@
 package no.nav.melosys.service.avklartefakta;
 
+import java.util.Collections;
+
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -31,8 +33,8 @@ public class AvklartMaritimtArbeidTest {
 
     @Test
     public void leggTilFakta_medTypeSokkel_girMaritimTypeSokkel() {
-        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("Stena Don");
-        avklartMaritimtArbeid.leggTilFakta(lagAvklartefaktaSokkelSkip("Stena Don", Maritimtyper.SOKKEL.getKode()));
+        Avklartefakta maritimTypeFakta = lagAvklartefaktaSokkelSkip("Stena Don", Maritimtyper.SOKKEL.getKode());
+        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("Stena Don", Collections.singletonList(maritimTypeFakta));
 
         assertThat(avklartMaritimtArbeid.getMaritimtype()).isEqualTo(Maritimtyper.SOKKEL);
         assertThat(avklartMaritimtArbeid.getLand()).isNull();
@@ -41,8 +43,8 @@ public class AvklartMaritimtArbeidTest {
 
     @Test
     public void leggTilFakta_medTypeArbeidsland_girArbeidsland() {
-        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("Stena Don");
-        avklartMaritimtArbeid.leggTilFakta(lagAvklartefaktaArbeidsland("Stena Don", Landkoder.GB.getKode()));
+        Avklartefakta arbeidslandFakta = lagAvklartefaktaArbeidsland("Stena Don", Landkoder.GB.getKode());
+        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("Stena Don", Collections.singletonList(arbeidslandFakta));
 
         assertThat(avklartMaritimtArbeid.getLand()).isEqualTo(Landkoder.GB.getKode());
         assertThat(avklartMaritimtArbeid.getMaritimtype()).isNull();

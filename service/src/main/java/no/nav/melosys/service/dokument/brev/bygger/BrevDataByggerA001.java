@@ -56,8 +56,8 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = this.person;
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentArbeidsgivere(behandling, this::utfyllManglendeAdressefelter);
-        brevData.selvstendigeVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter);
+        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, this::utfyllManglendeAdressefelter);
+        brevData.selvstendigeVirksomheter = avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter);
 
         brevData.bostedsadresse = hentBostedsadresse();
         brevData.arbeidssteder = hentArbeidssteder();
@@ -116,7 +116,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 
-        Set<String> avklarteOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
+        Set<String> avklarteOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         Stream<Periode> avklarteAnsettelsesPerioder =
             arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrgnumre).stream();
 

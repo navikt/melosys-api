@@ -41,7 +41,7 @@ public class BrevmottakerServiceTest {
     @Before
     public void setup() throws TekniskException {
         brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService);
-        when(avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
     }
 
     @Test

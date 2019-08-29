@@ -38,6 +38,7 @@ public class BrevDataTestUtils {
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.navn = "Company International Ltd.";
         foretakUtland.orgnr = "12345678910";
+        foretakUtland.uuid = "49m8gf-9dk4j0";
         foretakUtland.adresse = lagStrukturertAdresse();
         foretakUtland.adresse.landkode = "NO";
         return foretakUtland;

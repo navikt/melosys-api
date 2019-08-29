@@ -45,8 +45,8 @@ public class BrevDataByggerInnvilgelseFlereLand extends AbstraktDokumentDataBygg
 
         BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(behandling, saksbehandler);
 
-        brevdata.norskeArbeidsgivere = avklarteVirksomheterService.hentArbeidsgivere(behandling, UTEN_ADRESSE);
-        brevdata.norskeSelvstendigVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, UTEN_ADRESSE);
+        brevdata.norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, UTEN_ADRESSE);
+        brevdata.norskeSelvstendigVirksomheter = avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling, UTEN_ADRESSE);
 
         brevdata.lovvalgsperiode = hentLovvalgsperiode();
         brevdata.alleArbeidsland = landVelgerService.hentAlleArbeidsland(behandling).stream()

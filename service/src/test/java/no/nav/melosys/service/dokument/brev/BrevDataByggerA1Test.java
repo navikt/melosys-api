@@ -63,7 +63,7 @@ public class BrevDataByggerA1Test {
         RegisterOppslagSystemService registerOppslagService = mock(RegisterOppslagSystemService.class);
         avklarteOrganisasjoner = new HashSet<>();
 
-        when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong()))
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong()))
             .thenReturn(avklarteOrganisasjoner);
 
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();

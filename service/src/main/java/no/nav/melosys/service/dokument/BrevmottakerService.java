@@ -114,7 +114,7 @@ public class BrevmottakerService {
     }
 
     private List<Aktoer> avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
-        Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
+        Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         if (arbeidsgivendeOrgnumre.isEmpty()) {
             throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
         } else {

@@ -65,7 +65,8 @@ public class AvklartefaktaService {
             .findFirst();
     }
 
-    public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
+    // Denne leverer enten norske orgnr eller uuid for identifikasjon av utenlandske foretak
+    public Set<String> hentAvklarteOrgnrOgUuid(long behandlingsid) {
         Set<Avklartefakta> avklartefakta =
                 avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatyper.VIRKSOMHET, VALGT_FAKTA);
         return avklartefakta.stream()
@@ -109,12 +110,14 @@ public class AvklartefaktaService {
         Set<Avklartefakta> maritimeAvklartefakta =
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(behandlingsid, maritimeFaktatyper);
 
-        HashMap<String, AvklartMaritimtArbeid> maritimeFaktaGruppert = new HashMap<>();
-        maritimeAvklartefakta.forEach(avklartefakta ->
-            maritimeFaktaGruppert.computeIfAbsent(avklartefakta.getSubjekt(), v -> new AvklartMaritimtArbeid(avklartefakta.getSubjekt()))
-                .leggTilFakta(avklartefakta)
-        );
-        return maritimeFaktaGruppert;
+        Map<String, List<Avklartefakta>> maritimtArbeidGruppert = grupperForSubjekt(maritimeAvklartefakta);
+        return maritimtArbeidGruppert.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, AvklartMaritimtArbeid::av));
+    }
+
+    private Map<String, List<Avklartefakta>> grupperForSubjekt(Collection<Avklartefakta> avklartefakta) {
+        return avklartefakta.stream()
+            .collect(Collectors.groupingBy(Avklartefakta::getSubjekt, Collectors.toList()));
     }
 
     public Optional<Avklartefakta> hentVurderingUnntakPeriode(long behandlingsid) {
