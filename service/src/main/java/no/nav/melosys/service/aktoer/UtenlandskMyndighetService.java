@@ -3,10 +3,11 @@ package no.nav.melosys.service.aktoer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Preferanse;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.TekniskException;
@@ -54,30 +55,25 @@ public class UtenlandskMyndighetService {
     /**
      * Brukes til brevutsendelse fordi alle myndigheter lagres som aktører, men ikke alle ønsker brev tilsendt.
      */
-    public List<Aktoer> lagUtenlandskMyndighetFraBehandling(Behandling behandling) throws TekniskException {
+    public Map<UtenlandskMyndighet, Aktoer> lagUtenlandskMyndighetFraBehandling(Behandling behandling) throws TekniskException {
         Collection<Landkoder> utenlandskeMyndigheterLandkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling);
-        List<Aktoer> myndighetsaktører = new ArrayList<>();
-        for (Landkoder myndighetensLandkode : utenlandskeMyndigheterLandkoder) {
-            if (myndighetØnskerInnvilgelsesbrev(myndighetensLandkode)) {
-                Aktoer aktoer = new Aktoer();
-                aktoer.setRolle(MYNDIGHET);
-                aktoer.setInstitusjonId(lagInstitusjonsId(myndighetensLandkode));
-                myndighetsaktører.add(aktoer);
-            }
-        }
-        return myndighetsaktører;
+        List<UtenlandskMyndighet> utenlandskMyndighetList = utenlandskMyndighetRepository.findByLandkodeIsIn(utenlandskeMyndigheterLandkoder);
+        
+        return utenlandskMyndighetList
+                .stream()
+                .collect(Collectors.toMap(utenlandskMyndighet -> utenlandskMyndighet, this::lagAktoer));
     }
-
-    private boolean myndighetØnskerInnvilgelsesbrev(Landkoder landkode) throws TekniskException {
-        return utenlandskMyndighetRepository.findByLandkode(landkode)
-            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."))
-            .preferanser.stream().map(Preferanse::getPreferanse)
-            .noneMatch(p -> p == Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
+    
+    private Aktoer lagAktoer(UtenlandskMyndighet utenlandskMyndighet) {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(MYNDIGHET);
+        aktoer.setInstitusjonId(utenlandskMyndighet.landkode + ":" + utenlandskMyndighet.institusjonskode);
+        return aktoer;
     }
 
     private String lagInstitusjonsId(Landkoder landkode) throws TekniskException {
         UtenlandskMyndighet myndighet = utenlandskMyndighetRepository.findByLandkode(landkode)
-            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
+                .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
         return landkode.getKode() + ":" + myndighet.institusjonskode;
     }
 }

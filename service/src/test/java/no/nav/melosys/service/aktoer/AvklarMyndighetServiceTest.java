@@ -4,7 +4,6 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -17,8 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -51,21 +48,24 @@ public class AvklarMyndighetServiceTest {
         behandling = new Behandling();
         behandling.setFagsak(fagsak);
 
-        UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet("IT", "IT123", null);
-        UtenlandskMyndighet utenlandskMyndighetReservert = lagUtenlandskMyndighet("CZ", "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
+        UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet(Landkoder.IT, "IT123", null);
+        UtenlandskMyndighet utenlandskMyndighetReservert = lagUtenlandskMyndighet(Landkoder.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
 
         when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.IT))).thenReturn(Optional.of(utenlandskMyndighet));
         when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.CZ))).thenReturn(Optional.of(utenlandskMyndighetReservert));
+        
+        when(utenlandskMyndighetRepository.findByLandkodeIsIn(any(Collection.class))).thenReturn(Arrays.asList(utenlandskMyndighet, utenlandskMyndighetReservert));
+        
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(any(Behandling.class))).thenReturn(Arrays.asList(Landkoder.IT, Landkoder.CZ));
 
         forventetInstitusjonIdIT = Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode;
         forventetInstitusjonIdCZ = Landkoder.CZ + ":" + utenlandskMyndighetReservert.institusjonskode;
     }
 
-    private UtenlandskMyndighet lagUtenlandskMyndighet(String land, String institusjonId, Preferanse.PreferanseEnum preferanse) {
+    private UtenlandskMyndighet lagUtenlandskMyndighet(Landkoder landkode, String institusjonId, Preferanse.PreferanseEnum preferanse) {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.institusjonskode = institusjonId;
-        utenlandskMyndighet.land = land;
+        utenlandskMyndighet.landkode = landkode;
         if (preferanse != null) {
             utenlandskMyndighet.preferanser.add(new Preferanse(1L, preferanse));
         }
@@ -74,15 +74,9 @@ public class AvklarMyndighetServiceTest {
 
     @Test
     public void lagUtenlandskMyndighetFraBehandling_forventAktoerMedGyldigInstitusjonsId() throws Exception {
-        Collection<Aktoer> aktoerer = utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
+        Map<UtenlandskMyndighet, Aktoer> aktoerer = utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
         assertThat(aktoerer).isNotEmpty();
-        assertThat(aktoerer.iterator().next().getInstitusjonId()).isEqualTo(forventetInstitusjonIdIT);
-    }
-
-    @Test
-    public void lagUtenlandskMyndighetFraBehandling_CZerReservertFraA1_forventerIkkeAktør() throws TekniskException {
-        List<Aktoer> myndigheter = utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
-        assertThat(myndigheter.stream().map(Aktoer::getInstitusjonId)).containsOnly(forventetInstitusjonIdIT);
+        assertThat(aktoerer.values().iterator().next().getInstitusjonId()).isEqualTo(forventetInstitusjonIdIT);
     }
 
     @Test
