@@ -11,9 +11,6 @@ import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.AvklarteFaktaRepository;
-import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
@@ -33,30 +30,24 @@ public class UnntaksperiodeMottakInitialisererTest {
     private FagsakService fagsakService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    private GsakFasade gsakFasade;
-    @Mock
-    private SaksopplysningRepository saksopplysningRepository;
-    @Mock
-    private AvklarteFaktaRepository avklarteFaktaRepository;
 
     private UnntaksperiodeMottakInitialiserer unntaksperiodeMottakInitialiserer;
 
     @Before
     public void setup() {
-        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, lovvalgsperiodeService, gsakFasade, saksopplysningRepository, avklarteFaktaRepository);
+        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, lovvalgsperiodeService);
     }
 
     @Test
-    public void initialiserProsessinstans_nySak_verifiserResultatNySak() throws FunksjonellException {
+    public void finnSakOgBestemRuting_nySak_verifiserResultatNySak() throws FunksjonellException {
         Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1));
 
-        InitialiseringResultat resultat = unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans, 1L);
-        assertThat(resultat).isEqualTo(InitialiseringResultat.NY_SAK);
+        RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
+        assertThat(resultat).isEqualTo(RutingResultat.NY_SAK);
     }
 
     @Test
-    public void initialiserProsessinstans_oppdatertSedPåEksisterendeSakIkkeEndretPeriode_skalIkkeBehandles() throws Exception {
+    public void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakIkkeEndretPeriode_skalIkkeBehandles() throws Exception {
 
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusYears(1);
@@ -68,13 +59,13 @@ public class UnntaksperiodeMottakInitialisererTest {
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
         when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiodeOptional(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
-        InitialiseringResultat resultat = unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans, 1L);
+        RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
-        assertThat(resultat).isEqualTo(InitialiseringResultat.INGEN_BEHANDLING);
+        assertThat(resultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);
     }
 
     @Test
-    public void initialiserProsessinstans_oppdatertSedPåEksisterendeSakErEndretPeriode_skalBehandles() throws Exception {
+    public void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretPeriode_skalBehandles() throws Exception {
         LocalDate fom = LocalDate.now();
         LocalDate tom = null;
         Prosessinstans prosessinstans = hentProsessinstans(fom, tom);
@@ -86,35 +77,10 @@ public class UnntaksperiodeMottakInitialisererTest {
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
         when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiodeOptional(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
 
-        InitialiseringResultat resultat = unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans, 1L);
+        RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
-        assertThat(resultat).isEqualTo(InitialiseringResultat.NY_BEHANDLING);
+        assertThat(resultat).isEqualTo(RutingResultat.NY_BEHANDLING);
     }
-
-//    @Test
-//    public void behandling_medNøyaktigEnAktivBehandling_skalBehandlesMedEksisterendeBehandling() throws FunksjonellException, TekniskException {
-//        LocalDate fom = LocalDate.now();
-//        LocalDate tom = LocalDate.now().plusYears(1);
-//        Prosessinstans prosessinstans = hentProsessinstans(fom, tom);
-//
-//        Fagsak fagsak = hentFagsak();
-//        Behandling behandling = fagsak.getBehandlinger().get(0);
-//        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-//        fagsak.setBehandlinger(Collections.singletonList(behandling));
-//
-//        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-//        lovvalgsperiode.setFom(fom.minusYears(2L));
-//        lovvalgsperiode.setTom(tom.minusYears(1L));
-//
-//        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
-//        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
-//        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).thenReturn(new Oppgave.Builder().setOppgaveId("321").build());
-//
-//        unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans);
-//
-//        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
-//        assertThat(prosessinstans.getBehandling()).isNotNull();
-//    }
 
     private Fagsak hentFagsak() {
         Behandling behandling = new Behandling();

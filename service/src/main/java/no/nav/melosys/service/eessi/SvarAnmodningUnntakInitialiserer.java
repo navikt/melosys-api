@@ -25,7 +25,7 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
 
     @Override
     @Transactional
-    public InitialiseringResultat initialiserProsessinstans(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
+    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         Behandling behandling = hentBehandling(gsakSaksnummer);
 
@@ -35,7 +35,7 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
         }
 
         prosessinstans.setBehandling(behandling);
-        return InitialiseringResultat.OPPDATER_BEHANDLING;
+        return RutingResultat.OPPDATER_BEHANDLING;
     }
 
     private Behandling hentBehandling(Long gsakSaksnummer) throws TekniskException {

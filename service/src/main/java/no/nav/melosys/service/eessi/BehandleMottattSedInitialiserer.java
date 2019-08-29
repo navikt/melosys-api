@@ -11,7 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 
 public interface BehandleMottattSedInitialiserer {
 
-    InitialiseringResultat initialiserProsessinstans(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException;
+    RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException;
 
     boolean gjelderSedType(SedType sedType);
 

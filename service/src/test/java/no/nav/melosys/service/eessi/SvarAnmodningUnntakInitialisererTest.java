@@ -34,30 +34,30 @@ public class SvarAnmodningUnntakInitialisererTest {
     }
 
     @Test
-    public void initialiserProsessinstans_korrektBehandlingsstatus_verifiserKorrektResultat() throws Exception {
+    public void finnSakOgBestemRuting_korrektBehandlingsstatus_verifiserKorrektResultat() throws Exception {
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
         Prosessinstans prosessinstans = hentProsessinstans();
-        InitialiseringResultat resultat = svarAnmodningUnntakInitialiserer.initialiserProsessinstans(prosessinstans, 1L);
+        RutingResultat resultat = svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
-        assertThat(resultat).isEqualTo(InitialiseringResultat.OPPDATER_BEHANDLING);
+        assertThat(resultat).isEqualTo(RutingResultat.OPPDATER_BEHANDLING);
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }
 
     @Test(expected = FunksjonellException.class)
-    public void initialiserProsessinstans_feilBehandlingsstatus_forventException() throws Exception {
+    public void finnSakOgBestemRuting_feilBehandlingsstatus_forventException() throws Exception {
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.FORELOEPIG_LOVVALG)));
         Prosessinstans prosessinstans = hentProsessinstans();
-        svarAnmodningUnntakInitialiserer.initialiserProsessinstans(prosessinstans, 1L);
+        svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
     }
 
     @Test(expected = TekniskException.class)
-    public void initialiserProsessinstans_korrektBehandlingsstatusIngenFagsak_forventException() throws Exception {
+    public void finnSakOgBestemRuting_korrektBehandlingsstatusIngenFagsak_forventException() throws Exception {
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.empty());
         Prosessinstans prosessinstans = hentProsessinstans();
-        svarAnmodningUnntakInitialiserer.initialiserProsessinstans(prosessinstans, 1L);
+        svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
     }
 
     @Test

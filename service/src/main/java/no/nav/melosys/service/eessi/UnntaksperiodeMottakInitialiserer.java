@@ -9,62 +9,45 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.AvklarteFaktaRepository;
-import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.sak.FagsakService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 //A003,A009,A010
 @Service
 public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInitialiserer {
 
-    private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeMottakInitialiserer.class);
-
     private final FagsakService fagsakService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final GsakFasade gsakFasade;
-    private final SaksopplysningRepository saksopplysningRepository;
-    private final AvklarteFaktaRepository avklarteFaktaRepository;
 
     @Autowired
     public UnntaksperiodeMottakInitialiserer(FagsakService fagsakService,
-                                             LovvalgsperiodeService lovvalgsperiodeService,
-                                             @Qualifier("system") GsakFasade gsakFasade,
-                                             SaksopplysningRepository saksopplysningRepository,
-                                             AvklarteFaktaRepository avklarteFaktaRepository) {
+                                             LovvalgsperiodeService lovvalgsperiodeService) {
         this.fagsakService = fagsakService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.gsakFasade = gsakFasade;
-        this.saksopplysningRepository = saksopplysningRepository;
-        this.avklarteFaktaRepository = avklarteFaktaRepository;
     }
 
     @Override
-    public InitialiseringResultat initialiserProsessinstans(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException {
+    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
         if (gsakSaksnummer == null) {
-            return InitialiseringResultat.NY_SAK;
+            return RutingResultat.NY_SAK;
         }
 
         Optional<Fagsak> fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
         if (fagsak.isPresent()) {
             Behandling behandling = fagsak.get().getSistOppdaterteBehandling();
             if (periodeErEndret(melosysEessiMelding, behandling)) {
-                return InitialiseringResultat.NY_BEHANDLING;
+                return RutingResultat.NY_BEHANDLING;
             } else {
                 prosessinstans.setBehandling(behandling);
-                return InitialiseringResultat.INGEN_BEHANDLING;
+                return RutingResultat.INGEN_BEHANDLING;
             }
         } else {
-            return InitialiseringResultat.NY_SAK;
+            return RutingResultat.NY_SAK;
         }
     }
 

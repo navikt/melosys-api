@@ -9,7 +9,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.BehandleMottattSedInitialiserer;
-import no.nav.melosys.service.eessi.InitialiseringResultat;
+import no.nav.melosys.service.eessi.RutingResultat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,8 +42,8 @@ public class SedMottakRutingTest {
         doAnswer(invocationOnMock -> {
             Prosessinstans prosessinstans = invocationOnMock.getArgument(0);
             prosessinstans.setBehandling(new Behandling());
-            return InitialiseringResultat.INGEN_BEHANDLING;
-        }).when(behandleMottattSedInitialiserer).initialiserProsessinstans(any(Prosessinstans.class), anyLong());
+            return RutingResultat.INGEN_BEHANDLING;
+        }).when(behandleMottattSedInitialiserer).finnSakOgBestemRuting(any(Prosessinstans.class), anyLong());
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
@@ -51,7 +51,7 @@ public class SedMottakRutingTest {
 
         sedMottakRuting.utfør(prosessinstans);
 
-        verify(behandleMottattSedInitialiserer).initialiserProsessinstans(any(), anyLong());
+        verify(behandleMottattSedInitialiserer).finnSakOgBestemRuting(any(), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
     }
 
@@ -61,7 +61,7 @@ public class SedMottakRutingTest {
         prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
 
-        when(behandleMottattSedInitialiserer.initialiserProsessinstans(any(), anyLong())).thenReturn(InitialiseringResultat.NY_BEHANDLING);
+        when(behandleMottattSedInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(RutingResultat.NY_BEHANDLING);
         when(behandleMottattSedInitialiserer.hentAktuellProsessType()).thenReturn(ProsessType.REGISTRERING_UNNTAK);
 
         sedMottakRuting.utfør(prosessinstans);
@@ -75,7 +75,7 @@ public class SedMottakRutingTest {
         prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
 
-        when(behandleMottattSedInitialiserer.initialiserProsessinstans(any(), anyLong())).thenReturn(InitialiseringResultat.NY_SAK);
+        when(behandleMottattSedInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(RutingResultat.NY_SAK);
         when(behandleMottattSedInitialiserer.hentAktuellProsessType()).thenReturn(ProsessType.REGISTRERING_UNNTAK);
 
         sedMottakRuting.utfør(prosessinstans);
@@ -89,7 +89,7 @@ public class SedMottakRutingTest {
         prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
 
-        when(behandleMottattSedInitialiserer.initialiserProsessinstans(any(), anyLong())).thenReturn(null);
+        when(behandleMottattSedInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(null);
 
         sedMottakRuting.utfør(prosessinstans);
     }

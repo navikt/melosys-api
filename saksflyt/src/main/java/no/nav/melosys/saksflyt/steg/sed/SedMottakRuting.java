@@ -15,7 +15,9 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.BehandleMottattSedInitialiserer;
-import no.nav.melosys.service.eessi.InitialiseringResultat;
+import no.nav.melosys.service.eessi.RutingResultat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +31,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SedMottakRuting extends AbstraktStegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(SedMottakRuting.class);
 
     private final Collection<BehandleMottattSedInitialiserer> sedMottattInitialiserere;
     private final EessiService eessiService;
@@ -52,20 +56,20 @@ public class SedMottakRuting extends AbstraktStegBehandler {
         gsakSaksnummer.ifPresent(g -> prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, g));
 
         BehandleMottattSedInitialiserer behandleMottattSedInitialiserer = hentInitialisererForSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
-        InitialiseringResultat resultat = behandleMottattSedInitialiserer
-            .initialiserProsessinstans(prosessinstans, gsakSaksnummer.orElse(null));
+        RutingResultat resultat = behandleMottattSedInitialiserer
+            .finnSakOgBestemRuting(prosessinstans, gsakSaksnummer.orElse(null));
 
-        if (resultat == InitialiseringResultat.INGEN_BEHANDLING || resultat == InitialiseringResultat.OPPDATER_BEHANDLING) {
+        if (resultat == RutingResultat.INGEN_BEHANDLING || resultat == RutingResultat.OPPDATER_BEHANDLING) {
             validerBehandlingErSatt(prosessinstans);
             prosessinstans.setType(ProsessType.MOTTAK_SED_JOURNALFØRING);
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
 
-        } else if (resultat == InitialiseringResultat.NY_BEHANDLING) {
+        } else if (resultat == RutingResultat.NY_BEHANDLING) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandleMottattSedInitialiserer.hentBehandlingstype(melosysEessiMelding));
             prosessinstans.setType(behandleMottattSedInitialiserer.hentAktuellProsessType());
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_NY_BEHANDLING);
 
-        } else if (resultat == InitialiseringResultat.NY_SAK) {
+        } else if (resultat == RutingResultat.NY_SAK) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandleMottattSedInitialiserer.hentBehandlingstype(melosysEessiMelding));
             prosessinstans.setType(behandleMottattSedInitialiserer.hentAktuellProsessType());
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_SAK_OG_BEH);
@@ -73,6 +77,10 @@ public class SedMottakRuting extends AbstraktStegBehandler {
         } else {
             throw new TekniskException("Ukjent Initialiseringsresultat: " + resultat);
         }
+
+        log.info("Rutingresultat for SED-type {} fra rinasak {}: {}",
+            melosysEessiMelding.getSedType(), melosysEessiMelding.getRinaSaksnummer(), resultat
+        );
     }
 
     private void validerBehandlingErSatt(Prosessinstans prosessinstans) throws TekniskException {
