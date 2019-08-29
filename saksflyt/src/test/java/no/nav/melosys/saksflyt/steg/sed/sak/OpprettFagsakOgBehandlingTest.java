@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.steg.sed.sak;
 
-import java.util.Optional;
-
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -17,7 +15,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,32 +33,19 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_relasjonFinnesIkke_VerifiserNyFagsakOgBehandling() throws Exception {
+    public void utførSteg_prosessTypeAnmodningsUnntak_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans();
+        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         opprettFagsakOgBehandling.utfør(prosessinstans);
         verify(fagsakService).nyFagsakOgBehandling(any(OpprettSakRequest.class));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_GSAK_SAK);
     }
 
-    @Test
-    public void utførSteg_relasjonFinnes_verifiserNyBehandling() throws Exception {
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
-        Prosessinstans prosessinstans = hentProsessinstans();
-        opprettFagsakOgBehandling.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET);
-    }
-
     @Test(expected = TekniskException.class)
-    public void utførSteg_ikkeRegistreringUnntakType_kasterException() throws Exception {
+    public void utførSteg_ikkeProsessTypeMottakSed_kasterException() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans();
-        prosessinstans.setType(ProsessType.JFR_KNYTT);
+        prosessinstans.setType(ProsessType.MOTTAK_SED);
         opprettFagsakOgBehandling.utfør(prosessinstans);
-    }
-
-    @Test(expected = TekniskException.class)
-    public void utførSteg_relasjonFinnesMenFinnerIkkeFagsak_forventTekniskException() throws Exception {
-        when(fagsakService.hentFagsakFraGsakSaksnummer(any())).thenReturn(Optional.empty());
-        opprettFagsakOgBehandling.utfør(hentProsessinstans());
     }
 
     private Prosessinstans hentProsessinstans() {

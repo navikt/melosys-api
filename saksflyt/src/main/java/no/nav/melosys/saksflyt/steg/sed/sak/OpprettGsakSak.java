@@ -6,8 +6,8 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
 public class OpprettGsakSak extends AbstraktStegBehandler {
 
     private final GsakFasade gsakFasade;
-    private final FagsakRepository fagsakRepository;
+    private final FagsakService fagsakService;
 
-    public OpprettGsakSak(@Qualifier("system") GsakFasade gsakFasade, FagsakRepository fagsakRepository) {
+    public OpprettGsakSak(@Qualifier("system") GsakFasade gsakFasade, FagsakService fagsakService) {
         this.gsakFasade = gsakFasade;
-        this.fagsakRepository = fagsakRepository;
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
         );
 
         fagsak.setGsakSaksnummer(gsakSaksnummer);
-        fagsakRepository.save(fagsak);
+        fagsakService.lagre(fagsak);
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
 
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPDATER_SAKSRELASJON);

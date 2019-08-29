@@ -8,10 +8,14 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
+
+    private static Logger log = LoggerFactory.getLogger(OppdaterSaksrelasjon.class);
 
     private final EessiService eessiService;
 
@@ -28,12 +32,13 @@ public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
-        eessiService.lagreSaksrelasjon(
-            fagsak.getGsakSaksnummer(),
-            melosysEessiMelding.getRinaSaksnummer(),
-            melosysEessiMelding.getBucType()
-        );
 
+        Long gsakSaksnummer = fagsak.getGsakSaksnummer();
+        String rinaSaksnummer = melosysEessiMelding.getRinaSaksnummer();
+        String bucType = melosysEessiMelding.getBucType();
+
+        log.info("Lagrer saksrelasjon: gsakSaksnummer {}, rinasaksnummer {}, buctype {}", gsakSaksnummer, rinaSaksnummer, bucType);
+        eessiService.lagreSaksrelasjon(gsakSaksnummer, rinaSaksnummer, bucType);
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
     }
 }

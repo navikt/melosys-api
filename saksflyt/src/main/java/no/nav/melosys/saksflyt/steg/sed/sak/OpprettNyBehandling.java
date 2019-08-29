@@ -53,7 +53,7 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
         if (gsakSaksnummer == null) {
             throw new TekniskException("Gsaksaksnummer kan ikke være null");
         } else if (behandlingsType == null) {
-            throw new TekniskException("Behandlignstype kan ikke være null");
+            throw new TekniskException("Behandlingstype kan ikke være null");
         }
 
         Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer)
