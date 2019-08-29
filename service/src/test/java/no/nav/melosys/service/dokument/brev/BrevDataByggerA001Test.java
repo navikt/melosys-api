@@ -31,7 +31,7 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA001;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
@@ -146,12 +146,12 @@ public class BrevDataByggerA001Test {
         brevDataByggerA001 = new BrevDataByggerA001(lovvalgsperiodeService, anmodningsperiodeService, myndighetsRepo, vilkårRepo);
     }
 
-    private Dokumentressurser lagDokumentressurs() throws TekniskException {
+    private DokumentdataGrunnlag lagDokumentressurs() throws TekniskException {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        return new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {

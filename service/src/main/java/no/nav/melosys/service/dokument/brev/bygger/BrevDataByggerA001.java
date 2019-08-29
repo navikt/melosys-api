@@ -22,7 +22,7 @@ import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -32,7 +32,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
-    private Dokumentressurser dokumentressurser;
+    private DokumentdataGrunnlag dataGrunnlag;
     private Behandling behandling;
 
     public BrevDataByggerA001(LovvalgsperiodeService lovvalgsperiodeService,
@@ -46,21 +46,21 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(Dokumentressurser dokumentressurser, String saksbehandler) throws FunksjonellException, TekniskException {
-        this.dokumentressurser = dokumentressurser;
-        this.behandling = dokumentressurser.getBehandling();
+    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+        this.dataGrunnlag = dataGrunnlag;
+        this.behandling = dataGrunnlag.getBehandling();
 
         Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder();
         Landkoder landkode = anmodningsperioder.iterator().next().getUnntakFraLovvalgsland();
 
         BrevDataA001 brevData = new BrevDataA001();
-        brevData.personDokument = dokumentressurser.getPerson();
+        brevData.personDokument = dataGrunnlag.getPerson();
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = dokumentressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivere();
-        brevData.selvstendigeVirksomheter = dokumentressurser.getAvklarteVirksomheter().hentNorskeSelvstendige();
+        brevData.arbeidsgivendeVirkomsheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere();
+        brevData.selvstendigeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige();
 
-        brevData.bostedsadresse = dokumentressurser.getBosted().hentBostedsadresse();
-        brevData.arbeidssteder = dokumentressurser.getArbeidssteder().hentArbeidssteder();
+        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
+        brevData.arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
 
         brevData.vilkårsresultat161 = hentVilkårsresultat();
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
@@ -88,7 +88,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     private Optional<String> hentUtenlandskIdent(Landkoder landkode) {
-        return dokumentressurser.getSøknad().personOpplysninger.utenlandskIdent.stream()
+        return dataGrunnlag.getSøknad().personOpplysninger.utenlandskIdent.stream()
             .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
             .map(utenlandskIdent -> utenlandskIdent.ident)
             .findFirst();
@@ -116,7 +116,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 
-        Set<String> avklarteOrgnumre = dokumentressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivendeOrgnumre();
+        Set<String> avklarteOrgnumre = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivendeOrgnumre();
         Stream<Periode> avklarteAnsettelsesPerioder =
             arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrgnumre).stream();
 

@@ -11,7 +11,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,11 +52,11 @@ public class BrevDataByggerHenleggelseTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setBehandlinger(Arrays.asList(sisteBehandling, førsteBehandling));
         sisteBehandling.setFagsak(fagsak);
-        Dokumentressurser dokumentressurser = mock(Dokumentressurser.class);
-        when(dokumentressurser.getBehandling()).thenReturn(sisteBehandling);
+        DokumentdataGrunnlag dataGrunnlag = mock(DokumentdataGrunnlag.class);
+        when(dataGrunnlag.getBehandling()).thenReturn(sisteBehandling);
 
         String saksbehandler = "saksbehandler";
-        BrevDataMottattDato brevData = (BrevDataMottattDato) brevDataByggerHenleggelse.lag(dokumentressurser, saksbehandler);
+        BrevDataMottattDato brevData = (BrevDataMottattDato) brevDataByggerHenleggelse.lag(dataGrunnlag, saksbehandler);
 
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
         assertThat(brevData.initierendeJournalpostForsendelseMottattTidspunkt).isEqualTo(forsendelseMottatt);

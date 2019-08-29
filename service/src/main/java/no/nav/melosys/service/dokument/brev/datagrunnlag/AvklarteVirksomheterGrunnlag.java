@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev.ressurser;
+package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
 
-public class AvklarteVirksomheter {
+public class AvklarteVirksomheterGrunnlag {
     private final Behandling behandling;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final KodeverkService kodeverkService;
@@ -30,9 +30,9 @@ public class AvklarteVirksomheter {
     private List<AvklartVirksomhet> norskeSelvstendige;
     private List<AvklartVirksomhet> utenlandskeVirksomheter;
 
-    public AvklarteVirksomheter(Behandling behandling,
-                                AvklarteVirksomheterService avklarteVirksomheterService,
-                                KodeverkService kodeverkService) {
+    public AvklarteVirksomheterGrunnlag(Behandling behandling,
+                                        AvklarteVirksomheterService avklarteVirksomheterService,
+                                        KodeverkService kodeverkService) {
         this.behandling = behandling;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.kodeverkService = kodeverkService;

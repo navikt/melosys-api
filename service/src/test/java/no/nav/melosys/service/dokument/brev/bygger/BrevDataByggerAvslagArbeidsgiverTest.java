@@ -21,7 +21,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -114,9 +114,9 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(ART12_1_VESENTLIG_VIRKSOMHET))).thenReturn(Optional.of(vesentligVirksomhet));
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        Dokumentressurser dokumentressurser = new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        DokumentdataGrunnlag dataGrunnlag = new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
         String saksbehandler = "saksbehandler";
-        BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(dokumentressurser, saksbehandler);
+        BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(dataGrunnlag, saksbehandler);
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("987654321");
     }
 

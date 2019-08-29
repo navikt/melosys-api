@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev.ressurser;
+package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import java.time.LocalDate;
 
@@ -12,15 +12,15 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
 
-public class Bosted {
+public class BostedGrunnlag {
     private final KodeverkService kodeverkService;
 
     private final SoeknadDokument søknad;
     private final PersonDokument person;
 
-    public Bosted(SoeknadDokument søknad,
-                  PersonDokument person,
-                  KodeverkService kodeverkService) {
+    public BostedGrunnlag(SoeknadDokument søknad,
+                          PersonDokument person,
+                          KodeverkService kodeverkService) {
         this.søknad = søknad;
         this.person = person;
         this.kodeverkService = kodeverkService;

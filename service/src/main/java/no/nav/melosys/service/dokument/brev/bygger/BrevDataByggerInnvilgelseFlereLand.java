@@ -16,7 +16,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 
 public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     private final AvklartefaktaService avklartefaktaService;
@@ -24,8 +24,6 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     private final BrevDataByggerA1 brevbyggerA1;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final LandvelgerService landvelgerService;
-    private Behandling behandling;
-    private SoeknadDokument søknad;
 
     public BrevDataByggerInnvilgelseFlereLand(AvklartefaktaService avklartefaktaService,
                                               LandvelgerService landvelgerService,
@@ -41,14 +39,14 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(Dokumentressurser dokumentressurser, String saksbehandler) throws FunksjonellException, TekniskException {
-        this.behandling = dokumentressurser.getBehandling();
-        this.søknad = dokumentressurser.getSøknad();
+    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+        Behandling behandling = dataGrunnlag.getBehandling();
+        SoeknadDokument søknad = dataGrunnlag.getSøknad();
 
-        BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(dokumentressurser, saksbehandler);
+        BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(dataGrunnlag, saksbehandler);
 
-        brevdata.norskeArbeidsgivere = dokumentressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivere();
-        brevdata.norskeSelvstendigVirksomheter = dokumentressurser.getAvklarteVirksomheter().hentNorskeSelvstendige();
+        brevdata.norskeArbeidsgivere = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere();
+        brevdata.norskeSelvstendigVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige();
 
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
         brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandling).stream()
@@ -66,9 +64,9 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         return brevdata;
     }
 
-    private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(Dokumentressurser dokumentressurser, String saksbehandler) throws FunksjonellException, TekniskException {
+    private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(brevbestillingDto, saksbehandler);
-        brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dokumentressurser, saksbehandler);
+        brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         return brevdata;
     }
 }

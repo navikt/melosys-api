@@ -10,7 +10,7 @@ import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 
 public class BrevDataByggerMedMottattDato implements BrevDataBygger {
     private final BrevbestillingDto brevbestillingDto;
@@ -22,9 +22,9 @@ public class BrevDataByggerMedMottattDato implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(Dokumentressurser dokumentressurser, String saksbehandler) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws SikkerhetsbegrensningException, IntegrasjonException {
         BrevDataMottattDato brevData = new BrevDataMottattDato(saksbehandler, brevbestillingDto);
-        brevData.initierendeJournalpostForsendelseMottattTidspunkt = getForsendelseMottattFraJournalpost(dokumentressurser.getBehandling());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = getForsendelseMottattFraJournalpost(dataGrunnlag.getBehandling());
         return brevData;
     }
 

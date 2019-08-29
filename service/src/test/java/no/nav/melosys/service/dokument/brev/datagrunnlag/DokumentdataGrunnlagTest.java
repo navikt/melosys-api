@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,7 +23,6 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +37,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BrevressursTest {
+public class DokumentdataGrunnlagTest {
     @Mock
     private KodeverkService kodeverkService;
     @Mock
@@ -49,7 +48,7 @@ public class BrevressursTest {
     private PersonDokument person;
     private SoeknadDokument søknad;
     private Behandling behandling;
-    private Dokumentressurser brevressurs;
+    private DokumentdataGrunnlag dataGrunnlag;
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -71,7 +70,7 @@ public class BrevressursTest {
         søknad = new SoeknadDokument();
         behandling = lagBehandling(søknad, person);
 
-        brevressurs = new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        dataGrunnlag = new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     private Behandling lagBehandling(SoeknadDokument søknad, PersonDokument person) {
@@ -86,12 +85,12 @@ public class BrevressursTest {
     public void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws TekniskException {
         person.bostedsadresse = new Bostedsadresse();
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        brevressurs.getBosted().hentBostedsadresse();
+        dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
     }
 
     @Test
     public void hentBostedsadresse_brukerBostedFraPersonDokument() throws TekniskException {
-        StrukturertAdresse bostedsadresse = brevressurs.getBosted().hentBostedsadresse();
+        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
         assertThat(bostedsadresse.husnummer).isEqualTo("23");
         assertThat(bostedsadresse.postnummer).isEqualTo("0165");
@@ -110,7 +109,7 @@ public class BrevressursTest {
         oppgittBosted.landkode = "NO";
         søknad.bosted.oppgittAdresse = oppgittBosted;
 
-        StrukturertAdresse bostedsadresse = brevressurs.getBosted().hentBostedsadresse();
+        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("HerBorJegGata");
         assertThat(bostedsadresse.husnummer).isEqualTo("123");
         assertThat(bostedsadresse.postnummer).isEqualTo("0166");
@@ -127,7 +126,7 @@ public class BrevressursTest {
         AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
 
-        List<Arbeidssted> arbeidssteder = brevressurs.getArbeidssteder().hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
@@ -147,7 +146,7 @@ public class BrevressursTest {
         AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
 
-        List<Arbeidssted> arbeidssteder = brevressurs.getArbeidssteder().hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
@@ -163,15 +162,15 @@ public class BrevressursTest {
 
         when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.emptyMap());
 
-        Collection<Arbeidssted> arbeidssteder = brevressurs.getArbeidssteder().hentArbeidssteder();
+        Collection<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
         assertThat(arbeidssteder).isEmpty();
     }
 
     @Test
     public void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Collection<AvklartVirksomhet> norskeVirksomheter = brevressurs.getAvklarteVirksomheter().hentAlleNorskeVirksomheterMedAdresse();
+        Collection<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
         assertThat(norskeVirksomheter).hasSize(1);
-        brevressurs.getAvklarteVirksomheter().hentAlleNorskeVirksomheterMedAdresse();
+        dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
         verify(avklarteVirksomheterService, times(1)).hentAlleNorskeVirksomheter(any(), any());
     }
 
@@ -180,7 +179,7 @@ public class BrevressursTest {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
-        AvklartVirksomhet avklartVirksomhet = brevressurs.getAvklarteVirksomheter().hentHovedvirksomhet();
+        AvklartVirksomhet avklartVirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
         assertThat(avklartVirksomhet).isEqualTo(norskVirksomhet);
     }
 
@@ -192,8 +191,8 @@ public class BrevressursTest {
         AvklartVirksomhet utenlandskAvklartVirksomhet = new AvklartVirksomhet(lagForetakUtland());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(utenlandskAvklartVirksomhet));
 
-        AvklartVirksomhet hovedvirksomhet = brevressurs.getAvklarteVirksomheter().hentHovedvirksomhet();
-        Collection<AvklartVirksomhet> bivirksomhet = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
+        AvklartVirksomhet hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
+        Collection<AvklartVirksomhet> bivirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter();
         assertThat(hovedvirksomhet).isEqualTo(norskVirksomhet);
     }
 
@@ -204,7 +203,7 @@ public class BrevressursTest {
 
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.emptyList());
 
-        AvklartVirksomhet hovedvirksomhet = brevressurs.getAvklarteVirksomheter().hentHovedvirksomhet();
+        AvklartVirksomhet hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
         assertThat(hovedvirksomhet).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
     }
 
@@ -213,7 +212,7 @@ public class BrevressursTest {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter();
         assertThat(bivirksomheter).isEmpty();
     }
 
@@ -224,7 +223,7 @@ public class BrevressursTest {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter();
         assertThat(bivirksomheter).isEmpty();
     }
 
@@ -233,7 +232,7 @@ public class BrevressursTest {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter();
         assertThat(bivirksomheter).containsExactly(norskVirksomhet);
     }
 
@@ -245,7 +244,7 @@ public class BrevressursTest {
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = brevressurs.getAvklarteVirksomheter().hentBivirksomheter();
+        Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter();
         assertThat(bivirksomheter).hasSize(1);
 
         assertThat(bivirksomheter.iterator().next()).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);

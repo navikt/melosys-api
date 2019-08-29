@@ -23,7 +23,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -92,8 +92,8 @@ public class BrevDataByggerInnvilgelseTest {
             brevDataByggerA1);
     }
 
-    public Dokumentressurser lagBrevressurser() throws TekniskException {
-        return new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+    public DokumentdataGrunnlag lagBrevressurser() throws TekniskException {
+        return new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test

@@ -79,7 +79,7 @@ public final class Brevbestilling {
         return avsender;
     }
 
-    public Collection<Mottaker> getMottaker() {
+    public Collection<Mottaker> getMottakere() {
         return mottaker;
     }
 

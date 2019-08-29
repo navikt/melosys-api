@@ -59,7 +59,7 @@ public class SendHenleggelsesbrevTest {
         Brevbestilling brevbestilling = brevbestillingCaptor.getValue();
 
         assertThat(brevbestilling.getDokumentType()).isEqualTo(Produserbaredokumenter.MELDING_HENLAGT_SAK);
-        assertThat(brevbestilling.getMottaker().iterator().next().getRolle()).isEqualTo(Aktoersroller.BRUKER);
+        assertThat(brevbestilling.getMottakere().iterator().next().getRolle()).isEqualTo(Aktoersroller.BRUKER);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
     }

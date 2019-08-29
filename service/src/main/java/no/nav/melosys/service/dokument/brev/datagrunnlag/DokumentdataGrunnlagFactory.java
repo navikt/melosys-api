@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev.ressurser;
+package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.TekniskException;
@@ -10,21 +10,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DokumentdataInput {
+public class DokumentdataGrunnlagFactory {
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final KodeverkService kodeverkService;
 
     @Autowired
-    public DokumentdataInput(AvklartefaktaService avklartefaktaService,
-                             AvklarteVirksomheterSystemService avklarteVirksomheterService,
-                             KodeverkService kodeverkService) {
+    public DokumentdataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
+                                       AvklarteVirksomheterSystemService avklarteVirksomheterService,
+                                       KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.kodeverkService = kodeverkService;
     }
 
-    public Dokumentressurser av(Behandling behandling) throws TekniskException {
-        return new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+    public DokumentdataGrunnlag av(Behandling behandling) throws TekniskException {
+        return new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 }

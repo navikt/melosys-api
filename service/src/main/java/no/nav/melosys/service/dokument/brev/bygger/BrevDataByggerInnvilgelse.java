@@ -16,7 +16,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 
 public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
@@ -25,7 +25,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final BrevDataByggerA1 brevbyggerA1;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    private Dokumentressurser dokumentressurser;
+    private DokumentdataGrunnlag dataGrunnlag;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landvelgerService,
@@ -51,9 +51,9 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(Dokumentressurser dokumentressurser, String saksbehandler) throws FunksjonellException, TekniskException {
-        this.dokumentressurser = dokumentressurser;
-        Behandling behandling = dokumentressurser.getBehandling();
+    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+        this.dataGrunnlag = dataGrunnlag;
+        Behandling behandling = dataGrunnlag.getBehandling();
 
         // Bruker skal ha A1 som vedlegg - Arbeidsgiver skal ikke
         BrevDataInnvilgelse brevdata;
@@ -72,7 +72,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             .map(Landkoder::getBeskrivelse)
             .orElse(null);
 
-        List<AvklartVirksomhet> norskeVirksomheter = dokumentressurser.getAvklarteVirksomheter().hentAlleNorskeVirksomheterMedAdresse();
+        List<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
         brevdata.hovedvirksomhet = norskeVirksomheter.get(0);
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
@@ -83,7 +83,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
 
     private BrevDataInnvilgelse lagInnvilgelseBrevdataMedA1(String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataInnvilgelse brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
-        brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dokumentressurser, saksbehandler);
+        brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         return brevdata;
     }
 }

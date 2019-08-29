@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev.ressurser;
+package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import java.util.List;
 import java.util.Map;
@@ -17,18 +17,18 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 
-public class ArbeidsstedRessurs {
+public class ArbeidsstedGrunnlag {
     private final Behandling behandling;
     private final SoeknadDokument søknad;
-    private final AvklarteVirksomheter avklarteVirksomheter;
+    private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final AvklartefaktaService avklartefaktaService;
 
-    public ArbeidsstedRessurs(Behandling behandling, SoeknadDokument søknad,
-                              AvklarteVirksomheter avklarteVirksomheter,
-                              AvklartefaktaService avklartefaktaService) {
+    public ArbeidsstedGrunnlag(Behandling behandling, SoeknadDokument søknad,
+                               AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag,
+                               AvklartefaktaService avklartefaktaService) {
         this.behandling = behandling;
         this.søknad = søknad;
-        this.avklarteVirksomheter = avklarteVirksomheter;
+        this.avklarteVirksomheterGrunnlag = avklarteVirksomheterGrunnlag;
         this.avklartefaktaService = avklartefaktaService;
     }
 
@@ -44,7 +44,7 @@ public class ArbeidsstedRessurs {
             .collect(Collectors.toList());
 
         if (fysiskeArbeidssteder.isEmpty()) {
-            avklarteVirksomheter.hentUtenlandskeVirksomheter().stream()
+            avklarteVirksomheterGrunnlag.hentUtenlandskeVirksomheter().stream()
                 .filter(uv -> uv.adresseErOgsåArbeidssted)
                 .forEach(uv -> fysiskeArbeidssteder.add(utledArbeidsstedFraVirksomhet(uv)));
         }

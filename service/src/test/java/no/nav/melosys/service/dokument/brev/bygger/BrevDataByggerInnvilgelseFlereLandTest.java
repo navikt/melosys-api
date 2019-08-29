@@ -21,7 +21,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,8 +83,8 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
             brevDataByggerA1);
     }
 
-    private Dokumentressurser lagBrevressurser() throws TekniskException {
-        return new Dokumentressurser(behandling, null, avklarteVirksomheterService, avklartefaktaService);
+    private DokumentdataGrunnlag lagBrevressurser() throws TekniskException {
+        return new DokumentdataGrunnlag(behandling, null, avklarteVirksomheterService, avklartefaktaService);
     }
 
     private static Saksopplysning lagSøknadsopplysning() {
@@ -102,7 +102,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
         when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.of(maritimType));
 
-        Dokumentressurser brevdataressurser = lagBrevressurser();
+        DokumentdataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
         assertThat(brevData.avklartMaritimType).isEqualTo(Maritimtyper.SOKKEL);
@@ -112,7 +112,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
         when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.empty());
 
-        Dokumentressurser brevdataressurser = lagBrevressurser();
+        DokumentdataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
         assertThat(brevData.avklartMaritimType).isNull();
     }

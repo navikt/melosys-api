@@ -14,7 +14,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
@@ -34,13 +34,13 @@ public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(Dokumentressurser dokumentressurser, String saksbehandler) throws FunksjonellException, TekniskException {
-        this.behandling = dokumentressurser.getBehandling();
+    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+        this.behandling = dataGrunnlag.getBehandling();
 
         BrevDataAvslagArbeidsgiver brevData = new BrevDataAvslagArbeidsgiver(saksbehandler);
-        brevData.person = dokumentressurser.getPerson();
+        brevData.person = dataGrunnlag.getPerson();
 
-        brevData.hovedvirksomhet = dokumentressurser.getAvklarteVirksomheter().hentHovedvirksomhet();
+        brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
         brevData.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
         brevData.arbeidsland = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
 

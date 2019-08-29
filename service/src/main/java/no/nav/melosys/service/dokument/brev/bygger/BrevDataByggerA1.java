@@ -10,7 +10,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import org.apache.commons.lang3.StringUtils;
 
 public class BrevDataByggerA1 implements BrevDataBygger {
@@ -21,24 +21,24 @@ public class BrevDataByggerA1 implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(Dokumentressurser dokumentressurser, String saksbehandler) throws FunksjonellException, TekniskException {
-        List<AvklartVirksomhet> utenlandskeVirksomheter = dokumentressurser.getAvklarteVirksomheter().hentUtenlandskeVirksomheter();
-        List<AvklartVirksomhet> norskeVirksomheter = dokumentressurser.getAvklarteVirksomheter().hentAlleNorskeVirksomheterMedAdresse();
+    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+        List<AvklartVirksomhet> utenlandskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter();
+        List<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
         if (norskeVirksomheter.isEmpty() && utenlandskeVirksomheter.isEmpty()) {
             throw new FunksjonellException("Trenger minst en avklart virksomhet - utenlandsk eller norsk");
         }
 
         BrevDataA1 brevData = new BrevDataA1();
-        brevData.person = dokumentressurser.getPerson();
-        brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(dokumentressurser.getBehandling().getId());
-        brevData.selvstendigeForetak = dokumentressurser.getAvklarteVirksomheter().hentNorskeSelvstendigeForetakOrgnumre();
-        brevData.bostedsadresse = dokumentressurser.getBosted().hentBostedsadresse();
+        brevData.person = dataGrunnlag.getPerson();
+        brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(dataGrunnlag.getBehandling().getId());
+        brevData.selvstendigeForetak = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendigeForetakOrgnumre();
+        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
 
-        List<Arbeidssted> arbeidssteder = dokumentressurser.getArbeidssteder().hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
         brevData.arbeidssteder = arbeidssteder;
 
-        brevData.hovedvirksomhet = dokumentressurser.getAvklarteVirksomheter().hentHovedvirksomhet();
-        brevData.bivirksomheter = dokumentressurser.getAvklarteVirksomheter().hentBivirksomheter();
+        brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
+        brevData.bivirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter();
 
         // Feltet 5.1 i A1 fletter arbeidsgivere og oppdragsgivere.
         // Oppdragsgiver defineres for arbeidsstedet og må utledes derfra

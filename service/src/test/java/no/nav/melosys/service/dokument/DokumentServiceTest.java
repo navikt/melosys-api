@@ -48,8 +48,8 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
-import no.nav.melosys.service.dokument.brev.ressurser.DokumentdataInput;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -238,16 +238,16 @@ public final class DokumentServiceTest {
             mock(ProsessinstansService.class), brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
     }
 
-    public DokumentdataInput lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public DokumentdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
         AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
-        Dokumentressurser dokumentressurser = new Dokumentressurser(lagBehandling(), kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
-        DokumentdataInput dokumentdataInput = mock(DokumentdataInput.class);
-        when(dokumentdataInput.av(any())).thenReturn(dokumentressurser);
-        return dokumentdataInput;
+        DokumentdataGrunnlag dataGrunnlag = new DokumentdataGrunnlag(lagBehandling(), kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
+        DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory = mock(DokumentdataGrunnlagFactory.class);
+        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
+        return dokumentdataGrunnlagFactory;
     }
 
     private static Behandling lagBehandling() {

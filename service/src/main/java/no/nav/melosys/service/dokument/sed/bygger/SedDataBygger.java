@@ -16,7 +16,7 @@ import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -34,46 +34,46 @@ public class SedDataBygger {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
-    public SedDataDto lag(Dokumentressurser dokumentressurser, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
-        SedDataDto sedDataDto = lagPersonopplysninger(dokumentressurser);
+    public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+        SedDataDto sedDataDto = lagPersonopplysninger(datagrunnlag);
         sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat)));
-        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dokumentressurser.getBehandling()));
-        sedDataDto.setMottakerLand(dokumentressurser.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
+        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(datagrunnlag.getBehandling()));
+        sedDataDto.setMottakerLand(datagrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
         return sedDataDto;
     }
 
-    public SedDataDto lagUtkast(Dokumentressurser dokumentressurser) throws TekniskException, FunksjonellException {
-        SedDataDto sedDataDto = lagPersonopplysninger(dokumentressurser);
-        if (!lovvalgsperiodeService.hentLovvalgsperioder(dokumentressurser.getBehandling().getId()).isEmpty()) {
-            sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(lovvalgsperiodeService.hentLovvalgsperiode(dokumentressurser.getBehandling().getId()))));
+    public SedDataDto lagUtkast(DokumentdataGrunnlag dataGrunnlag) throws TekniskException, FunksjonellException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        if (!lovvalgsperiodeService.hentLovvalgsperioder(dataGrunnlag.getBehandling().getId()).isEmpty()) {
+            sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(lovvalgsperiodeService.hentLovvalgsperiode(dataGrunnlag.getBehandling().getId()))));
         } else {
             sedDataDto.setLovvalgsperioder(Collections.emptyList());
         }
         return sedDataDto;
     }
 
-    private SedDataDto lagPersonopplysninger(Dokumentressurser dokumentressurser) throws TekniskException, FunksjonellException {
+    private SedDataDto lagPersonopplysninger(DokumentdataGrunnlag dataGrunnlag) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = new SedDataDto();
 
-        sedDataDto.setArbeidsgivendeVirksomheter(map(dokumentressurser.getAvklarteVirksomheter().hentNorskeArbeidsgivere()));
+        sedDataDto.setArbeidsgivendeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere()));
 
-        sedDataDto.setArbeidssteder(dokumentressurser.getArbeidssteder().hentArbeidssteder().stream()
+        sedDataDto.setArbeidssteder(dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
             .map(this::mapArbeidssted).collect(Collectors.toList()));
 
-        sedDataDto.setBostedsadresse(fraBostedsadresse(dokumentressurser.getBosted().hentBostedsadresse()));
+        sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getBostedGrunnlag().hentBostedsadresse()));
 
-        sedDataDto.setBruker(hentBrukerFraPersonDokument(dokumentressurser.getPerson()));
+        sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
 
-        sedDataDto.setFamilieMedlem(dokumentressurser.getPerson().familiemedlemmer.stream()
+        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().familiemedlemmer.stream()
             .filter(f -> f.familierelasjon.equals(Familierelasjon.FARA) || f.familierelasjon.equals(Familierelasjon.MORA))
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
-        sedDataDto.setSelvstendigeVirksomheter(map(dokumentressurser.getAvklarteVirksomheter().hentNorskeSelvstendige()));
+        sedDataDto.setSelvstendigeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige()));
 
-        sedDataDto.setUtenlandskeVirksomheter(dokumentressurser.getAvklarteVirksomheter().hentUtenlandskeVirksomheter().stream().map(
+        sedDataDto.setUtenlandskeVirksomheter(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter().stream().map(
             this::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));
 
-        sedDataDto.setUtenlandskIdent(dokumentressurser.getSøknad().personOpplysninger.utenlandskIdent.stream()
+        sedDataDto.setUtenlandskIdent(dataGrunnlag.getSøknad().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
         return sedDataDto;

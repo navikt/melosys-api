@@ -17,7 +17,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,9 +76,9 @@ public class SedDataByggerTest {
         dataBygger = new SedDataBygger(lovvalgsperiodeService);
     }
 
-    private Dokumentressurser lagDokumentressurser() throws TekniskException {
+    private DokumentdataGrunnlag lagDokumentressurser() throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        return new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test

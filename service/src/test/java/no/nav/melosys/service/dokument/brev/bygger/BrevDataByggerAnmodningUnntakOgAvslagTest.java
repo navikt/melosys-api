@@ -19,7 +19,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.service.dokument.brev.ressurser.Dokumentressurser;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,8 +91,8 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
     }
 
-    public Dokumentressurser lagBrevressurser(Behandling behandling) throws TekniskException {
+    public DokumentdataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        return new Dokumentressurser(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 }
