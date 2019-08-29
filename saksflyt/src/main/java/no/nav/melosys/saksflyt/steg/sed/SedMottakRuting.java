@@ -1,8 +1,6 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.ProsessDataKey;
@@ -34,12 +32,6 @@ public class SedMottakRuting extends AbstraktStegBehandler {
 
     private final Collection<BehandleMottattSedInitialiserer> sedMottattInitialiserere;
     private final EessiService eessiService;
-
-    private static final List<ProsessSteg> LOVLIGE_NESTE_STEG = Arrays.asList(
-        ProsessSteg.SED_MOTTAK_OPPRETT_SAK_OG_BEH,
-        ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-        ProsessSteg.SED_MOTTAK_OPPRETT_NY_BEHANDLING
-    );
 
     @Autowired
     public SedMottakRuting(Collection<BehandleMottattSedInitialiserer> sedMottattInitialiserere, EessiService eessiService) {
@@ -81,30 +73,6 @@ public class SedMottakRuting extends AbstraktStegBehandler {
         } else {
             throw new TekniskException("Ukjent Initialiseringsresultat: " + resultat);
         }
-
-
-        /*
-
-        Gitt at SED støtter automatisk behandling
-
-        Finnes saksrelasjon?
-
-            JA
-            Koble til korrekt sak (sett behandling i prosessinstans)
-            Hent prosesstype
-
-            NEI
-            NESTE STEG OPPRETT FAGSAK OG GSAK
-            Hent behandlingstype
-            Hent prosesstype
-
-
-        HVIS PROSESSTYPE = NULL (SED_JOURNALFØR?) -> skal kun journalføres
-        Neste steg: prosesstype =
-            SED_JOURNALFØR -> SED_MOTTAK
-            eks REGISTRERING_UNNTAK -> spesifikk første steg for behandling
-
-         */
     }
 
     private void validerBehandlingErSatt(Prosessinstans prosessinstans) throws TekniskException {

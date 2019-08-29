@@ -9,7 +9,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -48,14 +47,14 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
     }
 
     @Override
-    public InitialiseringResultat initialiserProsessinstans(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException, TekniskException {
+    public InitialiseringResultat initialiserProsessinstans(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
         if (gsakSaksnummer == null) {
             return InitialiseringResultat.NY_SAK;
         }
 
-        Optional<Fagsak> fagsak = fagsakService.hentFagsakFraGsakSaksnummer(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class));
+        Optional<Fagsak> fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
         if (fagsak.isPresent()) {
             Behandling behandling = fagsak.get().getSistOppdaterteBehandling();
             if (periodeErEndret(melosysEessiMelding, behandling)) {

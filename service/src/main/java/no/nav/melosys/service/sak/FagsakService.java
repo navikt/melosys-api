@@ -246,4 +246,10 @@ public class FagsakService {
         fagsakRepository.save(fagsak);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
+
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus,  Behandling behandling) throws IkkeFunnetException {
+        fagsak.setStatus(saksstatus);
+        fagsakRepository.save(fagsak);
+        behandlingService.avsluttBehandling(behandling.getId());
+    }
 }

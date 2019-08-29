@@ -30,7 +30,7 @@ public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
         Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
         eessiService.lagreSaksrelasjon(
             fagsak.getGsakSaksnummer(),
-            fagsak.getSaksnummer(),
+            melosysEessiMelding.getRinaSaksnummer(),
             melosysEessiMelding.getBucType()
         );
 

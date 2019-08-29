@@ -11,7 +11,6 @@ import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -49,7 +48,7 @@ public class UnntaksperiodeMottakInitialisererTest {
     }
 
     @Test
-    public void initialiserProsessinstans_nySak_verifiserResultatNySak() throws FunksjonellException, TekniskException {
+    public void initialiserProsessinstans_nySak_verifiserResultatNySak() throws FunksjonellException {
         Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1));
 
         InitialiseringResultat resultat = unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans, 1L);
@@ -68,7 +67,7 @@ public class UnntaksperiodeMottakInitialisererTest {
         lovvalgsperiode.setTom(tom);
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
-        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiodeOptional(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
         InitialiseringResultat resultat = unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans, 1L);
 
         assertThat(resultat).isEqualTo(InitialiseringResultat.INGEN_BEHANDLING);
@@ -83,6 +82,9 @@ public class UnntaksperiodeMottakInitialisererTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(fom.plusMonths(1));
         lovvalgsperiode.setTom(LocalDate.now().plusYears(2));
+
+        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
+        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiodeOptional(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
 
         InitialiseringResultat resultat = unntaksperiodeMottakInitialiserer.initialiserProsessinstans(prosessinstans, 1L);
 
