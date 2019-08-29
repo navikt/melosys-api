@@ -52,7 +52,6 @@ public enum ProsessSteg implements Kodeverk {
     AOU_SVAR_OPPDATER_BEHANDLING("AOU_OPPDATER_BEHANDLING","Oppdater behandling"),
 
     //Mottak anmodning om unntak
-    AOU_MOTTAK_OPPRETT_FAGSAK_OG_BEH("AOU_MOTTAK_OPPRETT_FAGSAK_OG_BEH", "Opprett sak og behandling"),
     AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE("AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE", "Opprett anmodningsperiode"),
     AOU_MOTTAK_OPPRETT_PERIODE_MEDL("AOU_MOTTAK_OPPRETT_PERIODE_MEDL", "Opprett periode under avklaring i Medl"),
     AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET("AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
@@ -136,6 +135,8 @@ public enum ProsessSteg implements Kodeverk {
                 return REG_UNNTAK_OPPRETT_SEDDOKUMENT;
             case ANMODNING_OM_UNNTAK_SVAR:
                 return AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR;
+            case ANMODNING_OM_UNNTAK_MOTTAK:
+                return AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE;
             default:
                 throw new TekniskException("Første steg for prosesstype" + prosessType + " er ukjent");
         }
