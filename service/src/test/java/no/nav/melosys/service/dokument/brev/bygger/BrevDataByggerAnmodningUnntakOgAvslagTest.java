@@ -5,10 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -19,6 +18,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
@@ -33,6 +33,7 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStruktur
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,12 +45,23 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     @Mock
     LandvelgerService landvelgerService;
     @Mock
+    AnmodningsperiodeService anmodningsperiodeService;
+    @Mock
     KodeverkService kodeverkService;
 
     private BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAnmodningUnntakOgAvslag;
+    private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
     @Before
-    public void setUp() throws TekniskException {
+    public void setUp() {
+        anmodningsperiodeSvar = lagAnmodningsperiodeSvarAvslag();
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
+        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
+
+
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
         brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(landvelgerService);
     }
@@ -74,7 +86,6 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
         when(landvelgerService.hentArbeidsland(any())).thenReturn(Landkoder.DE);
-
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setOrgnummer("999");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
@@ -89,6 +100,14 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
         assertThat(brevData.hovedvirksomhet.isSelvstendigForetak()).isEqualTo(true);
         assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
+        assertThat(brevData.anmodningsperiodeSvar.get()).isEqualToComparingFieldByField(anmodningsperiodeSvar);
+    }
+
+    private AnmodningsperiodeSvar lagAnmodningsperiodeSvarAvslag() {
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setBegrunnelseFritekst("No tiendo");
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
+        return anmodningsperiodeSvar;
     }
 
     public DokumentdataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException {

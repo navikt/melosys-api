@@ -12,10 +12,7 @@ import no.nav.dok.melosysbrev._000081.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AvslagBegrunnelse;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -31,10 +28,26 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
                                 BrevData brevData) throws JAXBException, SAXException, TekniskException {
-        Fag fag = mapFag(behandling, resultat, (BrevDataAnmodningUnntakOgAvslag) brevData);
-        mapArt161(fag, resultat);
+        BrevDataAnmodningUnntakOgAvslag brevDataAnmodningUnntakOgAvslag = (BrevDataAnmodningUnntakOgAvslag) brevData;
+        Fag fag = mapFag(behandling, resultat, brevDataAnmodningUnntakOgAvslag);
+
+        if (brevDataAnmodningUnntakOgAvslag.anmodningsperiodeSvar.isPresent()) {
+            brevDataAnmodningUnntakOgAvslag.anmodningsperiodeSvar.ifPresent(aps ->
+                mapArt161AvslagFraAnmodningsperiode(fag, aps));
+        } else {
+            mapArt161Avslag(fag, resultat);
+        }
+
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+    }
+
+    private void mapArt161AvslagFraAnmodningsperiode(Fag fag, AnmodningsperiodeSvar svar) {
+        fag.setBegrunnelseFritekst(svar.getBegrunnelseFritekst());
+
+        Art161AvslagBegrunnelse avslagBegrunnelse = lagTomArt161AvslagBegrunnelse();
+        avslagBegrunnelse.setUtlAvslaarAvtale(JA);
+        fag.setArt161AvslagBegrunnelse(avslagBegrunnelse);
     }
 
     @Override
@@ -44,10 +57,10 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
         return fag;
     }
 
-    private void mapArt161(Fag fag, Behandlingsresultat resultat) throws TekniskException {
+    private void mapArt161Avslag(Fag fag, Behandlingsresultat resultat) throws TekniskException {
         Optional<Vilkaarsresultat> vilkaarsresultat = hentFørsteGyldigeVilkaarsresultatForArt16(resultat);
         Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet());
-        Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagArt161AvslagBegrunnelse();
+        Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagTomArt161AvslagBegrunnelse();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : art161Begrunnelser) {
             Art16_1_avslag artikkel161AvslagKode = Art16_1_avslag.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel161AvslagKode) {
@@ -74,7 +87,7 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
         fag.setArt161AvslagBegrunnelse(art161AvslagBegrunnelser);
     }
 
-    private static Art161AvslagBegrunnelse lagArt161AvslagBegrunnelse() {
+    private static Art161AvslagBegrunnelse lagTomArt161AvslagBegrunnelse() {
         return Art161AvslagBegrunnelse.builder().withIngenSpesielleForhold("")
             .withOver5Aar("")
             .withSaerligAvslagsgrunn("")
