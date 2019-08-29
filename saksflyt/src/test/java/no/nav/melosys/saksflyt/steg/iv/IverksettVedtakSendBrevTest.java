@@ -115,7 +115,7 @@ public class IverksettVedtakSendBrevTest {
         BrevDataService brevDataService = mock(BrevDataService.class);
         DoksysFasade dokSysFasade = mock(DoksysFasade.class);
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
-        when(utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(any())).thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(any())).thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService);
         return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger));

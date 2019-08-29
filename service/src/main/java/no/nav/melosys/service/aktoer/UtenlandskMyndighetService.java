@@ -52,10 +52,7 @@ public class UtenlandskMyndighetService {
         return institusjonsider;
     }
 
-    /**
-     * Brukes til brevutsendelse fordi alle myndigheter lagres som aktører, men ikke alle ønsker brev tilsendt.
-     */
-    public Map<UtenlandskMyndighet, Aktoer> lagUtenlandskMyndighetFraBehandling(Behandling behandling) throws TekniskException {
+    public Map<UtenlandskMyndighet, Aktoer> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) throws TekniskException {
         Collection<Landkoder> utenlandskeMyndigheterLandkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling);
         List<UtenlandskMyndighet> utenlandskMyndighetList = utenlandskMyndighetRepository.findByLandkodeIsIn(utenlandskeMyndigheterLandkoder);
         
@@ -67,13 +64,17 @@ public class UtenlandskMyndighetService {
     private Aktoer lagAktoer(UtenlandskMyndighet utenlandskMyndighet) {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(MYNDIGHET);
-        aktoer.setInstitusjonId(utenlandskMyndighet.landkode + ":" + utenlandskMyndighet.institusjonskode);
+        aktoer.setInstitusjonId(lagInstitusjonsId(utenlandskMyndighet));
         return aktoer;
     }
 
     private String lagInstitusjonsId(Landkoder landkode) throws TekniskException {
         UtenlandskMyndighet myndighet = utenlandskMyndighetRepository.findByLandkode(landkode)
                 .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
-        return landkode.getKode() + ":" + myndighet.institusjonskode;
+        return lagInstitusjonsId(myndighet);
+    }
+    
+    private String lagInstitusjonsId(UtenlandskMyndighet utenlandskMyndighet) {
+        return utenlandskMyndighet.landkode + ":" + utenlandskMyndighet.institusjonskode;
     }
 }

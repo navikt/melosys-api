@@ -74,7 +74,7 @@ public class AvklarMyndighetServiceTest {
 
     @Test
     public void lagUtenlandskMyndighetFraBehandling_forventAktoerMedGyldigInstitusjonsId() throws Exception {
-        Map<UtenlandskMyndighet, Aktoer> aktoerer = utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
+        Map<UtenlandskMyndighet, Aktoer> aktoerer = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
         assertThat(aktoerer).isNotEmpty();
         assertThat(aktoerer.values().iterator().next().getInstitusjonId()).isEqualTo(forventetInstitusjonIdIT);
     }

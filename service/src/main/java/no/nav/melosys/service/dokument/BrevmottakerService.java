@@ -16,6 +16,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 
@@ -134,7 +135,7 @@ public class BrevmottakerService {
             return Collections.singletonList(mottaker.getAktør());
         } else {
             // Utenlandsk myndighet
-            Map<UtenlandskMyndighet, Aktoer> utenlandskMyndighetAktoerMap = utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
+            Map<UtenlandskMyndighet, Aktoer> utenlandskMyndighetAktoerMap = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
 
             if (produserbartDokument == ATTEST_A1) {
                 return utenlandskMyndighetAktoerMap.entrySet()
@@ -150,8 +151,10 @@ public class BrevmottakerService {
 
     private boolean myndighetØnskerInnvilgelsesbrev(UtenlandskMyndighet utenlandskMyndighet) {
         return utenlandskMyndighet
-                .preferanser.stream().map(Preferanse::getPreferanse)
-                .noneMatch(p -> p == Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
+                .preferanser
+                .stream()
+                .map(Preferanse::getPreferanse)
+                .noneMatch(RESERVERT_FRA_A1::equals);
     }
     
     public Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
