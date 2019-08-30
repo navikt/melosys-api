@@ -1,10 +1,8 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.serverinfo;
 
 import javax.ws.rs.core.Response;
 
 import no.nav.melosys.tjenester.gui.dto.ServerinfoDto;
-import no.nav.melosys.tjenester.gui.serverinfo.Serverinfo;
-import no.nav.melosys.tjenester.gui.serverinfo.ServerinfoTjeneste;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +17,6 @@ public class ServerinfoTjenesteTest {
     }
 
     private ServerinfoDto lagServerinfo() {
-        return new ServerinfoDto(null, null, Serverinfo.FEIL, Serverinfo.FEIL, Serverinfo.VERA_URL);
+        return new ServerinfoDto(null, null, Serverinfo.FEIL, Serverinfo.FEIL, Serverinfo.hentVeraUrl(null, null));
     }
 }

@@ -24,4 +24,10 @@ public class ServerinfoTest {
     public void hentHash() {
         assertThat(Serverinfo.hentHash(image)).isEqualTo("b96a19ce83236594f2601c517f452db78a48748a");
     }
+
+    @Test
+    public void hentVeraUrl() {
+        assertThat(Serverinfo.hentVeraUrl("t8", "dev-fss"))
+            .isEqualTo("https://vera.adeo.no/#/matrix?apps=melosys$&envs=t8:dev-fss");
+    }
 }

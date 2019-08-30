@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class Serverinfo {
     public static final String FEIL = "Feil";
-    public static final String VERA_URL = "https://vera.adeo.no/#/log?application=melosys";
+    private static final String VERA_URL_TEMPLATE = "https://vera.adeo.no/#/matrix?apps=melosys$&envs=%s:%s";
     private static final String NAMESPACE_ENV = "NAIS_NAMESPACE";
     private static final String CLUSTER_ENV = "NAIS_CLUSTER_NAME";
     private static final String IMAGE_ENV = "NAIS_APP_IMAGE";
@@ -25,12 +25,14 @@ public final class Serverinfo {
 
     private static ServerinfoDto hentServerinfo() {
         final String naisAppImage = System.getenv(IMAGE_ENV);
+        final String namespace = System.getenv(NAMESPACE_ENV);
+        final String cluster = System.getenv(CLUSTER_ENV);
         return new ServerinfoDto(
-            System.getenv(NAMESPACE_ENV),
-            System.getenv(CLUSTER_ENV),
+            namespace,
+            cluster,
             hentBranch(naisAppImage),
             hentHash(naisAppImage),
-            VERA_URL
+            hentVeraUrl(namespace, cluster)
         );
     }
 
@@ -58,5 +60,9 @@ public final class Serverinfo {
         } else {
             return FEIL;
         }
+    }
+
+    static String hentVeraUrl(String namespace, String cluster)  {
+        return String.format(VERA_URL_TEMPLATE, namespace, cluster);
     }
 }
