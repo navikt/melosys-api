@@ -41,7 +41,7 @@ public interface JoarkFasade {
      * Oppdaterer journalpost med gsakSaksnummer.
      * Forsøker å ferdigstille journalpost hvis forsøkFerdigstill er satt
      */
-    void oppdaterJournalpostMedSaksnummer(String journalpostID, String brukerID, Long gsakSaksnummer, boolean forsøkFerdigstill)
+    void oppdaterJournalpostMedSaksnummerOgBruker(String journalpostID, String brukerID, Long gsakSaksnummer, boolean forsøkFerdigstill)
         throws SikkerhetsbegrensningException, IntegrasjonException;
 
     /**

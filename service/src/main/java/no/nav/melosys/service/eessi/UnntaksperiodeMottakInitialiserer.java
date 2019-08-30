@@ -37,7 +37,7 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
             return RutingResultat.NY_SAK;
         }
 
-        Optional<Fagsak> fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
+        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer);
         if (fagsak.isPresent()) {
             Behandling behandling = fagsak.get().getSistOppdaterteBehandling();
             if (periodeErEndret(melosysEessiMelding, behandling)) {
@@ -81,7 +81,7 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
     private boolean periodeErEndret(MelosysEessiMelding melosysEessiMelding, Behandling behandling) throws IkkeFunnetException {
         Periode periode = tilPeriode(melosysEessiMelding.getPeriode());
 
-        Optional<Lovvalgsperiode> lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiodeOptional(behandling.getId());
+        Optional<Lovvalgsperiode> lovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.getId());
         return lovvalgsperiode.map(value -> !PeriodeKontroller.periodeErLik(value.getFom(), value.getTom(),
             periode.getFom(), periode.getTom())).orElse(true);
     }

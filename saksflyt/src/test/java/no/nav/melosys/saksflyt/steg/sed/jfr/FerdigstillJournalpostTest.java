@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed.jfr;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -42,7 +42,7 @@ public class FerdigstillJournalpostTest {
         when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
         ferdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpostMedSaksnummer(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(true));
+        verify(joarkFasade).oppdaterJournalpostMedSaksnummerOgBruker(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(true));
         verify(tpsFasade).hentIdentForAktørId(eq(AKTØR_ID));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.hentFørsteProsessStegForType(prosessinstans.getType()));
     }
@@ -56,7 +56,7 @@ public class FerdigstillJournalpostTest {
         when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
         ferdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpostMedSaksnummer(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(true));
+        verify(joarkFasade).oppdaterJournalpostMedSaksnummerOgBruker(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(true));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 

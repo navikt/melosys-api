@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.sak;
+package no.nav.melosys.saksflyt.steg.sed.jfr;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;

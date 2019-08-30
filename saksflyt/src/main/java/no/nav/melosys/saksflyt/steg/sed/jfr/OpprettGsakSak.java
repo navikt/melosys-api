@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.sak;
+package no.nav.melosys.saksflyt.steg.sed.jfr;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessDataKey;
@@ -24,7 +24,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.SED_MOTTAK_OPPRETT_GSAK_SAK;
+        return ProsessSteg.SED_MOTTAK_OPPRETT_SAK;
     }
 
     @Override

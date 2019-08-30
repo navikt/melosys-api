@@ -4,7 +4,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.sak.FagsakService;
@@ -39,7 +38,7 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
     }
 
     private Behandling hentBehandling(Long gsakSaksnummer) throws TekniskException {
-        Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer)
+        Fagsak fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)
             .orElseThrow(() -> new TekniskException("Finner ikke fagsak fra gsakSaksnummer " + gsakSaksnummer));
 
         return fagsak.getAktivBehandling();
@@ -49,11 +48,6 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
     public boolean gjelderSedType(SedType sedType) {
         return sedType == SedType.A011
             || sedType == SedType.A002;
-    }
-
-    @Override
-    public Behandlingstyper hentBehandlingstype(MelosysEessiMelding melosysEessiMelding) {
-        throw new UnsupportedOperationException("Behandlingstype for svar på anmodning om unntak skal ikke endres");
     }
 
     @Override

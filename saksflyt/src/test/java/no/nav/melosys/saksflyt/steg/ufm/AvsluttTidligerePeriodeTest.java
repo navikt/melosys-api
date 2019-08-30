@@ -37,7 +37,7 @@ public class AvsluttTidligerePeriodeTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.ER_ENDRING, false);
+        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, false);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
 
         avsluttTidligerePeriode.utfør(prosessinstans);
@@ -71,7 +71,7 @@ public class AvsluttTidligerePeriodeTest {
     private Prosessinstans hentProsessinstans(Behandling behandling, boolean erEndring) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.ER_ENDRING, erEndring);
+        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, erEndring);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
         return prosessinstans;
     }

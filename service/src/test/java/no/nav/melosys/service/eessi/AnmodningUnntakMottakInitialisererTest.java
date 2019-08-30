@@ -39,7 +39,7 @@ public class AnmodningUnntakMottakInitialisererTest {
         final Long gsakSaksnummer = 123L;
         Fagsak fagsak = new Fagsak();
         fagsak.setStatus(Saksstatuser.OPPRETTET);
-        when(fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
         RutingResultat resultat = anmodningUnntakMottakInitialiserer.finnSakOgBestemRuting(new Prosessinstans(), gsakSaksnummer);
         assertThat(resultat).isEqualTo(RutingResultat.NY_BEHANDLING);
     }
@@ -49,7 +49,7 @@ public class AnmodningUnntakMottakInitialisererTest {
         final Long gsakSaksnummer = 123L;
         Fagsak fagsak = new Fagsak();
         fagsak.setStatus(Saksstatuser.AVSLUTTET);
-        when(fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
         RutingResultat resultat = anmodningUnntakMottakInitialiserer.finnSakOgBestemRuting(new Prosessinstans(), gsakSaksnummer);
         assertThat(resultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);
     }
@@ -57,7 +57,7 @@ public class AnmodningUnntakMottakInitialisererTest {
     @Test
     public void finnSakOgBestemRuting_sakEksistererIkke_nySak() {
         final Long gsakSaksnummer = 123L;
-        when(fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.empty());
+        when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.empty());
         RutingResultat resultat = anmodningUnntakMottakInitialiserer.finnSakOgBestemRuting(new Prosessinstans(), gsakSaksnummer);
         assertThat(resultat).isEqualTo(RutingResultat.NY_SAK);
     }

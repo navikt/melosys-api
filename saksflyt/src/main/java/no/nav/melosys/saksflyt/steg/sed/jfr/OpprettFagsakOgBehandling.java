@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.sak;
+package no.nav.melosys.saksflyt.steg.sed.jfr;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -30,7 +30,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.SED_MOTTAK_OPPRETT_SAK_OG_BEH;
+        return ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH;
     }
 
     @Override
@@ -62,6 +62,6 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         log.info("Fagsak {} opprettet med behandling {} for RINA-sak {}",
             fagsak.getSaksnummer(), behandling.getId(), melosysEessiMelding.getRinaSaksnummer());
 
-        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_GSAK_SAK);
+        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_SAK);
     }
 }

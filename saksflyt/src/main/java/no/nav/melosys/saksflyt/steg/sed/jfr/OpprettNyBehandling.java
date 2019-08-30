@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.sak;
+package no.nav.melosys.saksflyt.steg.sed.jfr;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -48,7 +48,7 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
 
         Long gsakSaksnummer = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
         Behandlingstyper behandlingsType = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
-        prosessinstans.setData(ProsessDataKey.ER_ENDRING, true);
+        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
 
         if (gsakSaksnummer == null) {
             throw new TekniskException("Gsaksaksnummer kan ikke være null");
@@ -56,14 +56,13 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
             throw new TekniskException("Behandlingstype kan ikke være null");
         }
 
-        Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer)
+        Fagsak fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)
             .orElseThrow(() -> new TekniskException("Finnes en kobling til gsakSaksnummer " +
                 gsakSaksnummer + ", men finner ingen fagsak!"));
 
-        if (!Saksstatuser.OPPRETTET.equals(fagsak.getStatus())) {
-            fagsak.setStatus(Saksstatuser.OPPRETTET);
-        }
-
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        fagsakService.lagre(fagsak);
+        
         avsluttTidligereBehandling(fagsak);
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, behandlingsType,
             prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
@@ -82,7 +81,7 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
     }
 
     private void ferdigstillOppgave(String saksnummer) throws FunksjonellException, TekniskException {
-        Collection<String> oppgaveIDer = gsakFasade.finnAlleOppgaverMedSaksnummer(saksnummer)
+        Collection<String> oppgaveIDer = gsakFasade.finnOppgaverMedSaksnummer(saksnummer)
             .stream().map(Oppgave::getOppgaveId).collect(Collectors.toList());
 
         for (String oppgaveID : oppgaveIDer) {

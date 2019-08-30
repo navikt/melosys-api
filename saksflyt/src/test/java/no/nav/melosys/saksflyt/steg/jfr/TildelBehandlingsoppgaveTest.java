@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,7 +51,7 @@ public class TildelBehandlingsoppgaveTest {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId(OPPGAVE_ID);
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(eq(SAKSNUMMER))).thenReturn(oppgaveBuilder.build());
+        when(gsakFasade.hentOppgaveMedSaksnummer(eq(SAKSNUMMER))).thenReturn(oppgaveBuilder.build());
     }
 
     @Test
@@ -58,30 +59,30 @@ public class TildelBehandlingsoppgaveTest {
         tildelBehandlingsoppgave.utførSteg(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-        verify(gsakFasade).finnOppgaveMedSaksnummer(eq(SAKSNUMMER));
+        verify(gsakFasade).hentOppgaveMedSaksnummer(eq(SAKSNUMMER));
         verify(gsakFasade).tildelOppgave(eq(OPPGAVE_ID), eq(SAKSBEHANDLER));
     }
 
     @Test
     public void utførSteg_finnerIngenOppgave_feiler() throws FunksjonellException, TekniskException {
-        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).thenThrow(new TekniskException(""));
+        when(gsakFasade.hentOppgaveMedSaksnummer(anyString())).thenThrow(new TekniskException(""));
 
         tildelBehandlingsoppgave.utførSteg(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        verify(gsakFasade).finnOppgaveMedSaksnummer(anyString());
+        verify(gsakFasade).hentOppgaveMedSaksnummer(anyString());
         verify(gsakFasade, never()).tildelOppgave(anyString(), anyString());
     }
 
     @Test
     public void utfør_finnerIngenOppgave_forventException() throws FunksjonellException, TekniskException {
-        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).thenThrow(new TekniskException(""));
+        when(gsakFasade.hentOppgaveMedSaksnummer(anyString())).thenThrow(new TekniskException(""));
 
         expectedException.expect(TekniskException.class);
         tildelBehandlingsoppgave.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        verify(gsakFasade).finnOppgaveMedSaksnummer(anyString());
+        verify(gsakFasade).hentOppgaveMedSaksnummer(anyString());
         verify(gsakFasade, never()).tildelOppgave(anyString(), anyString());
     }
 }

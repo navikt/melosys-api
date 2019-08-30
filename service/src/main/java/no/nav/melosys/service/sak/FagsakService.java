@@ -93,7 +93,7 @@ public class FagsakService {
         return fagsak;
     }
 
-    public Optional<Fagsak> hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) {
+    public Optional<Fagsak> finnFagsakFraGsakSaksnummer(Long gsakSaksnummer) {
         return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer);
     }
 

@@ -34,7 +34,7 @@ public class SedMottakRutingTest {
     public void setUp() throws MelosysException {
         sedMottakRuting = new SedMottakRuting(Collections.singleton(behandleMottattSedInitialiserer), eessiService);
         when(behandleMottattSedInitialiserer.gjelderSedType(any())).thenReturn(true);
-        when(eessiService.hentSakForRinasaksnummer(anyString())).thenReturn(Optional.of(1L));
+        when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(1L));
     }
 
     @Test
@@ -52,6 +52,28 @@ public class SedMottakRutingTest {
         sedMottakRuting.utfør(prosessinstans);
 
         verify(behandleMottattSedInitialiserer).finnSakOgBestemRuting(any(), anyLong());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+    }
+
+    @Test
+    public void utfør_resultatOppdaterBehandling_verifiserProsessStegJournalpost() throws Exception {
+        doAnswer(invocationOnMock -> {
+            Prosessinstans prosessinstans = invocationOnMock.getArgument(0);
+            prosessinstans.setBehandling(new Behandling());
+            return RutingResultat.OPPDATER_BEHANDLING;
+        }).when(behandleMottattSedInitialiserer).finnSakOgBestemRuting(any(Prosessinstans.class), anyLong());
+
+        doAnswer(invocationOnMock -> ProsessType.ANMODNING_OM_UNNTAK_SVAR)
+            .when(behandleMottattSedInitialiserer).hentAktuellProsessType();
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
+
+        sedMottakRuting.utfør(prosessinstans);
+
+        verify(behandleMottattSedInitialiserer).finnSakOgBestemRuting(any(), anyLong());
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_SVAR);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
     }
 
@@ -80,7 +102,7 @@ public class SedMottakRutingTest {
 
         sedMottakRuting.utfør(prosessinstans);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_SAK_OG_BEH);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH);
     }
 
     @Test(expected = TekniskException.class)

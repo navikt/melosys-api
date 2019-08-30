@@ -57,8 +57,8 @@ public class UnntaksperiodeMottakInitialisererTest {
         lovvalgsperiode.setFom(fom);
         lovvalgsperiode.setTom(tom);
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
-        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiodeOptional(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
+        when(lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
         RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
         assertThat(resultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);
@@ -74,8 +74,8 @@ public class UnntaksperiodeMottakInitialisererTest {
         lovvalgsperiode.setFom(fom.plusMonths(1));
         lovvalgsperiode.setTom(LocalDate.now().plusYears(2));
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
-        when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiodeOptional(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
+        when(lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
 
         RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 

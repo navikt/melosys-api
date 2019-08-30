@@ -87,8 +87,8 @@ public enum ProsessSteg implements Kodeverk {
     SED_MOTTAK_HENT_EESSI_MELDING("SED_MOTTAK_HENT_EESSI_MELDING", "Henter saksopplysninger fra mottatt SED"),
     SED_MOTTAK_RUTING("SED_MOTTAK_RUTING", "Bestemmer videre behandling for innkommende SED"),
     SED_MOTTAK_OPPRETT_NY_BEHANDLING("SED_MOTTAK_OPPRETT_NY_BEHANDLING", "Oppretter ny behandling for oppdatert SED"),
-    SED_MOTTAK_OPPRETT_SAK_OG_BEH("SED_MOTTAK_OPPRETT_SAK_OG_BEH","Opprett sak og behandling"),
-    SED_MOTTAK_OPPRETT_GSAK_SAK("SED_MOTTAK_OPPRETT_GSAK_SAK","Oppretter gsak sak for ny behandling"),
+    SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH("SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH","Opprett fagsak og behandling"),
+    SED_MOTTAK_OPPRETT_SAK("SED_MOTTAK_OPPRETT_SAK","Oppretter sak for ny behandling"),
     SED_MOTTAK_OPPDATER_SAKSRELASJON("SED_MOTTAK_OPPDATER_SAKSRELASJON","Oppdaterer saksrelasjon for ny gsak-sak"),
     SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
 

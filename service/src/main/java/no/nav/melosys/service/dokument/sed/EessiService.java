@@ -111,7 +111,7 @@ public class EessiService {
         return eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID);
     }
 
-    public Optional<Long> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
+    public Optional<Long> finnSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
         return eessiConsumer.hentSakForRinasaksnummer(rinaSaksnummer).stream()
             .findFirst().map(SaksrelasjonDto::getGsakSaksnummer);
     }

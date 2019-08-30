@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.sak;
+package no.nav.melosys.saksflyt.steg.sed.jfr;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -92,10 +92,10 @@ public class OpprettNyBehandlingTest {
             .setOppgaveId("123oppg")
             .build();
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer))
+        when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer))
             .thenReturn(Optional.of(fagsak));
         when(behandlingService.nyBehandling(any(), any(), any(), any(),any())).thenReturn(new Behandling());
-        when(gsakFasade.finnAlleOppgaverMedSaksnummer(eq(fagsak.getSaksnummer())))
+        when(gsakFasade.finnOppgaverMedSaksnummer(eq(fagsak.getSaksnummer())))
             .thenReturn(Collections.singletonList(oppgave));
 
         opprettNyBehandling.utfør(prosessinstans);

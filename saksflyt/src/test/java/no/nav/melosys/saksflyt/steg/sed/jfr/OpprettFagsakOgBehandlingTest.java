@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.sak;
+package no.nav.melosys.saksflyt.steg.sed.jfr;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
@@ -38,7 +38,7 @@ public class OpprettFagsakOgBehandlingTest {
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         opprettFagsakOgBehandling.utfør(prosessinstans);
         verify(fagsakService).nyFagsakOgBehandling(any(OpprettSakRequest.class));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_GSAK_SAK);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_SAK);
     }
 
     @Test(expected = TekniskException.class)

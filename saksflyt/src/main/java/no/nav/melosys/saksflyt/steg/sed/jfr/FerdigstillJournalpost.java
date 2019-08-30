@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed.jfr;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
@@ -48,9 +48,8 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         String brukerID = hentBrukerID(prosessinstans);
         Long gsakSaksnummer = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
-        joarkFasade.oppdaterJournalpostMedSaksnummer(journalpostId, brukerID, gsakSaksnummer, true);
+        joarkFasade.oppdaterJournalpostMedSaksnummerOgBruker(journalpostId, brukerID, gsakSaksnummer, true);
         log.info("Journalpost {} ferdigstilt for gsak-sak {}", journalpostId, prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID));
-
     }
 
     private String hentBrukerID(Prosessinstans prosessinstans) throws IkkeFunnetException {

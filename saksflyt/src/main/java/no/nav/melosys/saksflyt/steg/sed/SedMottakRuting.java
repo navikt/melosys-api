@@ -52,16 +52,21 @@ public class SedMottakRuting extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
-        Optional<Long> gsakSaksnummer = eessiService.hentSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
+        Optional<Long> gsakSaksnummer = eessiService.finnSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
         gsakSaksnummer.ifPresent(g -> prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, g));
 
         BehandleMottattSedInitialiserer behandleMottattSedInitialiserer = hentInitialisererForSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
         RutingResultat resultat = behandleMottattSedInitialiserer
             .finnSakOgBestemRuting(prosessinstans, gsakSaksnummer.orElse(null));
 
-        if (resultat == RutingResultat.INGEN_BEHANDLING || resultat == RutingResultat.OPPDATER_BEHANDLING) {
+        if (resultat == RutingResultat.INGEN_BEHANDLING) {
             validerBehandlingErSatt(prosessinstans);
             prosessinstans.setType(ProsessType.MOTTAK_SED_JOURNALFØRING);
+            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+
+        } else if (resultat == RutingResultat.OPPDATER_BEHANDLING) {
+            validerBehandlingErSatt(prosessinstans);
+            prosessinstans.setType(behandleMottattSedInitialiserer.hentAktuellProsessType());
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
 
         } else if (resultat == RutingResultat.NY_BEHANDLING) {
@@ -72,7 +77,7 @@ public class SedMottakRuting extends AbstraktStegBehandler {
         } else if (resultat == RutingResultat.NY_SAK) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandleMottattSedInitialiserer.hentBehandlingstype(melosysEessiMelding));
             prosessinstans.setType(behandleMottattSedInitialiserer.hentAktuellProsessType());
-            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_SAK_OG_BEH);
+            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH);
 
         } else {
             throw new TekniskException("Ukjent Initialiseringsresultat: " + resultat);

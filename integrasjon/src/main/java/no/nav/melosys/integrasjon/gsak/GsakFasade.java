@@ -37,12 +37,12 @@ public interface GsakFasade {
     /**
      * Finner Oppgave med gitt saksnummer.
      */
-    Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException;
+    Oppgave hentOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException;
 
     /**
      * Finner alle oppgaver med gitt saksnummer.
      */
-    List<Oppgave> finnAlleOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException;
+    List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException;
 
     /**
      * Finner Behandlingsoppgaver basert på bruker.

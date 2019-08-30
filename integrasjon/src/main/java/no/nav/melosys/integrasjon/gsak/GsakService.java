@@ -46,7 +46,7 @@ public class GsakService implements GsakFasade {
 
     private final OppgaveConsumer oppgaveConsumer;
 
-    private static final List<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_UFM = Arrays.asList(
+    private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_UFM = EnumSet.of(
         REGISTRERING_UNNTAK_NORSK_TRYGD, ANMODNING_OM_UNNTAK_HOVEDREGEL, UTL_MYND_UTPEKT_SEG_SELV
     );
 
@@ -60,7 +60,7 @@ public class GsakService implements GsakFasade {
     public Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
         SakDto sakDto = new SakDto();
 
-        if (Behandlingstyper.SOEKNAD == behandlingstype) { //TODO: skal MED eller UFM brukes?
+        if (Behandlingstyper.SOEKNAD == behandlingstype) {
             sakDto.setTema(Tema.MED.getKode());
         } else if (GYLDIGE_BEHANDLINGSTYPER_UFM.contains(behandlingstype)) {
             sakDto.setTema(Tema.UFM.getKode());
@@ -239,8 +239,8 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
-        List<Oppgave> oppgaver = finnAlleOppgaverMedSaksnummer(saksnummer);
+    public Oppgave hentOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
+        List<Oppgave> oppgaver = finnOppgaverMedSaksnummer(saksnummer);
 
         if (!oppgaver.isEmpty()) {
             if (oppgaver.size() > 1) {
@@ -253,7 +253,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnAlleOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+    public List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
             .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})

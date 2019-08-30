@@ -203,7 +203,7 @@ public class ProsessinstansService {
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_RUTING);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, melosysEessiMelding.getJournalpostId());
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, melosysEessiMelding.getDokumentId());
-        prosessinstans.setData(ProsessDataKey.ER_ENDRING, melosysEessiMelding.getErEndring());
+        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, melosysEessiMelding.getErEndring());
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, melosysEessiMelding.getGsakSaksnummer());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, melosysEessiMelding.getAktoerId());

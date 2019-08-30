@@ -15,7 +15,13 @@ public interface BehandleMottattSedInitialiserer {
 
     boolean gjelderSedType(SedType sedType);
 
-    Behandlingstyper hentBehandlingstype(MelosysEessiMelding melosysEessiMelding);
+    //Henter behandlingstype for spesifikk behandling av SED.
+    //Kalles kun om det skal opprettes ny behandling for SED'en. Derfor greit at den kaster exception når det ikke støttes
+    default Behandlingstyper hentBehandlingstype(MelosysEessiMelding melosysEessiMelding) {
+        throw new UnsupportedOperationException(
+            "Ny behandlingstype for initialiserer " + this.getClass().getSimpleName() + " støttes ikke"
+        );
+    }
 
     ProsessType hentAktuellProsessType();
 }

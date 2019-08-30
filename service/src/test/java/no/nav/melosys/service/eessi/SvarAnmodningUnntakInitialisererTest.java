@@ -36,7 +36,7 @@ public class SvarAnmodningUnntakInitialisererTest {
     @Test
     public void finnSakOgBestemRuting_korrektBehandlingsstatus_verifiserKorrektResultat() throws Exception {
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
         Prosessinstans prosessinstans = hentProsessinstans();
         RutingResultat resultat = svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
@@ -47,7 +47,7 @@ public class SvarAnmodningUnntakInitialisererTest {
     @Test(expected = FunksjonellException.class)
     public void finnSakOgBestemRuting_feilBehandlingsstatus_forventException() throws Exception {
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.FORELOEPIG_LOVVALG)));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.FORELOEPIG_LOVVALG)));
         Prosessinstans prosessinstans = hentProsessinstans();
         svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
     }
@@ -55,7 +55,7 @@ public class SvarAnmodningUnntakInitialisererTest {
     @Test(expected = TekniskException.class)
     public void finnSakOgBestemRuting_korrektBehandlingsstatusIngenFagsak_forventException() throws Exception {
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.empty());
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.empty());
         Prosessinstans prosessinstans = hentProsessinstans();
         svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
     }

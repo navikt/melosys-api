@@ -32,7 +32,7 @@ public class AnmodningUnntakMottakInitialiserer implements BehandleMottattSedIni
         }
 
         // TODO: Avklares hva som skal gjøres ved oppdatert SED
-        Optional<Fagsak> fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
+        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer);
         if (fagsak.isPresent()) {
             Behandling behandling = fagsak.get().getSistOppdaterteBehandling();
             prosessinstans.setBehandling(behandling);

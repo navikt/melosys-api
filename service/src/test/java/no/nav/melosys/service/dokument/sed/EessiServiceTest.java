@@ -187,7 +187,7 @@ public class EessiServiceTest {
     public void hentSakForRinaSaksnummer_forventOptionalIkkePresent() throws MelosysException {
         when(eessiConsumer.hentSakForRinasaksnummer(anyString()))
             .thenReturn(Collections.emptyList());
-        Optional<Long> res = eessiService.hentSakForRinasaksnummer("123");
+        Optional<Long> res = eessiService.finnSakForRinasaksnummer("123");
         assertThat(res).isNotPresent();
     }
 
@@ -195,7 +195,7 @@ public class EessiServiceTest {
     public void hentSakForRinaSaksnummer_forventOptionalPresent() throws MelosysException {
         when(eessiConsumer.hentSakForRinasaksnummer(anyString()))
             .thenReturn(Collections.singletonList(new SaksrelasjonDto(123L, "123", "123")));
-        Optional<Long> res = eessiService.hentSakForRinasaksnummer("123");
+        Optional<Long> res = eessiService.finnSakForRinasaksnummer("123");
         assertThat(res).isPresent();
     }
 
