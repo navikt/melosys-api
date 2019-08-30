@@ -24,9 +24,9 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
 
     @Override
     @Transactional
-    public void initialiserProsessinstans(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        Behandling behandling = hentBehandling(melosysEessiMelding.getGsakSaksnummer());
+        Behandling behandling = hentBehandling(gsakSaksnummer);
 
         if (behandling.getStatus() != Behandlingsstatus.ANMODNING_UNNTAK_SENDT) {
             throw new FunksjonellException("Finner behandling " + behandling.getId() + " for sed fra rinaSak " + melosysEessiMelding.getRinaSaksnummer()
@@ -34,12 +34,11 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
         }
 
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK_SVAR);
-        prosessinstans.setSteg(ProsessSteg.AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR);
+        return RutingResultat.OPPDATER_BEHANDLING;
     }
 
     private Behandling hentBehandling(Long gsakSaksnummer) throws TekniskException {
-        Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer)
+        Fagsak fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)
             .orElseThrow(() -> new TekniskException("Finner ikke fagsak fra gsakSaksnummer " + gsakSaksnummer));
 
         return fagsak.getAktivBehandling();
@@ -49,5 +48,10 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
     public boolean gjelderSedType(SedType sedType) {
         return sedType == SedType.A011
             || sedType == SedType.A002;
+    }
+
+    @Override
+    public ProsessType hentAktuellProsessType() {
+        return ProsessType.ANMODNING_OM_UNNTAK_SVAR;
     }
 }

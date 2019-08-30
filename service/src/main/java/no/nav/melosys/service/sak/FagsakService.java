@@ -8,7 +8,9 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -91,7 +93,7 @@ public class FagsakService {
         return fagsak;
     }
 
-    public Optional<Fagsak> hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) {
+    public Optional<Fagsak> finnFagsakFraGsakSaksnummer(Long gsakSaksnummer) {
         return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer);
     }
 
@@ -194,7 +196,6 @@ public class FagsakService {
         Instant nå = Instant.now();
 
         fagsak.setType(opprettSakRequest.getSakstype());
-        fagsak.setGsakSaksnummer(opprettSakRequest.getGsakSaksnummer());
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
@@ -244,5 +245,11 @@ public class FagsakService {
         fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
         fagsakRepository.save(fagsak);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+    }
+
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus,  Behandling behandling) throws IkkeFunnetException {
+        fagsak.setStatus(saksstatus);
+        fagsakRepository.save(fagsak);
+        behandlingService.avsluttBehandling(behandling.getId());
     }
 }

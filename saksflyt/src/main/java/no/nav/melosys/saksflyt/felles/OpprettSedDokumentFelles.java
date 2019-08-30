@@ -62,8 +62,10 @@ public class OpprettSedDokumentFelles {
         sedDokument.setLovvalgBestemmelse(
             LovvalgTilBestemmelseDtoMapper.mapBestemmelseVerdiTilMelosysLovvalgBestemmelse(melosysEessiMelding.getArtikkel())
         );
-        sedDokument.setUnntakFraLovvalgslandKode(hentUnntakFraLovvalgsland(melosysEessiMelding));
-        sedDokument.setUnntakFraLovvalgBestemmelse(hentUnntakFraLovvalgBestemmelse(melosysEessiMelding));
+        if (melosysEessiMelding.getAnmodningUnntak() != null) {
+            sedDokument.setUnntakFraLovvalgslandKode(hentUnntakFraLovvalgsland(melosysEessiMelding));
+            sedDokument.setUnntakFraLovvalgBestemmelse(hentUnntakFraLovvalgBestemmelse(melosysEessiMelding));
+        }
         sedDokument.setRinaSaksnummer(melosysEessiMelding.getRinaSaksnummer());
         sedDokument.setLovvalgsperiode(tilPeriode(melosysEessiMelding.getPeriode()));
         sedDokument.setRinaDokumentID(melosysEessiMelding.getSedId());

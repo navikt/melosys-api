@@ -39,7 +39,7 @@ public class HentMedlemskapsopplysningerTest {
 
     private Prosessinstans hentProsessinstans(Saksopplysning saksopplysning, boolean erEndring) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.ER_ENDRING, erEndring);
+        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, erEndring);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "123123");
 
         Behandling behandling = new Behandling();

@@ -5,10 +5,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -16,7 +17,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
@@ -46,6 +46,10 @@ public class GsakService implements GsakFasade {
 
     private final OppgaveConsumer oppgaveConsumer;
 
+    private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_UFM = EnumSet.of(
+        REGISTRERING_UNNTAK_NORSK_TRYGD, ANMODNING_OM_UNNTAK_HOVEDREGEL, UTL_MYND_UTPEKT_SEG_SELV
+    );
+
     @Autowired
     public GsakService(SakConsumer sakConsumer, OppgaveConsumer oppgaveConsumer) {
         this.sakConsumer = sakConsumer;
@@ -56,8 +60,10 @@ public class GsakService implements GsakFasade {
     public Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
         SakDto sakDto = new SakDto();
 
-        if (behandlingstype.equals(SOEKNAD)) {
+        if (Behandlingstyper.SOEKNAD == behandlingstype) {
             sakDto.setTema(Tema.MED.getKode());
+        } else if (GYLDIGE_BEHANDLINGSTYPER_UFM.contains(behandlingstype)) {
+            sakDto.setTema(Tema.UFM.getKode());
         } else {
             throw new TekniskException("Behandlingtype " + behandlingstype.getBeskrivelse() + " er ikke støttet.");
         }
@@ -233,18 +239,8 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
-        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medSaksreferanse(new String[]{saksnummer})
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
-            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
-            .build();
-
-        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
-        List<Oppgave> oppgaver = finnOppgaveListeResponse.stream()
-            .filter(Objects::nonNull)
-            .map(GsakService::oppgaveMappingDtoTilDomain)
-            .collect(Collectors.toList());
+    public Oppgave hentOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
+        List<Oppgave> oppgaver = finnOppgaverMedSaksnummer(saksnummer);
 
         if (!oppgaver.isEmpty()) {
             if (oppgaver.size() > 1) {
@@ -254,6 +250,21 @@ public class GsakService implements GsakFasade {
         } else {
             throw new IkkeFunnetException("Det finnes ingen aktive behandlingsoppgaver for sak " + saksnummer);
         }
+    }
+
+    @Override
+    public List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medSaksreferanse(new String[]{saksnummer})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
+        return finnOppgaveListeResponse.stream()
+            .filter(Objects::nonNull)
+            .map(GsakService::oppgaveMappingDtoTilDomain)
+            .collect(Collectors.toList());
     }
 
     @Override

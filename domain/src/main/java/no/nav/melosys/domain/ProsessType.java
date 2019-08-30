@@ -16,6 +16,7 @@ public enum ProsessType implements Kodeverk {
     JFR_NY_SAK("JFR_NY_SAK", "Journalføring med ny sak og søknad"),
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
+    MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
     OPPFRISKNING("OPPFRISKNING", "Oppfriskning av saksopplysninger"),
     REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak");
 
