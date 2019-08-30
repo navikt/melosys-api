@@ -6,6 +6,7 @@ import no.nav.melosys.tjenester.gui.*;
 import no.nav.melosys.tjenester.gui.saksflyt.AnmodningUnntakTjeneste;
 import no.nav.melosys.tjenester.gui.saksflyt.UnntakTjeneste;
 import no.nav.melosys.tjenester.gui.saksflyt.VedtakTjeneste;
+import no.nav.melosys.tjenester.gui.serverinfo.ServerinfoTjeneste;
 import no.nav.melosys.tjenester.gui.unntakshandtering.FunksjonellExceptionMapper;
 import no.nav.melosys.tjenester.gui.unntakshandtering.IkkeFunnetExceptionMapper;
 import no.nav.melosys.tjenester.gui.unntakshandtering.SikkerhetsbegrensningExceptionMapper;

@@ -33,7 +33,6 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
@@ -98,7 +97,7 @@ public class IverksettVedtakSendBrevTest {
         BehandlingService behandlingService = mock(BehandlingService.class);
         when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
 
-        dokService = Mockito.spy(lagDokumentService(byggerVelger));
+        dokService = spy(lagDokumentService(byggerVelger));
         BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger);
         return new IverksettVedtakSendBrev(brevBestiller, behandlingService, behandlingsresultatService);
     }
@@ -120,7 +119,7 @@ public class IverksettVedtakSendBrevTest {
         BrevDataService brevDataService = mock(BrevDataService.class);
         DoksysFasade dokSysFasade = mock(DoksysFasade.class);
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
-        when(utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(any())).thenReturn(Collections.singletonList(new Aktoer()));
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(any())).thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService);
         return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger));
@@ -183,7 +182,7 @@ public class IverksettVedtakSendBrevTest {
 
         Aktoer myndighet = new Aktoer();
         myndighet.setAktørId("2");
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setRolle(MYNDIGHET);
         myndighet.setInstitusjonId("SE:sesese123");
 
         Aktoer arbeidsgiver = new Aktoer();
@@ -258,7 +257,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MED_FLERE_PERIODER);
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
     @Test
@@ -275,7 +274,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTEN_PERIODER);
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
     @Test
@@ -343,7 +342,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
         Behandling behandling = prosessinstans.getBehandling();
         Aktoer arbeidsgiver = new Aktoer();
-        arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
+        arbeidsgiver.setRolle(ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("123456789");
         behandling.getFagsak().getAktører().add(arbeidsgiver);
         AbstraktStegBehandler instans = lagStegbehandler(behandling);
@@ -396,7 +395,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(IKKE_EKSISTERENDE_BEHANDLINGSID);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE));
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
 

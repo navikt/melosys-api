@@ -3,10 +3,7 @@ package no.nav.melosys.service.dokument;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -19,6 +16,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
@@ -67,7 +65,7 @@ public class BrevmottakerService {
         } else if (mottakerRolle == ARBEIDSGIVER) {
             mottakere = avklarMottakereForArbeidsgiver(behandling);
         } else if (mottakerRolle == MYNDIGHET) {
-            mottakere = avklarMottakereForMyndigheter(mottaker, behandling);
+            mottakere = avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
         } else {
             throw new FunksjonellException(mottakerRolle + " støttes ikke.");
         }
@@ -131,16 +129,34 @@ public class BrevmottakerService {
         return arbeidsgiver;
     }
 
-    private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker, Behandling behandling) throws TekniskException {
+    private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker, Behandling behandling, Produserbaredokumenter produserbartDokument) throws TekniskException {
         if (mottaker.getAktør().getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
             return Collections.singletonList(mottaker.getAktør());
         } else {
             // Utenlandsk myndighet
-            return utenlandskMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
+            Map<UtenlandskMyndighet, Aktoer> utenlandskMyndighetAktoerMap = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
+
+            if (produserbartDokument == ATTEST_A1) {
+                return utenlandskMyndighetAktoerMap.entrySet()
+                        .stream()
+                        .filter(e -> myndighetØnskerInnvilgelsesbrev(e.getKey()))
+                        .map(Map.Entry::getValue)
+                        .collect(Collectors.toList());
+            } else {
+                return new ArrayList<>(utenlandskMyndighetAktoerMap.values());                
+            }
         }
     }
 
+    private boolean myndighetØnskerInnvilgelsesbrev(UtenlandskMyndighet utenlandskMyndighet) {
+        return utenlandskMyndighet
+                .preferanser
+                .stream()
+                .map(Preferanse::getPreferanse)
+                .noneMatch(RESERVERT_FRA_A1::equals);
+    }
+    
     public Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
         if (mottaker == null) {
             return null;
