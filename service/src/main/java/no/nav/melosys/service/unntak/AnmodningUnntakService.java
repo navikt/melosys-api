@@ -6,10 +6,10 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -24,11 +24,19 @@ public class AnmodningUnntakService {
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
+    private final AnmodningsperiodeService anmodningsperiodeService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    public AnmodningUnntakService(BehandlingService behandlingService, OppgaveService oppgaveService, ProsessinstansService prosessinstansService) {
+    public AnmodningUnntakService(BehandlingService behandlingService,
+                                  OppgaveService oppgaveService,
+                                  ProsessinstansService prosessinstansService,
+                                  AnmodningsperiodeService anmodningsperiodeService,
+                                  LovvalgsperiodeService lovvalgsperiodeService) {
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
+        this.anmodningsperiodeService = anmodningsperiodeService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -43,10 +51,12 @@ public class AnmodningUnntakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntakSvar(long behandlingID) throws IkkeFunnetException {
+    public void anmodningOmUnntakSvar(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         validerBehandlingstypeUnntak(behandling);
+        validerPerioder(behandling);
         prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     private static void validerBehandlingstypeUnntak(Behandling behandling) {
@@ -54,6 +64,16 @@ public class AnmodningUnntakService {
             throw new BadRequestException("Behandling er ikke av type ANMODNING_OM_UNNTAK_HOVEDREGEL");
         } else if (behandling.getStatus() == Behandlingsstatus.AVSLUTTET) {
             throw new BadRequestException("Behandlingen er avsluttet");
+        }
+    }
+
+    private void validerPerioder(Behandling behandling) throws FunksjonellException {
+        if (anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(behandling.getId()).isEmpty()) {
+            throw new FunksjonellException("Finner ingen AnmodningsperiodeSvar for behandling " + behandling.getId());
+        }
+
+        if (lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId()).isEmpty()) {
+            throw new FunksjonellException("Finner ingen Lovvalgsperioder for behandling " + behandling.getId());
         }
     }
 }
