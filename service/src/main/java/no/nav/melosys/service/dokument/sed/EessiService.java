@@ -17,6 +17,8 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ public class EessiService {
     private static final Logger log = LoggerFactory.getLogger(EessiService.class);
 
     private final SedDataBygger sedDataBygger;
+    private final DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
     private final EessiConsumer eessiConsumer;
     private final boolean skalSendeSed;
 
@@ -37,8 +40,9 @@ public class EessiService {
     );
 
 
-    public EessiService(SedDataBygger sedDataBygger, EessiConsumer eessiConsumer, @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed) {
+    public EessiService(SedDataBygger sedDataBygger, DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory, EessiConsumer eessiConsumer, @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed) {
         this.sedDataBygger = sedDataBygger;
+        this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
         this.eessiConsumer = eessiConsumer;
         this.skalSendeSed = Boolean.valueOf(skalSendeSed);
     }
@@ -49,7 +53,8 @@ public class EessiService {
             try {
                 Fagsak fagsak = behandling.getFagsak();
 
-                SedDataDto sedData = sedDataBygger.lag(behandling, behandlingsresultat);
+                DokumentdataGrunnlag datagrunnlag = dokumentdataGrunnlagFactory.av(behandling);
+                SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat);
                 sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
                 log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
@@ -73,7 +78,8 @@ public class EessiService {
 
     public String opprettBucOgSed(Behandling behandling, String bucType, String mottakerLand, String mottakerId) throws MelosysException {
         if (skalSendeSed) {
-            SedDataDto sedDataDto = sedDataBygger.lagUtkast(behandling);
+            DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
+            SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag);
             sedDataDto.setMottakerLand(mottakerLand);
             sedDataDto.setMottakerId(mottakerId);
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());

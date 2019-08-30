@@ -31,6 +31,7 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntak
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -98,7 +99,7 @@ public class IverksettVedtakSendBrevTest {
         when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
 
         dokService = spy(lagDokumentService(byggerVelger));
-        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger);
+        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger, mock(DokumentdataGrunnlagFactory.class));
         return new IverksettVedtakSendBrev(brevBestiller, behandlingService, behandlingsresultatService);
     }
 
@@ -122,7 +123,7 @@ public class IverksettVedtakSendBrevTest {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(any())).thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService);
-        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger));
+        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger, mock(DokumentdataGrunnlagFactory.class)));
     }
 
     private static BehandlingsresultatService mockBehandlingsresultatService() throws IkkeFunnetException {

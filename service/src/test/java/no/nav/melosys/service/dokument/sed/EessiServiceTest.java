@@ -21,6 +21,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -33,13 +34,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiServiceTest {
     @Mock
     private SedDataBygger sedDataBygger;
+
     @Mock
     private EessiConsumer eessiConsumer;
 
@@ -55,7 +56,8 @@ public class EessiServiceTest {
 
     @Before
     public void setup() throws Exception {
-        eessiService = new EessiService(sedDataBygger, eessiConsumer, "true");
+        DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory = mock(DokumentdataGrunnlagFactory.class);
+        eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory, eessiConsumer, "true");
 
         behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
@@ -68,8 +70,8 @@ public class EessiServiceTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.SK);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
 
-        when(sedDataBygger.lag(any(Behandling.class), any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
-        when(sedDataBygger.lagUtkast(any(Behandling.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lag(any(), any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lagUtkast(any())).thenReturn(new SedDataDto());
     }
 
     @Test

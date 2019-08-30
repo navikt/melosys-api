@@ -1,19 +1,22 @@
 package no.nav.melosys.domain.brev;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public final class Brevbestilling {
     private final Produserbaredokumenter dokumentType;
     private final String avsender;
-    private final Mottaker mottaker;
+    private final Collection<Mottaker> mottaker;
     private final Behandling behandling;
     private final String begrunnelseKode;
     private final String fritekst;
 
     private Brevbestilling(Produserbaredokumenter dokumentType,
                            String avsender,
-                           Mottaker mottaker,
+                           Collection<Mottaker> mottaker,
                            Behandling behandling,
                            String begrunnelseKode,
                            String fritekst) {
@@ -28,7 +31,7 @@ public final class Brevbestilling {
     public static class Builder {
         private Produserbaredokumenter dokumentType;
         private String avsender;
-        private Mottaker mottaker;
+        private Collection<Mottaker> mottakere;
         private Behandling behandling;
         private String begrunnelseKode;
         private String fritekst;
@@ -43,8 +46,8 @@ public final class Brevbestilling {
             return this;
         }
 
-        public Builder medMottaker(Mottaker mottaker) {
-            this.mottaker = mottaker;
+        public Builder medMottakere(Mottaker... mottaker) {
+            this.mottakere = Arrays.asList(mottaker);
             return this;
         }
 
@@ -64,7 +67,7 @@ public final class Brevbestilling {
         }
 
         public Brevbestilling build() {
-            return new Brevbestilling(dokumentType, avsender, mottaker, behandling, begrunnelseKode, fritekst);
+            return new Brevbestilling(dokumentType, avsender, mottakere, behandling, begrunnelseKode, fritekst);
         }
     }
 
@@ -76,7 +79,7 @@ public final class Brevbestilling {
         return avsender;
     }
 
-    public Mottaker getMottaker() {
+    public Collection<Mottaker> getMottakere() {
         return mottaker;
     }
 
