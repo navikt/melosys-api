@@ -10,6 +10,8 @@ import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,29 +24,40 @@ public class BrevBestiller {
 
     private final DokumentSystemService dokumentService;
     private final BrevDataByggerVelger brevDataByggerVelger;
+    private final DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
 
     @Autowired
-    public BrevBestiller(DokumentSystemService dokumentService, BrevDataByggerVelger brevDataByggerVelger) {
+    public BrevBestiller(DokumentSystemService dokumentService, BrevDataByggerVelger brevDataByggerVelger, DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory) {
         this.dokumentService = dokumentService;
         this.brevDataByggerVelger = brevDataByggerVelger;
+        this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
     }
 
     public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(dokumentType)
             .medAvsender(avsender)
-            .medMottaker(mottaker)
+            .medMottakere(mottaker)
             .medBehandling(behandling).build();
         bestill(brevbestilling);
     }
 
     public void bestill(Brevbestilling brevbestilling) throws FunksjonellException, TekniskException {
+        DokumentdataGrunnlag brevdataRessurser = dokumentdataGrunnlagFactory.av(brevbestilling.getBehandling());
+        bestill(brevbestilling, brevdataRessurser);
+    }
+
+    public void bestill(Brevbestilling brevbestilling, DokumentdataGrunnlag brevdataRessurser) throws FunksjonellException, TekniskException {
         Produserbaredokumenter dokumentType = brevbestilling.getDokumentType();
         Behandling behandling = brevbestilling.getBehandling();
+
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(brevbestilling.getDokumentType());
-        BrevData brevData = brevDataBygger.lag(behandling, brevbestilling.getAvsender());
+        BrevData brevData = brevDataBygger.lag(brevdataRessurser, brevbestilling.getAvsender());
         brevData.begrunnelseKode = brevbestilling.getBegrunnelseKode();
         brevData.fritekst = brevbestilling.getFritekst();
-        dokumentService.produserDokument(dokumentType, brevbestilling.getMottaker(), behandling.getId(), brevData);
-        log.info("Brevet '{}' er bestillt for sak {} og behandling {}", dokumentType, behandling.getFagsak().getSaksnummer(), behandling.getId());
+
+        for (Mottaker mottaker : brevbestilling.getMottakere()) {
+            dokumentService.produserDokument(dokumentType, mottaker, behandling.getId(), brevData);
+            log.info("Brevet '{}' er bestillt for sak {} og behandling {}", dokumentType, behandling.getFagsak().getSaksnummer(), behandling.getId());
+        }
     }
 }

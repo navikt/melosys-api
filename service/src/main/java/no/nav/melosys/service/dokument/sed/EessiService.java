@@ -21,6 +21,8 @@ import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.integrasjon.eessi.dto.SvarAnmodningUnntakDto;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,7 @@ public class EessiService {
     private static final Logger log = LoggerFactory.getLogger(EessiService.class);
 
     private final SedDataBygger sedDataBygger;
+    private final DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
     private final EessiConsumer eessiConsumer;
     private final boolean skalSendeSed;
     private final BehandlingService behandlingService;
@@ -43,10 +46,11 @@ public class EessiService {
 
 
     public EessiService(SedDataBygger sedDataBygger,
-                        EessiConsumer eessiConsumer,
+                       DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory, EessiConsumer eessiConsumer,
                         @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed,
                         BehandlingService behandlingService) {
         this.sedDataBygger = sedDataBygger;
+        this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
         this.eessiConsumer = eessiConsumer;
         this.skalSendeSed = Boolean.valueOf(skalSendeSed);
         this.behandlingService = behandlingService;
@@ -58,7 +62,8 @@ public class EessiService {
             try {
                 Fagsak fagsak = behandling.getFagsak();
 
-                SedDataDto sedData = sedDataBygger.lag(behandling, behandlingsresultat);
+                DokumentdataGrunnlag datagrunnlag = dokumentdataGrunnlagFactory.av(behandling);
+                SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat);
                 sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
                 log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
@@ -82,7 +87,8 @@ public class EessiService {
 
     public String opprettBucOgSed(Behandling behandling, String bucType, String mottakerLand, String mottakerId) throws MelosysException {
         if (skalSendeSed) {
-            SedDataDto sedDataDto = sedDataBygger.lagUtkast(behandling);
+            DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
+            SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag);
             sedDataDto.setMottakerLand(mottakerLand);
             sedDataDto.setMottakerId(mottakerId);
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
@@ -120,7 +126,7 @@ public class EessiService {
         return eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID);
     }
 
-    public Optional<Long> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
+    public Optional<Long> finnSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
         return eessiConsumer.hentSakForRinasaksnummer(rinaSaksnummer).stream()
             .findFirst().map(SaksrelasjonDto::getGsakSaksnummer);
     }

@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.saksflyt.felles.FagsakOgBehandlingFelles;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,9 +24,9 @@ import static org.mockito.Mockito.when;
 public class AvsluttFagsakOgBehandlingTest {
 
     @Mock
-    private FagsakOgBehandlingFelles fagsakOgBehandlingFelles;
-    @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
+    @Mock
+    private FagsakService fagsakService;
 
     private AvsluttFagsakOgBehandling avsluttFagsakOgBehandling;
 
@@ -34,7 +34,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
     @Before
     public void setup() {
-        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakOgBehandlingFelles, behandlingsresultatRepository);
+        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(behandlingsresultatRepository, fagsakService);
         when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
     }
 
@@ -50,7 +50,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
 
-        verify(fagsakOgBehandlingFelles).avsluttFagsakOgBehandling(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(behandling.getFagsak()), eq(Saksstatuser.LOVVALG_AVKLART), eq(behandling));
         verify(behandlingsresultatRepository).findById(1L);
         verify(behandlingsresultatRepository).save(any(Behandlingsresultat.class));
 

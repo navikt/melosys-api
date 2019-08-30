@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
@@ -35,30 +34,35 @@ public class SvarAnmodningUnntakInitialisererTest {
     }
 
     @Test
-    public void initialiserProsessinstans_korrektBehandlingsstatusFagsakFinner_verifiserNesteSteg() throws Exception {
+    public void finnSakOgBestemRuting_korrektBehandlingsstatus_verifiserKorrektResultat() throws Exception {
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
-        Prosessinstans prosessinstans = hentProsessinstans(SedType.A011);
-        svarAnmodningUnntakInitialiserer.initialiserProsessinstans(prosessinstans);
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
+        Prosessinstans prosessinstans = hentProsessinstans();
+        RutingResultat resultat = svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_SVAR);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR);
+        assertThat(resultat).isEqualTo(RutingResultat.OPPDATER_BEHANDLING);
+        assertThat(prosessinstans.getBehandling()).isNotNull();
     }
 
     @Test(expected = FunksjonellException.class)
-    public void initialiserProsessinstans_feilBehandlingsstatus_forventException() throws Exception {
+    public void finnSakOgBestemRuting_feilBehandlingsstatus_forventException() throws Exception {
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.FORELOEPIG_LOVVALG)));
-        Prosessinstans prosessinstans = hentProsessinstans(SedType.A011);
-        svarAnmodningUnntakInitialiserer.initialiserProsessinstans(prosessinstans);
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.FORELOEPIG_LOVVALG)));
+        Prosessinstans prosessinstans = hentProsessinstans();
+        svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
     }
 
     @Test(expected = TekniskException.class)
-    public void initialiserProsessinstans_korrektBehandlingsstatusIngeFagsak_forventException() throws Exception {
+    public void finnSakOgBestemRuting_korrektBehandlingsstatusIngenFagsak_forventException() throws Exception {
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.empty());
-        Prosessinstans prosessinstans = hentProsessinstans(SedType.A002);
-        svarAnmodningUnntakInitialiserer.initialiserProsessinstans(prosessinstans);
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.empty());
+        Prosessinstans prosessinstans = hentProsessinstans();
+        svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
+    }
+
+    @Test
+    public void hentAktuellProsessType() {
+        assertThat(svarAnmodningUnntakInitialiserer.hentAktuellProsessType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_SVAR);
     }
 
     private Fagsak hentFagsak(Behandlingsstatus behandlingsstatus) {
@@ -70,17 +74,9 @@ public class SvarAnmodningUnntakInitialisererTest {
         return fagsak;
     }
 
-    private Prosessinstans hentProsessinstans(SedType sedType) {
+    private Prosessinstans hentProsessinstans() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(sedType));
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, new MelosysEessiMelding());
         return prosessinstans;
-    }
-
-    private MelosysEessiMelding hentMelosysEessiMelding(SedType sedType) {
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setGsakSaksnummer(123L);
-        melosysEessiMelding.setSedType(sedType.name());
-
-        return melosysEessiMelding;
     }
 }

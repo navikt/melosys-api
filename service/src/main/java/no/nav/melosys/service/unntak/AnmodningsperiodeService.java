@@ -99,6 +99,7 @@ public class AnmodningsperiodeService {
         }
 
         anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
+        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
         return anmodningsperiodeSvarRepository.save(anmodningsperiodeSvar);
     }
 

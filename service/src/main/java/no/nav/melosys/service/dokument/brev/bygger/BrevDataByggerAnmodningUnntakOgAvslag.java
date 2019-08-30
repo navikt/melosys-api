@@ -1,48 +1,33 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.List;
-import java.util.function.Function;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.felles.Adresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 
-public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataBygger implements BrevDataBygger {
-    private LandvelgerService landvelgerService;
+public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
+    private final LandvelgerService landvelgerService;
 
-    private static final Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
-
-    public BrevDataByggerAnmodningUnntakOgAvslag(AvklartefaktaService avklartefaktaService,
-                                                 AvklarteVirksomheterService avklarteVirksomheterService,
-                                                 LandvelgerService landvelgerService) {
-        super(null, null, avklartefaktaService, avklarteVirksomheterService);
+    public BrevDataByggerAnmodningUnntakOgAvslag(LandvelgerService landvelgerService) {
         this.landvelgerService = landvelgerService;
     }
 
     @Override
-    public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
-        this.behandling = behandling;
-        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-
+    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
 
-        List<AvklartVirksomhet> avklarteVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE);
+        List<AvklartVirksomhet> avklarteVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
         if (avklarteVirksomheter.size() != 1) {
             throw new TekniskException("Trenger minst en norsk virksomhet for avslag og ART16.1");
         }
 
-        brevData.hovedvirksomhet = avklarteVirksomheter.iterator().next();
-        brevData.arbeidsland = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
+        brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
+        brevData.arbeidsland = landvelgerService.hentArbeidsland(dataGrunnlag.getBehandling()).getBeskrivelse();
 
         return brevData;
     }

@@ -26,6 +26,7 @@
         </adresse>
     </arbeidUtland>
     <foretakUtland>
+        <uuid>ca24c782-c7f0-11e9-a32f-2a2ae2dbcce4</uuid>
         <navn>Jarlsberg International</navn>
         <adresse>
             <gatenavn>NEDRE VARÅSEN</gatenavn>

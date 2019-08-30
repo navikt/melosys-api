@@ -55,7 +55,7 @@ public class EessiConsumerImpl implements EessiConsumer {
 
     @Override
     public void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) throws MelosysException {
-        exchange("/sak", HttpMethod.POST, new HttpEntity<>(getDefaultHeaders()),
+        exchange("/sak", HttpMethod.POST, new HttpEntity<>(saksrelasjonDto, getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 

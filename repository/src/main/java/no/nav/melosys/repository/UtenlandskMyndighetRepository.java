@@ -1,5 +1,6 @@
 package no.nav.melosys.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,4 +13,6 @@ public interface UtenlandskMyndighetRepository extends CrudRepository<Utenlandsk
     Optional<UtenlandskMyndighet> findByLandkode(Landkoder landkode);
 
     List<UtenlandskMyndighet> findAll();
+    
+    List<UtenlandskMyndighet> findByLandkodeIsIn(Collection<Landkoder> landkoder);
 }

@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
@@ -44,6 +45,14 @@ public class LovvalgsperiodeService {
 
     public Collection<Lovvalgsperiode> hentLovvalgsperioder(long behandlingsid) {
         return lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsid);
+    }
+
+    public Lovvalgsperiode hentLovvalgsperiode(long behandlingsid) throws FunksjonellException {
+        Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder(behandlingsid);
+        if (lovvalgsperioder.size() != 1) {
+            throw new FunksjonellException("Forventer minst én og kun én lovvalgsperiode!");
+        }
+        return lovvalgsperioder.iterator().next();
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -110,5 +119,17 @@ public class LovvalgsperiodeService {
         return lovvalgsperiodeList.stream()
             .findFirst()
             .orElseThrow(() -> new IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for " + behandlingId));
+    }
+
+    public Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) throws IkkeFunnetException {
+        Behandling behandling = behandlingRepository.findById(behandlingId)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ingen behandling for " + behandlingId));
+
+        Behandling opprinneligBehandling = Optional.ofNullable(behandling.getOpprinneligBehandling())
+            .orElseThrow(() -> new IkkeFunnetException("Fant ingen opprinnelig behandling for " + behandlingId));
+
+        List<Lovvalgsperiode> lovvalgsperiodeList = lovvalgsperiodeRepo.findByBehandlingsresultatId(opprinneligBehandling.getId());
+        return lovvalgsperiodeList.stream()
+            .findFirst();
     }
 }

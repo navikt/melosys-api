@@ -31,6 +31,6 @@ spec:
     enabled: true
   prometheus:
     enabled: true
-    path: internal/prometheus
+    path: /internal/prometheus
   ingresses:
   - "https://@@URL@@"

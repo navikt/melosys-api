@@ -11,7 +11,9 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -227,6 +229,18 @@ public class FagsakServiceTest {
         assertThat(oppdaterFagsak.getAktører().stream()
             .map(Aktoer::getInstitusjonId)
             .collect(Collectors.toList())).containsOnlyElementsOf(nyeInstitusjonsIder);
+    }
+
+    @Test
+    public void avsluttFagsakOgBehandling() throws IkkeFunnetException {
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, behandling);
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
+        verify(fagsakRepo).save(eq(fagsak));
+        verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
     }
 
     private Fagsak lagFagsakMedAktørforMyndighet(String saksnummer, String id) {

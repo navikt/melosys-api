@@ -15,6 +15,7 @@ import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 
 public class BrevDataByggerHenleggelse implements BrevDataBygger {
     private final JoarkService joarkService;
@@ -26,8 +27,8 @@ public class BrevDataByggerHenleggelse implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, IntegrasjonException {
-        Instant forsendelseMottattTidspunkt = hentInitierendeJournalpostMottattTidspunktFraFørsteBehandling(behandling);
+    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, IntegrasjonException {
+        Instant forsendelseMottattTidspunkt = hentInitierendeJournalpostMottattTidspunktFraFørsteBehandling(dataGrunnlag.getBehandling());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato(saksbehandler, brevbestillingDto);
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = forsendelseMottattTidspunkt;

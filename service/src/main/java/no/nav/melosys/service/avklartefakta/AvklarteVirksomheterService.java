@@ -37,44 +37,54 @@ public class AvklarteVirksomheterService {
         this.registerOppslagService = registerOppslagService;
     }
 
-    public Set<String> hentSelvstendigeForetakOrgnumre(Behandling behandling) throws TekniskException {
+    public List<AvklartVirksomhet> hentUtenlandskeVirksomheter(Behandling behandling) throws TekniskException {
+        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
+
+        return søknad.foretakUtland.stream()
+            .filter(uf -> avklarteOrgnumreOgUuider.contains(uf.uuid))
+            .map(AvklartVirksomhet::new)
+            .collect(Collectors.toList());
+    }
+
+    public Set<String> hentNorskeSelvstendigeForetakOrgnumre(Behandling behandling) throws TekniskException {
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         Set<String> organisasjonsnumre = søknad.selvstendigArbeid.hentAlleOrganisasjonsnumre()
             .collect(Collectors.toSet());
 
-        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
-        organisasjonsnumre.retainAll(avklarteOrgnumre);
+        Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
+        organisasjonsnumre.retainAll(avklarteOrgnumreOgUuider);
         return organisasjonsnumre;
     }
 
-    public Set<String> hentArbeidsgivendeOrgnumre(Behandling behandling) throws TekniskException {
+    public Set<String> hentNorskeArbeidsgivendeOrgnumre(Behandling behandling) throws TekniskException {
         ArbeidsforholdDokument arbDok = hentArbeidsforholdDokument(behandling);
         Set<String> arbeidsgivendeOrgnumre = arbDok.hentOrgnumre();
         SoeknadDokument søknad = hentSøknadDokument(behandling);
         arbeidsgivendeOrgnumre.addAll(søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
 
-        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
-        arbeidsgivendeOrgnumre.retainAll(avklarteOrgnumre);
+        Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
+        arbeidsgivendeOrgnumre.retainAll(avklarteOrgnumreOgUuider);
         return arbeidsgivendeOrgnumre;
     }
 
-    public List<AvklartVirksomhet> hentSelvstendigeForetak(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Set<String> selvstendigeForetakOrgnumre = hentSelvstendigeForetakOrgnumre(behandling);
+    public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Set<String> selvstendigeForetakOrgnumre = hentNorskeSelvstendigeForetakOrgnumre(behandling);
         return registerOppslagService.hentOrganisasjoner(selvstendigeForetakOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.SELVSTENDIG))
             .collect(Collectors.toList());
     }
 
-    public List<AvklartVirksomhet> hentArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Set<String> arbeidsgivendeOrgnumre = hentArbeidsgivendeOrgnumre(behandling);
+    public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return registerOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID))
             .collect(Collectors.toList());
     }
 
     public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        List<AvklartVirksomhet> norskeVirksomheter = hentArbeidsgivere(behandling, adressekonverterer);
-        norskeVirksomheter.addAll(hentSelvstendigeForetak(behandling, adressekonverterer));
+        List<AvklartVirksomhet> norskeVirksomheter = hentNorskeArbeidsgivere(behandling, adressekonverterer);
+        norskeVirksomheter.addAll(hentNorskeSelvstendigeForetak(behandling, adressekonverterer));
         return norskeVirksomheter;
     }
 }

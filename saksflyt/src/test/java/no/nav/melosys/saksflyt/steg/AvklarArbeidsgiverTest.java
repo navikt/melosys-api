@@ -76,7 +76,7 @@ public class AvklarArbeidsgiverTest {
     @Test
     public void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() throws FunksjonellException, TekniskException {
         List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
-        when(avklarteVirksomheterService.hentArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
 
         steg.utfør(p);
 
@@ -98,14 +98,14 @@ public class AvklarArbeidsgiverTest {
 
     @Test
     public void utfør_iverksettVedtakType_forventStegIvOppdaterMedl() throws Exception {
-        when(avklarteVirksomheterService.hentArbeidsgivere(any(), any())).thenReturn(Collections.singletonList(avklartVirksomhet));
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(Collections.singletonList(avklartVirksomhet));
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_MEDL);
     }
 
     @Test
     public void utfør_avslagManglendeOpplysningerType_forventStegIvSendBrev() throws Exception {
-        when(avklarteVirksomheterService.hentArbeidsgivere(any(), any())).thenReturn(Collections.singletonList(avklartVirksomhet));
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(Collections.singletonList(avklartVirksomhet));
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         steg.utfør(p);
