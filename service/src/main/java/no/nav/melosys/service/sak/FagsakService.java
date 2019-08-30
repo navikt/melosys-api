@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -27,6 +29,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.metrics.MetrikkerNavn.SAKER_OPPRETTET;
+
 @Service
 public class FagsakService {
     private static final Logger log = LoggerFactory.getLogger(FagsakService.class);
@@ -39,6 +43,8 @@ public class FagsakService {
     private final TpsFasade tpsFasade;
     private final ProsessinstansService prosessinstansService;
     private final BehandlingsresultatService behandlingsresultatService;
+
+    private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
@@ -213,6 +219,7 @@ public class FagsakService {
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
+        sakerOpprettet.increment();
         return fagsak;
     }
 
