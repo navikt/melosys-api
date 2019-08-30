@@ -3,9 +3,9 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000108.ObjectFactory;
+import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
@@ -15,6 +15,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
@@ -72,6 +73,11 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         if (brevdata.avklartMaritimType == Maritimtyper.SOKKEL) {
             fag.setArbeidPåSokkel(JA);
         }
+
+        brevdata.anmodningsperiodesvartype
+            .map(Anmodningsperiodesvartyper::getKode)
+            .map(AnmodningsPeriodeSvarTypeKode::valueOf)
+            .ifPresent(fag::setAnmodningsPeriodeSvarType);
 
         Lovvalgsperiode periode = brevdata.lovvalgsperiode;
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));

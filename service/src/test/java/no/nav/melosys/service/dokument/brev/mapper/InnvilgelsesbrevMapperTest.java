@@ -87,6 +87,7 @@ public class InnvilgelsesbrevMapperTest {
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.hovedvirksomhet = virksomhet;
         brevdataInnvilgelse.arbeidsland = "Sverige";
+        brevdataInnvilgelse.anmodningsperiodesvartype = Optional.of(Anmodningsperiodesvartyper.INNVILGELSE);
         brevdataInnvilgelse.trygdemyndighetsland = "Sverige";
 
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);

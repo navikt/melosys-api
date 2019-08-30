@@ -59,11 +59,8 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
 
-
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(landvelgerService);
+        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(landvelgerService, anmodningsperiodeService);
     }
 
     @Test

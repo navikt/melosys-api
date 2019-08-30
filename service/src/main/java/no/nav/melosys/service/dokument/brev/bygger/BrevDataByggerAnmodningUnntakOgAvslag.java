@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -17,7 +18,8 @@ public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
     private final AnmodningsperiodeService anmodningsperiodeService;
 
-    public BrevDataByggerAnmodningUnntakOgAvslag(LandvelgerService landvelgerService) {
+    public BrevDataByggerAnmodningUnntakOgAvslag(LandvelgerService landvelgerService,
+                                                 AnmodningsperiodeService anmodningsperiodeService) {
         this.landvelgerService = landvelgerService;
         this.anmodningsperiodeService = anmodningsperiodeService;
     }
@@ -25,21 +27,19 @@ public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
     @Override
     public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
-
+        Behandling behandling = dataGrunnlag.getBehandling();
         List<AvklartVirksomhet> avklarteVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
         if (avklarteVirksomheter.size() != 1) {
             throw new TekniskException("Trenger minst en norsk virksomhet for avslag og ART16.1");
         }
 
         brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
-        brevData.arbeidsland = landvelgerService.hentArbeidsland(dataGrunnlag.getBehandling()).getBeskrivelse();
+        brevData.arbeidsland = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
 
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId());
-        if (!anmodningsperioder.isEmpty()) {
-            brevData.anmodningsperiodeSvar = anmodningsperioder.stream()
-                .findFirst()
-                .map(Anmodningsperiode::getAnmodningsperiodeSvar);
-        }
+        brevData.anmodningsperiodeSvar = anmodningsperioder.stream()
+            .findFirst()
+            .map(Anmodningsperiode::getAnmodningsperiodeSvar);
 
         return brevData;
     }
