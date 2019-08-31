@@ -46,7 +46,7 @@ public class EessiService {
 
 
     public EessiService(SedDataBygger sedDataBygger,
-                       DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory, EessiConsumer eessiConsumer,
+                        DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory, EessiConsumer eessiConsumer,
                         @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed,
                         BehandlingService behandlingService) {
         this.sedDataBygger = sedDataBygger;

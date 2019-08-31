@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.felles.FagsakOgBehandlingFelles;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,13 +22,13 @@ import static org.mockito.Mockito.verify;
 public class AvsluttFagsakOgBehandlingTest {
 
     @Mock
-    private FagsakOgBehandlingFelles fagsakOgBehandlingFelles;
+    private FagsakService fagsakService;
 
     private AvsluttFagsakOgBehandling avsluttFagsakOgBehandling;
 
     @Before
     public void setup() {
-        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakOgBehandlingFelles);
+        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService);
     }
 
     @Test
@@ -41,7 +41,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
 
-        verify(fagsakOgBehandlingFelles).avsluttFagsakOgBehandling(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(behandling.getFagsak()), eq(Saksstatuser.LOVVALG_AVKLART), eq(behandling));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }

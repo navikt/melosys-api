@@ -7,7 +7,6 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -35,7 +34,7 @@ public class SendSed extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         long behandlingId = prosessinstans.getBehandling().getId();
@@ -45,12 +44,8 @@ public class SendSed extends AbstraktStegBehandler {
             throw new FunksjonellException("Forventet én anmodningsperiode på behandling" + behandlingId + ", fant " + anmodningsperiodeSvar.size());
         }
 
-        try {
-            AnmodningsperiodeSvar svar = anmodningsperiodeSvar.iterator().next();
-            eessiService.sendAnmodningUnntakSvar(svar, behandlingId);
-        } catch (MelosysException e) {
-            throw new TekniskException("Kunne ikke sende svar for anmodning om unntak", e);
-        }
+        AnmodningsperiodeSvar svar = anmodningsperiodeSvar.iterator().next();
+        eessiService.sendAnmodningUnntakSvar(svar, behandlingId);
 
         log.info("Svar på anmodning om unntak sendt for behandling {}", behandlingId);
         prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_OPPDATER_MEDL);
