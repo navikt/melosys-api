@@ -25,6 +25,12 @@ public class KontrollFactoryTest {
         assertThat(kontroller).hasSize(8);
     }
 
+    @Test
+    public void hentKontrollerA010_verifiserKontroller() {
+        List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A010);
+        assertThat(kontroller).hasSize(7);
+    }
+
     @Test(expected = UnsupportedOperationException.class)
     public void hentKontrollerA008_verifiserIngenKontroller() {
         List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A008);
