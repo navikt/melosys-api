@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART11_3A;
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART11_4_2;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentOppgittBostedsland;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadslandkoder;
 
@@ -59,7 +58,7 @@ public class LandvelgerService {
         Collection<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandling);
 
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-        if (oppfylteVilkår.contains(FO_883_2004_ART11_3A) || oppfylteVilkår.contains(FO_883_2004_ART11_4_2)) {
+        if (oppfylteVilkår.contains(FO_883_2004_ART11_3A)) {
             return Collections.singletonList(hentBostedsland(behandling, søknad));
         }
 
