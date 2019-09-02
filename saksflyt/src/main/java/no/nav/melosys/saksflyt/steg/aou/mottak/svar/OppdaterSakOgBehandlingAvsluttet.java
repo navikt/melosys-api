@@ -3,12 +3,14 @@ package no.nav.melosys.saksflyt.steg.aou.mottak.svar;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.saksflyt.steg.sob.SakOgBehandlingStegBehander;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +20,15 @@ import org.springframework.stereotype.Component;
 public class OppdaterSakOgBehandlingAvsluttet extends SakOgBehandlingStegBehander {
     private static final Logger log = LoggerFactory.getLogger(OppdaterSakOgBehandlingAvsluttet.class);
 
+    private final FagsakService fagsakService;
+
     @Autowired
-    protected OppdaterSakOgBehandlingAvsluttet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
+    protected OppdaterSakOgBehandlingAvsluttet(SakOgBehandlingFasade sakOgBehandlingFasade,
+                                               TpsService tpsService,
+                                               BehandlingService behandlingService,
+                                               FagsakService fagsakService) {
         super(sakOgBehandlingFasade, tpsService, behandlingService);
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -35,6 +43,9 @@ public class OppdaterSakOgBehandlingAvsluttet extends SakOgBehandlingStegBehande
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
 
+        fagsakService.avsluttFagsakOgBehandling(
+            prosessinstans.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART, prosessinstans.getBehandling()
+        );
         sakOgBehandlingAvsluttet(saksnummer, behandlingId, aktørId);
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }

@@ -4,11 +4,13 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,12 +31,14 @@ public class OppdaterSakOgBehandlingAvsluttetTest {
     private TpsService tpsService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private FagsakService fagsakService;
 
     private OppdaterSakOgBehandlingAvsluttet oppdaterSakOgBehandlingAvsluttet;
 
     @Before
     public void setup() {
-        oppdaterSakOgBehandlingAvsluttet = new OppdaterSakOgBehandlingAvsluttet(sakOgBehandlingFasade, tpsService, behandlingService);
+        oppdaterSakOgBehandlingAvsluttet = new OppdaterSakOgBehandlingAvsluttet(sakOgBehandlingFasade, tpsService, behandlingService, fagsakService);
     }
 
     @Test
@@ -60,6 +64,7 @@ public class OppdaterSakOgBehandlingAvsluttetTest {
         oppdaterSakOgBehandlingAvsluttet.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(behandling.getFagsak()), eq(Saksstatuser.LOVVALG_AVKLART), eq(behandling));
         verify(sakOgBehandlingFasade).sendBehandlingAvsluttet(any());
         verify(tpsService, never()).hentAktørIdForIdent(anyString());
         verify(behandlingService, never()).hentBehandling(anyLong());

@@ -46,6 +46,6 @@ public class OppdaterMedlTest {
 
         verify(oppdaterMedlFelles).hentLovvalgsperiode(any(Behandling.class));
         verify(medlFasade).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_AVSLUTT_BEHANDLING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }

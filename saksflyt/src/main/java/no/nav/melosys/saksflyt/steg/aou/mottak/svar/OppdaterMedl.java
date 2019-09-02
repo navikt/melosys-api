@@ -42,6 +42,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.SED);
 
         log.info("Lovvalgsperiode for behandling {} satt til endelig i Medl", behandling.getId());
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_AVSLUTT_BEHANDLING);
+        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }
