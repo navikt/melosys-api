@@ -51,7 +51,7 @@ public class BrevDataByggerVelger {
                 return new BrevDataByggerAvslagArbeidsgiver(landvelgerService, lovvalgsperiodeService, vilkaarsresultatRepository);
             case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK:
-                return new BrevDataByggerAnmodningUnntakOgAvslag(landvelgerService, anmodningsperiodeService);
+                return new BrevDataByggerAnmodningUnntakOgAvslag(landvelgerService, anmodningsperiodeService, vilkaarsresultatRepository);
             case ANMODNING_UNNTAK:
                 return lagBrevDataByggerA001(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV:
