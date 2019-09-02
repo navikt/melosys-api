@@ -3,9 +3,9 @@ package no.nav.melosys.saksflyt.steg;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -104,8 +104,8 @@ public class AvklarMyndighetTest {
     public void utfør_anmodningUnntakSjekkSteg_forventAouOppdaterMedl() throws Exception {
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
-        no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet steg =
-            new no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
+        no.nav.melosys.saksflyt.steg.aou.ut.AvklarMyndighet steg =
+            new no.nav.melosys.saksflyt.steg.aou.ut.AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_MEDL);
     }
