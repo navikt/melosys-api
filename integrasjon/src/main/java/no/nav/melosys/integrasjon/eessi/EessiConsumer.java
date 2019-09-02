@@ -9,6 +9,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.SvarAnmodningUnntakDto;
 
 public interface EessiConsumer {
 
@@ -25,4 +26,6 @@ public interface EessiConsumer {
     void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) throws MelosysException;
 
     List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException;
+
+    void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException;
 }

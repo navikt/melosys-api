@@ -63,6 +63,11 @@ public enum ProsessSteg implements Kodeverk {
     AOU_MOTTAK_REGISTERKONTROLL("AOU_MOTTAK_REGISTERKONTROLL", "Validerer informasjon om en unntaksperiode"),
     AOU_MOTTAK_OPPRETT_OPPGAVE("AOU_MOTTAK_OPPRETT_OPPGAVE", "Opprett oppgave for manuell behandling"),
 
+    //Svar på mottatt anmodning om unntak
+    AOU_MOTTAK_SVAR_SEND_SED("AOU_MOTTAK_SVAR_SEND_SED","Send svar-sed"),
+    AOU_MOTTAK_SVAR_OPPDATER_MEDL("AOU_MOTTAK_SVAR_OPPDATER_MEDL", "Oppdater periode i Medl"),
+    AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET("AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET","Oppdaterer status på sak i sob til avsluttet"),
+
     //Iverksett Vedtak
     IV_FORKORT_PERIODE("IV_FORKORT_PERIODE", "Legger til endringsgrunn i AVKLARTEFAKTA for hvorfor perioden er forkortet"),
     IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),

@@ -21,6 +21,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.jeasy.random.EasyRandom;
@@ -40,9 +41,10 @@ import static org.mockito.Mockito.*;
 public class EessiServiceTest {
     @Mock
     private SedDataBygger sedDataBygger;
-
     @Mock
     private EessiConsumer eessiConsumer;
+    @Mock
+    private BehandlingService behandlingService;
 
     private EessiService eessiService;
 
@@ -57,7 +59,7 @@ public class EessiServiceTest {
     @Before
     public void setup() throws Exception {
         DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory = mock(DokumentdataGrunnlagFactory.class);
-        eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory, eessiConsumer, "true");
+        eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory, eessiConsumer, "true", behandlingService);
 
         behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
