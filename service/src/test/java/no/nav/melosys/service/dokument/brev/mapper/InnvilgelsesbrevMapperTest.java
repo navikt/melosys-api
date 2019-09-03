@@ -11,6 +11,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
@@ -157,7 +158,15 @@ public class InnvilgelsesbrevMapperTest {
         arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landkode = Landkoder.AT.getKode();
         dokument.arbeidUtland = Collections.singletonList(arbeidUtland);
+        dokument.maritimtArbeid.add(lagMaritimtArbeidUtenFartsområde());
         return dokument;
+    }
+
+    private static MaritimtArbeid lagMaritimtArbeidUtenFartsområde() {
+        MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
+        maritimtArbeid.navn = "Dunfjæder";
+        maritimtArbeid.installasjonsLandkode = "NO";
+        return maritimtArbeid;
     }
 
     private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
