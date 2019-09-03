@@ -29,6 +29,7 @@
         <module>saksflyt-api</module>
         <module>service</module>
         <module>sikkerhet</module>
+        <module>integrasjonstest</module>
     </modules>
 
     <properties>
