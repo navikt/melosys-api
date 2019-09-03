@@ -62,7 +62,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
 
     private Optional<Vilkaarsresultat> hentFørsteGyldigeVilkaarsresultatForArt16(Behandling behandling) {
         return vilkaarsresultatRepository.findByBehandlingsresultatId(behandling.getId()).stream()
-            .filter(v -> v.getVilkaar().equals(FO_883_2004_ART16_1) && !v.getBegrunnelser().isEmpty())
+            .filter(v -> v.getVilkaar() == FO_883_2004_ART16_1 && !v.getBegrunnelser().isEmpty())
             .findFirst();
     }
 }

@@ -142,11 +142,12 @@ public class BrevDataByggerInnvilgelseTest {
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         AnmodningsperiodeSvar anmodningsperiodeSvar = lagAnmodningsperiodeSvarInnvilgelse();
+        anmodningsperiode.setSendtUtland(true);
         anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
 
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.anmodningsperiodesvartype.get()).isEqualTo(anmodningsperiodeSvar.getAnmodningsperiodeSvarType());
+        assertThat(brevData.anmodningsperiodesvar.get()).isEqualTo(anmodningsperiodeSvar);
     }
 
     @Test
@@ -156,6 +157,6 @@ public class BrevDataByggerInnvilgelseTest {
 
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.anmodningsperiodesvartype.isPresent()).isFalse();
+        assertThat(brevData.anmodningsperiodesvar.isPresent()).isFalse();
     }
 }

@@ -22,10 +22,8 @@ import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
-import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_2_NORMALT_DRIVER_VIRKSOMHET;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*;
-import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt122NormalVirksomhetBegrunnelseType;
 
 public class AvslagYrkesaktivMapper implements BrevDataMapper {
 
