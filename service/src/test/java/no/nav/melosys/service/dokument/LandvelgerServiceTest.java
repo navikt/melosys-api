@@ -153,15 +153,6 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt1142OgAvklartArbeidsland_girAvklartArbeidsland() throws TekniskException, FunksjonellException {
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_2);
-        leggTilAlleAvklartArbeidsland(Arrays.asList(avklartArbeidsland));
-
-        Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling);
-        assertThat(land).containsExactly(avklartArbeidsland);
-    }
-
-    @Test
     public void hentTrygdemyndighetsland_medArt113A_girOppgittBostedsland() throws TekniskException, FunksjonellException {
         oppfyll(Vilkaar.FO_883_2004_ART11_3A);
         oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
