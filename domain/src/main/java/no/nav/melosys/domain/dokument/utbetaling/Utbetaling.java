@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Utbetaling {
 
-    public Aktoer utbetaltTil;
-
     @XmlElementWrapper(name = "ytelser")
     @XmlElement(name = "ytelse")
     public List<Ytelse> ytelser;

@@ -8,7 +8,5 @@ public class Ytelse {
 
     public String type;
 
-    public Aktoer rettighetshaver;
-
     public Periode periode;
 }
