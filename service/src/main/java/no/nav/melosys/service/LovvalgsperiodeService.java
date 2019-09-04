@@ -123,6 +123,6 @@ public class LovvalgsperiodeService {
 
     public Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) {
         return behandlingRepository.findById(behandlingId).map(Behandling::getOpprinneligBehandling)
-            .flatMap(value -> lovvalgsperiodeRepo.findByBehandlingsresultatId(value.getId()).stream().findFirst());
+            .flatMap(behandling -> lovvalgsperiodeRepo.findByBehandlingsresultatId(behandling.getId()).stream().findFirst());
     }
 }

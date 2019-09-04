@@ -8,8 +8,8 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.eessi.BehandleMottattSedInitialiserer;
-import no.nav.melosys.service.eessi.ManuellBehandlingSed;
+import no.nav.melosys.service.eessi.AutomatiskSedBehandlingInitialiserer;
+import no.nav.melosys.service.eessi.ManuellSedBehandlingInitialiserer;
 import no.nav.melosys.service.eessi.RutingResultat;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,9 +25,9 @@ import static org.mockito.Mockito.*;
 public class SedMottakRutingTest {
 
     @Mock
-    private BehandleMottattSedInitialiserer behandleMottattSedInitialiserer;
+    private AutomatiskSedBehandlingInitialiserer automatiskSedBehandlingInitialiserer;
     @Mock
-    private ManuellBehandlingSed manuellBehandlingSed;
+    private ManuellSedBehandlingInitialiserer manuellSedBehandlingInitialiserer;
     @Mock
     private EessiService eessiService;
 
@@ -35,8 +35,8 @@ public class SedMottakRutingTest {
 
     @Before
     public void setUp() throws MelosysException {
-        sedMottakRuting = new SedMottakRuting(Collections.singleton(behandleMottattSedInitialiserer), manuellBehandlingSed, eessiService);
-        when(behandleMottattSedInitialiserer.gjelderSedType(any(), any())).thenReturn(true);
+        sedMottakRuting = new SedMottakRuting(Collections.singleton(automatiskSedBehandlingInitialiserer), manuellSedBehandlingInitialiserer, eessiService);
+        when(automatiskSedBehandlingInitialiserer.gjelderSedType(any(), any())).thenReturn(true);
         when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(1L));
     }
 
@@ -46,7 +46,7 @@ public class SedMottakRutingTest {
             Prosessinstans prosessinstans = invocationOnMock.getArgument(0);
             prosessinstans.setBehandling(new Behandling());
             return RutingResultat.INGEN_BEHANDLING;
-        }).when(behandleMottattSedInitialiserer).finnSakOgBestemRuting(any(Prosessinstans.class), anyLong());
+        }).when(automatiskSedBehandlingInitialiserer).finnSakOgBestemRuting(any(Prosessinstans.class), anyLong());
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
@@ -54,7 +54,7 @@ public class SedMottakRutingTest {
 
         sedMottakRuting.utfør(prosessinstans);
 
-        verify(behandleMottattSedInitialiserer).finnSakOgBestemRuting(any(), anyLong());
+        verify(automatiskSedBehandlingInitialiserer).finnSakOgBestemRuting(any(), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
     }
 
@@ -64,10 +64,10 @@ public class SedMottakRutingTest {
             Prosessinstans prosessinstans = invocationOnMock.getArgument(0);
             prosessinstans.setBehandling(new Behandling());
             return RutingResultat.OPPDATER_BEHANDLING;
-        }).when(behandleMottattSedInitialiserer).finnSakOgBestemRuting(any(Prosessinstans.class), anyLong());
+        }).when(automatiskSedBehandlingInitialiserer).finnSakOgBestemRuting(any(Prosessinstans.class), anyLong());
 
         doAnswer(invocationOnMock -> ProsessType.ANMODNING_OM_UNNTAK_SVAR)
-            .when(behandleMottattSedInitialiserer).hentAktuellProsessType();
+            .when(automatiskSedBehandlingInitialiserer).hentAktuellProsessType();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
@@ -75,7 +75,7 @@ public class SedMottakRutingTest {
 
         sedMottakRuting.utfør(prosessinstans);
 
-        verify(behandleMottattSedInitialiserer).finnSakOgBestemRuting(any(), anyLong());
+        verify(automatiskSedBehandlingInitialiserer).finnSakOgBestemRuting(any(), anyLong());
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_SVAR);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
     }
@@ -86,8 +86,8 @@ public class SedMottakRutingTest {
         prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
 
-        when(behandleMottattSedInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(RutingResultat.NY_BEHANDLING);
-        when(behandleMottattSedInitialiserer.hentAktuellProsessType()).thenReturn(ProsessType.REGISTRERING_UNNTAK);
+        when(automatiskSedBehandlingInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(RutingResultat.NY_BEHANDLING);
+        when(automatiskSedBehandlingInitialiserer.hentAktuellProsessType()).thenReturn(ProsessType.REGISTRERING_UNNTAK);
 
         sedMottakRuting.utfør(prosessinstans);
 
@@ -100,8 +100,8 @@ public class SedMottakRutingTest {
         prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
 
-        when(behandleMottattSedInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(RutingResultat.NY_SAK);
-        when(behandleMottattSedInitialiserer.hentAktuellProsessType()).thenReturn(ProsessType.REGISTRERING_UNNTAK);
+        when(automatiskSedBehandlingInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(RutingResultat.NY_SAK);
+        when(automatiskSedBehandlingInitialiserer.hentAktuellProsessType()).thenReturn(ProsessType.REGISTRERING_UNNTAK);
 
         sedMottakRuting.utfør(prosessinstans);
 
@@ -114,7 +114,7 @@ public class SedMottakRutingTest {
         prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
 
-        when(behandleMottattSedInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(null);
+        when(automatiskSedBehandlingInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(null);
 
         sedMottakRuting.utfør(prosessinstans);
     }

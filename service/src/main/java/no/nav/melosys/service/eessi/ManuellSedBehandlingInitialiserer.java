@@ -20,21 +20,25 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ManuellBehandlingSed {
+public class ManuellSedBehandlingInitialiserer {
 
-    private static final Logger log = LoggerFactory.getLogger(ManuellBehandlingSed.class);
+    private static final Logger log = LoggerFactory.getLogger(ManuellSedBehandlingInitialiserer.class);
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final GsakFasade gsakFasade;
 
     @Autowired
-    public ManuellBehandlingSed(FagsakService fagsakService, BehandlingService behandlingService, @Qualifier("system") GsakFasade gsakFasade) {
+    public ManuellSedBehandlingInitialiserer(FagsakService fagsakService, BehandlingService behandlingService, @Qualifier("system") GsakFasade gsakFasade) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.gsakFasade = gsakFasade;
     }
 
+    /**
+     * Hvis SED'en er tilknyttet en sak går den til ferdigstilling av journalpost
+     * Ellers opprettes det en journalføringsoppgave
+     */
     public void bestemManuellBehandling(Prosessinstans prosessinstans, MelosysEessiMelding melosysEessiMelding) throws TekniskException, FunksjonellException {
 
         Optional<Long> gsakSaksnummer = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class));
@@ -44,8 +48,7 @@ public class ManuellBehandlingSed {
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_JFR_OPPG);
 
         } else {
-            Fagsak fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer.get())
-                .orElseThrow(() -> new TekniskException("Finner gsaksaksnummer " + gsakSaksnummer.get() + " men ikke fagsak"));
+            Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer.get());
             Behandling behandling = fagsak.getAktivBehandling() != null ? fagsak.getAktivBehandling() : fagsak.getSistOppdaterteBehandling();
 
             if (behandling.getStatus() == Behandlingsstatus.UNDER_BEHANDLING) {

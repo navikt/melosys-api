@@ -3,14 +3,19 @@ package no.nav.melosys.saksflyt.steg.sed.jfr;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,6 +27,9 @@ public class OpprettJournalfoeringsOppgaveTest {
     private GsakFasade gsakFasade;
 
     private OpprettJournalfoeringsOppgave opprettJournalfoeringsOppgave;
+
+    @Captor
+    private ArgumentCaptor<Oppgave> oppgaveCaptor;
 
     private static final String JOURNALPOST_ID = "12333211";
     private static final String AKTØR_ID = "333333";
@@ -48,7 +56,11 @@ public class OpprettJournalfoeringsOppgaveTest {
         when(gsakFasade.hentTemaFraSak(eq(gsakSaksnummer))).thenReturn(tema);
 
         opprettJournalfoeringsOppgave.utfør(prosessinstans);
-        verify(gsakFasade).opprettJournalføringsOppgave(eq(JOURNALPOST_ID), eq(AKTØR_ID), eq(tema));
+        verify(gsakFasade).opprettOppgave(oppgaveCaptor.capture());
+        Oppgave oppgave = oppgaveCaptor.getValue();
+        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
+        assertThat(oppgave.getTema()).isEqualTo(Tema.UFM);
+
     }
 
     @Test
@@ -59,7 +71,10 @@ public class OpprettJournalfoeringsOppgaveTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         opprettJournalfoeringsOppgave.utfør(prosessinstans);
-        verify(gsakFasade).opprettJournalføringsOppgave(eq(JOURNALPOST_ID), eq(AKTØR_ID), eq(Tema.MED));
+        verify(gsakFasade).opprettOppgave(oppgaveCaptor.capture());
+        Oppgave oppgave = oppgaveCaptor.getValue();
+        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
+        assertThat(oppgave.getTema()).isEqualTo(Tema.MED);
     }
 
 

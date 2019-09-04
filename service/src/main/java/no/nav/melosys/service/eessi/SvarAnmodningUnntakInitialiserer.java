@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 //A002,A011
 @Service
-public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedInitialiserer {
+public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandlingInitialiserer {
 
     private final FagsakService fagsakService;
 

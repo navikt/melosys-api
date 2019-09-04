@@ -10,9 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -112,22 +110,6 @@ public final class GsakServiceTest {
         assertThat(requests.get(0).getOppgavetype()).isNullOrEmpty();
         assertThat(requests.get(1).getBehandlesAvApplikasjon()).isNullOrEmpty();
         assertThat(requests.get(1).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
-    }
-
-    @Test
-    public void opprettJournalføringsOppgave_setterData() throws FunksjonellException, TekniskException {
-        String journalpostID = "jpID", aktørID = "aId";
-        Tema tema = Tema.UFM;
-
-        gsakService.opprettJournalføringsOppgave(journalpostID, aktørID, tema);
-        verify(oppgaveConsumer).opprettOppgave(oppgaveDtoCaptor.capture());
-
-        OpprettOppgaveDto opprettOppgaveDto = oppgaveDtoCaptor.getValue();
-        assertThat(opprettOppgaveDto.getJournalpostId()).isEqualTo(journalpostID);
-        assertThat(opprettOppgaveDto.getAktørId()).isEqualTo(aktørID);
-        assertThat(opprettOppgaveDto.getTema()).isEqualTo(tema.name());
-        assertThat(opprettOppgaveDto.getOppgavetype()).isEqualTo("JFR");
-
     }
 
     private Oppgave lagOppgave() {

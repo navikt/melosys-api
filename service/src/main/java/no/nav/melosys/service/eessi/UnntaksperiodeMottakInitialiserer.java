@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 //A003,A009,A010
 @Service
-public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInitialiserer {
+public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlingInitialiserer {
 
     private final FagsakService fagsakService;
     private final LovvalgsperiodeService lovvalgsperiodeService;

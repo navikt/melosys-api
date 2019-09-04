@@ -1,9 +1,14 @@
 package no.nav.melosys.saksflyt.steg.sed.jfr;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -38,7 +43,17 @@ public class OpprettJournalfoeringsOppgave extends AbstraktStegBehandler {
         String aktørID = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         Tema tema = avklarTema(prosessinstans);
 
-        String oppgaveID = gsakFasade.opprettJournalføringsOppgave(journalpostID, aktørID, tema);
+        Oppgave oppgave = new Oppgave.Builder()
+            .setOppgavetype(Oppgavetyper.JFR)
+            .setTema(tema)
+            .setAktørId(aktørID)
+            .setPrioritet(PrioritetType.NORM)
+            .setJournalpostId(journalpostID)
+            .setFristFerdigstillelse(LocalDate.now().plusDays(7))
+            .build();
+
+        String oppgaveID = gsakFasade.opprettOppgave(oppgave);
+
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Journalføringsoppgave opprettet med ID {}", oppgaveID);
     }

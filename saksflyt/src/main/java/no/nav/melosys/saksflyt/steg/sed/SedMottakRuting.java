@@ -15,8 +15,8 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.eessi.BehandleMottattSedInitialiserer;
-import no.nav.melosys.service.eessi.ManuellBehandlingSed;
+import no.nav.melosys.service.eessi.AutomatiskSedBehandlingInitialiserer;
+import no.nav.melosys.service.eessi.ManuellSedBehandlingInitialiserer;
 import no.nav.melosys.service.eessi.RutingResultat;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,14 +39,16 @@ public class SedMottakRuting extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SedMottakRuting.class);
 
-    private final Collection<BehandleMottattSedInitialiserer> sedMottattInitialiserere;
-    private final ManuellBehandlingSed manuellBehandlingSed;
+    private final Collection<AutomatiskSedBehandlingInitialiserer> automatiskSedBehandlingInitialiserere;
+    private final ManuellSedBehandlingInitialiserer manuellSedBehandlingInitialiserer;
     private final EessiService eessiService;
 
     @Autowired
-    public SedMottakRuting(Collection<BehandleMottattSedInitialiserer> sedMottattInitialiserere, ManuellBehandlingSed manuellBehandlingSed, EessiService eessiService) {
-        this.sedMottattInitialiserere = sedMottattInitialiserere;
-        this.manuellBehandlingSed = manuellBehandlingSed;
+    public SedMottakRuting(Collection<AutomatiskSedBehandlingInitialiserer> automatiskSedBehandlingInitialiserere,
+                           ManuellSedBehandlingInitialiserer manuellSedBehandlingInitialiserer,
+                           EessiService eessiService) {
+        this.automatiskSedBehandlingInitialiserere = automatiskSedBehandlingInitialiserere;
+        this.manuellSedBehandlingInitialiserer = manuellSedBehandlingInitialiserer;
         this.eessiService = eessiService;
     }
 
@@ -62,12 +64,13 @@ public class SedMottakRuting extends AbstraktStegBehandler {
         Optional<Long> gsakSaksnummer = eessiService.finnSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
         gsakSaksnummer.ifPresent(g -> prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, g));
 
-        BehandleMottattSedInitialiserer behandleMottattSedInitialiserer = hentInitialisererForSed(melosysEessiMelding);
+        AutomatiskSedBehandlingInitialiserer automatiskSedBehandlingInitialiserer = hentInitialisererForSed(melosysEessiMelding);
 
-        if (behandleMottattSedInitialiserer != null) {
-            rutSedTilAutomatiskBehandling(prosessinstans, behandleMottattSedInitialiserer, melosysEessiMelding, gsakSaksnummer.orElse(null));
+        if (automatiskSedBehandlingInitialiserer != null) {
+            //SED støtter automatisk behandling
+            rutSedTilAutomatiskBehandling(prosessinstans, automatiskSedBehandlingInitialiserer, melosysEessiMelding, gsakSaksnummer.orElse(null));
         } else {
-            manuellBehandlingSed.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
+            manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
         }
 
         if (inngangsSteg() == prosessinstans.getSteg()) {
@@ -78,9 +81,15 @@ public class SedMottakRuting extends AbstraktStegBehandler {
             melosysEessiMelding.getRinaSaksnummer(), prosessinstans.getSteg());
     }
 
-    private void rutSedTilAutomatiskBehandling(Prosessinstans prosessinstans, BehandleMottattSedInitialiserer behandleMottattSedInitialiserer,
-                                               MelosysEessiMelding melosysEessiMelding, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
-        RutingResultat resultat = behandleMottattSedInitialiserer
+    /*
+    Ruter SED til korrekt behandling basert på om kriterier om sed'en er knyttet til en sak,
+        er en oppdatert sed og/eller om perioden er oppdatert
+     */
+    private void rutSedTilAutomatiskBehandling(Prosessinstans prosessinstans,
+                                               AutomatiskSedBehandlingInitialiserer automatiskSedBehandlingInitialiserer,
+                                               MelosysEessiMelding melosysEessiMelding,
+                                               Long gsakSaksnummer) throws TekniskException, FunksjonellException {
+        RutingResultat resultat = automatiskSedBehandlingInitialiserer
             .finnSakOgBestemRuting(prosessinstans, gsakSaksnummer);
 
         if (resultat == RutingResultat.INGEN_BEHANDLING) {
@@ -90,17 +99,17 @@ public class SedMottakRuting extends AbstraktStegBehandler {
 
         } else if (resultat == RutingResultat.OPPDATER_BEHANDLING) {
             validerBehandlingErSatt(prosessinstans);
-            prosessinstans.setType(behandleMottattSedInitialiserer.hentAktuellProsessType());
+            prosessinstans.setType(automatiskSedBehandlingInitialiserer.hentAktuellProsessType());
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
 
         } else if (resultat == RutingResultat.NY_BEHANDLING) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandleMottattSedInitialiserer.hentBehandlingstype(melosysEessiMelding));
-            prosessinstans.setType(behandleMottattSedInitialiserer.hentAktuellProsessType());
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, automatiskSedBehandlingInitialiserer.hentBehandlingstype(melosysEessiMelding));
+            prosessinstans.setType(automatiskSedBehandlingInitialiserer.hentAktuellProsessType());
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_NY_BEHANDLING);
 
         } else if (resultat == RutingResultat.NY_SAK) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandleMottattSedInitialiserer.hentBehandlingstype(melosysEessiMelding));
-            prosessinstans.setType(behandleMottattSedInitialiserer.hentAktuellProsessType());
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, automatiskSedBehandlingInitialiserer.hentBehandlingstype(melosysEessiMelding));
+            prosessinstans.setType(automatiskSedBehandlingInitialiserer.hentAktuellProsessType());
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH);
 
         } else {
@@ -118,12 +127,12 @@ public class SedMottakRuting extends AbstraktStegBehandler {
         }
     }
 
-    private BehandleMottattSedInitialiserer hentInitialisererForSed(MelosysEessiMelding melosysEessiMelding) {
+    private AutomatiskSedBehandlingInitialiserer hentInitialisererForSed(MelosysEessiMelding melosysEessiMelding) {
         SedType sedType = SedType.valueOf(melosysEessiMelding.getSedType());
         Landkoder lovvalgsland = StringUtils.isNotEmpty(melosysEessiMelding.getLovvalgsland())
             ? Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()) : null;
 
-        return sedMottattInitialiserere.stream()
+        return automatiskSedBehandlingInitialiserere.stream()
             .filter(initialiserer -> initialiserer.gjelderSedType(sedType, lovvalgsland)).findFirst()
             .orElse(null);
     }

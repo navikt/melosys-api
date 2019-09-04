@@ -41,7 +41,6 @@ public class GsakService implements GsakFasade {
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
-    private static final String OPPGAVE_TYPE_JFR = "JFR";
 
     private final SakConsumer sakConsumer;
 
@@ -292,22 +291,6 @@ public class GsakService implements GsakFasade {
         }
         oppgave.setTilordnetRessurs(saksbehandlerID);
         oppgaveConsumer.oppdaterOppgave(oppgave);
-    }
-
-    @Override
-    public String opprettJournalføringsOppgave(String journalpostID, String aktørID, Tema tema) throws FunksjonellException, TekniskException {
-
-        OpprettOppgaveDto opprettOppgaveDto = new OpprettOppgaveDto();
-        opprettOppgaveDto.setJournalpostId(journalpostID);
-        opprettOppgaveDto.setAktørId(aktørID);
-        opprettOppgaveDto.setTema(tema.getKode());
-
-        opprettOppgaveDto.setPrioritet("NORM");
-        opprettOppgaveDto.setAktivDato(LocalDate.now());
-        opprettOppgaveDto.setFristFerdigstillelse(LocalDate.now().plusDays(7));
-        opprettOppgaveDto.setOppgavetype(OPPGAVE_TYPE_JFR);
-        opprettOppgaveDto.setTildeltEnhetsnr(String.valueOf(MELOSYS_ENHET_ID));
-        return oppgaveConsumer.opprettOppgave(opprettOppgaveDto);
     }
 
     /**

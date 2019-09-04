@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 //A001
 @Service
-public class AnmodningUnntakMottakInitialiserer implements BehandleMottattSedInitialiserer {
+public class AnmodningUnntakMottakInitialiserer implements AutomatiskSedBehandlingInitialiserer {
 
     private final FagsakService fagsakService;
 

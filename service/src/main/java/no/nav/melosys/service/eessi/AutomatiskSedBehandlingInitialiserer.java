@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 
-public interface BehandleMottattSedInitialiserer {
+public interface AutomatiskSedBehandlingInitialiserer {
 
     RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException;
 
