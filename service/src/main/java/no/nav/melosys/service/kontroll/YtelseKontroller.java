@@ -10,20 +10,21 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
+import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 
-public final class InntektKontroller {
+public final class YtelseKontroller {
 
-    private InntektKontroller() {
+    private YtelseKontroller() {
     }
 
     public static boolean utbetaltYtelserFraOffentligIPeriode(InntektDokument inntektDokument, LocalDate fom, LocalDate tom) {
 
-        YearMonth fra = YearMonth.from(fom);
-        YearMonth til = tom != null ? YearMonth.from(tom) : null;
-
-        if(inntektDokument == null || inntektDokument.getArbeidsInntektMaanedListe().isEmpty()) {
+        if (inntektDokument == null || inntektDokument.getArbeidsInntektMaanedListe().isEmpty()) {
             return false;
         }
+
+        YearMonth fra = YearMonth.from(fom);
+        YearMonth til = tom != null ? YearMonth.from(tom) : null;
 
         for (YtelseFraOffentlige ytelseFraOffentlige : hentYtelseFraOffentlige(inntektDokument)) {
             if (erUtbetaltIPeriode(ytelseFraOffentlige, fra, til)) {
@@ -32,6 +33,10 @@ public final class InntektKontroller {
         }
 
         return false;
+    }
+
+    public static boolean utbetaltBarnetrygdytelserIPeriode(UtbetalingDokument utbetalingDokument) {
+        return !(utbetalingDokument == null || utbetalingDokument.utbetalinger == null || utbetalingDokument.utbetalinger.isEmpty());
     }
 
     private static boolean erUtbetaltIPeriode(YtelseFraOffentlige ytelseFraOffentlige, YearMonth fom, YearMonth tom) {

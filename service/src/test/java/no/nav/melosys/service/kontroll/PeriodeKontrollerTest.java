@@ -60,12 +60,12 @@ public class PeriodeKontrollerTest {
 
     @Test
     public void periodeEldreEnn5År_periodeEldreEnn5År_registrerTreff() {
-        assertThat(PeriodeKontroller.datoEldreEnn5År(LocalDate.now().minusYears(6))).isTrue();
+        assertThat(PeriodeKontroller.datoEldreEnn3År(LocalDate.now().minusYears(6))).isTrue();
     }
 
     @Test
     public void periodeEldreEnn5År_periodeFraNå_registrerTreff() {
-        assertThat(PeriodeKontroller.datoEldreEnn5År(LocalDate.now())).isFalse();
+        assertThat(PeriodeKontroller.datoEldreEnn3År(LocalDate.now())).isFalse();
     }
 
     @Test

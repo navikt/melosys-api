@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.exception.TekniskException;
 import org.junit.Test;
 
@@ -148,6 +149,38 @@ public class SaksopplysningerUtilsTest {
         saksopplysninger.add(saksopplysning);
 
         SaksopplysningDokument saksopplysningdokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        assertThat(saksopplysningdokument).isNotEqualTo(medlDok);
+    }
+
+    @Test
+    public void hentUtbetalingDokument() throws TekniskException {
+        Behandling behandling = new Behandling();
+        Set<Saksopplysning> saksopplysninger = new HashSet<>();
+        behandling.setSaksopplysninger(saksopplysninger);
+
+        UtbetalingDokument utbetDok = new UtbetalingDokument();
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(utbetDok);
+        saksopplysning.setType(SaksopplysningType.UTBETAL);
+        saksopplysninger.add(saksopplysning);
+
+        SaksopplysningDokument saksopplysningdokument = SaksopplysningerUtils.hentUtbetalingDokument(behandling);
+        assertThat(saksopplysningdokument).isEqualTo(utbetDok);
+    }
+
+    @Test(expected = TekniskException.class)
+    public void hentUtbetalingDokumentSkalIkkeLevereMedlemskapsDok() throws TekniskException {
+        Behandling behandling = new Behandling();
+        Set<Saksopplysning> saksopplysninger = new HashSet<>();
+        behandling.setSaksopplysninger(saksopplysninger);
+
+        MedlemskapDokument medlDok = new MedlemskapDokument();
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(medlDok);
+        saksopplysning.setType(SaksopplysningType.MEDL);
+        saksopplysninger.add(saksopplysning);
+
+        SaksopplysningDokument saksopplysningdokument = SaksopplysningerUtils.hentUtbetalingDokument(behandling);
         assertThat(saksopplysningdokument).isNotEqualTo(medlDok);
     }
 }

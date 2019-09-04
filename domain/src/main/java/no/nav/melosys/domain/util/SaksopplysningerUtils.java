@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.exception.TekniskException;
 
 public final class SaksopplysningerUtils {
@@ -36,7 +37,7 @@ public final class SaksopplysningerUtils {
     public static PersonDokument hentPersonDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning
-                .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
+            .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
     }
 
     public static PersonhistorikkDokument hentPersonhistorikkDokument(Behandling behandling) throws TekniskException {
@@ -48,31 +49,37 @@ public final class SaksopplysningerUtils {
     public static SoeknadDokument hentSøknadDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.SØKNAD);
         return (SoeknadDokument) saksopplysning
-                .orElseThrow(() -> new TekniskException("Finner ikke søknaddokument"));
+            .orElseThrow(() -> new TekniskException("Finner ikke søknaddokument"));
     }
 
     public static MedlemskapDokument hentMedlemskapDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.MEDL);
         return (MedlemskapDokument) saksopplysning
-                .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
+            .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
     }
 
     public static ArbeidsforholdDokument hentArbeidsforholdDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.ARBFORH);
         return (ArbeidsforholdDokument) saksopplysning
-                .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
+            .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
     }
 
     public static SedDokument hentSedDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.SEDOPPL);
         return (SedDokument) saksopplysning
-                .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
+            .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
     }
 
     public static InntektDokument hentInntektDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.INNTK);
         return (InntektDokument) saksopplysning
-                .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
+            .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
+    }
+
+    public static UtbetalingDokument hentUtbetalingDokument(Behandling behandling) throws TekniskException {
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.UTBETAL);
+        return (UtbetalingDokument) saksopplysning
+            .orElseThrow(() -> new TekniskException("Finner ikke utbetalingdokument"));
     }
 
     public static String hentSammensattNavn(Behandling behandling) {

@@ -9,12 +9,14 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -45,13 +47,15 @@ public class HentOpplysningerFellesTest {
     @Mock
     private InntektService inntektService;
     @Mock
+    private UtbetaldataService utbetaldataService;
+    @Mock
     private SaksopplysningRepository saksopplysningRepository;
 
     private HentOpplysningerFelles hentOpplysningerFelles;
 
     @Before
     public void setUp() throws Exception {
-        hentOpplysningerFelles = new HentOpplysningerFelles(tpsFasade, fagsakService, behandlingService, medlFasade, inntektService, saksopplysningRepository);
+        hentOpplysningerFelles = new HentOpplysningerFelles(tpsFasade, fagsakService, behandlingService, medlFasade, inntektService, utbetaldataService, saksopplysningRepository);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(FNR);
         when(tpsFasade.hentPerson(anyString())).thenReturn(new Saksopplysning());
     }
@@ -138,6 +142,20 @@ public class HentOpplysningerFellesTest {
 
         verify(behandlingService).hentBehandling(anyLong());
         verify(inntektService).hentInntektListe(anyString(),eq(YearMonth.from(fom)), eq(YearMonth.from(tom)));
+    }
+
+    @Test
+    public void hentOgLagreUtbetalingsopplysninger() throws FunksjonellException, TekniskException {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(1);
+        Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
+        when(utbetaldataService.hentUtbetalingerBarnetrygd(anyString(), any(), any())).thenReturn(saksopplysning);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(hentBehandling(saksopplysning));
+
+        hentOpplysningerFelles.hentOgLagreUtbetalingsopplysninger(2L, FNR);
+
+        verify(behandlingService).hentBehandling(anyLong());
+        verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), any(), any());
     }
 
     private Behandling hentBehandling(Saksopplysning saksopplysning) {

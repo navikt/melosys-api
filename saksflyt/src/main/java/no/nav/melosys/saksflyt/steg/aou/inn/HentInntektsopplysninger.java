@@ -35,6 +35,7 @@ public class HentInntektsopplysninger extends AbstraktStegBehandler {
         long behandlingId = prosessinstans.getBehandling().getId();
         String fnr = prosessinstans.getData(ProsessDataKey.BRUKER_ID);
         hentOpplysningerFelles.hentOgLagreInntektsopplysninger(behandlingId, fnr);
+        hentOpplysningerFelles.hentOgLagreUtbetalingsopplysninger(behandlingId, fnr);
 
         prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_REGISTERKONTROLL);
     }

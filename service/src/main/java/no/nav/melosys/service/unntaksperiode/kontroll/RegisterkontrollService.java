@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
@@ -33,7 +34,8 @@ public class RegisterkontrollService {
         PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
         MedlemskapDokument medlemskapDokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
         InntektDokument inntektDokument = SaksopplysningerUtils.hentInntektDokument(behandling);
-        KontrollData kontrollData = new KontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument);
+        UtbetalingDokument utbetalingDokument = SaksopplysningerUtils.hentUtbetalingDokument(behandling);
+        KontrollData kontrollData = new KontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
 
         return utførKontroller(kontrollData, kontrollFactory.hentKontrollerForSedType(sedDokument.getSedType()));
     }

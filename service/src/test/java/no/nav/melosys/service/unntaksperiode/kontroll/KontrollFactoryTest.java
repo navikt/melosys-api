@@ -16,19 +16,19 @@ public class KontrollFactoryTest {
     @Test
     public void hentKontrollerA003_verifiserKontroller() {
         List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A003);
-        assertThat(kontroller).hasSize(9);
+        assertThat(kontroller).hasSize(10);
     }
 
     @Test
     public void hentKontrollerA009_verifiserKontroller() {
         List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A009);
-        assertThat(kontroller).hasSize(8);
+        assertThat(kontroller).hasSize(10);
     }
 
     @Test
     public void hentKontrollerA010_verifiserKontroller() {
         List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A010);
-        assertThat(kontroller).hasSize(7);
+        assertThat(kontroller).hasSize(9);
     }
 
     @Test(expected = UnsupportedOperationException.class)
