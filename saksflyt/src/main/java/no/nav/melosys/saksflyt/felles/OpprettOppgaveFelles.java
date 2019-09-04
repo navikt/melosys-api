@@ -15,7 +15,7 @@ public final class OpprettOppgaveFelles {
         //Midlertidige verdier for oppgave satt til disse er nærmere avklart
         return new Oppgave.Builder()
             .setPrioritet(PrioritetType.NORM)
-            .setTema(Tema.UFM)
+            .setTema(Tema.MED)
             .setSaksnummer(saksnummer)
             .setAktørId(aktørId)
             .setJournalpostId(journalpostId)
