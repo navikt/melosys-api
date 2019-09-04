@@ -92,12 +92,13 @@ public class AvslagYrkesaktivMapperTest {
             Art16_1_avslag.SOEKT_FOR_SENT,
             Art16_1_avslag.SAERLIG_AVSLAGSGRUNN);
         vilkaarsresultat16_1.setBegrunnelseFritekst("Fritekst");
-        resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevData.anmodningsperiodeSvar = Optional.empty();
+        brevData.yrkesaktivitet = Yrkesaktivitetstyper.LOENNET_ARBEID;
+        brevData.art16Vilkaar = Optional.of(vilkaarsresultat16_1);
 
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
@@ -113,13 +114,14 @@ public class AvslagYrkesaktivMapperTest {
         brevData.arbeidsland = Landkoder.ES.getBeskrivelse();
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevData.anmodningsperiodeSvar = Optional.of(lagAnmodningsperiodeSvarAvslag());
+        brevData.yrkesaktivitet = Yrkesaktivitetstyper.LOENNET_ARBEID;
+
+        Vilkaarsresultat vilkår16_1_oppfylt = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, Art16_1_anmodning.ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+        brevData.art16Vilkaar = Optional.of(vilkår16_1_oppfylt);
 
         Behandlingsresultat resultat = lagBehandlingsresultat();
         Vilkaarsresultat vilkår12_1_avslått = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET);
         resultat.getVilkaarsresultater().add(vilkår12_1_avslått);
-
-        Vilkaarsresultat vilkår16_1_oppfylt = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, Art16_1_anmodning.ERSTATTER_EN_ANNEN_UNDER_5_AAR);
-        resultat.getVilkaarsresultater().add(vilkår16_1_oppfylt);
 
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");

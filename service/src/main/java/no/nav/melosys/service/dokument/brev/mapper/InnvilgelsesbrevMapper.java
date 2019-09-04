@@ -8,6 +8,7 @@ import no.nav.dok.melosysbrev._000108.ObjectFactory;
 import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
+import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -74,7 +75,11 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             fag.setArbeidPåSokkel(JA);
         }
 
-        brevdata.anmodningsperiodesvartype
+        brevdata.anmodningsperiodesvar.map(AnmodningsperiodeSvar::getBegrunnelseFritekst)
+            .ifPresent(fag::setBegrunnelseFritekst);
+
+        brevdata.anmodningsperiodesvar
+            .map(AnmodningsperiodeSvar::getAnmodningsperiodeSvarType)
             .map(Anmodningsperiodesvartyper::getKode)
             .map(AnmodningsPeriodeSvarTypeKode::valueOf)
             .ifPresent(fag::setAnmodningsPeriodeSvarType);

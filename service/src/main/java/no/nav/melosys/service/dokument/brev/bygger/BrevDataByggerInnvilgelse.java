@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -86,11 +85,11 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
 
-        brevdata.anmodningsperiodesvartype = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId())
+        brevdata.anmodningsperiodesvar = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId())
             .stream()
+            .filter(Anmodningsperiode::erSendtUtland)
             .findFirst()
-            .map(Anmodningsperiode::getAnmodningsperiodeSvar)
-            .map(AnmodningsperiodeSvar::getAnmodningsperiodeSvarType);
+            .map(Anmodningsperiode::getAnmodningsperiodeSvar);
 
         return brevdata;
     }

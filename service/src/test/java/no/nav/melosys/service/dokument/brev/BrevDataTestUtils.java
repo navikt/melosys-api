@@ -93,7 +93,8 @@ public class BrevDataTestUtils {
 
     public static AnmodningsperiodeSvar lagAnmodningsperiodeSvarInnvilgelse() {
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
+        anmodningsperiodeSvar.setBegrunnelseFritekst("OK");
         return anmodningsperiodeSvar;
     }
 }
