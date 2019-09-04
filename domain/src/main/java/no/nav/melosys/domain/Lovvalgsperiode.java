@@ -219,14 +219,14 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
             && harGyldigBestemmelse();
     }
 
-    public static Lovvalgsperiode av(Anmodningsperiode anmodningsperiode, Medlemskapstyper medlemskapstype) throws FunksjonellException {
-        AnmodningsperiodeSvar anmodningsperiodeSvar = anmodningsperiode.getAnmodningsperiodeSvar();
-
+    public static Lovvalgsperiode av(AnmodningsperiodeSvar anmodningsperiodeSvar,
+                                     Medlemskapstyper medlemskapstype) throws FunksjonellException {
         if (anmodningsperiodeSvar == null) {
             throw new FunksjonellException("Kan ikke opprette lovvalgsperiode fra anmodningsperiode " +
                 "uten at et svar er registrert!");
         }
 
+        Anmodningsperiode anmodningsperiode = anmodningsperiodeSvar.getAnmodningsperiode();
         InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.AVSLAG ?
             InnvilgelsesResultat.AVSLAATT : InnvilgelsesResultat.INNVILGET;
 

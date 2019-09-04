@@ -43,7 +43,7 @@ public abstract class AbstraktAvklarArbeidsgiveraktoer extends AbstraktStegBehan
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
 
-        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterSystemService.hentArbeidsgivere(behandling, INGEN_ADRESSE);
+        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterSystemService.hentNorskeArbeidsgivere(behandling, INGEN_ADRESSE);
         List<String> norskeOrgnumre = avklarteNorskeArbeidsgivere.stream()
             .map(avklartVirksomhet -> avklartVirksomhet.orgnr)
             .collect(Collectors.toList());

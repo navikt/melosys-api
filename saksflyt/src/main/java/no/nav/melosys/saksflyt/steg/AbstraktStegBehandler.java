@@ -78,9 +78,13 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
             String feilmelding = "RuntimeException ";
             log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
+        } catch (MelosysException e) {
+            String feilmelding = "Melosysexception ";
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
+            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
         }
     }
 
-    protected abstract void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException;
+    protected abstract void utfør(Prosessinstans prosessinstans) throws MelosysException;
 
 }

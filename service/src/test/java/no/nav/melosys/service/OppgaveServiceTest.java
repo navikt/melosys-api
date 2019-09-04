@@ -13,7 +13,10 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -66,7 +69,7 @@ public class OppgaveServiceTest {
         oppgaveBuilder.setTilordnetRessurs("Z998877");
         oppgaveBuilder.setSaksnummer("MEL-12345");
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).
+        when(gsakFasade.hentOppgaveMedSaksnummer(anyString())).
             thenAnswer((Answer<Oppgave>) invocation -> {
                 String string = invocation.getArgument(0);
                 if (string.equals("MEL-12345")) {

@@ -1,27 +1,37 @@
 package no.nav.melosys.service.avklartefakta;
 
+import java.util.List;
+import java.util.Map;
+
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.ARBEIDSLAND;
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.SOKKEL_ELLER_SKIP;
 
 public class AvklartMaritimtArbeid {
     private final String navn;
     private String land;
-    private Maritimtyper maritimtyper;
+    private Maritimtyper maritimtype;
 
-    public AvklartMaritimtArbeid(String navn) {
-        this.navn = navn;
+    public static AvklartMaritimtArbeid av(Map.Entry<String, List<Avklartefakta>> entry) {
+        return new AvklartMaritimtArbeid(entry.getKey(), entry.getValue());
     }
 
-    public void leggTilFakta(Avklartefakta avklartefakta) {
+    public AvklartMaritimtArbeid(String navn, List<Avklartefakta> maritimeFakta) {
+        this.navn = navn;
+        maritimeFakta.forEach(this::leggTilFakta);
+    }
+
+    private void leggTilFakta(Avklartefakta avklartefakta) {
         String fakta = avklartefakta.getFakta();
-        switch (avklartefakta.getType()) {
-            case SOKKEL_ELLER_SKIP:
-                maritimtyper = Maritimtyper.valueOf(fakta);
-                break;
-            case ARBEIDSLAND:
-                land = fakta;
-                break;
-            default:
+        Avklartefaktatyper type = avklartefakta.getType();
+
+        if (type == SOKKEL_ELLER_SKIP) {
+            maritimtype = Maritimtyper.valueOf(fakta);
+        } else if (type == ARBEIDSLAND) {
+            land = fakta;
         }
     }
 
@@ -34,6 +44,6 @@ public class AvklartMaritimtArbeid {
     }
 
     public Maritimtyper getMaritimtype() {
-        return maritimtyper;
+        return maritimtype;
     }
 }

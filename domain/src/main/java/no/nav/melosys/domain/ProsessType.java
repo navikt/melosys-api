@@ -6,6 +6,8 @@ public enum ProsessType implements Kodeverk {
 
     //alfabetisk rekkefølge
     ANMODNING_OM_UNNTAK("ANMODNING_OM_UNNTAK", "Anmodning om unntak"),
+    ANMODNING_OM_UNNTAK_MOTTAK("ANMODNING_OM_UNNTAK_MOTTAK", "Mottar anmodning om unntak"),
+    ANMODNING_OM_UNNTAK_MOTTAK_SVAR("ANMODNING_OM_UNNTAK_MOTTAK_SVAR", "Svar på mottatt anmodning om unntak"),
     ANMODNING_OM_UNNTAK_SVAR("ANMODNING_OM_UNNTAK_SVAR", "Mottar svar på anmodning om unntak"),
     HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
     IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),
@@ -15,6 +17,7 @@ public enum ProsessType implements Kodeverk {
     JFR_NY_SAK("JFR_NY_SAK", "Journalføring med ny sak og søknad"),
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
+    MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
     OPPFRISKNING("OPPFRISKNING", "Oppfriskning av saksopplysninger"),
     REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak");
 

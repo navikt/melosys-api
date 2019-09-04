@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import no.nav.melosys.domain.kodeverk.Kodeverk;
+import no.nav.melosys.exception.TekniskException;
 
 public enum ProsessSteg implements Kodeverk {
 
@@ -50,6 +51,23 @@ public enum ProsessSteg implements Kodeverk {
     AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR("AOU_OPPRETT_ANMODNINGSPERIODESVAR","Oppretter svar for en anmodningsperiode"),
     AOU_SVAR_OPPDATER_BEHANDLING("AOU_OPPDATER_BEHANDLING","Oppdater behandling"),
 
+    //Mottak anmodning om unntak
+    AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE("AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE", "Opprett anmodningsperiode"),
+    AOU_MOTTAK_OPPRETT_PERIODE_MEDL("AOU_MOTTAK_OPPRETT_PERIODE_MEDL", "Opprett periode under avklaring i Medl"),
+    AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET("AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
+    AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE("AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode Medl hvis SED er endring"),
+    AOU_MOTTAK_OPPRETT_SEDDOKUMENT("AOU_MOTTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
+    AOU_MOTTAK_HENT_PERSON("AOU_MOTTAK_HENT_PERSON", "Henter person tilknyttet SED"),
+    AOU_MOTTAK_HENT_MEDLEMSKAP("AOU_MOTTAK_HENT_MEDLEMSKAP", "Henter opplysninger om medlemskap"),
+    AOU_MOTTAK_HENT_YTELSER("AOU_MOTTAK_HENT_YTELSER", "Henter opplysninger om ytelser"),
+    AOU_MOTTAK_REGISTERKONTROLL("AOU_MOTTAK_REGISTERKONTROLL", "Validerer informasjon om en unntaksperiode"),
+    AOU_MOTTAK_OPPRETT_OPPGAVE("AOU_MOTTAK_OPPRETT_OPPGAVE", "Opprett oppgave for manuell behandling"),
+
+    //Svar på mottatt anmodning om unntak
+    AOU_MOTTAK_SVAR_SEND_SED("AOU_MOTTAK_SVAR_SEND_SED","Send svar-sed"),
+    AOU_MOTTAK_SVAR_OPPDATER_MEDL("AOU_MOTTAK_SVAR_OPPDATER_MEDL", "Oppdater periode i Medl"),
+    AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET("AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET","Oppdaterer status på sak i sob til avsluttet"),
+
     //Iverksett Vedtak
     IV_FORKORT_PERIODE("IV_FORKORT_PERIODE", "Legger til endringsgrunn i AVKLARTEFAKTA for hvorfor perioden er forkortet"),
     IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),
@@ -71,11 +89,15 @@ public enum ProsessSteg implements Kodeverk {
     HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
 
     //Mottak av SED
-    SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
+    SED_MOTTAK_HENT_EESSI_MELDING("SED_MOTTAK_HENT_EESSI_MELDING", "Henter saksopplysninger fra mottatt SED"),
     SED_MOTTAK_RUTING("SED_MOTTAK_RUTING", "Bestemmer videre behandling for innkommende SED"),
+    SED_MOTTAK_OPPRETT_NY_BEHANDLING("SED_MOTTAK_OPPRETT_NY_BEHANDLING", "Oppretter ny behandling for oppdatert SED"),
+    SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH("SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH","Opprett fagsak og behandling"),
+    SED_MOTTAK_OPPRETT_SAK("SED_MOTTAK_OPPRETT_SAK","Oppretter sak for ny behandling"),
+    SED_MOTTAK_OPPDATER_SAKSRELASJON("SED_MOTTAK_OPPDATER_SAKSRELASJON","Oppdaterer saksrelasjon for ny gsak-sak"),
+    SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
 
     //Unntak medlemskap
-    REG_UNNTAK_OPPRETT_SAK_OG_BEH("REG_UNNTAK_OPPRETT_SAK_OG_BEH","Opprett sak og behandling"),
     REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
     REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
     REG_UNNTAK_OPPRETT_SEDDOKUMENT("REG_UNNTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
@@ -110,5 +132,18 @@ public enum ProsessSteg implements Kodeverk {
     @Override
     public String getBeskrivelse() {
         return beskrivelse;
+    }
+
+    public static ProsessSteg hentFørsteProsessStegForType(final ProsessType prosessType) throws TekniskException {
+        switch (prosessType)  {
+            case REGISTRERING_UNNTAK:
+                return REG_UNNTAK_OPPRETT_SEDDOKUMENT;
+            case ANMODNING_OM_UNNTAK_SVAR:
+                return AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR;
+            case ANMODNING_OM_UNNTAK_MOTTAK:
+                return AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE;
+            default:
+                throw new TekniskException("Første steg for prosesstype" + prosessType + " er ukjent");
+        }
     }
 }

@@ -4,9 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.SaksopplysningRepository;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,41 +12,34 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HentMedlemskapsopplysningerTest {
 
     @Mock
-    private SaksopplysningRepository saksopplysningRepository;
-    @Mock
-    private MedlFasade medlFasade;
-    @Mock
-    private BehandlingService behandlingService;
+    private HentOpplysningerFelles hentOpplysningerFelles;
 
     private HentMedlemskapsopplysninger hentMedlemskapsopplysninger;
 
     @Before
-    public void setUp() throws Exception {
-        hentMedlemskapsopplysninger = new HentMedlemskapsopplysninger(saksopplysningRepository,medlFasade, behandlingService);
-        when(medlFasade.hentPeriodeListe(anyString(), any(LocalDate.class), any()))
-            .thenReturn(new Saksopplysning());
+    public void setUp() {
+        hentMedlemskapsopplysninger = new HentMedlemskapsopplysninger(hentOpplysningerFelles);
     }
 
     @Test
     public void utfør() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now(), LocalDate.now()),false);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
         hentMedlemskapsopplysninger.utfør(prosessinstans);
-        verify(medlFasade).hentPeriodeListe(anyString(), any(), any());
+        verify(hentOpplysningerFelles).hentOgLagreMedlemskapsopplysninger(anyLong(), anyString());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_HENT_YTELSER);
     }
 
     private Prosessinstans hentProsessinstans(Saksopplysning saksopplysning, boolean erEndring) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.ER_ENDRING, erEndring);
+        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, erEndring);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "123123");
 
         Behandling behandling = new Behandling();

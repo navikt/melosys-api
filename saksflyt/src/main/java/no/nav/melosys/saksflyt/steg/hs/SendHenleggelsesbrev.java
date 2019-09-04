@@ -55,7 +55,7 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(MELDING_HENLAGT_SAK)
             .medAvsender(saksbehandler)
-            .medMottaker(Mottaker.av(Aktoersroller.BRUKER))
+            .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)
             .medFritekst(fritekst).build();

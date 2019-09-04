@@ -55,7 +55,7 @@ public class EessiConsumerImpl implements EessiConsumer {
 
     @Override
     public void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) throws MelosysException {
-        exchange("/sak", HttpMethod.POST, new HttpEntity<>(getDefaultHeaders()),
+        exchange("/sak", HttpMethod.POST, new HttpEntity<>(saksrelasjonDto, getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 
@@ -64,6 +64,13 @@ public class EessiConsumerImpl implements EessiConsumer {
         return exchange(String.format("/sak?rinaSaksnummer=%s", rinaSaksnummer), HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SaksrelasjonDto>>() {
         });
+    }
+
+    @Override
+    public void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException {
+        exchange(String.format("/buc/LA_BUC_01/%s/svar", rinaSaksnummer), HttpMethod.POST,
+            new HttpEntity<>(svarAnmodningUnntakDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
+            });
     }
 
     @Override

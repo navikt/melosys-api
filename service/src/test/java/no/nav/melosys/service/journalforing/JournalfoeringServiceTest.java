@@ -6,7 +6,6 @@ import java.util.Arrays;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -107,10 +106,9 @@ public class JournalfoeringServiceTest {
         journalpost.setMottaksKanal("EESSI");
         journalpost.getHoveddokument().setNavSkjemaID("A009");
         when(eessiService.støtterAutomatiskBehandling(anyString(), anyString())).thenReturn(Boolean.TRUE);
-        when(eessiService.hentSedTilknyttetJournalpost(opprettDto.getJournalpostID())).thenReturn(new MelosysEessiMelding());
 
         journalfoeringService.opprettOgJournalfør(opprettDto);
-        verify(prosessinstansService).opprettProsessinstansSedMottak(any(MelosysEessiMelding.class), anyString());
+        verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(),anyString());
     }
 
     @Test

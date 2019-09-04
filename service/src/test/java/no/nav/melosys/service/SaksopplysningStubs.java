@@ -8,6 +8,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 
@@ -25,7 +26,7 @@ public class SaksopplysningStubs {
         return arbeidsforhold;
     }
 
-    public static Saksopplysning lagSøknadOpplysning(List<String> selvstendigeForetak, List<String> ekstraArbeidsgivere) {
+    public static Saksopplysning lagSøknadOpplysning(List<String> selvstendigeForetak, List<ForetakUtland> foretakUtland, List<String> ekstraArbeidsgivere) {
         SoeknadDokument søknad = new SoeknadDokument();
         for (String orgnr : selvstendigeForetak) {
             SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
@@ -37,7 +38,8 @@ public class SaksopplysningStubs {
         arbeidUtland.adresse.landkode = "DE";
         søknad.arbeidUtland = new ArrayList<>();
         søknad.arbeidUtland.add(arbeidUtland);
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.addAll(ekstraArbeidsgivere);
+        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere;
+        søknad.foretakUtland = foretakUtland;
         søknad.soeknadsland.landkoder.add("DE");
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -48,7 +50,7 @@ public class SaksopplysningStubs {
     }
 
     public static Set<Saksopplysning> lagSøknadOgArbeidsforholdOpplysninger(List<String> selvstendigeForetak, List<String> ekstraArbeidsgivere, List<String> registrerteArbeidsgivere) {
-        Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, ekstraArbeidsgivere);
+        Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, null, ekstraArbeidsgivere);
         Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(registrerteArbeidsgivere);
         return new HashSet<>(Arrays.asList(søknad, arbeidsforhold));
     }

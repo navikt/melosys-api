@@ -4,7 +4,6 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
@@ -93,8 +92,7 @@ public class JournalfoeringService {
 
     private void opprettProsessinstansSedMottak(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         validerBrukerIDFinnes(journalfoeringDto);
-        MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalfoeringDto.getJournalpostID());
-        prosessinstansService.opprettProsessinstansSedMottak(melosysEessiMelding, journalfoeringDto.getBrukerID());
+        prosessinstansService.opprettProsessinstansSedMottak(journalfoeringDto.getJournalpostID(), journalfoeringDto.getBrukerID());
     }
 
     private void validerBrukerIDFinnes(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {

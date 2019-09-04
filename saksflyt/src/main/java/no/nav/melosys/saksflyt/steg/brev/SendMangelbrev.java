@@ -65,7 +65,7 @@ public class SendMangelbrev extends AbstraktStegBehandler {
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(MELDING_MANGLENDE_OPPLYSNINGER)
             .medAvsender(saksbehandler)
-            .medMottaker(Mottaker.av(mottaker))
+            .medMottakere(Mottaker.av(mottaker))
             .medBehandling(behandling)
             .medFritekst(fritekst).build();
         brevBestiller.bestill(brevbestilling);

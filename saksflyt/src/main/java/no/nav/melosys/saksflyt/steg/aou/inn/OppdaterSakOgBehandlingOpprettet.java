@@ -1,0 +1,46 @@
+package no.nav.melosys.saksflyt.steg.aou.inn;
+
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
+import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.saksflyt.steg.sob.SakOgBehandlingStegBehander;
+import no.nav.melosys.service.BehandlingService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+@Component("AnmodningUnntakMottakOppdaterSakOgBehandlingOpprettet")
+public class OppdaterSakOgBehandlingOpprettet extends SakOgBehandlingStegBehander {
+    private static final Logger log = LoggerFactory.getLogger(OppdaterSakOgBehandlingOpprettet.class);
+
+    protected OppdaterSakOgBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
+        super(sakOgBehandlingFasade, tpsService, behandlingService);
+    }
+
+    @Override
+    protected ProsessSteg inngangsSteg() {
+        return ProsessSteg.AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET;
+    }
+
+    @Override
+    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+
+        long behandlingId = prosessinstans.getBehandling().getId();
+        String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
+
+        if (StringUtils.isEmpty(aktørId)) {
+            throw new TekniskException("Aktørid finnes ikke for behandling " + behandlingId);
+        }
+
+        String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
+        sakOgBehandlingOpprettet(saksnummer, behandlingId, aktørId);
+
+        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE);
+    }
+}

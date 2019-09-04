@@ -235,7 +235,7 @@ public class AvklartefaktaServiceTest {
 
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), any(), eq("TRUE"))).thenReturn(new HashSet<>(Arrays.asList(avklartefakta)));
 
-        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(1L);
+        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrgnrOgUuid(1L);
         assertThat(avklarteOrgnumre).containsOnly(orgnr1);
     }
 

@@ -38,7 +38,7 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
 
         log.info("Henter behandlingsoppgave for fagsak {}", saksnummer);
-        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+        Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
         String behandlingsoppgaveId = oppgave.getOppgaveId();
 
         log.info("Tildeler behandlingsoppgave {} til saksbehandler {}", behandlingsoppgaveId, saksbehandler);
