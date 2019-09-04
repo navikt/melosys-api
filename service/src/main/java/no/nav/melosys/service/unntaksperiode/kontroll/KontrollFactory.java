@@ -36,7 +36,7 @@ class KontrollFactory {
             UnntaksperiodeKontroller::personDød,
             UnntaksperiodeKontroller::personBosattINorge,
             UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode,
-            UnntaksperiodeKontroller::utbetaltBarnetrygdytelserIPeriode
+            UnntaksperiodeKontroller::utbetaltBarnetrygdytelser
         );
     }
 
@@ -51,7 +51,7 @@ class KontrollFactory {
             UnntaksperiodeKontroller::statsborgerskapIkkeMedlemsland,
             UnntaksperiodeKontroller::personDød,
             UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode,
-            UnntaksperiodeKontroller::utbetaltBarnetrygdytelserIPeriode
+            UnntaksperiodeKontroller::utbetaltBarnetrygdytelser
         );
     }
 
@@ -65,7 +65,7 @@ class KontrollFactory {
             UnntaksperiodeKontroller::statsborgerskapIkkeMedlemsland,
             UnntaksperiodeKontroller::personDød,
             UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode,
-            UnntaksperiodeKontroller::utbetaltBarnetrygdytelserIPeriode
+            UnntaksperiodeKontroller::utbetaltBarnetrygdytelser
         );
     }
 }

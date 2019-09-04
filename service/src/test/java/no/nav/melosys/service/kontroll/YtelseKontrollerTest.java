@@ -79,7 +79,7 @@ public class YtelseKontrollerTest {
 
     @Test
     public void utbetaltBarnetrygdytelserIPeriode_harIngenUtbetalingDokument_forventFalse() {
-        assertThat(YtelseKontroller.utbetaltBarnetrygdytelserIPeriode(null)).isFalse();
+        assertThat(YtelseKontroller.utbetaltBarnetrygdytelser(null)).isFalse();
     }
 
     @Test
@@ -87,8 +87,8 @@ public class YtelseKontrollerTest {
         UtbetalingDokument utbetalingDokument = new UtbetalingDokument();
         utbetalingDokument.utbetalinger = Collections.emptyList();
 
-        assertThat(YtelseKontroller.utbetaltBarnetrygdytelserIPeriode(utbetalingDokument)).isFalse();
-        assertThat(YtelseKontroller.utbetaltBarnetrygdytelserIPeriode(new UtbetalingDokument())).isFalse();
+        assertThat(YtelseKontroller.utbetaltBarnetrygdytelser(utbetalingDokument)).isFalse();
+        assertThat(YtelseKontroller.utbetaltBarnetrygdytelser(new UtbetalingDokument())).isFalse();
     }
 
     @Test
@@ -96,7 +96,7 @@ public class YtelseKontrollerTest {
         UtbetalingDokument utbetalingDokument = new UtbetalingDokument();
         utbetalingDokument.utbetalinger = Arrays.asList(new Utbetaling(), new Utbetaling());
 
-        assertThat(YtelseKontroller.utbetaltBarnetrygdytelserIPeriode(utbetalingDokument)).isTrue();
+        assertThat(YtelseKontroller.utbetaltBarnetrygdytelser(utbetalingDokument)).isTrue();
     }
 
 

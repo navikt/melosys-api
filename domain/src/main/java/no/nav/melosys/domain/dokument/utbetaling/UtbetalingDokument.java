@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.utbetaling;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.*;
 
@@ -11,5 +12,5 @@ public class UtbetalingDokument implements SaksopplysningDokument {
 
     @XmlElementWrapper(name = "utbetalinger")
     @XmlElement(name = "utbetaling")
-    public List<Utbetaling> utbetalinger;
+    public List<Utbetaling> utbetalinger = new ArrayList<>();
 }

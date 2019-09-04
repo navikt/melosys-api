@@ -138,7 +138,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
     private static HentUtbetalingsinformasjonResponse filtrerYtelserAvTypeBarnetrygd(HentUtbetalingsinformasjonResponse response) {
         response.getUtbetalingListe().removeIf(utbetaling ->  utbetaling.getYtelseListe().stream()
-            .anyMatch(ytelse -> !ytelse.getYtelsestype().getValue().equalsIgnoreCase(BARNETRYGD)));
+            .noneMatch(ytelse -> ytelse.getYtelsestype().getValue().equalsIgnoreCase(BARNETRYGD)));
 
         return response;
     }

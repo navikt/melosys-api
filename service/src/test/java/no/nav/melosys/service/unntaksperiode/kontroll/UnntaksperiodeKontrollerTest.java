@@ -58,8 +58,8 @@ public class UnntaksperiodeKontrollerTest {
     }
 
     @Test
-    public void utbetaltBarnetrygdytelserIPeriode_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.utbetaltBarnetrygdytelserIPeriode(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
+    public void utbetaltBarnetrygdytelser_erFeil_verifiserBegrunnelse() {
+        assertThat(UnntaksperiodeKontroller.utbetaltBarnetrygdytelser(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
     }
 
     @Test

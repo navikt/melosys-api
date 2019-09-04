@@ -35,8 +35,8 @@ public final class YtelseKontroller {
         return false;
     }
 
-    public static boolean utbetaltBarnetrygdytelserIPeriode(UtbetalingDokument utbetalingDokument) {
-        return !(utbetalingDokument == null || utbetalingDokument.utbetalinger == null || utbetalingDokument.utbetalinger.isEmpty());
+    public static boolean utbetaltBarnetrygdytelser(UtbetalingDokument utbetalingDokument) {
+        return utbetalingDokument != null && utbetalingDokument.utbetalinger != null && !utbetalingDokument.utbetalinger.isEmpty();
     }
 
     private static boolean erUtbetaltIPeriode(YtelseFraOffentlige ytelseFraOffentlige, YearMonth fom, YearMonth tom) {
