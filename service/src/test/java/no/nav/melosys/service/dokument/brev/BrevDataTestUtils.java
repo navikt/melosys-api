@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
+import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -9,6 +10,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -80,5 +82,19 @@ public class BrevDataTestUtils {
         maritimtArbeid.enhetNavn = "Dunfjæder";
         maritimtArbeid.flaggLandkode = Landkoder.GB.getKode();
         return maritimtArbeid;
+    }
+
+    public static AnmodningsperiodeSvar lagAnmodningsperiodeSvarAvslag() {
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setBegrunnelseFritekst("No tiendo");
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
+        return anmodningsperiodeSvar;
+    }
+
+    public static AnmodningsperiodeSvar lagAnmodningsperiodeSvarInnvilgelse() {
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
+        anmodningsperiodeSvar.setBegrunnelseFritekst("OK");
+        return anmodningsperiodeSvar;
     }
 }

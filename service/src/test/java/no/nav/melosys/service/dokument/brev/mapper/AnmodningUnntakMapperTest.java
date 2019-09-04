@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 
 import com.google.common.collect.Sets;
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
@@ -89,7 +90,6 @@ public class AnmodningUnntakMapperTest {
         VilkaarBegrunnelse begrunnelse_16_1 = new VilkaarBegrunnelse();
         begrunnelse_16_1.setKode(Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode());
         vilkaarsresultat16_1.setBegrunnelser(Collections.singleton(begrunnelse_16_1));
-        resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         Anmodningsperiode anmodningsperiode =
@@ -99,6 +99,8 @@ public class AnmodningUnntakMapperTest {
 
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
+        brevData.yrkesaktivitet = Yrkesaktivitetstyper.SELVSTENDIG;
+        brevData.art16Vilkaar = Optional.of(vilkaarsresultat16_1);
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 

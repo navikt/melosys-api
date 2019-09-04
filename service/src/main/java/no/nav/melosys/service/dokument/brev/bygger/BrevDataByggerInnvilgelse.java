@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -17,12 +18,14 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 
 public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
     private final AvklartefaktaService avklartefaktaService;
     private final BrevbestillingDto brevbestillingDto;
     private final BrevDataByggerA1 brevbyggerA1;
+    private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
     private DokumentdataGrunnlag dataGrunnlag;
@@ -30,9 +33,11 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landvelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
+                                     AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
+        this.anmodningsperiodeService = anmodningsperiodeService;
         this.brevbestillingDto = brevbestillingDto;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.brevbyggerA1 = null;
@@ -41,10 +46,12 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landvelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
+                                     AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
                                      BrevDataByggerA1 brevbyggerA1) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
+        this.anmodningsperiodeService = anmodningsperiodeService;
         this.brevbestillingDto = brevbestillingDto;
         this.brevbyggerA1 = brevbyggerA1;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -77,6 +84,12 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
+
+        brevdata.anmodningsperiodesvar = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId())
+            .stream()
+            .filter(Anmodningsperiode::erSendtUtland)
+            .findFirst()
+            .map(Anmodningsperiode::getAnmodningsperiodeSvar);
 
         return brevdata;
     }
