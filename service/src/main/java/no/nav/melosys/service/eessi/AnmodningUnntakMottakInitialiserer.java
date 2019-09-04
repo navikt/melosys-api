@@ -8,6 +8,7 @@ import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.sak.FagsakService;
@@ -47,7 +48,7 @@ public class AnmodningUnntakMottakInitialiserer implements BehandleMottattSedIni
     }
 
     @Override
-    public boolean gjelderSedType(SedType sedType) {
+    public boolean gjelderSedType(SedType sedType, Landkoder lovvalgsland) {
         return sedType == SedType.A001;
     }
 

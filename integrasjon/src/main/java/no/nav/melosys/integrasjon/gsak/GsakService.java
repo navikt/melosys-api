@@ -41,6 +41,7 @@ public class GsakService implements GsakFasade {
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
+    private static final String OPPGAVE_TYPE_JFR = "JFR";
 
     private final SakConsumer sakConsumer;
 
@@ -79,6 +80,11 @@ public class GsakService implements GsakFasade {
         }
         log.info("Sak opprettet i GSAK med saksnummer: {}", sakDto.getId());
         return sakDto.getId();
+    }
+
+    @Override
+    public Tema hentTemaFraSak(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
+        return Tema.valueOf(sakConsumer.hentSak(gsakSaksnummer).getTema());
     }
 
     @Override
@@ -158,6 +164,16 @@ public class GsakService implements GsakFasade {
             throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
         }
         oppgave.setTilordnetRessurs(null);
+        oppgaveConsumer.oppdaterOppgave(oppgave);
+    }
+
+    @Override
+    public void oppdaterOppgavePrioritet(String oppgaveId, PrioritetType prioritet) throws FunksjonellException, TekniskException {
+        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
+        if (oppgave == null) {
+            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
+        }
+        oppgave.setPrioritet(prioritet.name());
         oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
@@ -276,6 +292,22 @@ public class GsakService implements GsakFasade {
         }
         oppgave.setTilordnetRessurs(saksbehandlerID);
         oppgaveConsumer.oppdaterOppgave(oppgave);
+    }
+
+    @Override
+    public String opprettJournalføringsOppgave(String journalpostID, String aktørID, Tema tema) throws FunksjonellException, TekniskException {
+
+        OpprettOppgaveDto opprettOppgaveDto = new OpprettOppgaveDto();
+        opprettOppgaveDto.setJournalpostId(journalpostID);
+        opprettOppgaveDto.setAktørId(aktørID);
+        opprettOppgaveDto.setTema(tema.getKode());
+
+        opprettOppgaveDto.setPrioritet("NORM");
+        opprettOppgaveDto.setAktivDato(LocalDate.now());
+        opprettOppgaveDto.setFristFerdigstillelse(LocalDate.now().plusDays(7));
+        opprettOppgaveDto.setOppgavetype(OPPGAVE_TYPE_JFR);
+        opprettOppgaveDto.setTildeltEnhetsnr(String.valueOf(MELOSYS_ENHET_ID));
+        return oppgaveConsumer.opprettOppgave(opprettOppgaveDto);
     }
 
     /**

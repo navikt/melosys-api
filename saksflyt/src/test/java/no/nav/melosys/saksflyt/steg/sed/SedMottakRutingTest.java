@@ -9,6 +9,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.BehandleMottattSedInitialiserer;
+import no.nav.melosys.service.eessi.ManuellBehandlingSed;
 import no.nav.melosys.service.eessi.RutingResultat;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,14 +27,16 @@ public class SedMottakRutingTest {
     @Mock
     private BehandleMottattSedInitialiserer behandleMottattSedInitialiserer;
     @Mock
+    private ManuellBehandlingSed manuellBehandlingSed;
+    @Mock
     private EessiService eessiService;
 
     private SedMottakRuting sedMottakRuting;
 
     @Before
     public void setUp() throws MelosysException {
-        sedMottakRuting = new SedMottakRuting(Collections.singleton(behandleMottattSedInitialiserer), eessiService);
-        when(behandleMottattSedInitialiserer.gjelderSedType(any())).thenReturn(true);
+        sedMottakRuting = new SedMottakRuting(Collections.singleton(behandleMottattSedInitialiserer), manuellBehandlingSed, eessiService);
+        when(behandleMottattSedInitialiserer.gjelderSedType(any(), any())).thenReturn(true);
         when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(1L));
     }
 
@@ -119,7 +122,7 @@ public class SedMottakRutingTest {
     private MelosysEessiMelding hentMelosysEessiMelding() {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setSedType("A009");
-        melosysEessiMelding.setRinaSaksnummer("rinarinarina");
+        melosysEessiMelding.setRinaSaksnummer("57483697");
         return melosysEessiMelding;
     }
 }

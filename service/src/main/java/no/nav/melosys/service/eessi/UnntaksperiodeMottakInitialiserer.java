@@ -6,6 +6,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -52,8 +53,8 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
     }
 
     @Override
-    public boolean gjelderSedType(SedType sedType) {
-        return sedType == SedType.A003
+    public boolean gjelderSedType(SedType sedType, Landkoder lovvalgsland) {
+        return (sedType == SedType.A003 && lovvalgsland != Landkoder.NO)
             || sedType == SedType.A009
             || sedType == SedType.A010;
     }

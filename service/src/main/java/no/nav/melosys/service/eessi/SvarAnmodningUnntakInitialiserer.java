@@ -3,6 +3,7 @@ package no.nav.melosys.service.eessi;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -45,7 +46,7 @@ public class SvarAnmodningUnntakInitialiserer implements BehandleMottattSedIniti
     }
 
     @Override
-    public boolean gjelderSedType(SedType sedType) {
+    public boolean gjelderSedType(SedType sedType, Landkoder lovvalgsland) {
         return sedType == SedType.A011
             || sedType == SedType.A002;
     }

@@ -158,4 +158,27 @@ public class MelosysEessiMelding {
     public void setAnmodningUnntak(AnmodningUnntak anmodningUnntak) {
         this.anmodningUnntak = anmodningUnntak;
     }
+
+    @Override
+    public String toString() {
+        return "MelosysEessiMelding{" +
+            "sedId='" + sedId + '\'' +
+            ", rinaSaksnummer='" + rinaSaksnummer + '\'' +
+            ", journalpostId='" + journalpostId + '\'' +
+            ", dokumentId='" + dokumentId + '\'' +
+            ", gsakSaksnummer=" + gsakSaksnummer +
+            ", aktoerId='" + aktoerId + '\'' +
+            ", statsborgerskap=" + statsborgerskap +
+            ", periode=" + periode +
+            ", lovvalgsland='" + lovvalgsland + '\'' +
+            ", artikkel='" + artikkel + '\'' +
+            ", erEndring=" + erEndring +
+            ", midlertidigBestemmelse=" + midlertidigBestemmelse +
+            ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
+            ", bucType='" + bucType + '\'' +
+            ", sedType='" + sedType + '\'' +
+            ", svarAnmodningUnntak=" + svarAnmodningUnntak +
+            ", anmodningUnntak=" + anmodningUnntak +
+            '}';
+    }
 }
