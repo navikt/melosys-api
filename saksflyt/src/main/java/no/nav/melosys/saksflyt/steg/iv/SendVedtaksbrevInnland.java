@@ -31,22 +31,20 @@ import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
  * Sender ulike brev basert på behandlingsresultat og lovvalgsbestemmelse.
  */
 @Component
-public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(IverksettVedtakSendBrev.class);
+public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
+    private static final Logger log = LoggerFactory.getLogger(SendVedtaksbrevInnland.class);
 
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public IverksettVedtakSendBrev(BrevBestiller brevBestiller,
-                                   BehandlingService behandlingService,
-                                   BehandlingsresultatService behandlingsresultatService) {
+    public SendVedtaksbrevInnland(BrevBestiller brevBestiller,
+                                  BehandlingService behandlingService,
+                                  BehandlingsresultatService behandlingsresultatService) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-
-        log.info("IverksetteVedtakSendBrev initialisert");
     }
 
     @Override
@@ -133,12 +131,10 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     }
 
     private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {
-
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         if (StringUtils.isEmpty(saksbehandler) && behandlingsresultat.erAutomatisert()) {
             saksbehandler = prosessinstans.getBehandling().getFagsak().getRegistrertAv();
         }
-
         return saksbehandler;
     }
 }

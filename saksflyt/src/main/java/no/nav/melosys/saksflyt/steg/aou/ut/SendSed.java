@@ -35,7 +35,6 @@ public class SendSed extends AbstraktSendSed {
     @Autowired
     public SendSed(BehandlingRepository behandlingRepository, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
         super(behandlingRepository, eessiService, behandlingsresultatService);
-        log.info("IverksettVedtakSendSed initialisert");
     }
 
     @Override

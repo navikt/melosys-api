@@ -2,11 +2,14 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,12 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class IverksettVedtakSendSedTest {
+public class SendVedtakUtlandTest {
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
@@ -30,7 +34,7 @@ public class IverksettVedtakSendSedTest {
     private EessiService eessiService;
 
     @InjectMocks
-    private IverksettVedtakSendSed iverksettVedtakSendSed;
+    private SendVedtakUtland sendVedtakUtland;
 
     private Prosessinstans prosessinstans;
     
@@ -55,7 +59,7 @@ public class IverksettVedtakSendSedTest {
 
     @Test
     public void utførSteg_suksessfull_statusErAvgiftsoppgave() throws Exception{
-        iverksettVedtakSendSed.utfør(prosessinstans);
+        sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE));
     }
@@ -63,7 +67,7 @@ public class IverksettVedtakSendSedTest {
     @Test
     public void utførStegForArtikkel11_suksessfull_statusErAvsluttBehandling() throws Exception {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
-        iverksettVedtakSendSed.utfør(prosessinstans);
+        sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
     }

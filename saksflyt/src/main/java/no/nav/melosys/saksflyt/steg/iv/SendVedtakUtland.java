@@ -17,14 +17,12 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class IverksettVedtakSendSed extends AbstraktSendSed {
-
-    private static final Logger log = LoggerFactory.getLogger(IverksettVedtakSendSed.class);
+public class SendVedtakUtland extends AbstraktSendSed {
+    private static final Logger log = LoggerFactory.getLogger(SendVedtakUtland.class);
 
     @Autowired
-    public IverksettVedtakSendSed(BehandlingRepository behandlingRepository, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
+    public SendVedtakUtland(BehandlingRepository behandlingRepository, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
         super(behandlingRepository, eessiService, behandlingsresultatService);
-        log.info("IverksettVedtakSendSed initialisert");
     }
 
     @Override

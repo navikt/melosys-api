@@ -43,9 +43,9 @@ import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class IverksettVedtakSendBrevTest {
+public class SendVedtaksbrevInnlandTest {
 
-    private final IverksettVedtakSendBrev agent;
+    private final SendVedtaksbrevInnland agent;
     private static final long BEHANDLINGSID = 42L;
     private static final long IKKE_EKSISTERENDE_BEHANDLINGSID = -42L;
     private static final long BEHANDLINGSID_UTEN_PERIODER = -43L;
@@ -60,11 +60,11 @@ public class IverksettVedtakSendBrevTest {
     private static final long ART13_1A_INNVILGET_BEHANDLINGSID = 51L;
     private static DokumentSystemService dokService;
 
-    public IverksettVedtakSendBrevTest() throws Exception {
+    public SendVedtaksbrevInnlandTest() throws Exception {
         agent = lagStegbehandler(lagBehandling(ART16_1_INNVILGET_BEHANDLINGSID));
     }
 
-    private static IverksettVedtakSendBrev lagStegbehandler(Behandling behandling) throws Exception {
+    private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling) throws Exception {
         BehandlingsresultatService behandlingsresultatService = mockBehandlingsresultatService();
 
         String saksbehandler = "Z123456";
@@ -100,7 +100,7 @@ public class IverksettVedtakSendBrevTest {
 
         dokService = spy(lagDokumentService(byggerVelger));
         BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger, mock(DokumentdataGrunnlagFactory.class));
-        return new IverksettVedtakSendBrev(brevBestiller, behandlingService, behandlingsresultatService);
+        return new SendVedtaksbrevInnland(brevBestiller, behandlingService, behandlingsresultatService);
     }
 
     private static BehandlingRepository mockBehandlingRepository() {
@@ -409,7 +409,7 @@ public class IverksettVedtakSendBrevTest {
 
         instans.utførSteg(prosessinstans);
 
-        verify(dokService, atLeastOnce()).produserDokument(any(Produserbaredokumenter.class), any(Mottaker.class), anyLong(), captor.capture());
+        verify(dokService, atLeastOnce()).produserDokument(any(Produserbaredokumenter.class), eq(Mottaker.av(BRUKER)), anyLong(), captor.capture());
         assertThat(captor.getValue().begrunnelseKode).isEqualTo(Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
