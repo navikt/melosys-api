@@ -298,16 +298,6 @@ public class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    public void utførSteg_innvilgelses12_1_kopiAvA1Sendes() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
-        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        instans.utførSteg(prosessinstans);
-
-        verify(dokService).produserDokument(eq(ATTEST_A1), eq(Mottaker.av(MYNDIGHET)), anyLong(), any());
-    }
-
-    @Test
     public final void utførStegPåInnvilgelsesBrevBestemtAv12_1_vedtakSendIkkeA1() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
         prosessinstans.getBehandling().getFagsak().hentMyndigheter().iterator().next().setInstitusjonId("CZ:1e1");

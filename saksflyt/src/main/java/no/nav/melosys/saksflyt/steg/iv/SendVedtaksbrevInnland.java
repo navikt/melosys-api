@@ -100,19 +100,13 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
 
     private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, Behandlingsresultat resultat, String saksbehandler)
         throws FunksjonellException, TekniskException {
-        Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);
-        String begrunnelseKode = null;
-        if (endretPeriodeBegrunnelseKode != null) {
-            begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
-        }
-
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
         Brevbestilling innvilgelseBrukerOgSkatt = new Brevbestilling.Builder().medDokumentType(innvilgelseType)
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
-            .medBegrunnelseKode(begrunnelseKode)
+            .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans))
             .medMottakere(Mottaker.av(BRUKER), FastMottaker.av(SKATT))
             .build();
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
@@ -121,13 +115,15 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
             brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
         }
+    }
 
-        Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-            .medAvsender(saksbehandler)
-            .medMottakere(Mottaker.av(MYNDIGHET))
-            .medBehandling(behandling)
-            .medBegrunnelseKode(begrunnelseKode).build();
-        brevBestiller.bestill(A1_Myndighet);
+    private String hentBegrunnelseKode(Prosessinstans prosessinstans) {
+        Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);
+        String begrunnelseKode = null;
+        if (endretPeriodeBegrunnelseKode != null) {
+            begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
+        }
+        return begrunnelseKode;
     }
 
     private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {
