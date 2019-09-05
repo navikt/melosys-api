@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("oppdaterSaksrelasjonSedMottak")
 public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
 
     private static Logger log = LoggerFactory.getLogger(OppdaterSaksrelasjon.class);
