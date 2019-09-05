@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktSendSed;
+import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -25,14 +25,14 @@ import org.springframework.stereotype.Component;
  *  AOU_SEND_SED -> FERDIG eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class SendSed extends AbstraktSendSed {
-    private static final Logger log = LoggerFactory.getLogger(SendSed.class);
+public class SendUtland extends AbstraktSendUtland {
+    private static final Logger log = LoggerFactory.getLogger(SendUtland.class);
 
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
     private static final int SVARFRIST_MÅNEDER = 2;
 
     @Autowired
-    public SendSed(BehandlingService behandlingService, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
+    public SendUtland(BehandlingService behandlingService, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
         super(behandlingService, eessiService, behandlingsresultatService);
     }
 

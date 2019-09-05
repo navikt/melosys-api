@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.steg.AbstraktSendSed;
+import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -24,7 +24,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_
 
 
 @Component
-public class SendVedtakUtland extends AbstraktSendSed {
+public class SendVedtakUtland extends AbstraktSendUtland {
     private static final Logger log = LoggerFactory.getLogger(SendVedtakUtland.class);
 
     private BrevBestiller brevBestiller;

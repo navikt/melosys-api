@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendSedTest {
+public class SendUtlandTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -33,7 +33,7 @@ public class SendSedTest {
     @Mock
     private EessiService eessiService;
 
-    private SendSed sendSed;
+    private SendUtland sendUtland;
 
     private Prosessinstans prosessinstans;
 
@@ -44,7 +44,7 @@ public class SendSedTest {
         prosessinstans.getBehandling().setId(1L);
         prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
         when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
-        sendSed = new SendSed(behandlingService,eessiService, behandlingsresultatService);
+        sendUtland = new SendUtland(behandlingService,eessiService, behandlingsresultatService);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class SendSedTest {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
 
-        sendSed.utfør(prosessinstans);
+        sendUtland.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
@@ -66,7 +66,7 @@ public class SendSedTest {
         prosessinstans.getBehandling().setId(2L);
         Instant nå = prosessinstans.getBehandling().getDokumentasjonSvarfristDato();
 
-        sendSed.utfør(prosessinstans);
+        sendUtland.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());

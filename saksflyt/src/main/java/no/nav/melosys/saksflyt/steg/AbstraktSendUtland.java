@@ -11,14 +11,14 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstraktSendSed extends AbstraktStegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(AbstraktSendSed.class);
+public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
+    private static final Logger log = LoggerFactory.getLogger(AbstraktSendUtland.class);
 
     protected final BehandlingService behandlingService;
     private final EessiService eessiService;
     protected final BehandlingsresultatService behandlingsresultatService;
 
-    protected AbstraktSendSed(BehandlingService behandlingService, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
+    protected AbstraktSendUtland(BehandlingService behandlingService, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
         this.behandlingService = behandlingService;
         this.eessiService = eessiService;
         this.behandlingsresultatService = behandlingsresultatService;
