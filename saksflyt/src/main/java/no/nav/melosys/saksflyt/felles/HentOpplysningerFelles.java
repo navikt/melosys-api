@@ -9,13 +9,11 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -34,6 +32,7 @@ public class HentOpplysningerFelles {
     private final BehandlingService behandlingService;
     private final MedlFasade medlFasade;
     private final InntektService inntektService;
+    private final UtbetaldataService utbetaldataService;
     private final SaksopplysningRepository saksopplysningRepository;
 
     @Autowired
@@ -42,12 +41,14 @@ public class HentOpplysningerFelles {
                                   BehandlingService behandlingService,
                                   MedlFasade medlFasade,
                                   InntektService inntektService,
+                                  UtbetaldataService utbetaldataService,
                                   SaksopplysningRepository saksopplysningRepository) {
         this.tpsFasade = tpsFasade;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.medlFasade = medlFasade;
         this.inntektService = inntektService;
+        this.utbetaldataService = utbetaldataService;
         this.saksopplysningRepository = saksopplysningRepository;
     }
 
@@ -97,7 +98,8 @@ public class HentOpplysningerFelles {
         LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
         LocalDate tom = sedDokument.getLovvalgsperiode().getTom();
 
-        Saksopplysning saksopplysning = hentInntektListe(fnr, fom, tom);
+        Periode periode = hentPeriodeForYtelser(fom, tom);
+        Saksopplysning saksopplysning = inntektService.hentInntektListe(fnr, periode.fom, periode.tom);
         saksopplysning.setBehandling(behandling);
         saksopplysning.setRegistrertDato(nå);
         saksopplysning.setEndretDato(nå);
@@ -106,7 +108,26 @@ public class HentOpplysningerFelles {
         log.info("Inntektsdokument hentet for behandling {}", behandling.getId());
     }
 
-    private Saksopplysning hentInntektListe(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void hentOgLagreUtbetalingsopplysninger(long behandlingId, String fnr) throws FunksjonellException, TekniskException {
+
+        Instant nå = Instant.now();
+
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+        LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
+        LocalDate tom = sedDokument.getLovvalgsperiode().getTom();
+
+        Periode periode = hentPeriodeForYtelser(fom, tom);
+        Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd(fnr, periode.fom.atDay(1), periode.tom.atDay(1));
+        saksopplysning.setBehandling(behandling);
+        saksopplysning.setRegistrertDato(nå);
+        saksopplysning.setEndretDato(nå);
+        saksopplysningRepository.save(saksopplysning);
+
+        log.info("Utbetalingsdokument hentet for behandling {}", behandlingId);
+    }
+
+    private static Periode hentPeriodeForYtelser(LocalDate fom, LocalDate tom) {
 
         YearMonth fomMnd;
         YearMonth tomMnd;
@@ -126,6 +147,16 @@ public class HentOpplysningerFelles {
             tomMnd = YearMonth.from(tom);
         }
 
-        return inntektService.hentInntektListe(fnr, fomMnd, tomMnd);
+        return new Periode(fomMnd, tomMnd);
+    }
+
+    private static final class Periode {
+        private YearMonth fom;
+        private YearMonth tom;
+
+        Periode(YearMonth fom, YearMonth tom) {
+            this.fom = fom;
+            this.tom = tom;
+        }
     }
 }

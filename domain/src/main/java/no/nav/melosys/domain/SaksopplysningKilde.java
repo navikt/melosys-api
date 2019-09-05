@@ -11,7 +11,8 @@ public enum SaksopplysningKilde implements Kodeverk {
     MEDL("MEDL", "Medlemskapsunntak"),
     SBH("SBH", "Saksbehandler"),
     SOB("SOB", "Sak og behandling"),
-    TPS("TPS", "Folkeregisteret");
+    TPS("TPS", "Folkeregisteret"),
+    UTBETALDATA("UTBETALDATA", "Utbetaldata");
 
 
     private String kode;
@@ -21,7 +22,7 @@ public enum SaksopplysningKilde implements Kodeverk {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
-    
+
     @Override
     public String getKode() {
         return kode;

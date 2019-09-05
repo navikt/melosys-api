@@ -28,39 +28,44 @@ class KontrollFactory {
     private List<Function<KontrollData, Unntak_periode_begrunnelser>> a003Kontroller() {
         return Lists.newArrayList(
             UnntaksperiodeKontroller::periodeErÅpen,
-            UnntaksperiodeKontroller::periodeEldreEnn5År,
+            UnntaksperiodeKontroller::periodeEldreEnn3År,
             UnntaksperiodeKontroller::periodeOver24Mnd,
             UnntaksperiodeKontroller::periodeOver1ÅrFremITid,
             UnntaksperiodeKontroller::overlappendeMedlemsperiode,
             UnntaksperiodeKontroller::statsborgerskapIkkeMedlemsland,
             UnntaksperiodeKontroller::personDød,
             UnntaksperiodeKontroller::personBosattINorge,
-            UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode
+            UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode,
+            UnntaksperiodeKontroller::utbetaltBarnetrygdytelser
         );
     }
 
     private List<Function<KontrollData, Unntak_periode_begrunnelser>> a009Kontroller() {
         return Lists.newArrayList(
             UnntaksperiodeKontroller::periodeErÅpen,
-            UnntaksperiodeKontroller::periodeEldreEnn5År,
+            UnntaksperiodeKontroller::periodeEldreEnn3År,
             UnntaksperiodeKontroller::periodeOver24Mnd,
             UnntaksperiodeKontroller::periodeOver1ÅrFremITid,
             UnntaksperiodeKontroller::overlappendeMedlemsperiode,
             UnntaksperiodeKontroller::lovvalgslandErNorge,
             UnntaksperiodeKontroller::statsborgerskapIkkeMedlemsland,
-            UnntaksperiodeKontroller::personDød
+            UnntaksperiodeKontroller::personDød,
+            UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode,
+            UnntaksperiodeKontroller::utbetaltBarnetrygdytelser
         );
     }
 
     private List<Function<KontrollData, Unntak_periode_begrunnelser>> a010Kontroller() {
         return Lists.newArrayList(
             UnntaksperiodeKontroller::periodeErÅpen,
-            UnntaksperiodeKontroller::periodeEldreEnn5År,
+            UnntaksperiodeKontroller::periodeEldreEnn3År,
             UnntaksperiodeKontroller::periodeOver1ÅrFremITid,
             UnntaksperiodeKontroller::overlappendeMedlemsperiode,
             UnntaksperiodeKontroller::lovvalgslandErNorge,
             UnntaksperiodeKontroller::statsborgerskapIkkeMedlemsland,
-            UnntaksperiodeKontroller::personDød
+            UnntaksperiodeKontroller::personDød,
+            UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode,
+            UnntaksperiodeKontroller::utbetaltBarnetrygdytelser
         );
     }
 }

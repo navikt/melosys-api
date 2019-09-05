@@ -3,10 +3,10 @@ package no.nav.melosys.service.unntaksperiode.kontroll;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
-import no.nav.melosys.service.kontroll.InntektKontroller;
 import no.nav.melosys.service.kontroll.MedlemskapKontroller;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.kontroll.PersonKontroller;
+import no.nav.melosys.service.kontroll.YtelseKontroller;
 
 /**
  * Kontroller fra no.nav.melosys.service.kontroll som returnerer begrunnelser for unntaksperiode
@@ -34,8 +34,8 @@ final class UnntaksperiodeKontroller {
             Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD : null;
     }
 
-    static Unntak_periode_begrunnelser periodeEldreEnn5År(KontrollData kontrollData) {
-        return PeriodeKontroller.datoEldreEnn5År(kontrollData.sedDokument.getLovvalgsperiode().getFom()) ?
+    static Unntak_periode_begrunnelser periodeEldreEnn3År(KontrollData kontrollData) {
+        return PeriodeKontroller.datoEldreEnn3År(kontrollData.sedDokument.getLovvalgsperiode().getFom()) ?
             Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL : null;
     }
 
@@ -47,7 +47,12 @@ final class UnntaksperiodeKontroller {
     static Unntak_periode_begrunnelser utbetaltYtelserFraOffentligIPeriode(KontrollData kontrollData) {
         LocalDate fom = kontrollData.sedDokument.getLovvalgsperiode().getFom();
         LocalDate tom = kontrollData.sedDokument.getLovvalgsperiode().getTom();
-        return InntektKontroller.utbetaltYtelserFraOffentligIPeriode(kontrollData.inntektDokument, fom, tom) ?
+        return YtelseKontroller.utbetaltYtelserFraOffentligIPeriode(kontrollData.inntektDokument, fom, tom) ?
+            Unntak_periode_begrunnelser.MOTTAR_YTELSER : null;
+    }
+
+    static Unntak_periode_begrunnelser utbetaltBarnetrygdytelser(KontrollData kontrollData) {
+        return YtelseKontroller.utbetaltBarnetrygdytelser(kontrollData.utbetalingDokument) ?
             Unntak_periode_begrunnelser.MOTTAR_YTELSER : null;
     }
 

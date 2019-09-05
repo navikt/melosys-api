@@ -24,8 +24,8 @@ public final class PeriodeKontroller {
         return tom != null && ChronoUnit.YEARS.between(fom, tom) >= 5L;
     }
 
-    public static boolean datoEldreEnn5År(LocalDate fom) {
-        return fom.isBefore(LocalDate.now().minusYears(5L));
+    public static boolean datoEldreEnn3År(LocalDate fom) {
+        return fom.isBefore(LocalDate.now().minusYears(3L));
     }
 
     public static boolean datoOver1ÅrFremITid(LocalDate fom) {

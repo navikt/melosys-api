@@ -2,6 +2,7 @@ package no.nav.melosys.service.unntaksperiode.kontroll;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Collections;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
@@ -15,6 +16,8 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.dokument.utbetaling.Utbetaling;
+import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import org.junit.Test;
@@ -41,7 +44,7 @@ public class UnntaksperiodeKontrollerTest {
 
     @Test
     public void periodeEldreEnn5År_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.periodeEldreEnn5År(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL);
+        assertThat(UnntaksperiodeKontroller.periodeEldreEnn3År(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL);
     }
 
     @Test
@@ -52,6 +55,11 @@ public class UnntaksperiodeKontrollerTest {
     @Test
     public void utbetaltYtelserFraOffentligIPeriode_erFeil_verifiserBegrunnelse() {
         assertThat(UnntaksperiodeKontroller.utbetaltYtelserFraOffentligIPeriode(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
+    }
+
+    @Test
+    public void utbetaltBarnetrygdytelser_erFeil_verifiserBegrunnelse() {
+        assertThat(UnntaksperiodeKontroller.utbetaltBarnetrygdytelser(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
     }
 
     @Test
@@ -108,7 +116,10 @@ public class UnntaksperiodeKontrollerTest {
         arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe().add(inntekt);
         inntektDokument.getArbeidsInntektMaanedListe().add(arbeidsInntektMaaned);
 
-        return new KontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument);
+        UtbetalingDokument utbetalingDokument = new UtbetalingDokument();
+        utbetalingDokument.utbetalinger = Collections.singletonList(new Utbetaling());
+
+        return new KontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
     }
 
 }

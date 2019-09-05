@@ -12,7 +12,8 @@ public enum SaksopplysningType implements Kodeverk {
     PERSOPL("PERSOPL", "Personopplysning"),
     SEDOPPL("SEDOPPL", "SED-opplysninger"),
     SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
-    SØKNAD("SØKNAD", "Søknad");
+    SØKNAD("SØKNAD", "Søknad"),
+    UTBETAL("UTBETAL", "Utbetaldata");
 
     private String kode;
     private String beskrivelse;
@@ -21,7 +22,7 @@ public enum SaksopplysningType implements Kodeverk {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
-    
+
     @Override
     public String getKode() {
         return kode;

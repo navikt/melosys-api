@@ -36,8 +36,8 @@ public class HentInntektOpplysninger extends AbstraktStegBehandler {
         long behandlingId = prosessinstans.getBehandling().getId();
         String fnr = prosessinstans.getData(ProsessDataKey.BRUKER_ID);
         hentOpplysningerFelles.hentOgLagreInntektsopplysninger(behandlingId, fnr);
+        hentOpplysningerFelles.hentOgLagreUtbetalingsopplysninger(behandlingId, fnr);
 
-        //TODO: skal også sjekke mot UR. Sjekker nå kun mot inntektskomponent. MELOSYS-2496
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_REGISTERKONTROLL);
     }
 }

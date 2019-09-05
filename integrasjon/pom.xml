@@ -147,6 +147,13 @@
             <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
         </dependency>
 
+        <!-- Utbetaling -->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-fim-utbetaling-v1-tjenestespesifikasjon</artifactId>
+            <classifier>jaxws</classifier>
+        </dependency>
+
         <!--Test-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
