@@ -11,13 +11,13 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -26,26 +26,25 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendSedTest {
-
+    @Mock
+    private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private BehandlingRepository behandlingRepository;
-    @Mock
     private EessiService eessiService;
 
-    @InjectMocks
     private SendSed sendSed;
 
     private Prosessinstans prosessinstans;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IkkeFunnetException {
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setId(1L);
         prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
+        sendSed = new SendSed(behandlingService,eessiService, behandlingsresultatService);
     }
 
     @Test

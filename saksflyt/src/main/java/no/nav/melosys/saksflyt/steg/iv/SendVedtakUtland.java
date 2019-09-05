@@ -6,8 +6,8 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktSendSed;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
@@ -21,8 +21,10 @@ public class SendVedtakUtland extends AbstraktSendSed {
     private static final Logger log = LoggerFactory.getLogger(SendVedtakUtland.class);
 
     @Autowired
-    public SendVedtakUtland(BehandlingRepository behandlingRepository, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
-        super(behandlingRepository, eessiService, behandlingsresultatService);
+    public SendVedtakUtland(BehandlingService behandlingService,
+                            EessiService eessiService,
+                            BehandlingsresultatService behandlingsresultatService) {
+        super(behandlingService, eessiService, behandlingsresultatService);
     }
 
     @Override

@@ -7,14 +7,13 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -25,19 +24,16 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendVedtakUtlandTest {
-
+    @Mock
+    private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private BehandlingRepository behandlingRepository;
-    @Mock
     private EessiService eessiService;
 
-    @InjectMocks
     private SendVedtakUtland sendVedtakUtland;
 
     private Prosessinstans prosessinstans;
-    
     private Lovvalgsperiode lovvalgsperiode;
 
     @Before
@@ -45,7 +41,7 @@ public class SendVedtakUtlandTest {
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setId(1L);
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         lovvalgsperiode = new Lovvalgsperiode();
@@ -55,6 +51,8 @@ public class SendVedtakUtlandTest {
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        sendVedtakUtland = new SendVedtakUtland(behandlingService, eessiService, behandlingsresultatService);
     }
 
     @Test
