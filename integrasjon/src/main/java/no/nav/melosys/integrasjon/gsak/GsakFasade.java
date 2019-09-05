@@ -3,11 +3,13 @@ package no.nav.melosys.integrasjon.gsak;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 
@@ -28,6 +30,8 @@ public interface GsakFasade {
                                                   Set<Behandlingstema> behandlingstemaer
     ) throws TekniskException, FunksjonellException;
 
+    void oppdaterOppgavePrioritet(String oppgaveId, PrioritetType prioritet) throws FunksjonellException, TekniskException;
+
     /**
      * Finner Oppgaver basert på ansvarlig saksbehandler
      * Oppgave sorterer oppgavene stigende etter frist.
@@ -38,6 +42,11 @@ public interface GsakFasade {
      * Finner Oppgave med gitt saksnummer.
      */
     Oppgave hentOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException;
+
+    /**
+     * Henter tema for aktuell saksnummer
+     */
+    Tema hentTemaFraSak(Long gsakSaksnummer) throws TekniskException, FunksjonellException;
 
     /**
      * Finner alle oppgaver med gitt saksnummer.
@@ -74,5 +83,4 @@ public interface GsakFasade {
      * Tildeler en oppgaver til en saksbehandler
      */
     void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException;
-
 }

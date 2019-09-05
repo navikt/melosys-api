@@ -121,15 +121,8 @@ public class LovvalgsperiodeService {
             .orElseThrow(() -> new IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for " + behandlingId));
     }
 
-    public Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) throws IkkeFunnetException {
-        Behandling behandling = behandlingRepository.findById(behandlingId)
-            .orElseThrow(() -> new IkkeFunnetException("Fant ingen behandling for " + behandlingId));
-
-        Behandling opprinneligBehandling = Optional.ofNullable(behandling.getOpprinneligBehandling())
-            .orElseThrow(() -> new IkkeFunnetException("Fant ingen opprinnelig behandling for " + behandlingId));
-
-        List<Lovvalgsperiode> lovvalgsperiodeList = lovvalgsperiodeRepo.findByBehandlingsresultatId(opprinneligBehandling.getId());
-        return lovvalgsperiodeList.stream()
-            .findFirst();
+    public Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) {
+        return behandlingRepository.findById(behandlingId).map(Behandling::getOpprinneligBehandling)
+            .flatMap(behandling -> lovvalgsperiodeRepo.findByBehandlingsresultatId(behandling.getId()).stream().findFirst());
     }
 }

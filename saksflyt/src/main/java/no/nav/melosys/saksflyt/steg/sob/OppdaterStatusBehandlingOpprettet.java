@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_SAKSRELASJON;
 import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
 
 /**
@@ -50,7 +50,7 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
 
         sakOgBehandlingOpprettet(saksnummer, behandling.getId(), aktørID);
 
-        prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+        prosessinstans.setSteg(JFR_OPPDATER_SAKSRELASJON);
         log.info("Oppdatert sob-status til opprettet for prosessinstans {}", prosessinstans.getId());
     }
 }

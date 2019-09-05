@@ -9,8 +9,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
@@ -24,6 +24,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_SAKSRELASJON;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
@@ -54,6 +56,7 @@ public class OppdaterStatusBehandlingOpprettetTest {
         p.setBehandling(b);
         agent.utfør(p);
         verify(sakOgBehandlingFasade).sendBehandlingOpprettet(any(BehandlingStatusMapper.class));
+        assertThat(p.getSteg()).isEqualTo(JFR_OPPDATER_SAKSRELASJON);
     }
 
     private static Behandling lagBehandling() {

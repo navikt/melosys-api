@@ -93,6 +93,11 @@ public class FagsakService {
         return fagsak;
     }
 
+    public Fagsak hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) throws IkkeFunnetException {
+        return finnFagsakFraGsakSaksnummer(gsakSaksnummer)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke fagsak for gsakSaksnummer " + gsakSaksnummer));
+    }
+
     public Optional<Fagsak> finnFagsakFraGsakSaksnummer(Long gsakSaksnummer) {
         return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer);
     }

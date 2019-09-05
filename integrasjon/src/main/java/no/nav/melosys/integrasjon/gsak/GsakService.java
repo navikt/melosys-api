@@ -82,6 +82,11 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public Tema hentTemaFraSak(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
+        return Tema.valueOf(sakConsumer.hentSak(gsakSaksnummer).getTema());
+    }
+
+    @Override
     public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
         if (oppgave == null) {
@@ -158,6 +163,16 @@ public class GsakService implements GsakFasade {
             throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
         }
         oppgave.setTilordnetRessurs(null);
+        oppgaveConsumer.oppdaterOppgave(oppgave);
+    }
+
+    @Override
+    public void oppdaterOppgavePrioritet(String oppgaveId, PrioritetType prioritet) throws FunksjonellException, TekniskException {
+        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
+        if (oppgave == null) {
+            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
+        }
+        oppgave.setPrioritet(prioritet.name());
         oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 

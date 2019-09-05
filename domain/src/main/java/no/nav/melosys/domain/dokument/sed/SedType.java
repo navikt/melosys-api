@@ -1,6 +1,19 @@
 package no.nav.melosys.domain.dokument.sed;
 
 public enum SedType {
+    X001,
+    X002,
+    X003,
+    X004,
+    X005,
+    X006,
+    X007,
+    X008,
+    X009,
+    X010,
+    X011,
+    X012,
+    X013,
     A001,
     A002,
     A003,
@@ -12,5 +25,16 @@ public enum SedType {
     A009,
     A010,
     A011,
-    A012
+    A012,
+    H001,
+    H002,
+    H003,
+    H004,
+    H005,
+    H010,
+    H011,
+    H020,
+    H061,
+    H065,
+    H070
 }

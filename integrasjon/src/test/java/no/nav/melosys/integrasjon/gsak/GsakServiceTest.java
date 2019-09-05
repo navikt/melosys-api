@@ -3,14 +3,14 @@ package no.nav.melosys.integrasjon.gsak;
 import java.util.Collections;
 import java.util.List;
 
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -41,16 +41,16 @@ public final class GsakServiceTest {
     @Captor
     private ArgumentCaptor<OppgaveSearchRequest> oppgaveSearchRequestCaptor;
 
-    private GsakService instans;
+    private GsakService gsakService;
 
     @Before
     public void setup() {
-        instans = new GsakService(sakConsumer, oppgaveConsumer);
+        gsakService = new GsakService(sakConsumer, oppgaveConsumer);
     }
 
     @Test
     public final void tildelIkkeEksisterendeOppgaveGirIkkeFunnetException() {
-        Throwable unntak = catchThrowable(() -> instans.tildelOppgave("1", "2"));
+        Throwable unntak = catchThrowable(() -> gsakService.tildelOppgave("1", "2"));
         assertThat(unntak)
                 .isInstanceOf(IkkeFunnetException.class)
                 .hasMessageContaining("Feil")
@@ -63,7 +63,7 @@ public final class GsakServiceTest {
         oppgaveBuilder.setOppgavetype(Oppgavetyper.VUR);
         oppgaveBuilder.setTema(Tema.MED);
         oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
-        instans.opprettOppgave(oppgaveBuilder.build());
+        gsakService.opprettOppgave(oppgaveBuilder.build());
 
         ArgumentCaptor<OpprettOppgaveDto> captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
         verify(oppgaveConsumer).opprettOppgave(captor.capture());
@@ -78,7 +78,7 @@ public final class GsakServiceTest {
     public void opprettOppgave_gyldigOppgave_validerDto() throws Exception {
         Oppgave oppgave = lagOppgave();
 
-        instans.opprettOppgave(oppgave);
+        gsakService.opprettOppgave(oppgave);
         verify(oppgaveConsumer).opprettOppgave(oppgaveDtoCaptor.capture());
 
         OpprettOppgaveDto oppgaveDto = oppgaveDtoCaptor.getValue();
@@ -101,7 +101,7 @@ public final class GsakServiceTest {
         OppgaveDto oppgaveDto = new OppgaveDto();
         when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Collections.singletonList(oppgaveDto));
 
-        instans.finnOppgaveListeMedAnsvarlig("123");
+        gsakService.finnOppgaveListeMedAnsvarlig("123");
         verify(oppgaveConsumer, times(2)).hentOppgaveListe(oppgaveSearchRequestCaptor.capture());
 
         List<OppgaveSearchRequest> requests = oppgaveSearchRequestCaptor.getAllValues();

@@ -5,15 +5,16 @@ import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 
-public interface BehandleMottattSedInitialiserer {
+public interface AutomatiskSedBehandlingInitialiserer {
 
     RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException;
 
-    boolean gjelderSedType(SedType sedType);
+    boolean gjelderSedType(SedType sedType, Landkoder lovvalgsland);
 
     //Henter behandlingstype for spesifikk behandling av SED.
     //Kalles kun om det skal opprettes ny behandling for SED'en. Derfor greit at den kaster exception når det ikke støttes
