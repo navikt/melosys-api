@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -70,6 +71,13 @@ public class EessiConsumerImpl implements EessiConsumer {
     public void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException {
         exchange(String.format("/buc/LA_BUC_01/%s/svar", rinaSaksnummer), HttpMethod.POST,
             new HttpEntity<>(svarAnmodningUnntakDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
+            });
+    }
+
+    @Override
+    public byte[] hentSedForhåndsvisning(SedDataDto sedDataDto, SedType sedType) throws MelosysException {
+        return exchange(String.format("/sed/%s/pdf", sedType), HttpMethod.POST,
+            new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<byte[]>() {
             });
     }
 

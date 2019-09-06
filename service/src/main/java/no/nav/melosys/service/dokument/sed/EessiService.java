@@ -143,4 +143,13 @@ public class EessiService {
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
         eessiConsumer.sendAnmodningUnntakSvar(svarAnmodningUnntakDto, rinaSaksnummer);
     }
+
+    public byte[] hentSedForhåndsvisning(long behandingID, SedType sedType) throws MelosysException {
+        Behandling behandling = behandlingService.hentBehandling(behandingID);
+        DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag);
+
+        log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandingID);
+        return eessiConsumer.hentSedForhåndsvisning(sedDataDto, sedType);
+    }
 }

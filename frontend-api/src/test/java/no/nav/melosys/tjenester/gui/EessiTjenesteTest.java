@@ -8,12 +8,14 @@ import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
@@ -21,7 +23,6 @@ import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
@@ -43,11 +44,11 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private EessiService eessiService;
-
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private TilgangService tilgangService;
 
-    @InjectMocks
     private EessiTjeneste eessiTjeneste;
 
     @Before
@@ -58,6 +59,8 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         behandling.setFagsak(fagsak);
 
         when(behandlingService.hentBehandling(eq(123L))).thenReturn(behandling);
+
+        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService, tilgangService);
     }
 
     @Test
@@ -103,10 +106,19 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         Response response = eessiTjeneste.hentBucer(123L, "utkast");
         assertThat(response.getEntity()).isInstanceOf(BucerTilknyttetBehandlingDto.class);
 
-        BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto)  response.getEntity();
+        BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto) response.getEntity();
         assertThat(dto.getBucer()).hasOnlyElementsOfType(BucInformasjon.class);
 
         valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);
+    }
+
+    @Test
+    public void hentSedForhåndsvisning() throws MelosysException {
+        final byte[] MOCK_PDF = "bytes fra en pdf".getBytes();
+        when(eessiService.hentSedForhåndsvisning(anyLong(), any())).thenReturn(MOCK_PDF);
+
+        Response response = eessiTjeneste.hentSedForhåndsvisning(1L, SedType.A001);
+        assertThat(response.getEntity()).isEqualTo(MOCK_PDF);
     }
 
     private BucInformasjon bucInformasjon() {
