@@ -4,18 +4,25 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 
 /**
  * Sender elektronisk sed til mottakerinstitusjon
@@ -34,8 +41,12 @@ public class SendUtland extends AbstraktSendUtland {
     private static final int SVARFRIST_MÅNEDER = 2;
 
     @Autowired
-    public SendUtland(EessiService eessiService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
-        super(eessiService, behandlingsresultatService);
+    public SendUtland(EessiService eessiService,
+                      BrevBestiller brevBestiller,
+                      BehandlingService behandlingService,
+                      BehandlingsresultatService behandlingsresultatService,
+                      LandvelgerService landvelgerService) {
+        super(eessiService, brevBestiller, behandlingsresultatService, landvelgerService);
         this.behandlingService = behandlingService;
     }
 
@@ -61,9 +72,18 @@ public class SendUtland extends AbstraktSendUtland {
     }
 
     @Override
-    protected boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
+    protected Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        return new Brevbestilling.Builder().medDokumentType(Produserbaredokumenter.ANMODNING_UNNTAK)
+            .medAvsender(hentSaksbehandler(prosessinstans))
+            .medMottakere(Mottaker.av(MYNDIGHET))
+            .medBehandling(behandling).build();
+    }
+
+    @Override
+    protected boolean noeSkalSendes(Behandlingsresultat behandlingsresultat) {
         Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
-        return behandlingsresultat.getType() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK
+        return behandlingsresultat.erAnmodningOmUnntak()
             && (anmodningsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
             || anmodningsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2);
     }
