@@ -28,12 +28,15 @@ import org.springframework.stereotype.Component;
 public class SendUtland extends AbstraktSendUtland {
     private static final Logger log = LoggerFactory.getLogger(SendUtland.class);
 
+    private final BehandlingService behandlingService;
+
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
     private static final int SVARFRIST_MÅNEDER = 2;
 
     @Autowired
-    public SendUtland(BehandlingService behandlingService, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
-        super(behandlingService, eessiService, behandlingsresultatService);
+    public SendUtland(EessiService eessiService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
+        super(eessiService, behandlingsresultatService);
+        this.behandlingService = behandlingService;
     }
 
     @Override

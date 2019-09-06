@@ -27,14 +27,16 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_
 public class SendVedtakUtland extends AbstraktSendUtland {
     private static final Logger log = LoggerFactory.getLogger(SendVedtakUtland.class);
 
+    private BehandlingService behandlingService;
     private BrevBestiller brevBestiller;
 
     @Autowired
-    public SendVedtakUtland(BehandlingService behandlingService,
-                            EessiService eessiService,
+    public SendVedtakUtland(EessiService eessiService,
+                            BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller) {
-        super(behandlingService, eessiService, behandlingsresultatService);
+        super(eessiService, behandlingsresultatService);
+        this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
     }
 

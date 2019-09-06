@@ -22,6 +22,7 @@ import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.jeasy.random.EasyRandom;
@@ -45,11 +46,12 @@ public class EessiServiceTest {
     private EessiConsumer eessiConsumer;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
 
     private EessiService eessiService;
 
     private Behandling behandling;
-    private Behandlingsresultat behandlingsresultat;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -59,18 +61,21 @@ public class EessiServiceTest {
     @Before
     public void setup() throws Exception {
         DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory = mock(DokumentdataGrunnlagFactory.class);
-        eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory, eessiConsumer, "true", behandlingService);
+        eessiService = new EessiService("true", sedDataBygger, dokumentdataGrunnlagFactory,
+            eessiConsumer, behandlingService, behandlingsresultatService);
 
         behandling = new Behandling();
+        behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("123");
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        behandlingsresultat = new Behandlingsresultat();
-
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.SK);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         when(sedDataBygger.lag(any(), any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
         when(sedDataBygger.lagUtkast(any())).thenReturn(new SedDataDto());
@@ -78,7 +83,7 @@ public class EessiServiceTest {
 
     @Test
     public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
-        eessiService.opprettOgSendSed(behandling, behandlingsresultat);
+        eessiService.opprettOgSendSed(behandling.getId());
         verify(eessiConsumer).opprettOgSendSed(any(SedDataDto.class));
     }
 
@@ -115,7 +120,7 @@ public class EessiServiceTest {
     @Test(expected = MelosysException.class)
     public void hentMottakerinstitusjoner_medFeilIConsumer_forventTomListe() throws MelosysException {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenThrow(new IntegrasjonException("Error!"));
-        List<Institusjon> institusjon = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
+        eessiService.hentMottakerinstitusjoner("LA_BUC_01");
     }
 
     @Test

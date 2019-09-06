@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -38,13 +37,12 @@ public class SendUtlandTest {
     private Prosessinstans prosessinstans;
 
     @Before
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setId(1L);
         prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
-        sendUtland = new SendUtland(behandlingService,eessiService, behandlingsresultatService);
+        sendUtland = new SendUtland(eessiService, behandlingService, behandlingsresultatService);
     }
 
     @Test
@@ -55,7 +53,7 @@ public class SendUtlandTest {
         sendUtland.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
-        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        verify(eessiService).opprettOgSendSed(anyLong());
     }
 
     @Test
@@ -70,7 +68,7 @@ public class SendUtlandTest {
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());
-        verify(eessiService, never()).opprettOgSendSed(any(), any());
+        verify(eessiService, never()).opprettOgSendSed(anyLong());
     }
 
     private static Behandlingsresultat hentBehandlingsresultat() {

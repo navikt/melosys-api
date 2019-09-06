@@ -51,13 +51,13 @@ public class SendVedtakUtlandTest {
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        sendVedtakUtland = new SendVedtakUtland(behandlingService, eessiService, behandlingsresultatService, brevBestiller);
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller);
     }
 
     @Test
     public void utførSteg_suksessfull_statusErAvgiftsoppgave() throws Exception{
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        verify(eessiService).opprettOgSendSed(anyLong());
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE));
     }
 
@@ -65,7 +65,7 @@ public class SendVedtakUtlandTest {
     public void utførStegForArtikkel11_suksessfull_statusErAvsluttBehandling() throws Exception {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        verify(eessiService).opprettOgSendSed(anyLong());
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
     }
 }
