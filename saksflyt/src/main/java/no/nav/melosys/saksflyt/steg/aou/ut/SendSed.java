@@ -47,7 +47,7 @@ public class SendSed extends AbstraktSendSed {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         try {
             super.utfør(prosessinstans);
-            prosessinstans.setSteg(ProsessSteg.FERDIG);
+            prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
 
             Behandling behandling = prosessinstans.getBehandling();
             LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);

@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.gsak;
 
+import java.time.LocalDate;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
 import no.nav.melosys.domain.Fagsystem;
@@ -25,6 +27,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
@@ -37,9 +40,11 @@ public final class GsakServiceTest {
     @Mock
     private SakConsumer sakConsumer;
     @Captor
-    private ArgumentCaptor<OpprettOppgaveDto> oppgaveDtoCaptor;
+    private ArgumentCaptor<OpprettOppgaveDto> opprettOppgaveDtoCaptor;
     @Captor
     private ArgumentCaptor<OppgaveSearchRequest> oppgaveSearchRequestCaptor;
+    @Captor
+    private ArgumentCaptor<OppgaveDto> oppgaveDtoCaptor;
 
     private GsakService gsakService;
 
@@ -79,9 +84,9 @@ public final class GsakServiceTest {
         Oppgave oppgave = lagOppgave();
 
         gsakService.opprettOppgave(oppgave);
-        verify(oppgaveConsumer).opprettOppgave(oppgaveDtoCaptor.capture());
+        verify(oppgaveConsumer).opprettOppgave(opprettOppgaveDtoCaptor.capture());
 
-        OpprettOppgaveDto oppgaveDto = oppgaveDtoCaptor.getValue();
+        OpprettOppgaveDto oppgaveDto = opprettOppgaveDtoCaptor.getValue();
 
         assertThat(oppgaveDto).isNotNull();
         assertThat(oppgaveDto.getJournalpostId()).isEqualTo(oppgave.getJournalpostId());
@@ -111,16 +116,53 @@ public final class GsakServiceTest {
         assertThat(requests.get(1).getBehandlesAvApplikasjon()).isNullOrEmpty();
         assertThat(requests.get(1).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
     }
+    
+    @Test
+    public void oppdaterOppgave() throws Exception {
+        Oppgave oppgave = lagOppgave();
+        
+        gsakService.oppdaterOppgave(oppgave);
+
+        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoCaptor.capture());
+        assertThat(oppgaveDtoCaptor.getValue().getAktørId())
+                .isEqualTo("aktoer123");
+    }
+    
+    @Test
+    public void mapDtoTilDomainTilDto() {
+        Oppgave oppgave = lagOppgave();
+        OppgaveDto oppgaveDto = GsakService.oppgaveMappingDomainTilDto(oppgave);
+        assertThat(oppgaveDto).hasNoNullFieldsOrProperties();
+        Oppgave oppgaveMappetTilbake = GsakService.oppgaveMappingDtoTilDomain(oppgaveDto);
+        assertThat(oppgaveMappetTilbake).isEqualToComparingFieldByField(oppgave);
+    }
+    
+    @Test
+    public void mapBehandlingstypeTilFelleskodeTilBehandlingstype() {
+        EnumSet<Behandlingstyper> behandlingstyper = EnumSet.complementOf(EnumSet.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED));
+        
+        for (Behandlingstyper behandlingstype : behandlingstyper) {
+            Behandlingstyper mappetType = GsakService.hentBehandlingstyper(GsakService.hentFellesKode(behandlingstype));
+            assertThat(mappetType).isEqualTo(behandlingstype);
+        }
+    }
 
     private Oppgave lagOppgave() {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setAktivDato(LocalDate.now());
         oppgaveBuilder.setAktørId("aktoer123");
         oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
+        oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
         oppgaveBuilder.setBeskrivelse("bla bla");
+        oppgaveBuilder.setFristFerdigstillelse(LocalDate.now().plusMonths(1L));
+        oppgaveBuilder.setOppgaveId("123");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgaveBuilder.setJournalpostId("journalpost123");
         oppgaveBuilder.setSaksnummer("sak123");
+        oppgaveBuilder.setStatus("tildet");
         oppgaveBuilder.setTema(Tema.MED);
+        oppgaveBuilder.setTemagruppe("temagruppe");
+        oppgaveBuilder.setTildeltEnhetsnr("4530");
         oppgaveBuilder.setTilordnetRessurs("ressurs123");
 
         return oppgaveBuilder.build();

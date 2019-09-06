@@ -55,7 +55,7 @@ public class SendSedTest {
 
         sendSed.utfør(prosessinstans);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
     }
 
@@ -69,7 +69,7 @@ public class SendSedTest {
 
         sendSed.utfør(prosessinstans);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());
         verify(eessiService, never()).opprettOgSendSed(any(), any());
     }
