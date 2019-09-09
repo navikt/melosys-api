@@ -8,12 +8,15 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Comparators;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.DokumentVisningService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DokumentTjenesteTest extends JsonSchemaTestParent {
@@ -38,11 +42,13 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private DokumentVisningService dokumentVisningService;
     @Mock
+    private EessiService eessiService;
+    @Mock
     private TilgangService tilgangService;
 
     @Before
     public void setUp() {
-        dokumentTjeneste = new DokumentTjeneste(dokumentService, dokumentVisningService, tilgangService);
+        dokumentTjeneste = new DokumentTjeneste(dokumentService, dokumentVisningService, eessiService, tilgangService);
     }
 
     @Test
@@ -56,5 +62,14 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         assertThat(inOrder).isTrue();
 
         validerArray(dtos, "dokumenter-oversikt-schema.json", log);
+    }
+
+    @Test
+    public void hentSedForhåndsvisning() throws MelosysException {
+        final byte[] MOCK_PDF = "bytes fra en pdf".getBytes();
+        when(eessiService.genererSedForhåndsvisning(anyLong(), any())).thenReturn(MOCK_PDF);
+
+        Response response = dokumentTjeneste.produserUtkastSed(1L, SedType.A001);
+        assertThat(response.getEntity()).isEqualTo(MOCK_PDF);
     }
 }

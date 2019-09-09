@@ -8,14 +8,12 @@ import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
@@ -46,8 +44,6 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     private EessiService eessiService;
     @Mock
     private BehandlingService behandlingService;
-    @Mock
-    private TilgangService tilgangService;
 
     private EessiTjeneste eessiTjeneste;
 
@@ -60,7 +56,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
         when(behandlingService.hentBehandling(eq(123L))).thenReturn(behandling);
 
-        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService, tilgangService);
+        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService);
     }
 
     @Test
@@ -110,15 +106,6 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         assertThat(dto.getBucer()).hasOnlyElementsOfType(BucInformasjon.class);
 
         valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);
-    }
-
-    @Test
-    public void hentSedForhåndsvisning() throws MelosysException {
-        final byte[] MOCK_PDF = "bytes fra en pdf".getBytes();
-        when(eessiService.hentSedForhåndsvisning(anyLong(), any())).thenReturn(MOCK_PDF);
-
-        Response response = eessiTjeneste.hentSedForhåndsvisning(1L, SedType.A001);
-        assertThat(response.getEntity()).isEqualTo(MOCK_PDF);
     }
 
     private BucInformasjon bucInformasjon() {

@@ -30,5 +30,5 @@ public interface EessiConsumer {
 
     void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException;
 
-    byte[] hentSedForhåndsvisning(SedDataDto sedDataDto, SedType sedType) throws MelosysException;
+    byte[] genererSedForhåndsvisning(SedDataDto sedDataDto, SedType sedType) throws MelosysException;
 }

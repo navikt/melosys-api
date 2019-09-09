@@ -75,7 +75,7 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public byte[] hentSedForhåndsvisning(SedDataDto sedDataDto, SedType sedType) throws MelosysException {
+    public byte[] genererSedForhåndsvisning(SedDataDto sedDataDto, SedType sedType) throws MelosysException {
         return exchange(String.format("/sed/%s/pdf", sedType), HttpMethod.POST,
             new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<byte[]>() {
             });
