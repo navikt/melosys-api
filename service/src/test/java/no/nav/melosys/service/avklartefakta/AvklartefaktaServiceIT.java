@@ -105,7 +105,7 @@ public class AvklartefaktaServiceIT {
         fagsak.setSaksnummer("123");
         fagsak.setEndretDato(ENDRET_DATO);
         fagsak.setRegistrertDato(ENDRET_DATO);
-        fagsak.setStatus(Saksstatuser.AVSLUTTET);
+        fagsak.setStatus(Saksstatuser.VIDERESENDT);
         return fagsak;
     }
 

@@ -90,6 +90,11 @@ public enum ProsessSteg implements Kodeverk {
     HS_HENLEGG_SAK("HS_HENLEGG_SAK", "Henlegg en sak"),
     HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
 
+    // Videresend søknad
+    VS_OPPDATER_RESULTAT("VS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
+    VS_VIDERESEND_SAK("VS_VIDERESEND_SAK", "Oppdater fagsak og behandling"),
+    VS_SEND_BREV("VS_SEND_BREV", "Opprett orienteringsbrev og brev med vedlagt søknad"),
+
     //Mottak av SED
     SED_MOTTAK_OPPRETT_JFR_OPPG("SED_MOTTAK_OPPRETT_JFR_OPPG", "Oppretter journalføringsoppgave for SED som ikke skal behandles automatisk"),
     SED_MOTTAK_HENT_EESSI_MELDING("SED_MOTTAK_HENT_EESSI_MELDING", "Henter saksopplysninger fra mottatt SED"),

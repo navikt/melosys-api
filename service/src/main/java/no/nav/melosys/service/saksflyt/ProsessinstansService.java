@@ -232,4 +232,13 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
         lagre(prosessinstans);
     }
+
+    public void opprettProsessinstansVideresendSoknad(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.VIDERESEND_SOKNAD);
+        prosessinstans.setSteg(ProsessSteg.VS_SEND_BREV);
+        prosessinstans.setBehandling(behandling);
+
+        lagre(prosessinstans);
+    }
 }
