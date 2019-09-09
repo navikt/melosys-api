@@ -110,7 +110,7 @@ public class EessiServiceTest {
             easyRandom.nextObject(Institusjon.class)
         ));
 
-        List<Institusjon> mottakerinstitusjoner = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
+        List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01");
 
         verify(eessiConsumer).hentMottakerinstitusjoner(anyString());
         assertThat(mottakerinstitusjoner).hasSize(2);
@@ -120,7 +120,7 @@ public class EessiServiceTest {
     @Test(expected = MelosysException.class)
     public void hentMottakerinstitusjoner_medFeilIConsumer_forventTomListe() throws MelosysException {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenThrow(new IntegrasjonException("Error!"));
-        eessiService.hentMottakerinstitusjoner("LA_BUC_01");
+        eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01");
     }
 
     @Test

@@ -85,7 +85,7 @@ public class EessiService {
         }
     }
 
-    public List<Institusjon> hentMottakerinstitusjoner(String bucType) throws MelosysException {
+    public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType) throws MelosysException {
         return eessiConsumer.hentMottakerinstitusjoner(bucType);
     }
 

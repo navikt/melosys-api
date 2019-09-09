@@ -52,7 +52,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         final String landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingsresultat.getBehandling()).stream().findFirst().map(Landkoder::getKode)
             .orElseThrow(() -> new FunksjonellException("Fant ikke trygdemyndighetsland for behandling " + behandlingsresultat.getBehandling().getId()));
         BucType bucType = LovvalgBestemmelseUtils.hentBucTypeFraBestemmelse(behandlingsresultat.hentBestemmelse());
-        return eessiService.hentMottakerinstitusjoner(bucType.toString()).stream().anyMatch(i -> i.getLandkode().equals(landkode));
+        return eessiService.hentEessiMottakerinstitusjoner(bucType.toString()).stream().anyMatch(i -> i.getLandkode().equals(landkode));
     }
 
     protected abstract Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException;
