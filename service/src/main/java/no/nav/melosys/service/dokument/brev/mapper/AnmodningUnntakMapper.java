@@ -92,7 +92,7 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
 
         no.nav.dok.melosysbrev._000081.LovvalgsperiodeType lovvalgsperiodeType = new no.nav.dok.melosysbrev._000081.LovvalgsperiodeType();
 
-        lovvalgsperiodeType.setUnntakFraLovvalgsland(anmodningsperiode.getUnntakFraLovvalgsland().getKode());
+        lovvalgsperiodeType.setUnntakFraLovvalgsland(anmodningsperiode.getUnntakFraLovvalgsland().getBeskrivelse());
 
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(anmodningsperiode.getFom()));
