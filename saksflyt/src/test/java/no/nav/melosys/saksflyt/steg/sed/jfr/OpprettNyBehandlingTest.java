@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.sed.jfr;
 import java.util.Collections;
 import java.util.Optional;
 
+import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -86,7 +87,7 @@ public class OpprettNyBehandlingTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-199001");
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.setBehandlinger(Lists.newArrayList(behandling));
 
         Oppgave oppgave = new Oppgave.Builder()
             .setOppgaveId("123oppg")

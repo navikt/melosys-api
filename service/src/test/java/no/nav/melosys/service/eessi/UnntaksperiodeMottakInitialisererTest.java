@@ -9,6 +9,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -54,11 +55,12 @@ public class UnntaksperiodeMottakInitialisererTest {
         Prosessinstans prosessinstans = hentProsessinstans(fom, tom);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setLovvalgsland(Landkoder.SE);
         lovvalgsperiode.setFom(fom);
         lovvalgsperiode.setTom(tom);
 
         when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
-        when(lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
         RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
         assertThat(resultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);
@@ -75,7 +77,7 @@ public class UnntaksperiodeMottakInitialisererTest {
         lovvalgsperiode.setTom(LocalDate.now().plusYears(2));
 
         when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
-        when(lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(anyLong())).thenReturn(Optional.of(lovvalgsperiode));
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
 
         RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 

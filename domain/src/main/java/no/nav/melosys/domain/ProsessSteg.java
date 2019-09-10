@@ -140,7 +140,7 @@ public enum ProsessSteg implements Kodeverk {
     public static ProsessSteg hentFørsteProsessStegForType(final ProsessType prosessType) throws TekniskException {
         switch (prosessType)  {
             case REGISTRERING_UNNTAK:
-                return REG_UNNTAK_OPPRETT_SEDDOKUMENT;
+                return REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET;
             case ANMODNING_OM_UNNTAK_SVAR:
                 return AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR;
             case ANMODNING_OM_UNNTAK_MOTTAK:

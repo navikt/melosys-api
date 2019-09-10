@@ -8,8 +8,6 @@ import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.sak.FagsakService;
@@ -31,12 +29,13 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
     }
 
     @Override
-    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException {
-        MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) {
 
         if (gsakSaksnummer == null) {
             return RutingResultat.NY_SAK;
         }
+
+        MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
         Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer);
         if (fagsak.isPresent()) {
@@ -79,12 +78,14 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
         throw new IllegalArgumentException("UnntaksperiodeMottakInitialiserer støtter ikke sedtype " + sedType);
     }
 
-    private boolean periodeErEndret(MelosysEessiMelding melosysEessiMelding, Behandling behandling) throws IkkeFunnetException {
+    private boolean periodeErEndret(MelosysEessiMelding melosysEessiMelding, Behandling behandling) {
         Periode periode = tilPeriode(melosysEessiMelding.getPeriode());
+        String lovvalgsLand = melosysEessiMelding.getLovvalgsland();
 
-        Optional<Lovvalgsperiode> lovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.getId());
-        return lovvalgsperiode.map(value -> !PeriodeKontroller.periodeErLik(value.getFom(), value.getTom(),
-            periode.getFom(), periode.getTom())).orElse(true);
+        return lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId()).stream().findFirst().map(lovvalgsperiode ->
+            !PeriodeKontroller.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), periode.getFom(), periode.getTom())
+            || !lovvalgsLand.equalsIgnoreCase(lovvalgsperiode.getLovvalgsland().getKode()))
+            .orElse(true);
     }
 
     private static Periode tilPeriode(no.nav.melosys.domain.eessi.melding.Periode periode) {
