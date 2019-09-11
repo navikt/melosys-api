@@ -2,7 +2,6 @@ package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -98,7 +97,6 @@ public class BehandlingService {
         Instant nå = Instant.now();
 
         Behandling behandling = new Behandling();
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);

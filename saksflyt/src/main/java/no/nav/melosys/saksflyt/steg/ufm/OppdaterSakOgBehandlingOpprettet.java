@@ -35,7 +35,10 @@ public class OppdaterSakOgBehandlingOpprettet extends SakOgBehandlingStegBehande
             throw new TekniskException("Aktørid finnes ikke for behandling " + behandlingId);
         }
 
-        sakOgBehandlingOpprettet(saksnummer, behandlingId, aktørId);
+        if (!Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class))) {
+            sakOgBehandlingOpprettet(saksnummer, behandlingId, aktørId);
+        }
+
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE);
     }
 }

@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.felles;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -46,6 +48,10 @@ public class OppdaterMedlFelles {
         return hentBehandlingsresultat(behandling).hentValidertLovvalgsperiode();
     }
 
+    private Optional<Lovvalgsperiode> finnLovvalgsperiode(Behandling behandling) throws IkkeFunnetException {
+        return hentBehandlingsresultat(behandling).getLovvalgsperioder().stream().findFirst();
+    }
+
     public Anmodningsperiode hentAnmodningsperiode(Behandling behandling) throws FunksjonellException {
         return hentBehandlingsresultat(behandling).hentValidertAnmodningsperiode();
     }
@@ -74,9 +80,11 @@ public class OppdaterMedlFelles {
         Behandling tidligereBehandling = fagsak.getTidligsteInaktiveBehandling();
 
         if (tidligereBehandling != null) {
-            log.info("Avslutter tidligere periode for fagsak {}", fagsak.getSaksnummer());
-            Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode(tidligereBehandling);
-            medlFasade.avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
+            Optional<Lovvalgsperiode> lovvalgsperiode = finnLovvalgsperiode(tidligereBehandling);
+            if (lovvalgsperiode.isPresent() && lovvalgsperiode.get().getMedlPeriodeID() != null) {
+                log.info("Avslutter tidligere periode for fagsak {}", fagsak.getSaksnummer());
+                medlFasade.avvisPeriode(lovvalgsperiode.get().getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
+            }
         }
     }
 }
