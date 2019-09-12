@@ -34,34 +34,13 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 public class JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(JsonSchemaTestParent.class);
 
-    protected static final String FEILMELDING = "Schemavalidering feilet for schema {}";
+    private static final String FEILMELDING = "Schemavalidering feilet for schema {}";
 
     private static ObjectMapper objectMapper;
-
     private static ObjectMapper objectMapperMedKodeverkServiceStub;
-
     private static EasyRandom easyRandom;
-
-    private final String schemaNavn;
-
-    protected JsonSchemaTestParent() {
-        this(null);
-    }
-
-    public JsonSchemaTestParent(String schemaNavn) {
-        this.schemaNavn = schemaNavn;
-    }
-
-    public Logger getLogger() {
-        return log;
-    }
-
-    public String schemaNavn() {
-        return schemaNavn;
-    }
 
     protected static EasyRandomParameters defaultEasyRandomParameters() {
         return new EasyRandomParameters()
@@ -77,10 +56,6 @@ public class JsonSchemaTestParent {
             easyRandom = new EasyRandom(defaultEasyRandomParameters());
         }
         return easyRandom;
-    }
-
-    protected Schema hentSchema() throws IOException, JSONException {
-        return hentSchema(schemaNavn());
     }
 
     protected Schema hentSchema(String schemaNavn) throws IOException, JSONException {
@@ -119,47 +94,42 @@ public class JsonSchemaTestParent {
         return objectMapperMedKodeverkServiceStub;
     }
 
-    protected void valider(Object o) throws IOException {
-        valider(o, getLogger());
+    protected void valider(Object o, String schemaNavn) throws IOException {
+        String jsonString = objectMapper().writeValueAsString(o);
+        valider(jsonString, schemaNavn, log);
     }
 
-    protected void valider(String s) throws IOException {
-        valider(s, getLogger());
+    protected void valider(Object o, String schemaNavn, Logger logger) throws IOException {
+        String jsonString = objectMapper().writeValueAsString(o);
+        valider(jsonString, schemaNavn, logger);
     }
 
-    protected void valider(Object o, Logger log) throws IOException {
-        String jsonInString = objectMapper().writeValueAsString(o);
-        valider(jsonInString, log);
+    protected void valider(String json, String schemaNavn, Logger logger) throws IOException {
+        valider(new JSONObject(json), hentSchema(schemaNavn), logger);
     }
 
-    protected void valider(String s, Logger log) throws IOException {
-        try {
-            Schema schema = hentSchema();
-            schema.validate(new JSONObject(s));
-        } catch (ValidationException e) {
-            formaterFeil(e, log);
-        }
+    protected void validerArray(Collection liste, String schemaNavn) throws IOException {
+        validerArray(liste, schemaNavn, log);
     }
 
-    protected void validerListe(Collection liste) throws IOException {
-        validerListe(liste, getLogger());
-    }
-
-    protected void validerListe(Collection liste, Logger log) throws IOException {
+    protected void validerArray(Collection liste, String schemaNavn, Logger logger) throws IOException {
         String json = objectMapper().writeValueAsString(liste);
+        valider(new JSONArray(json), hentSchema(schemaNavn), logger);
+    }
+
+    private void valider(Object jsonObject, Schema schema, Logger logger) {
         try {
-            Schema schema = hentSchema();
-            schema.validate(new JSONArray(json));
+            schema.validate(jsonObject);
         } catch (ValidationException e) {
-            formaterFeil(e, log);
+            formaterFeil(e, schema, logger);
         }
     }
 
-    private void formaterFeil(ValidationException e, Logger log) {
-        log.error(FEILMELDING, schemaNavn());
+    private void formaterFeil(ValidationException e, Schema schema, Logger logger) {
+        logger.error(FEILMELDING, schema.getTitle());
         e.getCausingExceptions().stream()
             .map(ValidationException::toJSON)
-            .forEach(jsonObject -> log.error(jsonObject.toString()));
+            .forEach(jsonObject -> logger.error(jsonObject.toString()));
         throw e;
     }
 

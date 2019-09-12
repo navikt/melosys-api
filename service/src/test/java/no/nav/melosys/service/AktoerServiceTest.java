@@ -124,19 +124,21 @@ public class AktoerServiceTest {
 
         aktørService.slettAktoer(10L);
 
-        verify(aktørRepository, never()).deleteById(optionalAktoer.get());
+        verify(aktørRepository, never()).deleteByAktørId(optionalAktoer.get().getAktørId());
     }
 
     @Test
     public void slettAktør_sletteRepresentant_fungerer() throws FunksjonellException, TekniskException {
         Aktoer aktoer = new Aktoer();
+        aktoer.setId(10L);
         aktoer.setRolle(Aktoersroller.REPRESENTANT);
+        aktoer.setFagsak(new Fagsak());
         Optional<Aktoer> optionalAktoer = Optional.of(aktoer);
         doReturn(optionalAktoer).when(aktørRepository).findById(10L);
 
         aktørService.slettAktoer(10L);
 
-        verify(aktørRepository).deleteById(optionalAktoer.get());
+        verify(aktørRepository).deleteById(optionalAktoer.get().getId());
     }
 
     @Test

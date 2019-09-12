@@ -28,17 +28,14 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnntakTjenesteTest extends JsonSchemaTestParent {
+    private static final String UNNTAKSPERIODE_SCHEMA = "saksflyt-unntaksperioder-ikkegodkjenn-post-schema.json";
+
     @Mock
     private UnntaksperiodeService unntaksperiodeService;
     @Mock
     private BehandlingRepository behandlingRepository;
 
     private UnntakTjeneste unntakTjeneste;
-
-    @Override
-    public String schemaNavn() {
-        return "saksflyt-unntaksperiode-post-schema.json";
-    }
 
     @Before
     public void setUp() {
@@ -100,6 +97,6 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
 
         unntakTjeneste.ikkeGodkjennUnntaksperiode(1L, dto);
 
-        valider(dto);
+        valider(dto, UNNTAKSPERIODE_SCHEMA);
     }
 }

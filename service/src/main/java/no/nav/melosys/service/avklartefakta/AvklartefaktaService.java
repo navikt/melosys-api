@@ -7,7 +7,10 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -43,14 +46,13 @@ public class AvklartefaktaService {
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-    public Set<Avklartefakta> hentAlleAvklarteArbeidsland(long behandlingsid) {
-        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
-    }
+    public Set<Landkoder> hentAlleAvklarteArbeidsland(long behandlingsid) {
+        Set<Avklartefakta> avklarteArbeidsland =
+            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
 
-    public Optional<Landkoder> hentArbeidsland(long behandlingsid) {
-        return hentAlleAvklarteArbeidsland(behandlingsid).stream()
+        return avklarteArbeidsland.stream()
             .map(af -> Landkoder.valueOf(af.getFakta()))
-            .findFirst();
+            .collect(Collectors.toSet());
     }
 
     public Optional<Landkoder> hentBostedland(long behandlingsid) {
@@ -75,6 +77,22 @@ public class AvklartefaktaService {
         AvklartYrkesgruppeType aktivitetType = AvklartYrkesgruppeType.valueOf(avklartefakta.getFakta());
 
         return aktivitetType.tilYrkesgruppeType();
+    }
+
+    public Set<Landkoder> hentLandkoderMedMarginaltArbeid(long behandlingsid) {
+        Collection<Avklartefakta> marginaltArbeid =
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatype.MARGINALT_ARBEID, VALGT_FAKTA);
+
+        return marginaltArbeid.stream()
+            .map(Avklartefakta::getSubjekt)
+            .map(Landkoder::valueOf)
+            .collect(Collectors.toSet());
+    }
+
+    public boolean harMarginaltArbeid(long behandlingsid) {
+        Collection<Avklartefakta> marginaltArbeid =
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatype.MARGINALT_ARBEID, VALGT_FAKTA);
+        return !marginaltArbeid.isEmpty();
     }
 
     public Optional<Maritimtyper> hentMaritimType(long behandlingsid) {
@@ -112,7 +130,8 @@ public class AvklartefaktaService {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingsid));
 
-        avklarteFaktaRepository.deleteByBehandlingsresultat(resultat);
+        avklarteFaktaRepository.deleteByBehandlingsresultatId(behandlingsid);
+        avklarteFaktaRepository.flush();
 
         List<Avklartefakta> avklartefaktaList = avklartefaktaDtos.stream()
             .map(avklartefaktaDto -> faktaKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, resultat))

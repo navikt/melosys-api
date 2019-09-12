@@ -10,14 +10,11 @@ import no.nav.dok.melosysbrev._000081.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -27,8 +24,6 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.Vilkaarbegrunne
  * Anmodning om unntak og avslag har to forskjellige maler med samme innhold
  */
 abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
-
-    private static final Logger log = LoggerFactory.getLogger(AbstraktAnmodningUnntakOgAvslagMapper.class);
 
     Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {
         Fag fag = new Fag();
@@ -87,21 +82,17 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             .findFirst();
     }
 
-    private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
-        Lovvalgsperiode lovvalgsperiode = resultat.getLovvalgsperioder()
-            .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat" + resultat.getId()));
+    LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
+
+        Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
 
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
 
-        Landkoder unntakFraLovvalgsland = lovvalgsperiode.getUnntakFraLovvalgsland();
-        if (unntakFraLovvalgsland != null) {
-            lovvalgsperiodeType.setUnntakFraLovvalgsland(unntakFraLovvalgsland.getBeskrivelse());
-        }
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
             lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
         } catch (DatatypeConfigurationException e) {
-            log.error("", e);
+            throw new TekniskException(e);
         }
         return lovvalgsperiodeType;
     }

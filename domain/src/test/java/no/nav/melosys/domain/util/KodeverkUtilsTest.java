@@ -39,6 +39,6 @@ public class KodeverkUtilsTest {
         String[] strings = KodeverkUtils.hentAlleKoder(Oppgavetyper.class);
         List<String> list = Arrays.asList(strings);
         assertThat(list).contains("JFR");
-        assertThat(list).size().isEqualTo(3);
+        assertThat(list).size().isEqualTo(4);
     }
 }

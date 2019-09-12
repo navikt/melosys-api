@@ -36,7 +36,7 @@ public class VedtakTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("{behandlingID}")
+    @Path("{behandlingID}/fatt")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public Response fattVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("fattVedtakDto") FattVedtakDto fattVedtakDto) throws FunksjonellException, TekniskException {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null) {
@@ -48,7 +48,7 @@ public class VedtakTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("/endre/{behandlingID}")
+    @Path("{behandlingID}/endreperiode")
     @ApiOperation(value = "Endrer et vedtak for en gitt behandling")
     public Response endreVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("endreVedtakDto") EndreVedtakDto endreVedtakDto) throws FunksjonellException, TekniskException {
         if (endreVedtakDto.getBegrunnelseKode() == null) {

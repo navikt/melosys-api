@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class Oppgaveplukker {
     private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
-    static final List<Oppgavetyper> KJENTE_OPPGAVETYPER = Arrays.asList(Oppgavetyper.BEH_SAK_MK, Oppgavetyper.VUR);
+    static final List<Oppgavetyper> KJENTE_OPPGAVETYPER = Arrays.asList(Oppgavetyper.BEH_SAK_MK, Oppgavetyper.VUR, Oppgavetyper.BEH_SED);
 
     private final GsakFasade gsakFasade;
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;

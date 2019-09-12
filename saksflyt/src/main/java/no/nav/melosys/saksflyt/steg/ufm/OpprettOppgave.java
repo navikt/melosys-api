@@ -54,7 +54,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgaveBuilder.setSaksnummer(fagsak.getSaksnummer());
         oppgaveBuilder.setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID));
         oppgaveBuilder.setJournalpostId(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));
-        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SED);
         oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgaveBuilder.build());

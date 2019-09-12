@@ -7,10 +7,11 @@ import javax.persistence.*;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 @Entity
 @Table(name = "anmodningsperiode")
-public class Anmodningsperiode implements ErPeriode {
+public class Anmodningsperiode implements Medlemskapsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,8 +46,15 @@ public class Anmodningsperiode implements ErPeriode {
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse unntakFraBestemmelse;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trygde_dekning")
+    private Trygdedekninger dekning;
+
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
+
+    @Column(name = "sendt_utland")
+    private boolean sendtUtland;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "anmodningsperiode")
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
@@ -56,7 +64,7 @@ public class Anmodningsperiode implements ErPeriode {
     }
 
     public Anmodningsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse,
-                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse, AnmodningsperiodeSvar anmodningsperiodeSvar) {
+                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse, Trygdedekninger dekning) {
         this.fom = fom;
         this.tom = tom;
         this.lovvalgsland = lovvalgsland;
@@ -64,7 +72,7 @@ public class Anmodningsperiode implements ErPeriode {
         this.tilleggsbestemmelse = tilleggsbestemmelse;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland;
         this.unntakFraBestemmelse = unntakFraBestemmelse;
-        this.anmodningsperiodeSvar = anmodningsperiodeSvar;
+        this.dekning = dekning;
     }
 
     public Long getId() {
@@ -105,8 +113,24 @@ public class Anmodningsperiode implements ErPeriode {
         return unntakFraLovvalgsland;
     }
 
+    public void setUnntakFraLovvalgsland(Landkoder unntakFraLovvalgsland) {
+        this.unntakFraLovvalgsland = unntakFraLovvalgsland;
+    }
+
     public LovvalgBestemmelse getUnntakFraBestemmelse() {
         return unntakFraBestemmelse;
+    }
+
+    public void setUnntakFraBestemmelse(LovvalgBestemmelse unntakFraBestemmelse) {
+        this.unntakFraBestemmelse = unntakFraBestemmelse;
+    }
+
+    public Trygdedekninger getDekning() {
+        return dekning;
+    }
+
+    public void setDekning(Trygdedekninger dekning) {
+        this.dekning = dekning;
     }
 
     public Long getMedlPeriodeID() {
@@ -115,6 +139,14 @@ public class Anmodningsperiode implements ErPeriode {
 
     public void setMedlPeriodeID(Long medlPeriodeID) {
         this.medlPeriodeID = medlPeriodeID;
+    }
+
+    public boolean erSendtUtland() {
+        return sendtUtland;
+    }
+
+    public void setSendtUtland(boolean sendtUtland) {
+        this.sendtUtland = sendtUtland;
     }
 
     public AnmodningsperiodeSvar getAnmodningsperiodeSvar() {
@@ -141,5 +173,11 @@ public class Anmodningsperiode implements ErPeriode {
     @Override
     public int hashCode() {
         return Objects.hash(behandlingsresultat, fom);
+    }
+
+    public boolean gjelderSammeLandOgUnntakSom(Anmodningsperiode periode2) {
+        return lovvalgsland == periode2.getLovvalgsland() &&
+            unntakFraBestemmelse == periode2.getUnntakFraBestemmelse() &&
+            unntakFraLovvalgsland == periode2.getUnntakFraLovvalgsland();
     }
 }

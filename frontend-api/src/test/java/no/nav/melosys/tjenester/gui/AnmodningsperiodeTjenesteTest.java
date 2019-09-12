@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Anmodningsperiode;
@@ -9,10 +10,12 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.tjenester.gui.dto.periode.AnmodningsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.periode.AnmodningsperiodeSvarDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeGetDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
@@ -21,7 +24,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.ofType;
@@ -31,8 +35,15 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
+    private static final Logger logger = LoggerFactory.getLogger(AnmodningsperiodeTjenesteTest.class);
+    private static final String ANMODNINGSPERIODER_GET_SCHEMA = "anmodningsperioder-schema.json";
+    private static final String ANMODNINGSPERIODER_POST_SCHEMA = "anmodningsperioder-post-schema.json";
+    private static final String ANMODNINGSPERIODER_SVAR_SCHEMA = "anmodningsperioder-svar-schema.json";
+
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
+    @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private TilgangService tilgangService;
 
@@ -40,35 +51,37 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
     private EasyRandom random = new EasyRandom(new EasyRandomParameters()
         .excludeField(ofType(Behandlingsresultat.class))
-        .randomize(ofType(LovvalgBestemmelse.class), () -> new EnumRandomizer(LovvalgsBestemmelser_883_2004.class).getRandomValue()));
+        .randomize(ofType(LovvalgBestemmelse.class), () -> new EnumRandomizer<>(LovvalgsBestemmelser_883_2004.class).getRandomValue()));
 
     @Before
     public void setUp() {
-        anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, tilgangService);
+        anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, lovvalgsperiodeService, tilgangService);
     }
 
     @Test
     public void hentAnmodningsperioder() throws Exception {
-        Set<Anmodningsperiode> mockliste = random.objects(Anmodningsperiode.class, 3).collect(Collectors.toSet());
-        when(anmodningsperiodeService.hentAnmodningsperioder(1L)).thenReturn(mockliste);
+        when(anmodningsperiodeService.hentAnmodningsperioder(1L)).thenReturn(mockAnmodningsperioder());
 
-        Collection<AnmodningsperiodeDto> anmodningsperioder = anmodningsperiodeTjeneste.hentAnmodningsperioder(1L);
-        assertThat(anmodningsperioder).isNotEmpty();
-        //validerListe(anmodningsperioder); TODO schema
+        AnmodningsperiodeGetDto anmodningsperiodeGetDto = anmodningsperiodeTjeneste.hentAnmodningsperioder(1L);
+        assertThat(anmodningsperiodeGetDto.getAnmodningsperioder()).isNotEmpty();
+        valider(anmodningsperiodeGetDto, ANMODNINGSPERIODER_GET_SCHEMA, logger);
     }
 
     @Test
     public void lagreAnmodningsperioder() throws Exception {
-        when(anmodningsperiodeService.lagreAnmodningsperioder(anyLong(), anyCollection())).thenReturn(Collections.singletonList(hentAnmodningsperiodeMedId()));
+        Set<Anmodningsperiode> mockAnmodninger = random.objects(Anmodningsperiode.class, 3).collect(Collectors.toSet());
+        when(anmodningsperiodeService.lagreAnmodningsperioder(anyLong(), anyCollection()))
+            .thenReturn(mockAnmodninger);
 
-        List<AnmodningsperiodeDto> anmodningsperiodeDtoer = new ArrayList<>();
-        anmodningsperiodeDtoer.add(AnmodningsperiodeDto.av(hentAnmodningsperiodeMedId()));
+        AnmodningsperiodePostDto postDto = AnmodningsperiodePostDto.av(mockAnmodninger);
 
-        anmodningsperiodeTjeneste.lagreAnmodningsperioder(1L, anmodningsperiodeDtoer);
+        AnmodningsperiodeGetDto anmodningsperiodeGetDto =
+            anmodningsperiodeTjeneste.lagreAnmodningsperioder(1L, AnmodningsperiodePostDto.av(mockAnmodninger));
 
         verify(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(anyLong(), anyCollection());
-        //TODO schema
+        valider(postDto, ANMODNINGSPERIODER_POST_SCHEMA, logger);
+        valider(anmodningsperiodeGetDto, ANMODNINGSPERIODER_GET_SCHEMA, logger);
     }
 
     @Test
@@ -89,7 +102,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         assertThat(svarDto).isNotNull();
         assertThat(svarDto.begrunnelseFritekst).isNotEmpty();
         assertThat(svarDto.anmodningsperiodeSvarType).isEqualTo(AnmodningsperiodeSvarType.INNVILGELSE.name());
-        //TODO schema
+        valider(svarDto, ANMODNINGSPERIODER_SVAR_SCHEMA, logger);
     }
 
     @Test
@@ -102,6 +115,9 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(AnmodningsperiodeSvarType.INNVILGELSE);
+        svar.setBegrunnelseFritekst("fritekst");
+        svar.setAnmodningsperiode(anmodningsperiode);
+        anmodningsperiode.setAnmodningsperiodeSvar(svar);
 
         when(anmodningsperiodeService.hentAnmodningsperiode(anyLong())).thenReturn(Optional.of(anmodningsperiode));
         when(anmodningsperiodeService.lagreAnmodningsperiodeSvar(anyLong(), any()))
@@ -111,13 +127,10 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         assertThat(svarDto).isNotNull();
         assertThat(svarDto.anmodningsperiodeSvarType).isEqualTo(AnmodningsperiodeSvarType.INNVILGELSE.name());
         verify(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
-        //TODO schema
+        valider(svarDto, ANMODNINGSPERIODER_SVAR_SCHEMA, logger);
     }
 
-    private Anmodningsperiode hentAnmodningsperiodeMedId() {
-
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        ReflectionTestUtils.setField(anmodningsperiode, "id", 1L);
-        return anmodningsperiode;
+    private Set<Anmodningsperiode> mockAnmodningsperioder() {
+        return random.objects(Anmodningsperiode.class, 3).collect(Collectors.toSet());
     }
 }

@@ -11,7 +11,10 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.oppgave.*;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
+import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -310,7 +313,12 @@ public class OppgaveplukkerTest {
 
     @Test
     public void hentOppgaveTyper_støtterKjenteBehandlingstyper() {
-        Set<Behandlingstyper> behandlingstyper = new HashSet<>(Arrays.asList(Behandlingstyper.SOEKNAD, Behandlingstyper.ENDRET_PERIODE));
+        Set<Behandlingstyper> behandlingstyper = new HashSet<>(Arrays.asList(
+            Behandlingstyper.SOEKNAD,
+            Behandlingstyper.ENDRET_PERIODE,
+            Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD,
+            Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV
+        ));
 
         Set<Oppgavetyper> oppgavetypeSet = oppgaveplukker.hentOppgavetyper(behandlingstyper);
 

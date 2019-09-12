@@ -49,18 +49,14 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FagsakTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(FagsakTjenesteTest.class);
-
     private static final String FAGSAKER_SCHEMA = "fagsaker-schema.json";
-    private static final String SOK_FAGSAKER_SCHEMA = "sok-fagsaker-schema.json";
+    private static final String SOK_FAGSAKER_SCHEMA = "fagsaker-sok-schema.json";
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
 
     private static TilgangService tilgangService;
-
-    private String schemaType;
 
     private EasyRandom random;
 
@@ -81,18 +77,12 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9)));
     }
 
-    @Override
-    public String schemaNavn() {
-        return schemaType;
-    }
-
     @Test
     public void fagsakSchemaValidering() throws IOException, JSONException {
         FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
-        schemaType = FAGSAKER_SCHEMA;
-        valider(jsonString, log);
+        valider(jsonString, FAGSAKER_SCHEMA, log);
     }
 
     @Test
@@ -102,8 +92,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         behandlingOversiktDtoer.get(0).setLand(Collections.singletonList(Landkoder.NO.getKode()));
         fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 
-        schemaType = SOK_FAGSAKER_SCHEMA;
-        validerListe(fagsakOppsummeringDtoList, log);
+        validerArray(fagsakOppsummeringDtoList, SOK_FAGSAKER_SCHEMA, log);
     }
 
     @Test

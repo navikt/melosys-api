@@ -1,9 +1,10 @@
-package no.nav.melosys.tjenester.gui.dto.periode;
+package no.nav.melosys.tjenester.gui.dto.anmodning;
 
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
 public class AnmodningsperiodeSvarDto {
 
@@ -32,7 +33,7 @@ public class AnmodningsperiodeSvarDto {
         );
     }
 
-    public static AnmodningsperiodeSvarDto fra(AnmodningsperiodeSvar anmodningsperiodeSvar) {
+    public static AnmodningsperiodeSvarDto av(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         return new AnmodningsperiodeSvarDto(
             anmodningsperiodeSvar.getAnmodningsperiodeSvarType().getKode(),
             new PeriodeDto(anmodningsperiodeSvar.getInnvilgetFom(), anmodningsperiodeSvar.getInnvilgetTom()),

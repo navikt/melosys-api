@@ -107,37 +107,60 @@ public class Fagsak extends RegistreringsInfo {
             .orElse(null);
     }
 
-    /**
-     * Returnerer en aktør med angitt {@link Aktoersroller} knyttet til saken eller {@code null} hvis ingen finnes.
-     */
-    public Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
-        if (rolleType == null) {
-            return null;
-        }
-        List<Aktoer> kandidater = aktører.stream().filter(a -> rolleType.equals(a.getRolle())).collect(Collectors.toList());
+    public Aktoer hentBruker() throws TekniskException {
+        return hentAktørMedRolleType(Aktoersroller.BRUKER);
+    }
 
-        if (kandidater.isEmpty()) {
-            return null;
-        } else if (kandidater.size() > 1) {
+    public Aktoer hentArbeidsgiver() throws TekniskException {
+        return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
+    }
+
+    public List<Aktoer> hentMyndigheter() {
+        return hentAktørerMedRolleType(MYNDIGHET);
+    }
+
+    /**
+     * Returnerer den sist oppdaterte behandlingen knyttet til saken eller {@code null} hvis den ikke finnes
+     */
+    public Behandling getSistOppdaterteBehandling() {
+        return getBehandlinger().stream()
+            .max(Comparator.comparing(Behandling::getEndretDato))
+            .orElse(null);
+    }
+
+    private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
+        Collection<Aktoer> kandidater = hentAktørerMedRolleType(rolleType);
+        if (kandidater.size() > 1) {
             throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
-        } else {
-            return kandidater.get(0);
         }
+        return kandidater.stream().findFirst().orElse(null);
+    }
+
+    private List<Aktoer> hentAktørerMedRolleType(Aktoersroller rolleType) {
+        if (rolleType == null) {
+            return Collections.emptyList();
+        }
+        return aktører.stream()
+            .filter(a -> rolleType == a.getRolle())
+            .collect(Collectors.toList());
     }
 
     public boolean harAktørMedRolleType(Aktoersroller rolleType) {
-        return aktører.stream().filter(a -> rolleType.equals(a.getRolle())).count() > 0;
+        return !hentAktørerMedRolleType(rolleType).isEmpty();
     }
 
     /**
      * Henter myndighetens landkode fra institusjonsID som har format landkode:institusjonskode.
      */
     public Landkoder hentMyndighetLandkode() throws TekniskException {
-        Aktoer myndighet = hentAktørMedRolleType(MYNDIGHET);
-        if (myndighet == null) {
+        List<Aktoer> myndigheter = hentMyndigheter();
+        if (myndigheter.isEmpty()) {
             throw new TekniskException("Finner ingen aktør med rolle " + MYNDIGHET + " for fagsak " + saksnummer);
         }
-        return myndighet.hentMyndighetLandkode();
+        if (myndigheter.size() > 1) {
+            throw new TekniskException("Kan ikke hente landkode for en bestemt myndighet fordi finnes flere myndigheter");
+        }
+        return myndigheter.get(0).hentMyndighetLandkode();
     }
 
     /**

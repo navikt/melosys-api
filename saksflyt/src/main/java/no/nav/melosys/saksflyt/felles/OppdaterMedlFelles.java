@@ -1,50 +1,48 @@
 package no.nav.melosys.saksflyt.felles;
 
-import java.util.Set;
-
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OppdaterMedlFelles {
     private final TpsFasade tpsFasade;
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
+    private final AnmodningsperiodeRepository anmodningsperiodeRepository;
 
     public OppdaterMedlFelles(TpsFasade tpsFasade,
-                              BehandlingsresultatRepository behandlingsresultatRepository,
-                              LovvalgsperiodeRepository lovvalgsperiodeRepository) {
+                              BehandlingsresultatService behandlingsresultatService,
+                              LovvalgsperiodeRepository lovvalgsperiodeRepository,
+                              AnmodningsperiodeRepository anmodningsperiodeRepository) {
         this.tpsFasade = tpsFasade;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
+        this.anmodningsperiodeRepository = anmodningsperiodeRepository;
     }
 
     public String hentFnr(Behandling behandling) throws TekniskException, IkkeFunnetException {
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
+        Aktoer bruker = fagsak.hentBruker();
         return tpsFasade.hentIdentForAktørId(bruker.getAktørId());
     }
 
     public Lovvalgsperiode hentLovvalgsperiode(Behandling behandling) throws FunksjonellException {
-        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandling);
+        return hentBehandlingsresultat(behandling).hentValidertLovvalgsperiode();
+    }
 
-        Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
-        if (lovvalgsperioder.size() != 1) {
-            throw new FunksjonellException("Det er enten ingen eller for mange Lovvalgsperioder for behandling " + behandling.getId());
-        }
-        return lovvalgsperioder.iterator().next();
+    public Anmodningsperiode hentAnmodningsperiode(Behandling behandling) throws FunksjonellException {
+        return hentBehandlingsresultat(behandling).hentValidertAnmodningsperiode();
     }
 
     public Behandlingsresultat hentBehandlingsresultat(Behandling behandling) throws IkkeFunnetException {
-        return behandlingsresultatRepository.findById(behandling.getId())
-            .orElseThrow(() -> new IkkeFunnetException("Opprettelse av periode i MEDL feilet fordi behandlingsresultat med behandling ID " + behandling.getId() + " ikke finnes."));
+        return behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
     }
 
     public void lagreMedlPeriodeId(Long medlPeriodeID, Lovvalgsperiode lovvalgsperiode, long behandlingID) throws FunksjonellException {
@@ -53,5 +51,13 @@ public class OppdaterMedlFelles {
         }
         lovvalgsperiode.setMedlPeriodeID(medlPeriodeID);
         lovvalgsperiodeRepository.save(lovvalgsperiode);
+    }
+
+    public void lagreMedlPeriodeId(Long medlPeriodeID, Anmodningsperiode anmodningsperiode, long behandlingID) throws FunksjonellException {
+        if (medlPeriodeID == null) {
+            throw new FunksjonellException("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling " + behandlingID);
+        }
+        anmodningsperiode.setMedlPeriodeID(medlPeriodeID);
+        anmodningsperiodeRepository.save(anmodningsperiode);
     }
 }

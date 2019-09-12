@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.gsak.sak.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SakDto {
-
     private Long id;
     private String tema; // https://kodeverkviewer.adeo.no/kodeverk/xml/fagomrade.xml
     private String applikasjon; // Fagsystemkode for applikasjon
@@ -14,8 +13,6 @@ public class SakDto {
     private String orgnr; // Orgnr til foretaket saken gjelder
     private String opprettetAv;// Brukerident til den som opprettet saken
     private String opprettetTidspunkt; // Lagres som LocalDateTime i Sak API, men eksponeres som ZonedDateTime
-
-    public SakDto() {}
 
     public Long getId() {
         return id;

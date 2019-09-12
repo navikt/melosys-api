@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
@@ -22,23 +24,30 @@ import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import static java.util.stream.Collectors.toList;
+import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
 public class BehandlingService {
-
     private final BehandlingRepository behandlingRepository;
-
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
-    private BehandlingsresultatService behandlingsresultatService;
-    private OppgaveService oppgaveService;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final OppgaveService oppgaveService;
+
+    private final Counter behandlingerOpprettet = Metrics.counter(BEHANDLINGER_OPPRETTET);
+    private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
 
     @Autowired
-    public BehandlingService(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository, BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService) {
+    public BehandlingService(BehandlingRepository behandlingRepository,
+                             BehandlingsresultatRepository behandlingsresultatRepository,
+                             TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
+                             BehandlingsresultatService behandlingsresultatService,
+                             @Lazy OppgaveService oppgaveService) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
@@ -68,13 +77,12 @@ public class BehandlingService {
      * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
      */
     public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException {
-        if (!erLovligNesteStatusEtterDokumentVurdering(status)) {
-            throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
-        }
-
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
-        if (!behandling.erAktiv()) {
+
+        if (behandling.getStatus() == Behandlingsstatus.VURDER_DOKUMENT && !erLovligNesteStatusEtterDokumentVurdering(status)) {
+            throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
+        } else if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
         }
         behandling.setStatus(status);
@@ -113,6 +121,7 @@ public class BehandlingService {
         behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         behandlingsresultatRepository.save(behandlingsresultat);
 
+        behandlingerOpprettet.increment();
         return behandling;
     }
 
@@ -152,9 +161,9 @@ public class BehandlingService {
     public void avsluttBehandling(long behandlingId) throws IkkeFunnetException {
         Behandling behandling = behandlingRepository.findById(behandlingId)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
-
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
+        behandlingerAvsluttet.increment();
     }
 
     public Behandling hentBehandling(long behandlingId) throws IkkeFunnetException {

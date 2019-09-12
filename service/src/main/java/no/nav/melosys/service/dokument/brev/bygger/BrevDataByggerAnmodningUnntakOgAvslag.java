@@ -18,9 +18,10 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 
 public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataBygger implements BrevDataBygger {
-
     private AvklarteVirksomheterService avklarteVirksomheterService;
     private LandvelgerService landvelgerService;
+
+    private static final Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
 
     public BrevDataByggerAnmodningUnntakOgAvslag(AvklartefaktaService avklartefaktaService,
                                                  AvklarteVirksomheterService avklarteVirksomheterService,
@@ -30,8 +31,6 @@ public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataB
         this.landvelgerService = landvelgerService;
     }
 
-    Function<OrganisasjonDokument, Adresse> ingenAdresse = org -> null;
-
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
         this.behandling = behandling;
@@ -39,7 +38,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataB
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
 
-        List<AvklartVirksomhet> avklarteVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse);
+        List<AvklartVirksomhet> avklarteVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE);
         if (avklarteVirksomheter.size() != 1) {
             throw new TekniskException("Trenger minst en norsk virksomhet for avslag og ART16.1");
         }

@@ -33,15 +33,13 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-public final class LovvalgsperiodeTjenesteTest {
-
+public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
+    private static final String LOVVALGSPERIODER_SCHEMA = "lovvalgsperioder-schema.json";
     private static final LocalDate FOM = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
             LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2,
             TilleggsBestemmelser_883_2004.FO_883_2004_ART13_4,
             Landkoder.SK,
-            null,
-            null,
             InnvilgelsesResultat.AVSLAATT,
             null,
             Medlemskapstyper.FRIVILLIG,
@@ -49,11 +47,6 @@ public final class LovvalgsperiodeTjenesteTest {
 
     private static final long BEHANDLING_UTEN_TILGANG = 238L;
     private static final long BEHANDLING_MED_TEKNISK_FEIL = 832L;
-    private final JsonSchemaTestParent jsonSchemaTest;
-
-    public LovvalgsperiodeTjenesteTest() {
-        jsonSchemaTest = new JsonSchemaTestParent("lovvalgsperioder-schema.json");
-    }
 
     @Test
     public void hentEksisterendeLovvalgsperiodeGir200OkOgEnForekomst() throws Exception {
@@ -113,7 +106,7 @@ public final class LovvalgsperiodeTjenesteTest {
         @SuppressWarnings("unchecked")
         Collection<LovvalgsperiodeDto> resultatliste = (Collection<LovvalgsperiodeDto>) resultat.getEntity();
         assertThat(resultatliste.size()).isEqualTo(forventet.size());
-        jsonSchemaTest.validerListe(resultatliste);
+        validerArray(resultatliste, LOVVALGSPERIODER_SCHEMA);
     }
 
     @Test
@@ -126,14 +119,14 @@ public final class LovvalgsperiodeTjenesteTest {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
         TilgangService tilgangService = mock(TilgangService.class);
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
-        jsonSchemaTest.validerListe(perioder);
+        validerArray(perioder, LOVVALGSPERIODER_SCHEMA);
         Collection<LovvalgsperiodeDto> resultat = instans.lagreLovvalgsperioder(behandlingsid, perioder);
         assertThat(resultat.size()).isEqualTo(perioder.size());
         if (!perioder.isEmpty()) {
             assertThat(perioder.iterator().next())
                     .isEqualToComparingFieldByFieldRecursively(resultat.iterator().next());
         }
-        jsonSchemaTest.validerListe(resultat);
+        validerArray(resultat, LOVVALGSPERIODER_SCHEMA);
     }
 
     private static LovvalgsperiodeService lagLovvalgsperiodeService() {

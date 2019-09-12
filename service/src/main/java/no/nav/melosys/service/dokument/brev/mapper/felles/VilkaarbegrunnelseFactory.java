@@ -164,16 +164,13 @@ public final class VilkaarbegrunnelseFactory {
     public static Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
         Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = lagArt122NormalVirksomhetBegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Normaltdrivervirksomhet normaltDriverVirksomhet = Normaltdrivervirksomhet.valueOf(vilkaarBegrunnelse.getKode());
+            Art12_2_Normalt_Virksomhet_Begrunnelser normaltDriverVirksomhet = Art12_2_Normalt_Virksomhet_Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (normaltDriverVirksomhet) {
                 case IKKE_FORUTGAAENDE_DRIFT:
                     art122NormalVirksomhetBegrunnelseType.setIkkeForutgåendeDrift(JA);
                     break;
-                case HAR_IKKE_NØDVENDIG_INFRASTRUKTUR:
-                    art122NormalVirksomhetBegrunnelseType.setHarIkkeNødvendigInfrastruktur(JA);
-                    break;
-                case OPPRETTHOLDER_IKKE_LISENSER_AUTORISASJON:
-                    art122NormalVirksomhetBegrunnelseType.setOpprettholderIkkeLisenserAutorisasjon(JA);
+                case IKKE_GJENOPPTA_DRIFT:
+                    art122NormalVirksomhetBegrunnelseType.setIkkeGjenopptaDrift(JA);
                     break;
                 default:
                     throw new TekniskException(normaltDriverVirksomhet + IKKE_STØTTET);

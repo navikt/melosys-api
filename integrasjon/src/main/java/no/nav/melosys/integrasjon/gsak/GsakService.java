@@ -38,9 +38,6 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 public class GsakService implements GsakFasade {
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
-    private static final int FRIST_JFR_DAGER = 1;
-    private static final int FRIST_VUR_DAGER = 1;
-    private static final int FRIST_BEH_UKER = 12;
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
@@ -128,18 +125,10 @@ public class GsakService implements GsakFasade {
         if (oppgave.getBehandlingstype() != null) {
             oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstype()));
         }
-        if (oppgave.erJournalFøring()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusDays(FRIST_JFR_DAGER));
-        } else if (oppgave.erBehandling()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_BEH_UKER));
-        } else if (oppgave.erVurderDokument()) {
-            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_VUR_DAGER));
-        } else {
-            throw new FunksjonellException("Type " + oppgave.getOppgavetype().getKode() + " støttes ikke.");
-        }
         if (oppgave.getBehandlingstema() != null) {
             oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode());
         }
+        oppgaveDto.setFristFerdigstillelse(oppgave.lagFristFerdigstillelse(idag));
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
         oppgaveDto.setPrioritet(PrioritetType.NORM.toString());
@@ -244,7 +233,7 @@ public class GsakService implements GsakFasade {
     public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode()})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 

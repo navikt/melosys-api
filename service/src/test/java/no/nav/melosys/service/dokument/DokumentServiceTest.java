@@ -34,7 +34,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
@@ -45,6 +45,7 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgi
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Test;
 import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
@@ -175,7 +176,7 @@ public final class DokumentServiceTest {
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
         brevDataA1.hovedvirksomhet = arbeidsgiver;
-        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse("SAKSBEHANDLER", new BrevbestillingDto());
+        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevDataA1;
         brevdataInnvilgelse.norskeVirksomheter = brevDataA1.norskeVirksomheter;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
@@ -225,9 +226,9 @@ public final class DokumentServiceTest {
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
+        BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class), avklarteVirksomheterService, mock(UtenlandskMyndighetService.class));
         return new DokumentService(behandlingRepository, brevDataService, dokSysFasade,
-            mock(KontaktopplysningService.class), mock(ProsessinstansService.class), brevdatabyggervelger,
-            avklarteVirksomheterService, mock(AvklarMyndighetService.class));
+            mock(ProsessinstansService.class), brevmottakerService, brevdatabyggervelger);
     }
 
     private static Behandling lagBehandling() {
@@ -309,13 +310,14 @@ public final class DokumentServiceTest {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
+        AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         JoarkService joarkService = mock(JoarkService.class);
         AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
-        return new BrevDataByggerVelger(avklartefaktaService, avklarteVirksomheterSystemService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository,
-            vilkaarsresultatRepository, joarkService);
+        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, avklarteVirksomheterSystemService, kodeverkService, lovvalgsperiodeService,
+            utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) throws FunksjonellException, TekniskException {

@@ -21,47 +21,42 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppgaveServiceTest {
-
-    private OppgaveService oppgaveService;
-
     @Mock
-    private FagsakRepository fagsakRepository;
-
+    private FagsakService fagsakService;
     @Mock
-    private BehandlingRepository behandlingRepository;
-
+    private BehandlingService behandlingService;
     @Mock
     private GsakFasade gsakFasade;
-
     @Mock
     private TpsFasade tpsFasade;
-
     @Mock
     private SaksopplysningerService saksopplysningerService;
+
+    private OppgaveService oppgaveService;
 
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
         this.oppgaveService = new OppgaveService(
                 gsakFasade,
-                fagsakRepository,
-                behandlingRepository,
+                fagsakService,
+                behandlingService,
                 tpsFasade,
             saksopplysningerService);
 
@@ -108,8 +103,8 @@ public class OppgaveServiceTest {
         List<Behandling> behandlinger = new ArrayList<>();
         behandlinger.add(lagBehandling());
         fagsak.setBehandlinger(behandlinger);
-        when(fagsakRepository.findBySaksnummer(any(String.class))).thenReturn(fagsak);
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(lagBehandling());
+        when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);

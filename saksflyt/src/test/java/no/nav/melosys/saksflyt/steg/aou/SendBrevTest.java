@@ -10,6 +10,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,9 @@ public class SendBrevTest {
     @Mock
     private BehandlingRepository behandlingRepository;
 
+    @Mock
+    private AnmodningsperiodeService anmodningsperiodeService;
+
     private Prosessinstans p;
     private SendBrev agent;
 
@@ -47,12 +51,13 @@ public class SendBrevTest {
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.ANMODNING_OM_UNNTAK.getKode());
 
-        agent = new SendBrev(brevBestiller, behandlingRepository);
+        agent = new SendBrev(brevBestiller, behandlingRepository, anmodningsperiodeService);
     }
 
     @Test
-    public void utfoerSteg() {
+    public void utfoerSteg() throws FunksjonellException {
         agent.utførSteg(p);
+        verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(anyLong());
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_SED);
     }
 

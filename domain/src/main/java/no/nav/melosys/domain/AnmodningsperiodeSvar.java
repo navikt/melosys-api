@@ -5,7 +5,6 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
-import org.apache.commons.lang3.StringUtils;
 
 @Entity
 @Table(name = "anmodningsperiode_svar")
@@ -122,8 +121,21 @@ public class AnmodningsperiodeSvar {
         return Objects.hash(id, registrertDato, begrunnelseFritekst, innvilgetFom, innvilgetTom);
     }
 
+    @Override
+    public String toString() {
+        return "AnmodningsperiodeSvar{" +
+            "id=" + id +
+            ", anmodningsperiode=" + anmodningsperiode +
+            ", anmodningsperiodeSvarType=" + anmodningsperiodeSvarType +
+            ", registrertDato=" + registrertDato +
+            ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
+            ", innvilgetFom=" + innvilgetFom +
+            ", innvilgetTom=" + innvilgetTom +
+            '}';
+    }
+
     public boolean erGyldigDelvisInnvilgelse() {
         return AnmodningsperiodeSvarType.DELVIS_INNVILGELSE == getAnmodningsperiodeSvarType()
-            && (getInnvilgetFom() != null || getInnvilgetTom() != null || StringUtils.isNotEmpty(getBegrunnelseFritekst()));
+            && getInnvilgetFom() != null && getInnvilgetTom() != null;
     }
 }

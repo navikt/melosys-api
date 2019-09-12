@@ -61,13 +61,9 @@ public class SendSed extends AbstraktSendSed {
 
     @Override
     protected boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
-        if (behandlingsresultat.getLovvalgsperioder().size() > 1) {
-            throw new UnsupportedOperationException("Flere enn en"
-                + " lovvalgsperiode er ikke støttet i første leveranse");
-        }
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().iterator().next();
+        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
         return behandlingsresultat.getType() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK
-            && (lovvalgsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1
-            || lovvalgsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2);
+            && (anmodningsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1
+            || anmodningsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2);
     }
 }

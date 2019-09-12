@@ -35,15 +35,11 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjenesteTest.class);
-
-    private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-medlemsperioder-post-schema.json";
+    private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-tidligeremedlemsperioder-post-schema.json";
     private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
 
     private BehandlingTjeneste behandlingTjeneste;
-
-    private String schemaType;
 
     @Mock
     private BehandlingService behandlingService;
@@ -68,31 +64,19 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
         );
     }
 
-    @Override
-    public String schemaNavn() {
-        return schemaType;
-    }
-
     @Test
     public void behandlingerPerioderValidering() throws IOException {
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = Arrays.asList(2L, 3L, 5L);
-
-        String jsonString = objectMapper().writeValueAsString(tidligereMedlemsperioderDto);
-        assertThat(jsonString).isNotEmpty();
-
-        schemaType = TIDLIGERE_MEDLEMSPERIODER_SCHEMA;
-        valider(jsonString, log);
+        valider(tidligereMedlemsperioderDto, TIDLIGERE_MEDLEMSPERIODER_SCHEMA, log);
     }
 
     @Test
     public void hentBehandling_erSchemaValidert() throws IOException {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
         behandlingDto.getSaksopplysninger().setSed(null);
-
-        schemaType = BEHANDLINGER_SCHEMA;
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(behandlingDto);
-        valider(jsonString, log);
+        valider(jsonString, BEHANDLINGER_SCHEMA, log);
     }
 
     @Test

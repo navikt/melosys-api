@@ -22,8 +22,6 @@ public final class LovvalgsperiodeDto {
     public final String lovvalgsbestemmelse;
     public final String tilleggBestemmelse;
     public final String lovvalgsland;
-    public final String unntakFraBestemmelse;
-    public final String unntakFraLovvalgsland;
     public final String innvilgelsesResultat;
     public final String trygdeDekning;
     public final String medlemskapstype;
@@ -33,8 +31,6 @@ public final class LovvalgsperiodeDto {
             LovvalgBestemmelse lovvalgsbestemmelse,
             LovvalgBestemmelse tilleggBestemmelse,
             Landkoder lovvalgsland,
-            LovvalgBestemmelse unntakFraBestemmelse,
-            Landkoder unntakFraLovvalgsland,
             InnvilgelsesResultat innvilgelsesResultat,
             Trygdedekninger trygdeDekning,
             Medlemskapstyper medlemskapstype,
@@ -43,8 +39,6 @@ public final class LovvalgsperiodeDto {
         this.lovvalgsbestemmelse = lovvalgsbestemmelse != null ? lovvalgsbestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
         this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
-        this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
-        this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
         this.innvilgelsesResultat = innvilgelsesResultat.name();
         this.trygdeDekning = trygdeDekning != null ? trygdeDekning.name() : null;
         this.medlemskapstype = medlemskapstype != null ? medlemskapstype.name() : null;
@@ -52,14 +46,12 @@ public final class LovvalgsperiodeDto {
     }
 
     @JsonCreator
-    public LovvalgsperiodeDto(Map<String, String> json) {
+    LovvalgsperiodeDto(Map<String, String> json) {
         this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 LocalDate.parse(json.get("tomDato"))),
                 konverterLovvalgsBestemmelse(json.get("lovvalgsbestemmelse")),
                 konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
                 enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
-                konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
-                enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
                 InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
                 enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
                 enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
@@ -79,8 +71,6 @@ public final class LovvalgsperiodeDto {
             lovvalgsperiode.getBestemmelse(),
             lovvalgsperiode.getTilleggsbestemmelse(),
             lovvalgsperiode.getLovvalgsland(),
-            lovvalgsperiode.getUnntakFraBestemmelse(),
-            lovvalgsperiode.getUnntakFraLovvalgsland(),
             lovvalgsperiode.getInnvilgelsesresultat(),
             lovvalgsperiode.getDekning(),
             lovvalgsperiode.getMedlemskapstype(),
@@ -98,9 +88,7 @@ public final class LovvalgsperiodeDto {
         resultat.setTom(periode.getTom());
         resultat.setLovvalgsland(enumVerdiEllerNull(Landkoder.class, lovvalgsland));
         resultat.setBestemmelse(konverterer.convertToEntityAttribute(lovvalgsbestemmelse));
-        resultat.setUnntakFraBestemmelse(konverterer.convertToEntityAttribute(unntakFraBestemmelse));
         resultat.setTilleggsbestemmelse(konverterer.convertToEntityAttribute(tilleggBestemmelse));
-        resultat.setUnntakFraLovvalgsland(enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland));
         resultat.setInnvilgelsesresultat(enumVerdiEllerNull(InnvilgelsesResultat.class, innvilgelsesResultat));
         resultat.setDekning(enumVerdiEllerNull(Trygdedekninger.class, trygdeDekning));
         resultat.setMedlemskapstype(enumVerdiEllerNull(Medlemskapstyper.class, medlemskapstype));

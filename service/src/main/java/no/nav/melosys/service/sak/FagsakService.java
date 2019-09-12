@@ -2,7 +2,10 @@ package no.nav.melosys.service.sak;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -22,35 +25,32 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.metrics.MetrikkerNavn.SAKER_OPPRETTET;
+
 @Service
 public class FagsakService {
-
+    private static final Logger log = LoggerFactory.getLogger(FagsakService.class);
     private static final String FAGSAKID_PREFIX = "MEL-";
 
     private final FagsakRepository fagsakRepository;
-
     private final BehandlingService behandlingService;
-
     private final KontaktopplysningService kontaktopplysningService;
-
     private final OppgaveService oppgaveService;
-
     private final TpsFasade tpsFasade;
-
     private final ProsessinstansService prosessinstansService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
-    private BehandlingsresultatService behandlingsresultatService;
-
-    private static final Logger log = LoggerFactory.getLogger(FagsakService.class);
+    private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService,
-                         OppgaveService oppgaveService,
+                         @Lazy OppgaveService oppgaveService,
                          TpsFasade tpsFasade,
                          ProsessinstansService prosessinstansService,
                          BehandlingsresultatService behandlingsresultatService) {
@@ -110,10 +110,31 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
+    // Sletter aktører som ikke ligger i oppgitt liste og legger til de som mangler.
+    // Oppdaterer IKKE de som allerede finnes i database
+    @Transactional
+    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId()));
+
+        Collection<Aktoer> nyeMyndigheter = ider.stream()
+            .map(id -> lagAktør(fagsak, Aktoersroller.MYNDIGHET, id))
+            .collect(Collectors.toList());
+
+        fagsak.getAktører().addAll(nyeMyndigheter);
+        fagsakRepository.save(fagsak);
+    }
+
     @Transactional
     public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
+        Aktoer aktør = lagAktør(fagsak, aktørsrolle, ID);
+        fagsak.getAktører().add(aktør);
+        fagsakRepository.save(fagsak);
+    }
+
+    private static Aktoer lagAktør(Fagsak fagsak, Aktoersroller aktørsrolle, String ID) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(aktørsrolle);
@@ -131,9 +152,7 @@ public class FagsakService {
             default:
                 throw new IllegalStateException(aktørsrolle + " støttes ikke.");
         }
-
-        fagsak.getAktører().add(aktør);
-        fagsakRepository.save(fagsak);
+        return aktør;
     }
 
     /**
@@ -200,6 +219,7 @@ public class FagsakService {
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
+        sakerOpprettet.increment();
         return fagsak;
     }
 

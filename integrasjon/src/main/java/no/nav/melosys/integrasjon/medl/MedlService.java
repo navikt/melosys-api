@@ -7,10 +7,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -32,24 +29,16 @@ import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeReques
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MedlService implements MedlFasade {
-
-    private static final Logger log = LoggerFactory.getLogger(MedlService.class);
-
     private static final String MEDLEMSKAP_VERSJON = "2.0";
 
     private final MedlemskapConsumer medlemskapConsumer;
-
     private final BehandleMedlemskapConsumer behandleMedlemskapConsumer;
-
-    private DokumentFactory dokumentFactory;
-
+    private final DokumentFactory dokumentFactory;
     private final JAXBContext jaxbContext;
 
     @Autowired
@@ -63,7 +52,6 @@ public class MedlService implements MedlFasade {
         try {
             jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponseWrapper.class);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IllegalStateException(e);
         }
     }
@@ -82,7 +70,6 @@ public class MedlService implements MedlFasade {
 
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IntegrasjonException(e);
         }
 
@@ -104,13 +91,13 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public Long opprettPeriodeUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
+    public Long opprettPeriodeUnderAvklaring(String fnr, Medlemskapsperiode periodeMedBestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        return opprettPeriode(fnr, periodeMedBestemmelse, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
     }
 
-    Long opprettPeriode(String fnr, Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    Long opprettPeriode(String fnr, Medlemskapsperiode periodeMedBestemmelse, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         try {
-            OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, lovvalgsperiode, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
+            OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, periodeMedBestemmelse, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
             OpprettPeriodeResponse response = behandleMedlemskapConsumer.opprettPeriode(request);
             return response.getPeriodeId();
         } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PersonIkkeFunnet e) {
@@ -147,10 +134,10 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public void avvisPeriode(Lovvalgsperiode lovvalgsperiode, StatusaarsakMedl årsak) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void avvisPeriode(Long medlPeriodeID, StatusaarsakMedl årsak) throws SikkerhetsbegrensningException, IkkeFunnetException {
         try {
             behandleMedlemskapConsumer.avvisPeriode(
-                MedlPeriodeKonverter.konverterTilAvvisPeriodeRequest(lovvalgsperiode.getMedlPeriodeID(), årsak)
+                MedlPeriodeKonverter.konverterTilAvvisPeriodeRequest(medlPeriodeID, årsak)
             );
         } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning ex) {
             throw new SikkerhetsbegrensningException(ex);

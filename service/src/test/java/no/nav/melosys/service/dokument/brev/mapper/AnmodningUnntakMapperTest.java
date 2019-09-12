@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import com.google.common.collect.Sets;
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
@@ -61,10 +62,8 @@ public class AnmodningUnntakMapperTest {
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
         Behandlingsresultat resultat = new Behandlingsresultat();
-
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
@@ -90,6 +89,11 @@ public class AnmodningUnntakMapperTest {
         resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
+        Anmodningsperiode anmodningsperiode =
+            new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO, null, null, Landkoder.DK,
+                null, null);
+        resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
+
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
 
@@ -98,5 +102,6 @@ public class AnmodningUnntakMapperTest {
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
         assertThat("<ns3:yrkesaktivitet>SELVSTENDIG</ns3:yrkesaktivitet>").isSubstringOf(xml);
         assertThat(Landkoder.AT.getBeskrivelse()).isSubstringOf(xml);
+        assertThat(xml).doesNotContain(Landkoder.DK.getKode());
     }
 }

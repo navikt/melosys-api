@@ -2,8 +2,11 @@ package no.nav.melosys.saksflyt.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,25 +34,23 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
 @Component
 @Scope(SCOPE_SINGLETON)
 public class Saksflyt {
-
     private static final Logger logger = LoggerFactory.getLogger(Saksflyt.class);
 
-    private int antallTråder;
-
-    private final ThreadPoolTaskExecutor taskExecutor;
-
+    private final ExecutorService taskExecutor;
     // Liste med arbeidstråder. Disse er prototype bønner med tilstand og tråd.
     private final ArbeiderTraad[] tråder;
-
     private final List<Future<?>> futures;
+
+    private int antallTråder;
 
     @Autowired
     public Saksflyt(
         ApplicationContext context,
         @Qualifier("applicationTaskExecutor") ThreadPoolTaskExecutor taskExecutor,
+        MeterRegistry registry,
         @Value("${melosys.saksflyt.arbeider.antallTråder:1}") int antallTråder
     ) {
-        this.taskExecutor = taskExecutor;
+        this.taskExecutor = ExecutorServiceMetrics.monitor(registry, taskExecutor.getThreadPoolExecutor(), "saksflyt");
         this.antallTråder = antallTråder;
         tråder = new ArbeiderTraad[antallTråder];
         futures = new ArrayList<>();

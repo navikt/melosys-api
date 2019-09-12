@@ -68,10 +68,12 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
             SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
             Lovvalgsperiode lovvalgsperiode = UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument);
             oppdaterStatusOgLagreMedlPeriode(behandlingId, lovvalgsperiode, behandling);
-        } else if (lovvalgsperioder.iterator().next().getMedlPeriodeID() == null) {
-            Behandling behandling = behandlingService.hentBehandling(behandlingId);
-            Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
-            oppdaterStatusOgLagreMedlPeriode(behandlingId, lovvalgsperiode, behandling);
+        } else {
+            Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+            if (lovvalgsperiode.getMedlPeriodeID() == null) {
+                Behandling behandling = behandlingService.hentBehandling(behandlingId);
+                oppdaterStatusOgLagreMedlPeriode(behandlingId, lovvalgsperiode, behandling);
+            }
         }
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);

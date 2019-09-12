@@ -7,12 +7,12 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktAvklarMyndighet;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +29,14 @@ import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_MYNDIGHET;
  */
 @Component("IverksettVedtakAvklarMyndighet")
 public class AvklarMyndighet extends AbstraktAvklarMyndighet {
-
     private static final Logger log = LoggerFactory.getLogger(AvklarMyndighet.class);
 
     @Autowired
-    public AvklarMyndighet(BehandlingRepository behandlingRepository,
-                           BehandlingsresultatRepository behandlingsresultatRepository,
-                           AvklarMyndighetService avklarMyndighetService) {
-        super(behandlingRepository, behandlingsresultatRepository,
-            avklarMyndighetService);
+    public AvklarMyndighet(BehandlingService behandlingService,
+                           BehandlingsresultatService behandlingsresultatService,
+                           UtenlandskMyndighetService utenlandskMyndighetService) {
+        super(behandlingService, behandlingsresultatService,
+            utenlandskMyndighetService);
         log.info("AvklarMyndighet initialisert");
     }
 

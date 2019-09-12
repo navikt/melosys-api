@@ -8,7 +8,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AnmodningUnntakService {
-    private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeService.class);
+    private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakService.class);
 
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
@@ -30,7 +29,7 @@ public class AnmodningUnntakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void anmodningOmUnntak(long behandlingID) throws FunksjonellException, TekniskException {
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_UTL);
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);

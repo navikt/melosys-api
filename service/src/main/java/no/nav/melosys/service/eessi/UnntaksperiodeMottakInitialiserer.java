@@ -1,14 +1,18 @@
 package no.nav.melosys.service.eessi;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.repository.AvklarteFaktaRepository;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
@@ -16,6 +20,7 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,24 +29,36 @@ import org.springframework.transaction.annotation.Transactional;
 public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInitialiserer {
 
     private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeMottakInitialiserer.class);
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final FagsakService fagsakService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final GsakFasade gsakFasade;
+    private final SaksopplysningRepository saksopplysningRepository;
+    private final AvklarteFaktaRepository avklarteFaktaRepository;
 
     @Autowired
-    public UnntaksperiodeMottakInitialiserer(FagsakService fagsakService, LovvalgsperiodeService lovvalgsperiodeService) {
+    public UnntaksperiodeMottakInitialiserer(FagsakService fagsakService,
+                                             LovvalgsperiodeService lovvalgsperiodeService,
+                                             @Qualifier("system") GsakFasade gsakFasade,
+                                             SaksopplysningRepository saksopplysningRepository,
+                                             AvklarteFaktaRepository avklarteFaktaRepository) {
         this.fagsakService = fagsakService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.gsakFasade = gsakFasade;
+        this.saksopplysningRepository = saksopplysningRepository;
+        this.avklarteFaktaRepository = avklarteFaktaRepository;
     }
 
     @Override
     @Transactional
-    public void initialiserProsessinstans(Prosessinstans prosessinstans) {
+    public void initialiserProsessinstans(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         SedType sedType = SedType.valueOf(melosysEessiMelding.getSedType());
 
-        if (skalBehandles(melosysEessiMelding)) {
+        if (skalBehandlesPåEksisterendeBehandling(melosysEessiMelding)) {
+            log.info("Behandler mottatt EESSI-medling på en eksisterende behandling. Buc: {}, SED: {}", melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getSedId());
+            initialiserForEksisterendeBehandling(prosessinstans, melosysEessiMelding, sedType);
+        } else if (skalBehandlesPåNyBehandling(melosysEessiMelding)) {
             log.info("Behandler mottatt EESSI-medling. Buc: {}, SED: {}", melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getSedId());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, hentBehandlingstypeForSedType(sedType));
             prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
@@ -49,6 +66,33 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
         } else {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
         }
+    }
+
+    private void initialiserForEksisterendeBehandling(Prosessinstans prosessinstans, MelosysEessiMelding melosysEessiMelding, SedType sedType) throws TekniskException, FunksjonellException {
+        Optional<Behandling> behandlingOptional = hentSistOppdaterteBehandling(melosysEessiMelding);
+        if (!behandlingOptional.isPresent()) {
+            throw new IkkeFunnetException("Finner ikke sist oppdaterte behandling for gsak " + melosysEessiMelding.getGsakSaksnummer());
+        }
+
+        Behandling behandling = behandlingOptional.get();
+        ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        saksopplysningRepository.deleteAllByBehandling(behandling);
+        avklarteFaktaRepository.deleteByBehandlingsresultatId(behandling.getId());
+
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, hentBehandlingstypeForSedType(sedType));
+        prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
+    }
+
+    private void ferdigstillOppgaveMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+        if (oppgave == null) {
+            throw new TekniskException("Finner ingen oppgave med saksnummer " + saksnummer);
+        }
+
+        log.info("Ferdigstiller oppgave {} for fagsak {}", oppgave.getOppgaveId(), saksnummer);
+        gsakFasade.ferdigstillOppgave(oppgave.getOppgaveId());
     }
 
     private Behandlingstyper hentBehandlingstypeForSedType(SedType sedType) {
@@ -68,7 +112,7 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
             || sedType == SedType.A010;
     }
 
-    private boolean skalBehandles(MelosysEessiMelding melosysEessiMelding) {
+    private boolean skalBehandlesPåNyBehandling(MelosysEessiMelding melosysEessiMelding) {
         return !melosysEessiMelding.getErEndring() || periodeErEndret(melosysEessiMelding);
     }
 
@@ -77,11 +121,10 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
         Lovvalgsperiode lovvalgsperiode;
 
         try {
-            Optional<Fagsak> eksisterendeFagsak = fagsakService.hentFagsakFraGsakSaksnummer(melosysEessiMelding.getGsakSaksnummer());
-            if (eksisterendeFagsak.isPresent()) {
-                Fagsak fagsak = eksisterendeFagsak.get();
-                Behandling behandling = fagsak.getTidligsteInaktiveBehandling();
-                lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandling.getId());
+            Optional<Behandling> behandling = hentSistOppdaterteBehandling(melosysEessiMelding);
+
+            if (behandling.isPresent()) {
+                lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandling.get().getId());
                 return !PeriodeKontroller.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(),
                     periode.getFom(), periode.getTom());
             }
@@ -93,10 +136,30 @@ public class UnntaksperiodeMottakInitialiserer implements BehandleMottattSedInit
         return true;
     }
 
-    private Periode tilPeriode(no.nav.melosys.service.kafka.model.Periode periode) {
+    private boolean skalBehandlesPåEksisterendeBehandling(MelosysEessiMelding melosysEessiMelding) {
+        return sisteOppdaterteBehandlingErAktiv(melosysEessiMelding) &&
+            (!melosysEessiMelding.getErEndring() || periodeErEndret(melosysEessiMelding));
+    }
+
+    private boolean sisteOppdaterteBehandlingErAktiv(MelosysEessiMelding melosysEessiMelding) {
+        return hentSistOppdaterteBehandling(melosysEessiMelding).map(Behandling::erAktiv).orElse(false);
+    }
+
+    private Optional<Behandling> hentSistOppdaterteBehandling(MelosysEessiMelding melosysEessiMelding) {
+        Optional<Fagsak> eksisterendeFagsak = fagsakService.hentFagsakFraGsakSaksnummer(melosysEessiMelding.getGsakSaksnummer());
+
+        if (eksisterendeFagsak.isPresent()) {
+            Fagsak fagsak = eksisterendeFagsak.get();
+            return Optional.ofNullable(fagsak.getSistOppdaterteBehandling());
+        }
+
+        return Optional.empty();
+    }
+
+    private static Periode tilPeriode(no.nav.melosys.service.kafka.model.Periode periode) {
         return new Periode(
-            LocalDate.parse(periode.getFom(), dateTimeFormatter),
-            periode.getTom() != null ? LocalDate.parse(periode.getTom(), dateTimeFormatter) : null
+            periode.getFom(),
+            periode.getTom()
         );
     }
 }

@@ -43,7 +43,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
         LovvalgsperiodeRepository.class }, includeFilters = @Filter(type = FilterType.REGEX, pattern = { "no.nav.melosys.service.LovvalgsperiodeService",
                 "no.nav.melosys.repository.LovvalgsperiodeRepository" }))
 public class LovvalgsperiodeServiceIT {
-
     @SpringBootConfiguration
     static class Config {
     }
@@ -96,8 +95,6 @@ public class LovvalgsperiodeServiceIT {
         rad.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         rad.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_1);
         rad.setLovvalgsland(Landkoder.SK);
-        rad.setUnntakFraLovvalgsland(Landkoder.SI);
-        rad.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3A);
         rad.setMedlemskapstype(Medlemskapstyper.UNNTATT);
         return rad;
     }

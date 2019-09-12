@@ -10,10 +10,11 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +41,14 @@ public class SendBrev extends AbstraktStegBehandler {
 
     private final BrevBestiller brevBestiller;
     private final BehandlingRepository behandlingRepository;
+    private final AnmodningsperiodeService anmodningsperiodeService;
 
     @Autowired
     public SendBrev(BrevBestiller brevBestiller,
-                    BehandlingRepository behandlingRepository) {
+                    BehandlingRepository behandlingRepository, AnmodningsperiodeService anmodningsperiodeService) {
         this.brevBestiller = brevBestiller;
         this.behandlingRepository = behandlingRepository;
+        this.anmodningsperiodeService = anmodningsperiodeService;
 
         log.info("AnmodningOmUnntakSendBrev initialisert");
     }
@@ -73,6 +76,8 @@ public class SendBrev extends AbstraktStegBehandler {
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         brevBestiller.bestill(ORIENTERING_ANMODNING_UNNTAK, saksbehandler, Mottaker.av(BRUKER), behandling);
         brevBestiller.bestill(ANMODNING_UNNTAK, saksbehandler, Mottaker.av(MYNDIGHET), behandling);
+
+        anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
 
         log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
         prosessinstans.setSteg(ProsessSteg.AOU_SEND_SED);

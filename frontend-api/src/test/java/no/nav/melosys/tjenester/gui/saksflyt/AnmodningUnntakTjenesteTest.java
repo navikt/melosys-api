@@ -1,11 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
-import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
-import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,18 +11,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
+public class AnmodningUnntakTjenesteTest {
     @Mock
     private AnmodningUnntakService anmodningUnntakService;
     @Mock
     private TilgangService tilgangService;
 
     private AnmodningUnntakTjeneste anmodningUnntakTjeneste;
-
-    @Override
-    public String schemaNavn() {
-        return "saksflyt-vedtak-post-schema.json";
-    }
 
     @Before
     public void setUp() {
@@ -35,16 +26,11 @@ public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void anmodningOmUnntak_fungerer() throws Exception {
-        FattVedtakDto fattVedtakDto = new FattVedtakDto();
         long behandlingID = 3;
-        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        anmodningUnntakTjeneste.anmodningOmUnntak(behandlingID, fattVedtakDto);
+        anmodningUnntakTjeneste.anmodningOmUnntak(behandlingID);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
         verify(anmodningUnntakService).anmodningOmUnntak(behandlingID);
-
-        String json = new ObjectMapper().writeValueAsString(fattVedtakDto);
-        valider(json);
     }
 }

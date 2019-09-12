@@ -9,7 +9,11 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -115,7 +119,6 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getId() == null);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
-        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getUnntakFraLovvalgsland().equals(Landkoder.BE));
 
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
@@ -152,12 +155,21 @@ public class BehandlingsresultatServiceTest {
         verify(behandlingsresultatRepo, never()).save(any());
     }
 
+    @Test
+    public void oppdaterBehandlingsmaate_bhmåteUdefinert_verifiserOppdatert() throws FunksjonellException {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
+        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        behandlingsresultatService.oppdaterBehandlingsMaate(1L, Behandlingsmaate.AUTOMATISERT);
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
+        assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.AUTOMATISERT);
+    }
+
     private Lovvalgsperiode opprettLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setId(32L);
         lovvalgsperiode.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.BE);
         return lovvalgsperiode;
     }
 

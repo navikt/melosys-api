@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.sakogbehandling;
 
 import java.io.StringWriter;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
@@ -15,24 +14,16 @@ import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingSta
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingstatusClient;
 import no.nav.tjeneste.virksomhet.sakogbehandling.v1.meldinger.FinnSakOgBehandlingskjedeListeRequest;
 import no.nav.tjeneste.virksomhet.sakogbehandling.v1.meldinger.FinnSakOgBehandlingskjedeListeResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SakOgBehandlingService implements SakOgBehandlingFasade {
-
-    private static final Logger log = LoggerFactory.getLogger(SakOgBehandlingService.class);
-
     private static final String SOB_VERSJON = "1.0";
 
     private final BehandlingskjedeConsumer behandlingskjedeConsumer;
-
     private final BehandlingstatusClient behandlingstatusClient;
-
-    private DokumentFactory dokumentFactory;
-
+    private final DokumentFactory dokumentFactory;
     private final JAXBContext jaxbContext;
 
     @Autowired
@@ -44,7 +35,6 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
         try {
             jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.sakogbehandling.v1.FinnSakOgBehandlingskjedeListeResponse.class);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IllegalStateException(e);
         }
     }

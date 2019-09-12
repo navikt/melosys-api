@@ -1,17 +1,19 @@
 package no.nav.melosys.saksflyt.steg;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.iv.AvklarMyndighet;
-import no.nav.melosys.service.aktoer.AvklarMyndighetService;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,42 +27,30 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvklarMyndighetTest {
-
     @Mock
-    private BehandlingRepository behandlingRepository;
-
+    private BehandlingService behandlingService;
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private AvklarMyndighetService avklarMyndighetService;
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private AvklarMyndighet steg;
 
     private Prosessinstans p;
 
     @Before
-    public void setUp() {
-        steg = new AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, avklarMyndighetService);
+    public void setUp() throws IkkeFunnetException {
+        steg = new AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("saksnr");
 
         Behandling behandling = lagBehandling(fagsak);
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         p.setBehandling(behandling);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-
-        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
@@ -85,11 +75,11 @@ public class AvklarMyndighetTest {
     public void utfør_utenMyndighet_myndighetOpprettes() throws FunksjonellException, TekniskException {
 
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
 
         steg.utfør(p);
 
-        verify(avklarMyndighetService).avklarUtenlandskMyndighetOgLagre(any(Behandling.class));
+        verify(utenlandskMyndighetService).avklarUtenlandskMyndighetSomAktørOgLagre(any(Behandling.class));
     }
 
     private static Behandlingsresultat lagBehandlingResultat() {
@@ -105,23 +95,9 @@ public class AvklarMyndighetTest {
     }
 
     @Test
-    public void utfør_medMyndighet_myndighetOpprettesIkke() throws FunksjonellException, TekniskException {
-        Fagsak fagsakMedMyndighet = new Fagsak();
-        fagsakMedMyndighet.setSaksnummer("med myndighet");
-        Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
-        fagsakMedMyndighet.getAktører().add(myndighet);
-        p.getBehandling().setFagsak(fagsakMedMyndighet);
-
-        steg.utfør(p);
-
-        verify(avklarMyndighetService, never()).avklarUtenlandskMyndighetOgLagre(any(Behandling.class));
-    }
-
-    @Test
     public void utfør_iverksettVedtakSjekkSteg_forventAvklarArbeidsgiver() throws Exception {
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_AVKLAR_ARBEIDSGIVER);
     }
@@ -129,9 +105,9 @@ public class AvklarMyndighetTest {
     @Test
     public void utfør_anmodningUnntakSjekkSteg_forventAouOppdaterMedl() throws Exception {
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
         no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet steg =
-            new no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, avklarMyndighetService);
+            new no.nav.melosys.saksflyt.steg.aou.AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_MEDL);
     }

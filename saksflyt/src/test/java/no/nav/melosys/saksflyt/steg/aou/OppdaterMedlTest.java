@@ -2,18 +2,19 @@ package no.nav.melosys.saksflyt.steg.aou;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,28 +29,25 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
-
     private OppdaterMedl agent;
 
     @Mock
     private MedlFasade medlFasade;
-
     @Mock
     private TpsFasade tpsFasade;
-
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LovvalgsperiodeRepository lovvalgsperiodeRepository;
+    @Mock
+    private AnmodningsperiodeRepository anmodningsperiodeRepository;
 
     private Prosessinstans p;
-
     private Behandlingsresultat behandlingsresultat;
 
     @Before
-    public void setUp() {
-        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository);
+    public void setUp() throws IkkeFunnetException {
+        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
         agent = new OppdaterMedl(medlFasade, felles);
 
         p = new Prosessinstans();
@@ -69,15 +67,13 @@ public class OppdaterMedlTest {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setLovvalgsland(Landkoder.CH);
-        lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Landkoder.CH,
+            LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, null, null, null, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstyper.SOEKNAD);
@@ -93,7 +89,7 @@ public class OppdaterMedlTest {
     @Test
     public void lagreMedlPeriodeId() {
         agent.utførSteg(p);
-        verify(lovvalgsperiodeRepository).save(any(Lovvalgsperiode.class));
+        verify(anmodningsperiodeRepository).save(any(Anmodningsperiode.class));
     }
 
     @Test
@@ -106,7 +102,7 @@ public class OppdaterMedlTest {
 
     @Test
     public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() {
-        behandlingsresultat.setLovvalgsperioder(new HashSet<>());
+        behandlingsresultat.setAnmodningsperioder(new HashSet<>());
 
         agent.utførSteg(p);
         assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());

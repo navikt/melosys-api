@@ -11,12 +11,13 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BrevDataByggerVelger {
-
+    private final AnmodningsperiodeService anmodningsperiodeService;
     private final AvklartefaktaService avklartefaktaService;
     private final KodeverkService kodeverkService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -27,13 +28,15 @@ public class BrevDataByggerVelger {
     private final LandvelgerService landvelgerService;
 
     @Autowired
-    public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
+    public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
+                                AvklartefaktaService avklartefaktaService,
                                 AvklarteVirksomheterSystemService avklarteVirksomheterService,
                                 KodeverkService kodeverkService,
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
                                 JoarkService joarkService) {
+        this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -66,6 +69,8 @@ public class BrevDataByggerVelger {
                 return lagBrevDataByggerA001(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV:
                 return lagBrevDataByggerInnvilgelse(brevbestillingDto);
+            case INNVILGELSE_YRKESAKTIV_FLERE_LAND:
+                return lagBrevDataByggerInnvilgelseFlereLand(brevbestillingDto);
             case INNVILGELSE_ARBEIDSGIVER:
                 return new BrevDataByggerInnvilgelse(avklartefaktaService,
                                                     landvelgerService,
@@ -91,7 +96,8 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerA001(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA001 a001Bygger =
-            new BrevDataByggerA001(avklartefaktaService,
+            new BrevDataByggerA001(anmodningsperiodeService,
+                avklartefaktaService,
                 avklarteVirksomheterService,
                 kodeverkService,
                 lovvalgsperiodeService,
@@ -105,6 +111,18 @@ public class BrevDataByggerVelger {
             new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
 
         return new BrevDataByggerInnvilgelse(avklartefaktaService,
+            landvelgerService,
+            lovvalgsperiodeService,
+            brevbestillingDto,
+            brevbyggerA1);
+    }
+
+    private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingDto brevbestillingDto) {
+        BrevDataByggerA1 brevbyggerA1 =
+            new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
+
+        return new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
+            avklarteVirksomheterService,
             landvelgerService,
             lovvalgsperiodeService,
             brevbestillingDto,

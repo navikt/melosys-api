@@ -3,6 +3,7 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
@@ -22,8 +23,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
     private Long id;
 
     @MapsId
-    @OneToOne(fetch=FetchType.EAGER, optional = false)
-    @JoinColumn(name="behandling_id")
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "behandling_id")
     private Behandling behandling;
 
     @Enumerated(EnumType.STRING)
@@ -51,13 +52,16 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "utfall_registrering_unntak")
     private UtfallRegistreringUnntak utfallRegistreringUnntak;
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Lovvalgsperiode> lovvalgsperioder = new HashSet<>(1);
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Anmodningsperiode> anmodningsperioder = new HashSet<>(1);
+
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -143,6 +147,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.lovvalgsperioder = lovvalgsperioder;
     }
 
+    public Set<Anmodningsperiode> getAnmodningsperioder() {
+        return anmodningsperioder;
+    }
+
+    public void setAnmodningsperioder(Set<Anmodningsperiode> anmodningsperioder) {
+        this.anmodningsperioder = anmodningsperioder;
+    }
+
     public Set<Vilkaarsresultat> getVilkaarsresultater() {
         return vilkaarsresultater;
     }
@@ -179,7 +191,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return Objects.equals(this.type, that.type)
             && Objects.equals(this.behandling, that.behandling);
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(type, behandling);
@@ -189,22 +201,28 @@ public class Behandlingsresultat extends RegistreringsInfo {
         if (type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return true;
         }
-        Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
         return type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
-            && lovvalgsperiode.getLovvalgsland() != Landkoder.NO
-            && lovvalgsperiode.harGyldigBestemmelse();
+            && lovvalgsperiode.erAvslått();
     }
 
     public boolean erInnvilgelse() {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
-            Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode();
-            return lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
-                && lovvalgsperiode.getLovvalgsland() == Landkoder.NO
-                && lovvalgsperiode.harGyldigBestemmelse();
+            Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
+            return lovvalgsperiode.erInvilget();
         } else {
             return false;
         }
+    }
+
+    public boolean erInnvilgelseFlereLand() {
+        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
+            Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
+            return lovvalgsperiode.erInvilget() && lovvalgsperiode.erArtikkel13();
+        } else {
+            return false;
+        }
+
     }
 
     // Medl skal ikke oppdateres ved avslag.
@@ -212,15 +230,30 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return !erAvslag();
     }
 
-    public boolean sedSkalSendes() {
-        return erInnvilgelse();
-    }
-
-    private Lovvalgsperiode validerLovvalgsperiode() {
+    public Lovvalgsperiode hentValidertLovvalgsperiode() {
+        if (lovvalgsperioder.isEmpty()) {
+            throw new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id);
+        }
         if (lovvalgsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en"
                 + " lovvalgsperiode er ikke støttet i første leveranse");
         }
         return lovvalgsperioder.iterator().next();
+    }
+
+    public Anmodningsperiode hentValidertAnmodningsperiode() {
+        if (anmodningsperioder.isEmpty()) {
+            throw new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id);
+        }
+        if (anmodningsperioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en"
+                + " anmodningsperiode er ikke støttet i første leveranse");
+        }
+        return anmodningsperioder.iterator().next();
+    }
+
+    public boolean erAutomatisert() {
+        return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
+            || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
     }
 }

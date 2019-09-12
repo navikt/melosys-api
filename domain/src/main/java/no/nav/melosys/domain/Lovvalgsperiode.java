@@ -5,18 +5,14 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.exception.FunksjonellException;
 
 import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
-import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1;
 
 @Entity
 @Table(name = "lovvalg_periode")
-public class Lovvalgsperiode implements ErPeriode {
-
+public class Lovvalgsperiode implements Medlemskapsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +20,7 @@ public class Lovvalgsperiode implements ErPeriode {
     @ManyToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
-    
+
     @Column(name = "fom_dato", nullable = false, updatable = false)
     private LocalDate fom;
 
@@ -42,14 +38,6 @@ public class Lovvalgsperiode implements ErPeriode {
     @Column(name = "tillegg_bestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse tilleggsbestemmelse;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "unntak_fra_lovvalgsland", updatable = false)
-    private Landkoder unntakFraLovvalgsland;
-
-    @Column(name = "unntak_fra_bestemmelse", updatable = false)
-    @Convert(converter = LovvalgBestemmelsekonverterer.class)
-    private LovvalgBestemmelse unntakFraBestemmelse;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "innvilgelse_resultat", nullable = false, updatable = false)
@@ -124,22 +112,6 @@ public class Lovvalgsperiode implements ErPeriode {
         this.tilleggsbestemmelse = tilleggsbestemmelse;
     }
 
-    public Landkoder getUnntakFraLovvalgsland() {
-        return unntakFraLovvalgsland;
-    }
-
-    public void setUnntakFraLovvalgsland(Landkoder unntakFraLovvalgsland) {
-        this.unntakFraLovvalgsland = unntakFraLovvalgsland;
-    }
-
-    public LovvalgBestemmelse getUnntakFraBestemmelse() {
-        return unntakFraBestemmelse;
-    }
-
-    public void setUnntakFraBestemmelse(LovvalgBestemmelse unntakFraBestemmelse) {
-        this.unntakFraBestemmelse = unntakFraBestemmelse;
-    }
-
     public InnvilgelsesResultat getInnvilgelsesresultat() {
         return innvilgelsesresultat;
     }
@@ -184,7 +156,7 @@ public class Lovvalgsperiode implements ErPeriode {
         return Objects.equals(this.behandlingsresultat, that.behandlingsresultat)
             && Objects.equals(this.fom, that.fom);
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(behandlingsresultat, fom);
@@ -200,8 +172,6 @@ public class Lovvalgsperiode implements ErPeriode {
             ", lovvalgsland=" + lovvalgsland +
             ", bestemmelse=" + bestemmelse +
             ", tilleggsbestemmelse=" + tilleggsbestemmelse +
-            ", unntakFraLovvalgsland=" + unntakFraLovvalgsland +
-            ", unntakFraBestemmelse=" + unntakFraBestemmelse +
             ", innvilgelsesresultat=" + innvilgelsesresultat +
             ", medlemskapstype=" + medlemskapstype +
             ", dekning=" + dekning +
@@ -211,6 +181,60 @@ public class Lovvalgsperiode implements ErPeriode {
 
     public boolean harGyldigBestemmelse() {
         return bestemmelse == FO_883_2004_ART11_3A || bestemmelse == FO_883_2004_ART11_3B || bestemmelse == FO_883_2004_ART11_4_2
-            || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1;
+            || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1
+            || bestemmelse == FO_883_2004_ART13_1A;
+    }
+
+    public boolean erArtikkel13() {
+        return bestemmelse == FO_883_2004_ART13_1A
+            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1_B2 || bestemmelse == FO_883_2004_ART13_1_B3 || bestemmelse == FO_883_2004_ART13_1_B4
+            || bestemmelse == FO_883_2004_ART13_2A || bestemmelse == FO_883_2004_ART13_2B
+            || bestemmelse == FO_883_2004_ART13_3
+            || bestemmelse == FO_883_2004_ART13_4;
+    }
+
+    public boolean erInvilget() {
+        return getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
+            && getLovvalgsland() == Landkoder.NO
+            && harGyldigBestemmelse();
+    }
+
+    public boolean erAvslått() {
+        return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
+            && getLovvalgsland() != Landkoder.NO
+            && harGyldigBestemmelse();
+    }
+
+    public static Lovvalgsperiode av(AnmodningsperiodeSvar anmodningsperiodeSvar,
+                                     Medlemskapstyper medlemskapstype) throws FunksjonellException {
+
+        if (anmodningsperiodeSvar == null) {
+            throw new FunksjonellException("Kan ikke opprette lovvalgsperiode fra anmodningsperiode " +
+                "uten at et svar er registrert!");
+        }
+
+        Anmodningsperiode anmodningsperiode = anmodningsperiodeSvar.getAnmodningsperiode();
+
+        InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.AVSLAG ?
+            InnvilgelsesResultat.AVSLAATT : InnvilgelsesResultat.INNVILGET;
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(anmodningsperiode.getBestemmelse());
+
+        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE) {
+            lovvalgsperiode.setFom(anmodningsperiodeSvar.getInnvilgetFom());
+            lovvalgsperiode.setTom(anmodningsperiodeSvar.getInnvilgetTom());
+        } else {
+            lovvalgsperiode.setFom(anmodningsperiode.getFom());
+            lovvalgsperiode.setTom(anmodningsperiode.getTom());
+        }
+
+        lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
+        lovvalgsperiode.setMedlemskapstype(medlemskapstype);
+        lovvalgsperiode.setMedlPeriodeID(anmodningsperiode.getMedlPeriodeID());
+        lovvalgsperiode.setTilleggsbestemmelse(anmodningsperiode.getTilleggsbestemmelse());
+        lovvalgsperiode.setLovvalgsland(anmodningsperiode.getLovvalgsland());
+        lovvalgsperiode.setDekning(anmodningsperiode.getDekning());
+        return lovvalgsperiode;
     }
 }

@@ -1,23 +1,26 @@
 package no.nav.melosys.service.kafka.model;
 
+import java.time.LocalDate;
+
 public class Periode {
 
-    private String fom;
-    private String tom;
+    private LocalDate fom;
 
-    public String getFom() {
+    private LocalDate tom;
+
+    public LocalDate getFom() {
         return fom;
     }
 
-    public void setFom(String fom) {
+    public void setFom(LocalDate fom) {
         this.fom = fom;
     }
 
-    public String getTom() {
+    public LocalDate getTom() {
         return tom;
     }
 
-    public void setTom(String tom) {
+    public void setTom(LocalDate tom) {
         this.tom = tom;
     }
 }

@@ -62,6 +62,7 @@ public class AktoerService {
         return aktørRepository.save(aktoer).getId();
     }
 
+    @Transactional
     public void slettAktoer(long databaseID) throws TekniskException, FunksjonellException {
         Aktoer aktoer = aktørRepository.findById(databaseID).
             orElseThrow(() -> new TekniskException("Klarte ikke slette aktøren. Fant ingen aktør på id: " + databaseID));
@@ -69,12 +70,15 @@ public class AktoerService {
         if (aktoer.getRolle().equals(Aktoersroller.BRUKER)) {
             throw new FunksjonellException("Aktøren er en bruker. Det er ikke lov til å slette denne");
         }
-        aktørRepository.deleteById(aktoer);
+        Fagsak fagsak = aktoer.getFagsak();
+        fagsak.getAktører().remove(aktoer);
+        aktørRepository.deleteById(databaseID);
     }
 
     @Transactional
     public void erstattEksisterendeArbeidsgiveraktører(Fagsak fagsak, List<String> orgnumre) {
         aktørRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
+        aktørRepository.flush();
 
         for (String orgnummer : orgnumre) {
             lagArbeidsgiveraktør(fagsak, orgnummer);

@@ -21,10 +21,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-integrasjon</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-internt-kodeverk</artifactId>
         </dependency>
         <dependency>

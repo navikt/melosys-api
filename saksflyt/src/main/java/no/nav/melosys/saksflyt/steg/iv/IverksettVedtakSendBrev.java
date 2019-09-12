@@ -7,12 +7,10 @@ import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
@@ -20,6 +18,7 @@ import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,17 +46,14 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Autowired
     public IverksettVedtakSendBrev(BrevBestiller brevBestiller,
                                    BehandlingService behandlingService,
-                                   BehandlingsresultatService behandlingsresultatService,
-                                   UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
+                                   BehandlingsresultatService behandlingsresultatService) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
 
         log.info("IverksetteVedtakSendBrev initialisert");
     }
@@ -79,14 +75,14 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
-        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
 
         if (resultat.erAvslag()) {
             sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
         } else if (resultat.erInnvilgelse()) {
-            sendInnvilgelsesbrev(prosessinstans, behandling, saksbehandler);
+            sendInnvilgelsesbrev(prosessinstans, behandling, resultat, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
@@ -116,7 +112,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         brevBestiller.bestill(avslagType, saksbehandler, FastMottaker.av(SKATT), behandling);
     }
 
-    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, String saksbehandler)
+    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, Behandlingsresultat resultat, String saksbehandler)
         throws FunksjonellException, TekniskException {
         Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
         String begrunnelseKode = null;
@@ -124,7 +120,10 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
         }
 
-        Brevbestilling.Builder innvilgelseBuilder = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
+        Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
+            ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
+
+        Brevbestilling.Builder innvilgelseBuilder = new Brevbestilling.Builder().medDokumentType(innvilgelseType)
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode);
@@ -137,20 +136,22 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
             brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
         }
-        if (myndighetØnskerInnvilgelsesbrev(fagsak.hentMyndighetLandkode())) {
-            Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-                .medAvsender(saksbehandler)
-                .medMottaker(Mottaker.av(MYNDIGHET))
-                .medBehandling(behandling)
-                .medBegrunnelseKode(begrunnelseKode).build();
-            brevBestiller.bestill(A1_Myndighet);
-        }
+
+        Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
+            .medAvsender(saksbehandler)
+            .medMottaker(Mottaker.av(MYNDIGHET))
+            .medBehandling(behandling)
+            .medBegrunnelseKode(begrunnelseKode).build();
+        brevBestiller.bestill(A1_Myndighet);
     }
 
-    private boolean myndighetØnskerInnvilgelsesbrev(Landkoder landkode) throws TekniskException {
-        return utenlandskMyndighetRepository.findByLandkode(landkode)
-            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."))
-            .preferanser.stream().map(Preferanse::getPreferanse)
-            .noneMatch(p -> p.equals(Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
+    private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {
+
+        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        if (StringUtils.isEmpty(saksbehandler) && behandlingsresultat.erAutomatisert()) {
+            saksbehandler = prosessinstans.getBehandling().getFagsak().getRegistrertAv();
+        }
+
+        return saksbehandler;
     }
 }

@@ -24,28 +24,16 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VilkaarTjenesteTest extends JsonSchemaTestParent {
-
     private static final Logger log = LoggerFactory.getLogger(VilkaarTjenesteTest.class);
 
-    private static final String VILKÅR_SCHEMA = "vilkar-schema.json";
+    private static final String VILKÅR_SCHEMA = "vilkaar-schema.json";
 
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
-
     @Mock
     private TilgangService tilgangService;
 
     private VilkaarTjeneste vilkaarTjeneste;
-
-    @Override
-    public Logger getLogger() {
-        return log;
-    }
-
-    @Override
-    public String schemaNavn() {
-        return VILKÅR_SCHEMA;
-    }
 
     @Before
     public void setUp() {
@@ -59,7 +47,7 @@ public class VilkaarTjenesteTest extends JsonSchemaTestParent {
 
         List<VilkaarDto> vilkaarDtoListe = vilkaarTjeneste.hentVilkår(1L);
 
-        validerListe(vilkaarDtoListe);
+        validerArray(vilkaarDtoListe, VILKÅR_SCHEMA, log);
     }
 
     @Test(expected = FunksjonellException.class)

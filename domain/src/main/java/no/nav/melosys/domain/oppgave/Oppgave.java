@@ -6,11 +6,17 @@ import java.util.Comparator;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.exception.FunksjonellException;
 
 /**
  * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
  */
 public final class Oppgave {
+
+    private static final int FRIST_JFR_DAGER = 1;
+    private static final int FRIST_VUR_DAGER = 1;
+    private static final int FRIST_BEH_UKER = 12;
+
     private final String oppgaveId;
     private final String saksnummer;
     private final LocalDate fristFerdigstillelse;
@@ -178,18 +184,23 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.VUR;
     }
 
+    public boolean erSedBehandling() {
+        return oppgavetype == Oppgavetyper.BEH_SED;
+    }
+
     public static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
         switch (behandlingstype) {
             case SOEKNAD:
                 return Oppgavetyper.BEH_SAK_MK;
             case ENDRET_PERIODE:
                 return Oppgavetyper.VUR;
+            case UTL_MYND_UTPEKT_SEG_SELV:
+            case REGISTRERING_UNNTAK_NORSK_TRYGD:
+                return Oppgavetyper.BEH_SED;
             case ANKE:
             case KLAGE:
             case UTL_MYND_UTPEKT_NORGE:
             case NY_VURDERING:
-            case UTL_MYND_UTPEKT_SEG_SELV:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD:
             case ANMODNING_OM_UNNTAK_HOVEDREGEL:
             case ØVRIGE_SED:
             default:
@@ -220,4 +231,16 @@ public final class Oppgave {
         }
         return res;
     };
+
+    public LocalDate lagFristFerdigstillelse(LocalDate fraDato) throws FunksjonellException {
+        if (erJournalFøring()) {
+            return fraDato.plusDays(FRIST_JFR_DAGER);
+        } else if (erBehandling() || erSedBehandling()) {
+            return fraDato.plusWeeks(FRIST_BEH_UKER);
+        } else if (erVurderDokument()) {
+            return fraDato.plusWeeks(FRIST_VUR_DAGER);
+        } else {
+            throw new FunksjonellException("Type " + oppgavetype.getKode() + " støttes ikke.");
+        }
+    }
 }

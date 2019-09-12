@@ -94,7 +94,8 @@ public class AvklartefaktaServiceTest {
         HashSet<AvklartefaktaDto> avklartefaktaDtoer = new HashSet<>();
         avklartefaktaDtoer.add(new AvklartefaktaDto(avklartefakta));
         avklartefaktaService.lagreAvklarteFakta(123L, avklartefaktaDtoer);
-        verify(avklarteFaktaRepository).deleteByBehandlingsresultat(any());
+        verify(avklarteFaktaRepository).deleteByBehandlingsresultatId(anyLong());
+        verify(avklarteFaktaRepository).flush();
         verify(avklartefaktaDtoKonverterer).opprettAvklartefaktaFraDto(any(), any());
         verify(avklarteFaktaRepository).saveAll(any());
 
@@ -141,6 +142,25 @@ public class AvklartefaktaServiceTest {
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
         avklartefaktaService.hentYrkesGruppe(1L);
+    }
+
+    @Test
+    public void hentMarginaltArbeid_medEttLandMedMarginaltArbeid_girMarginaltArbeid() {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("MARGINALT_ARBEID");
+        Set<Avklartefakta> avklartefaktaFraDb = Collections.singleton(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), eq(Avklartefaktatype.MARGINALT_ARBEID), eq("TRUE"))).thenReturn(avklartefaktaFraDb);
+
+        boolean harMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(1L);
+        assertThat(harMarginaltArbeid).isTrue();
+    }
+
+    @Test
+    public void hentMarginaltArbeid_ingenLandMedMarginaltArbeid_girIkkeMarginaltArbeid() {
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), any(), any())).thenReturn(Collections.emptySet());
+
+        boolean harMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(1L);
+        assertThat(harMarginaltArbeid).isFalse();
     }
 
     @Test

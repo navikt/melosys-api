@@ -9,12 +9,15 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
@@ -28,8 +31,6 @@ import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdRespon
 import no.nav.tjeneste.virksomhet.person.v3.binding.*;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -37,20 +38,13 @@ import org.springframework.stereotype.Service;
 @Service
 @Primary
 public class TpsService implements TpsFasade {
-
-    private static final Logger log = LoggerFactory.getLogger(TpsService.class);
-
     private static final String PERSON_VERSJON = "3.0";
     private static final String PERSONHISTORIKK_VERSJON = "3.4";
 
     private final AktorConsumer aktorConsumer;
-
     private final PersonConsumer personConsumer;
-
     private final DokumentFactory dokumentFactory;
-
     private final AktoerIdCache aktørIdCache;
-
     private final JAXBContext jaxbContext;
 
     @Autowired
@@ -64,7 +58,6 @@ public class TpsService implements TpsFasade {
             jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class,
                 no.nav.tjeneste.virksomhet.person.v3.HentPersonhistorikkResponse.class);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IllegalStateException(e);
         }
     }
@@ -141,7 +134,6 @@ public class TpsService implements TpsFasade {
             xmlRoot.setResponse(response);
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IntegrasjonException(e);
         }
 
@@ -211,7 +203,6 @@ public class TpsService implements TpsFasade {
             xmlRoot.setResponse(response);
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
-            log.error("", e);
             throw new IntegrasjonException(e);
         }
 
@@ -244,29 +235,6 @@ public class TpsService implements TpsFasade {
             throw new SikkerhetsbegrensningException(e);
         } catch (HentPersonerMedSammeAdresseIkkeFunnet e) {
             throw new IkkeFunnetException(e);
-        }
-    }
-
-    @Override
-    public String hentFagsakIdentMedRolleType(Fagsak fagsak, Aktoersroller rolleType) throws TekniskException {
-        Aktoer aktør = fagsak.hentAktørMedRolleType(rolleType);
-
-        if (aktør == null) {
-            throw new TekniskException("Det finnes ingen " + rolleType + " på sak " + fagsak.getSaksnummer());
-        }
-
-        if (aktør.getAktørId() != null) {
-            try {
-                return hentIdentForAktørId(aktør.getAktørId());
-            } catch (IkkeFunnetException e) {
-                throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
-            }
-        } else if (aktør.getOrgnr() != null) {
-            return aktør.getOrgnr();
-        } else if (rolleType == Aktoersroller.MYNDIGHET && aktør.getInstitusjonId() != null) {
-            return aktør.getInstitusjonId();
-        }else {
-            throw new TekniskException("Det finnes ingen ident for " + rolleType + " på sak " + fagsak.getSaksnummer());
         }
     }
 
