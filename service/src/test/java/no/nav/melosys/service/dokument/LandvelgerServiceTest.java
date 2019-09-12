@@ -145,20 +145,11 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt1142_girOppgittBostedsland() throws TekniskException, FunksjonellException {
+    public void hentTrygdemyndighetsland_medArt1142_girSøknadsland() throws TekniskException, FunksjonellException {
         oppfyll(Vilkaar.FO_883_2004_ART11_4_2);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling);
-        assertThat(land).containsExactly(oppgittbostedsland);
-    }
-
-    @Test
-    public void hentTrygdemyndighetsland_medArt1142OgAvklartBostedsland_girAvklartBostedsland() throws TekniskException, FunksjonellException {
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_2);
-        when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(avklartBostedsland));
-
-        Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling);
-        assertThat(land).containsExactly(avklartBostedsland);
+        assertThat(land).containsExactly(søknadsland);
     }
 
     @Test
