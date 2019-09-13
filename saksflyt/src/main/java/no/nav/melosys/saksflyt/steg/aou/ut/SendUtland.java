@@ -81,7 +81,7 @@ public class SendUtland extends AbstraktSendUtland {
     }
 
     @Override
-    protected boolean noeSkalSendes(Behandlingsresultat behandlingsresultat) {
+    protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
         Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
         return behandlingsresultat.erAnmodningOmUnntak()
             && (anmodningsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1

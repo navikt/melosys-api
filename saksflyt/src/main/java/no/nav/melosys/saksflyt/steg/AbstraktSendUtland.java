@@ -39,7 +39,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (noeSkalSendes(behandlingsresultat)) {
+        if (skalSendesUtland(behandlingsresultat)) {
             if (erEessiKlar(behandlingsresultat)) {
                 eessiService.opprettOgSendSed(behandlingID);
             } else {
@@ -57,7 +57,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
 
     protected abstract Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException;
 
-    protected abstract boolean noeSkalSendes(Behandlingsresultat behandlingsresultat);
+    protected abstract boolean skalSendesUtland(Behandlingsresultat behandlingsresultat);
 
     protected String hentBegrunnelseKode(Prosessinstans prosessinstans) {
         Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);

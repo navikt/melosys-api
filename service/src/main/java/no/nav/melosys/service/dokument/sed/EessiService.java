@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
@@ -86,7 +83,11 @@ public class EessiService {
     }
 
     public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType) throws MelosysException {
-        return eessiConsumer.hentMottakerinstitusjoner(bucType);
+        if (skalSendeSed) {
+            return eessiConsumer.hentMottakerinstitusjoner(bucType);
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public String opprettBucOgSed(Behandling behandling, String bucType, String mottakerLand, String mottakerId) throws MelosysException {
