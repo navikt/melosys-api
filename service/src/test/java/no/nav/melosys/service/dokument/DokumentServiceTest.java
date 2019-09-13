@@ -37,6 +37,7 @@ import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.*;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -329,8 +330,10 @@ public final class DokumentServiceTest {
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         JoarkService joarkService = mock(JoarkService.class);
+        BehandlingService behandlingService = mock(BehandlingService.class);
+        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingService, vilkaarsresultatRepository);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
-            utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService);
+            utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService, landvelgerService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) throws FunksjonellException, TekniskException {

@@ -64,7 +64,7 @@ public class SendUtlandTest {
         Institusjon institusjon1 = new Institusjon("XY:XOPB", "Ikke eksisterende", "XY");
         Institusjon institusjon2 = new Institusjon("SJ:123", "???", "SJ");
         List<Institusjon> institusjoner = Arrays.asList(institusjon1, institusjon2);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(any())).thenReturn(Collections.singletonList(Landkoder.SJ));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SJ));
         when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(institusjoner);
 
         sendUtland = new SendUtland(eessiService, brevBestiller, behandlingService, behandlingsresultatService, landvelgerService);
@@ -112,11 +112,18 @@ public class SendUtlandTest {
 
     private static Behandlingsresultat hentBehandlingsresultat() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(hentBehandling());
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
             Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
         behandlingsresultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         return behandlingsresultat;
+    }
+
+    private static Behandling hentBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        return behandling;
     }
 }

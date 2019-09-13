@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
@@ -23,7 +22,6 @@ public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final LandvelgerService landvelgerService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private Behandling behandling;
 
     public BrevDataByggerAvslagArbeidsgiver(LandvelgerService landvelgerService,
                                             LovvalgsperiodeService lovvalgsperiodeService,
@@ -35,23 +33,23 @@ public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
 
     @Override
     public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
-        this.behandling = dataGrunnlag.getBehandling();
+        long behandlingID = dataGrunnlag.getBehandling().getId();
 
         BrevDataAvslagArbeidsgiver brevData = new BrevDataAvslagArbeidsgiver(saksbehandler);
         brevData.person = dataGrunnlag.getPerson();
 
         brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
-        brevData.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
-        brevData.arbeidsland = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
+        brevData.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
+        brevData.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
 
-        brevData.vilkårbegrunnelser121 = hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
-        brevData.vilkårbegrunnelser121VesentligVirksomhet = hentVilkaarbegrunnelser(ART12_1_VESENTLIG_VIRKSOMHET);
+        brevData.vilkårbegrunnelser121 = hentVilkaarbegrunnelser(behandlingID, FO_883_2004_ART12_1);
+        brevData.vilkårbegrunnelser121VesentligVirksomhet = hentVilkaarbegrunnelser(behandlingID, ART12_1_VESENTLIG_VIRKSOMHET);
 
         return brevData;
     }
 
-    private Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar vilkaarType) throws TekniskException {
-        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandling.getId(), vilkaarType);
+    private Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(long behandlingID, Vilkaar vilkaarType) throws TekniskException {
+        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, vilkaarType);
         Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
             new TekniskException("Fant ingen vilkårbegrunnelse for " + vilkaarType));
 

@@ -53,9 +53,10 @@ public class SendVedtakUtlandTest {
 
     @Before
     public void setUp() throws Exception {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
         prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(new Behandling());
-        prosessinstans.getBehandling().setId(1L);
+        prosessinstans.setBehandling(behandling);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -65,12 +66,13 @@ public class SendVedtakUtlandTest {
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.setBehandling(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         Institusjon institusjon1 = new Institusjon("AX:XOPB", "Ikke eksisterende", "AX");
         Institusjon institusjon2 = new Institusjon("YZ:123", "???", "YZ");
         List<Institusjon> institusjoner = Arrays.asList(institusjon1, institusjon2);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(any())).thenReturn(Collections.singletonList(Landkoder.AX));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.AX));
         when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(institusjoner);
 
         sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, landvelgerService);

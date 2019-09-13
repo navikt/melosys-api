@@ -62,7 +62,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
 
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
-        when(landvelgerService.hentArbeidsland(any())).thenReturn(Landkoder.AT);
+        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,

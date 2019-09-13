@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -33,9 +34,9 @@ public class UtenlandskMyndighetService {
         this.fagsakService = fagsakService;
     }
 
-    public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) throws TekniskException {
+    public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) throws IkkeFunnetException, TekniskException {
         String saksnummer = behandling.getFagsak().getSaksnummer();
-        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling);
+        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (landkoder.isEmpty()) {
             throw new TekniskException("Mangler myndighetsland for sak " + saksnummer);
         }
@@ -53,7 +54,12 @@ public class UtenlandskMyndighetService {
     }
 
     public Map<UtenlandskMyndighet, Aktoer> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) throws TekniskException {
-        Collection<Landkoder> utenlandskeMyndigheterLandkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling);
+        Collection<Landkoder> utenlandskeMyndigheterLandkoder = null;
+        try {
+            utenlandskeMyndigheterLandkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
+        } catch (IkkeFunnetException e) {
+            e.printStackTrace(); //FIXME
+        }
         List<UtenlandskMyndighet> utenlandskMyndighetList = utenlandskMyndighetRepository.findByLandkodeIsIn(utenlandskeMyndigheterLandkoder);
         
         return utenlandskMyndighetList
