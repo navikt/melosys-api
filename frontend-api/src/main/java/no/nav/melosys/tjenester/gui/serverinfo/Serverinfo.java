@@ -36,7 +36,7 @@ public final class Serverinfo {
         );
     }
 
-    static List<String> hentBranchOgHash(final String image) {
+    static List<String> hentVersjonelementer(final String image) {
         if (StringUtils.isNotEmpty(image) && image.split(":").length == 3) {
             String imageTag = image.split(":")[2];
             return Arrays.asList(imageTag.split("-"));
@@ -45,24 +45,33 @@ public final class Serverinfo {
     }
 
     static String hentBranch(final String image) {
-        List<String> branchOgHash = hentBranchOgHash(image);
-        if (branchOgHash.size() > 1) {
-            return branchOgHash.get(0) + "-" + branchOgHash.get(1);
+        List<String> versjonelementer = hentVersjonelementer(image);
+        if (versjonelementer.size() > 1) {
+            return versjonelementer.get(0) + "-" + versjonelementer.get(1);
+        } else {
+            return FEIL;
+        }
+    }
+
+    static String hentByggnummer(final String image) {
+        List<String> versjonelementer = hentVersjonelementer(image);
+        if (versjonelementer.size() > 2) {
+            return versjonelementer.get(2);
         } else {
             return FEIL;
         }
     }
 
     static String hentHash(final String image) {
-        List<String> branchOgHash = hentBranchOgHash(image);
-        if (branchOgHash.size() > 2) {
-            return branchOgHash.get(2);
+        List<String> versjonelementer = hentVersjonelementer(image);
+        if (versjonelementer.size() > 3) {
+            return versjonelementer.get(3);
         } else {
             return FEIL;
         }
     }
 
-    static String hentVeraUrl(String namespace, String cluster)  {
+    static String hentVeraUrl(String namespace, String cluster) {
         return String.format(VERA_URL_TEMPLATE, namespace, cluster);
     }
 }
