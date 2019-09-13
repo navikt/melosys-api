@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.exception.FunksjonellException;
@@ -36,7 +35,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
     @Override
     public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
-        Behandling behandling = dataGrunnlag.getBehandling();
+        long behandlingID = dataGrunnlag.getBehandling().getId();
         List<AvklartVirksomhet> avklarteVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
         if (avklarteVirksomheter.size() != 1) {
             throw new TekniskException("Trenger minst en norsk virksomhet for avslag og ART16.1");
@@ -44,24 +43,24 @@ public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
 
         brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
         brevData.yrkesaktivitet = brevData.hovedvirksomhet.yrkesaktivitet;
-        brevData.arbeidsland = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        brevData.art16Vilkaar = hentFørsteGyldigeVilkaarsresultatForArt16(behandling);
+        brevData.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
+        brevData.art16Vilkaar = hentFørsteGyldigeVilkaarsresultatForArt16(behandlingID);
 
-        brevData.anmodningsperiodeSvar = hentAnmodningsperiodeSvar(behandling);
+        brevData.anmodningsperiodeSvar = hentAnmodningsperiodeSvar(behandlingID);
 
         return brevData;
     }
 
-    private Optional<AnmodningsperiodeSvar> hentAnmodningsperiodeSvar(Behandling behandling) {
-        Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId());
+    private Optional<AnmodningsperiodeSvar> hentAnmodningsperiodeSvar(long behandlingID) {
+        Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.hentAnmodningsperioder(behandlingID);
         return anmodningsperioder.stream()
             .filter(Anmodningsperiode::erSendtUtland)
             .findFirst()
             .map(Anmodningsperiode::getAnmodningsperiodeSvar);
     }
 
-    private Optional<Vilkaarsresultat> hentFørsteGyldigeVilkaarsresultatForArt16(Behandling behandling) {
-        return vilkaarsresultatRepository.findByBehandlingsresultatId(behandling.getId()).stream()
+    private Optional<Vilkaarsresultat> hentFørsteGyldigeVilkaarsresultatForArt16(long behandlingID) {
+        return vilkaarsresultatRepository.findByBehandlingsresultatId(behandlingID).stream()
             .filter(v -> v.getVilkaar() == FO_883_2004_ART16_1 && !v.getBegrunnelser().isEmpty())
             .findFirst();
     }

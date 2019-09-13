@@ -4,18 +4,25 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.saksflyt.steg.AbstraktSendSed;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 
 /**
  * Sender elektronisk sed til mottakerinstitusjon
@@ -25,17 +32,22 @@ import org.springframework.stereotype.Component;
  *  AOU_SEND_SED -> FERDIG eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class SendSed extends AbstraktSendSed {
+public class SendUtland extends AbstraktSendUtland {
+    private static final Logger log = LoggerFactory.getLogger(SendUtland.class);
 
-    private static final Logger log = LoggerFactory.getLogger(SendSed.class);
+    private final BehandlingService behandlingService;
 
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
     private static final int SVARFRIST_MÅNEDER = 2;
 
     @Autowired
-    public SendSed(BehandlingRepository behandlingRepository, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
-        super(behandlingRepository, eessiService, behandlingsresultatService);
-        log.info("IverksettVedtakSendSed initialisert");
+    public SendUtland(EessiService eessiService,
+                      BrevBestiller brevBestiller,
+                      BehandlingService behandlingService,
+                      BehandlingsresultatService behandlingsresultatService,
+                      LandvelgerService landvelgerService) {
+        super(eessiService, brevBestiller, behandlingsresultatService, landvelgerService);
+        this.behandlingService = behandlingService;
     }
 
     @Override
@@ -52,7 +64,7 @@ public class SendSed extends AbstraktSendSed {
             Behandling behandling = prosessinstans.getBehandling();
             LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
             behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(TIME_ZONE_ID).toInstant());
-            behandlingRepository.save(behandling);
+            behandlingService.lagre(behandling);
         } catch (Exception ex) {
             prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
             log.error("Kan ikke opprette og sende sed for behandling {}", prosessinstans.getBehandling().getId(), ex);
@@ -60,9 +72,18 @@ public class SendSed extends AbstraktSendSed {
     }
 
     @Override
-    protected boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
+    protected Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        return new Brevbestilling.Builder().medDokumentType(Produserbaredokumenter.ANMODNING_UNNTAK)
+            .medAvsender(hentSaksbehandler(prosessinstans))
+            .medMottakere(Mottaker.av(MYNDIGHET))
+            .medBehandling(behandling).build();
+    }
+
+    @Override
+    protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
         Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
-        return behandlingsresultat.getType() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK
+        return behandlingsresultat.erAnmodningOmUnntak()
             && (anmodningsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
             || anmodningsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2);
     }

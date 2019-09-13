@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
@@ -15,12 +12,14 @@ import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.integrasjon.eessi.dto.SvarAnmodningUnntakDto;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -31,33 +30,35 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EessiService {
-
     private static final Logger log = LoggerFactory.getLogger(EessiService.class);
 
     private final SedDataBygger sedDataBygger;
     private final DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
     private final EessiConsumer eessiConsumer;
-    private final boolean skalSendeSed;
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final boolean skalSendeSed;
 
     private static final List<SedType> AUTOMATISK_BEHANDLING_SED_TYPER = Arrays.asList(
         SedType.A001, SedType.A003, SedType.A009, SedType.A010
     );
 
-
-    public EessiService(SedDataBygger sedDataBygger,
+    public EessiService(@Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed, SedDataBygger sedDataBygger,
                         DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory, EessiConsumer eessiConsumer,
-                        @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed,
-                        BehandlingService behandlingService) {
+                        BehandlingService behandlingService,
+                        BehandlingsresultatService behandlingsresultatService) {
+        this.skalSendeSed = Boolean.valueOf(skalSendeSed);
         this.sedDataBygger = sedDataBygger;
         this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
         this.eessiConsumer = eessiConsumer;
-        this.skalSendeSed = Boolean.valueOf(skalSendeSed);
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-
+    public void opprettOgSendSed(long behandlingID) throws IkkeFunnetException {
+        log.info("Starter sending av SED for behandling {}", behandlingID);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (skalSendeSed) {
             try {
                 Fagsak fagsak = behandling.getFagsak();
@@ -81,8 +82,12 @@ public class EessiService {
         }
     }
 
-    public List<Institusjon> hentMottakerinstitusjoner(String bucType) throws MelosysException {
-        return eessiConsumer.hentMottakerinstitusjoner(bucType);
+    public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType) throws MelosysException {
+        if (skalSendeSed) {
+            return eessiConsumer.hentMottakerinstitusjoner(bucType);
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public String opprettBucOgSed(Behandling behandling, String bucType, String mottakerLand, String mottakerId) throws MelosysException {
