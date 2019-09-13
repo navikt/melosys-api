@@ -1,8 +1,10 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -35,7 +37,7 @@ public class IverksettVedtakSendSed extends AbstraktSendSed {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException {
         try {
-            super.utfør(prosessinstans);
+            super.sendSed(prosessinstans, avklarBucType(prosessinstans.getBehandling()));
             
             if (erArtikkel11(prosessinstans)) {
                 prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
@@ -58,5 +60,10 @@ public class IverksettVedtakSendSed extends AbstraktSendSed {
         return behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId())
                 .hentValidertLovvalgsperiode()
                 .erArtikkel11();
+    }
+
+    private BucType avklarBucType(Behandling behandling) {
+        //FIXME: venter på MELOSYS-2979
+        return BucType.LA_BUC_04;
     }
 }

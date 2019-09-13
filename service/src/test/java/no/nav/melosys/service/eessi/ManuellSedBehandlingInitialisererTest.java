@@ -3,7 +3,7 @@ package no.nav.melosys.service.eessi;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.oppgave.Oppgave;

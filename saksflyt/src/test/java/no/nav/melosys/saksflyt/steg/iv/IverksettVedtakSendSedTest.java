@@ -2,8 +2,9 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -56,7 +57,7 @@ public class IverksettVedtakSendSedTest {
     @Test
     public void utførSteg_suksessfull_statusErAvgiftsoppgave() throws Exception{
         iverksettVedtakSendSed.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class), any(BucType.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE));
     }
 
@@ -64,7 +65,7 @@ public class IverksettVedtakSendSedTest {
     public void utførStegForArtikkel11_suksessfull_statusErAvsluttBehandling() throws Exception {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         iverksettVedtakSendSed.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class), any(BucType.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
     }
 }

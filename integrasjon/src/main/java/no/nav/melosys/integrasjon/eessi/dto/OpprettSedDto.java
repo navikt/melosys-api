@@ -2,16 +2,16 @@ package no.nav.melosys.integrasjon.eessi.dto;
 
 public class OpprettSedDto {
 
-    private String bucId;
+    private String rinaSaksnummer;
 
     private String rinaUrl;
 
-    public String getBucId() {
-        return bucId;
+    public String getRinaSaksnummer() {
+        return rinaSaksnummer;
     }
 
-    public void setBucId(String bucId) {
-        this.bucId = bucId;
+    public void setRinaSaksnummer(String rinaSaksnummer) {
+        this.rinaSaksnummer = rinaSaksnummer;
     }
 
     public String getRinaUrl() {
