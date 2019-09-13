@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.person;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -58,5 +59,12 @@ public class Gateadresse {
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(gatenavn).append(gatenummer).append(husnummer).append(husbokstav).toHashCode();
+    }
+
+    public boolean erTom() {
+        return StringUtils.isEmpty(gatenavn) &&
+            gatenummer == null &&
+            husnummer == null &&
+            StringUtils.isEmpty(husbokstav);
     }
 }

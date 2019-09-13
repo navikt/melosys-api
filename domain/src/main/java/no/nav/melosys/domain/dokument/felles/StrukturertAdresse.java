@@ -6,6 +6,7 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
+import org.apache.commons.lang3.StringUtils;
 
 public class StrukturertAdresse extends Adresse {
 
@@ -31,7 +32,20 @@ public class StrukturertAdresse extends Adresse {
 
         adresse.postnummer = bostedsadresse.getPostnr();
         adresse.poststed = bostedsadresse.getPoststed();
-        adresse.landkode = LandkoderUtils.tilIso2(bostedsadresse.getLand().getKode()).getKode();
+        if (StringUtils.isNotEmpty(bostedsadresse.getLand().getKode())) {
+            adresse.landkode = LandkoderUtils.tilIso2(bostedsadresse.getLand().getKode()).getKode();
+        }
+
         return adresse;
+    }
+
+    @Override
+    public boolean erTom() {
+        return StringUtils.isEmpty(gatenavn) &&
+            StringUtils.isEmpty(husnummer) &&
+            StringUtils.isEmpty(postnummer) &&
+            StringUtils.isEmpty(poststed) &&
+            StringUtils.isEmpty(region) &&
+            StringUtils.isEmpty(landkode);
     }
 }

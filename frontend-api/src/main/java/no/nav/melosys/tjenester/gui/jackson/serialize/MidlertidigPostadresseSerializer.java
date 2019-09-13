@@ -51,7 +51,7 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
 
         } else if (midlertidigPostadresse instanceof MidlertidigPostadresseUtland) {
             MidlertidigPostadresseUtland adresse = (MidlertidigPostadresseUtland) midlertidigPostadresse;
-            dto.ustrukturertAdresse = new UstrukturertAdresse(adresse);
+            dto.ustrukturertAdresse = UstrukturertAdresse.av(adresse);
             dto.adressetype = MidlertidigPostadresse.Adressetype.USTRUKTURERT;
         }
         generator.writeObject(dto);

@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.doksys;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 
 public class DokumentbestillingMetadata {
 
@@ -29,7 +30,5 @@ public class DokumentbestillingMetadata {
 
     public UtenlandskMyndighet utenlandskMyndighet;
 
-    // Parameter som settes for å angi om registerInfo skal utledes for dokumentet som bestilles. Default false.
-    public boolean utledRegisterInfo;
-
+    public StrukturertAdresse postadresse;
 }

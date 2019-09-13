@@ -101,7 +101,7 @@ public class OrganisasjonsDetaljer {
         UstrukturertAdresse ustrukturertAdresse;
         if (adresse instanceof SemistrukturertAdresse) {
             SemistrukturertAdresse sAdresse = (SemistrukturertAdresse) adresse;
-            ustrukturertAdresse = new UstrukturertAdresse(sAdresse);
+            ustrukturertAdresse = UstrukturertAdresse.av(sAdresse);
         }
         else {
             // Enhetsregistret har bare SemistrukturertAdresser

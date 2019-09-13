@@ -1,7 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
@@ -21,6 +24,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.DummyArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 
+import static no.nav.melosys.domain.util.AdresseUtils.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -164,7 +168,7 @@ class A1Mapper {
         AdresseType adresseType = new AdresseType();
         adresseType.setNavn(fysiskArbeidssted.getNavn());
         StrukturertAdresse adresse = fysiskArbeidssted.getAdresse();
-        adresseType.setAdresselinje1(Objects.toString(adresse.gatenavn, "") + " " + Objects.toString(adresse.husnummer, ""));
+        adresseType.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
         adresseType.setAdresselinje2(adresse.postnummer);
         adresseType.setAdresselinje3(adresse.poststed);
         adresseType.setAdresselinje4(adresse.region);

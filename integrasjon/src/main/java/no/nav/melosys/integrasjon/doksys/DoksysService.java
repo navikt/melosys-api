@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.doksys;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -26,6 +27,7 @@ import org.w3c.dom.ls.LSSerializer;
 
 import static no.nav.melosys.domain.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.domain.Fagsystem.MELOSYS;
+import static no.nav.melosys.domain.util.AdresseUtils.sammenslå;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
@@ -52,7 +54,6 @@ public class DoksysService implements DoksysFasade {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
         DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
 
-        wsRequest.setUtledRegisterInfo(metadata.utledRegisterInfo);
         wsRequest.setDokumenttypeId(metadata.dokumenttypeID);
         wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
@@ -76,7 +77,10 @@ public class DoksysService implements DoksysFasade {
 
         DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
         info.setDokumenttypeId(metadata.dokumenttypeID);
-        info.setUtledRegisterInfo(metadata.utledRegisterInfo);
+
+        // UtledRegisterInfo er utdatert.
+        // Deaktivering av registerutledning gjøres ved "setBerik" på mottaker
+
         // Hvis vedlegg skal sendes, må denne settes først når vedleggene har blitt sendt
         info.setFerdigstillForsendelse(true);
 
@@ -91,9 +95,7 @@ public class DoksysService implements DoksysFasade {
         info.setSakstilhoerendeFagsystem(sakstilhørendeFagsystem);
 
         Person bruker = objectFactory.createPerson();
-        if (!metadata.utledRegisterInfo) {
-            bruker.setNavn(metadata.brukerNavn);
-        }
+        bruker.setNavn(metadata.brukerNavn);
         bruker.setIdent(metadata.brukerID);
         info.setBruker(bruker);
 
@@ -109,9 +111,7 @@ public class DoksysService implements DoksysFasade {
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
         info.setSaksbehandlernavn(metadata.saksbehandler);
 
-        if (!metadata.utledRegisterInfo) {
-            info.setAdresse(lagAdresse(metadata));
-        }
+        info.setAdresse(lagAdresse(metadata));
 
         wsRequest.setDokumentbestillingsinformasjon(info);
         wsRequest.setBrevdata(dokumentbestilling.getBrevData());
@@ -137,19 +137,29 @@ public class DoksysService implements DoksysFasade {
         }
     }
 
-    private Adresse lagAdresse(DokumentbestillingMetadata metadata) throws TekniskException {
+    private Adresse lagAdresse(DokumentbestillingMetadata metadata) {
         if (metadata.mottaker.erUtenlandskMyndighet()) {
             return lagUtenlandskAdresse(metadata.utenlandskMyndighet);
-        } else {
-            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakerRolle: " + metadata.mottaker.getRolle());
+        } else if (metadata.postadresse != null) {
+            return lagUtenlandskAdresse(metadata.postadresse);
         }
+        return null;
     }
 
     private UtenlandskPostadresse lagUtenlandskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
         UtenlandskPostadresse utenlandskPostadresse = new UtenlandskPostadresse();
         utenlandskPostadresse.setAdresselinje1(utenlandskMyndighet.gateadresse);
-        utenlandskPostadresse.setAdresselinje2(utenlandskMyndighet.postnummer + " " + utenlandskMyndighet.poststed);
+        utenlandskPostadresse.setAdresselinje2(sammenslå(utenlandskMyndighet.postnummer, utenlandskMyndighet.poststed));
         utenlandskPostadresse.setLand(new Landkoder().withValue(utenlandskMyndighet.landkode.getKode()));
+        return utenlandskPostadresse;
+    }
+
+    private UtenlandskPostadresse lagUtenlandskAdresse(StrukturertAdresse postadresse) {
+        UtenlandskPostadresse utenlandskPostadresse = new UtenlandskPostadresse();
+        utenlandskPostadresse.setAdresselinje1(sammenslå(postadresse.gatenavn, postadresse.husnummer));
+        utenlandskPostadresse.setAdresselinje3(postadresse.region);
+        utenlandskPostadresse.setAdresselinje2(sammenslå(postadresse.postnummer, postadresse.poststed));
+        utenlandskPostadresse.setLand(new Landkoder().withValue(postadresse.landkode));
         return utenlandskPostadresse;
     }
 

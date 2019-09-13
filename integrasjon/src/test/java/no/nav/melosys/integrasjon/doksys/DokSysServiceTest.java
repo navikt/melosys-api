@@ -6,14 +6,10 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.*;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Adresse;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Person;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.UtenlandskPostadresse;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastRequest;
@@ -48,9 +44,8 @@ public class DokSysServiceTest {
     }
 
     @Test
-    public void produserDokumentutkast() throws IntegrasjonException, ProduserDokumentutkastBrevdataValideringFeilet, ProduserDokumentutkastInputValideringFeilet {
-        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.dokumenttypeID = "dok_1234";
+    public void produserDokumentutkast() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataForBruker(null);
         when(dokumentproduksjonConsumer.produserDokumentutkast(any())).thenReturn(new ProduserDokumentutkastResponse());
 
         dokSysService.produserDokumentutkast(new Dokumentbestilling(metadata, lagBrevData()));
@@ -62,13 +57,8 @@ public class DokSysServiceTest {
     }
 
     @Test
-    public void produserIkkeredigerbartDokument() throws ProduserIkkeredigerbartDokumentDokumentErRedigerbart, ProduserIkkeRedigerbartDokumentJoarkForretningsmessigUnntak,
-        ProduserIkkeredigerbartDokumentSikkerhetsbegrensning, ProduserIkkeredigerbartDokumentBrevdataValideringFeilet, ProduserIkkeredigerbartDokumentDokumentErVedlegg,
-        ProduserIkkeRedigerbartDokumentInputValideringFeilet, FunksjonellException, TekniskException {
-        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.dokumenttypeID = "dok_1234";
-        metadata.mottaker = lagAktør(Aktoersroller.BRUKER);
-        metadata.utledRegisterInfo = true;
+    public void produserIkkeredigerbartDokument_forBruker() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataForBruker(null);
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
         dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
@@ -77,6 +67,44 @@ public class DokSysServiceTest {
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
         ProduserIkkeredigerbartDokumentRequest dokumentRequest = captor.getValue();
         assertThat(dokumentRequest.getDokumentbestillingsinformasjon().getDokumenttypeId()).isEqualTo(metadata.dokumenttypeID);
+        assertThat(dokumentRequest.getDokumentbestillingsinformasjon().getAdresse()).isNull();
+    }
+
+    @Test
+    public void produserIkkeredigerbartDokument_forBrukerMedPostadresse_girPostadresseOgNavn() throws Exception {
+        StrukturertAdresse postadresse = new StrukturertAdresse();
+        postadresse.gatenavn = "Gatenavn";
+        postadresse.husnummer = "123";
+        postadresse.postnummer = "1337";
+        postadresse.poststed = "Poststed";
+        postadresse.region = "Region";
+        postadresse.landkode = "BE";
+        DokumentbestillingMetadata metadata = lagMetadataForBruker(postadresse);
+        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
+
+        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
+
+        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
+        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
+        UtenlandskPostadresse adresse = hentAdresseFraCaptor(captor);
+        assertThat(adresse.getAdresselinje1()).isEqualTo(postadresse.gatenavn+" "+postadresse.husnummer);
+        assertThat(adresse.getAdresselinje2()).isEqualTo(postadresse.postnummer+" "+postadresse.poststed);
+        assertThat(adresse.getAdresselinje3()).isEqualTo(postadresse.region);
+        assertThat(adresse.getLand().getValue()).isEqualTo(postadresse.landkode);
+        assertThat(((Person)captor.getValue().getDokumentbestillingsinformasjon().getBruker()).getNavn()).isEqualTo("Kim Se");
+    }
+
+    private UtenlandskPostadresse hentAdresseFraCaptor(ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor) {
+        return (UtenlandskPostadresse) captor.getValue().getDokumentbestillingsinformasjon().getAdresse();
+    }
+
+    private DokumentbestillingMetadata lagMetadataForBruker(StrukturertAdresse postadresse) {
+        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
+        metadata.dokumenttypeID = "dok_1234";
+        metadata.brukerNavn = "Kim Se";
+        metadata.mottaker = lagAktør(Aktoersroller.BRUKER);
+        metadata.postadresse = postadresse;
+        return metadata;
     }
 
     private Aktoer lagAktør(Aktoersroller rolle) {
@@ -93,33 +121,39 @@ public class DokSysServiceTest {
     }
 
     @Test
-    public void produserIkkeredigerbartDokument_tilUtenlandskMyndighet() throws ProduserIkkeredigerbartDokumentDokumentErRedigerbart, ProduserIkkeRedigerbartDokumentJoarkForretningsmessigUnntak,
-        ProduserIkkeredigerbartDokumentSikkerhetsbegrensning, ProduserIkkeredigerbartDokumentBrevdataValideringFeilet, ProduserIkkeredigerbartDokumentDokumentErVedlegg,
-        ProduserIkkeRedigerbartDokumentInputValideringFeilet, FunksjonellException, TekniskException {
-        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagAktør(Aktoersroller.MYNDIGHET);
-        metadata.utenlandskMyndighet = new UtenlandskMyndighet();
-        metadata.utenlandskMyndighet.gateadresse = "Stubenstrasse 77";
-        metadata.utenlandskMyndighet.poststed = "0101";
-        metadata.utenlandskMyndighet.landkode = Landkoder.GL;
-        metadata.utenlandskMyndighet.institusjonskode = "INST-023%zdf";
-        metadata.dokumenttypeID = "dok_1234";
+    public void produserIkkeredigerbartDokument_tilUtenlandskMyndighet() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataMedMyndighet();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
         dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
 
         ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
+
         ProduserIkkeredigerbartDokumentRequest dokumentRequest = captor.getValue();
         assertThat(dokumentRequest.getDokumentbestillingsinformasjon().getMottaker()).isInstanceOf(Person.class);
-        Adresse adresse = dokumentRequest.getDokumentbestillingsinformasjon().getAdresse();
-        assertThat(adresse).isInstanceOf(UtenlandskPostadresse.class);
-        UtenlandskPostadresse utenlandskPostadresse = (UtenlandskPostadresse) adresse;
+
+        UtenlandskPostadresse utenlandskPostadresse = hentAdresseFraCaptor(captor);
         assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse);
         assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.utenlandskMyndighet.landkode.getKode());
-
     }
 
+    private DokumentbestillingMetadata lagMetadataMedMyndighet() {
+        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
+        metadata.mottaker = lagAktør(Aktoersroller.MYNDIGHET);
+        metadata.utenlandskMyndighet = lagUtenlandskMyndighet();
+        metadata.dokumenttypeID = "dok_1234";
+        return metadata;
+    }
+
+    private UtenlandskMyndighet lagUtenlandskMyndighet() {
+        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.gateadresse = "Stubenstrasse 77";
+        utenlandskMyndighet.poststed = "0101";
+        utenlandskMyndighet.landkode = Landkoder.GL;
+        utenlandskMyndighet.institusjonskode = "INST-023%zdf";
+        return utenlandskMyndighet;
+    }
 
     private static Element lagBrevData() {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

@@ -144,7 +144,7 @@ public class BrevmottakerService {
                         .map(Map.Entry::getValue)
                         .collect(Collectors.toList());
             } else {
-                return new ArrayList<>(utenlandskMyndighetAktoerMap.values());                
+                return new ArrayList<>(utenlandskMyndighetAktoerMap.values());
             }
         }
     }
@@ -156,7 +156,7 @@ public class BrevmottakerService {
                 .map(Preferanse::getPreferanse)
                 .noneMatch(RESERVERT_FRA_A1::equals);
     }
-    
+
     public Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
         if (mottaker == null) {
             return null;

@@ -51,7 +51,7 @@ public class PersonhistorikkDto {
         public final Periode periode;
 
         PostadressePeriodeDto(PostadressePeriode postadressePeriode) {
-            this.postadresse = new UstrukturertAdresse(postadressePeriode.postadresse);
+            this.postadresse = UstrukturertAdresse.av(postadressePeriode.postadresse);
             this.periode = postadressePeriode.periode;
         }
     }

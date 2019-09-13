@@ -5,64 +5,78 @@ import java.util.List;
 
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import org.apache.commons.lang3.StringUtils;
+
+import static no.nav.melosys.domain.util.AdresseUtils.sammenslå;
 
 public class UstrukturertAdresse extends Adresse {
 
     public final List<String> adresselinjer = new ArrayList<>();
 
-    public UstrukturertAdresse(MidlertidigPostadresseUtland adresse) {
-        if (adresse.adresselinje1 != null) {
-            adresselinjer.add(adresse.adresselinje1);
+    private UstrukturertAdresse(String l1, String l2, String l3, String l4, String landKode) {
+        if (StringUtils.isNotEmpty(l1)) {
+            adresselinjer.add(l1);
         }
-        if (adresse.adresselinje2 != null) {
-            adresselinjer.add(adresse.adresselinje2);
+        if (StringUtils.isNotEmpty(l2)) {
+            adresselinjer.add(l2);
         }
-        if (adresse.adresselinje3 != null) {
-            adresselinjer.add(adresse.adresselinje3);
+        if (StringUtils.isNotEmpty(l3)) {
+            adresselinjer.add(l3);
         }
-        if (adresse.adresselinje4 != null) {
-            adresselinjer.add(adresse.adresselinje4);
+        if (StringUtils.isNotEmpty(l4)) {
+            adresselinjer.add(l4);
         }
-        if (adresse.land != null) {
-            landkode = adresse.land.getKode();
+        if (StringUtils.isNotEmpty(landKode)) {
+            this.landkode = landKode;
         }
     }
 
-    public UstrukturertAdresse(SemistrukturertAdresse sAdresse) {
-        if (sAdresse.getAdresselinje1() != null) {
-            adresselinjer.add(sAdresse.getAdresselinje1());
-        }
-        if (sAdresse.getAdresselinje2() != null) {
-            adresselinjer.add(sAdresse.getAdresselinje2());
-        }
-        if (sAdresse.getAdresselinje3() != null) {
-            adresselinjer.add(sAdresse.getAdresselinje3());
-        }
-        landkode = sAdresse.getLandkode();
+    public static UstrukturertAdresse av(MidlertidigPostadresseUtland adresse) {
+        return new UstrukturertAdresse(adresse.adresselinje1, adresse.adresselinje2,
+                                       adresse.adresselinje3, adresse.adresselinje4,
+                                       adresse.land.getKode());
+    }
 
+    public static UstrukturertAdresse av(SemistrukturertAdresse sAdresse) {
+        String poststed;
         if (sAdresse.erUtenlandsk()) {
-            adresselinjer.add(sAdresse.getPoststedUtland());
+            poststed = sAdresse.getPoststedUtland();
         } else {
             String _poststed = sAdresse.getPoststed() == null ? "" : " " + sAdresse.getPoststed();
-            adresselinjer.add(sAdresse.getPostnr() + _poststed);
+            poststed = sAdresse.getPostnr() + _poststed;
+        }
+
+        return new UstrukturertAdresse(sAdresse.getAdresselinje1(), sAdresse.getAdresselinje2(),
+                                       sAdresse.getAdresselinje3(), poststed,
+                                       sAdresse.getLandkode());
+    }
+
+    public static UstrukturertAdresse av(no.nav.melosys.domain.dokument.person.UstrukturertAdresse adresse) {
+        return new UstrukturertAdresse(adresse.adresselinje1, adresse.adresselinje2,
+                                       adresse.adresselinje3, adresse.adresselinje4,
+                                       adresse.land.getKode());
+    }
+
+    public static UstrukturertAdresse av(StrukturertAdresse sAdresse) {
+        String linje1 = sammenslå(sAdresse.gatenavn, sAdresse.husnummer);
+
+        return new UstrukturertAdresse(linje1,
+                                       sAdresse.postnummer,
+                                       sAdresse.poststed,
+                                       sAdresse.region,
+                                       sAdresse.landkode);
+    }
+
+    public String getAdresselinje(int linjenummer) {
+        if (linjenummer > adresselinjer.size()) {
+            return null;
+        } else {
+            return adresselinjer.get(linjenummer - 1);
         }
     }
 
-    public UstrukturertAdresse(no.nav.melosys.domain.dokument.person.UstrukturertAdresse adresse) {
-        if (adresse.adresselinje1 != null) {
-            adresselinjer.add(adresse.adresselinje1);
-        }
-        if (adresse.adresselinje2 != null) {
-            adresselinjer.add(adresse.adresselinje2);
-        }
-        if (adresse.adresselinje3 != null) {
-            adresselinjer.add(adresse.adresselinje3);
-        }
-        if (adresse.adresselinje4 != null) {
-            adresselinjer.add(adresse.adresselinje4);
-        }
-        if (adresse.land != null) {
-            landkode = adresse.land.getKode();
-        }
+    @Override
+    public boolean erTom() {
+        return adresselinjer.isEmpty() && StringUtils.isEmpty(landkode);
     }
 }

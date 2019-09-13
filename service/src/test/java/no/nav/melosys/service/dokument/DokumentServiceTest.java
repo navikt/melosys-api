@@ -15,8 +15,6 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
@@ -40,8 +38,8 @@ import no.nav.melosys.repository.*;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
@@ -62,6 +60,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -294,25 +293,6 @@ public final class DokumentServiceTest {
         KjoennsType kjønn = new KjoennsType();
         kjønn.setKode("K");
         return kjønn;
-    }
-
-    private static Bostedsadresse lagBostedsadresse() {
-        Bostedsadresse badr = new Bostedsadresse();
-        badr.setLand(new Land(Land.BELGIA));
-        badr.setPoststed("Sted");
-        badr.setPostnr("1234");
-        Gateadresse gadr = lagGateAdresse();
-        badr.setGateadresse(gadr);
-        return badr;
-    }
-
-    private static Gateadresse lagGateAdresse() {
-        Gateadresse gadr = new Gateadresse();
-        gadr.setGatenavn("Gate");
-        gadr.setGatenummer(1);
-        gadr.setHusbokstav("A");
-        gadr.setHusnummer(123);
-        return gadr;
     }
 
     private static AvklarteFaktaRepository mockAvklarteFaktaRepository(Avklartefakta arbeidsgiverFaktum, Avklartefakta yrkesgruppeFaktum) {
