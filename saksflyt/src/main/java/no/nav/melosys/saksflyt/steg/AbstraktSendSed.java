@@ -34,7 +34,7 @@ public abstract class AbstraktSendSed extends AbstraktStegBehandler {
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         if (skalSendeSed(behandlingsresultat)) {
-            log.info("Starter sending av SED for behandling {}", behandling.getId());
+            log.info("Starter sending av SED for bucType {} i behandling {}", bucType, behandling.getId());
             eessiService.opprettOgSendSed(behandling, behandlingsresultat, bucType);
         }
     }
