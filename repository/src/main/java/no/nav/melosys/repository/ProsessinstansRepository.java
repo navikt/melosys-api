@@ -6,10 +6,13 @@ import java.util.Optional;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-public interface ProsessinstansRepository extends CrudRepository<Prosessinstans, Long> {
-    List<Prosessinstans> findByStegIsNot(ProsessSteg steg);
+public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, Long> {
+    @Query("SELECT NEW no.nav.melosys.repository.ProsessinstansAntall(p.type, p.steg, COUNT(p)) FROM Prosessinstans p "
+        + "WHERE p.steg <> no.nav.melosys.domain.ProsessSteg.FERDIG GROUP BY p.type, p.steg")
+    List<ProsessinstansAntall> antallAktiveOgFeiletPerTypeOgSteg();
     Optional<Prosessinstans> findByBehandling_IdAndStegIsNotAndStegIsNot(long id, ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
     Optional<Prosessinstans> findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(ProsessType prosessType, long id, ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
     List<Prosessinstans> findAllByStegIsNotAndStegIsNot(ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
