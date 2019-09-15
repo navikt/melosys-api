@@ -14,7 +14,7 @@ import no.nav.melosys.integrasjon.eessi.dto.SvarAnmodningUnntakDto;
 
 public interface EessiConsumer {
 
-    OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, BucType bucType, boolean forsøkSend) throws MelosysException;
+    OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, byte[] vedlegg, BucType bucType, boolean forsøkSend) throws MelosysException;
 
     void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException;
 

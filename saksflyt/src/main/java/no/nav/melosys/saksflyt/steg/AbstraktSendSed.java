@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -26,7 +26,7 @@ public abstract class AbstraktSendSed extends AbstraktStegBehandler {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    protected void sendSed(Prosessinstans prosessinstans, BucType bucType) throws TekniskException, FunksjonellException {
+    protected void sendSed(Prosessinstans prosessinstans, BucType bucType) throws MelosysException {
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         if (behandling == null) {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));

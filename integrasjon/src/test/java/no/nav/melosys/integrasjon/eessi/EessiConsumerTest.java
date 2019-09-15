@@ -18,26 +18,29 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiConsumerTest {
 
-    @Spy
-    private RestTemplate restTemplate;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
     private EessiConsumer eessiConsumer;
     private MockRestServiceServer server;
 
@@ -46,16 +49,21 @@ public class EessiConsumerTest {
     @Before
     public void setup() {
         server = MockRestServiceServer.createServer(restTemplate);
-        eessiConsumer = new EessiConsumerImpl(restTemplate);
+        eessiConsumer = new EessiConsumerImpl(restTemplate, new ObjectMapper());
         sedDataDto = new SedDataDto();
     }
 
     @Test
     public void opprettOgSend_forventMap() throws Exception {
+
         BucType bucType = BucType.LA_BUC_01;
         server.expect(requestTo("/buc/" + bucType + "?forsokSend=true"))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header(HttpHeaders.CONTENT_TYPE, StringContains.containsString(MediaType.MULTIPART_FORM_DATA_VALUE)))
+            .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andRespond(withSuccess("{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}", MediaType.APPLICATION_JSON));
-        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, bucType, true);
+
+        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, "pdf".getBytes(), bucType, true);
         assertThat(opprettSedDto.getRinaSaksnummer()).isEqualTo("12345");
     }
 
@@ -64,7 +72,7 @@ public class EessiConsumerTest {
         BucType bucType = BucType.LA_BUC_01;
         server.expect(requestTo("/buc/" + bucType + "?forsokSend=true"))
             .andRespond(withBadRequest());
-        eessiConsumer.opprettBucOgSed(sedDataDto, BucType.LA_BUC_01, true);
+        eessiConsumer.opprettBucOgSed(sedDataDto, null, BucType.LA_BUC_01, true);
     }
 
     @Test

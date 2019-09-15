@@ -57,27 +57,31 @@ public class EessiService {
         this.behandlingService = behandlingService;
     }
 
-    public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat, BucType bucType) {
+    public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
+        opprettOgSendSed(behandling, behandlingsresultat, bucType, null);
+    }
+
+    public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat, BucType bucType, byte[] vedlegg) throws MelosysException {
 
         if (skalSendeSed) {
-            try {
-                Fagsak fagsak = behandling.getFagsak();
+            Fagsak fagsak = behandling.getFagsak();
 
-                DokumentdataGrunnlag datagrunnlag = dokumentdataGrunnlagFactory.av(behandling);
-                SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat);
-                sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
+            DokumentdataGrunnlag datagrunnlag = dokumentdataGrunnlagFactory.av(behandling);
+            SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat);
+            sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
-                log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
-                OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedData, bucType, true);
+            log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
+            OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedData, vedlegg, bucType, true);
 
-                log.info("Buc opprettet med id {} for behandling {}", opprettSedDto.getRinaSaksnummer(), behandling.getId());
-            } catch (Exception e) {
-                log.error("Feil ved opprettelse av SED for behandling {}", behandling.getId(), e);
-            }
+            log.info("Buc opprettet med id {} for behandling {}", opprettSedDto.getRinaSaksnummer(), behandling.getId());
         }
     }
 
     public String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId) throws MelosysException {
+        return opprettBucOgSed(behandling, bucType, mottakerLand, mottakerId, null);
+    }
+
+    private String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId, byte[] vedlegg) throws MelosysException {
         if (skalSendeSed) {
             DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
             SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag);
@@ -86,7 +90,7 @@ public class EessiService {
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
             log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
-            return eessiConsumer.opprettBucOgSed(sedDataDto, bucType, false).getRinaUrl();
+            return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, false).getRinaUrl();
         }
 
         throw new IllegalStateException("Ikke mulig å sende sed");

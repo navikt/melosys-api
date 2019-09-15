@@ -80,26 +80,19 @@ public class EessiServiceTest {
 
     @Test
     public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
+        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true))).thenReturn(new OpprettSedDto());
         eessiService.opprettOgSendSed(behandling, behandlingsresultat, BucType.LA_BUC_04);
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), eq(BucType.LA_BUC_04), eq(true));
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_04), eq(true));
     }
-
-//    @Test
-//    public void opprettOgSendSed_ingenLovvalgsperiode_forventException() throws Exception {
-//        expectedException.expect(TekniskException.class);
-//        expectedException.expectMessage("Finner ingen lovvalgsperiode!");
-//        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet());
-//        eessiService.opprettBucOgSed(behandling, behandlingsresultat);
-//    } TODO kommenter inn når sed-feilmeldinger blir kastet fra service igjen
 
     @Test
     public void opprettBucOgSed_verifiserKorrektSedType() throws Exception {
         OpprettSedDto opprettSedDto = new OpprettSedDto();
         opprettSedDto.setRinaUrl("localhost:3000");
-        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(BucType.class), anyBoolean())).thenReturn(opprettSedDto);
+        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean())).thenReturn(opprettSedDto);
 
         eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, "SE", "SE:001");
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), eq(BucType.LA_BUC_01), eq(false));
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class),any(), eq(BucType.LA_BUC_01), eq(false));
     }
 
     @Test
@@ -119,7 +112,7 @@ public class EessiServiceTest {
     @Test(expected = MelosysException.class)
     public void hentMottakerinstitusjoner_medFeilIConsumer_forventTomListe() throws MelosysException {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenThrow(new IntegrasjonException("Error!"));
-        List<Institusjon> institusjon = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
+        eessiService.hentMottakerinstitusjoner("LA_BUC_01");
     }
 
     @Test

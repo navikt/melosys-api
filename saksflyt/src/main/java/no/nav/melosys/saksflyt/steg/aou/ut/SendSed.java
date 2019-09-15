@@ -7,8 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktSendSed;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -45,19 +44,16 @@ public class SendSed extends AbstraktSendSed {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        try {
-            sendSed(prosessinstans, BucType.LA_BUC_01);
-            prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
+    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-            Behandling behandling = prosessinstans.getBehandling();
-            LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
-            behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(TIME_ZONE_ID).toInstant());
-            behandlingRepository.save(behandling);
-        } catch (Exception ex) {
-            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
-            log.error("Kan ikke opprette og sende sed for behandling {}", prosessinstans.getBehandling().getId(), ex);
-        }
+        sendSed(prosessinstans, BucType.LA_BUC_01);
+
+        Behandling behandling = prosessinstans.getBehandling();
+        LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
+        behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(TIME_ZONE_ID).toInstant());
+        behandlingRepository.save(behandling);
+
+        prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
     }
 
     @Override
