@@ -36,16 +36,18 @@ public class EessiConsumerImpl implements EessiConsumer {
     private static final String SEDDATA_FILNAVN = "sedData";
     private static final String VEDLEGG_FILNAVN = "vedlegg";
 
+    private static final String SEND_AUTOMATISK = "sendAutomatisk";
+
     EessiConsumerImpl(RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, byte[] vedlegg, BucType bucType, boolean forsøkSend) throws MelosysException {
+    public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, byte[] vedlegg, BucType bucType, boolean sendAutomatisk) throws MelosysException {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath(String.format("/buc/%s", bucType))
-            .queryParam("forsokSend", forsøkSend);
+            .queryParam(SEND_AUTOMATISK, sendAutomatisk);
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);

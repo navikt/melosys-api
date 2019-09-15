@@ -6,13 +6,14 @@ import java.time.ZoneId;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.saksflyt.steg.AbstraktSendSed;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -57,7 +58,7 @@ public class SendUtland extends AbstraktSendUtland {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-        sendSed(prosessinstans, BucType.LA_BUC_01);
+        sendUtland(prosessinstans, BucType.LA_BUC_01);
 
         Behandling behandling = prosessinstans.getBehandling();
         LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);

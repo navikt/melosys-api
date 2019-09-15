@@ -1,6 +1,9 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
@@ -13,7 +16,6 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
@@ -61,7 +63,7 @@ public class EessiService {
         opprettOgSendSed(behandlingID, bucType, null);
     }
 
-    public void opprettOgSendSed(long behandlingID, BucType bucType, byte[] vedlegg) throws IkkeFunnetException {
+    private void opprettOgSendSed(long behandlingID, BucType bucType, byte[] vedlegg) throws MelosysException {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);

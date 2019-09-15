@@ -8,9 +8,9 @@ import java.util.List;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -79,7 +79,7 @@ public class SendUtlandTest {
         sendUtland.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
-        verify(eessiService).opprettOgSendSed(anyLong());
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_01));
     }
 
     @Test

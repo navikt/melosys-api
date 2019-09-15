@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.util;
 
-import no.nav.melosys.domain.dokument.sed.BucType;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
