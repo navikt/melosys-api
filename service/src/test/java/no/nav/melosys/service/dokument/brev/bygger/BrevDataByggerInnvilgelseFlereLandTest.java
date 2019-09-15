@@ -73,8 +73,8 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
 
-        when(landvelgerService.hentAlleArbeidsland(any())).thenReturn(Collections.singleton(Landkoder.AT));
-        when(landvelgerService.hentBostedsland(any(), any())).thenReturn(Landkoder.DE);
+        when(landvelgerService.hentAlleArbeidsland(anyLong())).thenReturn(Collections.singleton(Landkoder.AT));
+        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(Landkoder.DE);
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
             landvelgerService,

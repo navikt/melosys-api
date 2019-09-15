@@ -28,14 +28,15 @@ public class BrevDataByggerVelger {
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
-                                JoarkService joarkService) {
+                                JoarkService joarkService,
+                                LandvelgerService landvelgerService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.joarkService = joarkService;
-        this.landvelgerService = new LandvelgerService(avklartefaktaService, vilkaarsresultatRepository);
+        this.landvelgerService = landvelgerService;
     }
 
     // For brevbygging i saksflyt

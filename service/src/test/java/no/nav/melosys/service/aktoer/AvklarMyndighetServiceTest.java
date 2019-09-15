@@ -46,6 +46,7 @@ public class AvklarMyndighetServiceTest {
         fagsak.setSaksnummer("123");
 
         behandling = new Behandling();
+        behandling.setId(1L);
         behandling.setFagsak(fagsak);
 
         UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet(Landkoder.IT, "IT123", null);
@@ -56,7 +57,7 @@ public class AvklarMyndighetServiceTest {
         
         when(utenlandskMyndighetRepository.findByLandkodeIsIn(any(Collection.class))).thenReturn(Arrays.asList(utenlandskMyndighet, utenlandskMyndighetReservert));
         
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(any(Behandling.class))).thenReturn(Arrays.asList(Landkoder.IT, Landkoder.CZ));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Arrays.asList(Landkoder.IT, Landkoder.CZ));
 
         forventetInstitusjonIdIT = Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode;
         forventetInstitusjonIdCZ = Landkoder.CZ + ":" + utenlandskMyndighetReservert.institusjonskode;

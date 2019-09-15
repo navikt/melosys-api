@@ -63,7 +63,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void hentMottakerInstitusjoner() throws IOException, MelosysException {
-        when(eessiService.hentMottakerinstitusjoner(anyString()))
+        when(eessiService.hentEessiMottakerinstitusjoner(anyString()))
             .thenReturn(Arrays.asList(
                 defaultEasyRandom().nextObject(Institusjon.class),
                 defaultEasyRandom().nextObject(Institusjon.class),
