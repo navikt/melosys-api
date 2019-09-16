@@ -57,7 +57,7 @@ public class EessiConsumerTest {
     public void opprettOgSend_forventMap() throws Exception {
 
         BucType bucType = BucType.LA_BUC_01;
-        server.expect(requestTo("/buc/" + bucType + "?forsokSend=true"))
+        server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.CONTENT_TYPE, StringContains.containsString(MediaType.MULTIPART_FORM_DATA_VALUE)))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
@@ -70,7 +70,7 @@ public class EessiConsumerTest {
     @Test(expected = MelosysException.class)
     public void opprettOgSend_forventException() throws Exception {
         BucType bucType = BucType.LA_BUC_01;
-        server.expect(requestTo("/buc/" + bucType + "?forsokSend=true"))
+        server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true"))
             .andRespond(withBadRequest());
         eessiConsumer.opprettBucOgSed(sedDataDto, null, BucType.LA_BUC_01, true);
     }
