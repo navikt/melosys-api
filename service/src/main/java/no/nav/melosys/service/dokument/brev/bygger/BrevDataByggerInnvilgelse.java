@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -60,7 +59,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     @Override
     public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         this.dataGrunnlag = dataGrunnlag;
-        Behandling behandling = dataGrunnlag.getBehandling();
+        long behandlingID = dataGrunnlag.getBehandling().getId();
 
         // Bruker skal ha A1 som vedlegg - Arbeidsgiver skal ikke
         BrevDataInnvilgelse brevdata;
@@ -71,10 +70,10 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
         }
 
-        brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
-        brevdata.arbeidsland = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
+        brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
+        brevdata.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
 
-        brevdata.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling).stream()
+        brevdata.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
             .findFirst()
             .map(Landkoder::getBeskrivelse)
             .orElse(null);
@@ -82,10 +81,10 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         List<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
         brevdata.hovedvirksomhet = norskeVirksomheter.get(0);
 
-        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
+        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandlingID);
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
 
-        brevdata.anmodningsperiodesvar = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId())
+        brevdata.anmodningsperiodesvar = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream()
             .filter(Anmodningsperiode::erSendtUtland)
             .findFirst()

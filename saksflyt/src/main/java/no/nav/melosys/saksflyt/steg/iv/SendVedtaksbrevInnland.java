@@ -31,22 +31,20 @@ import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
  * Sender ulike brev basert på behandlingsresultat og lovvalgsbestemmelse.
  */
 @Component
-public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(IverksettVedtakSendBrev.class);
+public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
+    private static final Logger log = LoggerFactory.getLogger(SendVedtaksbrevInnland.class);
 
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public IverksettVedtakSendBrev(BrevBestiller brevBestiller,
-                                   BehandlingService behandlingService,
-                                   BehandlingsresultatService behandlingsresultatService) {
+    public SendVedtaksbrevInnland(BrevBestiller brevBestiller,
+                                  BehandlingService behandlingService,
+                                  BehandlingsresultatService behandlingsresultatService) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-
-        log.info("IverksetteVedtakSendBrev initialisert");
     }
 
     @Override
@@ -102,19 +100,13 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
 
     private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, Behandlingsresultat resultat, String saksbehandler)
         throws FunksjonellException, TekniskException {
-        Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);
-        String begrunnelseKode = null;
-        if (endretPeriodeBegrunnelseKode != null) {
-            begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
-        }
-
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
         Brevbestilling innvilgelseBrukerOgSkatt = new Brevbestilling.Builder().medDokumentType(innvilgelseType)
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
-            .medBegrunnelseKode(begrunnelseKode)
+            .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans))
             .medMottakere(Mottaker.av(BRUKER), FastMottaker.av(SKATT))
             .build();
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
@@ -123,22 +115,22 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
             brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
         }
+    }
 
-        Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-            .medAvsender(saksbehandler)
-            .medMottakere(Mottaker.av(MYNDIGHET))
-            .medBehandling(behandling)
-            .medBegrunnelseKode(begrunnelseKode).build();
-        brevBestiller.bestill(A1_Myndighet);
+    private String hentBegrunnelseKode(Prosessinstans prosessinstans) {
+        Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);
+        String begrunnelseKode = null;
+        if (endretPeriodeBegrunnelseKode != null) {
+            begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
+        }
+        return begrunnelseKode;
     }
 
     private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {
-
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         if (StringUtils.isEmpty(saksbehandler) && behandlingsresultat.erAutomatisert()) {
             saksbehandler = prosessinstans.getBehandling().getFagsak().getRegistrertAv();
         }
-
         return saksbehandler;
     }
 }

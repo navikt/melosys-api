@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.sed.jfr;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;

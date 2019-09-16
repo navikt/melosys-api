@@ -47,6 +47,7 @@ public enum ProsessSteg implements Kodeverk {
     AOU_OPPDATER_MEDL("AOU_OPPDATER_MEDL", "Oppdatering av medlemskap med anmodning om unntak"),
     AOU_SEND_BREV("AOU_SEND_BREV", "Send orienteringsbrev og A001 for anmodning om unntak"),
     AOU_SEND_SED("AOU_SEND_SED","Send elektronisk SED A001"),
+    AOU_OPPDATER_OPPGAVE("AOU_OPPDATER_OPPGAVE", "Oppdatering av oppgave med frist og beskrivelse"),
 
     //Svar anmodning om unntak
     AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR("AOU_OPPRETT_ANMODNINGSPERIODESVAR","Oppretter svar for en anmodningsperiode"),
@@ -118,8 +119,8 @@ public enum ProsessSteg implements Kodeverk {
     FERDIG("FERDIG", "Prosessen er ferdig");
 
 
-    private String kode;
-    private String beskrivelse;
+    private final String kode;
+    private final String beskrivelse;
 
     ProsessSteg(String kode, String beskrivelse) {
         this.kode = kode;
@@ -139,7 +140,7 @@ public enum ProsessSteg implements Kodeverk {
     public static ProsessSteg hentFørsteProsessStegForType(final ProsessType prosessType) throws TekniskException {
         switch (prosessType)  {
             case REGISTRERING_UNNTAK:
-                return REG_UNNTAK_OPPRETT_SEDDOKUMENT;
+                return REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET;
             case ANMODNING_OM_UNNTAK_SVAR:
                 return AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR;
             case ANMODNING_OM_UNNTAK_MOTTAK:

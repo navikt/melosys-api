@@ -10,8 +10,12 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
@@ -148,7 +152,15 @@ public class InnvilgelsesbrevMapperTest {
         arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landkode = Landkoder.AT.getKode();
         dokument.arbeidUtland = Collections.singletonList(arbeidUtland);
+        dokument.maritimtArbeid.add(lagMaritimtArbeidUtenFartsområde());
         return dokument;
+    }
+
+    private static MaritimtArbeid lagMaritimtArbeidUtenFartsområde() {
+        MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
+        maritimtArbeid.enhetNavn = "Dunfjæder";
+        maritimtArbeid.installasjonsLandkode = "NO";
+        return maritimtArbeid;
     }
 
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {

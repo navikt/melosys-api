@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -13,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
@@ -35,8 +38,9 @@ public class ProsessinstansService {
     private static Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
 
     private final ProsessinstansRepository prosessinstansRepo;
-
     private final ApplicationEventPublisher applicationEventPublisher;
+
+    private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
 
     @Autowired
     public ProsessinstansService(ProsessinstansRepository prosessinstansRepo, ApplicationEventPublisher applicationEventPublisher) {
@@ -82,6 +86,7 @@ public class ProsessinstansService {
 
     public void lagre(Prosessinstans prosessinstans) {
         lagre(prosessinstans, SubjectHandler.getInstance().getUserID());
+        prosessinstanserOpprettet.increment();
     }
 
     void lagre(Prosessinstans prosessinstans, String saksbehandler) {

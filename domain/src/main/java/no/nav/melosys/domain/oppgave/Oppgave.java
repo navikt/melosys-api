@@ -29,8 +29,12 @@ public final class Oppgave {
     private final PrioritetType prioritet;
     private final String saksnummer;
     private final Tema tema;
+    private final String temagruppe;
     private final String tilordnetRessurs;
+    private final String tildeltEnhetsnr;
     private final int versjon;
+    private final LocalDate aktivDato;
+    private final String status;
 
     public static class Builder {
         private String aktørId;
@@ -45,9 +49,37 @@ public final class Oppgave {
         private PrioritetType prioritet;
         private String saksnummer;
         private Tema tema;
+        private String temagruppe;
         private String tilordnetRessurs;
+        private String tildeltEnhetsnr;
         private int versjon;
+        private LocalDate aktivDato;
+        private String status;
 
+        public Builder() {
+        }
+        
+        public Builder(Oppgave copy) {
+            this.aktørId = copy.getAktørId();
+            this.behandlingstema = copy.getBehandlingstema();
+            this.behandlingstype = copy.getBehandlingstype();
+            this.beskrivelse = copy.getBeskrivelse();
+            this.behandlesAvApplikasjon = copy.getBehandlesAvApplikasjon();
+            this.fristFerdigstillelse = copy.getFristFerdigstillelse();
+            this.journalpostId = copy.getJournalpostId();
+            this.oppgaveId = copy.getOppgaveId();
+            this.oppgavetype = copy.getOppgavetype();
+            this.prioritet = copy.getPrioritet();
+            this.saksnummer = copy.getSaksnummer();
+            this.tema = copy.getTema();
+            this.temagruppe = copy.getTemagruppe();
+            this.tilordnetRessurs = copy.getTilordnetRessurs();
+            this.tildeltEnhetsnr = copy.getTildeltEnhetsnr();
+            this.versjon = copy.getVersjon();
+            this.aktivDato = copy.getAktivDato();
+            this.status = copy.getStatus();
+        }
+        
         public Builder setOppgaveId(String oppgaveId) {
             this.oppgaveId = oppgaveId;
             return this;
@@ -118,6 +150,26 @@ public final class Oppgave {
             return this;
         }
 
+        public Builder setTemagruppe(String temagruppe) {
+            this.temagruppe = temagruppe;
+            return this;
+        }
+
+        public Builder setTildeltEnhetsnr(String tildeltEnhetsnr) {
+            this.tildeltEnhetsnr = tildeltEnhetsnr;
+            return this;
+        }
+
+        public Builder setAktivDato(LocalDate aktivDato) {
+            this.aktivDato = aktivDato;
+            return this;
+        }
+
+        public Builder setStatus(String status) {
+            this.status = status;
+            return this;
+        }
+
         public Oppgave build() {
             return new Oppgave(this);
         }
@@ -138,6 +190,10 @@ public final class Oppgave {
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
         this.beskrivelse = builder.beskrivelse;
+        this.tildeltEnhetsnr = builder.tildeltEnhetsnr;
+        this.status = builder.status;
+        this.aktivDato = builder.aktivDato;
+        this.temagruppe = builder.temagruppe;
     }
 
     public String getAktørId() {
@@ -194,6 +250,22 @@ public final class Oppgave {
 
     public int getVersjon() {
         return versjon;
+    }
+
+    public String getTemagruppe() {
+        return temagruppe;
+    }
+
+    public String getTildeltEnhetsnr() {
+        return tildeltEnhetsnr;
+    }
+
+    public LocalDate getAktivDato() {
+        return aktivDato;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public boolean erBehandling() {

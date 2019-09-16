@@ -15,8 +15,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +65,7 @@ public class SedDataBygger {
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
 
         sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().familiemedlemmer.stream()
-            .filter(f -> f.familierelasjon.equals(Familierelasjon.FARA) || f.familierelasjon.equals(Familierelasjon.MORA))
+            .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
         sedDataDto.setSelvstendigeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige()));
@@ -171,15 +171,13 @@ public class SedDataBygger {
 
     private List<Lovvalgsperiode> lagTidligereLovvalgsperioderDto(Behandling behandling)
         throws TekniskException {
-        List<Lovvalgsperiode> tidligereLovvalgsperioderDto = new ArrayList<>();
+
         Collection<no.nav.melosys.domain.Lovvalgsperiode> tidligereLovvalgsperioder =
             lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
 
-        tidligereLovvalgsperioder.stream()
+        return tidligereLovvalgsperioder.stream()
             .map(this::lagLovvalgsperiodeDto)
-            .forEach(tidligereLovvalgsperioderDto::add);
-
-        return tidligereLovvalgsperioderDto;
+            .collect(Collectors.toList());
     }
 
     private String hentUnntaksBegrunnelse(Behandlingsresultat behandlingsresultat) {
@@ -205,7 +203,7 @@ public class SedDataBygger {
         String[] navn = splitFulltNavn(f.navn);
         familieMedlem.setFornavn(navn[0]);
         familieMedlem.setEtternavn(navn[1]);
-        familieMedlem.setRelasjon(f.familierelasjon.equals(Familierelasjon.FARA) ? "FAR" : "MOR");
+        familieMedlem.setRelasjon(f.familierelasjon == Familierelasjon.FARA ? "FAR" : "MOR");
         return familieMedlem;
     }
 
@@ -213,7 +211,7 @@ public class SedDataBygger {
         Virksomhet virksomhet = new Virksomhet();
         virksomhet.setNavn(uVirksomhet.navn);
         virksomhet.setOrgnr(uVirksomhet.orgnr);
-        virksomhet.setType("registrering"); //TODO - riktig?
+        virksomhet.setType("registrering");
         virksomhet.setAdresse(fraStrukturertAdresse((StrukturertAdresse) uVirksomhet.adresse));
         return virksomhet;
     }

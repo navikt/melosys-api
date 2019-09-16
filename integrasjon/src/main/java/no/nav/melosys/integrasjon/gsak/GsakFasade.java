@@ -83,4 +83,9 @@ public interface GsakFasade {
      * Tildeler en oppgaver til en saksbehandler
      */
     void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException;
+
+    /**
+     * Oppdaterer en eksisterende oppgave.
+     */
+    void oppdaterOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException;
 }

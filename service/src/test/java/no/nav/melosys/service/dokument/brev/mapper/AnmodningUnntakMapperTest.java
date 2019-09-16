@@ -93,7 +93,7 @@ public class AnmodningUnntakMapperTest {
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         Anmodningsperiode anmodningsperiode =
-            new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO, null, null, Landkoder.DE,
+            new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO, null, null, Landkoder.DK,
                 null, null);
         resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
 
@@ -107,5 +107,6 @@ public class AnmodningUnntakMapperTest {
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
         assertThat("<ns3:yrkesaktivitet>SELVSTENDIG</ns3:yrkesaktivitet>").isSubstringOf(xml);
         assertThat(Landkoder.AT.getBeskrivelse()).isSubstringOf(xml);
+        assertThat(xml).doesNotContain(Landkoder.DK.getKode());
     }
 }

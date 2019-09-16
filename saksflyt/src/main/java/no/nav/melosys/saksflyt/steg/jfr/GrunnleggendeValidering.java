@@ -135,9 +135,6 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
         if (periode == null || periode.getFom() == null) {
             throw new FunksjonellException("Søknadsperioden er ikke oppgitt eller mangler fom.");
         }
-        if (periode.getTom() != null && periode.getFom().equals(periode.getTom())) {
-            throw new FunksjonellException("Fra og med dato kan ikke være lik til og med dato.");
-        }
         if (periode.getTom() != null && periode.getFom().isAfter(periode.getTom())) {
             throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
         }

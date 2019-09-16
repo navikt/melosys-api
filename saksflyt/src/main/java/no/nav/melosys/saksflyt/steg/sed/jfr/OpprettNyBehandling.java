@@ -18,6 +18,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.DOKUMENT_ID;
@@ -32,7 +33,9 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
     private final BehandlingService behandlingService;
     private final GsakFasade gsakFasade;
 
-    public OpprettNyBehandling(FagsakService fagsakService, BehandlingService behandlingService, GsakFasade gsakFasade) {
+    public OpprettNyBehandling(FagsakService fagsakService,
+                               BehandlingService behandlingService,
+                               @Qualifier("system") GsakFasade gsakFasade) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.gsakFasade = gsakFasade;
@@ -59,13 +62,15 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
         Fagsak fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)
             .orElseThrow(() -> new TekniskException("Finnes en kobling til gsakSaksnummer " +
                 gsakSaksnummer + ", men finner ingen fagsak!"));
-
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsakService.lagre(fagsak);
         
         avsluttTidligereBehandling(fagsak);
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, behandlingsType,
             prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
+
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        fagsak.getBehandlinger().add(behandling);
+        fagsakService.lagre(fagsak);
+
         ferdigstillOppgave(fagsak.getSaksnummer());
         log.info("Opprettet ny behandling for fagsak {}", gsakSaksnummer);
         prosessinstans.setBehandling(behandling);

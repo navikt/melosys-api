@@ -63,7 +63,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setFlaggland(brevdata.arbeidsland);
         if (!søknad.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = søknad.maritimtArbeid.iterator().next();
-            if (maritimtArbeid.fartsomradeKode.equalsIgnoreCase(Fartsomraade.INNENRIKS.getKode())) {
+            if (Fartsomraade.INNENRIKS.getKode().equalsIgnoreCase(maritimtArbeid.fartsomradeKode)) {
                 fag.setArbeidPåTerritorialfarvann(JA);
             }
         }

@@ -3,7 +3,7 @@ package no.nav.melosys.service.unntaksperiode.kontroll;
 import java.util.List;
 import java.util.function.Function;
 
-import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import org.junit.Test;
 

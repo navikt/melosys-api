@@ -6,21 +6,25 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.common.collect.Sets;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.BucInformasjon;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.jeasy.random.EasyRandom;
@@ -34,8 +38,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiServiceTest {
@@ -46,12 +49,11 @@ public class EessiServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
+    private BehandlingsresultatService behandlingsresultatService;
 
     private EessiService eessiService;
 
     private Behandling behandling;
-    private Behandlingsresultat behandlingsresultat;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -60,18 +62,22 @@ public class EessiServiceTest {
 
     @Before
     public void setup() throws Exception {
-        eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory, eessiConsumer, "true", behandlingService);
+        DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory = mock(DokumentdataGrunnlagFactory.class);
+        eessiService = new EessiService("true", sedDataBygger, dokumentdataGrunnlagFactory,
+            eessiConsumer, behandlingService, behandlingsresultatService);
 
         behandling = new Behandling();
+        behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("123");
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        behandlingsresultat = new Behandlingsresultat();
-
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.SK);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         when(sedDataBygger.lag(any(), any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
         when(sedDataBygger.lagUtkast(any())).thenReturn(new SedDataDto());
@@ -79,24 +85,19 @@ public class EessiServiceTest {
 
     @Test
     public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
-        eessiService.opprettOgSendSed(behandling, behandlingsresultat);
-        verify(eessiConsumer).opprettOgSendSed(any(SedDataDto.class));
+        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true))).thenReturn(new OpprettSedDto());
+        eessiService.opprettOgSendSed(behandling.getId(), BucType.LA_BUC_03);
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_03), eq(true));
     }
-
-//    @Test
-//    public void opprettOgSendSed_ingenLovvalgsperiode_forventException() throws Exception {
-//        expectedException.expect(TekniskException.class);
-//        expectedException.expectMessage("Finner ingen lovvalgsperiode!");
-//        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet());
-//        eessiService.opprettOgSendSed(behandling, behandlingsresultat);
-//    } TODO kommenter inn når sed-feilmeldinger blir kastet fra service igjen
 
     @Test
     public void opprettBucOgSed_verifiserKorrektSedType() throws Exception {
-        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), anyString())).thenReturn("localhost:3000");
+        OpprettSedDto opprettSedDto = new OpprettSedDto();
+        opprettSedDto.setRinaUrl("localhost:3000");
+        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean())).thenReturn(opprettSedDto);
 
-        eessiService.opprettBucOgSed(behandling, "LA_BUC_01", "SE", "SE:001");
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), eq("LA_BUC_01"));
+        eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, "SE", "SE:001");
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class),any(), eq(BucType.LA_BUC_01), eq(false));
     }
 
     @Test
@@ -106,7 +107,7 @@ public class EessiServiceTest {
             easyRandom.nextObject(Institusjon.class)
         ));
 
-        List<Institusjon> mottakerinstitusjoner = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
+        List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01");
 
         verify(eessiConsumer).hentMottakerinstitusjoner(anyString());
         assertThat(mottakerinstitusjoner).hasSize(2);
@@ -116,7 +117,7 @@ public class EessiServiceTest {
     @Test(expected = MelosysException.class)
     public void hentMottakerinstitusjoner_medFeilIConsumer_forventTomListe() throws MelosysException {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenThrow(new IntegrasjonException("Error!"));
-        List<Institusjon> institusjon = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
+        eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01");
     }
 
     @Test
@@ -155,8 +156,8 @@ public class EessiServiceTest {
 
     @Test
     public void støtterAutomatiskBehandling_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
-        List<String> sedTyperAutomatiskBehandling = Arrays.asList(
-            "H001",
+        List<String> sedTyperIkkeAutomatiskBehandling = Arrays.asList(
+            SedType.H001.name(),
             SedType.A002.name(),
             SedType.A004.name(),
             SedType.A005.name(),
@@ -167,7 +168,7 @@ public class EessiServiceTest {
             SedType.A012.name()
         );
 
-        for (String sedType : sedTyperAutomatiskBehandling) {
+        for (String sedType : sedTyperIkkeAutomatiskBehandling) {
             assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isFalse();
         }
     }
