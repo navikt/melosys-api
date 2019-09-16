@@ -1,0 +1,1 @@
+ALTER TABLE prosessinstans_hendelser DROP CONSTRAINT fk_pihend_pi;
