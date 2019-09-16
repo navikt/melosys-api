@@ -15,6 +15,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
@@ -28,10 +29,12 @@ import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 @Service
 public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final LandvelgerService landvelgerService;
 
     @Autowired
-    public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService) {
+    public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService, LandvelgerService landvelgerService) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.landvelgerService = landvelgerService;
     }
 
     public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
@@ -61,6 +64,10 @@ public class SedDataBygger {
             .map(this::mapArbeidssted).collect(Collectors.toList()));
 
         sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getBostedGrunnlag().hentBostedsadresse()));
+
+        sedDataDto.setAvklartBostedsland(
+            landvelgerService.hentBostedsland(dataGrunnlag.getBehandling().getId(), dataGrunnlag.getSøknad()).getKode()
+        );
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
 

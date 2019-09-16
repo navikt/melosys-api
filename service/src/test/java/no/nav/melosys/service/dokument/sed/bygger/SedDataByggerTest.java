@@ -17,6 +17,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
@@ -41,6 +42,8 @@ public class SedDataByggerTest {
     LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     AvklartefaktaService avklartefaktaService;
+    @Mock
+    LandvelgerService landvelgerService;
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
@@ -73,7 +76,7 @@ public class SedDataByggerTest {
 
         behandling = DataByggerStubs.hentBehandlingStub();
 
-        dataBygger = new SedDataBygger(lovvalgsperiodeService);
+        dataBygger = new SedDataBygger(lovvalgsperiodeService, landvelgerService);
     }
 
     private DokumentdataGrunnlag lagDokumentressurser() throws TekniskException {
