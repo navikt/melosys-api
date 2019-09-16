@@ -1,22 +1,24 @@
 package no.nav.melosys.tjenester.gui.dto.eessi;
 
+import no.nav.melosys.domain.eessi.BucType;
+
 public class BucBestillingDto {
 
-    private String bucType;
+    private BucType bucType;
     private String mottakerLand;
     private String mottakerId;
 
-    public BucBestillingDto(String bucType, String mottakerLand, String mottakerId) {
+    public BucBestillingDto(BucType bucType, String mottakerLand, String mottakerId) {
         this.bucType = bucType;
         this.mottakerLand = mottakerLand;
         this.mottakerId = mottakerId;
     }
 
-    public String getBucType() {
+    public BucType getBucType() {
         return bucType;
     }
 
-    public void setBucType(String bucType) {
+    public void setBucType(BucType bucType) {
         this.bucType = bucType;
     }
 

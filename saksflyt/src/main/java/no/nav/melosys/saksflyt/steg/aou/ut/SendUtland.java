@@ -6,11 +6,11 @@ import java.time.ZoneId;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingService;
@@ -56,19 +56,16 @@ public class SendUtland extends AbstraktSendUtland {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        try {
-            super.utfør(prosessinstans);
-            prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
+    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-            Behandling behandling = prosessinstans.getBehandling();
-            LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
-            behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(TIME_ZONE_ID).toInstant());
-            behandlingService.lagre(behandling);
-        } catch (Exception ex) {
-            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
-            log.error("Kan ikke opprette og sende sed for behandling {}", prosessinstans.getBehandling().getId(), ex);
-        }
+        sendUtland(prosessinstans, BucType.LA_BUC_01);
+
+        Behandling behandling = prosessinstans.getBehandling();
+        LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
+        behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(TIME_ZONE_ID).toInstant());
+        behandlingService.lagre(behandling);
+
+        prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
     }
 
     @Override

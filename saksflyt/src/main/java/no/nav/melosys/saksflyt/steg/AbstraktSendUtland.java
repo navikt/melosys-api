@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.brev.Brevbestilling;
-import no.nav.melosys.domain.dokument.sed.BucType;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
@@ -35,13 +35,12 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         this.landvelgerService = landvelgerService;
     }
 
-    @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    protected void sendUtland(Prosessinstans prosessinstans, BucType bucType) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (skalSendesUtland(behandlingsresultat)) {
             if (erEessiKlar(behandlingsresultat)) {
-                eessiService.opprettOgSendSed(behandlingID);
+                eessiService.opprettOgSendSed(behandlingID, bucType);
             } else {
                 brevBestiller.bestill(lagBrevBestilling(prosessinstans));
             }

@@ -1,13 +1,13 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
@@ -46,19 +46,15 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException {
-        try {
-            super.utfør(prosessinstans);
+    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-            if (erArtikkel11(prosessinstans)) {
-                prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
-            } else {
-                prosessinstans.setSteg(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
-            }
-        } catch (Exception ex) {
-            log.error("Kan ikke opprette og sende sed for behandling {}", prosessinstans.getBehandling().getId(), ex);
-            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+        super.sendUtland(prosessinstans, avklarBucType(prosessinstans.getBehandling()));
+        if (erArtikkel11(prosessinstans)) {
+            prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+        } else {
+            prosessinstans.setSteg(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
         }
+
     }
 
     @Override
@@ -76,11 +72,18 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         return behandlingsresultat.erInnvilgelse() &&
             behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse() != Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
     }
-    
+
     private boolean erArtikkel11(Prosessinstans prosessinstans) throws IkkeFunnetException {
         return behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId())
-                .hentValidertLovvalgsperiode()
-                .erArtikkel11();
+            .hentValidertLovvalgsperiode()
+            .erArtikkel11();
     }
 
+    private BucType avklarBucType(Behandling behandling) throws IkkeFunnetException, TekniskException {
+        return behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
+            .getLovvalgsperioder().stream().findFirst()
+            .map(Lovvalgsperiode::getBestemmelse)
+            .map(LovvalgBestemmelseUtils::hentBucTypeFraBestemmelse)
+            .orElseThrow(() -> new TekniskException("Finner ikke lovvalgsbestemmelse for behandling " + behandling.getId()));
+    }
 }

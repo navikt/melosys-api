@@ -2,36 +2,81 @@ package no.nav.melosys.integrasjon.eessi;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.BucInformasjon;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 public class EessiConsumerImpl implements EessiConsumer {
 
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
-    EessiConsumerImpl(RestTemplate restTemplate) {
+    private static final String SEDDATA_FILNAVN = "sedData";
+    private static final String VEDLEGG_FILNAVN = "vedlegg";
+
+    private static final String SEND_AUTOMATISK = "sendAutomatisk";
+
+    EessiConsumerImpl(RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @Override
-    public Map<String, String> opprettOgSendSed(SedDataDto sedDataDto) throws MelosysException {
-        return exchange("/sed/createAndSend", HttpMethod.POST, new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<Map<String, String>>() {
-        });
+    public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, byte[] vedlegg, BucType bucType, boolean sendAutomatisk) throws MelosysException {
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(String.format("/buc/%s", bucType))
+            .queryParam(SEND_AUTOMATISK, sendAutomatisk);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        byte[] sedData;
+
+        try {
+            sedData = objectMapper.writeValueAsBytes(sedDataDto);
+        } catch (JsonProcessingException jpe) {
+            throw new TekniskException("Feil ved parsing av sedDataDto", jpe);
+        }
+
+        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+        formData.add(SEDDATA_FILNAVN, lagByteArrayResource(sedData, SEDDATA_FILNAVN));
+
+        if (ArrayUtils.isNotEmpty(vedlegg)) {
+            formData.add(VEDLEGG_FILNAVN, lagByteArrayResource(vedlegg, VEDLEGG_FILNAVN));
+        }
+
+        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(formData, httpHeaders),
+            new ParameterizedTypeReference<OpprettSedDto>() {});
+    }
+
+    @Override
+    public void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException {
+        exchange(String.format("/buc/LA_BUC_01/%s/svar", rinaSaksnummer), HttpMethod.POST,
+            new HttpEntity<>(svarAnmodningUnntakDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
+            });
     }
 
     @Override
@@ -67,22 +112,6 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException {
-        exchange(String.format("/buc/LA_BUC_01/%s/svar", rinaSaksnummer), HttpMethod.POST,
-            new HttpEntity<>(svarAnmodningUnntakDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
-            });
-    }
-
-    @Override
-    public String opprettBucOgSed(SedDataDto sedDataDto, String bucType) throws MelosysException {
-        OpprettSedDto opprettSedDto = exchange("/sed/create/" + bucType, HttpMethod.POST,
-            new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<OpprettSedDto>() {
-        });
-
-        return opprettSedDto.getRinaUrl();
-    }
-
-    @Override
     public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException {
         status = Optional.ofNullable(status).orElse("");
 
@@ -106,5 +135,14 @@ public class EessiConsumerImpl implements EessiConsumer {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         return headers;
+    }
+
+    private ByteArrayResource lagByteArrayResource(byte[] data, String filnavn) {
+        return new ByteArrayResource(data) {
+            @Override
+            public String getFilename() {
+                return filnavn;
+            }
+        };
     }
 }

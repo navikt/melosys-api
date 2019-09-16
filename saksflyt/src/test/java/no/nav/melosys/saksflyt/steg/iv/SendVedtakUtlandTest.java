@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -79,9 +80,17 @@ public class SendVedtakUtlandTest {
     }
 
     @Test
-    public void utførSteg_suksessfull_statusErAvgiftsoppgave() throws Exception{
+    public void utførSteg_artikkel12Suksessfull_statusErAvgiftsoppgave() throws Exception{
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong());
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_04));
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
+    }
+
+    @Test
+    public void utførSteg_artikkel13Suksessfull_statusErAvgiftsoppgave() throws Exception{
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        sendVedtakUtland.utfør(prosessinstans);
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_02));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
@@ -99,7 +108,7 @@ public class SendVedtakUtlandTest {
     public void utførStegForArtikkel11_suksessfull_statusErAvsluttBehandling() throws Exception {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong());
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_05));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 }

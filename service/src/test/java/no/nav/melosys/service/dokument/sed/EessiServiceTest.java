@@ -10,15 +10,17 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.BehandlingService;
@@ -83,24 +85,19 @@ public class EessiServiceTest {
 
     @Test
     public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
-        eessiService.opprettOgSendSed(behandling.getId());
-        verify(eessiConsumer).opprettOgSendSed(any(SedDataDto.class));
+        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true))).thenReturn(new OpprettSedDto());
+        eessiService.opprettOgSendSed(behandling.getId(), BucType.LA_BUC_03);
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_03), eq(true));
     }
-
-//    @Test
-//    public void opprettOgSendSed_ingenLovvalgsperiode_forventException() throws Exception {
-//        expectedException.expect(TekniskException.class);
-//        expectedException.expectMessage("Finner ingen lovvalgsperiode!");
-//        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet());
-//        eessiService.opprettOgSendSed(behandling, behandlingsresultat);
-//    } TODO kommenter inn når sed-feilmeldinger blir kastet fra service igjen
 
     @Test
     public void opprettBucOgSed_verifiserKorrektSedType() throws Exception {
-        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), anyString())).thenReturn("localhost:3000");
+        OpprettSedDto opprettSedDto = new OpprettSedDto();
+        opprettSedDto.setRinaUrl("localhost:3000");
+        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean())).thenReturn(opprettSedDto);
 
-        eessiService.opprettBucOgSed(behandling, "LA_BUC_01", "SE", "SE:001");
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), eq("LA_BUC_01"));
+        eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, "SE", "SE:001");
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class),any(), eq(BucType.LA_BUC_01), eq(false));
     }
 
     @Test
@@ -159,8 +156,8 @@ public class EessiServiceTest {
 
     @Test
     public void støtterAutomatiskBehandling_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
-        List<String> sedTyperAutomatiskBehandling = Arrays.asList(
-            "H001",
+        List<String> sedTyperIkkeAutomatiskBehandling = Arrays.asList(
+            SedType.H001.name(),
             SedType.A002.name(),
             SedType.A004.name(),
             SedType.A005.name(),
@@ -171,7 +168,7 @@ public class EessiServiceTest {
             SedType.A012.name()
         );
 
-        for (String sedType : sedTyperAutomatiskBehandling) {
+        for (String sedType : sedTyperIkkeAutomatiskBehandling) {
             assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isFalse();
         }
     }

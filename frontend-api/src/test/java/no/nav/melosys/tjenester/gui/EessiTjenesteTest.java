@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.BucInformasjon;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -80,9 +81,9 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void opprettBuc() throws IOException, MelosysException {
-        when(eessiService.opprettBucOgSed(any(), anyString(), anyString(), anyString())).thenReturn(MOCK_RINA_URL);
+        when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyString(), anyString())).thenReturn(MOCK_RINA_URL);
 
-        BucBestillingDto nyBucDto = new BucBestillingDto("LA_BUC_01", "NAVT002", "NO");
+        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, "NAVT002", "NO");
         Response response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         assertThat(response.getEntity()).isExactlyInstanceOf(OpprettBucSvarDto.class);
         OpprettBucSvarDto opprettBucSvarDto = (OpprettBucSvarDto) response.getEntity();
