@@ -32,7 +32,7 @@ public class ProsessinstansStatusCache {
     }
 
     double antallProsessinstanserFeilet(ProsessType type) {
-        return Long.valueOf(antallProsessinstanserMedTypeSteg(type, STEG_FEILET)).doubleValue();
+        return (double) antallProsessinstanserMedTypeSteg(type, STEG_FEILET);
     }
 
     private long antallProsessinstanserMedTypeSteg(ProsessType prosessType, EnumSet<ProsessSteg> steg) {
@@ -64,7 +64,7 @@ public class ProsessinstansStatusCache {
         antallPerTypeOgSteg = new HashMap<>();
         for (ProsessinstansAntall prosessinstansAntall : prosessinstansMetrikker) {
             Pair<ProsessType, ProsessSteg> typeOgStatus = Pair.of(prosessinstansAntall.getProsessType(), prosessinstansAntall.getProsessSteg());
-            antallPerTypeOgSteg.put(typeOgStatus, Long.valueOf(prosessinstansAntall.getAntall()));
+            antallPerTypeOgSteg.put(typeOgStatus, prosessinstansAntall.getAntall());
         }
     }
 }

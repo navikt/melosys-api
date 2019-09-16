@@ -17,8 +17,6 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,8 +31,6 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
  */
 @Component
 public class SendUtland extends AbstraktSendUtland {
-    private static final Logger log = LoggerFactory.getLogger(SendUtland.class);
-
     private final BehandlingService behandlingService;
 
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();

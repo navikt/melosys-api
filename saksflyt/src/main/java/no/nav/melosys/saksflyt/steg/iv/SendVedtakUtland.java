@@ -15,8 +15,6 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +24,6 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_
 
 @Component
 public class SendVedtakUtland extends AbstraktSendUtland {
-    private static final Logger log = LoggerFactory.getLogger(SendVedtakUtland.class);
-
     private BehandlingService behandlingService;
 
     @Autowired
