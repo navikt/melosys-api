@@ -109,6 +109,12 @@ public class SoeknadDokumentTest implements KonverteringTest {
         SoeknadDokument søknad = hentSoeknadDokumentFraFil(XML_PATH, "1.1");
     }
 
+    @Test
+    public void testKonverteringSoeknad_v1_2() throws IOException {
+        final String XML_PATH = "soeknad/soeknad_1.2.xml";
+        SoeknadDokument søknad = hentSoeknadDokumentFraFil(XML_PATH, "1.2");
+    }
+
     public SoeknadDokument hentSoeknadDokumentFraFil(String sti, String versjon) throws IOException {
         return (SoeknadDokument) getSaksopplysning(sti, versjon).getDokument();
     }
