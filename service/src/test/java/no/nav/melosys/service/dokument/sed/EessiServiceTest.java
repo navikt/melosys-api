@@ -26,6 +26,7 @@ import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
+import no.nav.melosys.service.dokument.sed.bygger.MedlemsperiodeType;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -79,7 +80,7 @@ public class EessiServiceTest {
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        when(sedDataBygger.lag(any(), any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lag(any(), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
         when(sedDataBygger.lagUtkast(any())).thenReturn(new SedDataDto());
     }
 

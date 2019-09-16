@@ -37,9 +37,9 @@ public class SedDataBygger {
         this.landvelgerService = landvelgerService;
     }
 
-    public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+    public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(datagrunnlag);
-        sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat)));
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(datagrunnlag.getBehandling()));
         sedDataDto.setMottakerLand(datagrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
         return sedDataDto;
@@ -146,24 +146,18 @@ public class SedDataBygger {
         return adresse;
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(Behandlingsresultat behandlingsresultat) {
+    private List<Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
 
-        if (!behandlingsresultat.getLovvalgsperioder().isEmpty()) {
-            return lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode());
+        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
+        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(),
+                hentUnntaksBegrunnelse(behandlingsresultat)));
+        } else {
+            return Collections.emptyList();
         }
-
-        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
-        return lagLovvalgsperiodeDto(anmodningsperiode, hentUnntaksBegrunnelse(behandlingsresultat));
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode periodeMedBestemmelse) {
-        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
-        lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
-        lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
-        lovvalgsperiodeDto.setLovvalgsland(periodeMedBestemmelse.getLovvalgsland() != null ? periodeMedBestemmelse.getLovvalgsland().getKode() : null);
-        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(periodeMedBestemmelse.getBestemmelse()));
-        return lovvalgsperiodeDto;
-    }
 
     private Lovvalgsperiode lagLovvalgsperiodeDto(Anmodningsperiode anmodningsperiode, String unntaksBegrunnelse) {
         Lovvalgsperiode lovvalgsperiodeDto = lagLovvalgsperiodeDto(anmodningsperiode);
@@ -173,6 +167,15 @@ public class SedDataBygger {
             .mapMelosysLovvalgTilBestemmelseDto(anmodningsperiode.getUnntakFraBestemmelse()));
         lovvalgsperiodeDto.setUnntaksBegrunnelse(unntaksBegrunnelse);
 
+        return lovvalgsperiodeDto;
+    }
+
+    private Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode periodeMedBestemmelse) {
+        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
+        lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
+        lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
+        lovvalgsperiodeDto.setLovvalgsland(periodeMedBestemmelse.getLovvalgsland() != null ? periodeMedBestemmelse.getLovvalgsland().getKode() : null);
+        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(periodeMedBestemmelse.getBestemmelse()));
         return lovvalgsperiodeDto;
     }
 

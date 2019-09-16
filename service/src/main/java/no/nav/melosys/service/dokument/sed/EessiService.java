@@ -26,6 +26,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
+import no.nav.melosys.service.dokument.sed.bygger.MedlemsperiodeType;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,7 @@ public class EessiService {
         opprettOgSendSed(behandlingID, bucType, null);
     }
 
-    private void opprettOgSendSed(long behandlingID, BucType bucType, byte[] vedlegg) throws MelosysException {
+    public void opprettOgSendSed(long behandlingID, BucType bucType, byte[] vedlegg) throws MelosysException {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -71,7 +72,7 @@ public class EessiService {
             Fagsak fagsak = behandling.getFagsak();
 
             DokumentdataGrunnlag datagrunnlag = dokumentdataGrunnlagFactory.av(behandling);
-            SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat);
+            SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
             sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
             log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
