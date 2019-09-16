@@ -19,8 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.VS_VIDERESEND_SAK;
-import static no.nav.melosys.domain.ProsessSteg.VS_SEND_BREV;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
  * Videresender Sak
@@ -57,6 +56,6 @@ public class VideresendSak extends AbstraktStegBehandler {
         oppdaterFagsakOgBehandling.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.VIDERESENDT, Behandlingsstatus.AVSLUTTET);
 
         log.info("Satt sak til videresendt for prosessinstans {}", prosessinstans.getId());
-        prosessinstans.setSteg(VS_SEND_BREV);
+        prosessinstans.setSteg(VS_SEND_ORIENTERINGSBREV);
     }
 }

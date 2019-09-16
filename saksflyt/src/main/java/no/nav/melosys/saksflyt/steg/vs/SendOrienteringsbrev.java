@@ -1,50 +1,39 @@
 package no.nav.melosys.saksflyt.steg.vs;
 
-import java.util.Map;
-
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.HS_SEND_BREV;
-import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
- * Sender orienteringsbrev til bruker og et brev med søknad som vedlegg til utenlandsk myndighet
+ * Sender orienteringsbrev til bruker
  *
  * Transisjoner:
- * VS_SEND_BREV -> IV_STATUS_BEH_AVSL eller FEILET_MASKINELT hvis feil
+ * VS_SEND_ORIENTERINGSBREV -> VS_SEND_SOKNAD eller FEILET_MASKINELT hvis feil
  */
-@Component("VideresendSoknadSendBrev")
-public class SendBrev extends AbstraktStegBehandler {
+@Component("VideresendSoknadOrienteringsbrev")
+public class SendOrienteringsbrev extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(SendBrev.class);
+    private static final Logger log = LoggerFactory.getLogger(SendOrienteringsbrev.class);
 
     private final BrevBestiller brevBestiller;
 
     @Autowired
-    public SendBrev(BrevBestiller brevBestiller) {
+    public SendOrienteringsbrev(BrevBestiller brevBestiller) {
         this.brevBestiller = brevBestiller;
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return HS_SEND_BREV;
-    }
-
-    @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
+        return VS_SEND_ORIENTERINGSBREV;
     }
 
     @Override
@@ -52,6 +41,6 @@ public class SendBrev extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
 
-        prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
+        prosessinstans.setSteg(VS_SEND_SOKNAD);
     }
 }

@@ -236,7 +236,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansVideresendSoknad(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.VIDERESEND_SOKNAD);
-        prosessinstans.setSteg(ProsessSteg.VS_SEND_BREV);
+        prosessinstans.setSteg(ProsessSteg.VS_OPPDATER_RESULTAT);
         prosessinstans.setBehandling(behandling);
 
         lagre(prosessinstans);

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = {"saksflyt", "soknad"})
-@Path("/saksflyt/soknad")
+@Path("/saksflyt/soknader")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VideresendTjeneste extends RestTjeneste {
