@@ -9,10 +9,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.eessi.BucInformasjon;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedInformasjon;
+import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
@@ -172,5 +169,15 @@ public class EessiConsumerTest {
 
         assertThat(response.getSedType()).isEqualTo(melosysEessiMelding.getSedType());
         assertThat(response.getJournalpostId()).isEqualTo(melosysEessiMelding.getJournalpostId());
+    }
+
+    @Test
+    public void genererSedForhåndsvisning() throws MelosysException {
+        final byte[] PDF = "pdf".getBytes();
+        server.expect(requestTo("/sed/A001/pdf"))
+            .andRespond(withSuccess(PDF, MediaType.APPLICATION_PDF));
+
+        byte[] pdf = eessiConsumer.genererSedForhåndsvisning(new SedDataDto(), SedType.A001);
+        assertThat(pdf).isEqualTo(PDF);
     }
 }

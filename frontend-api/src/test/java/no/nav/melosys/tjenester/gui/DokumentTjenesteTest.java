@@ -8,7 +8,7 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Comparators;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.dokument.sed.SedType;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;

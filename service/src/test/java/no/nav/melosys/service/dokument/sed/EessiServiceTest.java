@@ -6,15 +6,14 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.common.collect.Sets;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -38,7 +37,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiServiceTest {
@@ -50,6 +50,8 @@ public class EessiServiceTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
 
     private EessiService eessiService;
 
@@ -62,7 +64,6 @@ public class EessiServiceTest {
 
     @Before
     public void setup() throws Exception {
-        DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory = mock(DokumentdataGrunnlagFactory.class);
         eessiService = new EessiService("true", sedDataBygger, dokumentdataGrunnlagFactory,
             eessiConsumer, behandlingService, behandlingsresultatService);
 
