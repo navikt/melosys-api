@@ -6,9 +6,9 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +32,12 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
 
     private final BrevBestiller brevBestiller;
     
-    private final BehandlingRepository behandlingRepository;
+    private final BehandlingService behandlingService;
 
     @Autowired
-    public SendForvaltningsmelding(BrevBestiller brevBestiller, BehandlingRepository behandlingRepository) {
+    public SendForvaltningsmelding(BrevBestiller brevBestiller, BehandlingService behandlingService) {
         this.brevBestiller = brevBestiller;
-        this.behandlingRepository = behandlingRepository;
+        this.behandlingService = behandlingService;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         // Henter ut behandling med saksopplysninger
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);

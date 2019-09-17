@@ -9,8 +9,8 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,11 +31,11 @@ public class SendForvaltningsmeldingTest {
     private BrevBestiller brevBestiller;
     
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
 
     @Before
     public void setUp() {
-        agent = new SendForvaltningsmelding(brevBestiller, behandlingRepository);
+        agent = new SendForvaltningsmelding(brevBestiller, behandlingService);
     }
 
     @Test
@@ -43,14 +43,14 @@ public class SendForvaltningsmeldingTest {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         p.setBehandling(behandling);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
 
         agent.utførSteg(p);
 
-        verify(behandlingRepository).findWithSaksopplysningerById(1L);
+        verify(behandlingService).hentBehandling(1L);
         verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), anyString(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
