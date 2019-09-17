@@ -63,7 +63,7 @@ public class OpprettOppgaveTest {
 
         agent.utførSteg(p);
 
-        verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
+        verify(gsakFasade).opprettOppgave(oppgave.capture());
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
         assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(EU_EOS);
@@ -71,7 +71,7 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg_nySak_ikkeSendForvaltningsmelding() throws FunksjonellException, TekniskException {
+    public void utfoerSteg_skalSendesForvaltningsmeldingFalse_ikkeSendForvaltningsmelding() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);

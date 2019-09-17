@@ -35,7 +35,7 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
 @Service
 public class ProsessinstansService {
-    private static Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
 
     private final ProsessinstansRepository prosessinstansRepo;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -211,7 +211,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansForvaltningsmeldingSend(Behandling behandling) {
+    public void opprettProsessinstansForvaltningsmelding(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.FORVALTNINGSMELDING_SEND);
         prosessinstans.setSteg(ProsessSteg.SEND_FORVALTNINGSMELDING);

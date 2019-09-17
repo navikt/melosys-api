@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.w3c.dom.Element;
 
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 
 @Service
@@ -135,6 +136,8 @@ public class DokumentService {
 
         if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
             prosessinstansService.opprettProsessinstansMangelbrev(behandling, mottaker, brevdata);
+        } else if (produserbartDokument == MELDING_FORVENTET_SAKSBEHANDLINGSTID) {
+            prosessinstansService.opprettProsessinstansForvaltningsmelding(behandling);            
         } else {
             throw new FunksjonellException("Produserbaredokumenter " + produserbartDokument + " er ikke støttet.");
         }
