@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
@@ -30,10 +31,13 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(SendForvaltningsmelding.class);
 
     private final BrevBestiller brevBestiller;
+    
+    private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public SendForvaltningsmelding(BrevBestiller brevBestiller) {
+    public SendForvaltningsmelding(BrevBestiller brevBestiller, BehandlingRepository behandlingRepository) {
         this.brevBestiller = brevBestiller;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
@@ -45,10 +49,12 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = prosessinstans.getBehandling();
+        // Henter ut behandling med saksopplysninger
+        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
+        
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);
-
+        
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());
     }

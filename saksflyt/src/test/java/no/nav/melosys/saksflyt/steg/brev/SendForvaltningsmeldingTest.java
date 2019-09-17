@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendForvaltningsmeldingTest {
@@ -27,10 +29,13 @@ public class SendForvaltningsmeldingTest {
 
     @Mock
     private BrevBestiller brevBestiller;
+    
+    @Mock
+    private BehandlingRepository behandlingRepository;
 
     @Before
     public void setUp() {
-        agent = new SendForvaltningsmelding(brevBestiller);
+        agent = new SendForvaltningsmelding(brevBestiller, behandlingRepository);
     }
 
     @Test
@@ -38,11 +43,14 @@ public class SendForvaltningsmeldingTest {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+
         p.setBehandling(behandling);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
 
         agent.utførSteg(p);
 
+        verify(behandlingRepository).findWithSaksopplysningerById(1L);
         verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), anyString(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
