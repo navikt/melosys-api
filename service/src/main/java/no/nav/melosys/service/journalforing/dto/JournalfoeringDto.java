@@ -13,7 +13,7 @@ public class JournalfoeringDto {
     private String hoveddokumentTittel;
     private List<DokumentDto> vedlegg;
     private boolean skalTilordnes;
-    private boolean skalSendesForvaltningsmelding;
+    private boolean skalSendesForvaltningsmelding = true;
 
     public String getBehandlingstypeKode() {
         return behandlingstypeKode;
