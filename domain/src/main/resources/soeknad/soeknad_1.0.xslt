@@ -11,4 +11,11 @@
     <xsl:template match="sammeAdresseSomArbeidsgiver"/>
     <xsl:template match="familiesBostedLandkode"/>
     <xsl:template match="adresseIUtlandet"/>
+
+    <xsl:template match="maritimtArbeid/navn">
+        <enhetNavn>
+            <xsl:apply-templates />
+        </enhetNavn>
+    </xsl:template>
+
 </xsl:stylesheet>

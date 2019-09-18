@@ -31,6 +31,7 @@ import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentResponse;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -38,6 +39,7 @@ import org.springframework.util.CollectionUtils;
 import static no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand.UTGAAR;
 
 @Service
+@Primary
 public class JoarkService implements JoarkFasade {
     private final InngaaendeJournalConsumer inngåendeJournalConsumer;
     private final JournalConsumer journalConsumer;

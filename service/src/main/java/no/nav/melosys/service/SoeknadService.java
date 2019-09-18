@@ -23,7 +23,7 @@ public class SoeknadService {
 
     private final BehandlingRepository behandlingRepo;
 
-    private static final String SØKNAD_VERSJON = "1.1";
+    private static final String SØKNAD_VERSJON = "1.2";
 
     private final SaksopplysningRepository saksopplysningRepo;
 
