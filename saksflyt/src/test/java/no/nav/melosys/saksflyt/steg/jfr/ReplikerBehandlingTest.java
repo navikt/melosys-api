@@ -43,7 +43,7 @@ public class ReplikerBehandlingTest {
         fagsakRepository = mock(FagsakRepository.class);
         agent = new ReplikerBehandling(fagsakRepository, behandlingService);
         fagsak = new Fagsak();
-        fagsak.setStatus(Saksstatuser.AVSLUTTET);
+        fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
         fagsak.setBehandlinger(new ArrayList<>());
         p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, "MelTest-1");

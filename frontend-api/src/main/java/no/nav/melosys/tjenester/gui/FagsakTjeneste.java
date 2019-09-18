@@ -25,7 +25,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
+import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -47,7 +50,6 @@ public class FagsakTjeneste extends RestTjeneste {
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
-
     private final TilgangService tilgangService;
 
     @Autowired
@@ -91,6 +93,17 @@ public class FagsakTjeneste extends RestTjeneste {
         tilgangService.sjekkSak(sak);
 
         fagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
+        return Response.ok().build();
+    }
+
+    @PUT
+    @Path("{saksnr}/henlegg-videresend")
+    @ApiOperation(value = "Videresender søknad for en gitt behandling")
+    public Response videresend(@PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+        Fagsak sak = fagsakService.hentFagsak(saksnummer);
+        tilgangService.sjekkSak(sak);
+
+        fagsakService.henleggOgVideresend(saksnummer);
         return Response.ok().build();
     }
 
