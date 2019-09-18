@@ -222,7 +222,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagBrevXml_medBrukerMedAdresseIRegister_skalBerikes() throws TekniskException {
+    public void lagBrevXml_medBrukerMedAdresseIRegister_skalBerikes() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling(lagSaksopplysninger());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
@@ -235,7 +235,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagBrevXml_medBrukerUtenAdresseIRegister_skalIkkeBerikes() throws TekniskException {
+    public void lagBrevXml_medBrukerUtenAdresseIRegister_skalIkkeBerikes() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling(lagSaksopplysningerUtenAdresseIRegister());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());

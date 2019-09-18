@@ -66,7 +66,7 @@
         <assertj.version>3.8.0</assertj.version>
         <cxf.version>3.1.11</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-lang.version>3.2.1</commons-lang.version>
+        <commons-lang.version>3.9</commons-lang.version>
         <everit.jsonschema.validator.version>1.9.1</everit.jsonschema.validator.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>21.0</guava.version>

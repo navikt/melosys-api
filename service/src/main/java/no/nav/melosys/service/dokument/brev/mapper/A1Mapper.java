@@ -15,6 +15,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
@@ -24,7 +25,6 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.DummyArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 
-import static no.nav.melosys.domain.util.AdresseUtils.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -167,11 +167,11 @@ class A1Mapper {
     private AdresseType mapFysiskArbeidssted(FysiskArbeidssted fysiskArbeidssted) {
         AdresseType adresseType = new AdresseType();
         adresseType.setNavn(fysiskArbeidssted.getNavn());
-        StrukturertAdresse adresse = fysiskArbeidssted.getAdresse();
-        adresseType.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
-        adresseType.setAdresselinje2(adresse.postnummer);
-        adresseType.setAdresselinje3(adresse.poststed);
-        adresseType.setAdresselinje4(adresse.region);
+        UstrukturertAdresse adresse = UstrukturertAdresse.av(fysiskArbeidssted.getAdresse());
+        adresseType.setAdresselinje1(adresse.getAdresselinje(1));
+        adresseType.setAdresselinje2(adresse.getAdresselinje(2));
+        adresseType.setAdresselinje3(adresse.getAdresselinje(3));
+        adresseType.setAdresselinje4(adresse.getAdresselinje(4));
         adresseType.setLand(adresse.landkode);
         return adresseType;
     }

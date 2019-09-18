@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.person;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -46,6 +47,13 @@ public class Gateadresse {
         this.husbokstav = husbokstav;
     }
 
+    @JsonIgnore
+    public boolean erTom() {
+        return StringUtils.isAllEmpty(gatenavn, husbokstav) &&
+            gatenummer == null &&
+            husnummer == null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -59,12 +67,5 @@ public class Gateadresse {
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(gatenavn).append(gatenummer).append(husnummer).append(husbokstav).toHashCode();
-    }
-
-    public boolean erTom() {
-        return StringUtils.isEmpty(gatenavn) &&
-            gatenummer == null &&
-            husnummer == null &&
-            StringUtils.isEmpty(husbokstav);
     }
 }

@@ -111,7 +111,11 @@ public class DoksysService implements DoksysFasade {
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
         info.setSaksbehandlernavn(metadata.saksbehandler);
 
-        info.setAdresse(lagAdresse(metadata));
+        if (metadata.mottaker.erUtenlandskMyndighet()) {
+            info.setAdresse(lagUtenlandskAdresse(metadata.utenlandskMyndighet));
+        } else if (metadata.postadresse != null) {
+            info.setAdresse(lagUtenlandskAdresse(metadata.postadresse));
+        }
 
         wsRequest.setDokumentbestillingsinformasjon(info);
         wsRequest.setBrevdata(dokumentbestilling.getBrevData());
@@ -135,15 +139,6 @@ public class DoksysService implements DoksysFasade {
             | ProduserIkkeRedigerbartDokumentInputValideringFeilet e) {
             throw new IntegrasjonException(e);
         }
-    }
-
-    private Adresse lagAdresse(DokumentbestillingMetadata metadata) {
-        if (metadata.mottaker.erUtenlandskMyndighet()) {
-            return lagUtenlandskAdresse(metadata.utenlandskMyndighet);
-        } else if (metadata.postadresse != null) {
-            return lagUtenlandskAdresse(metadata.postadresse);
-        }
-        return null;
     }
 
     private UtenlandskPostadresse lagUtenlandskAdresse(UtenlandskMyndighet utenlandskMyndighet) {

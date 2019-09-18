@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.felles.Land;
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,13 +26,15 @@ public class UstrukturertAdresse {
 
     public Land land;
 
+    @JsonIgnore
     public boolean erTom() {
-        return StringUtils.isEmpty(adresselinje1) &&
-            StringUtils.isEmpty(adresselinje2) &&
-            StringUtils.isEmpty(adresselinje3) &&
-            StringUtils.isEmpty(adresselinje4) &&
-            StringUtils.isEmpty(postnr) &&
-            StringUtils.isEmpty(poststed) &&
+        return StringUtils.isAllEmpty(
+            adresselinje1,
+            adresselinje2,
+            adresselinje3,
+            adresselinje4,
+            postnr,
+            poststed) &&
             land == null;
     }
 }

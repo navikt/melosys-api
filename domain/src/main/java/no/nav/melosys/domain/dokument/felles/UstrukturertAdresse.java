@@ -3,6 +3,7 @@ package no.nav.melosys.domain.dokument.felles;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import org.apache.commons.lang3.StringUtils;
@@ -10,8 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import static no.nav.melosys.domain.util.AdresseUtils.sammenslå;
 
 public class UstrukturertAdresse extends Adresse {
-
-    public final List<String> adresselinjer = new ArrayList<>();
+    private final List<String> adresselinjer = new ArrayList<>();
 
     private UstrukturertAdresse(String l1, String l2, String l3, String l4, String landKode) {
         if (StringUtils.isNotEmpty(l1)) {
@@ -67,6 +67,11 @@ public class UstrukturertAdresse extends Adresse {
                                        sAdresse.landkode);
     }
 
+    public List<String> getAdresselinjer() {
+        return adresselinjer;
+    }
+
+    @JsonIgnore
     public String getAdresselinje(int linjenummer) {
         if (linjenummer > adresselinjer.size()) {
             return null;
@@ -75,7 +80,6 @@ public class UstrukturertAdresse extends Adresse {
         }
     }
 
-    @Override
     public boolean erTom() {
         return adresselinjer.isEmpty() && StringUtils.isEmpty(landkode);
     }

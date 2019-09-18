@@ -41,11 +41,6 @@ public class StrukturertAdresse extends Adresse {
 
     @Override
     public boolean erTom() {
-        return StringUtils.isEmpty(gatenavn) &&
-            StringUtils.isEmpty(husnummer) &&
-            StringUtils.isEmpty(postnummer) &&
-            StringUtils.isEmpty(poststed) &&
-            StringUtils.isEmpty(region) &&
-            StringUtils.isEmpty(landkode);
+        return StringUtils.isAllEmpty(gatenavn, husnummer, postnummer, poststed, region, landkode);
     }
 }

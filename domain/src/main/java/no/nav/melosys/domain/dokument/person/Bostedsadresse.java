@@ -70,6 +70,7 @@ public class Bostedsadresse {
         this.land = land;
     }
 
+    @JsonIgnore
     public boolean erTom() {
         return gateadresse.erTom() &&
             StringUtils.isEmpty(postnr) &&

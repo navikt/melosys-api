@@ -89,7 +89,7 @@ public class BrevDataService {
         metadata.utenlandskMyndighet = mottaker.erUtenlandskMyndighet() ? hentMyndighetFraAktoer(mottaker) : null;
 
         if (mottaker.getRolle() == BRUKER) {
-            boolean brukerharIkkeAdresseIRegister = brukerHarIkkeTpsadresse(behandling);
+            boolean brukerharIkkeAdresseIRegister = brukerHarIkkeTpsAdresse(behandling);
             if (brukerharIkkeAdresseIRegister) {
                 StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
                 if (!oppgittAdresse.erTom()) {
@@ -135,7 +135,7 @@ public class BrevDataService {
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
     @Transactional(propagation = Propagation.MANDATORY, readOnly = true)
-    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) throws TekniskException {
+    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) throws TekniskException, FunksjonellException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid " + behandling.getId()));
 
@@ -152,7 +152,7 @@ public class BrevDataService {
             InputSource is = new InputSource(new StringReader(brevXml));
             Document doc = db.parse(is);
             brevXmlElement = doc.getDocumentElement();
-        } catch (JAXBException | SAXException | ParserConfigurationException | IOException | FunksjonellException e) {
+        } catch (JAXBException | SAXException | ParserConfigurationException | IOException e) {
             throw new TekniskException("XML genereringsfeil " + behandling.getFagsak().getSaksnummer(), e);
         }
         return brevXmlElement;
@@ -234,10 +234,10 @@ public class BrevDataService {
         mottakerBrev.setId(mottakerID);
 
         String navn = tpsFasade.hentSammensattNavn(mottakerID);
-        if (brukerHarIkkeTpsadresse(behandling)) {
+        if (brukerHarIkkeTpsAdresse(behandling)) {
             StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
             if (oppgittAdresse.erTom()) {
-                throw new FunksjonellException("Bruker har verken adresse i TPS eller oppgitt adresse i søknad");
+                throw new TekniskException("Bruker har verken adresse i TPS eller oppgitt adresse i søknad");
             }
             mottakerBrev.setMottakeradresse(lagAdresse(oppgittAdresse));
             mottakerBrev.setBerik(false);
@@ -277,7 +277,7 @@ public class BrevDataService {
         return sakspart;
     }
 
-    private boolean brukerHarIkkeTpsadresse(Behandling behandling) throws TekniskException {
+    private boolean brukerHarIkkeTpsAdresse(Behandling behandling) throws TekniskException {
         PersonDokument person = SaksopplysningerUtils.hentPersonDokument(behandling);
         return person.harIkkeRegistrertAdresse();
     }
