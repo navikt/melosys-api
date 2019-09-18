@@ -7,17 +7,22 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ServerinfoTest {
-    private final String image = "docker.adeo.no:5000/melosys/melosys:sprint-34-b96a19ce83236594f2601c517f452db78a48748a";
+    private final String image = "docker.adeo.no:5000/melosys/melosys:sprint-34-157-b96a19ce83236594f2601c517f452db78a48748a";
 
     @Test
-    public void hentBranchOgHash() {
-        List<String> strings = Serverinfo.hentBranchOgHash(image);
-        assertThat(strings).hasSize(3);
+    public void hentVersjonelementer() {
+        List<String> strings = Serverinfo.hentVersjonelementer(image);
+        assertThat(strings).hasSize(4);
     }
 
     @Test
     public void hentBranch() {
         assertThat(Serverinfo.hentBranch(image)).isEqualTo("sprint-34");
+    }
+
+    @Test
+    public void hentByggnummer() {
+        assertThat(Serverinfo.hentByggnummer(image)).isEqualTo("157");
     }
 
     @Test

@@ -6,11 +6,4 @@
             <xsl:apply-templates select="@*|*|text()"/>
         </xsl:copy>
     </xsl:template>
-
-    <xsl:template match="maritimtArbeid/navn">
-        <enhetNavn>
-            <xsl:apply-templates />
-        </enhetNavn>
-    </xsl:template>
-
 </xsl:stylesheet>

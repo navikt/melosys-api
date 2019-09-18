@@ -12,8 +12,6 @@
     </personOpplysninger>
     <oppholdUtland>
         <oppholdslandkoder>SE</oppholdslandkoder>
-        <forutgaendeBostedINorge>true</forutgaendeBostedINorge>
-        <sammeAdresseSomArbeidsgiver>true</sammeAdresseSomArbeidsgiver>
         <oppholdsPeriode/>
     </oppholdUtland>
     <arbeidNorge/>
@@ -63,14 +61,12 @@
         <trygdeavgiftTrukketGjennomSkatt>false</trygdeavgiftTrukketGjennomSkatt>
     </arbeidsgiversBekreftelse>
     <maritimtArbeid>
-        <navn>Dunfjæder</navn>
+        <enhetNavn>Dunfjæder</enhetNavn>
         <flaggLandkode>NO</flaggLandkode>
     </maritimtArbeid>
     <bosted>
         <intensjonOmRetur>false</intensjonOmRetur>
         <antallMaanederINorge>2</antallMaanederINorge>
-        <adresseIUtlandet>false</adresseIUtlandet>
-        <familiesBostedLandkode>NO</familiesBostedLandkode>
         <oppgittAdresse/>
     </bosted>
 </soeknadDokument>

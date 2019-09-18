@@ -45,7 +45,7 @@ node {
             commitId = scmInfo.GIT_COMMIT
 
             commit = sh(script: "git log -1 --oneline", returnStdout: true)
-            imageVersion = "${branchName}-${commitId}"
+            imageVersion = "${branchName}-${BUILD_NUMBER}-${commitId}"
         }
 
         stage("Build application") {
