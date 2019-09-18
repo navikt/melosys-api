@@ -92,7 +92,6 @@ public enum ProsessSteg implements Kodeverk {
 
     // Videresend søknad
     VS_OPPDATER_RESULTAT("VS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
-    VS_VIDERESEND_SAK("VS_VIDERESEND_SAK", "Oppdater fagsak og behandling"),
     VS_SEND_ORIENTERINGSBREV("VS_SEND_ORIENTERINGSBREV", "Opprett orienteringsbrev og brev med vedlagt søknad"),
     VS_SEND_SOKNAD("VS_SEND_SOKNAD", "Opprett brev med vedlagt søknad"),
 

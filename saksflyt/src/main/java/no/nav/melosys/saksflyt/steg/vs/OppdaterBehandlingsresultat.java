@@ -6,14 +6,14 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.VS_VIDERESEND_SAK;
+import static no.nav.melosys.domain.ProsessSteg.VS_SEND_ORIENTERINGSBREV;
 
 /**
  * Oppdaterer behandlingsresultat
@@ -25,12 +25,11 @@ import static no.nav.melosys.domain.ProsessSteg.VS_VIDERESEND_SAK;
 public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingsresultat.class);
 
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public OppdaterBehandlingsresultat(BehandlingsresultatRepository behandlingsresultatRepository) {
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
-        log.info("OppdaterBehandlingsresultat initialisert");
+    public OppdaterBehandlingsresultat(BehandlingsresultatService behandlingsresultatService) {
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Override
@@ -42,15 +41,12 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke oppdatere behandlingsresultatet for henleggelsen fordi behandling " + behandlingID + " ikke finnes."));
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(Behandlingsresultattyper.HENLEGGELSE);
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.FRITEKST));
 
-        behandlingsresultatRepository.save(behandlingsresultat);
-
         log.info("Oppdatert behandlingsresultat for prosessinstans {}. Satt til henleggelse", prosessinstans.getId());
-        prosessinstans.setSteg(VS_VIDERESEND_SAK);
+        prosessinstans.setSteg(VS_SEND_ORIENTERINGSBREV);
     }
 }

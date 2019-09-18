@@ -6,7 +6,6 @@ import no.nav.melosys.tjenester.gui.*;
 import no.nav.melosys.tjenester.gui.saksflyt.AnmodningUnntakTjeneste;
 import no.nav.melosys.tjenester.gui.saksflyt.UnntakTjeneste;
 import no.nav.melosys.tjenester.gui.saksflyt.VedtakTjeneste;
-import no.nav.melosys.tjenester.gui.saksflyt.VideresendTjeneste;
 import no.nav.melosys.tjenester.gui.serverinfo.ServerinfoTjeneste;
 import no.nav.melosys.tjenester.gui.unntakshandtering.FunksjonellExceptionMapper;
 import no.nav.melosys.tjenester.gui.unntakshandtering.IkkeFunnetExceptionMapper;
@@ -52,7 +51,6 @@ public class JerseyConfig extends ResourceConfig {
         register(UnntakTjeneste.class);
         register(VedtakTjeneste.class);
         register(VilkaarTjeneste.class);
-        register(VideresendTjeneste.class);
 
         // Globale ExceptionMappers (implisitt unntakshåndtering for hyppig
         // forekommende unntak i REST-grensesnittet).
