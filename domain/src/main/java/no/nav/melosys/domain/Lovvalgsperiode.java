@@ -194,7 +194,7 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
             || bestemmelse == FO_883_2004_ART13_3
             || bestemmelse == FO_883_2004_ART13_4;
     }
-    
+
     public boolean erArtikkel11() {
         return bestemmelse == FO_883_2004_ART11_1
                 || bestemmelse == FO_883_2004_ART11_3A
@@ -202,7 +202,7 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
                 || bestemmelse == FO_883_2004_ART11_3C
                 || bestemmelse == FO_883_2004_ART11_3E
                 || bestemmelse == FO_883_2004_ART11_4_2
-                || bestemmelse == FO_883_2004_ART11_2 
+                || bestemmelse == FO_883_2004_ART11_2
                 || bestemmelse == FO_883_2004_ART11_4_1
                 || bestemmelse == FO_883_2004_ART11_5;
     }
@@ -227,8 +227,6 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
         }
 
         Anmodningsperiode anmodningsperiode = anmodningsperiodeSvar.getAnmodningsperiode();
-        InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.AVSLAG ?
-            InnvilgelsesResultat.AVSLAATT : InnvilgelsesResultat.INNVILGET;
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(anmodningsperiode.getBestemmelse());
@@ -241,11 +239,16 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
             lovvalgsperiode.setTom(anmodningsperiode.getTom());
         }
 
+        InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.AVSLAG ?
+            InnvilgelsesResultat.AVSLAATT : InnvilgelsesResultat.INNVILGET;
         lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
+
         lovvalgsperiode.setMedlemskapstype(medlemskapstype);
         lovvalgsperiode.setMedlPeriodeID(anmodningsperiode.getMedlPeriodeID());
         lovvalgsperiode.setTilleggsbestemmelse(anmodningsperiode.getTilleggsbestemmelse());
-        lovvalgsperiode.setLovvalgsland(anmodningsperiode.getLovvalgsland());
+        if (innvilgelsesResultat != InnvilgelsesResultat.AVSLAATT) {
+            lovvalgsperiode.setLovvalgsland(anmodningsperiode.getLovvalgsland());
+        }
         lovvalgsperiode.setDekning(anmodningsperiode.getDekning());
         return lovvalgsperiode;
     }
