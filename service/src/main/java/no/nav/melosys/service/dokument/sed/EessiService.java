@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EessiService {
@@ -52,7 +53,7 @@ public class EessiService {
                         DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory, EessiConsumer eessiConsumer,
                         BehandlingService behandlingService,
                         BehandlingsresultatService behandlingsresultatService) {
-        this.skalSendeSed = Boolean.valueOf(skalSendeSed);
+        this.skalSendeSed = Boolean.parseBoolean(skalSendeSed);
         this.sedDataBygger = sedDataBygger;
         this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
         this.eessiConsumer = eessiConsumer;
@@ -82,6 +83,7 @@ public class EessiService {
         }
     }
 
+    @Transactional(readOnly = true)
     public String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId) throws MelosysException {
         return opprettBucOgSed(behandling, bucType, mottakerLand, mottakerId, null);
     }
@@ -89,7 +91,8 @@ public class EessiService {
     private String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId, byte[] vedlegg) throws MelosysException {
         if (skalSendeSed) {
             DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
-            SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag);
+            Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+            SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
             sedDataDto.setMottakerLand(mottakerLand);
             sedDataDto.setMottakerId(mottakerId);
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());

@@ -127,23 +127,22 @@ public class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_forventFelt_utenLovvalgsperioder()
+    public void lagUtkast_medlemsperiodeTypeIngen_utenLovvalgsperioder()
         throws FunksjonellException, TekniskException {
-        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser());
+        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.INGEN);
 
         lagUtkastAssertions(sedData);
         assertThat(sedData.getLovvalgsperioder().isEmpty()).isTrue();
     }
 
     @Test
-    public void lagUtkast_forventFelt_medLovvalgsperioder()
+    public void lagUtkast_medlemsperiodeTypeLovvalgsperiode_medLovvalgsperioder()
         throws FunksjonellException, TekniskException {
-        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lagLovvalgsperiode()));
-        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser());
+        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         lagUtkastAssertions(sedData);
-        assertThat(sedData.getLovvalgsperioder().isEmpty()).isFalse();
+        assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
+        assertThat(sedData.getLovvalgsperioder().get(0).getFom()).isEqualTo(lovvalgsperiode.getFom());
     }
 
     private void lagUtkastAssertions(SedDataDto sedData) {

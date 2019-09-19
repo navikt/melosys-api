@@ -81,7 +81,7 @@ public class EessiServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         when(sedDataBygger.lag(any(), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
-        when(sedDataBygger.lagUtkast(any())).thenReturn(new SedDataDto());
+        when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
     }
 
     @Test

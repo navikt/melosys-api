@@ -39,19 +39,15 @@ public class SedDataBygger {
 
     public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(datagrunnlag);
-        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setLovvalgsperioder(hentLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(datagrunnlag.getBehandling()));
         sedDataDto.setMottakerLand(datagrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
         return sedDataDto;
     }
 
-    public SedDataDto lagUtkast(DokumentdataGrunnlag dataGrunnlag) throws TekniskException, FunksjonellException {
+    public SedDataDto lagUtkast(DokumentdataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        if (!lovvalgsperiodeService.hentLovvalgsperioder(dataGrunnlag.getBehandling().getId()).isEmpty()) {
-            sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(lovvalgsperiodeService.hentLovvalgsperiode(dataGrunnlag.getBehandling().getId()))));
-        } else {
-            sedDataDto.setLovvalgsperioder(Collections.emptyList());
-        }
+        sedDataDto.setLovvalgsperioder(finnLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         return sedDataDto;
     }
 
@@ -115,7 +111,7 @@ public class SedDataBygger {
         arbeidssted.setNavn(arb.getNavn());
         arbeidssted.setFysisk(arb.erFysisk());
         if (arb.erFysisk()) {
-            FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted)arb;
+            FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arb;
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
         } else {
             arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
@@ -146,16 +142,30 @@ public class SedDataBygger {
         return adresse;
     }
 
-    private List<Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
+    private List<Lovvalgsperiode> hentLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
 
         if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
         } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(),
                 hentUnntaksBegrunnelse(behandlingsresultat)));
-        } else {
-            return Collections.emptyList();
         }
+
+        return Collections.emptyList();
+    }
+
+    private List<Lovvalgsperiode> finnLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
+
+        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE && !behandlingsresultat.getLovvalgsperioder().isEmpty()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.getLovvalgsperioder().iterator().next()));
+        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE && !behandlingsresultat.getAnmodningsperioder().isEmpty()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(
+                    behandlingsresultat.getAnmodningsperioder().iterator().next(),
+                    hentUnntaksBegrunnelse(behandlingsresultat)
+                ));
+        }
+
+        return Collections.emptyList();
     }
 
 
