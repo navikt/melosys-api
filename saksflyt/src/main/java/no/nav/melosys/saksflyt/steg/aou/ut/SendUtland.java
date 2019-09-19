@@ -17,6 +17,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 @Component
 public class SendUtland extends AbstraktSendUtland {
     private final BehandlingService behandlingService;
+    private final AnmodningsperiodeService anmodningsperiodeService;
 
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
     private static final int SVARFRIST_MÅNEDER = 2;
@@ -41,9 +43,10 @@ public class SendUtland extends AbstraktSendUtland {
                       BrevBestiller brevBestiller,
                       BehandlingService behandlingService,
                       BehandlingsresultatService behandlingsresultatService,
-                      LandvelgerService landvelgerService) {
+                      LandvelgerService landvelgerService, AnmodningsperiodeService anmodningsperiodeService) {
         super(eessiService, brevBestiller, behandlingsresultatService, landvelgerService);
         this.behandlingService = behandlingService;
+        this.anmodningsperiodeService = anmodningsperiodeService;
     }
 
     @Override
@@ -54,13 +57,13 @@ public class SendUtland extends AbstraktSendUtland {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-        sendUtland(BucType.LA_BUC_01, prosessinstans);
-
         Behandling behandling = prosessinstans.getBehandling();
         LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
         behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(TIME_ZONE_ID).toInstant());
         behandlingService.lagre(behandling);
+        anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
 
+        sendUtland(BucType.LA_BUC_01, prosessinstans);
         prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
     }
 
