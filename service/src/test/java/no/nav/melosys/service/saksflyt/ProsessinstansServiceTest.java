@@ -165,6 +165,30 @@ public class ProsessinstansServiceTest {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
 
+        journalfoeringDto.setSkalSendesForvaltningsmelding(true);
+
+        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+
+        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isTrue();
+    }
+
+    @Test
+    public void opprettProsessinstansJournalføring_skalTilordnesFalse_settesIProsessinstans() {
+        settInnloggetSaksbehandler();
+        JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
+
+        journalfoeringDto.setSkalSendesForvaltningsmelding(false);
+
+        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+
+        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isFalse();
+    }
+
+    @Test
+    public void opprettProsessinstansJournalføring_skalSendesForvaltningsmeldingTrue_settesIProsessinstans() {
+        settInnloggetSaksbehandler();
+        JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
+
         journalfoeringDto.setSkalTilordnes(true);
 
         Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
@@ -173,7 +197,7 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansJournalføring_skalTilordnesFalse_settesIProsessinstans() {
+    public void opprettProsessinstansJournalføring_skalSendesForvaltningsmeldingFalse_settesIProsessinstans() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
 
