@@ -8,10 +8,12 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.apache.commons.lang3.StringUtils;
 
+import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
@@ -95,6 +97,15 @@ public final class BrevDataUtils {
         bostedAdresse.setRegion(bosted.region);
         bostedAdresse.setLandkode(bosted.landkode);
         return bostedAdresse;
+    }
+
+    public static UtenlandskPostadresse lagAdresse(StrukturertAdresse adresse) {
+        return UtenlandskPostadresse.builder()
+            .withAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer))
+            .withAdresselinje3(adresse.region)
+            .withAdresselinje2(sammenslå(adresse.postnummer, adresse.poststed))
+            .withLand(Landkoder.valueOf(adresse.landkode).getBeskrivelse())
+            .build();
     }
 
     public static PersonnavnType lagPersonnavn(PersonDokument personDokument) {

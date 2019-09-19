@@ -4,7 +4,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.felles.Land;
+import org.apache.commons.lang3.StringUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "UstrukturertAdresse")
@@ -23,4 +25,16 @@ public class UstrukturertAdresse {
     public String poststed;
 
     public Land land;
+
+    @JsonIgnore
+    public boolean erTom() {
+        return StringUtils.isAllEmpty(
+            adresselinje1,
+            adresselinje2,
+            adresselinje3,
+            adresselinje4,
+            postnr,
+            poststed) &&
+            land == null;
+    }
 }

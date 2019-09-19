@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.*;
 
 public class PersonhistorikkDto {
@@ -51,7 +51,7 @@ public class PersonhistorikkDto {
         public final Periode periode;
 
         PostadressePeriodeDto(PostadressePeriode postadressePeriode) {
-            this.postadresse = new UstrukturertAdresse(postadressePeriode.postadresse);
+            this.postadresse = UstrukturertAdresse.av(postadressePeriode.postadresse);
             this.periode = postadressePeriode.periode;
         }
     }

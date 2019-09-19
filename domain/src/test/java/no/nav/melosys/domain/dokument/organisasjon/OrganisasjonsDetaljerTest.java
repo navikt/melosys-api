@@ -3,8 +3,8 @@ package no.nav.melosys.domain.dokument.organisasjon;
 import java.util.Arrays;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,10 +51,10 @@ public class OrganisasjonsDetaljerTest {
         orgDetaljer.forretningsadresse = Arrays.asList(adresse);
 
         UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
-        assertThat(resultatAdresse.adresselinjer.get(0)).isEqualTo(linje1);
-        assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
-        assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
-        assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(postnr + " " + poststed);
+        assertThat(resultatAdresse.getAdresselinje(1)).isEqualTo(linje1);
+        assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2);
+        assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3);
+        assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo(postnr + " " + poststed);
         assertThat(resultatAdresse.landkode).isEqualTo(landkode);
     }
 
@@ -67,10 +67,10 @@ public class OrganisasjonsDetaljerTest {
         orgDetaljer.forretningsadresse = Arrays.asList(adresse);
 
         UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
-        assertThat(resultatAdresse.adresselinjer.get(0)).isEqualTo(linje1);
-        assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
-        assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
-        assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(poststedUtland);
+        assertThat(resultatAdresse.getAdresselinje(1)).isEqualTo(linje1);
+        assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2);
+        assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3);
+        assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo(poststedUtland);
         assertThat(resultatAdresse.landkode).isEqualTo(landkode);
     }
 
