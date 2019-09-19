@@ -8,12 +8,12 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.util.AdresseUtils.sammenslå;
+import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 

@@ -6,7 +6,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;

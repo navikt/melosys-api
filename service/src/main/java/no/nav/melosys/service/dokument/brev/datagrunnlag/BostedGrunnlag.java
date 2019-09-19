@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev.datagrunnlag;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;

@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.util;
+package no.nav.melosys.domain.dokument.adresse;
 
 import java.util.Objects;
 

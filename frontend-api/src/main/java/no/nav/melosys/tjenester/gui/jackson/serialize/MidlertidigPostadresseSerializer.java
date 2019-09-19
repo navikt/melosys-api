@@ -12,9 +12,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.domain.dokument.felles.MidlertidigPostadresse;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 

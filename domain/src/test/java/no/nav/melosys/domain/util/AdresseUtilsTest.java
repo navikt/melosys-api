@@ -2,7 +2,7 @@ package no.nav.melosys.domain.util;
 
 import org.junit.Test;
 
-import static no.nav.melosys.domain.util.AdresseUtils.sammenslå;
+import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AdresseUtilsTest {
