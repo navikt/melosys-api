@@ -239,7 +239,7 @@ public class EessiServiceTest {
 
         verify(behandlingService).hentBehandling(eq(1L));
         verify(dokumentdataGrunnlagFactory).av(any());
-        verify(sedDataBygger).lagUtkast(any());
+        verify(sedDataBygger).lagUtkast(any(), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).genererSedForhåndsvisning(any(), any());
         assertThat(pdf).isEqualTo(PDF);
     }

@@ -155,8 +155,16 @@ public class EessiService {
     public byte[] genererSedForhåndsvisning(long behandingID, SedType sedType) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandingID);
         DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandingID);
 
+        MedlemsperiodeType medlemsperiodeType;
+        if (sedType == SedType.A001) {
+            medlemsperiodeType = MedlemsperiodeType.ANMODNINGSPERIODE;
+        } else {
+            medlemsperiodeType = MedlemsperiodeType.LOVVALGSPERIODE;
+        }
+
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandingID);
         return eessiConsumer.genererSedForhåndsvisning(sedDataDto, sedType);
     }
