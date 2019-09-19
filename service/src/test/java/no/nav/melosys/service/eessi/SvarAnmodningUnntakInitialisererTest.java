@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,16 +28,19 @@ public class SvarAnmodningUnntakInitialisererTest {
 
     @Mock
     private FagsakService fagsakService;
+    @Mock
+    private AnmodningsperiodeService anmodningsperiodeService;
 
     @Before
     public void setUp() {
-        svarAnmodningUnntakInitialiserer = new SvarAnmodningUnntakInitialiserer(fagsakService);
+        svarAnmodningUnntakInitialiserer = new SvarAnmodningUnntakInitialiserer(fagsakService, anmodningsperiodeService);
     }
 
     @Test
-    public void finnSakOgBestemRuting_korrektBehandlingsstatus_verifiserKorrektResultat() throws Exception {
+    public void finnSakOgBestemRuting_anmodningsperiodeUtenSvarFinnes_verifiserKorrektResultat() throws Exception {
 
         when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
+        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(new Anmodningsperiode()));
         Prosessinstans prosessinstans = hentProsessinstans();
         RutingResultat resultat = svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
@@ -44,10 +48,26 @@ public class SvarAnmodningUnntakInitialisererTest {
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }
 
+    @Test
+    public void finnSakOgBestemRuting_anmodningsperiodeSvarRegistrert_verifiserKorrektResultat() throws Exception {
+
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
+
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
+        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
+        Prosessinstans prosessinstans = hentProsessinstans();
+        RutingResultat resultat = svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
+
+        assertThat(resultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);
+        assertThat(prosessinstans.getBehandling()).isNotNull();
+    }
+
     @Test(expected = FunksjonellException.class)
-    public void finnSakOgBestemRuting_feilBehandlingsstatus_forventException() throws Exception {
+    public void finnSakOgBestemRuting_ingenAnmodningsperiode_forventException() throws Exception {
 
         when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingsstatus.FORELOEPIG_LOVVALG)));
+        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
         Prosessinstans prosessinstans = hentProsessinstans();
         svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
     }
