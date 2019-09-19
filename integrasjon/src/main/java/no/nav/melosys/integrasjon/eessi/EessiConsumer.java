@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.eessi;
 
 import java.util.List;
 
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
@@ -27,4 +28,6 @@ public interface EessiConsumer {
     void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) throws MelosysException;
 
     List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException;
+
+    byte[] genererSedForhåndsvisning(SedDataDto sedDataDto, SedType sedType) throws MelosysException;
 }

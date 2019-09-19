@@ -1,6 +1,10 @@
 package no.nav.melosys.metrics;
 
 public final class MetrikkerNavn {
+    private MetrikkerNavn() {
+        throw new IllegalStateException("Utility");
+    }
+
     private static final String METRIKKER_NAMESPACE = "melosys.";
 
     public static final String SAKER_OPPRETTET = METRIKKER_NAMESPACE + "saker.opprettet";

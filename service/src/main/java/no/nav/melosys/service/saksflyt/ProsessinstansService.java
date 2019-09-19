@@ -35,7 +35,7 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
 @Service
 public class ProsessinstansService {
-    private static Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
 
     private final ProsessinstansRepository prosessinstansRepo;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -64,6 +64,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
+        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, journalfoeringDto.isSkalSendesForvaltningsmelding());
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
             final String hovedDokumentID = journalfoeringDto.getDokumentID();
@@ -206,6 +207,14 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_UNDER_AVKLARING);
+        prosessinstans.setBehandling(behandling);
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansForvaltningsmelding(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.FORVALTNINGSMELDING_SEND);
+        prosessinstans.setSteg(ProsessSteg.SEND_FORVALTNINGSMELDING);
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);
     }

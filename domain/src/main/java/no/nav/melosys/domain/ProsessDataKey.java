@@ -37,6 +37,7 @@ public enum ProsessDataKey {
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
     SED_DOKUMENT("sedDokument"),
+    SKAL_SENDES_FORVALTNINGSMELDING("skalSendesForvaltningsmelding"),
     SKAL_TILORDNES("skalTilordnes"),
     STATSBORGERSKAP("statsborgerskap"),
     SØKNADSLAND("land"),

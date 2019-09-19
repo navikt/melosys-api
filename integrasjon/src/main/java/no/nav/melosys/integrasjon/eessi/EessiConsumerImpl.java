@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
@@ -109,6 +110,13 @@ public class EessiConsumerImpl implements EessiConsumer {
         return exchange(String.format("/sak?rinaSaksnummer=%s", rinaSaksnummer), HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SaksrelasjonDto>>() {
         });
+    }
+
+    @Override
+    public byte[] genererSedForhåndsvisning(SedDataDto sedDataDto, SedType sedType) throws MelosysException {
+        return exchange(String.format("/sed/%s/pdf", sedType), HttpMethod.POST,
+            new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<byte[]>() {
+            });
     }
 
     @Override
