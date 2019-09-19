@@ -119,13 +119,13 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         if (Boolean.TRUE.equals(res.kvalifisererForEf883_2004)) {
             nyFagsakstype = Sakstyper.EU_EOS;
         } else {
-            nyFagsakstype = Sakstyper.FTRL; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
+            nyFagsakstype = Sakstyper.UKJENT;
         }
         if (fagsak.getType() != null && fagsak.getType() != nyFagsakstype && Sakstyper.UKJENT != fagsak.getType()) {
             log.error("Avbryter behandling av prosessinstans {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakstype);
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakstype, null);
             return;
-        }
+        } 
         fagsak.setType(nyFagsakstype);
         fagsakRepository.save(fagsak);
 
