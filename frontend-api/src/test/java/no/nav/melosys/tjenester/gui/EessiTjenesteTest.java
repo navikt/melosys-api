@@ -22,7 +22,6 @@ import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
@@ -44,11 +43,9 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private EessiService eessiService;
-
     @Mock
     private BehandlingService behandlingService;
 
-    @InjectMocks
     private EessiTjeneste eessiTjeneste;
 
     @Before
@@ -59,6 +56,8 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         behandling.setFagsak(fagsak);
 
         when(behandlingService.hentBehandling(eq(123L))).thenReturn(behandling);
+
+        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService);
     }
 
     @Test
@@ -104,7 +103,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         Response response = eessiTjeneste.hentBucer(123L, "utkast");
         assertThat(response.getEntity()).isInstanceOf(BucerTilknyttetBehandlingDto.class);
 
-        BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto)  response.getEntity();
+        BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto) response.getEntity();
         assertThat(dto.getBucer()).hasOnlyElementsOfType(BucInformasjon.class);
 
         valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);

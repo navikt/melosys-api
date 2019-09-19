@@ -6,15 +6,14 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.common.collect.Sets;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -38,7 +37,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiServiceTest {
@@ -50,6 +50,8 @@ public class EessiServiceTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
 
     private EessiService eessiService;
 
@@ -62,7 +64,6 @@ public class EessiServiceTest {
 
     @Before
     public void setup() throws Exception {
-        DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory = mock(DokumentdataGrunnlagFactory.class);
         eessiService = new EessiService("true", sedDataBygger, dokumentdataGrunnlagFactory,
             eessiConsumer, behandlingService, behandlingsresultatService);
 
@@ -209,5 +210,37 @@ public class EessiServiceTest {
     public void lagreSaksrelasjon_validerInput() throws MelosysException {
         eessiService.lagreSaksrelasjon(123L, "123", "312");
         verify(eessiConsumer).lagreSaksrelasjon(any());
+    }
+
+    @Test
+    public void sendAnmodningUnntakSvar_forventKall() throws MelosysException {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        saksopplysning.setDokument(new SedDokument());
+        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+        eessiService.sendAnmodningUnntakSvar(anmodningsperiodeSvar, 1L);
+
+        verify(behandlingService).hentBehandling(eq(1L));
+        verify(eessiConsumer).sendAnmodningUnntakSvar(any(), any());
+    }
+
+    @Test
+    public void genererSedForhåndsvisning_forventPdf() throws MelosysException {
+        final byte[] PDF = "pdf".getBytes();
+        when(eessiConsumer.genererSedForhåndsvisning(any(), any())).thenReturn(PDF);
+
+        byte[] pdf = eessiService.genererSedForhåndsvisning(1L, SedType.A001);
+
+        verify(behandlingService).hentBehandling(eq(1L));
+        verify(dokumentdataGrunnlagFactory).av(any());
+        verify(sedDataBygger).lagUtkast(any());
+        verify(eessiConsumer).genererSedForhåndsvisning(any(), any());
+        assertThat(pdf).isEqualTo(PDF);
     }
 }
