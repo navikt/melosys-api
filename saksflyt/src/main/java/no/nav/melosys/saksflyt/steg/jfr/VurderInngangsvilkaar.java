@@ -121,7 +121,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         } else {
             nyFagsakstype = Sakstyper.FTRL; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
         }
-        if (fagsak.getType() != null && fagsak.getType() != nyFagsakstype) {
+        if (fagsak.getType() != null && fagsak.getType() != nyFagsakstype && Sakstyper.UKJENT != fagsak.getType()) {
             log.error("Avbryter behandling av prosessinstans {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakstype);
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakstype, null);
             return;
