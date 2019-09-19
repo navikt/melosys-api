@@ -5,10 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
@@ -31,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EessiService {
@@ -51,7 +49,7 @@ public class EessiService {
                         DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory, EessiConsumer eessiConsumer,
                         BehandlingService behandlingService,
                         BehandlingsresultatService behandlingsresultatService) {
-        this.skalSendeSed = Boolean.valueOf(skalSendeSed);
+        this.skalSendeSed = Boolean.parseBoolean(skalSendeSed);
         this.sedDataBygger = sedDataBygger;
         this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
         this.eessiConsumer = eessiConsumer;
@@ -63,7 +61,7 @@ public class EessiService {
         opprettOgSendSed(behandlingID, bucType, null);
     }
 
-    private void opprettOgSendSed(long behandlingID, BucType bucType, byte[] vedlegg) throws MelosysException {
+    public void opprettOgSendSed(long behandlingID, BucType bucType, byte[] vedlegg) throws MelosysException {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -71,7 +69,7 @@ public class EessiService {
             Fagsak fagsak = behandling.getFagsak();
 
             DokumentdataGrunnlag datagrunnlag = dokumentdataGrunnlagFactory.av(behandling);
-            SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat);
+            SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
             sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
             log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
@@ -81,6 +79,7 @@ public class EessiService {
         }
     }
 
+    @Transactional(readOnly = true)
     public String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId) throws MelosysException {
         return opprettBucOgSed(behandling, bucType, mottakerLand, mottakerId, null);
     }
@@ -88,7 +87,8 @@ public class EessiService {
     private String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId, byte[] vedlegg) throws MelosysException {
         if (skalSendeSed) {
             DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
-            SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag);
+            Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+            SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
             sedDataDto.setMottakerLand(mottakerLand);
             sedDataDto.setMottakerId(mottakerId);
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
@@ -155,8 +155,16 @@ public class EessiService {
     public byte[] genererSedForhåndsvisning(long behandingID, SedType sedType) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandingID);
         DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandingID);
 
+        MedlemsperiodeType medlemsperiodeType;
+        if (sedType == SedType.A001) {
+            medlemsperiodeType = MedlemsperiodeType.ANMODNINGSPERIODE;
+        } else {
+            medlemsperiodeType = MedlemsperiodeType.LOVVALGSPERIODE;
+        }
+
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandingID);
         return eessiConsumer.genererSedForhåndsvisning(sedDataDto, sedType);
     }

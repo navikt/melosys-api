@@ -52,15 +52,18 @@ public class SendVedtakUtlandTest {
     @Captor
     private ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor;
 
+    private static final long BEHANDLING_ID = 1L;
     @Before
     public void setUp() throws Exception {
+
         Behandling behandling = new Behandling();
-        behandling.setId(1L);
+        behandling.setId(BEHANDLING_ID);
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(BEHANDLING_ID);
         lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
@@ -82,7 +85,7 @@ public class SendVedtakUtlandTest {
     @Test
     public void utførSteg_artikkel12Suksessfull_statusErAvgiftsoppgave() throws Exception{
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_04));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_04), eq(null));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
@@ -90,7 +93,7 @@ public class SendVedtakUtlandTest {
     public void utførSteg_artikkel13Suksessfull_statusErAvgiftsoppgave() throws Exception{
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_02));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_02), eq(null));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
@@ -108,7 +111,7 @@ public class SendVedtakUtlandTest {
     public void utførStegForArtikkel11_suksessfull_statusErAvsluttBehandling() throws Exception {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_05));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_05), eq(null));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 }

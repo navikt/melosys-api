@@ -15,6 +15,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
@@ -28,27 +29,25 @@ import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 @Service
 public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final LandvelgerService landvelgerService;
 
     @Autowired
-    public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService) {
+    public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService, LandvelgerService landvelgerService) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.landvelgerService = landvelgerService;
     }
 
-    public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+    public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(datagrunnlag);
-        sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat)));
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(datagrunnlag.getBehandling()));
         sedDataDto.setMottakerLand(datagrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
         return sedDataDto;
     }
 
-    public SedDataDto lagUtkast(DokumentdataGrunnlag dataGrunnlag) throws TekniskException, FunksjonellException {
+    public SedDataDto lagUtkast(DokumentdataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        if (!lovvalgsperiodeService.hentLovvalgsperioder(dataGrunnlag.getBehandling().getId()).isEmpty()) {
-            sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(lovvalgsperiodeService.hentLovvalgsperiode(dataGrunnlag.getBehandling().getId()))));
-        } else {
-            sedDataDto.setLovvalgsperioder(Collections.emptyList());
-        }
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         return sedDataDto;
     }
 
@@ -61,6 +60,10 @@ public class SedDataBygger {
             .map(this::mapArbeidssted).collect(Collectors.toList()));
 
         sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getBostedGrunnlag().hentBostedsadresse()));
+
+        sedDataDto.setAvklartBostedsland(
+            landvelgerService.hentBostedsland(dataGrunnlag.getBehandling().getId(), dataGrunnlag.getSøknad()).getKode()
+        );
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
 
@@ -108,7 +111,7 @@ public class SedDataBygger {
         arbeidssted.setNavn(arb.getNavn());
         arbeidssted.setFysisk(arb.erFysisk());
         if (arb.erFysisk()) {
-            FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted)arb;
+            FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arb;
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
         } else {
             arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
@@ -139,24 +142,32 @@ public class SedDataBygger {
         return adresse;
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(Behandlingsresultat behandlingsresultat) {
+    private List<Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
 
-        if (!behandlingsresultat.getLovvalgsperioder().isEmpty()) {
-            return lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode());
+        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
+        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(),
+                hentUnntaksBegrunnelse(behandlingsresultat)));
         }
 
-        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
-        return lagLovvalgsperiodeDto(anmodningsperiode, hentUnntaksBegrunnelse(behandlingsresultat));
+        return Collections.emptyList();
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode periodeMedBestemmelse) {
-        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
-        lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
-        lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
-        lovvalgsperiodeDto.setLovvalgsland(periodeMedBestemmelse.getLovvalgsland() != null ? periodeMedBestemmelse.getLovvalgsland().getKode() : null);
-        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(periodeMedBestemmelse.getBestemmelse()));
-        return lovvalgsperiodeDto;
+    private List<Lovvalgsperiode> lagLovvalgsperioderDtoHvisFinnes(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
+
+        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE && !behandlingsresultat.getLovvalgsperioder().isEmpty()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.getLovvalgsperioder().iterator().next()));
+        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE && !behandlingsresultat.getAnmodningsperioder().isEmpty()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(
+                    behandlingsresultat.getAnmodningsperioder().iterator().next(),
+                    hentUnntaksBegrunnelse(behandlingsresultat)
+                ));
+        }
+
+        return Collections.emptyList();
     }
+
 
     private Lovvalgsperiode lagLovvalgsperiodeDto(Anmodningsperiode anmodningsperiode, String unntaksBegrunnelse) {
         Lovvalgsperiode lovvalgsperiodeDto = lagLovvalgsperiodeDto(anmodningsperiode);
@@ -166,6 +177,15 @@ public class SedDataBygger {
             .mapMelosysLovvalgTilBestemmelseDto(anmodningsperiode.getUnntakFraBestemmelse()));
         lovvalgsperiodeDto.setUnntaksBegrunnelse(unntaksBegrunnelse);
 
+        return lovvalgsperiodeDto;
+    }
+
+    private Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode periodeMedBestemmelse) {
+        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
+        lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
+        lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
+        lovvalgsperiodeDto.setLovvalgsland(periodeMedBestemmelse.getLovvalgsland() != null ? periodeMedBestemmelse.getLovvalgsland().getKode() : null);
+        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(periodeMedBestemmelse.getBestemmelse()));
         return lovvalgsperiodeDto;
     }
 

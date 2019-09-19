@@ -18,6 +18,9 @@ public class SedDataDto {
     private List<Arbeidssted> arbeidssteder;
     private List<Virksomhet> utenlandskeVirksomheter;
 
+    //Videresending av søknad
+    private String avklartBostedsland;
+
     private Long gsakSaksnummer;
 
     //Lovvalg
@@ -89,6 +92,14 @@ public class SedDataDto {
 
     public void setUtenlandskeVirksomheter(List<Virksomhet> utenlandskeVirksomheter) {
         this.utenlandskeVirksomheter = utenlandskeVirksomheter;
+    }
+
+    public String getAvklartBostedsland() {
+        return avklartBostedsland;
+    }
+
+    public void setAvklartBostedsland(String avklartBostedsland) {
+        this.avklartBostedsland = avklartBostedsland;
     }
 
     public List<Lovvalgsperiode> getLovvalgsperioder() {

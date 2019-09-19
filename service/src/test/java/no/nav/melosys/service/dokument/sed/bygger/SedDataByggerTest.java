@@ -17,6 +17,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
@@ -26,8 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -41,10 +41,14 @@ public class SedDataByggerTest {
     LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     AvklartefaktaService avklartefaktaService;
+    @Mock
+    LandvelgerService landvelgerService;
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
     private Behandlingsresultat behandlingsresultat;
+    private Lovvalgsperiode lovvalgsperiode;
+    private Anmodningsperiode anmodningsperiode;
 
     @Before
     @SuppressWarnings("unchecked")
@@ -53,7 +57,9 @@ public class SedDataByggerTest {
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(Landkoder.IT);
+
+        lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1L));
@@ -67,13 +73,14 @@ public class SedDataByggerTest {
         behandlingsresultat.setVilkaarsresultater(Collections.singleton(vilkaarsresultat));
         lovvalgsperiode.setBehandlingsresultat(behandlingsresultat);
 
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
+        anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
+        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
 
         behandling = DataByggerStubs.hentBehandlingStub();
 
-        dataBygger = new SedDataBygger(lovvalgsperiodeService);
+        dataBygger = new SedDataBygger(lovvalgsperiodeService, landvelgerService);
     }
 
     private DokumentdataGrunnlag lagDokumentressurser() throws TekniskException {
@@ -82,43 +89,60 @@ public class SedDataByggerTest {
     }
 
     @Test
-    public void testHentAvklarteSelvstendigeForetak()
-        throws FunksjonellException, TekniskException {
-        SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat);
+    public void lag_medlemsperiodeTypeLovvalgsperiode_forventLovvalgsperiodeBrukt() throws FunksjonellException, TekniskException {
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         assertThat(sedData).isNotNull();
-        assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotNull();
+        assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotEmpty();
         assertThat(sedData.getArbeidssteder()).isNotNull();
         assertThat(sedData.getBruker()).isNotNull();
         assertThat(sedData.getBostedsadresse()).isNotNull();
         assertThat(sedData.getFamilieMedlem()).isNotNull();
-        assertThat(sedData.getLovvalgsperioder()).isNotNull();
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotNull();
         assertThat(sedData.getUtenlandskeVirksomheter()).isNotNull();
         assertThat(sedData.getUtenlandskIdent()).isNotNull();
         assertThat(sedData.getMottakerLand()).isEqualTo("SE");
 
+        assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
+        assertThat(sedData.getLovvalgsperioder().get(0).getFom()).isEqualTo(lovvalgsperiode.getFom());
+
         assertThat(sedData.getArbeidsgivendeVirksomheter().isEmpty()).isFalse();
     }
 
     @Test
-    public void lagUtkast_forventFelt_utenLovvalgsperioder()
+    public void lag_medlemsperiodeTypeAnmodningsperiode_forventAnmodningsperiodeBrukt() throws FunksjonellException, TekniskException {
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.ANMODNINGSPERIODE);
+
+        assertThat(sedData).isNotNull();
+        assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
+        assertThat(sedData.getLovvalgsperioder().get(0).getFom()).isEqualTo(anmodningsperiode.getFom());
+    }
+
+    @Test
+    public void lag_medlemsperiodeTypeIngen_forventAnmodningsperiodeBrukt() throws FunksjonellException, TekniskException {
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.INGEN);
+
+        assertThat(sedData).isNotNull();
+        assertThat(sedData.getLovvalgsperioder()).isEmpty();
+    }
+
+    @Test
+    public void lagUtkast_medlemsperiodeTypeIngen_utenLovvalgsperioder()
         throws FunksjonellException, TekniskException {
-        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser());
+        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.INGEN);
 
         lagUtkastAssertions(sedData);
         assertThat(sedData.getLovvalgsperioder().isEmpty()).isTrue();
     }
 
     @Test
-    public void lagUtkast_forventFelt_medLovvalgsperioder()
+    public void lagUtkast_medlemsperiodeTypeLovvalgsperiode_medLovvalgsperioder()
         throws FunksjonellException, TekniskException {
-        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lagLovvalgsperiode()));
-        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser());
+        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         lagUtkastAssertions(sedData);
-        assertThat(sedData.getLovvalgsperioder().isEmpty()).isFalse();
+        assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
+        assertThat(sedData.getLovvalgsperioder().get(0).getFom()).isEqualTo(lovvalgsperiode.getFom());
     }
 
     private void lagUtkastAssertions(SedDataDto sedData) {

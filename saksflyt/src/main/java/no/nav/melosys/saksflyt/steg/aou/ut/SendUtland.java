@@ -54,7 +54,7 @@ public class SendUtland extends AbstraktSendUtland {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-        sendUtland(prosessinstans, BucType.LA_BUC_01);
+        sendUtland(BucType.LA_BUC_01, prosessinstans);
 
         Behandling behandling = prosessinstans.getBehandling();
         LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);

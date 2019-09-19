@@ -80,8 +80,8 @@ public class EessiServiceTest {
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        when(sedDataBygger.lag(any(), any(Behandlingsresultat.class))).thenReturn(new SedDataDto());
-        when(sedDataBygger.lagUtkast(any())).thenReturn(new SedDataDto());
+        when(sedDataBygger.lag(any(), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
     }
 
     @Test
@@ -239,7 +239,7 @@ public class EessiServiceTest {
 
         verify(behandlingService).hentBehandling(eq(1L));
         verify(dokumentdataGrunnlagFactory).av(any());
-        verify(sedDataBygger).lagUtkast(any());
+        verify(sedDataBygger).lagUtkast(any(), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).genererSedForhåndsvisning(any(), any());
         assertThat(pdf).isEqualTo(PDF);
     }

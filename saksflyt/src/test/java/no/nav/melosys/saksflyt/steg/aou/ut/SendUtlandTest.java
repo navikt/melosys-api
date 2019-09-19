@@ -55,11 +55,13 @@ public class SendUtlandTest {
     @Captor
     private ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor;
 
+    private static final long BEHANDLING_ID = 1L;
+
     @Before
     public void setUp() throws MelosysException {
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(new Behandling());
-        prosessinstans.getBehandling().setId(1L);
+        prosessinstans.getBehandling().setId(BEHANDLING_ID);
         prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
 
         Institusjon institusjon1 = new Institusjon("XY:XOPB", "Ikke eksisterende", "XY");
@@ -74,19 +76,19 @@ public class SendUtlandTest {
     @Test
     public void utfør_artikkel16_verifiserStegFerdig() throws Exception {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
 
         sendUtland.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_01));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_01), eq(null));
     }
 
     @Test
     public void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
         when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(Collections.emptyList());
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
 
         sendUtland.utfør(prosessinstans);
 
@@ -113,6 +115,7 @@ public class SendUtlandTest {
 
     private static Behandlingsresultat hentBehandlingsresultat() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(BEHANDLING_ID);
         behandlingsresultat.setBehandling(hentBehandling());
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,

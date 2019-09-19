@@ -7,7 +7,6 @@ import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -35,22 +34,25 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         this.landvelgerService = landvelgerService;
     }
 
-    protected void sendUtland(Prosessinstans prosessinstans, BucType bucType) throws MelosysException {
+    protected void sendUtland(BucType bucType, Prosessinstans prosessinstans) throws MelosysException {
+        sendUtland(bucType, prosessinstans, null);
+    }
+
+    protected void sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (skalSendesUtland(behandlingsresultat)) {
-            if (erEessiKlar(behandlingsresultat)) {
-                eessiService.opprettOgSendSed(behandlingID, bucType);
+            if (erEessiKlar(behandlingsresultat, bucType)) {
+                eessiService.opprettOgSendSed(behandlingID, bucType, vedlegg);
             } else {
                 brevBestiller.bestill(lagBrevBestilling(prosessinstans));
             }
         }
     }
 
-    private boolean erEessiKlar(Behandlingsresultat behandlingsresultat) throws MelosysException {
-        final String landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingsresultat.getBehandling().getId()).stream().findFirst().map(Landkoder::getKode)
+    private boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
+        final String landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingsresultat.getId()).stream().findFirst().map(Landkoder::getKode)
             .orElseThrow(() -> new FunksjonellException("Fant ikke trygdemyndighetsland for behandling " + behandlingsresultat.getBehandling().getId()));
-        BucType bucType = LovvalgBestemmelseUtils.hentBucTypeFraBestemmelse(behandlingsresultat.hentBestemmelse());
         return eessiService.hentEessiMottakerinstitusjoner(bucType.toString()).stream().anyMatch(i -> i.getLandkode().equals(landkode));
     }
 
