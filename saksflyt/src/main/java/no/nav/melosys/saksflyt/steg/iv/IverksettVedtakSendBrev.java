@@ -72,7 +72,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
-            log.warn("Innvilgelsesbrev kan ikke sendes for behandling {} i "
+            log.warn("Vedtaksbrev kan ikke sendes for behandling {} i "
                     + "prosessinstansen {}.",
                 behandling.getId(), prosessinstans.getId());
             prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
