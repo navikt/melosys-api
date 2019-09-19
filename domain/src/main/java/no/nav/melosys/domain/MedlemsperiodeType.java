@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.sed.bygger;
+package no.nav.melosys.domain;
 
 import no.nav.melosys.domain.eessi.BucType;
 

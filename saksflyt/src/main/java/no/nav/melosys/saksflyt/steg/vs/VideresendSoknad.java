@@ -30,17 +30,17 @@ import static no.nav.melosys.domain.ProsessSteg.VS_SEND_SOKNAD;
  * Transisjoner:
  * VS_SEND_SOKNAD -> VS_SEND_SOKNAD eller FEILET_MASKINELT hvis feil
  */
-@Component("VideresendSoknadbrev")
-public class SendSoknad extends AbstraktSendUtland {
+@Component
+public class VideresendSoknad extends AbstraktSendUtland {
 
-    private static final Logger log = LoggerFactory.getLogger(SendSoknad.class);
+    private static final Logger log = LoggerFactory.getLogger(VideresendSoknad.class);
 
     private final JoarkFasade joarkFasade;
 
     @Autowired
-    protected SendSoknad(EessiService eessiService, BrevBestiller brevBestiller,
-                         BehandlingsresultatService behandlingsresultatService,
-                         LandvelgerService landvelgerService, @Qualifier("system") JoarkFasade joarkFasade) {
+    protected VideresendSoknad(EessiService eessiService, BrevBestiller brevBestiller,
+                               BehandlingsresultatService behandlingsresultatService,
+                               LandvelgerService landvelgerService, @Qualifier("system") JoarkFasade joarkFasade) {
         super(eessiService, brevBestiller, behandlingsresultatService, landvelgerService);
         this.joarkFasade = joarkFasade;
     }
@@ -54,7 +54,7 @@ public class SendSoknad extends AbstraktSendUtland {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        sendUtland(prosessinstans, BucType.LA_BUC_03, hentSøknadDokument(prosessinstans.getBehandling()));
+        sendUtland(BucType.LA_BUC_03, prosessinstans, hentSøknadDokument(prosessinstans.getBehandling()));
         prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
     }
 
@@ -73,7 +73,7 @@ public class SendSoknad extends AbstraktSendUtland {
 
     @Override
     protected Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
-        throw new IllegalStateException("Videresending av søknad er ikke implementert!");
+        throw new UnsupportedOperationException("Videresending av søknad er ikke implementert!");
     }
 
     @Override

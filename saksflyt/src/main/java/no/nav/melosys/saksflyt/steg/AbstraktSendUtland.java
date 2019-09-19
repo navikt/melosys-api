@@ -34,11 +34,11 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         this.landvelgerService = landvelgerService;
     }
 
-    protected void sendUtland(Prosessinstans prosessinstans, BucType bucType) throws MelosysException {
-        sendUtland(prosessinstans, bucType, null);
+    protected void sendUtland(BucType bucType, Prosessinstans prosessinstans) throws MelosysException {
+        sendUtland(bucType, prosessinstans, null);
     }
 
-    protected void sendUtland(Prosessinstans prosessinstans, BucType bucType, byte[] vedlegg) throws MelosysException {
+    protected void sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (skalSendesUtland(behandlingsresultat)) {

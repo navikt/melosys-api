@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendSoknadTest {
+public class VideresendSoknadTest {
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
@@ -42,14 +42,14 @@ public class SendSoknadTest {
     @Mock
     private JoarkFasade joarkFasade;
 
-    private SendSoknad sendSoknad;
+    private VideresendSoknad videresendSoknad;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {
-        sendSoknad = new SendSoknad(eessiService, brevBestiller, behandlingsresultatService, landvelgerService, joarkFasade);
+        videresendSoknad = new VideresendSoknad(eessiService, brevBestiller, behandlingsresultatService, landvelgerService, joarkFasade);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class SendSoknadTest {
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");
-        sendSoknad.utfør(prosessinstans);
+        videresendSoknad.utfør(prosessinstans);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class SendSoknadTest {
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("DokumentID til behandling " + behandling.getId() + " finnes ikke!");
-        sendSoknad.utfør(prosessinstans);
+        videresendSoknad.utfør(prosessinstans);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class SendSoknadTest {
         when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_03.name())))
             .thenReturn(Collections.singletonList(new Institusjon("2", "frankrike", "FR")));
 
-        sendSoknad.utfør(prosessinstans);
+        videresendSoknad.utfør(prosessinstans);
 
         verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(BucType.LA_BUC_03), eq(vedlegg));
     }

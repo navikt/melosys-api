@@ -39,7 +39,7 @@ public class SedDataBygger {
 
     public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(datagrunnlag);
-        sedDataDto.setLovvalgsperioder(hentLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(datagrunnlag.getBehandling()));
         sedDataDto.setMottakerLand(datagrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
         return sedDataDto;
@@ -47,7 +47,7 @@ public class SedDataBygger {
 
     public SedDataDto lagUtkast(DokumentdataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setLovvalgsperioder(finnLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         return sedDataDto;
     }
 
@@ -142,7 +142,7 @@ public class SedDataBygger {
         return adresse;
     }
 
-    private List<Lovvalgsperiode> hentLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
+    private List<Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
 
         if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
@@ -154,7 +154,7 @@ public class SedDataBygger {
         return Collections.emptyList();
     }
 
-    private List<Lovvalgsperiode> finnLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
+    private List<Lovvalgsperiode> lagLovvalgsperioderDtoHvisFinnes(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
 
         if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE && !behandlingsresultat.getLovvalgsperioder().isEmpty()) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.getLovvalgsperioder().iterator().next()));

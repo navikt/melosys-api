@@ -44,7 +44,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-        super.sendUtland(prosessinstans, avklarBucType(prosessinstans.getBehandling()));
+        super.sendUtland(avklarBucType(prosessinstans.getBehandling()), prosessinstans);
         if (erArtikkel11(prosessinstans)) {
             prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
         } else {
