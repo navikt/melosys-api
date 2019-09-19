@@ -36,8 +36,9 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
             .stream().findFirst();
 
         if (!anmodningsperiode.isPresent()) {
-            throw new FunksjonellException("Finner behandling " + behandling.getId() + " for sed fra rinaSak " + melosysEessiMelding.getRinaSaksnummer()
-                + ", men behandlingen har ingen anmodningsperiode " + behandling.getStatus());
+            throw new FunksjonellException(String.format(
+                "Mottatt SED %s på buctype %s - finner behandling %s for rinasak %s, men behandlingen har ingen anmodningsperiode",
+                melosysEessiMelding.getSedType(), melosysEessiMelding.getBucType(), behandling.getId(), melosysEessiMelding.getRinaSaksnummer()));
         }
 
         prosessinstans.setBehandling(behandling);
