@@ -50,12 +50,12 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
+        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
         ProsessType prosessType = prosessinstans.getType();
-        if (arbeidsgiverAvklares(prosessType)) {
+        if (arbeidsgiverAvklares(prosessType, resultat)) {
             super.utfør(prosessinstans);
         }
 
-        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
         if (resultat.medlOppdateres()) {
             prosessinstans.setSteg(IV_OPPDATER_MEDL);
         } else {
@@ -64,7 +64,8 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
     }
 
     // Ved forkortet periode har allerede arbeidsgiver blitt avklart
-    private static boolean arbeidsgiverAvklares(ProsessType prosessType) {
-        return prosessType != IVERKSETT_VEDTAK_FORKORT_PERIODE;
+    private static boolean arbeidsgiverAvklares(ProsessType prosessType, Behandlingsresultat resultat) {
+        return prosessType != IVERKSETT_VEDTAK_FORKORT_PERIODE &&
+            !resultat.hentValidertLovvalgsperiode().erArtikkel13();
     }
 }

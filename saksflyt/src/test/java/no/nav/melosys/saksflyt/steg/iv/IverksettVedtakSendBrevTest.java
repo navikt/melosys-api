@@ -331,6 +331,26 @@ public class IverksettVedtakSendBrevTest {
     }
 
     @Test
+    public void utførSteg_innvilgelses13_1A_senderIkkeInnvilgelseTilArbeidsgiver() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService, never()).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
+    }
+
+    @Test
+    public void utførSteg_innvilgelses12_senderInnvilgelseTilArbeidsgiver() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
+    }
+
+    @Test
     public final void utførSteg_avslag12_1_tilAvsluttBehandling() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
