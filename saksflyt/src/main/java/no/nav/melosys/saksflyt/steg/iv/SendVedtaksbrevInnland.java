@@ -111,9 +111,12 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
             .build();
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
 
-        Fagsak fagsak = behandling.getFagsak();
-        if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-            brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+        // Saker for art13 eller med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
+        if (!resultat.hentValidertLovvalgsperiode().erArtikkel13()) {
+            Fagsak fagsak = behandling.getFagsak();
+            if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
+                brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+            }
         }
     }
 
