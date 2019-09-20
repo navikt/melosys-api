@@ -347,7 +347,7 @@ public class IverksettVedtakSendBrevTest {
 
         instans.utførSteg(prosessinstans);
 
-        verify(dokService, times(1)).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
     }
 
     @Test

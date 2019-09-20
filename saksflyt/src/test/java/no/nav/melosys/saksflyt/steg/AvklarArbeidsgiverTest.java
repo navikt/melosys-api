@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class AvklarArbeidsgiverTest {
     @Mock
-    AktoerRepository aktoerRepository;
+    AktoerService aktoerService;
     @Mock
     BehandlingRepository behandlingRepository;
     @Mock
@@ -49,7 +49,7 @@ public class AvklarArbeidsgiverTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        AktoerService aktoerService = new AktoerService(aktoerRepository);
+        aktoerService = mock(AktoerService.class);
         steg = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingRepository, behandlingsresultatService);
 
         p = new Prosessinstans();
@@ -75,6 +75,9 @@ public class AvklarArbeidsgiverTest {
 
     @Test
     public void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() throws FunksjonellException, TekniskException {
+        AktoerRepository aktoerRepository = mock(AktoerRepository.class);
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService, behandlingRepository, behandlingsresultatService);
+
         List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
 
@@ -91,6 +94,9 @@ public class AvklarArbeidsgiverTest {
 
     @Test
     public void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() throws FunksjonellException, TekniskException {
+        AktoerRepository aktoerRepository = mock(AktoerRepository.class);
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService, behandlingRepository, behandlingsresultatService);
+
         steg.utfør(p);
         verify(aktoerRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
         verify(aktoerRepository, never()).save(any());
@@ -110,5 +116,19 @@ public class AvklarArbeidsgiverTest {
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
+    }
+
+    @Test
+    public void utfør_iverksettVedtakArt12_arbeidsgiverAktoererSkalOpprettes() throws FunksjonellException, TekniskException {
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        steg.utfør(p);
+        verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());
+    }
+
+    @Test
+    public void utfør_iverksettVedtakArt13_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        steg.utfør(p);
+        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
     }
 }
