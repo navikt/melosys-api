@@ -119,9 +119,11 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             .build();
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
 
-        Fagsak fagsak = behandling.getFagsak();
-        if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-            brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+        if (!resultat.hentValidertLovvalgsperiode().erArtikkel13()) {
+            Fagsak fagsak = behandling.getFagsak();
+            if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
+                brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+            }
         }
 
         Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
