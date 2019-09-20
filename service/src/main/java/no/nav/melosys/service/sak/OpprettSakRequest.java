@@ -1,7 +1,7 @@
 package no.nav.melosys.service.sak;
 
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class OpprettSakRequest {
     private String aktørID;
@@ -11,7 +11,6 @@ public class OpprettSakRequest {
     private Behandlingstyper behandlingstype;
     private String initierendeJournalpostId;
     private String initierendeDokumentId;
-    private Long gsakSaksnummer;
     private Sakstyper sakstype;
 
     private OpprettSakRequest(OpprettSakRequest.Builder builder) {
@@ -22,7 +21,6 @@ public class OpprettSakRequest {
         this.behandlingstype = builder.behandlingstype;
         this.initierendeJournalpostId = builder.initierendeJournalpostId;
         this.initierendeDokumentId = builder.initierendeDokumentId;
-        this.gsakSaksnummer = builder.gsakSaksnummer;
         this.sakstype = builder.sakstype;
     }
 
@@ -54,10 +52,6 @@ public class OpprettSakRequest {
         return initierendeDokumentId;
     }
 
-    public Long getGsakSaksnummer() {
-        return gsakSaksnummer;
-    }
-
     public Sakstyper getSakstype() {
         return sakstype;
     }
@@ -70,7 +64,6 @@ public class OpprettSakRequest {
         private Behandlingstyper behandlingstype;
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
-        private Long gsakSaksnummer;
         private Sakstyper sakstype;
 
         public Builder medAktørID(String aktørID) {
@@ -105,11 +98,6 @@ public class OpprettSakRequest {
 
         public Builder medInitierendeDokumentId(String initierendeDokumentId) {
             this.initierendeDokumentId = initierendeDokumentId;
-            return this;
-        }
-
-        public Builder medGsakSaksnummer(Long gsakSaksnummer) {
-            this.gsakSaksnummer = gsakSaksnummer;
             return this;
         }
 

@@ -1,13 +1,16 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
@@ -23,7 +26,6 @@ import org.junit.rules.ExpectedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class LovvalgsperiodeServiceTest {
@@ -46,7 +48,7 @@ public class LovvalgsperiodeServiceTest {
         this.instanse = new LovvalgsperiodeService(mockBehandlingsresultatRepo(), lovvalgsperiodeRepositoryMock, tidligereMedlemsperiodeRepository, behandlingRepositoryMock);
     }
 
-    public static TidligereMedlemsperiodeRepository lagTidligerePerioderRepo() {
+    private static TidligereMedlemsperiodeRepository lagTidligerePerioderRepo() {
         TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository = mock(TidligereMedlemsperiodeRepository.class);
         TidligereMedlemsperiodeId medlemsperiodeId = new TidligereMedlemsperiodeId();
         medlemsperiodeId.setPeriodeId(23L);
@@ -54,7 +56,7 @@ public class LovvalgsperiodeServiceTest {
         TidligereMedlemsperiode tidligerePeriode = new TidligereMedlemsperiode();
         tidligerePeriode.setId(medlemsperiodeId);
 
-        when(tidligereMedlemsperiodeRepository.findById_BehandlingId(anyLong())).thenReturn(Arrays.asList(tidligerePeriode));
+        when(tidligereMedlemsperiodeRepository.findById_BehandlingId(anyLong())).thenReturn(Collections.singletonList(tidligerePeriode));
         return tidligereMedlemsperiodeRepository;
     }
 
@@ -68,13 +70,8 @@ public class LovvalgsperiodeServiceTest {
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepo() {
         BehandlingsresultatRepository mock = mock(BehandlingsresultatRepository.class);
-        when(mock.findById(eq(13L))).thenReturn(Optional.of(lagBehandlingsresultat(13L)));
+        when(mock.findById(eq(13L))).thenReturn(Optional.of(new Behandlingsresultat()));
         return mock;
-    }
-
-    private static Behandlingsresultat lagBehandlingsresultat(long id) {
-        Behandlingsresultat resultat = new Behandlingsresultat();
-        return resultat;
     }
 
     @Test
@@ -117,10 +114,10 @@ public class LovvalgsperiodeServiceTest {
         Behandling behandling = lagBehandlingMedMedlOpplysning(medlDokument);
 
         Collection<Lovvalgsperiode> lovvalgsperioder = instanse.hentTidligereLovvalgsperioder(behandling);
-        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(lp -> lp.getMedlPeriodeID())).containsOnly(medlemsperiode.id);
-        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(lp -> lp.getFom())).isNotNull();
-        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(lp -> lp.getTom())).isNotNull();
-        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(lp -> lp.getBestemmelse())).isNotNull();
+        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(Lovvalgsperiode::getMedlPeriodeID)).containsOnly(medlemsperiode.id);
+        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(Lovvalgsperiode::getFom)).isNotNull();
+        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(Lovvalgsperiode::getTom)).isNotNull();
+        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(Lovvalgsperiode::getBestemmelse)).isNotNull();
     }
 
     @Test
@@ -133,9 +130,9 @@ public class LovvalgsperiodeServiceTest {
         Behandling behandling = lagBehandlingMedMedlOpplysning(medlDokument);
 
         Collection<Lovvalgsperiode> lovvalgsperioder = instanse.hentTidligereLovvalgsperioder(behandling);
-        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(lp -> lp.getMedlPeriodeID())).containsOnly(medlemsperiode.id);
+        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(Lovvalgsperiode::getMedlPeriodeID)).containsOnly(medlemsperiode.id);
         AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream()
-                .map(lp -> lp.getBestemmelse())).containsOnly(LovvalgsBestemmelser_883_2004.FO_883_2004_ANNET);
+                .map(Lovvalgsperiode::getBestemmelse)).containsOnly(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET);
     }
 
     @Test
@@ -186,6 +183,38 @@ public class LovvalgsperiodeServiceTest {
         instanse.hentOpprinneligLovvalgsperiode(5L);
     }
 
+    @Test
+    public void finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
+        Behandling behandling = new Behandling();
+        Behandling opprinneligBehandling = new Behandling();
+        opprinneligBehandling.setId(5L);
+        behandling.setOpprinneligBehandling(opprinneligBehandling);
+
+        Lovvalgsperiode opprinneligLovvalgsperiode = new Lovvalgsperiode();
+        doReturn(Collections.singletonList(opprinneligLovvalgsperiode)).when(lovvalgsperiodeRepositoryMock).findByBehandlingsresultatId(5L);
+
+        Optional<Behandling> optionalBehandling = Optional.of(behandling);
+        doReturn(optionalBehandling).when(behandlingRepositoryMock).findById(5L);
+
+        Optional<Lovvalgsperiode> lovvalgsperiode = instanse.finnOpprinneligLovvalgsperiode(5L);
+        assertThat(lovvalgsperiode).isPresent();
+        assertThat(lovvalgsperiode.get()).isEqualTo(opprinneligLovvalgsperiode);
+    }
+
+    @Test
+    public void finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_optionalEmpty() {
+        Behandling behandling = new Behandling();
+        Optional<Behandling> optionalBehandling = Optional.of(behandling);
+        doReturn(optionalBehandling).when(behandlingRepositoryMock).findById(5L);
+
+        Behandling opprinneligBehandling = new Behandling();
+        opprinneligBehandling.setId(5L);
+        behandling.setOpprinneligBehandling(opprinneligBehandling);
+
+        Optional<Lovvalgsperiode> lovvalgsperiode = instanse.finnOpprinneligLovvalgsperiode(5L);
+        assertThat(lovvalgsperiode).isNotPresent();
+    }
+
     private Behandling lagBehandlingMedMedlOpplysning(MedlemskapDokument medlDokument) {
         Saksopplysning medl = new Saksopplysning();
         medl.setDokument(medlDokument);
@@ -193,7 +222,7 @@ public class LovvalgsperiodeServiceTest {
 
         Behandling behandling = mock(Behandling.class);
         when(behandling.getId()).thenReturn(1L);
-        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(medl)));
+        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Collections.singletonList(medl)));
         return behandling;
     }
 

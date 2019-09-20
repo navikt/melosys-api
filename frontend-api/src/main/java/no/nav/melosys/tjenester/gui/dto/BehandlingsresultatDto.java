@@ -5,7 +5,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 
 public class BehandlingsresultatDto {
     private final String behandlingsresultatTypeKode;

@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -9,6 +9,7 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.api.StegBehandler;
 import no.nav.melosys.saksflyt.impl.Utils;
+import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
@@ -30,7 +31,9 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
     /**
      * Returnerer en Map som definerer unntakshåndtering for steget. 
      */
-    protected abstract Map<Feilkategori, UnntakBehandler> unntaksHåndtering();
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
     
     public AbstraktStegBehandler() {
         inngangsvilkår = Utils.medSteg(inngangsSteg()).and(Utils.somIkkeSover);
@@ -75,9 +78,13 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
             String feilmelding = "RuntimeException ";
             log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
+        } catch (MelosysException e) {
+            String feilmelding = "Melosysexception ";
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
+            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
         }
     }
 
-    protected abstract void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException;
+    protected abstract void utfør(Prosessinstans prosessinstans) throws MelosysException;
 
 }

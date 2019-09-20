@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
@@ -38,6 +39,17 @@ public class AnmodningUnntakTjeneste extends RestTjeneste {
     public Response anmodningOmUnntak(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID);
+        return Response.ok().build();
+    }
+
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("{behandlingID}/svar")
+    @ApiOperation(value = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
+    public Response svar(@PathParam("behandlingID") long behandlingID) throws MelosysException {
+        tilgangService.sjekkTilgang(behandlingID);
+        anmodningUnntakService.anmodningOmUnntakSvar(behandlingID);
         return Response.ok().build();
     }
 }

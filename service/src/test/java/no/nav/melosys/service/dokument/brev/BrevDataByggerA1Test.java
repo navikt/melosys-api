@@ -17,16 +17,14 @@ import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,6 +51,7 @@ public class BrevDataByggerA1Test {
     private Set<String> avklarteOrganisasjoner;
 
     private SoeknadDokument søknad;
+    private DokumentdataGrunnlag dataGrunnlag;
 
     private BrevDataByggerA1 brevDataByggerA1;
 
@@ -62,11 +61,11 @@ public class BrevDataByggerA1Test {
     private String orgnr2 = "10987654321";
 
     @Before
-    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        RegisterOppslagSystemService registerOppslagService = mock(RegisterOppslagSystemService.class);
+    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+
         avklarteOrganisasjoner = new HashSet<>();
 
-        when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong()))
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong()))
             .thenReturn(avklarteOrganisasjoner);
 
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
@@ -112,11 +111,13 @@ public class BrevDataByggerA1Test {
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
+        RegisterOppslagSystemService registerOppslagService = mock(RegisterOppslagSystemService.class);
         when(registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner))
             .thenReturn(organisasjonDokumenter);
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
+        dataGrunnlag = new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService);
     }
 
     private OrganisasjonDokument leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
@@ -131,7 +132,7 @@ public class BrevDataByggerA1Test {
     }
 
     @Test
-    public void testHentAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testHentAvklarteSelvstendigeForetak() throws FunksjonellException, TekniskException {
         avklarteOrganisasjoner.add("12345678910");
 
         SelvstendigForetak foretak = new SelvstendigForetak();
@@ -142,18 +143,18 @@ public class BrevDataByggerA1Test {
         foretak2.orgnr = "10987654321";
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak2);
 
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
         assertThat(brevDataDto.selvstendigeForetak).containsOnly(foretak.orgnr);
     }
 
 
     @Test
-    public void testIngenAvklarteforetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testIngenAvklarteforetak() throws FunksjonellException, TekniskException {
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
 
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
         assertThat(brevDataDto.selvstendigeForetak).isEmpty();
         // TODO: Orgnr ikke obligatorisk registrert for utenlandske foretak
         //assertThat(brevDataDto.utenlandskeVirksomheter).isEmpty();
@@ -170,14 +171,14 @@ public class BrevDataByggerA1Test {
     }
 
     @Test
-    public void testArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws FunksjonellException, TekniskException {
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.foretakNavn = "Utenlandsk Oppdragsgiver LTD";
         arbeidUtland.adresse = lagStrukturertAdresse();
         søknad.arbeidUtland.add(arbeidUtland);
 
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
-        assertThat(brevDataDto.utenlandskeVirksomheter.stream().map(uv -> uv.navn)).contains(arbeidUtland.foretakNavn);
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
+        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(arbeidUtland.foretakNavn);
         assertThat(brevDataDto.arbeidssteder.stream()
             .filter(Arbeidssted::erFysisk)
             .map(FysiskArbeidssted.class::cast)

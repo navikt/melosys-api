@@ -17,11 +17,15 @@ public final class PeriodeKontroller {
     }
 
     public static boolean periodeOver24Mnd(LocalDate fom, LocalDate tom) {
-        return tom != null && ChronoUnit.MONTHS.between(fom, tom) >= 23L;
+        return tom != null && ChronoUnit.MONTHS.between(fom, tom) >= 24L;
     }
 
-    public static boolean datoEldreEnn5År(LocalDate fom) {
-        return fom.isBefore(LocalDate.now().minusYears(5L));
+    public static boolean periodeOver5År(LocalDate fom, LocalDate tom) {
+        return tom != null && ChronoUnit.YEARS.between(fom, tom) >= 5L;
+    }
+
+    public static boolean datoEldreEnn3År(LocalDate fom) {
+        return fom.isBefore(LocalDate.now().minusYears(3L));
     }
 
     public static boolean datoOver1ÅrFremITid(LocalDate fom) {

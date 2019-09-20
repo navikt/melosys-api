@@ -5,6 +5,9 @@ import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -51,7 +54,7 @@ public class OppdaterMedlTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
+        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
         agent = new OppdaterMedl(medlFasade, felles);
 
         p = new Prosessinstans();
@@ -72,7 +75,7 @@ public class OppdaterMedlTest {
         behandling.setFagsak(fagsak);
 
         lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.CH);
         lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);

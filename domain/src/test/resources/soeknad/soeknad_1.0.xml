@@ -62,7 +62,10 @@
         <arbeidsgiverBetalerArbeidsgiveravgift>false</arbeidsgiverBetalerArbeidsgiveravgift>
         <trygdeavgiftTrukketGjennomSkatt>false</trygdeavgiftTrukketGjennomSkatt>
     </arbeidsgiversBekreftelse>
-    <maritimtArbeid/>
+    <maritimtArbeid>
+        <navn>Dunfjæder</navn>
+        <flaggLandkode>NO</flaggLandkode>
+    </maritimtArbeid>
     <bosted>
         <intensjonOmRetur>false</intensjonOmRetur>
         <antallMaanederINorge>2</antallMaanederINorge>

@@ -4,9 +4,9 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -81,10 +81,10 @@ public class VedtakServiceTest {
 
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
-        vedtakService.endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
+        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
 
         verify(behandlingRepository).findById(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperioder.ENDRINGER_ARBEIDSSITUASJON));
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }

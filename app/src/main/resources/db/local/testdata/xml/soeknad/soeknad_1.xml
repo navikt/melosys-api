@@ -15,21 +15,25 @@
     </oppholdUtland>
     <arbeidNorge/>
     <arbeidUtland>
+        <foretakNavn>Equinor</foretakNavn>
         <adresse>
             <gatenavn>NEDRE VARÅSEN</gatenavn>
             <husnummer>1</husnummer>
             <postnummer>0666</postnummer>
-            <region/>
+            <poststed>Oslo</poststed>
+            <region>Akershus</region>
             <landkode>NO</landkode>
         </adresse>
     </arbeidUtland>
     <foretakUtland>
+        <uuid>ca24c782-c7f0-11e9-a32f-2a2ae2dbcce4</uuid>
         <navn>Jarlsberg International</navn>
         <adresse>
             <gatenavn>NEDRE VARÅSEN</gatenavn>
             <husnummer>1</husnummer>
             <postnummer>0666</postnummer>
-            <region/>
+            <poststed>Oslo</poststed>
+            <region>Akershus</region>
             <landkode>NO</landkode>
         </adresse>
     </foretakUtland>

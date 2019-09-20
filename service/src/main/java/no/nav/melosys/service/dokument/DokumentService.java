@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -21,6 +21,8 @@ import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
@@ -32,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.w3c.dom.Element;
 
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 
 @Service
 @Primary
@@ -48,19 +50,22 @@ public class DokumentService {
     private final ProsessinstansService prosessinstansService;
     private final BrevmottakerService brevmottakerService;
     private final BrevDataByggerVelger brevDataByggerVelger;
+    private final DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
 
     @Autowired
     public DokumentService(BehandlingRepository behandlingRepository,
                            BrevDataService brevDataService, DoksysFasade dokSysFasade,
                            ProsessinstansService prosessinstansService,
                            BrevmottakerService brevmottakerService,
-                           BrevDataByggerVelger brevDataByggerVelger) {
+                           BrevDataByggerVelger brevDataByggerVelger,
+                           DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory) {
         this.behandlingRepository = behandlingRepository;
         this.brevDataService = brevDataService;
         this.dokSysFasade = dokSysFasade;
         this.prosessinstansService = prosessinstansService;
         this.brevmottakerService = brevmottakerService;
         this.brevDataByggerVelger = brevDataByggerVelger;
+        this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
     }
 
     /**
@@ -78,8 +83,9 @@ public class DokumentService {
             throw new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE);
         }
 
+        DokumentdataGrunnlag brevdataRessurser = dokumentdataGrunnlagFactory.av(behandling);
         BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
-        BrevData brevData = bygger.lag(behandling, SubjectHandler.getInstance().getUserID());
+        BrevData brevData = bygger.lag(brevdataRessurser, SubjectHandler.getInstance().getUserID());
 
         Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ? brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);

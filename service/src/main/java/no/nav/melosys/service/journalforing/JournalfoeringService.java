@@ -9,6 +9,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -33,13 +34,16 @@ public class JournalfoeringService {
 
     private final ProsessinstansService prosessinstansService;
 
+    private final EessiService eessiService;
+
     @Autowired
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  OppgaveService oppgaveService,
-                                 ProsessinstansService prosessinstansService) {
+                                 ProsessinstansService prosessinstansService, EessiService eessiService) {
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
+        this.eessiService = eessiService;
     }
 
     public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
@@ -47,7 +51,19 @@ public class JournalfoeringService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
+    public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+        Journalpost journalpost = hentJournalpost(journalfoeringDto.getJournalpostID());
+
+        if (journalpost.mottaksKanalErEessi() && eessiService.støtterAutomatiskBehandling(journalfoeringDto.getJournalpostID(), journalpost.getHoveddokument().getNavSkjemaID())) {
+            opprettProsessinstansSedMottak(journalfoeringDto);
+        } else {
+            opprettSakOgJournalfør(journalfoeringDto);
+        }
+
+        oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
+    }
+
+    private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
 
         valider(journalfoeringDto);
@@ -55,7 +71,7 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
-        // Land trenges av regelmodulen får å vurdere inngangsvilkår
+        // Land trenges av regelmodulen for å vurdere inngangsvilkår
         prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
         // Perioden trenges for å hente saksopplysninger
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
@@ -72,7 +88,17 @@ public class JournalfoeringService {
         }
 
         prosessinstansService.lagre(prosessinstans);
-        oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
+    }
+
+    private void opprettProsessinstansSedMottak(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+        validerBrukerIDFinnes(journalfoeringDto);
+        prosessinstansService.opprettProsessinstansSedMottak(journalfoeringDto.getJournalpostID(), journalfoeringDto.getBrukerID());
+    }
+
+    private void validerBrukerIDFinnes(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+        if (StringUtils.isEmpty(journalfoeringDto.getBrukerID())) {
+            throw new FunksjonellException("BrukerID er påkrevd!");
+        }
     }
 
     @Transactional(rollbackFor = MelosysException.class)

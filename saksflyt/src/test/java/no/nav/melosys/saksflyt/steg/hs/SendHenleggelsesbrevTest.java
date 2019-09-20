@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.hs;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
@@ -59,7 +59,7 @@ public class SendHenleggelsesbrevTest {
         Brevbestilling brevbestilling = brevbestillingCaptor.getValue();
 
         assertThat(brevbestilling.getDokumentType()).isEqualTo(Produserbaredokumenter.MELDING_HENLAGT_SAK);
-        assertThat(brevbestilling.getMottaker().getRolle()).isEqualTo(Aktoersroller.BRUKER);
+        assertThat(brevbestilling.getMottakere().iterator().next().getRolle()).isEqualTo(Aktoersroller.BRUKER);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
     }

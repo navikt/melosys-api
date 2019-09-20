@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
@@ -36,7 +37,7 @@ public class RegelmodulServiceTest {
     private RegelmodulService regelmodulService;
 
     @Before
-    public void setUp() {
+    public void setUp() throws ParserConfigurationException {
         behandlingRepository = Mockito.mock(BehandlingRepository.class);
         regelmodulService = new RegelmodulService("", behandlingRepository);
     }

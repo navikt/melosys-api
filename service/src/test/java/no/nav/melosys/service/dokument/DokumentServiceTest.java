@@ -23,6 +23,11 @@ import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
@@ -43,6 +48,8 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -52,12 +59,11 @@ import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToke
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatype.*;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public final class DokumentServiceTest {
@@ -88,7 +94,7 @@ public final class DokumentServiceTest {
     public final void produser_avslagArbeidsgiver_funker() throws Exception {
         BrevData brevData = lagBrevDataAvslagArbeidsgiver();
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
-        when(avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
         instans.produserDokument(AVSLAG_ARBEIDSGIVER, Mottaker.av(ARBEIDSGIVER), BEHANDLINGSID, brevData);
         verify(dokSysFasade).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
     }
@@ -115,7 +121,7 @@ public final class DokumentServiceTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(ARBEIDSGIVER);
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
-        when(avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(dokSysFasade, lagBrevdatabyggerVelgerMock(brevbestilling));
         byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, AVSLAG_ARBEIDSGIVER, brevbestilling);
@@ -168,20 +174,20 @@ public final class DokumentServiceTest {
     private static BrevData lagBrevDataInnvilgelse() {
         BrevDataA1 brevDataA1 = new BrevDataA1();
         AvklartVirksomhet arbeidsgiver = new AvklartVirksomhet("Virker av og til", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevDataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(arbeidsgiver, arbeidsgiver));
+        brevDataA1.hovedvirksomhet = arbeidsgiver;
         brevDataA1.bostedsadresse = lagStrukturertAdresse();
         brevDataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
         brevDataA1.selvstendigeForetak = Collections.emptySet();
-        brevDataA1.utenlandskeVirksomheter = Collections.emptyList();
+        brevDataA1.bivirksomheter = Collections.emptyList();
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
-        brevDataA1.hovedvirksomhet = arbeidsgiver;
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevDataA1;
-        brevdataInnvilgelse.norskeVirksomheter = brevDataA1.norskeVirksomheter;
+        brevdataInnvilgelse.hovedvirksomhet = arbeidsgiver;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.arbeidsland = "Norway";
+        brevdataInnvilgelse.anmodningsperiodesvar = Optional.of(lagAnmodningsperiodeSvarInnvilgelse());
         brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
 
         return brevdataInnvilgelse;
@@ -220,15 +226,30 @@ public final class DokumentServiceTest {
             yrkesgruppeFaktum));
         BehandlingsresultatRepository behandlingsresultatRepository = mockBehandlingsresultatRepo(behandlingsresultat);
         AvklarteFaktaRepository avklarteFaktaRepository = mockAvklarteFaktaRepository(arbeidsgiverFaktum, yrkesgruppeFaktum);
+        AvklartefaktaDtoKonverterer faktaKonverterer = new AvklartefaktaDtoKonverterer();
+        AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, faktaKonverterer);
+
         if (brevdatabyggervelger == null) {
-            brevdatabyggervelger = lagBrevdataByggerVelger(tpsFasade, avklarteFaktaRepository, behandlingsresultatRepository);
+            brevdatabyggervelger = lagBrevdataByggerVelger(avklartefaktaService);
         }
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
         BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class), avklarteVirksomheterService, mock(UtenlandskMyndighetService.class));
         return new DokumentService(behandlingRepository, brevDataService, dokSysFasade,
-            mock(ProsessinstansService.class), brevmottakerService, brevdatabyggervelger);
+            mock(ProsessinstansService.class), brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
+    }
+
+    public DokumentdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        KodeverkRegister kodeverkRegister = mockKodeverkRegister();
+        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
+        EregFasade eregFasade = mockEregFasade();
+        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
+        AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
+        DokumentdataGrunnlag dataGrunnlag = new DokumentdataGrunnlag(lagBehandling(), kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
+        DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory = mock(DokumentdataGrunnlagFactory.class);
+        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
+        return dokumentdataGrunnlagFactory;
     }
 
     private static Behandling lagBehandling() {
@@ -302,21 +323,13 @@ public final class DokumentServiceTest {
         return avklarteFaktaRepository;
     }
 
-    private static BrevDataByggerVelger lagBrevdataByggerVelger(TpsFasade tpsFasade, AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        AvklartefaktaDtoKonverterer faktaKonverterer = new AvklartefaktaDtoKonverterer();
-        AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, faktaKonverterer);
-        EregFasade eregFasade = mockEregFasade();
-        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
-        KodeverkRegister kodeverkRegister = mockKodeverkRegister();
-        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
+    private static BrevDataByggerVelger lagBrevdataByggerVelger(AvklartefaktaService avklartefaktaService) {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         JoarkService joarkService = mock(JoarkService.class);
-        AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
-        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, avklarteVirksomheterSystemService, kodeverkService, lovvalgsperiodeService,
+        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
             utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService);
     }
 
@@ -335,7 +348,7 @@ public final class DokumentServiceTest {
                 when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerVedlegg);
             }
         } else {
-            when(brevdatabyggervelger.hent(any())).thenReturn(brevDataByggerVedlegg);
+            when(brevdatabyggervelger.hent(any(), any())).thenReturn(brevDataByggerVedlegg);
             when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
         }
 
@@ -378,11 +391,11 @@ public final class DokumentServiceTest {
 
     private static Lovvalgsperiode lagLovvalgsperiode() {
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(LocalDate.now());
         periode.setTom(LocalDate.now());
         periode.setLovvalgsland(Landkoder.NO);
-        periode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
     }
 
@@ -413,11 +426,11 @@ public final class DokumentServiceTest {
         return søknad;
     }
 
-    private static Avklartefakta lagAvklarteFakta(Avklartefaktatype type, String subjekt) {
+    private static Avklartefakta lagAvklarteFakta(Avklartefaktatyper type, String subjekt) {
         return lagAvklarteFakta(type, "TRUE", subjekt);
     }
 
-    private static Avklartefakta lagAvklarteFakta(Avklartefaktatype type, String fakta, String subjekt) {
+    private static Avklartefakta lagAvklarteFakta(Avklartefaktatyper type, String fakta, String subjekt) {
         Avklartefakta arbeidsgiverFaktum = new Avklartefakta();
         arbeidsgiverFaktum.setSubjekt(subjekt);
         arbeidsgiverFaktum.setType(type);

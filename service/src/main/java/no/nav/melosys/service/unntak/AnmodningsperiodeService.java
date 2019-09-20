@@ -4,11 +4,12 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.AnmodningsperiodeSvarType;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -38,6 +39,19 @@ public class AnmodningsperiodeService {
 
     public Collection<Anmodningsperiode> hentAnmodningsperioder(long behandlingID) {
         return anmodningsperiodeRepository.findByBehandlingsresultatId(behandlingID);
+    }
+
+    public Optional<AnmodningsperiodeSvar> hentAnmodningsperiodeSvar(long anmodningsperiodeID) {
+        return anmodningsperiodeSvarRepository.findById(anmodningsperiodeID);
+    }
+
+    public Collection<AnmodningsperiodeSvar> hentAnmodningsperiodeSvarForBehandling(long behandlingID) {
+        return hentAnmodningsperioder(behandlingID).stream()
+            .map(Anmodningsperiode::getId)
+            .map(this::hentAnmodningsperiodeSvar)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toList());
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -112,9 +126,9 @@ public class AnmodningsperiodeService {
         if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == null) {
             throw new FunksjonellException("Må spesifiseres svarType for svar på anmodningsperiode");
 
-        } else if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE
+        } else if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE
                         && !anmodningsperiodeSvar.erGyldigDelvisInnvilgelse()) {
-            throw new FunksjonellException("Periode må være fyllt ut ved " + AnmodningsperiodeSvarType.DELVIS_INNVILGELSE);
+            throw new FunksjonellException("Periode må være fyllt ut ved " + Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
         }
     }
 }

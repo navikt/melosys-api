@@ -1,10 +1,8 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Converter;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
-import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
-
-public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningType> {
+public enum SaksopplysningType implements Kodeverk {
 
     ARBFORH("ARBFORH", "Arbeidsforhold"),
     INNTK("INNTK", "Inntekt"),
@@ -14,7 +12,8 @@ public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningTy
     PERSOPL("PERSOPL", "Personopplysning"),
     SEDOPPL("SEDOPPL", "SED-opplysninger"),
     SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
-    SØKNAD("SØKNAD", "Søknad");
+    SØKNAD("SØKNAD", "Søknad"),
+    UTBETAL("UTBETAL", "Utbetaldata");
 
     private String kode;
     private String beskrivelse;
@@ -23,7 +22,7 @@ public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningTy
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
-    
+
     @Override
     public String getKode() {
         return kode;
@@ -33,14 +32,5 @@ public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningTy
     public String getBeskrivelse() {
         return beskrivelse;
     }
-
-    @Converter
-    public static class DbConverter extends InterntKodeverkTabell.DbKonverterer<SaksopplysningType> {
-        @Override
-        protected SaksopplysningType[] getLovligeVerdier() {
-            return SaksopplysningType.values();
-        }
-    }
-
 }
 

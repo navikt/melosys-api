@@ -20,6 +20,7 @@
   }],
   "foretakUtland": [
     {
+      "uuid": "ca24c782-c7f0-11e9-a32f-2a2ae2dbcce4",
       "navn": "Volkswagen AG",
       "orgnr": "1122334444",
       "adresse": {
@@ -99,7 +100,9 @@
   },
   "maritimtArbeid": [
     {
-      "navn": "Navn på skipet",
+      "foretakNavn": "Equiesou",
+      "foretakOrgnr": null,
+      "enhetNavn": "Navn på skipet",
       "fartsomradeKode": "INNENRIKS",
       "flaggLandkode": "GB",
       "installasjonsLandkode": "GB"

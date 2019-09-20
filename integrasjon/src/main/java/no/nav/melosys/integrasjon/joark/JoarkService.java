@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
@@ -109,6 +109,7 @@ public class JoarkService implements JoarkFasade {
         Journalpost journalpost = new Journalpost(journalpostID);
         journalpost.setBrukerId(response.getBrukerListe().stream().map(Bruker::getIdentifikator).findFirst().orElse(null));
         journalpost.setForsendelseMottatt(response.getForsendelseMottatt().toInstant());
+        journalpost.setMottaksKanal(response.getMottaksKanal());
 
         List<Dokument> dokumentListe = response.getDokumentListe();
         journalpost.setHoveddokument(lagArkivDokument(dokumentListe.get(0)));
@@ -132,6 +133,7 @@ public class JoarkService implements JoarkFasade {
         ArkivDokument arkivDokument = new ArkivDokument();
         arkivDokument.setDokumentId(dokument.getDokumentId());
         arkivDokument.setTittel(dokument.getTittel());
+        arkivDokument.setNavSkjemaID(dokument.getNavSkjemaId());
         return arkivDokument;
     }
 
@@ -242,6 +244,25 @@ public class JoarkService implements JoarkFasade {
         journalpost.setForsoekEndeligJF(false);
 
         journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpost, journalpostID);
+    }
+
+    @Override
+    public void oppdaterJournalpostMedSaksnummerOgBruker(String journalpostID, String brukerID, Long gsakSaksnummer, boolean forsokFerdigstill) throws SikkerhetsbegrensningException, IntegrasjonException {
+        PutJournalpostRequest request = new PutJournalpostRequest();
+
+        ArkivSakWithArkivsakSystemEnum arkivsak = new ArkivSakWithArkivsakSystemEnum();
+        arkivsak.setArkivSakSystem(ArkivSakWithArkivsakSystemEnum.ArkivSakSystem.GSAK);
+        arkivsak.setArkivSakId(Long.toString(gsakSaksnummer));
+        request.setArkivSak(arkivsak);
+
+        Bruker bruker = new Bruker();
+        bruker.setBrukerType(Bruker.BrukerType.PERSON);
+        bruker.setIdentifikator(brukerID);
+        request.setBruker(bruker);
+
+        request.setJournalfEnhet(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
+        request.setForsoekEndeligJF(forsokFerdigstill);
+        journalfoerInngaaendeConsumer.oppdaterJournalpost(request, journalpostID);
     }
 
     private void oppdaterDokument(String journalpostId, String dokumentID, String tittel, boolean medDokumentkategori) throws SikkerhetsbegrensningException, IntegrasjonException {

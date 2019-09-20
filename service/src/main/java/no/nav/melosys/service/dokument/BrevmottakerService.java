@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Service
 public class BrevmottakerService {
@@ -112,7 +112,7 @@ public class BrevmottakerService {
     }
 
     private List<Aktoer> avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
-        Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
+        Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         if (arbeidsgivendeOrgnumre.isEmpty()) {
             throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
         } else {

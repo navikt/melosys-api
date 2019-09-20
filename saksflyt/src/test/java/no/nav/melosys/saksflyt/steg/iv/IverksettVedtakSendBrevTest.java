@@ -7,6 +7,11 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
@@ -26,16 +31,16 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntak
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.HELFO;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class IverksettVedtakSendBrevTest {
@@ -94,7 +99,7 @@ public class IverksettVedtakSendBrevTest {
         when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
 
         dokService = spy(lagDokumentService(byggerVelger));
-        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger);
+        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger, mock(DokumentdataGrunnlagFactory.class));
         return new IverksettVedtakSendBrev(brevBestiller, behandlingService, behandlingsresultatService);
     }
 
@@ -110,7 +115,7 @@ public class IverksettVedtakSendBrevTest {
 
     private static DokumentSystemService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger) throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
-        when(avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(any())).thenReturn(Sets.newHashSet("123456789"));
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any())).thenReturn(Sets.newHashSet("123456789"));
         BehandlingRepository behandlingRepository = mockBehandlingRepository();
         BrevDataService brevDataService = mock(BrevDataService.class);
         DoksysFasade dokSysFasade = mock(DoksysFasade.class);
@@ -118,7 +123,7 @@ public class IverksettVedtakSendBrevTest {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(any())).thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService);
-        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger));
+        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger, mock(DokumentdataGrunnlagFactory.class)));
     }
 
     private static BehandlingsresultatService mockBehandlingsresultatService() throws IkkeFunnetException {
@@ -126,7 +131,7 @@ public class IverksettVedtakSendBrevTest {
         Lovvalgsperiode periode = lagLovvalgsperiodeArt16_1();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(periode, Landkoder.AT, Behandlingsresultattyper.IKKE_FASTSATT);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID)).thenReturn(behandlingsresultat);
-        Lovvalgsperiode periode2 = lagLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
+        Lovvalgsperiode periode2 = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
         Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(new HashSet<>(Arrays.asList(periode, periode2)), null, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         assertThat(behandlingsresultatMedFlerePerioder.getLovvalgsperioder().size()).isGreaterThan(1);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_MED_FLERE_PERIODER)).thenReturn(behandlingsresultatMedFlerePerioder);
@@ -140,22 +145,22 @@ public class IverksettVedtakSendBrevTest {
         Behandlingsresultat innvilgetBehandlingsResultat = lagBehandlingsresultat(periode);
         when(behandlingsresultatService.hentBehandlingsresultat(ART16_1_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetBehandlingsResultat);
 
-        Behandlingsresultat innvilgetResultat12_1 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1));
+        Behandlingsresultat innvilgetResultat12_1 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1));
         when(behandlingsresultatService.hentBehandlingsresultat(ART12_1_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat12_1);
 
-        Behandlingsresultat innvilgetResultat13_1A = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_1A));
+        Behandlingsresultat innvilgetResultat13_1A = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
         when(behandlingsresultatService.hentBehandlingsresultat(ART13_1A_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat13_1A);
 
-        Behandlingsresultat avslåttResultat12_1 = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false));
+        Behandlingsresultat avslåttResultat12_1 = lagBehandlingsresultat(lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false));
         when(behandlingsresultatService.hentBehandlingsresultat(ART12_1_AVSLÅTT_BEHANDLINGSID)).thenReturn(avslåttResultat12_1);
 
-        Behandlingsresultat innvilgetResultat12_2 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2));
+        Behandlingsresultat innvilgetResultat12_2 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2));
         when(behandlingsresultatService.hentBehandlingsresultat(ART12_2_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat12_2);
 
         Behandlingsresultat utenlandskLovvalgResultat = lagBehandlingsresultat(periode, Landkoder.BE);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_UTENLANDSK_LOVVALG)).thenReturn(utenlandskLovvalgResultat);
 
-        Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ANNET));
+        Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE)).thenReturn(norskLovvalgUtenInnvilgetBestemmelse);
 
         return behandlingsresultatService;
@@ -190,14 +195,14 @@ public class IverksettVedtakSendBrevTest {
     }
 
     private static Lovvalgsperiode lagLovvalgsperiodeArt16_1() {
-        return lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
+        return lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
     }
 
-    private static Lovvalgsperiode lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004 bestemmelse) {
+    private static Lovvalgsperiode lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004 bestemmelse) {
         return lagLovvalgsperiode(bestemmelse, LocalDate.now(), Landkoder.NO, true);
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiode(LovvalgsBestemmelser_883_2004 bestemmelse, LocalDate fom, Landkoder land, boolean innvilget) {
+    private static Lovvalgsperiode lagLovvalgsperiode(Lovvalgbestemmelser_883_2004 bestemmelse, LocalDate fom, Landkoder land, boolean innvilget) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         periode.setFom(fom);
         periode.setTom(fom.plusDays(1));
@@ -326,6 +331,26 @@ public class IverksettVedtakSendBrevTest {
     }
 
     @Test
+    public void utførSteg_innvilgelses13_1A_senderIkkeInnvilgelseTilArbeidsgiver() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService, never()).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
+    }
+
+    @Test
+    public void utførSteg_innvilgelses12_senderInnvilgelseTilArbeidsgiver() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
+    }
+
+    @Test
     public final void utførSteg_avslag12_1_tilAvsluttBehandling() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
@@ -399,13 +424,13 @@ public class IverksettVedtakSendBrevTest {
     public final void utførStegPåInnvilgelsesBrev_medBegrunnelsekode_oppdatererBrevdata() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_2_INNVILGET_BEHANDLINGSID));
-        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
+        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
         ArgumentCaptor<BrevData> captor = ArgumentCaptor.forClass(BrevData.class);
 
         instans.utførSteg(prosessinstans);
 
         verify(dokService, atLeastOnce()).produserDokument(any(Produserbaredokumenter.class), any(Mottaker.class), anyLong(), captor.capture());
-        assertThat(captor.getValue().begrunnelseKode).isEqualTo(Endretperioder.ENDRINGER_ARBEIDSSITUASJON.getKode());
+        assertThat(captor.getValue().begrunnelseKode).isEqualTo(Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 

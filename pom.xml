@@ -38,10 +38,10 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>1.0.5-16</melosys.frontend.version>
-        <melosys.jsonschema.version>1.28.0-19</melosys.jsonschema.version>
+        <melosys.frontend.version>1.1.1-20</melosys.frontend.version>
+        <melosys.jsonschema.version>1.31.0-26</melosys.jsonschema.version>
         <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
-        <melosys.internt.kodeverk.version>1.2.26</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.11.3-458</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -49,7 +49,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.1.6</dokprod.melosysbrev.version>
+        <dokprod.melosysbrev.version>1.1.12</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
@@ -60,6 +60,7 @@
         <sakogbehandling.version>1.0.0-alpha011</sakogbehandling.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>3.4.1</tps.person.version>
+        <utbetaling.version>1.1.3</utbetaling.version>
 
         <!-- Versjoner av eksterne biblioteker -->
         <assertj.version>3.8.0</assertj.version>
@@ -90,7 +91,6 @@
         <spring-security-pac4j.version>4.1.0</spring-security-pac4j.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
-
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -419,6 +419,13 @@
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb-sources</classifier>
                 <version>${dokprod.melosysbrev.version}</version>
+            </dependency>
+            <!-- Utbetaling -->
+            <dependency>
+                <groupId>no.nav.tjenester.fim</groupId>
+                <artifactId>nav-fim-utbetaling-v1-tjenestespesifikasjon</artifactId>
+                <classifier>jaxws</classifier>
+                <version>${utbetaling.version}</version>
             </dependency>
 
             <!-- Test -->

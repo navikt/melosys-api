@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Rule;

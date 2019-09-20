@@ -6,7 +6,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -17,52 +20,47 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.apache.commons.collections4.CollectionUtils;
 
-public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements BrevDataBygger {
+public class BrevDataByggerA001 implements BrevDataBygger {
+    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
-    public BrevDataByggerA001(AnmodningsperiodeService anmodningsperiodeService,
-                              AvklartefaktaService avklartefaktaService,
-                              AvklarteVirksomheterService avklarteVirksomheterService,
-                              KodeverkService kodeverkService,
-                              LovvalgsperiodeService lovvalgsperiodeService,
+    private DokumentdataGrunnlag dataGrunnlag;
+    private Behandling behandling;
+
+    public BrevDataByggerA001(LovvalgsperiodeService lovvalgsperiodeService,
+                              AnmodningsperiodeService anmodningsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
-        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
     @Override
-    public BrevData lag(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
-        this.behandling = behandling;
-        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-        this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
+    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+        this.dataGrunnlag = dataGrunnlag;
+        this.behandling = dataGrunnlag.getBehandling();
 
         Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder();
         Landkoder landkode = anmodningsperioder.iterator().next().getUnntakFraLovvalgsland();
 
         BrevDataA001 brevData = new BrevDataA001();
-        brevData.personDokument = this.person;
+        brevData.personDokument = dataGrunnlag.getPerson();
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
-        brevData.selvstendigeVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter);
+        brevData.arbeidsgivendeVirkomsheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere();
+        brevData.selvstendigeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige();
 
-        brevData.bostedsadresse = hentBostedsadresse();
-        brevData.arbeidssteder = hentArbeidssteder();
+        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
+        brevData.arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
 
         brevData.vilkårsresultat161 = hentVilkårsresultat();
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
@@ -90,7 +88,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     }
 
     private Optional<String> hentUtenlandskIdent(Landkoder landkode) {
-        return søknad.personOpplysninger.utenlandskIdent.stream()
+        return dataGrunnlag.getSøknad().personOpplysninger.utenlandskIdent.stream()
             .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
             .map(utenlandskIdent -> utenlandskIdent.ident)
             .findFirst();
@@ -118,11 +116,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 
-        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
-        if (avklarteOrgnumre.size() != 1) {
-            throw new TekniskException("Kan ikke avgjøre ansettelsesperiode ved flere arbeidsforhold");
-        }
-
+        Set<String> avklarteOrgnumre = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivendeOrgnumre();
         Stream<Periode> avklarteAnsettelsesPerioder =
             arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrgnumre).stream();
 

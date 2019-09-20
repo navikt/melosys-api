@@ -1,26 +1,13 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
-import java.time.Instant;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.dokument.sed.BucType;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.dokument.sed.SedType;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
-import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
-import no.nav.melosys.service.kafka.model.Statsborgerskap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +17,11 @@ import org.springframework.stereotype.Component;
 public class OpprettSedDokument extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettSedDokument.class);
 
-    private final SaksopplysningRepository saksopplysningRepository;
-    private final DokumentFactory dokumentFactory;
+    private final OpprettSedDokumentFelles opprettSedDokumentFelles;
 
     @Autowired
-    public OpprettSedDokument(SaksopplysningRepository saksopplysningRepository, DokumentFactory dokumentFactory) {
-        this.saksopplysningRepository = saksopplysningRepository;
-        this.dokumentFactory = dokumentFactory;
+    public OpprettSedDokument(OpprettSedDokumentFelles opprettSedDokumentFelles) {
+        this.opprettSedDokumentFelles = opprettSedDokumentFelles;
     }
 
     @Override
@@ -45,56 +30,9 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
     }
 
     @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
-    @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
-        Instant nå = Instant.now();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(opprettSedDokument(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class)));
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setBehandling(prosessinstans.getBehandling());
-        saksopplysning.setKilde(SaksopplysningKilde.EESSI);
-        saksopplysning.setVersjon("0.2-SNAPSHOT");
-        saksopplysning.setEndretDato(nå);
-        saksopplysning.setRegistrertDato(nå);
-
-        String xml = dokumentFactory.lagInternXml(saksopplysning);
-        saksopplysning.setDokumentXml(xml);
-
-        saksopplysningRepository.save(saksopplysning);
-        log.info("Saksopplysning: SedDokument opprettet for behandling {}", prosessinstans.getBehandling().getId());
-
+        opprettSedDokumentFelles.opprettSedSaksopplysning(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class), prosessinstans.getBehandling());
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_HENT_PERSON);
-    }
-
-    private SedDokument opprettSedDokument(MelosysEessiMelding melosysEessiMelding) {
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgslandKode(Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()));
-        sedDokument.setLovvalgBestemmelse(
-            LovvalgTilBestemmelseDtoMapper.mapBestemmelseVerdiTilMelosysLovvalgBestemmelse(melosysEessiMelding.getArtikkel())
-        );
-        sedDokument.setRinaSaksnummer(melosysEessiMelding.getRinaSaksnummer());
-        sedDokument.setLovvalgsperiode(tilPeriode(melosysEessiMelding.getPeriode()));
-        sedDokument.setRinaDokumentID(melosysEessiMelding.getSedId());
-        sedDokument.setStatsborgerskapKoder(
-            melosysEessiMelding.getStatsborgerskap().stream().map(Statsborgerskap::getLandkode).collect(Collectors.toList())
-        );
-        sedDokument.setErEndring(melosysEessiMelding.getErEndring());
-        sedDokument.setSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
-        sedDokument.setBucType(BucType.valueOf(melosysEessiMelding.getBucType()));
-
-        return sedDokument;
-    }
-
-    private Periode tilPeriode(no.nav.melosys.service.kafka.model.Periode periode) {
-        return new Periode(
-                periode.getFom(),
-                periode.getTom()
-        );
     }
 }

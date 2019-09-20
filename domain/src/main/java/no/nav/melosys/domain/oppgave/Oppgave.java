@@ -3,8 +3,9 @@ package no.nav.melosys.domain.oppgave;
 import java.time.LocalDate;
 import java.util.Comparator;
 
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.exception.FunksjonellException;
 
@@ -12,45 +13,90 @@ import no.nav.melosys.exception.FunksjonellException;
  * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
  */
 public final class Oppgave {
-
     private static final int FRIST_JFR_DAGER = 1;
     private static final int FRIST_VUR_DAGER = 1;
     private static final int FRIST_BEH_UKER = 12;
 
-    private final String oppgaveId;
-    private final String saksnummer;
+    private final String aktørId;
+    private final Behandlingstema behandlingstema;
+    private final Behandlingstyper behandlingstype;
+    private final String beskrivelse;
+    private final Fagsystem behandlesAvApplikasjon;
     private final LocalDate fristFerdigstillelse;
-    private final Tema tema;
+    private final String journalpostId;
+    private final String oppgaveId;
     private final Oppgavetyper oppgavetype;
     private final PrioritetType prioritet;
-    private final String journalpostId;
+    private final String saksnummer;
+    private final Tema tema;
+    private final String temagruppe;
     private final String tilordnetRessurs;
+    private final String tildeltEnhetsnr;
     private final int versjon;
-    private final String aktørId;
-    private final Behandlingstyper behandlingstype;
-    private final Behandlingstema behandlingstema;
+    private final LocalDate aktivDato;
+    private final String status;
 
     public static class Builder {
-        private String oppgaveId;
-        private String saksnummer;
+        private String aktørId;
+        private Fagsystem behandlesAvApplikasjon;
+        private Behandlingstema behandlingstema;
+        private Behandlingstyper behandlingstype;
+        private String beskrivelse;
         private LocalDate fristFerdigstillelse;
-        private Tema tema;
+        private String journalpostId;
+        private String oppgaveId;
         private Oppgavetyper oppgavetype;
         private PrioritetType prioritet;
-        private String journalpostId;
+        private String saksnummer;
+        private Tema tema;
+        private String temagruppe;
         private String tilordnetRessurs;
+        private String tildeltEnhetsnr;
         private int versjon;
-        private String aktørId;
-        private Behandlingstyper behandlingstype;
-        private Behandlingstema behandlingstema;
+        private LocalDate aktivDato;
+        private String status;
 
+        public Builder() {
+        }
+        
+        public Builder(Oppgave copy) {
+            this.aktørId = copy.getAktørId();
+            this.behandlingstema = copy.getBehandlingstema();
+            this.behandlingstype = copy.getBehandlingstype();
+            this.beskrivelse = copy.getBeskrivelse();
+            this.behandlesAvApplikasjon = copy.getBehandlesAvApplikasjon();
+            this.fristFerdigstillelse = copy.getFristFerdigstillelse();
+            this.journalpostId = copy.getJournalpostId();
+            this.oppgaveId = copy.getOppgaveId();
+            this.oppgavetype = copy.getOppgavetype();
+            this.prioritet = copy.getPrioritet();
+            this.saksnummer = copy.getSaksnummer();
+            this.tema = copy.getTema();
+            this.temagruppe = copy.getTemagruppe();
+            this.tilordnetRessurs = copy.getTilordnetRessurs();
+            this.tildeltEnhetsnr = copy.getTildeltEnhetsnr();
+            this.versjon = copy.getVersjon();
+            this.aktivDato = copy.getAktivDato();
+            this.status = copy.getStatus();
+        }
+        
         public Builder setOppgaveId(String oppgaveId) {
             this.oppgaveId = oppgaveId;
             return this;
         }
 
+        public Builder setBehandlesAvApplikasjon(Fagsystem fagsystem) {
+            this.behandlesAvApplikasjon = fagsystem;
+            return this;
+        }
+
         public Builder setSaksnummer(String saksnummer) {
             this.saksnummer = saksnummer;
+            return this;
+        }
+
+        public Builder setBeskrivelse(String beskrivelse) {
+            this.beskrivelse = beskrivelse;
             return this;
         }
 
@@ -104,6 +150,26 @@ public final class Oppgave {
             return this;
         }
 
+        public Builder setTemagruppe(String temagruppe) {
+            this.temagruppe = temagruppe;
+            return this;
+        }
+
+        public Builder setTildeltEnhetsnr(String tildeltEnhetsnr) {
+            this.tildeltEnhetsnr = tildeltEnhetsnr;
+            return this;
+        }
+
+        public Builder setAktivDato(LocalDate aktivDato) {
+            this.aktivDato = aktivDato;
+            return this;
+        }
+
+        public Builder setStatus(String status) {
+            this.status = status;
+            return this;
+        }
+
         public Oppgave build() {
             return new Oppgave(this);
         }
@@ -111,33 +177,55 @@ public final class Oppgave {
 
     private Oppgave(Builder builder) {
         this.oppgaveId = builder.oppgaveId;
+        this.behandlesAvApplikasjon = builder.behandlesAvApplikasjon != null ? builder.behandlesAvApplikasjon : Fagsystem.MELOSYS;
         this.saksnummer = builder.saksnummer;
         this.fristFerdigstillelse = builder.fristFerdigstillelse;
         this.tema = builder.tema;
         this.oppgavetype = builder.oppgavetype;
-        this.prioritet = builder.prioritet;
+        this.prioritet = builder.prioritet != null ? builder.prioritet : PrioritetType.NORM;
         this.journalpostId = builder.journalpostId;
         this.tilordnetRessurs = builder.tilordnetRessurs;
         this.versjon = builder.versjon;
         this.aktørId = builder.aktørId;
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
+        this.beskrivelse = builder.beskrivelse;
+        this.tildeltEnhetsnr = builder.tildeltEnhetsnr;
+        this.status = builder.status;
+        this.aktivDato = builder.aktivDato;
+        this.temagruppe = builder.temagruppe;
     }
 
-    public String getOppgaveId() {
-        return oppgaveId;
+    public String getAktørId() {
+        return aktørId;
     }
 
-    public String getSaksnummer() {
-        return saksnummer;
+    public Fagsystem getBehandlesAvApplikasjon() {
+        return behandlesAvApplikasjon;
+    }
+
+    public Behandlingstema getBehandlingstema() {
+        return behandlingstema;
+    }
+
+    public Behandlingstyper getBehandlingstype() {
+        return behandlingstype;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     public LocalDate getFristFerdigstillelse() {
         return fristFerdigstillelse;
     }
 
-    public Tema getTema() {
-        return tema;
+    public String getJournalpostId() {
+        return journalpostId;
+    }
+
+    public String getOppgaveId() {
+        return oppgaveId;
     }
 
     public Oppgavetyper getOppgavetype() {
@@ -148,8 +236,12 @@ public final class Oppgave {
         return prioritet;
     }
 
-    public String getJournalpostId() {
-        return journalpostId;
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public Tema getTema() {
+        return tema;
     }
 
     public String getTilordnetRessurs() {
@@ -160,16 +252,20 @@ public final class Oppgave {
         return versjon;
     }
 
-    public String getAktørId() {
-        return aktørId;
+    public String getTemagruppe() {
+        return temagruppe;
     }
 
-    public Behandlingstyper getBehandlingstype() {
-        return behandlingstype;
+    public String getTildeltEnhetsnr() {
+        return tildeltEnhetsnr;
     }
 
-    public Behandlingstema getBehandlingstema() {
-        return behandlingstema;
+    public LocalDate getAktivDato() {
+        return aktivDato;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public boolean erBehandling() {

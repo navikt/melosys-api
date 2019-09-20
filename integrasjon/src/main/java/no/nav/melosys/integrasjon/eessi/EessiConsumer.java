@@ -5,8 +5,11 @@ import java.util.Map;
 
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.SvarAnmodningUnntakDto;
 
 public interface EessiConsumer {
 
@@ -17,4 +20,12 @@ public interface EessiConsumer {
     List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException;
 
     List<Institusjon> hentMottakerinstitusjoner(String bucType) throws MelosysException;
+
+    MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) throws MelosysException;
+
+    void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) throws MelosysException;
+
+    List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException;
+
+    void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException;
 }

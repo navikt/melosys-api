@@ -14,7 +14,8 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.sed.SedType;
-import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,7 @@ public class RegisterkontrollServiceTest {
         behandling.getSaksopplysninger().add(lagSaksopplysning(new MedlemskapDokument(), SaksopplysningType.MEDL));
         behandling.getSaksopplysninger().add(lagSaksopplysning(new InntektDokument(), SaksopplysningType.INNTK));
         behandling.getSaksopplysninger().add(lagSaksopplysning(new PersonDokument(), SaksopplysningType.PERSOPL));
+        behandling.getSaksopplysninger().add(lagSaksopplysning(new UtbetalingDokument(), SaksopplysningType.UTBETAL));
 
         when(kontrollFactory.hentKontrollerForSedType(any())).thenReturn(Lists.newArrayList(f1, f2, f3));
     }

@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.Collection;
+import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -8,10 +10,9 @@ import no.nav.dok.melosysbrev._000084.BrevdataType;
 import no.nav.dok.melosysbrev._000084.Fag;
 import no.nav.dok.melosysbrev._000084.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000084.ObjectFactory;
-import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AnmodningBegrunnelseKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
@@ -19,10 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*;
 
-
-public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper {
+public class AnmodningUnntakMapper implements BrevDataMapper {
 
     private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakMapper.class);
 
@@ -30,68 +32,53 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
-                                BrevData brevData) throws JAXBException, SAXException, TekniskException {
-        Fag fag = til000084Fag(mapFag(behandling, resultat, (BrevDataAnmodningUnntakOgAvslag) brevData));
-        mapArt161(fag, resultat);
+                                BrevData brevDataFelles) throws JAXBException, SAXException, TekniskException {
+        BrevDataAnmodningUnntakOgAvslag brevdata = (BrevDataAnmodningUnntakOgAvslag) brevDataFelles;
+        Fag fag = mapFag(behandling, resultat, brevdata);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private void mapArt161(Fag fag, Behandlingsresultat resultat) throws TekniskException {
-
-        Vilkaarsresultat vilkaarsresultat = hentFørsteGyldigeVilkaarsresultatForArt16(resultat)
-            .orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1"));
-
-        VilkaarBegrunnelse vilkaarBegrunnelse = vilkaarsresultat.getBegrunnelser().iterator().next();
-        fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(vilkaarBegrunnelse.getKode()));
-    }
-
-    private static JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
-        ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = factory.createBrevdataType();
-        brevdataType.setFelles(fellesType);
-        brevdataType.setNAVFelles(navFelles);
-        brevdataType.setFag(fag);
-        return factory.createBrevdata(brevdataType);
-    }
-
-    private static Fag til000084Fag(no.nav.dok.melosysbrev._000081.Fag fag000081) {
+    Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {
         Fag fag = new Fag();
+        if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
+            // Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004 (MELOSYS-1863)
+            fag.setInngangsvilkårBegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
+        } else {
+            throw new TekniskException("Forholdet er ikke dekket av inngangsvilkårene for 883/2004");
+        }
 
-        fag.setAnmodningFritekst(fag000081.getAnmodningFritekst());
-        fag.setArbeidsland(fag000081.getArbeidsland());
-        fag.setAvslag(fag000081.getAvslag());
-        fag.setArt121Begrunnelse(fag000081.getArt121Begrunnelse());
-        fag.setArt121ForutgåendeBegrunnelse(fag000081.getArt121ForutgåendeBegrunnelse());
-        fag.setArt122Begrunnelse(fag000081.getArt122Begrunnelse());
-        fag.setArt122NormalVirksomhetBegrunnelse(fag000081.getArt122NormalVirksomhetBegrunnelse());
-        fag.setArt161AnmodningBegrunnelse(fag000081.getArt161AnmodningBegrunnelse());
-        fag.setArt161AvslagBegrunnelse(fag000081.getArt161AvslagBegrunnelse());
-        fag.setBegrunnelseFritekst(fag000081.getBegrunnelseFritekst());
-        fag.setForetakNavn(fag000081.getForetakNavn());
-        fag.setFtrl213AvslagBegrunnelse(fag000081.getFtrl213AvslagBegrunnelse());
-        fag.setInngangsvilkårBegrunnelse(fag000081.getInngangsvilkårBegrunnelse());
-        fag.setLovvalgsperiode(tilLovvalgsperiodeType000084(fag000081.getLovvalgsperiode()));
-        fag.setYrkesaktivitet(fag000081.getYrkesaktivitet());
+        fag.setForetakNavn(brevData.hovedvirksomhet.navn);
+        fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(brevData.yrkesaktivitet.getKode()));
+
+        fag.setArbeidsland(brevData.arbeidsland);
+        fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
+
+        Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
+        fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
+
+        Set<VilkaarBegrunnelse> art121ForutgåendeBegrunnelser = hentVilkaarbegrunnelser(resultat, ART12_1_FORUTGAAENDE_MEDLEMSKAP);
+        fag.setArt121ForutgåendeBegrunnelse(mapArt121ForutgaaendeBegrunnelseType(art121ForutgåendeBegrunnelser));
+
+        Set<VilkaarBegrunnelse> art122Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_2);
+        fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
+
+        Set<VilkaarBegrunnelse> art122NormalVirksomhetBegrunnelse = hentVilkaarbegrunnelser(resultat, ART12_2_NORMALT_DRIVER_VIRKSOMHET);
+        fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelse));
+
+        Collection<VilkaarBegrunnelse> art16Begrunnelser = brevData.art16Vilkaar.map(Vilkaarsresultat::getBegrunnelser)
+            .orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1"));
+        VilkaarBegrunnelse vilkaarBegrunnelse = art16Begrunnelser.iterator().next();
+        fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(vilkaarBegrunnelse.getKode()));
+
+        brevData.art16Vilkaar.map(Vilkaarsresultat::getBegrunnelseFritekst).ifPresent(fag::setAnmodningFritekst);
 
         return fag;
     }
 
-    private static LovvalgsperiodeType tilLovvalgsperiodeType000084(no.nav.dok.melosysbrev._000081.LovvalgsperiodeType lovvalgsperiodeType000081) {
-        LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
-        lovvalgsperiodeType.setFomDato(lovvalgsperiodeType000081.getFomDato());
-        lovvalgsperiodeType.setTomDato(lovvalgsperiodeType000081.getTomDato());
-        lovvalgsperiodeType.setUnntakFraLovvalgsland(lovvalgsperiodeType000081.getUnntakFraLovvalgsland());
-        return lovvalgsperiodeType;
-    }
-
-    @Override
-    no.nav.dok.melosysbrev._000081.LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) {
-
+    LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) {
         Anmodningsperiode anmodningsperiode = resultat.hentValidertAnmodningsperiode();
-
-        no.nav.dok.melosysbrev._000081.LovvalgsperiodeType lovvalgsperiodeType = new no.nav.dok.melosysbrev._000081.LovvalgsperiodeType();
-
+        LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
         lovvalgsperiodeType.setUnntakFraLovvalgsland(anmodningsperiode.getUnntakFraLovvalgsland().getBeskrivelse());
 
         try {
@@ -101,5 +88,14 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
             log.error("", e);
         }
         return lovvalgsperiodeType;
+    }
+
+    private static JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
+        ObjectFactory factory = new ObjectFactory();
+        BrevdataType brevdataType = factory.createBrevdataType();
+        brevdataType.setFelles(fellesType);
+        brevdataType.setNAVFelles(navFelles);
+        brevdataType.setFag(fag);
+        return factory.createBrevdata(brevdataType);
     }
 }

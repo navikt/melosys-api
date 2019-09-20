@@ -94,6 +94,8 @@ public final class SaksopplysningerTilDto {
                 case SEDOPPL:
                     dto.setSed(SedDokumentDto.fra((SedDokument)dokument));
                     break;
+                case UTBETAL:
+                    break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
             }

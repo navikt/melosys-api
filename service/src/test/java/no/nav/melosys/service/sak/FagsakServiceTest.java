@@ -11,7 +11,13 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -32,8 +38,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -225,6 +229,18 @@ public class FagsakServiceTest {
         assertThat(oppdaterFagsak.getAktører().stream()
             .map(Aktoer::getInstitusjonId)
             .collect(Collectors.toList())).containsOnlyElementsOf(nyeInstitusjonsIder);
+    }
+
+    @Test
+    public void avsluttFagsakOgBehandling() throws IkkeFunnetException {
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, behandling);
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
+        verify(fagsakRepo).save(eq(fagsak));
+        verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
     }
 
     private Fagsak lagFagsakMedAktørforMyndighet(String saksnummer, String id) {

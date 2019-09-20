@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.time.Instant;
 import java.time.Period;
-import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessDataKey;
@@ -11,15 +10,12 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.MANGELBREV;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 
 /**
  * Sender mangelbrev til søker/arbeidsgiver
@@ -57,11 +53,6 @@ public class SendMangelbrev extends AbstraktStegBehandler {
     }
 
     @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
-    @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
@@ -74,7 +65,7 @@ public class SendMangelbrev extends AbstraktStegBehandler {
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(MELDING_MANGLENDE_OPPLYSNINGER)
             .medAvsender(saksbehandler)
-            .medMottaker(Mottaker.av(mottaker))
+            .medMottakere(Mottaker.av(mottaker))
             .medBehandling(behandling)
             .medFritekst(fritekst).build();
         brevBestiller.bestill(brevbestilling);

@@ -1,18 +1,13 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.Map;
-
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,18 +32,13 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
-    @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
 
         log.info("Henter behandlingsoppgave for fagsak {}", saksnummer);
-        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+        Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
         String behandlingsoppgaveId = oppgave.getOppgaveId();
 
         log.info("Tildeler behandlingsoppgave {} til saksbehandler {}", behandlingsoppgaveId, saksbehandler);

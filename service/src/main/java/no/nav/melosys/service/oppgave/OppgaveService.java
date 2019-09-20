@@ -94,7 +94,7 @@ public class OppgaveService {
     }
 
     public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-        return gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+        return gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
     }
 
     public Long hentAktivBehandlingId(String saksnummer) throws IkkeFunnetException, TekniskException {

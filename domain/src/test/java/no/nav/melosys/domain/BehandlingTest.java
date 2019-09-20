@@ -1,6 +1,6 @@
 package no.nav.melosys.domain;
 
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

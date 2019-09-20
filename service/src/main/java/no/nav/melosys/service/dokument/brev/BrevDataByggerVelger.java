@@ -1,16 +1,13 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
-import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,31 +16,25 @@ import org.springframework.stereotype.Component;
 public class BrevDataByggerVelger {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final AvklartefaktaService avklartefaktaService;
-    private final KodeverkService kodeverkService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final JoarkService joarkService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LandvelgerService landvelgerService;
 
     @Autowired
     public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
                                 AvklartefaktaService avklartefaktaService,
-                                AvklarteVirksomheterSystemService avklarteVirksomheterService,
-                                KodeverkService kodeverkService,
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
                                 JoarkService joarkService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
-        this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.joarkService = joarkService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.landvelgerService = new LandvelgerService(avklartefaktaService, vilkaarsresultatRepository);
     }
 
@@ -57,14 +48,10 @@ public class BrevDataByggerVelger {
             case ATTEST_A1:
                 return lagBrevDataByggerA1(brevbestillingDto);
             case AVSLAG_ARBEIDSGIVER:
-                return new BrevDataByggerAvslagArbeidsgiver(avklartefaktaService,
-                                                            avklarteVirksomheterService,
-                                                            landvelgerService,
-                                                            lovvalgsperiodeService,
-                                                            vilkaarsresultatRepository);
+                return new BrevDataByggerAvslagArbeidsgiver(landvelgerService, lovvalgsperiodeService, vilkaarsresultatRepository);
             case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK:
-                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, landvelgerService);
+                return new BrevDataByggerAnmodningUnntakOgAvslag(landvelgerService, anmodningsperiodeService, vilkaarsresultatRepository);
             case ANMODNING_UNNTAK:
                 return lagBrevDataByggerA001(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV:
@@ -75,6 +62,7 @@ public class BrevDataByggerVelger {
                 return new BrevDataByggerInnvilgelse(avklartefaktaService,
                                                     landvelgerService,
                                                     lovvalgsperiodeService,
+                                                    anmodningsperiodeService,
                                                     brevbestillingDto);
             case MELDING_HENLAGT_SAK:
                 return new BrevDataByggerHenleggelse(joarkService, brevbestillingDto);
@@ -88,19 +76,14 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerA1(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 a1Bygger =
-            new BrevDataByggerA1(avklartefaktaService,
-                avklarteVirksomheterService,
-                kodeverkService);
+            new BrevDataByggerA1(avklartefaktaService);
         return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
     }
 
     private BrevDataBygger lagBrevDataByggerA001(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA001 a001Bygger =
-            new BrevDataByggerA001(anmodningsperiodeService,
-                avklartefaktaService,
-                avklarteVirksomheterService,
-                kodeverkService,
-                lovvalgsperiodeService,
+            new BrevDataByggerA001(lovvalgsperiodeService,
+                anmodningsperiodeService,
                 utenlandskMyndighetRepository,
                 vilkaarsresultatRepository);
         return new BrevDataByggerVedlegg(a001Bygger, brevbestillingDto);
@@ -108,21 +91,21 @@ public class BrevDataByggerVelger {
 
     private BrevDataBygger lagBrevDataByggerInnvilgelse(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
-            new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
+            new BrevDataByggerA1(avklartefaktaService);
 
         return new BrevDataByggerInnvilgelse(avklartefaktaService,
             landvelgerService,
             lovvalgsperiodeService,
+            anmodningsperiodeService,
             brevbestillingDto,
             brevbyggerA1);
     }
 
     private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
-            new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
+            new BrevDataByggerA1(avklartefaktaService);
 
         return new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
-            avklarteVirksomheterService,
             landvelgerService,
             lovvalgsperiodeService,
             brevbestillingDto,

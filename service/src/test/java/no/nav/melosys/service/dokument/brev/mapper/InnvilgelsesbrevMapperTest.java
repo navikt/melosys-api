@@ -8,18 +8,26 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
@@ -42,14 +50,14 @@ public class InnvilgelsesbrevMapperTest {
     @Test
     public void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789"))));
+                Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))));
     }
 
     @Test
     public void mapTilBrevXmlUtenArbeidslandISøknadGirUnntak() {
         Behandling behandlingUtenSaksopplysninger = lagBehandling(lagFagsak(), Collections.emptySet());
         Behandlingsresultat behandlingsresultatUtenAvklartArbeidsland = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789")));
+                Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789")));
         Throwable unntak = catchThrowable(() -> testMapTilBrevXml(behandlingUtenSaksopplysninger,
                 behandlingsresultatUtenAvklartArbeidsland));
         assertThat(unntak).isInstanceOf(TekniskException.class)
@@ -69,20 +77,20 @@ public class InnvilgelsesbrevMapperTest {
         MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataA1 brevdataA1 = new BrevDataA1();
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("Virker ikke", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevdataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet, virksomhet));
+        brevdataA1.hovedvirksomhet = virksomhet;
+        brevdataA1.bivirksomheter = Collections.singletonList(virksomhet);
         brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
         brevdataA1.selvstendigeForetak = Collections.emptySet();
-        brevdataA1.utenlandskeVirksomheter = Collections.emptyList();
         brevdataA1.person = lagPersonDokument();
-        brevdataA1.hovedvirksomhet = virksomhet;
         brevdataA1.arbeidssteder = new ArrayList<>();
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(),"SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.norskeVirksomheter = brevdataA1.norskeVirksomheter;
+        brevdataInnvilgelse.hovedvirksomhet = virksomhet;
         brevdataInnvilgelse.arbeidsland = "Sverige";
+        brevdataInnvilgelse.anmodningsperiodesvar = Optional.of(lagAnmodningsperiodeSvarInnvilgelse());
         brevdataInnvilgelse.trygdemyndighetsland = "Sverige";
 
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
@@ -91,20 +99,10 @@ public class InnvilgelsesbrevMapperTest {
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 
-    private static StrukturertAdresse lagStrukturertAdresse() {
-        StrukturertAdresse vadr = new StrukturertAdresse();
-        vadr.gatenavn = "Gate";
-        vadr.husnummer = "12B";
-        vadr.poststed = "Sted";
-        vadr.postnummer = "4321";
-        vadr.landkode = Landkoder.BG.getKode();
-        return vadr;
-    }
-
     private static Behandlingsresultat lagBehandlingsresultat() {
         Set<Avklartefakta> fakta = new HashSet<>(Arrays.asList(
-                lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789"),
-                lagAvklarteFakta(Avklartefaktatype.ARBEIDSLAND, "SE")));
+                lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"),
+                lagAvklarteFakta(Avklartefaktatyper.ARBEIDSLAND, "SE")));
         return lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()), fakta);
     }
 
@@ -121,15 +119,15 @@ public class InnvilgelsesbrevMapperTest {
 
     private static Lovvalgsperiode lagLovvalgsperiode(LocalDate fom) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(fom);
         periode.setTom(LocalDate.now());
         periode.setLovvalgsland(Landkoder.AT);
-        periode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
     }
 
-    private static Avklartefakta lagAvklarteFakta(Avklartefaktatype type, String verdi) {
+    private static Avklartefakta lagAvklarteFakta(Avklartefaktatyper type, String verdi) {
         Avklartefakta faktum = new Avklartefakta();
         faktum.setType(type);
         faktum.setFakta("TRUE");
@@ -144,12 +142,8 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
-        Saksopplysning søknad = lagSoeknadssaksopplysning();
+        Saksopplysning søknad = lagSoeknadssaksopplysning(lagSoeknadDokument());
         return lagBehandling(fagsak, Collections.singleton(søknad));
-    }
-
-    private static Saksopplysning lagSoeknadssaksopplysning() {
-        return lagSaksopplysning(SaksopplysningType.SØKNAD, lagSoeknadDokument());
     }
 
     private static SoeknadDokument lagSoeknadDokument() {
@@ -164,16 +158,9 @@ public class InnvilgelsesbrevMapperTest {
 
     private static MaritimtArbeid lagMaritimtArbeidUtenFartsområde() {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.navn = "Dunfjæder";
+        maritimtArbeid.enhetNavn = "Dunfjæder";
         maritimtArbeid.installasjonsLandkode = "NO";
         return maritimtArbeid;
-    }
-
-    private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
-        Saksopplysning søknad = new Saksopplysning();
-        søknad.setType(type);
-        søknad.setDokument(dokument);
-        return søknad;
     }
 
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {

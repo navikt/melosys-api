@@ -8,7 +8,13 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -21,9 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import static no.nav.melosys.domain.ProsessSteg.HS_OPPDATER_RESULTAT;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
@@ -106,6 +112,15 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    public void opprettProsessinstansAnmodningOmUnntakMottakSvar(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR);
+        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_SEND_SED);
+        prosessinstans.setBehandling(behandling);
+
+        lagre(prosessinstans);
+    }
+
     public void opprettProsessinstansHenleggSak(Behandling behandling, Henleggelsesgrunner begrunnelseKode, String fritekst) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -117,7 +132,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.FRITEKST, fritekst);
         }
 
-        prosessinstans.setSteg(HS_OPPDATER_RESULTAT);
+        prosessinstans.setSteg(no.nav.melosys.domain.ProsessSteg.HS_OPPDATER_RESULTAT);
 
         lagre(prosessinstans);
     }
@@ -159,7 +174,7 @@ public class ProsessinstansService {
         lagre(nyprosessinstans);
     }
 
-    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperioder endretperiode) {
+    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode) {
         Prosessinstans nyprosessinstans = new Prosessinstans();
         nyprosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiode);
         nyprosessinstans.setBehandling(behandling);
@@ -177,7 +192,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, Collection<IkkeGodkjentBegrunnelser> begrunnelser, String begrunnelseFritekst) {
+    public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, Collection<Ikke_godkjent_begrunnelser> begrunnelser, String begrunnelseFritekst) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT);
@@ -192,6 +207,29 @@ public class ProsessinstansService {
         prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_UNDER_AVKLARING);
         prosessinstans.setBehandling(behandling);
+        lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void opprettProsessinstansSedMottak(MelosysEessiMelding melosysEessiMelding) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.MOTTAK_SED);
+        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_RUTING);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, melosysEessiMelding.getJournalpostId());
+        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, melosysEessiMelding.getDokumentId());
+        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, melosysEessiMelding.getErEndring());
+        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, melosysEessiMelding.getGsakSaksnummer());
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, melosysEessiMelding.getAktoerId());
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansSedMottak(String journalpostID, String brukerID) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.MOTTAK_SED);
+        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
         lagre(prosessinstans);
     }
 }

@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.ufm;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
+import no.nav.melosys.integrasjon.tps.TpsService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,12 +18,14 @@ public class OppdaterSakOgBehandlingOpprettetTest {
 
     @Mock
     private SakOgBehandlingFasade sakOgBehandlingFasade;
+    @Mock
+    private TpsService tpsService;
 
     private OppdaterSakOgBehandlingOpprettet oppdaterSakOgBehandlingOpprettet;
 
     @Before
     public void setup() {
-        oppdaterSakOgBehandlingOpprettet = new OppdaterSakOgBehandlingOpprettet(sakOgBehandlingFasade);
+        oppdaterSakOgBehandlingOpprettet = new OppdaterSakOgBehandlingOpprettet(sakOgBehandlingFasade, tpsService, null);
     }
 
     @Test

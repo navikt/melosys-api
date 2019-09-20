@@ -9,6 +9,8 @@ import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -24,9 +26,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
 import static java.util.Arrays.asList;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

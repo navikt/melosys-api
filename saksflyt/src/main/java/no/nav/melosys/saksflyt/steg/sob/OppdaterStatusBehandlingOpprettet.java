@@ -5,6 +5,8 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
+import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_SAKSRELASJON;
 import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
 
 /**
@@ -28,8 +30,8 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingOpprettet.class);
 
     @Autowired
-    public OppdaterStatusBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade) {
-        super(sakOgBehandlingFasade);
+    public OppdaterStatusBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
+        super(sakOgBehandlingFasade, tpsService, behandlingService);
         log.info("OppdaterStatusBehandlingOpprettet initialisert");
     }
 
@@ -48,7 +50,7 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
 
         sakOgBehandlingOpprettet(saksnummer, behandling.getId(), aktørID);
 
-        prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+        prosessinstans.setSteg(JFR_OPPDATER_SAKSRELASJON);
         log.info("Oppdatert sob-status til opprettet for prosessinstans {}", prosessinstans.getId());
     }
 }

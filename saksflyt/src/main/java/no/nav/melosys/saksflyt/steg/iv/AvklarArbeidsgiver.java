@@ -1,18 +1,13 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import java.util.Map;
-
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktAvklarArbeidsgiveraktoer;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
@@ -51,20 +46,16 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
         return IV_AVKLAR_ARBEIDSGIVER;
     }
 
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
+        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
         ProsessType prosessType = prosessinstans.getType();
-        if (arbeidsgiverAvklares(prosessType)) {
+        if (arbeidsgiverAvklares(prosessType, resultat)) {
             super.utfør(prosessinstans);
         }
 
-        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
         if (resultat.medlOppdateres()) {
             prosessinstans.setSteg(IV_OPPDATER_MEDL);
         } else {
@@ -73,7 +64,8 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
     }
 
     // Ved forkortet periode har allerede arbeidsgiver blitt avklart
-    private static boolean arbeidsgiverAvklares(ProsessType prosessType) {
-        return prosessType != IVERKSETT_VEDTAK_FORKORT_PERIODE;
+    private static boolean arbeidsgiverAvklares(ProsessType prosessType, Behandlingsresultat resultat) {
+        return prosessType != IVERKSETT_VEDTAK_FORKORT_PERIODE &&
+            !resultat.hentValidertLovvalgsperiode().erArtikkel13();
     }
 }

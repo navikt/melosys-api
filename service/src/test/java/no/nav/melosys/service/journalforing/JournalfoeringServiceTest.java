@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.FagsakDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -22,6 +24,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JournalfoeringServiceTest {
@@ -35,15 +38,25 @@ public class JournalfoeringServiceTest {
    @Mock
     private OppgaveService oppgaveService;
 
+   @Mock
+   private EessiService eessiService;
+
     private JournalfoeringService journalfoeringService;
 
     private JournalfoeringOpprettDto opprettDto;
 
     private JournalfoeringTilordneDto tilordneDto;
 
+    private Journalpost journalpost;
+
     @Before
-    public void setup() {
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService);
+    public void setup() throws SikkerhetsbegrensningException, IntegrasjonException {
+
+        journalpost = new Journalpost("123");
+        journalpost.setHoveddokument(new ArkivDokument());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService);
         JournalfoeringOpprettDto opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setDokumentID("setDokumentID");
@@ -67,7 +80,7 @@ public class JournalfoeringServiceTest {
     }
 
     @Test
-    public void opprettSakOgJournalfør() throws FunksjonellException, TekniskException {
+    public void opprettSakOgJournalfør() throws MelosysException {
         FagsakDto fagsakDto = new FagsakDto();
         PeriodeDto periode = new PeriodeDto();
         periode.setFom(LocalDate.MIN);
@@ -75,7 +88,7 @@ public class JournalfoeringServiceTest {
         fagsakDto.setSoknadsperiode(periode);
         fagsakDto.setLand(Arrays.asList("DK"));
         opprettDto.setFagsak(fagsakDto);
-        journalfoeringService.opprettSakOgJournalfør(opprettDto);
+        journalfoeringService.opprettOgJournalfør(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
         verify(oppgaveService).ferdigstillOppgave(anyString());
@@ -83,9 +96,19 @@ public class JournalfoeringServiceTest {
     }
 
     @Test(expected = FunksjonellException.class)
-    public void opprettSakOgJournalfør_oppgaveID_mangler() throws FunksjonellException, TekniskException {
+    public void opprettSakOgJournalfør_oppgaveID_mangler() throws MelosysException {
         opprettDto.setOppgaveID(null);
-        journalfoeringService.opprettSakOgJournalfør(opprettDto);
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+    }
+
+    @Test
+    public void opprettOgJournalfør_erSed_prosessinstansOpprettet() throws MelosysException {
+        journalpost.setMottaksKanal("EESSI");
+        journalpost.getHoveddokument().setNavSkjemaID("A009");
+        when(eessiService.støtterAutomatiskBehandling(anyString(), anyString())).thenReturn(Boolean.TRUE);
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+        verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(),anyString());
     }
 
     @Test

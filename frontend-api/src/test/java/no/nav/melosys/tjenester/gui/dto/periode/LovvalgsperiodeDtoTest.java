@@ -7,6 +7,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -56,8 +58,8 @@ public class LovvalgsperiodeDtoTest {
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {
         LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(
             new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
-            enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("lovvalgsbestemmelse")),
-            TilleggsBestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),
+            enumVerdiEllerNull(Lovvalgbestemmelser_883_2004.class, json.get("lovvalgsbestemmelse")),
+            Tilleggsbestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
             InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
             enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),

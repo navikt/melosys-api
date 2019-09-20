@@ -1,10 +1,13 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.begrunnelser.*;
 import no.nav.melosys.exception.TekniskException;
 
 public final class VilkaarbegrunnelseFactory {
@@ -19,7 +22,7 @@ public final class VilkaarbegrunnelseFactory {
     public static Art121BegrunnelseType mapArt121BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
         Art121BegrunnelseType art121BegrunnelseType = lagArt121BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_1_Begrunnelser artikkel12_1 = Art12_1_Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
+            Art12_1_begrunnelser artikkel12_1 = Art12_1_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel12_1) {
                 case UTSENDELSE_OVER_24_MN:
                     art121BegrunnelseType.setUtsendelseOver24Mn(JA);
@@ -61,7 +64,7 @@ public final class VilkaarbegrunnelseFactory {
         Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType = lagArt121ForutgaaendeBegrunnelseType();
 
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_1_Forutgaaende_Medl_Begrunnelse forutgaaendeMedlemskap = Art12_1_Forutgaaende_Medl_Begrunnelse.valueOf(vilkaarBegrunnelse.getKode());
+            Art12_1_forutgaaende_medl forutgaaendeMedlemskap = Art12_1_forutgaaende_medl.valueOf(vilkaarBegrunnelse.getKode());
             switch (forutgaaendeMedlemskap) {
                 case UNNTATT_MEDLEMSKAP:
                     art121ForutgaaendeBegrunnelseType.setUntattMedlemskap(JA);
@@ -90,7 +93,7 @@ public final class VilkaarbegrunnelseFactory {
     public static Art121VesentligVirksomhetBegrunnelse mapArt121VesentligVirksomhetBegrunnelse(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
         Art121VesentligVirksomhetBegrunnelse brevBegrunnelse = lagArt121VesentligVirksomhetBegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_1_Vesentlig_Virksomhet_Begrunnelser vesentligVirksomhetBegrunnelse = Art12_1_Vesentlig_Virksomhet_Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
+            Art12_1_vesentlig_virksomhet vesentligVirksomhetBegrunnelse = Art12_1_vesentlig_virksomhet.valueOf(vilkaarBegrunnelse.getKode());
             switch (vesentligVirksomhetBegrunnelse) {
                 case FOR_LITE_KONTRAKTER_NORGE:
                     brevBegrunnelse.setForLiteKontrakterNorge(JA);
@@ -135,7 +138,7 @@ public final class VilkaarbegrunnelseFactory {
     public static Art122BegrunnelseType mapArt122BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
         Art122BegrunnelseType art122BegrunnelseType = lagArt122BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_2_Begrunnelser artikkel12_2 = Art12_2_Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
+            Art12_2_begrunnelser artikkel12_2 = Art12_2_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel12_2) {
                 case UTSENDELSE_OVER_24_MN:
                     art122BegrunnelseType.setUtsendelseOver24Mn(JA);
@@ -164,7 +167,7 @@ public final class VilkaarbegrunnelseFactory {
     public static Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
         Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = lagArt122NormalVirksomhetBegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_2_Normalt_Virksomhet_Begrunnelser normaltDriverVirksomhet = Art12_2_Normalt_Virksomhet_Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
+            Art12_2_normalt_virksomhet normaltDriverVirksomhet = Art12_2_normalt_virksomhet.valueOf(vilkaarBegrunnelse.getKode());
             switch (normaltDriverVirksomhet) {
                 case IKKE_FORUTGAAENDE_DRIFT:
                     art122NormalVirksomhetBegrunnelseType.setIkkeForutgåendeDrift(JA);
@@ -185,5 +188,12 @@ public final class VilkaarbegrunnelseFactory {
         art122NormalVirksomhetBegrunnelseType.setHarIkkeNødvendigInfrastruktur("");
         art122NormalVirksomhetBegrunnelseType.setOpprettholderIkkeLisenserAutorisasjon("");
         return art122NormalVirksomhetBegrunnelseType;
+    }
+
+    public static Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, Vilkaar vilkaarType) {
+        return resultat.getVilkaarsresultater().stream()
+            .filter(vr -> vr.getVilkaar() == vilkaarType)
+            .flatMap(vr -> vr.getBegrunnelser().stream())
+            .collect(Collectors.toSet());
     }
 }

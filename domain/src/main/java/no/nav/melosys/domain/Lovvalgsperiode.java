@@ -8,7 +8,9 @@ import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 
-import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*;
 
 @Entity
 @Table(name = "lovvalg_periode")
@@ -193,6 +195,18 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
             || bestemmelse == FO_883_2004_ART13_4;
     }
 
+    public boolean erArtikkel11() {
+        return bestemmelse == FO_883_2004_ART11_1
+                || bestemmelse == FO_883_2004_ART11_3A
+                || bestemmelse == FO_883_2004_ART11_3B
+                || bestemmelse == FO_883_2004_ART11_3C
+                || bestemmelse == FO_883_2004_ART11_3E
+                || bestemmelse == FO_883_2004_ART11_4_2
+                || bestemmelse == FO_883_2004_ART11_2
+                || bestemmelse == FO_883_2004_ART11_4_1
+                || bestemmelse == FO_883_2004_ART11_5;
+    }
+
     public boolean erInvilget() {
         return getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
             && getLovvalgsland() == Landkoder.NO
@@ -207,7 +221,6 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
 
     public static Lovvalgsperiode av(AnmodningsperiodeSvar anmodningsperiodeSvar,
                                      Medlemskapstyper medlemskapstype) throws FunksjonellException {
-
         if (anmodningsperiodeSvar == null) {
             throw new FunksjonellException("Kan ikke opprette lovvalgsperiode fra anmodningsperiode " +
                 "uten at et svar er registrert!");
@@ -215,13 +228,10 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
 
         Anmodningsperiode anmodningsperiode = anmodningsperiodeSvar.getAnmodningsperiode();
 
-        InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.AVSLAG ?
-            InnvilgelsesResultat.AVSLAATT : InnvilgelsesResultat.INNVILGET;
-
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(anmodningsperiode.getBestemmelse());
 
-        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == AnmodningsperiodeSvarType.DELVIS_INNVILGELSE) {
+        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE) {
             lovvalgsperiode.setFom(anmodningsperiodeSvar.getInnvilgetFom());
             lovvalgsperiode.setTom(anmodningsperiodeSvar.getInnvilgetTom());
         } else {
@@ -229,11 +239,16 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
             lovvalgsperiode.setTom(anmodningsperiode.getTom());
         }
 
+        InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.AVSLAG ?
+            InnvilgelsesResultat.AVSLAATT : InnvilgelsesResultat.INNVILGET;
         lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
+
         lovvalgsperiode.setMedlemskapstype(medlemskapstype);
         lovvalgsperiode.setMedlPeriodeID(anmodningsperiode.getMedlPeriodeID());
         lovvalgsperiode.setTilleggsbestemmelse(anmodningsperiode.getTilleggsbestemmelse());
-        lovvalgsperiode.setLovvalgsland(anmodningsperiode.getLovvalgsland());
+        if (innvilgelsesResultat != InnvilgelsesResultat.AVSLAATT) {
+            lovvalgsperiode.setLovvalgsland(anmodningsperiode.getLovvalgsland());
+        }
         lovvalgsperiode.setDekning(anmodningsperiode.getDekning());
         return lovvalgsperiode;
     }

@@ -223,6 +223,9 @@ public class JoarkServiceTest {
         getJournalpostResponse.setArkivSak(new ArkivSakNoArkivsakSystemEnum());
         getJournalpostResponse.getArkivSak().setArkivSakId(arkivsakId);
 
+        String mottaksKanal = "EESSI eller NETS";
+        getJournalpostResponse.setMottaksKanal(mottaksKanal);
+
         String brukerId = "123b";
         Bruker bruker = new Bruker();
         bruker.setBrukerType(Bruker.BrukerType.PERSON);
@@ -237,10 +240,11 @@ public class JoarkServiceTest {
         getJournalpostResponse.setForsendelseMottatt(forsendelseMottatt);
 
         List<Dokument> dokumentListe = new ArrayList<>();
-        String dokumentTittel = "titteldok", dokumentId = "123dok";
+        String dokumentTittel = "titteldok", dokumentId = "123dok", navSkjemaID = "123skjemaID";
         Dokument hoveddokument = new Dokument();
         hoveddokument.setTittel(dokumentTittel);
         hoveddokument.setDokumentId(dokumentId);
+        hoveddokument.setNavSkjemaId(navSkjemaID);
         dokumentListe.add(hoveddokument);
 
         Dokument vedlegg1 = new Dokument();
@@ -265,8 +269,10 @@ public class JoarkServiceTest {
         assertThat(journalpost.getForsendelseMottatt()).isEqualTo(forsendelseMottatt.toInstant());
         assertThat(journalpost.getHoveddokument().getDokumentId()).isEqualTo(dokumentId);
         assertThat(journalpost.getHoveddokument().getTittel()).isEqualTo(dokumentTittel);
+        assertThat(journalpost.getHoveddokument().getNavSkjemaID()).isEqualTo(navSkjemaID);
         assertThat(journalpost.getArkivSakId()).isEqualTo(arkivsakId);
         assertThat(journalpost.getVedleggListe().size()).isEqualTo(2);
+        assertThat(journalpost.getMottaksKanal()).isEqualTo(mottaksKanal);
     }
 
     @Test

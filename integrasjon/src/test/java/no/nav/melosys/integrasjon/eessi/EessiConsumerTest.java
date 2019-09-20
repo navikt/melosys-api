@@ -8,10 +8,14 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -131,5 +135,49 @@ public class EessiConsumerTest {
             .andRespond(withBadRequest());
 
         eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01");
+    }
+
+    @Test
+    public void lagreSaksrelasjon_validerUrl() throws MelosysException {
+        server.expect(requestTo("/sak"))
+            .andRespond(withSuccess());
+        eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(123L, "123", "123"));
+    }
+
+    @Test
+    public void hentSakForRinaSaksnummer_validerUrlOgResponse() throws MelosysException {
+        final String rinaSaksnummer = "114422";
+        final long gsakSaksnummer = 123L;
+        final String bucType = "LA_BUC_04";
+
+        server.expect(requestTo("/sak?rinaSaksnummer=" + rinaSaksnummer))
+            .andRespond(withSuccess("[{\"rinaSaksnummer\":\"" + rinaSaksnummer + "\"," +
+                    " \"gsakSaksnummer\":" + gsakSaksnummer + "," +
+                    " \"bucType\":\"" + bucType + "\"}]",
+                MediaType.APPLICATION_JSON));
+
+        List<SaksrelasjonDto> response = eessiConsumer.hentSakForRinasaksnummer(rinaSaksnummer);
+        assertThat(response).hasSize(1);
+
+        SaksrelasjonDto saksrelasjonDto = response.get(0);
+        assertThat(saksrelasjonDto.getRinaSaksnummer()).isEqualTo(rinaSaksnummer);
+        assertThat(saksrelasjonDto.getGsakSaksnummer()).isEqualTo(gsakSaksnummer);
+        assertThat(saksrelasjonDto.getBucType()).isEqualTo(bucType);
+    }
+
+    @Test
+    public void hentMelosysEessiMeldingFraJournalpostID_validerResponse() throws MelosysException, JsonProcessingException {
+        final String journalpostID = "115314";
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setSedType("A009");
+        melosysEessiMelding.setJournalpostId(journalpostID);
+
+        server.expect(requestTo("/journalpost/" + journalpostID + "/eessimelding"))
+            .andRespond(withSuccess(new ObjectMapper().writeValueAsString(melosysEessiMelding), MediaType.APPLICATION_JSON));
+
+        MelosysEessiMelding response = eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID);
+
+        assertThat(response.getSedType()).isEqualTo(melosysEessiMelding.getSedType());
+        assertThat(response.getJournalpostId()).isEqualTo(melosysEessiMelding.getJournalpostId());
     }
 }

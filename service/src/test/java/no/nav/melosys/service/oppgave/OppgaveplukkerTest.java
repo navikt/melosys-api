@@ -7,10 +7,10 @@ import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
@@ -34,7 +34,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.oppgave.Oppgaveplukker.KJENTE_OPPGAVETYPER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -232,7 +231,7 @@ public class OppgaveplukkerTest {
         final String saksbehandlerID = "test";
         final String begrunnelse = "Oppgaven er kjedelig";
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
+        when(gsakFasade.hentOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
@@ -259,7 +258,7 @@ public class OppgaveplukkerTest {
         oppgaveBuilder.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
+        when(gsakFasade.hentOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
         tilbakelegging.setBehandlingID(BEHANDLING_ID);

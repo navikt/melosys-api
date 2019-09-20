@@ -1,23 +1,16 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
-import java.util.Map;
-
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.steg.UnntakBehandler;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +21,13 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AvsluttFagsakOgBehandling.class);
 
-    private final OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final FagsakService fagsakService;
 
     @Autowired
-    public AvsluttFagsakOgBehandling(OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling, BehandlingsresultatRepository behandlingsresultatRepository) {
-        this.oppdaterFagsakOgBehandling = oppdaterFagsakOgBehandling;
+    public AvsluttFagsakOgBehandling(BehandlingsresultatRepository behandlingsresultatRepository, FagsakService fagsakService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -43,25 +36,23 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
-    @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+        fagsakService.avsluttFagsakOgBehandling(
+            prosessinstans.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART, prosessinstans.getBehandling()
+        );
 
-        Behandling behandling = prosessinstans.getBehandling();
-        oppdaterFagsakOgBehandling.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.LOVVALG_AVKLART, Behandlingsstatus.AVSLUTTET);
+        oppdaterUtfallRegistreringUnntak(prosessinstans.getBehandling().getId());
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
+    }
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
-            .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat for behandling " + behandling.getId()));
+
+    private void oppdaterUtfallRegistreringUnntak(long behandlingId) throws TekniskException {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingId)
+            .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat for behandling " + behandlingId));
 
         behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        behandlingsresultat.setUtfallRegistreringUnntak(UtfallRegistreringUnntak.GODKJENT);
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
         behandlingsresultatRepository.save(behandlingsresultat);
-
-        log.info("Periode regisrert og behandling avsluttet for fagsak {}, behandling {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }
