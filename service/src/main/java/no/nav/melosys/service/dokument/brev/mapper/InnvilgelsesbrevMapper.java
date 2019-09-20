@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -8,10 +9,7 @@ import no.nav.dok.melosysbrev._000108.ObjectFactory;
 import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
@@ -24,7 +22,10 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_2;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*;
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
@@ -39,13 +40,13 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
         vedleggMapper.map(brevDataInnvilgelse.vedleggA1);
 
-        Fag fag = mapFag(behandling, brevDataInnvilgelse);
+        Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag, vedleggMapper.hent());
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, BrevDataInnvilgelse brevdata) throws TekniskException {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevdata) throws TekniskException {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
@@ -97,6 +98,12 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         if (brevdata.begrunnelseKode != null) {
             fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.begrunnelseKode));
         }
+
+        Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
+        fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
+
+        Set<VilkaarBegrunnelse> art122Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_2);
+        fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
 
         return fag;
     }
