@@ -25,6 +25,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +49,8 @@ public class SendUtlandTest {
     private BrevBestiller brevBestiller;
     @Mock
     private LandvelgerService landvelgerService;
+    @Mock
+    private AnmodningsperiodeService anmodningsperiodeService;
 
     private SendUtland sendUtland;
 
@@ -70,7 +73,7 @@ public class SendUtlandTest {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SJ));
         when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(institusjoner);
 
-        sendUtland = new SendUtland(eessiService, brevBestiller, behandlingService, behandlingsresultatService, landvelgerService);
+        sendUtland = new SendUtland(eessiService, brevBestiller, behandlingService, behandlingsresultatService, landvelgerService, anmodningsperiodeService);
     }
 
     @Test
@@ -82,6 +85,7 @@ public class SendUtlandTest {
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_01), eq(null));
+        verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(BEHANDLING_ID));
     }
 
     @Test
@@ -96,6 +100,7 @@ public class SendUtlandTest {
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
         assertThat(brevbestillingArgumentCaptor.getValue().getDokumentType()).isEqualTo(Produserbaredokumenter.ANMODNING_UNNTAK);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
+        verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(BEHANDLING_ID));
     }
 
     @Test
@@ -111,6 +116,7 @@ public class SendUtlandTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());
         verify(eessiService, never()).opprettOgSendSed(anyLong(), any());
+        verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(prosessinstans.getBehandling().getId()));
     }
 
     private static Behandlingsresultat hentBehandlingsresultat() {

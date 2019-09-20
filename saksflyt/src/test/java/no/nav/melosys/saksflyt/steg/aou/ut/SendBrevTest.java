@@ -10,7 +10,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,8 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -31,11 +30,10 @@ public class SendBrevTest {
     @Mock
     private BehandlingRepository behandlingRepository;
 
-    @Mock
-    private AnmodningsperiodeService anmodningsperiodeService;
-
     private Prosessinstans p;
     private SendBrev agent;
+
+    private static final String SAKSBEHANDLER = "Z121212";
 
     @Before
     public void setUp() {
@@ -51,20 +49,13 @@ public class SendBrevTest {
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.ANMODNING_OM_UNNTAK.getKode());
 
-        agent = new SendBrev(brevBestiller, behandlingRepository, anmodningsperiodeService);
+        agent = new SendBrev(brevBestiller, behandlingRepository);
     }
 
     @Test
-    public void utfoerSteg() throws FunksjonellException {
+    public void utfoerSteg() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
-        verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(anyLong());
+        brevBestiller.bestill(eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), eq(SAKSBEHANDLER), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_SED);
-    }
-
-    @Test
-    public void utførStegAntallSendteBrev() throws FunksjonellException, TekniskException {
-        agent.utførSteg(p);
-        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), anyString(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
-        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ANMODNING_UNNTAK), anyString(), eq(Mottaker.av(Aktoersroller.MYNDIGHET)), any(Behandling.class));
     }
 }
