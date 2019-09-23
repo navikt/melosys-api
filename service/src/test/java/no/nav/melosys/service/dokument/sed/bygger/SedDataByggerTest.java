@@ -18,7 +18,8 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,9 +52,7 @@ public class SedDataByggerTest {
     private Anmodningsperiode anmodningsperiode;
 
     @Before
-    @SuppressWarnings("unchecked")
-    public void setup()
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void setup() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
@@ -83,13 +82,17 @@ public class SedDataByggerTest {
         dataBygger = new SedDataBygger(lovvalgsperiodeService, landvelgerService);
     }
 
-    private DokumentdataGrunnlag lagDokumentressurser() throws TekniskException {
+    private SedDataGrunnlagMedSoknad lagDokumentressurser() throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        return new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+    }
+
+    private SedDataGrunnlagUtenSoknad lagDokumentressurserUtenSøknad() throws TekniskException {
+        return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService);
     }
 
     @Test
-    public void lag_medlemsperiodeTypeLovvalgsperiode_forventLovvalgsperiodeBrukt() throws FunksjonellException, TekniskException {
+    public void lag_medlemsperiodeTypeLovvalgsperiodeMedSøknad_forventLovvalgsperiodeBrukt() throws FunksjonellException, TekniskException {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -110,7 +113,7 @@ public class SedDataByggerTest {
     }
 
     @Test
-    public void lag_medlemsperiodeTypeAnmodningsperiode_forventAnmodningsperiodeBrukt() throws FunksjonellException, TekniskException {
+    public void lag_medlemsperiodeTypeAnmodningsperiodeMedSøknad_forventAnmodningsperiode() throws FunksjonellException, TekniskException {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.ANMODNINGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -119,7 +122,16 @@ public class SedDataByggerTest {
     }
 
     @Test
-    public void lag_medlemsperiodeTypeIngen_forventAnmodningsperiodeBrukt() throws FunksjonellException, TekniskException {
+    public void lag_medlemsperiodeTypeAnmodningsperiodeUtenSøknad_forventAnmodningsperiode() throws FunksjonellException, TekniskException {
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurserUtenSøknad(), behandlingsresultat, MedlemsperiodeType.ANMODNINGSPERIODE);
+
+        assertThat(sedData).isNotNull();
+        assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
+        assertThat(sedData.getLovvalgsperioder().get(0).getFom()).isEqualTo(anmodningsperiode.getFom());
+    }
+
+    @Test
+    public void lag_medlemsperiodeTypeIngenMedSøknad_forventAnmodningsperiode() throws FunksjonellException, TekniskException {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.INGEN);
 
         assertThat(sedData).isNotNull();
@@ -127,7 +139,16 @@ public class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_medlemsperiodeTypeIngen_utenLovvalgsperioder()
+    public void lagUtkast_medlemsperiodeTypeIngenMedSøknad_forventAnmodningsperiode() throws FunksjonellException, TekniskException {
+        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.ANMODNINGSPERIODE);
+
+        assertThat(sedData).isNotNull();
+        assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
+        assertThat(sedData.getLovvalgsperioder().get(0).getUnntakFraLovvalgsland()).isNotEmpty();
+    }
+
+    @Test
+    public void lagUtkast_medlemsperiodeTypeIngenMedSøknad_utenLovvalgsperioder()
         throws FunksjonellException, TekniskException {
         SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.INGEN);
 
@@ -136,7 +157,17 @@ public class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_medlemsperiodeTypeLovvalgsperiode_medLovvalgsperioder()
+    public void lagUtkast_medlemsperiodeTypeIngenUtenSøknad_utenLovvalgsperioder()
+        throws FunksjonellException, TekniskException {
+        SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurserUtenSøknad(), behandlingsresultat, MedlemsperiodeType.INGEN);
+
+        assertThat(sedData.getBruker()).isNotNull();
+        assertThat(sedData.getBostedsadresse()).isNotNull();
+        assertThat(sedData.getLovvalgsperioder().isEmpty()).isTrue();
+    }
+
+    @Test
+    public void lagUtkast_medlemsperiodeTypeLovvalgsperiodeMedSøknad_medLovvalgsperioder()
         throws FunksjonellException, TekniskException {
         SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
@@ -147,22 +178,16 @@ public class SedDataByggerTest {
 
     private void lagUtkastAssertions(SedDataDto sedData) {
         assertThat(sedData).isNotNull();
-        assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotNull();
-        assertThat(sedData.getArbeidssteder()).isNotNull();
+        assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotEmpty();
+        assertThat(sedData.getArbeidssteder()).isNotEmpty();
         assertThat(sedData.getBruker()).isNotNull();
         assertThat(sedData.getBostedsadresse()).isNotNull();
-        assertThat(sedData.getFamilieMedlem()).isNotNull();
-        assertThat(sedData.getUtenlandskIdent()).isNotNull();
-        assertThat(sedData.getSelvstendigeVirksomheter()).isNotNull();
+        assertThat(sedData.getFamilieMedlem()).isNotEmpty();
+        assertThat(sedData.getUtenlandskIdent()).isNotEmpty();
+        assertThat(sedData.getSelvstendigeVirksomheter()).isNotEmpty();
         assertThat(sedData.getUtenlandskeVirksomheter()).isNotNull();
-        assertThat(sedData.getTidligereLovvalgsperioder()).isNull();
+        assertThat(sedData.getTidligereLovvalgsperioder()).isNotNull();
         assertThat(sedData.getMottakerLand()).isNull();
         assertThat(sedData.getArbeidsgivendeVirksomheter().isEmpty()).isFalse();
-    }
-
-    private Lovvalgsperiode lagLovvalgsperiode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        return lovvalgsperiode;
     }
 }

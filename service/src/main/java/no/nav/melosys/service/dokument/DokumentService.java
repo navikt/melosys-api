@@ -21,8 +21,8 @@ import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
@@ -84,7 +84,7 @@ public class DokumentService {
             throw new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE);
         }
 
-        DokumentdataGrunnlag brevdataRessurser = dokumentdataGrunnlagFactory.av(behandling);
+        BrevDataGrunnlag brevdataRessurser = dokumentdataGrunnlagFactory.av(behandling);
         BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
         BrevData brevData = bygger.lag(brevdataRessurser, SubjectHandler.getInstance().getUserID());
 

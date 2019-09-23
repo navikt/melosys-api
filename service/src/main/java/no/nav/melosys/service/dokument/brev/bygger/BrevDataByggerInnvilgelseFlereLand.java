@@ -15,7 +15,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 
 public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     private final AvklartefaktaService avklartefaktaService;
@@ -38,7 +38,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         long behandlingID = dataGrunnlag.getBehandling().getId();
         SoeknadDokument søknad = dataGrunnlag.getSøknad();
 
@@ -63,7 +63,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         return brevdata;
     }
 
-    private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(brevbestillingDto, saksbehandler);
         brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         return brevdata;

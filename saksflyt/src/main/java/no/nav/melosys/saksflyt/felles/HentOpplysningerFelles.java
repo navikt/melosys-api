@@ -59,7 +59,7 @@ public class HentOpplysningerFelles {
 
         Instant nå = Instant.now();
 
-        Saksopplysning saksopplysning = tpsFasade.hentPerson(ident);
+        Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(ident);
         saksopplysning.setBehandling(behandling);
         saksopplysning.setRegistrertDato(nå);
         saksopplysning.setEndretDato(nå);

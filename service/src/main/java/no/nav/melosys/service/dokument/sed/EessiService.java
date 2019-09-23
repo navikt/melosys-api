@@ -21,9 +21,8 @@ import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.integrasjon.eessi.dto.SvarAnmodningUnntakDto;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +34,7 @@ public class EessiService {
     private static final Logger log = LoggerFactory.getLogger(EessiService.class);
 
     private final SedDataBygger sedDataBygger;
-    private final DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
+    private final SedDataGrunnlagFactory dataGrunnlagFactory;
     private final EessiConsumer eessiConsumer;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -46,12 +45,12 @@ public class EessiService {
     );
 
     public EessiService(@Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed, SedDataBygger sedDataBygger,
-                        DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory, EessiConsumer eessiConsumer,
+                        SedDataGrunnlagFactory dataGrunnlagFactory, EessiConsumer eessiConsumer,
                         BehandlingService behandlingService,
                         BehandlingsresultatService behandlingsresultatService) {
         this.skalSendeSed = Boolean.parseBoolean(skalSendeSed);
         this.sedDataBygger = sedDataBygger;
-        this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
+        this.dataGrunnlagFactory = dataGrunnlagFactory;
         this.eessiConsumer = eessiConsumer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -68,7 +67,7 @@ public class EessiService {
         if (skalSendeSed) {
             Fagsak fagsak = behandling.getFagsak();
 
-            DokumentdataGrunnlag datagrunnlag = dokumentdataGrunnlagFactory.av(behandling);
+            SedDataGrunnlag datagrunnlag = dataGrunnlagFactory.av(behandling);
             SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
             sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
@@ -86,7 +85,7 @@ public class EessiService {
 
     private String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId, byte[] vedlegg) throws MelosysException {
         if (skalSendeSed) {
-            DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
+            SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
             sedDataDto.setMottakerLand(mottakerLand);
@@ -154,7 +153,7 @@ public class EessiService {
 
     public byte[] genererSedForhåndsvisning(long behandingID, SedType sedType) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandingID);
-        DokumentdataGrunnlag dataGrunnlag = dokumentdataGrunnlagFactory.av(behandling);
+        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandingID);
 
         MedlemsperiodeType medlemsperiodeType;

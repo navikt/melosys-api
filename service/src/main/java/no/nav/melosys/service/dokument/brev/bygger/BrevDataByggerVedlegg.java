@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.*;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 
 public class BrevDataByggerVedlegg implements BrevDataBygger {
     private BrevbestillingDto brevbestillingDto;
@@ -24,7 +24,7 @@ public class BrevDataByggerVedlegg implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataVedlegg brevData = new BrevDataVedlegg(saksbehandler);
 
         if (a1Bygger != null) {
