@@ -26,7 +26,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
     private static final Logger log = LoggerFactory.getLogger(V1_1_05__SAKSOPPLYSNING_data.class);
 
-    private static final int MOCK_BEHANDLING_ID = 3;
     private static final String DB_FLYWAY_MIGRATION_TESTDATA_XML = "db/local/testdata/xml";
 
     private final ResourcePatternResolver resourcePatternResolver;
@@ -80,6 +79,9 @@ public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
             case XsltConfig.TPS_MAPPE:
                 generateBatch(conn, dir, SaksopplysningType.PERSOPL, "3.0", SaksopplysningKilde.TPS);
                 return;
+            case "pershist":
+                generateBatch(conn, dir, SaksopplysningType.PERSHIST, "3.4", SaksopplysningKilde.TPS);
+                return;
             case XsltConfig.MEDL_MAPPE:
                 generateBatch(conn, dir, SaksopplysningType.MEDL, "2.0", SaksopplysningKilde.MEDL);
                 return;
@@ -99,23 +101,33 @@ public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
         }
     }
 
+    private String[] getBehandlingsIder(String filename) {
+        String[] nameParts = filename.split("-");
+        if (nameParts.length != 2) {throw new UnsupportedOperationException("Filnavn må følge {behandlingsId}-beskrivendenavn.xml"); }
+        return nameParts[0].split("_");
+    }
+
     private void insertXML(Resource file, Connection conn, SaksopplysningType opplysning_type, String versjon, SaksopplysningKilde kilde, int i) {
-        String query = "INSERT INTO SAKSOPPLYSNING (ID, BEHANDLING_ID, OPPLYSNING_TYPE, VERSJON, KILDE, REGISTRERT_DATO, ENDRET_DATO, DOKUMENT_XML) VALUES (?, ?, ?, ?, ?, ?, ?, XMLType(?)) ";
-        try (OraclePreparedStatement ps = (OraclePreparedStatement) conn.prepareStatement(query)) {
-            ps.setInt(1, currentRowNum++);
-            ps.setInt(2, MOCK_BEHANDLING_ID);
-            ps.setString(3, opplysning_type.getKode());
-            ps.setString(4, versjon);
-            ps.setString(5, kilde.getKode());
-            Timestamp x = Timestamp.valueOf(LocalDateTime.now());
-            ps.setTimestamp(6, x);
-            ps.setTimestamp(7, x);
-            ps.setCharacterStream(8, new InputStreamReader(file.getInputStream()), file.contentLength());
-            if (ps.executeUpdate() == 1) {
-                log.info("Successfully inserted {} {}", i, file.getFilename());
+        for (String behandlingsidText : getBehandlingsIder(file.getFilename())) {
+            int behandlingsid = Integer.parseInt(behandlingsidText);
+
+            String query = "INSERT INTO SAKSOPPLYSNING (ID, BEHANDLING_ID, OPPLYSNING_TYPE, VERSJON, KILDE, REGISTRERT_DATO, ENDRET_DATO, DOKUMENT_XML) VALUES (?, ?, ?, ?, ?, ?, ?, XMLType(?)) ";
+            try (OraclePreparedStatement ps = (OraclePreparedStatement) conn.prepareStatement(query)) {
+                ps.setInt(1, currentRowNum++);
+                ps.setInt(2, behandlingsid);
+                ps.setString(3, opplysning_type.getKode());
+                ps.setString(4, versjon);
+                ps.setString(5, kilde.getKode());
+                Timestamp x = Timestamp.valueOf(LocalDateTime.now());
+                ps.setTimestamp(6, x);
+                ps.setTimestamp(7, x);
+                ps.setCharacterStream(8, new InputStreamReader(file.getInputStream()), file.contentLength());
+                if (ps.executeUpdate() == 1) {
+                    log.info("Successfully inserted {} {}, behandlingsid: {}", i, file.getFilename(), behandlingsid);
+                }
+            } catch (Exception e) {
+                log.error("", e);
             }
-        } catch (Exception e) {
-            log.error("", e);
         }
     }
 }

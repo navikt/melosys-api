@@ -1,0 +1,48 @@
+<b:hentPersonResponse xmlns:b="http://nav.no/tjeneste/virksomhet/person/v3" xmlns:a="http://nav.no/tjeneste/virksomhet/person/v3/informasjon">
+    <response>
+        <person c:type="a:Bruker" xmlns:c="http://www.w3.org/2001/XMLSchema-instance">
+            <bostedsadresse>
+                <strukturertAdresse c:type="a:Gateadresse">
+                    <landkode>NOR</landkode>
+                    <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>
+                    <poststed>5081</poststed>
+                    <bolignummer>H0304</bolignummer>
+                    <kommunenummer>1201</kommunenummer>
+                    <gatenavn>ANDEBYVEIEN</gatenavn>
+                    <husnummer>123</husnummer>
+                    <husbokstav>A</husbokstav>
+                </strukturertAdresse>
+            </bostedsadresse>
+            <sivilstand fomGyldighetsperiode="1989-07-01T00:00:00.000+02:00">
+                <sivilstand>GIFT</sivilstand>
+            </sivilstand>
+            <statsborgerskap>
+                <land>NOR</land>
+            </statsborgerskap>
+            <aktoer c:type="a:PersonIdent">
+                <ident>
+                    <ident>99999999991</ident>
+                    <type>FNR</type>
+                </ident>
+            </aktoer>
+            <kjoenn>
+                <kjoenn>K</kjoenn>
+            </kjoenn>
+            <personnavn>
+                <etternavn>LILLA</etternavn>
+                <fornavn>HEST</fornavn>
+                <sammensattNavn>LILLA HEST</sammensattNavn>
+            </personnavn>
+            <personstatus>
+                <personstatus>BOSA</personstatus>
+            </personstatus>
+            <foedselsdato>
+                <foedselsdato>1963-05-05+02:00</foedselsdato>
+            </foedselsdato>
+            <gjeldendePostadressetype>BOSTEDSADRESSE</gjeldendePostadressetype>
+            <geografiskTilknytning c:type="a:Bydel">
+                <geografiskTilknytning>120107</geografiskTilknytning>
+            </geografiskTilknytning>
+        </person>
+    </response>
+</b:hentPersonResponse>

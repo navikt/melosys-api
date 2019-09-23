@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone='yes'?>
+<ns2:hentPersonhistorikkResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/person/v3" xmlns:ns3="http://nav.no/tjeneste/virksomhet/person/v3/informasjon">
+    <response>
+        <aktoer xsi:type="ns3:PersonIdent" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <ident>
+                <ident>99999999993</ident>
+                <type>FNR</type>
+            </ident>
+        </aktoer>
+        <personstatusListe endringstidspunkt="2019-01-15T00:00:00.000+01:00" endretAv="AJOURHD, SKD" endringstype="endret">
+            <periode>
+                <fom>1963-01-29T00:00:00.000+01:00</fom>
+            </periode>
+            <personstatus>BOSA</personstatus>
+        </personstatusListe>
+        <statsborgerskapListe endringstidspunkt="2019-01-15T00:00:00.000+01:00" endretAv="AJOURHD, SKD" endringstype="endret">
+            <periode>
+                <fom>1963-01-29T00:00:00.000+01:00</fom>
+            </periode>
+            <statsborgerskap>
+                <land>NOR</land>
+            </statsborgerskap>
+        </statsborgerskapListe>
+        <bostedsadressePeriodeListe endringstidspunkt="2019-01-15T00:00:00.000+01:00" endretAv="SKD" endringstype="endret">
+            <periode>
+                <fom>2000-10-01T00:00:00.000+02:00</fom>
+            </periode>
+            <bostedsadresse>
+                <strukturertAdresse xsi:type="ns3:Gateadresse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <landkode>NOR</landkode>
+                    <poststed>0666</poststed>
+                    <kommunenummer>0301</kommunenummer>
+                    <gatenummer>13789</gatenummer>
+                    <gatenavn>NEDRE VARÅSEN</gatenavn>
+                    <husnummer>1</husnummer>
+                </strukturertAdresse>
+            </bostedsadresse>
+        </bostedsadressePeriodeListe>
+    </response>
+</ns2:hentPersonhistorikkResponse>

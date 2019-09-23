@@ -63,7 +63,13 @@
         <arbeidsgiverBetalerArbeidsgiveravgift>false</arbeidsgiverBetalerArbeidsgiveravgift>
         <trygdeavgiftTrukketGjennomSkatt>false</trygdeavgiftTrukketGjennomSkatt>
     </arbeidsgiversBekreftelse>
-    <maritimtArbeid/>
+    <maritimtArbeid>
+        <foretakNavn>Equinor</foretakNavn>
+        <foretakOrgnr>123456789</foretakOrgnr>
+        <enhetNavn>Seven Kestrel</enhetNavn>
+        <flaggLandkode>GB</flaggLandkode>
+        <installasjonsLandkode>GB</installasjonsLandkode>
+    </maritimtArbeid>
     <bosted>
         <intensjonOmRetur>false</intensjonOmRetur>
         <antallMaanederINorge>0</antallMaanederINorge>
