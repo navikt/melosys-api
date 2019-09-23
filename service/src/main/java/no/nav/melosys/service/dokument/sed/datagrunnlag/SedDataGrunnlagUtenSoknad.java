@@ -13,7 +13,6 @@ public class SedDataGrunnlagUtenSoknad implements SedDataGrunnlag {
     private PersonDokument personDokument;
     private BostedGrunnlag bostedGrunnlag;
 
-
     public SedDataGrunnlagUtenSoknad(Behandling behandling, KodeverkService kodeverkService) throws TekniskException {
         this.behandling = behandling;
         this.personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
