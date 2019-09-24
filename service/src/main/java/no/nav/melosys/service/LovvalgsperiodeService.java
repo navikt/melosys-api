@@ -52,7 +52,11 @@ public class LovvalgsperiodeService {
         if (lovvalgsperioder.size() != 1) {
             throw new FunksjonellException("Forventer minst én og kun én lovvalgsperiode!");
         }
-        return lovvalgsperioder.iterator().next();
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
+        if (!lovvalgsperiode.harGyldigKombinasjon()) {
+            throw new FunksjonellException("Lovvalgsperioden har en ugyldig kombinasjon av resultat og lovvalgsland");
+        }
+        return lovvalgsperiode;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
