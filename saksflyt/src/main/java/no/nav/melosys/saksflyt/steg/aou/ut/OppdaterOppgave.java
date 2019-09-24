@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.aou.ut;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -41,8 +40,9 @@ public class OppdaterOppgave extends AbstraktStegBehandler {
 
         LocalDate frist = LocalDate.from(prosessinstans.getBehandling().getDokumentasjonSvarfristDato().atZone(ZoneId.systemDefault()).toLocalDate());
 
-        String oppgaveId = prosessinstans.getData(ProsessDataKey.OPPGAVE_ID);
-        Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
+        String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
+        Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
+        
         Oppgave.Builder builder = new Oppgave.Builder(oppgave);
 
         if (oppgave.getFristFerdigstillelse().isBefore(frist)) {
@@ -52,8 +52,7 @@ public class OppdaterOppgave extends AbstraktStegBehandler {
         
         gsakFasade.oppdaterOppgave(builder.build());
 
-        LOGGER.info("Oppdatert oppgave {} med beskrivelse, og frist som samsvarer med behandlingsfristen", oppgaveId);
+        LOGGER.info("Oppdatert oppgave {} med beskrivelse, og frist som samsvarer med behandlingsfristen", oppgave.getOppgaveId());
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
-    
 }
