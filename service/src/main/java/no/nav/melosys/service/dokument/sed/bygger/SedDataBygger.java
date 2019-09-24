@@ -16,8 +16,10 @@ import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.LandvelgerService;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -37,21 +39,66 @@ public class SedDataBygger {
         this.landvelgerService = landvelgerService;
     }
 
-    public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
-        SedDataDto sedDataDto = lagPersonopplysninger(datagrunnlag);
+    public SedDataDto lag(SedDataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        if (dataGrunnlag instanceof SedDataGrunnlagMedSoknad) {
+            return lag((SedDataGrunnlagMedSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        } else if (dataGrunnlag instanceof SedDataGrunnlagUtenSoknad) {
+            return lag((SedDataGrunnlagUtenSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        }
+        throw new IllegalArgumentException("Ukjent datagrunnlag: " + dataGrunnlag.getClass().getSimpleName());
+    }
+
+    private SedDataDto lag(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
-        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(datagrunnlag.getBehandling()));
-        sedDataDto.setMottakerLand(datagrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
+        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
+        sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
         return sedDataDto;
     }
 
-    public SedDataDto lagUtkast(DokumentdataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
+    private SedDataDto lag(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
+        return sedDataDto;
+    }
+
+    public SedDataDto lagUtkast(SedDataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        if (dataGrunnlag instanceof SedDataGrunnlagMedSoknad) {
+            return lagUtkast((SedDataGrunnlagMedSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        } else if (dataGrunnlag instanceof SedDataGrunnlagUtenSoknad) {
+            return lagUtkast((SedDataGrunnlagUtenSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        }
+        throw new IllegalArgumentException("Ukjent datagrunnlag: " + dataGrunnlag.getClass().getSimpleName());
+    }
+
+    private SedDataDto lagUtkast(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         return sedDataDto;
     }
 
-    private SedDataDto lagPersonopplysninger(DokumentdataGrunnlag dataGrunnlag) throws TekniskException, FunksjonellException {
+    private SedDataDto lagUtkast(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        return sedDataDto;
+    }
+
+    private SedDataDto lagPersonopplysninger(SedDataGrunnlagUtenSoknad dataGrunnlag) throws TekniskException {
+        SedDataDto sedDataDto = new SedDataDto();
+
+        sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
+
+        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().familiemedlemmer.stream()
+            .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
+            .map(this::hentFamilieMedlem).collect(Collectors.toList()));
+
+        sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getBostedGrunnlag().hentBostedsadresse()));
+
+        return sedDataDto;
+    }
+
+    private SedDataDto lagPersonopplysninger(SedDataGrunnlagMedSoknad dataGrunnlag) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = new SedDataDto();
 
         sedDataDto.setArbeidsgivendeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere()));

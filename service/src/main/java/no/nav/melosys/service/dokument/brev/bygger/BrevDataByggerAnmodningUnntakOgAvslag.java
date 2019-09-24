@@ -14,7 +14,7 @@ import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
@@ -33,7 +33,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
         long behandlingID = dataGrunnlag.getBehandling().getId();
         List<AvklartVirksomhet> avklarteVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();

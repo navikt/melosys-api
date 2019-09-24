@@ -9,8 +9,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import org.apache.commons.lang3.StringUtils;
 
 public class BrevDataByggerA1 implements BrevDataBygger {
@@ -21,7 +21,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         List<AvklartVirksomhet> utenlandskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter();
         List<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
         if (norskeVirksomheter.isEmpty() && utenlandskeVirksomheter.isEmpty()) {

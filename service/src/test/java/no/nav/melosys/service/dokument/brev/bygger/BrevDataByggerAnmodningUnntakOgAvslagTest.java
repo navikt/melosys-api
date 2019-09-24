@@ -19,7 +19,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
@@ -111,8 +111,8 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         return anmodningsperiodeSvar;
     }
 
-    public DokumentdataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException {
+    public BrevDataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        return new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 }

@@ -16,7 +16,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 
 public class BrevDataByggerInnvilgelse implements BrevDataBygger {
@@ -27,7 +27,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    private DokumentdataGrunnlag dataGrunnlag;
+    private BrevDataGrunnlag dataGrunnlag;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landvelgerService,
@@ -57,7 +57,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         this.dataGrunnlag = dataGrunnlag;
         long behandlingID = dataGrunnlag.getBehandling().getId();
 

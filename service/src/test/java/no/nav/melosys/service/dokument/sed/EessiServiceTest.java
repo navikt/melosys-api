@@ -24,8 +24,9 @@ import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,6 +34,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +53,7 @@ public class EessiServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
+    private SedDataGrunnlagFactory dokumentdataGrunnlagFactory;
 
     private EessiService eessiService;
 
@@ -80,8 +82,10 @@ public class EessiServiceTest {
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        when(sedDataBygger.lag(any(), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
-        when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
+        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+
+        when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
     }
 
     @Test
@@ -239,7 +243,7 @@ public class EessiServiceTest {
 
         verify(behandlingService).hentBehandling(eq(1L));
         verify(dokumentdataGrunnlagFactory).av(any());
-        verify(sedDataBygger).lagUtkast(any(), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).genererSedForhåndsvisning(any(), any());
         assertThat(pdf).isEqualTo(PDF);
     }

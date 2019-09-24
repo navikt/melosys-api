@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev.datagrunnlag;
+package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
 
@@ -27,7 +27,7 @@ public class BostedGrunnlag {
     }
 
     public StrukturertAdresse hentBostedsadresse() throws TekniskException {
-        StrukturertAdresse bostedsadresse = SoeknadUtils.hentBostedsadresse(søknad);
+        StrukturertAdresse bostedsadresse = søknad != null ? SoeknadUtils.hentBostedsadresse(søknad) : null;
         if (bostedsadresse == null) {
             bostedsadresse = hentBostedsadresseFraRegister();
         }

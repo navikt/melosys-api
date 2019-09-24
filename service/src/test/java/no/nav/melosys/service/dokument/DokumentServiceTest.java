@@ -9,9 +9,9 @@ import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
@@ -47,8 +47,8 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -60,8 +60,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
@@ -249,16 +249,16 @@ public final class DokumentServiceTest {
                 prosessinstansService, brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
     }
 
-    private DokumentdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    private BrevdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
         AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
-        DokumentdataGrunnlag dataGrunnlag = new DokumentdataGrunnlag(lagBehandling(), kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
-        DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory = mock(DokumentdataGrunnlagFactory.class);
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
-        return dokumentdataGrunnlagFactory;
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(lagBehandling(), kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
+        BrevdataGrunnlagFactory brevdataGrunnlagFactory = mock(BrevdataGrunnlagFactory.class);
+        when(brevdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
+        return brevdataGrunnlagFactory;
     }
 
     private static Behandling lagBehandling() {

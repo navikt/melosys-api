@@ -52,6 +52,10 @@ public final class SaksopplysningerUtils {
             .orElseThrow(() -> new TekniskException("Finner ikke søknaddokument"));
     }
 
+    public static Optional<SoeknadDokument> finnSøknadDokument(Behandling behandling) {
+        return hentDokument(behandling, SaksopplysningType.SØKNAD).map(d -> (SoeknadDokument) d);
+    }
+
     public static MedlemskapDokument hentMedlemskapDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.MEDL);
         return (MedlemskapDokument) saksopplysning
