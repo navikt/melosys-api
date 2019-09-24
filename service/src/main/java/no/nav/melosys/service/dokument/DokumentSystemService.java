@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 public class DokumentSystemService extends DokumentService {
 
     @Autowired
-    public DokumentSystemService(BehandlingRepository behandlingRepository,
+    public DokumentSystemService(BehandlingService behandlingService,
                                  BrevDataService brevDataService, @Qualifier("system") DoksysFasade dokSysFasade,
                                  BrevmottakerService brevmottakerService, BrevDataByggerVelger brevDataByggerVelger, DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory) {
-        super(behandlingRepository, brevDataService, dokSysFasade, null,  brevmottakerService, brevDataByggerVelger, dokumentdataGrunnlagFactory);
+        super(behandlingService, brevDataService, dokSysFasade, null,  brevmottakerService, brevDataByggerVelger, dokumentdataGrunnlagFactory);
     }
 }

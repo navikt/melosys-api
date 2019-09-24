@@ -36,11 +36,15 @@ import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.*;
+import no.nav.melosys.repository.AvklarteFaktaRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
@@ -64,6 +68,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.*;
 
 public final class DokumentServiceTest {
@@ -217,7 +222,7 @@ public final class DokumentServiceTest {
     private DokumentService lagDokumentService(DoksysFasade dokSysFasade, BrevDataByggerVelger brevdatabyggervelger) throws Exception {
         Aktoer aktør = lagAktør(Aktoersroller.BRUKER);
         Behandling behandling = lagBehandling();
-        BehandlingRepository behandlingRepository = mockBehandlingRepository(behandling);
+        BehandlingService behandlingService = mockBehandlingService(behandling);
         TpsFasade tpsFasade = mockTpsFasade(aktør);
         Avklartefakta arbeidsgiverFaktum = lagAvklarteFakta(VIRKSOMHET, ORGNR);
         Avklartefakta yrkesgruppeFaktum = lagAvklarteFakta(YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), null);
@@ -236,7 +241,7 @@ public final class DokumentServiceTest {
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
         BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class), avklarteVirksomheterService, mock(UtenlandskMyndighetService.class));
-        return new DokumentService(behandlingRepository, brevDataService, dokSysFasade,
+        return new DokumentService(behandlingService, brevDataService, dokSysFasade,
             mock(ProsessinstansService.class), brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
     }
 
@@ -412,11 +417,11 @@ public final class DokumentServiceTest {
         return tpsFasade;
     }
 
-    private static BehandlingRepository mockBehandlingRepository(Behandling behandling) {
-        BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        when(behandlingRepository.findById(eq(BEHANDLINGSID))).thenReturn(Optional.of(behandling));
-        when(behandlingRepository.findWithSaksopplysningerById(eq(BEHANDLINGSID))).thenReturn(behandling);
-        return behandlingRepository;
+    private static BehandlingService mockBehandlingService(Behandling behandling) throws IkkeFunnetException {
+        BehandlingService behandlingService = mock(BehandlingService.class);
+        when(behandlingService.hentBehandling(eq(BEHANDLINGSID))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
+        return behandlingService;
     }
 
     private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
