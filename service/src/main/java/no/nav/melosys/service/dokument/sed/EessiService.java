@@ -151,6 +151,7 @@ public class EessiService {
         eessiConsumer.sendAnmodningUnntakSvar(svarAnmodningUnntakDto, rinaSaksnummer);
     }
 
+    @Transactional(readOnly = true)
     public byte[] genererSedForhåndsvisning(long behandingID, SedType sedType) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandingID);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
