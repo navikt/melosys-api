@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.aou.ut;
 import java.time.*;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -24,6 +25,7 @@ public class OppdaterOppgaveTest {
 
     private static final String OPPGAVE_ID = "123";
     private static final String ANMODNING_UNNTAK_BESKRIVELSE = "Anmodning om unntak er sendt utenlandsk trygdemyndighet.";
+    private static final String SAKSNUMMER = "234";
 
     @Mock
     private GsakFasade gsakFasade;
@@ -41,6 +43,9 @@ public class OppdaterOppgaveTest {
         Behandling behandling = new Behandling();
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
         behandling.setDokumentasjonSvarfristDato(Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault())));
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
+        behandling.setFagsak(fagsak);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID);
         
@@ -51,12 +56,12 @@ public class OppdaterOppgaveTest {
         LocalDate enMånedFremITid = LocalDate.now().plusMonths(1L);
 
         Oppgave oppgave = lagOppgave(enMånedFremITid, null);
-        when(gsakFasade.hentOppgave(anyString())).thenReturn(oppgave);
+        when(gsakFasade.hentOppgaveMedSaksnummer(anyString())).thenReturn(oppgave);
 
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
 
         agent.utførSteg(prosessinstans);
-        verify(gsakFasade).hentOppgave(OPPGAVE_ID);
+        verify(gsakFasade).hentOppgaveMedSaksnummer(SAKSNUMMER);
         verify(gsakFasade).oppdaterOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue())
                 .hasFieldOrPropertyWithValue("oppgaveId", OPPGAVE_ID)
@@ -72,10 +77,10 @@ public class OppdaterOppgaveTest {
         LocalDate treMånederFremITid = LocalDate.now().plusMonths(3L);
 
         Oppgave oppgave = lagOppgave(treMånederFremITid, eksisterendeBeskrivelse);
-        when(gsakFasade.hentOppgave(anyString())).thenReturn(oppgave);
+        when(gsakFasade.hentOppgaveMedSaksnummer(anyString())).thenReturn(oppgave);
 
         agent.utførSteg(prosessinstans);
-        verify(gsakFasade).hentOppgave(OPPGAVE_ID);
+        verify(gsakFasade).hentOppgaveMedSaksnummer(SAKSNUMMER);
         verify(gsakFasade).oppdaterOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue())
                 .hasFieldOrPropertyWithValue("oppgaveId", OPPGAVE_ID)
