@@ -5,6 +5,7 @@ import java.util.List;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -93,10 +94,14 @@ public class DokumentService {
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, BrevData brevData)
+    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, Brevbestilling brevbestilling)
         throws TekniskException, FunksjonellException {
         Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument.");
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(brevbestilling.getDokumentType());
+        BrevData brevData = brevDataBygger.lag(dokumentdataGrunnlagFactory.av(behandling), brevbestilling.getAvsender());
+        brevData.begrunnelseKode = brevbestilling.getBegrunnelseKode();
+        brevData.fritekst = brevbestilling.getFritekst();
 
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);
         for (Aktoer aktør : mottakere) {

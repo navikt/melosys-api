@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -99,7 +100,7 @@ public class IverksettVedtakSendBrevTest {
         when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
 
         dokService = spy(lagDokumentService(byggerVelger));
-        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger, mock(DokumentdataGrunnlagFactory.class));
+        BrevBestiller brevBestiller = new BrevBestiller(dokService);
         return new IverksettVedtakSendBrev(brevBestiller, behandlingService, behandlingsresultatService);
     }
 
@@ -425,12 +426,12 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_2_INNVILGET_BEHANDLINGSID));
         prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
-        ArgumentCaptor<BrevData> captor = ArgumentCaptor.forClass(BrevData.class);
+        ArgumentCaptor<Brevbestilling> captor = ArgumentCaptor.forClass(Brevbestilling.class);
 
         instans.utførSteg(prosessinstans);
 
         verify(dokService, atLeastOnce()).produserDokument(any(Produserbaredokumenter.class), any(Mottaker.class), anyLong(), captor.capture());
-        assertThat(captor.getValue().begrunnelseKode).isEqualTo(Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode());
+        assertThat(captor.getValue().getBegrunnelseKode()).isEqualTo(Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
