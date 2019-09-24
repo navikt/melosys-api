@@ -5,24 +5,24 @@ import java.util.List;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
@@ -41,10 +41,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING
 public class DokumentService {
     private static final Logger log = LoggerFactory.getLogger(DokumentService.class);
 
-    private static final String BEHANDLING_ID = "Behandling med ID ";
-    private static final String FINNES_IKKE = " finnes ikke.";
-
-    private final BehandlingRepository behandlingRepository;
+    private final BehandlingService behandlingService;
     private final BrevDataService brevDataService;
     private final DoksysFasade dokSysFasade;
     private final ProsessinstansService prosessinstansService;
@@ -53,13 +50,13 @@ public class DokumentService {
     private final DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
 
     @Autowired
-    public DokumentService(BehandlingRepository behandlingRepository,
+    public DokumentService(BehandlingService behandlingService,
                            BrevDataService brevDataService, DoksysFasade dokSysFasade,
                            ProsessinstansService prosessinstansService,
                            BrevmottakerService brevmottakerService,
                            BrevDataByggerVelger brevDataByggerVelger,
                            DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory) {
-        this.behandlingRepository = behandlingRepository;
+        this.behandlingService = behandlingService;
         this.brevDataService = brevDataService;
         this.dokSysFasade = dokSysFasade;
         this.prosessinstansService = prosessinstansService;
@@ -78,11 +75,7 @@ public class DokumentService {
     @Transactional(readOnly = true)
     public byte[] produserUtkast(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE);
-        }
-
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         DokumentdataGrunnlag brevdataRessurser = dokumentdataGrunnlagFactory.av(behandling);
         BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
         BrevData brevData = bygger.lag(brevdataRessurser, SubjectHandler.getInstance().getUserID());
@@ -101,11 +94,14 @@ public class DokumentService {
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, BrevData brevData)
+    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, Brevbestilling brevbestilling)
         throws TekniskException, FunksjonellException {
         Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument.");
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE));
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(brevbestilling.getDokumentType());
+        BrevData brevData = brevDataBygger.lag(dokumentdataGrunnlagFactory.av(behandling), brevbestilling.getAvsender());
+        brevData.begrunnelseKode = brevbestilling.getBegrunnelseKode();
+        brevData.fritekst = brevbestilling.getFritekst();
 
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);
         for (Aktoer aktør : mottakere) {
@@ -130,8 +126,7 @@ public class DokumentService {
     public void produserDokumentISaksflyt(Produserbaredokumenter produserbartDokument, Aktoersroller mottaker, long behandlingID, BrevData brevdata)
         throws FunksjonellException {
         Assert.notNull(mottaker, "Dokument uten mottaker.");
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE));
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
             prosessinstansService.opprettProsessinstansMangelbrev(behandling, mottaker, brevdata);
