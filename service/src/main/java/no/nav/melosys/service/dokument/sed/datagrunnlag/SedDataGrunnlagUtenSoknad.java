@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BostedGrunnlag;
+import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataGrunnlagUtenSoknad implements SedDataGrunnlag {

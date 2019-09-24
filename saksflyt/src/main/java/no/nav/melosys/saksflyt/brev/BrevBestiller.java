@@ -11,7 +11,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +24,13 @@ public class BrevBestiller {
 
     private final DokumentSystemService dokumentService;
     private final BrevDataByggerVelger brevDataByggerVelger;
-    private final DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
+    private final BrevdataGrunnlagFactory brevdataGrunnlagFactory;
 
     @Autowired
-    public BrevBestiller(DokumentSystemService dokumentService, BrevDataByggerVelger brevDataByggerVelger, DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory) {
+    public BrevBestiller(DokumentSystemService dokumentService, BrevDataByggerVelger brevDataByggerVelger, BrevdataGrunnlagFactory brevdataGrunnlagFactory) {
         this.dokumentService = dokumentService;
         this.brevDataByggerVelger = brevDataByggerVelger;
-        this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
+        this.brevdataGrunnlagFactory = brevdataGrunnlagFactory;
     }
 
     public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
@@ -42,7 +42,7 @@ public class BrevBestiller {
     }
 
     public void bestill(Brevbestilling brevbestilling) throws FunksjonellException, TekniskException {
-        BrevDataGrunnlag brevdataRessurser = dokumentdataGrunnlagFactory.av(brevbestilling.getBehandling());
+        BrevDataGrunnlag brevdataRessurser = brevdataGrunnlagFactory.av(brevbestilling.getBehandling());
         bestill(brevbestilling, brevdataRessurser);
     }
 

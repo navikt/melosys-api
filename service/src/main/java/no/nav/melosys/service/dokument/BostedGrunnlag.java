@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev.datagrunnlag;
+package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
 

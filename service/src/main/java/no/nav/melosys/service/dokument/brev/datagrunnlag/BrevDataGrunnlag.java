@@ -7,6 +7,7 @@ import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.DataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 

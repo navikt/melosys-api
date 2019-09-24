@@ -10,15 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DokumentdataGrunnlagFactory {
+public class BrevdataGrunnlagFactory {
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final KodeverkService kodeverkService;
 
     @Autowired
-    public DokumentdataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
-                                       AvklarteVirksomheterSystemService avklarteVirksomheterService,
-                                       KodeverkService kodeverkService) {
+    public BrevdataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
+                                   AvklarteVirksomheterSystemService avklarteVirksomheterService,
+                                   KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.kodeverkService = kodeverkService;
