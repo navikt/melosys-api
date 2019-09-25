@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -13,6 +15,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
@@ -128,11 +131,21 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void medlperiodeIDFinnes_oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
+    public void medlperiodeIDFinnesLovvalgsperiodeInnvilget_oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setMedlPeriodeID(123L);
         agent.utfør(p);
 
         verify(medlFasade).oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
+    }
+
+    @Test
+    public void medlperiodeIDFinnesLovvalgsperiodeAvslått_avvisPeriode() throws FunksjonellException, TekniskException {
+        lovvalgsperiode.setMedlPeriodeID(123L);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        agent.utfør(p);
+
+        verify(medlFasade).avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
         assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
     }
 }

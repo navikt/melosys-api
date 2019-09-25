@@ -9,9 +9,9 @@ import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -227,7 +227,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     // Medl skal ikke oppdateres ved avslag.
     public boolean medlOppdateres() {
-        return !erAvslag();
+        return !erAvslag() || hentValidertLovvalgsperiode().getMedlPeriodeID() != null;
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
