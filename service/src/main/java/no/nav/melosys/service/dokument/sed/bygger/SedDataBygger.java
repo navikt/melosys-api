@@ -53,6 +53,7 @@ public class SedDataBygger {
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
+        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
@@ -60,6 +61,7 @@ public class SedDataBygger {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
+        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
@@ -75,12 +77,14 @@ public class SedDataBygger {
     private SedDataDto lagUtkast(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
     private SedDataDto lagUtkast(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
@@ -207,9 +211,9 @@ public class SedDataBygger {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.getLovvalgsperioder().iterator().next()));
         } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE && !behandlingsresultat.getAnmodningsperioder().isEmpty()) {
             return Collections.singletonList(lagLovvalgsperiodeDto(
-                    behandlingsresultat.getAnmodningsperioder().iterator().next(),
-                    hentUnntaksBegrunnelse(behandlingsresultat)
-                ));
+                behandlingsresultat.getAnmodningsperioder().iterator().next(),
+                hentUnntaksBegrunnelse(behandlingsresultat)
+            ));
         }
 
         return Collections.emptyList();
@@ -245,6 +249,15 @@ public class SedDataBygger {
         return tidligereLovvalgsperioder.stream()
             .map(this::lagLovvalgsperiodeDto)
             .collect(Collectors.toList());
+    }
+
+    private static SvarAnmodningUnntakDto lagSvarAnmodningUnntakDto(Behandlingsresultat behandlingsresultat) throws TekniskException {
+        Anmodningsperiode anmodningsperiode = behandlingsresultat.getAnmodningsperioder().iterator().next();
+
+        if (anmodningsperiode != null && anmodningsperiode.getAnmodningsperiodeSvar() != null) {
+            return SvarAnmodningUnntakDto.av(anmodningsperiode.getAnmodningsperiodeSvar());
+        }
+        return null;
     }
 
     private String hentUnntaksBegrunnelse(Behandlingsresultat behandlingsresultat) {

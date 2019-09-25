@@ -13,7 +13,6 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -226,11 +225,11 @@ public class EessiServiceTest {
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        eessiService.sendAnmodningUnntakSvar(anmodningsperiodeSvar, 1L);
+        eessiService.sendAnmodningUnntakSvar(1L);
 
         verify(behandlingService).hentBehandling(eq(1L));
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
+        verify(dokumentdataGrunnlagFactory).av(any());
         verify(eessiConsumer).sendAnmodningUnntakSvar(any(), any());
     }
 

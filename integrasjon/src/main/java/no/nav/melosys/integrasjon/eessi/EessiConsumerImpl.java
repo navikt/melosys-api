@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -74,9 +74,9 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException {
+    public void sendAnmodningUnntakSvar(SedDataDto sedDataDto, String rinaSaksnummer) throws MelosysException {
         exchange(String.format("/buc/LA_BUC_01/%s/svar", rinaSaksnummer), HttpMethod.POST,
-            new HttpEntity<>(svarAnmodningUnntakDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
+            new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
             });
     }
 
