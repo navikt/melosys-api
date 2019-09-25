@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.6.RELEASE</version>
+        <version>2.1.8.RELEASE</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -86,8 +86,7 @@
         <easy-random.version>4.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <spring-boot.version>2.1.6.RELEASE</spring-boot.version>
-        <spring-kafka.version>2.2.3.RELEASE</spring-kafka.version>
+        <spring-boot.version>2.1.8.RELEASE</spring-boot.version>
         <spring-security-pac4j.version>4.1.0</spring-security-pac4j.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
@@ -183,9 +182,11 @@
                 <version>${logback.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
                 <version>${jackson.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
