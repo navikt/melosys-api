@@ -89,7 +89,7 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
     private void validerLovalgsperioder(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
         if (Behandlingsresultattyper.valueOf(prosessinstans.getData(BEHANDLINGSRESULTATTYPE)) == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
             Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-            if (!lovvalgsperiode.harGyldigKombinasjon()) {
+            if (!lovvalgsperiode.harGyldigTilstand()) {
                 throw new FunksjonellException("Lovvalgsperioden har en ugyldig kombinasjon av lovvalgsresultat og lovvalgsland");
             }
         }
