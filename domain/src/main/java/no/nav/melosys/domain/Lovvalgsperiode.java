@@ -8,8 +8,8 @@ import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*;
 
 @Entity
@@ -207,7 +207,7 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
                 || bestemmelse == FO_883_2004_ART11_5;
     }
 
-    public boolean erInvilget() {
+    public boolean erInnvilget() {
         return getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
             && getLovvalgsland() == Landkoder.NO
             && harGyldigBestemmelse();
@@ -215,7 +215,6 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
 
     public boolean erAvslått() {
         return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
-            && getLovvalgsland() != Landkoder.NO
             && harGyldigBestemmelse();
     }
 

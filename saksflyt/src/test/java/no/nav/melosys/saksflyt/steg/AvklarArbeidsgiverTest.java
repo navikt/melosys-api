@@ -110,6 +110,16 @@ public class AvklarArbeidsgiverTest {
     }
 
     @Test
+    public void utfør_avslagManglendeOpplysningerTypeHarMedlperiodeID_forventStegIvOppdaterMedl() throws Exception {
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(Collections.singletonList(avklartVirksomhet));
+        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        lovvalgsperiode.setMedlPeriodeID(123L);
+        steg.utfør(p);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_MEDL);
+    }
+
+    @Test
     public void utfør_avslagManglendeOpplysningerType_forventStegIvSendBrev() throws Exception {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(Collections.singletonList(avklartVirksomhet));
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
