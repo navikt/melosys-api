@@ -215,7 +215,6 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
 
     public boolean erAvslått() {
         return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
-            && getLovvalgsland() != null
             && harGyldigBestemmelse();
     }
 
