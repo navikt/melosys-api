@@ -34,7 +34,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
-import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
@@ -378,14 +377,13 @@ public class GsakService implements GsakFasade {
     }
 
     private static <K extends Kodeverk> K mapTilEnumFraKode(Class<K> clazz, String verdi, String oppgaveId) {
-        try {
-            if (verdi != null && erGyldigKode(clazz, verdi)) {
+        if (verdi != null) {
+            try {
                 return KodeverkUtils.dekod(clazz, verdi);
+            } catch (IkkeFunnetException e) {
+                log.error("Fikk uventet {}: {} for OppgaveID: {}", clazz.getSimpleName(), verdi, oppgaveId);
             }
-        } catch (IkkeFunnetException e) {
-            // Håndteres under
         }
-        log.error("Fikk uventet {}: {} for OppgaveID: {}", clazz.getSimpleName(), verdi, oppgaveId);
         return null;
     }
 }
