@@ -227,7 +227,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     // Medl skal ikke oppdateres ved avslag.
     public boolean medlOppdateres() {
-        return !erAvslag() || hentValidertLovvalgsperiode().getMedlPeriodeID() != null;
+        return harMedlPeriode() || !erAvslag();
+    }
+
+    private boolean harMedlPeriode() {
+        return lovvalgsperioder.stream().anyMatch(l -> l.getMedlPeriodeID() != null);
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {

@@ -80,7 +80,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             medlFasade.avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
         } else {
             throw new FunksjonellException("Kan ikke oppdatere medlperiode: Lovvalgsperiode med ID " + lovvalgsperiode.getId() +
-                " har en medlperiodeID, men er verken innvilgeet eller avslått.");
+                " har en medlperiodeID, men er verken innvilget eller avslått.");
         }
     }
 }
