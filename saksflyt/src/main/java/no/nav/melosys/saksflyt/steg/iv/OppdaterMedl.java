@@ -74,7 +74,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     }
 
     private void oppdaterEksisterendeMedlPeriode(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
-        if (lovvalgsperiode.erInvilget()) {
+        if (lovvalgsperiode.erInnvilget()) {
             medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
         } else if (lovvalgsperiode.erAvslått()) {
             medlFasade.avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);

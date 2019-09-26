@@ -209,7 +209,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erInnvilgelse() {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
             Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
-            return lovvalgsperiode.erInvilget();
+            return lovvalgsperiode.erInnvilget();
         } else {
             return false;
         }
@@ -218,7 +218,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erInnvilgelseFlereLand() {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
             Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
-            return lovvalgsperiode.erInvilget() && lovvalgsperiode.erArtikkel13();
+            return lovvalgsperiode.erInnvilget() && lovvalgsperiode.erArtikkel13();
         } else {
             return false;
         }

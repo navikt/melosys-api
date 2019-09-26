@@ -207,9 +207,9 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
                 || bestemmelse == FO_883_2004_ART11_5;
     }
 
-    public boolean erInvilget() {
+    public boolean erInnvilget() {
         return getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
-            && getLovvalgsland() != null
+            && getLovvalgsland() == Landkoder.NO
             && harGyldigBestemmelse();
     }
 
