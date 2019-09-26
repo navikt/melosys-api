@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -73,14 +75,14 @@ public class EessiConsumerTest {
     }
 
     @Test
-    public void hentTilknyttedeBucer_forventBucer() throws MelosysException, IOException, URISyntaxException {
+    public void hentTilknyttedeBucer_medEnStatus_forventBucer() throws MelosysException, IOException, URISyntaxException {
         URI uri = (getClass().getClassLoader().getResource("mock/eux/bucer.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(uri)));
 
-        server.expect(requestTo("/sak/1/bucer/?status=utkast"))
+        server.expect(requestTo("/sak/1/bucer/?statuser=utkast"))
             .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-        List<BucInformasjon> bucInformasjonListe = eessiConsumer.hentTilknyttedeBucer(1L, "utkast");
+        List<BucInformasjon> bucInformasjonListe = eessiConsumer.hentTilknyttedeBucer(1L, Collections.singletonList("utkast"));
         assertThat(bucInformasjonListe)
             .extracting(BucInformasjon::getId, BucInformasjon::getBucType)
             .contains(
@@ -100,12 +102,28 @@ public class EessiConsumerTest {
             );
     }
 
+    @Test
+    public void hentTilknyttedeBucer_medFlereStatuser_forventRettSti() throws IOException, URISyntaxException, MelosysException {
+        server.expect(requestTo("/sak/1/bucer/?statuser=utkast,mottatt,sendt"))
+            .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
+
+        eessiConsumer.hentTilknyttedeBucer(1L, Arrays.asList("utkast", "mottatt", "sendt"));
+    }
+
+    @Test
+    public void hentTilknyttedeBucer_medIngenStatuser_forventRettSti() throws MelosysException {
+        server.expect(requestTo("/sak/1/bucer/?statuser="))
+            .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
+
+        eessiConsumer.hentTilknyttedeBucer(1L, Collections.emptyList());
+    }
+
     @Test(expected = MelosysException.class)
     public void hentTilknyttedeBucer_forventException() throws MelosysException {
-        server.expect(requestTo("/sak/1/bucer/?status=utkast"))
+        server.expect(requestTo("/sak/1/bucer/?statuser="))
             .andRespond(withBadRequest());
 
-        eessiConsumer.hentTilknyttedeBucer(1L, "utkast");
+        eessiConsumer.hentTilknyttedeBucer(1L, null);
     }
 
     @Test
