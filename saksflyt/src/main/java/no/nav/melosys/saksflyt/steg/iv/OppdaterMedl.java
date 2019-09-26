@@ -6,6 +6,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
@@ -53,7 +54,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
         Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
         if (lovvalgsperiode.getMedlPeriodeID() != null) {
-            medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+            oppdaterEksisterendeMedlPeriode(lovvalgsperiode);
         } else if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
             Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
             felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
@@ -70,5 +71,16 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
         return behandlingsresultat.getType() == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
+    }
+
+    private void oppdaterEksisterendeMedlPeriode(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
+        if (lovvalgsperiode.erInnvilget()) {
+            medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        } else if (lovvalgsperiode.erAvslått()) {
+            medlFasade.avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
+        } else {
+            throw new FunksjonellException("Kan ikke oppdatere medlperiode: Lovvalgsperiode med ID " + lovvalgsperiode.getId() +
+                " har en medlperiodeID, men er verken innvilget eller avslått.");
+        }
     }
 }
