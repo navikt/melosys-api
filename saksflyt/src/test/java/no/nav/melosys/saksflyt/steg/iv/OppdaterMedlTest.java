@@ -133,6 +133,7 @@ public class OppdaterMedlTest {
     @Test
     public void medlperiodeIDFinnesLovvalgsperiodeInnvilget_oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setMedlPeriodeID(123L);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
         agent.utfør(p);
 
         verify(medlFasade).oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
