@@ -107,8 +107,8 @@ public class EessiService {
         }
     }
 
-    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException {
-        return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, status);
+    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException {
+        return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, statuser);
     }
 
     public boolean støtterAutomatiskBehandling(String journalpostID, String sedType) throws MelosysException {
