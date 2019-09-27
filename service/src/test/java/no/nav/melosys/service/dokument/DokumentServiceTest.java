@@ -41,6 +41,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -337,7 +338,8 @@ public final class DokumentServiceTest {
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         JoarkService joarkService = mock(JoarkService.class);
         BehandlingService behandlingService = mock(BehandlingService.class);
-        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingService, vilkaarsresultatRepository);
+        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
+        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingService, behandlingsresultatService, vilkaarsresultatRepository);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
             utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService, landvelgerService);
     }

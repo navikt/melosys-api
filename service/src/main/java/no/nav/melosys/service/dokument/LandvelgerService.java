@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -17,6 +18,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,14 +31,18 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadslandkoder;
 public class LandvelgerService {
     private AvklartefaktaService avklartefaktaService;
     private BehandlingService behandlingService;
+    private BehandlingsresultatService behandlingsresultatService;
     private VilkaarsresultatRepository vilkaarsresultatRepository;
 
     @Autowired
     public LandvelgerService(AvklartefaktaService avklartefaktaService,
                              BehandlingService behandlingService,
+                             BehandlingsresultatService behandlingsresultatService,
                              VilkaarsresultatRepository vilkaarsresultatRepository) {
         this.behandlingService = behandlingService;
+
         this.avklartefaktaService = avklartefaktaService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
@@ -65,6 +71,14 @@ public class LandvelgerService {
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         if (oppfylteVilkår.contains(FO_883_2004_ART11_3A)) {
             return Collections.singletonList(hentBostedsland(behandlingID, søknad));
+        }
+
+        Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertLovvalgsperiode();
+        if (lovvalgsperiode.erArtikkel13()) {
+            Landkoder bostedsland = hentBostedsland(behandlingID, søknad);
+            if (bostedsland != Landkoder.NO) {
+                return Collections.singletonList(bostedsland);
+            }
         }
 
         Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
