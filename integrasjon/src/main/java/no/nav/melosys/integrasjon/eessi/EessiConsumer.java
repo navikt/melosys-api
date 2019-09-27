@@ -18,7 +18,7 @@ public interface EessiConsumer {
 
     void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) throws MelosysException;
 
-    List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException;
+    List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException;
 
     List<Institusjon> hentMottakerinstitusjoner(String bucType) throws MelosysException;
 

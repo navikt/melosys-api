@@ -47,12 +47,16 @@ public class LovvalgsperiodeService {
         return lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsid);
     }
 
-    public Lovvalgsperiode hentLovvalgsperiode(long behandlingsid) throws FunksjonellException {
+    public Lovvalgsperiode hentValidertLovvalgsperiode(long behandlingsid) throws FunksjonellException {
         Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder(behandlingsid);
         if (lovvalgsperioder.size() != 1) {
             throw new FunksjonellException("Forventer minst én og kun én lovvalgsperiode!");
         }
-        return lovvalgsperioder.iterator().next();
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
+        if (!lovvalgsperiode.harGyldigTilstand()) {
+            throw new FunksjonellException("Lovvalgsperioden har en ugyldig kombinasjon av resultat og lovvalgsland");
+        }
+        return lovvalgsperiode;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

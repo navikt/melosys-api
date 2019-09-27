@@ -132,23 +132,23 @@ public class EessiServiceTest {
 
     @Test
     public void hentTilknyttedeBucer_forventListeMedRettType() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyString())).thenReturn(Arrays.asList(
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(Arrays.asList(
             easyRandom.nextObject(BucInformasjon.class),
             easyRandom.nextObject(BucInformasjon.class),
             easyRandom.nextObject(BucInformasjon.class)
         ));
 
-        List<BucInformasjon> tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, "utkast");
+        List<BucInformasjon> tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, Arrays.asList("utkast", "sendt"));
 
-        verify(eessiConsumer).hentTilknyttedeBucer(anyLong(), anyString());
+        verify(eessiConsumer).hentTilknyttedeBucer(anyLong(), anyList());
         assertThat(tilknyttedeBucer).hasSize(3);
         assertThat(tilknyttedeBucer).hasOnlyElementsOfType(BucInformasjon.class);
     }
 
     @Test(expected = MelosysException.class)
     public void hentTilknyttedeBucer_medFeilIConsumer_forventException() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyString())).thenThrow(new IntegrasjonException("Error!"));
-        eessiService.hentTilknyttedeBucer(123L, "utkast");
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList())).thenThrow(new IntegrasjonException("Error!"));
+        eessiService.hentTilknyttedeBucer(123L, Collections.singletonList("utkast"));
     }
 
     @Test

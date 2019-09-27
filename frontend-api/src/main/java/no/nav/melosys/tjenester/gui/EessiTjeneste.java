@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -71,13 +72,13 @@ public class EessiTjeneste extends RestTjeneste {
         response = BucerTilknyttetBehandlingDto.class
     )
     public Response hentBucer(@PathParam("behandlingID") long behandlingID,
-                              @QueryParam("status") String status) throws MelosysException {
+                              @QueryParam("statuser") List<String> statuser) throws MelosysException {
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
 
         log.info("Henter tilknyttede bucer for gsak {}", gsakSaksnummer);
-        BucerTilknyttetBehandlingDto bucerDto = new BucerTilknyttetBehandlingDto(eessiService.hentTilknyttedeBucer(gsakSaksnummer, status));
+        BucerTilknyttetBehandlingDto bucerDto = new BucerTilknyttetBehandlingDto(eessiService.hentTilknyttedeBucer(gsakSaksnummer, statuser));
         return Response.ok(bucerDto).build();
     }
 }

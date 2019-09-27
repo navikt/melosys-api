@@ -184,7 +184,8 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
     public boolean harGyldigBestemmelse() {
         return bestemmelse == FO_883_2004_ART11_3A || bestemmelse == FO_883_2004_ART11_3B || bestemmelse == FO_883_2004_ART11_4_2
             || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1
-            || bestemmelse == FO_883_2004_ART13_1A;
+            || bestemmelse == FO_883_2004_ART13_1A
+            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1_B2 || bestemmelse == FO_883_2004_ART13_1_B3 || bestemmelse == FO_883_2004_ART13_1_B4;
     }
 
     public boolean erArtikkel13() {
@@ -217,6 +218,10 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
         return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
             && getLovvalgsland() != Landkoder.NO
             && harGyldigBestemmelse();
+    }
+
+    public boolean harGyldigTilstand() {
+        return erInvilget() || erAvslått();
     }
 
     public static Lovvalgsperiode av(AnmodningsperiodeSvar anmodningsperiodeSvar,

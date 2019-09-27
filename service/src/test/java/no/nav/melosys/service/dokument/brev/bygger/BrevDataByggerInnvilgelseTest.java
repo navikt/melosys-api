@@ -85,7 +85,7 @@ public class BrevDataByggerInnvilgelseTest {
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Arrays.asList(virksomhet));
 
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
+        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(periode);
 
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));

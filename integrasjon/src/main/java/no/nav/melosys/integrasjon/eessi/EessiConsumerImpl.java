@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.eessi;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,6 +37,7 @@ public class EessiConsumerImpl implements EessiConsumer {
     private static final String VEDLEGG_FILNAVN = "vedlegg";
 
     private static final String SEND_AUTOMATISK = "sendAutomatisk";
+    private static final String STATUSER = "statuser";
 
     EessiConsumerImpl(RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
@@ -120,14 +120,24 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException {
-        status = Optional.ofNullable(status).orElse("");
+    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException {
 
-        List<BucinfoDto> bucinfoDtoList = exchange(String.format("/sak/%s/bucer/?status=%s", gsakSaksnummer, status), HttpMethod.GET,
+        String uri = UriComponentsBuilder.fromPath(String.format("/sak/%s/bucer/", gsakSaksnummer))
+            .queryParam(STATUSER, lagStatuserString(statuser)).toUriString();
+
+        List<BucinfoDto> bucinfoDtoList = exchange(uri, HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucinfoDto>>() {
         });
 
         return bucinfoDtoList.stream().map(BucinfoDto::tilDomene).collect(Collectors.toList());
+    }
+
+    private static String lagStatuserString(List<String> statuser) {
+        if (statuser == null) {
+            return "";
+        } else {
+            return String.join(",", statuser);
+        }
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {

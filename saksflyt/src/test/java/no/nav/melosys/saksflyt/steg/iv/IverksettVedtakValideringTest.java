@@ -1,8 +1,12 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
+import java.util.NoSuchElementException;
+
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -34,8 +38,10 @@ public class IverksettVedtakValideringTest {
     @Before
     public void setUp() throws IkkeFunnetException {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.getLovvalgsperioder().add(new Lovvalgsperiode());
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode();
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
+
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         agent = new IverksettVedtakValidering(behandlingsresultatService);
@@ -50,6 +56,14 @@ public class IverksettVedtakValideringTest {
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
 
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.getKode());
+    }
+
+    private Lovvalgsperiode lagLovvalgsperiode() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        return lovvalgsperiode;
     }
 
     @Test
@@ -89,8 +103,8 @@ public class IverksettVedtakValideringTest {
     public void utfør_iverksettVedtakManglerLovvalgsperiode_feiler() throws FunksjonellException, TekniskException {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(new Behandlingsresultat());
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Lovvalgsperiode mangler for behandlingsresultat");
+        expectedException.expect(NoSuchElementException.class);
+        expectedException.expectMessage("Ingen lovvalgsperiode finnes for behandlingsresultat");
 
         agent.utfør(p);
     }
@@ -108,7 +122,7 @@ public class IverksettVedtakValideringTest {
     public void utfør_manglerSaksbehandlerErAutomatisert_ingenFeil() throws FunksjonellException, TekniskException {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.DELVIS_AUTOMATISERT);
-        behandlingsresultat.getLovvalgsperioder().add(new Lovvalgsperiode());
+        behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsperiode());
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         p.setData(ProsessDataKey.SAKSBEHANDLER, "");
