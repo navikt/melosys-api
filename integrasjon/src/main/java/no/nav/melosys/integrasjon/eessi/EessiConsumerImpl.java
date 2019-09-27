@@ -121,23 +121,14 @@ public class EessiConsumerImpl implements EessiConsumer {
 
     @Override
     public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException {
-
         String uri = UriComponentsBuilder.fromPath(String.format("/sak/%s/bucer/", gsakSaksnummer))
-            .queryParam(STATUSER, lagStatuserString(statuser)).toUriString();
+            .queryParam(STATUSER, statuser.toArray()).toUriString();
 
         List<BucinfoDto> bucinfoDtoList = exchange(uri, HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucinfoDto>>() {
         });
 
         return bucinfoDtoList.stream().map(BucinfoDto::tilDomene).collect(Collectors.toList());
-    }
-
-    private static String lagStatuserString(List<String> statuser) {
-        if (statuser == null) {
-            return "";
-        } else {
-            return String.join(",", statuser);
-        }
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {
