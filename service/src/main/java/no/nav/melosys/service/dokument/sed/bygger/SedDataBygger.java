@@ -93,7 +93,7 @@ public class SedDataBygger {
             .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
-        sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getBostedGrunnlag().hentBostedsadresse()));
+        sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getAdresseGrunnlag().hentAdresseHvisFinnes()));
 
         return sedDataDto;
     }
@@ -106,7 +106,7 @@ public class SedDataBygger {
         sedDataDto.setArbeidssteder(dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
             .map(this::mapArbeidssted).collect(Collectors.toList()));
 
-        sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getBostedGrunnlag().hentBostedsadresse()));
+        sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getAdresseGrunnlag().hentAdresseHvisFinnes()));
 
         sedDataDto.setAvklartBostedsland(
             landvelgerService.hentBostedsland(dataGrunnlag.getBehandling().getId(), dataGrunnlag.getSøknad()).getKode()
