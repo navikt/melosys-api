@@ -14,6 +14,7 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
@@ -153,7 +154,7 @@ public class EessiService {
         String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
 
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
-        eessiConsumer.sendAnmodningUnntakSvar(sedDataDto, rinaSaksnummer);
+        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, hentSedTypeForAnmodningUnntakSvar(behandlingsresultat));
     }
 
     @Transactional(readOnly = true)
@@ -172,5 +173,15 @@ public class EessiService {
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandingID);
         return eessiConsumer.genererSedForhåndsvisning(sedDataDto, sedType);
+    }
+
+    private static SedType hentSedTypeForAnmodningUnntakSvar(Behandlingsresultat behandlingsresultat) {
+        Anmodningsperiodesvartyper anmodningsperiodeSvarType =
+            behandlingsresultat.hentValidertAnmodningsperiode().getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType();
+
+        if (anmodningsperiodeSvarType == Anmodningsperiodesvartyper.INNVILGELSE) {
+            return SedType.A011;
+        }
+        return SedType.A002;
     }
 }

@@ -74,8 +74,8 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public void sendAnmodningUnntakSvar(SedDataDto sedDataDto, String rinaSaksnummer) throws MelosysException {
-        exchange(String.format("/buc/LA_BUC_01/%s/svar", rinaSaksnummer), HttpMethod.POST,
+    public void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) throws MelosysException {
+        exchange(String.format("/buc/%s/sed/%s", rinaSaksnummer, sedType), HttpMethod.POST,
             new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
             });
     }

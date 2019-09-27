@@ -16,7 +16,7 @@ public interface EessiConsumer {
 
     OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, byte[] vedlegg, BucType bucType, boolean forsøkSend) throws MelosysException;
 
-    void sendAnmodningUnntakSvar(SedDataDto sedDataDto, String rinaSaksnummer) throws MelosysException;
+    void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) throws MelosysException;
 
     List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException;
 

@@ -13,6 +13,7 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -79,6 +80,11 @@ public class EessiServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.SK);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
+        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
+        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
@@ -230,7 +236,7 @@ public class EessiServiceTest {
         verify(behandlingService).hentBehandling(eq(1L));
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
         verify(dokumentdataGrunnlagFactory).av(any());
-        verify(eessiConsumer).sendAnmodningUnntakSvar(any(), any());
+        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A002));
     }
 
     @Test
