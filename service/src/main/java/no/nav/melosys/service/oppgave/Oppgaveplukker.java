@@ -126,11 +126,13 @@ public class Oppgaveplukker {
                 throw new TekniskException("Fant ingen aktiv behandling på fagsak " + saksnummer);
             }
 
-            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato() == null) {
-                throw new TekniskException("Behandling " + behandling.getId() + " tilhørende " + saksnummer + " avventer dokumentasjon, men har ingen svarfristdato");
-            }
-            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
-                iter.remove();
+            if (behandling.erVenterForDokumentasjon()) {
+                if (behandling.getDokumentasjonSvarfristDato() == null) {
+                    log.error("Behandling " + behandling.getId() + " tilhørende " + saksnummer + " avventer dokumentasjon, men har ingen svarfristdato");
+                    iter.remove();
+                } else if (behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
+                    iter.remove();
+                }
             }
         }
     }
