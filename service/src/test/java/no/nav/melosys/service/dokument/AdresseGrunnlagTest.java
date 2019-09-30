@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
@@ -33,10 +35,11 @@ public class AdresseGrunnlagTest {
         soeknadDokument.bosted.oppgittAdresse.landkode = "SE";
         soeknadDokument.bosted.oppgittAdresse.gatenavn = "gate";
 
-        StrukturertAdresse strukturertAdresse = adresseGrunnlag.hentAdresseHvisFinnes();
+        Optional<StrukturertAdresse> strukturertAdresse = adresseGrunnlag.finnAdresse();
 
-        assertThat(strukturertAdresse.gatenavn).isEqualTo("gate");
-        assertThat(strukturertAdresse.landkode).isEqualTo("SE");
+        assertThat(strukturertAdresse.isPresent()).isTrue();
+        assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
+        assertThat(strukturertAdresse.get().landkode).isEqualTo("SE");
     }
 
     @Test
@@ -46,10 +49,11 @@ public class AdresseGrunnlagTest {
         personDokument.bostedsadresse.setGateadresse(new Gateadresse());
         personDokument.bostedsadresse.getGateadresse().setGatenavn("gate");
 
-        StrukturertAdresse strukturertAdresse = adresseGrunnlag.hentAdresseHvisFinnes();
+        Optional<StrukturertAdresse> strukturertAdresse = adresseGrunnlag.finnAdresse();
 
-        assertThat(strukturertAdresse.gatenavn).isEqualTo("gate");
-        assertThat(strukturertAdresse.landkode).isEqualTo("SE");
+        assertThat(strukturertAdresse.isPresent()).isTrue();
+        assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
+        assertThat(strukturertAdresse.get().landkode).isEqualTo("SE");
     }
 
     @Test
@@ -58,14 +62,16 @@ public class AdresseGrunnlagTest {
         personDokument.postadresse.land = new Land("SWE");
         personDokument.postadresse.adresselinje1 = "gate";
 
-        StrukturertAdresse strukturertAdresse = adresseGrunnlag.hentAdresseHvisFinnes();
+        Optional<StrukturertAdresse> strukturertAdresse = adresseGrunnlag.finnAdresse();
 
-        assertThat(strukturertAdresse.gatenavn).isEqualTo("gate");
-        assertThat(strukturertAdresse.landkode).isEqualTo("SE");
+        assertThat(strukturertAdresse.isPresent()).isTrue();
+        assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
+        assertThat(strukturertAdresse.get().landkode).isEqualTo("SE");
     }
 
-    @Test(expected = TekniskException.class)
-    public void hentAdresseHvisFinnes_ingenAdresse_forventException() throws TekniskException {
-        adresseGrunnlag.hentAdresseHvisFinnes();
+    @Test
+    public void hentAdresseHvisFinnes_ingenAdresse_forventTomOptional() throws TekniskException {
+        Optional<StrukturertAdresse> strukturertAdresse = adresseGrunnlag.finnAdresse();
+        assertThat(strukturertAdresse.isPresent()).isFalse();
     }
 }

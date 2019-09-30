@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
@@ -25,21 +26,21 @@ public class AdresseGrunnlag {
         this.person = person;
     }
 
-    public StrukturertAdresse hentAdresseHvisFinnes() throws TekniskException {
+    public Optional<StrukturertAdresse> finnAdresse() throws TekniskException {
         StrukturertAdresse adresse = hentBostedsadresse();
 
         if (adresse == null) {
-            adresse = hentPostAdresse();
+            adresse = hentPostadresse();
         }
 
-        return adresse;
+        return Optional.ofNullable(adresse);
     }
 
-    private StrukturertAdresse hentPostAdresse() throws TekniskException {
+    private StrukturertAdresse hentPostadresse() throws TekniskException {
         UstrukturertAdresse ustrukturertAdresse = person.postadresse;
 
         if (ustrukturertAdresse.erTom()) {
-            throw new TekniskException("Finner ingen adresse på bruker");
+            return null;
         }
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
@@ -55,7 +56,7 @@ public class AdresseGrunnlag {
     private StrukturertAdresse hentBostedsadresse() throws TekniskException {
         StrukturertAdresse bostedsadresse = søknad != null ? SoeknadUtils.hentBostedsadresse(søknad) : null;
         if (bostedsadresse == null) {
-            bostedsadresse = hentBostedsadresseFraRegister();
+            return hentBostedsadresseFraRegister();
         }
         return bostedsadresse;
     }
