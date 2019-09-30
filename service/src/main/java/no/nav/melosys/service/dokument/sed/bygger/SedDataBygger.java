@@ -55,6 +55,7 @@ public class SedDataBygger {
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
+        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
@@ -64,6 +65,7 @@ public class SedDataBygger {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
+        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
@@ -80,6 +82,7 @@ public class SedDataBygger {
         StrukturertAdresse bostedsadresse = dataGrunnlag.getAdresseGrunnlag().finnAdresse().orElse(null);
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
@@ -87,6 +90,7 @@ public class SedDataBygger {
         StrukturertAdresse bostedsadresse = dataGrunnlag.getAdresseGrunnlag().finnAdresse().orElse(null);
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
@@ -255,6 +259,15 @@ public class SedDataBygger {
         return tidligereLovvalgsperioder.stream()
             .map(SedDataBygger::lagLovvalgsperiodeDto)
             .collect(Collectors.toList());
+    }
+
+    private static SvarAnmodningUnntakDto lagSvarAnmodningUnntakDto(Behandlingsresultat behandlingsresultat) throws TekniskException {
+        Anmodningsperiode anmodningsperiode = behandlingsresultat.getAnmodningsperioder().iterator().next();
+
+        if (anmodningsperiode != null && anmodningsperiode.getAnmodningsperiodeSvar() != null) {
+            return SvarAnmodningUnntakDto.av(anmodningsperiode.getAnmodningsperiodeSvar());
+        }
+        return null;
     }
 
     private static String hentUnntaksBegrunnelse(Behandlingsresultat behandlingsresultat) {

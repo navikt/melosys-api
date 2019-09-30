@@ -1,15 +1,10 @@
 package no.nav.melosys.saksflyt.steg.aou.inn.svar;
 
-import java.util.Collection;
-
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +15,10 @@ public class SendSed extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(SendSed.class);
 
     private final EessiService eessiService;
-    private final AnmodningsperiodeService anmodningsperiodeService;
 
     @Autowired
-    public SendSed(EessiService eessiService, AnmodningsperiodeService anmodningsperiodeService) {
+    public SendSed(EessiService eessiService) {
         this.eessiService = eessiService;
-        this.anmodningsperiodeService = anmodningsperiodeService;
     }
 
     @Override
@@ -38,14 +31,7 @@ public class SendSed extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         long behandlingId = prosessinstans.getBehandling().getId();
-        Collection<AnmodningsperiodeSvar> anmodningsperiodeSvar = anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(behandlingId);
-
-        if (anmodningsperiodeSvar.size() != 1) {
-            throw new FunksjonellException("Forventet én anmodningsperiode på behandling" + behandlingId + ", fant " + anmodningsperiodeSvar.size());
-        }
-
-        AnmodningsperiodeSvar svar = anmodningsperiodeSvar.iterator().next();
-        eessiService.sendAnmodningUnntakSvar(svar, behandlingId);
+        eessiService.sendAnmodningUnntakSvar(behandlingId);
 
         log.info("Svar på anmodning om unntak sendt for behandling {}", behandlingId);
         prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_OPPDATER_MEDL);
