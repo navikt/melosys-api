@@ -17,25 +17,43 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-public class AdresseGrunnlagTest {
+public class BostedGrunnlagTest {
     private SoeknadDokument soeknadDokument = new SoeknadDokument();
     private PersonDokument personDokument = new PersonDokument();
-    private AdresseGrunnlag adresseGrunnlag;
+    private BostedGrunnlag bostedGrunnlag;
 
     @Before
     public void setup() {
         KodeverkService kodeverkService = mock(KodeverkService.class);
-        adresseGrunnlag = new AdresseGrunnlag(soeknadDokument, personDokument, kodeverkService);
+        bostedGrunnlag = new BostedGrunnlag(soeknadDokument, personDokument, kodeverkService);
     }
 
     @Test
-    public void hentAdresseHvisFinnes_harBostedsadresse_forventBostedsadresse() throws TekniskException {
+    public void hentBostedsadresse_forventStrukturertAdresse() throws TekniskException {
         soeknadDokument.bosted = new Bosted();
         soeknadDokument.bosted.oppgittAdresse = new StrukturertAdresse();
         soeknadDokument.bosted.oppgittAdresse.landkode = "SE";
         soeknadDokument.bosted.oppgittAdresse.gatenavn = "gate";
 
-        Optional<StrukturertAdresse> strukturertAdresse = adresseGrunnlag.finnAdresse();
+        StrukturertAdresse strukturertAdresse = bostedGrunnlag.hentBostedsadresse();
+
+        assertThat(strukturertAdresse.gatenavn).isEqualTo("gate");
+        assertThat(strukturertAdresse.landkode).isEqualTo("SE");
+    }
+
+    @Test(expected = TekniskException.class)
+    public void hentBostedsadresse_ingenAdresse_forventException() throws TekniskException {
+        bostedGrunnlag.hentBostedsadresse();
+    }
+
+    @Test
+    public void finnAdresse_harBostedsadresse_forventBostedsadresse() throws TekniskException {
+        soeknadDokument.bosted = new Bosted();
+        soeknadDokument.bosted.oppgittAdresse = new StrukturertAdresse();
+        soeknadDokument.bosted.oppgittAdresse.landkode = "SE";
+        soeknadDokument.bosted.oppgittAdresse.gatenavn = "gate";
+
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnAdresse();
 
         assertThat(strukturertAdresse.isPresent()).isTrue();
         assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
@@ -43,13 +61,13 @@ public class AdresseGrunnlagTest {
     }
 
     @Test
-    public void hentAdresseHvisFinnes_harBostedsadresseIRegister_forventBostedsadresse() throws TekniskException {
+    public void finnAdresse_harBostedsadresseIRegister_forventBostedsadresse() throws TekniskException {
         personDokument.bostedsadresse = new no.nav.melosys.domain.dokument.person.Bostedsadresse();
         personDokument.bostedsadresse.setLand(new Land("SWE"));
         personDokument.bostedsadresse.setGateadresse(new Gateadresse());
         personDokument.bostedsadresse.getGateadresse().setGatenavn("gate");
 
-        Optional<StrukturertAdresse> strukturertAdresse = adresseGrunnlag.finnAdresse();
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnAdresse();
 
         assertThat(strukturertAdresse.isPresent()).isTrue();
         assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
@@ -57,12 +75,12 @@ public class AdresseGrunnlagTest {
     }
 
     @Test
-    public void hentAdresseHvisFinnes_harPostadresse_forventPostadresse() throws TekniskException {
+    public void finnAdresse_harPostadresse_forventPostadresse() throws TekniskException {
         personDokument.postadresse = new UstrukturertAdresse();
         personDokument.postadresse.land = new Land("SWE");
         personDokument.postadresse.adresselinje1 = "gate";
 
-        Optional<StrukturertAdresse> strukturertAdresse = adresseGrunnlag.finnAdresse();
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnAdresse();
 
         assertThat(strukturertAdresse.isPresent()).isTrue();
         assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
@@ -70,8 +88,9 @@ public class AdresseGrunnlagTest {
     }
 
     @Test
-    public void hentAdresseHvisFinnes_ingenAdresse_forventTomOptional() throws TekniskException {
-        Optional<StrukturertAdresse> strukturertAdresse = adresseGrunnlag.finnAdresse();
+    public void finnAdresse_ingenAdresse_forventTomOptional() throws TekniskException {
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnAdresse();
         assertThat(strukturertAdresse.isPresent()).isFalse();
     }
+
 }

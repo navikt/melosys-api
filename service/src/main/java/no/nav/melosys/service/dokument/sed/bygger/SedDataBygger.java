@@ -49,7 +49,7 @@ public class SedDataBygger {
     }
 
     private SedDataDto lag(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
-        StrukturertAdresse bostedsadresse = dataGrunnlag.getAdresseGrunnlag().finnAdresse()
+        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnAdresse()
             .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId()));
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
@@ -60,7 +60,7 @@ public class SedDataBygger {
     }
 
     private SedDataDto lag(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
-        StrukturertAdresse bostedsadresse = dataGrunnlag.getAdresseGrunnlag().finnAdresse()
+        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnAdresse()
             .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId()));
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
@@ -79,7 +79,7 @@ public class SedDataBygger {
     }
 
     private SedDataDto lagUtkast(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
-        StrukturertAdresse bostedsadresse = dataGrunnlag.getAdresseGrunnlag().finnAdresse().orElse(null);
+        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnAdresse().orElse(null);
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
@@ -87,7 +87,7 @@ public class SedDataBygger {
     }
 
     private SedDataDto lagUtkast(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException {
-        StrukturertAdresse bostedsadresse = dataGrunnlag.getAdresseGrunnlag().finnAdresse().orElse(null);
+        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnAdresse().orElse(null);
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
@@ -262,7 +262,10 @@ public class SedDataBygger {
     }
 
     private static SvarAnmodningUnntakDto lagSvarAnmodningUnntakDto(Behandlingsresultat behandlingsresultat) throws TekniskException {
-        Anmodningsperiode anmodningsperiode = behandlingsresultat.getAnmodningsperioder().iterator().next();
+        Anmodningsperiode anmodningsperiode = null;
+        if (behandlingsresultat.getAnmodningsperioder().iterator().hasNext()) {
+            anmodningsperiode = behandlingsresultat.getAnmodningsperioder().iterator().next();
+        }
 
         if (anmodningsperiode != null && anmodningsperiode.getAnmodningsperiodeSvar() != null) {
             return SvarAnmodningUnntakDto.av(anmodningsperiode.getAnmodningsperiodeSvar());
