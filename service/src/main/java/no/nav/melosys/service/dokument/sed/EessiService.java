@@ -5,12 +5,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.MedlemsperiodeType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
@@ -18,7 +22,6 @@ import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.dto.SvarAnmodningUnntakDto;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -142,13 +145,16 @@ public class EessiService {
         eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(gsakSaksnummer, rinaSaksnummer, bucType));
     }
 
-    public void sendAnmodningUnntakSvar(AnmodningsperiodeSvar anmodningsperiodeSvar, long behandlingId) throws MelosysException {
+    public void sendAnmodningUnntakSvar(long behandlingId) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
+
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.ANMODNINGSPERIODE);
         String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
-        SvarAnmodningUnntakDto svarAnmodningUnntakDto = SvarAnmodningUnntakDto.av(anmodningsperiodeSvar);
 
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
-        eessiConsumer.sendAnmodningUnntakSvar(svarAnmodningUnntakDto, rinaSaksnummer);
+        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, hentSedTypeForAnmodningUnntakSvar(behandlingsresultat));
     }
 
     @Transactional(readOnly = true)
@@ -167,5 +173,15 @@ public class EessiService {
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandingID);
         return eessiConsumer.genererSedForhåndsvisning(sedDataDto, sedType);
+    }
+
+    private static SedType hentSedTypeForAnmodningUnntakSvar(Behandlingsresultat behandlingsresultat) {
+        Anmodningsperiodesvartyper anmodningsperiodeSvarType =
+            behandlingsresultat.hentValidertAnmodningsperiode().getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType();
+
+        if (anmodningsperiodeSvarType == Anmodningsperiodesvartyper.INNVILGELSE) {
+            return SedType.A011;
+        }
+        return SedType.A002;
     }
 }
