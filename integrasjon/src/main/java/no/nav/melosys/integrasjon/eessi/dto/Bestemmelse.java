@@ -23,8 +23,12 @@ public enum Bestemmelse {
     ART_13_3("13_3"),
     ART_13_4("13_4"),
     ART_14_11("14_11"),
+    ART_15("15"),
     ART_16_1("16_1"),
-    ART_16_2("16_2");
+    ART_16_2("16_2"),
+    ART_87_8("87_8"),
+    ART_87_a("87_a"),
+    ANNET("annet");
 
     private String value;
 

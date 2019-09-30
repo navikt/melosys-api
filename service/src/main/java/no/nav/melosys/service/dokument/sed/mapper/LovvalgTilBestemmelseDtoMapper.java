@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
 import org.springframework.util.Assert;
 
-public class LovvalgTilBestemmelseDtoMapper {
+public final class LovvalgTilBestemmelseDtoMapper {
 
     private static final BiMap<LovvalgBestemmelse, Bestemmelse> mapper = HashBiMap.create();
 
@@ -25,7 +25,7 @@ public class LovvalgTilBestemmelseDtoMapper {
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B, Bestemmelse.ART_11_3_b);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C, Bestemmelse.ART_11_3_c);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E, Bestemmelse.ART_11_3_e);
-        mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1, Bestemmelse.ART_11_4); //fixme: MEDL må støtte 11_4
+        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, Bestemmelse.ART_11_4);
         mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5, Bestemmelse.ART_11_5);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Bestemmelse.ART_12_1);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2, Bestemmelse.ART_12_2);
@@ -36,12 +36,20 @@ public class LovvalgTilBestemmelseDtoMapper {
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, Bestemmelse.ART_13_3);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, Bestemmelse.ART_13_4);
         mapper.put(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11, Bestemmelse.ART_14_11);
+//        mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART15, Bestemmelse.ART_15); fixme: finnes ikke i melosys. 15 legges inn i kodeverk?
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, Bestemmelse.ART_16_1);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Bestemmelse.ART_16_2);
+        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET, Bestemmelse.ANNET);
+        mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A, Bestemmelse.ART_87_a);
+//        mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_7, Bestemmelse.ART_87_8); fixme: finnes ikke i melosys venter på avklaring
     }
 
     public static Bestemmelse mapMelosysLovvalgTilBestemmelseDto(LovvalgBestemmelse lovvalgBestemmelse) {
         Assert.notNull(lovvalgBestemmelse, "LovvalgBestemmelse er null.");
+
+        if (lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1) {
+            return Bestemmelse.ART_11_3_a; //fixme: Venter på endelig avklaring om hva vi skal mappe 11_4_1 til
+        }
 
         if (mapper.containsKey(lovvalgBestemmelse)) {
             return mapper.get(lovvalgBestemmelse);
