@@ -103,8 +103,8 @@ public class EessiConsumerTest {
     }
 
     @Test
-    public void hentTilknyttedeBucer_medFlereStatuser_forventRettSti() throws IOException, URISyntaxException, MelosysException {
-        server.expect(requestTo("/sak/1/bucer/?statuser=utkast,mottatt,sendt"))
+    public void hentTilknyttedeBucer_medFlereStatuser_forventRettSti() throws MelosysException {
+        server.expect(requestTo("/sak/1/bucer/?statuser=utkast&statuser=mottatt&statuser=sendt"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
         eessiConsumer.hentTilknyttedeBucer(1L, Arrays.asList("utkast", "mottatt", "sendt"));
@@ -112,18 +112,10 @@ public class EessiConsumerTest {
 
     @Test
     public void hentTilknyttedeBucer_medIngenStatuser_forventRettSti() throws MelosysException {
-        server.expect(requestTo("/sak/1/bucer/?statuser="))
+        server.expect(requestTo("/sak/1/bucer/?statuser"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
         eessiConsumer.hentTilknyttedeBucer(1L, Collections.emptyList());
-    }
-
-    @Test(expected = MelosysException.class)
-    public void hentTilknyttedeBucer_forventException() throws MelosysException {
-        server.expect(requestTo("/sak/1/bucer/?statuser="))
-            .andRespond(withBadRequest());
-
-        eessiConsumer.hentTilknyttedeBucer(1L, null);
     }
 
     @Test

@@ -71,7 +71,7 @@ public class BehandlingTjeneste extends RestTjeneste {
     @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public Response hentMedlemsperioder(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
-        log.info("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        log.debug("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
@@ -85,7 +85,7 @@ public class BehandlingTjeneste extends RestTjeneste {
         response = TidligereMedlemsperioderDto.class)
     public Response hentBehandling(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
-        log.info("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
+        log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);

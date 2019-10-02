@@ -54,7 +54,10 @@ public class GsakService implements GsakFasade {
                     .put(UTL_MYND_UTPEKT_NORGE, "ae0112")
                     .put(NY_VURDERING, "ae0028")
                     .put(UTL_MYND_UTPEKT_SEG_SELV, "ae0113")
-                    .put(REGISTRERING_UNNTAK_NORSK_TRYGD, "ae0111")
+                    .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
+                    .put(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, "ae0235")
+                    .put(ØVRIGE_SED, "ukjent")
+                    .put(VURDER_TRYGDETID, "ae0236")
                     .build();
     
     private final SakConsumer sakConsumer;
@@ -62,7 +65,8 @@ public class GsakService implements GsakFasade {
     private final OppgaveConsumer oppgaveConsumer;
 
     private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_UFM = EnumSet.of(
-        REGISTRERING_UNNTAK_NORSK_TRYGD, ANMODNING_OM_UNNTAK_HOVEDREGEL, UTL_MYND_UTPEKT_SEG_SELV
+        REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+        ANMODNING_OM_UNNTAK_HOVEDREGEL, UTL_MYND_UTPEKT_SEG_SELV
     );
 
     @Autowired
