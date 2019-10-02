@@ -8,9 +8,9 @@ import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -43,9 +43,9 @@ public final class MedlPeriodeKonverter {
         // Article 13
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, GrunnlagMedl.FO_13_1_A);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, GrunnlagMedl.FO_13_1_B);
-        tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1_B2, GrunnlagMedl.FO_13_B_II);
-        tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1_B3, GrunnlagMedl.FO_13_B_III);
-        tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1_B4, GrunnlagMedl.FO_13_B_IV);
+        tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2, GrunnlagMedl.FO_13_B_II);
+        tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3, GrunnlagMedl.FO_13_B_III);
+        tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4, GrunnlagMedl.FO_13_B_IV);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, GrunnlagMedl.FO_13_2_A);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B, GrunnlagMedl.FO_13_2_B);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, GrunnlagMedl.FO_13_3);

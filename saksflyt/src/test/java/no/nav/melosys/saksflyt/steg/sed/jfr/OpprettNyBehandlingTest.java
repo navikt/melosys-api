@@ -72,7 +72,7 @@ public class OpprettNyBehandlingTest {
     @Test
     public void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() throws MelosysException {
         final long gsakSaksnummer = 123L;
-        final Behandlingstyper behandlingstype = Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD;
+        final Behandlingstyper behandlingstype = Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         final String journalpostID = "jp123";
         final String dokumentID = "dok123";
 

@@ -5,8 +5,8 @@ import java.util.Comparator;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 
 /**
@@ -291,7 +291,8 @@ public final class Oppgave {
             case ENDRET_PERIODE:
                 return Oppgavetyper.VUR;
             case UTL_MYND_UTPEKT_SEG_SELV:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD:
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
                 return Oppgavetyper.BEH_SED;
             case ANKE:
             case KLAGE:

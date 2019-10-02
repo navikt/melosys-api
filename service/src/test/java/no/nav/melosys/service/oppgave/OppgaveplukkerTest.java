@@ -315,7 +315,7 @@ public class OppgaveplukkerTest {
         Set<Behandlingstyper> behandlingstyper = new HashSet<>(Arrays.asList(
             Behandlingstyper.SOEKNAD,
             Behandlingstyper.ENDRET_PERIODE,
-            Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD,
+            Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
             Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV
         ));
 
