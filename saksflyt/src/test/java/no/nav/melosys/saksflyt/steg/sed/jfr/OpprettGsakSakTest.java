@@ -39,7 +39,7 @@ public class OpprettGsakSakTest {
     public void utfør() throws MelosysException {
 
         String saksnummer = "saksnr";
-        Behandlingstyper behandlingstype = Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD;
+        Behandlingstyper behandlingstype = Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         String aktørID = "aktør";
         Long gsakSaksnummer = 12233L;
 

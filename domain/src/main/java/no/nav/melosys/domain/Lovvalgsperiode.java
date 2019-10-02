@@ -185,12 +185,12 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
         return bestemmelse == FO_883_2004_ART11_3A || bestemmelse == FO_883_2004_ART11_3B || bestemmelse == FO_883_2004_ART11_4_2
             || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1
             || bestemmelse == FO_883_2004_ART13_1A
-            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1_B2 || bestemmelse == FO_883_2004_ART13_1_B3 || bestemmelse == FO_883_2004_ART13_1_B4;
+            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1B2 || bestemmelse == FO_883_2004_ART13_1B3 || bestemmelse == FO_883_2004_ART13_1B4;
     }
 
     public boolean erArtikkel13() {
         return bestemmelse == FO_883_2004_ART13_1A
-            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1_B2 || bestemmelse == FO_883_2004_ART13_1_B3 || bestemmelse == FO_883_2004_ART13_1_B4
+            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1B2 || bestemmelse == FO_883_2004_ART13_1B3 || bestemmelse == FO_883_2004_ART13_1B4
             || bestemmelse == FO_883_2004_ART13_2A || bestemmelse == FO_883_2004_ART13_2B
             || bestemmelse == FO_883_2004_ART13_3
             || bestemmelse == FO_883_2004_ART13_4;
