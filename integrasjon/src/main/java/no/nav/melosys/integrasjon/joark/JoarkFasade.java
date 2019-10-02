@@ -8,6 +8,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse;
 
 public interface JoarkFasade {
 
@@ -30,6 +32,11 @@ public interface JoarkFasade {
      * Henter en liste med journalposter knyttet til en sak.
      */
     List<Journalpost> hentKjerneJournalpostListe(Long gsakSakID) throws IntegrasjonException, SikkerhetsbegrensningException;
+
+    /**
+     * Oppretter en journalpost  i Joark
+     */
+    OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request, boolean forsøkEndeligJfr);
 
     /**
      * Oppdaterer en journalpost i Joark

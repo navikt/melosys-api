@@ -3,11 +3,14 @@ package no.nav.melosys.service.journalforing;
 import java.time.LocalDate;
 import java.util.Arrays;
 
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.FagsakDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
@@ -21,8 +24,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,11 +38,11 @@ public class JournalfoeringServiceTest {
     @Mock
     private ProsessinstansService prosessinstansService;
 
-   @Mock
+    @Mock
     private OppgaveService oppgaveService;
 
-   @Mock
-   private EessiService eessiService;
+    @Mock
+    private EessiService eessiService;
 
     private JournalfoeringService journalfoeringService;
 
@@ -108,7 +111,7 @@ public class JournalfoeringServiceTest {
         when(eessiService.støtterAutomatiskBehandling(anyString(), anyString())).thenReturn(Boolean.TRUE);
 
         journalfoeringService.opprettOgJournalfør(opprettDto);
-        verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(),anyString());
+        verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(), anyString());
     }
 
     @Test
@@ -136,5 +139,35 @@ public class JournalfoeringServiceTest {
     public void valider_brukerID_mangler() throws FunksjonellException {
         opprettDto.setBrukerID(null);
         journalfoeringService.valider(opprettDto);
+    }
+
+    @Test
+    public void opprettJournalpostSedSomBrev_forventJournalpostId() throws TekniskException {
+        String fnr = "11223344556";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(123L);
+        byte[] dokument = "et dokument".getBytes();
+
+        when(joarkFasade.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
+            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").journalstatus("ENDELIG").build());
+
+        String journalpostId = journalfoeringService.opprettJournalpostSedSomBrev(fagsak, "MED", fnr,
+            "mottakernavn", "SWE", "SED A011", "SED A011", dokument, null);
+
+        assertThat(journalpostId).isEqualTo("1234");
+    }
+
+    @Test(expected = TekniskException.class)
+    public void opprettJournalpostSedSomBrev_forventException() throws TekniskException {
+        String fnr = "11223344556";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(123L);
+        byte[] dokument = "et dokument".getBytes();
+
+        when(joarkFasade.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
+            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").journalstatus("MIDLERTIDIG").build());
+
+        journalfoeringService.opprettJournalpostSedSomBrev(fagsak, "MED", fnr, "mottakernavn",
+            "SWE", "SED A011", "SED A011", dokument, null);
     }
 }

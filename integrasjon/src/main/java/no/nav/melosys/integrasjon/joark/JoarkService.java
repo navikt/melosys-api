@@ -18,6 +18,9 @@ import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
+import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.binding.*;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
@@ -44,14 +47,17 @@ public class JoarkService implements JoarkFasade {
     private final InngaaendeJournalConsumer inngåendeJournalConsumer;
     private final JournalConsumer journalConsumer;
     private final JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
+    private final JournalpostapiConsumer journalpostapiConsumer;
 
     @Autowired
     public JoarkService(InngaaendeJournalConsumer inngåendeJournal,
                         JournalConsumer journal,
-                        JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer) {
+                        JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer,
+                        JournalpostapiConsumer journalpostapiConsumer) {
         this.inngåendeJournalConsumer = inngåendeJournal;
         this.journalConsumer = journal;
         this.journalfoerInngaaendeConsumer = journalfoerInngaaendeConsumer;
+        this.journalpostapiConsumer = journalpostapiConsumer;
     }
 
     @Override
@@ -201,6 +207,11 @@ public class JoarkService implements JoarkFasade {
         detaljertDokumentinformasjon.getSkannetInnholdListe()
             .forEach(vedlegg -> arkivDokument.getInterneVedlegg().add(new ArkivDokumentVedlegg(vedlegg.getVedleggInnhold())));
         return arkivDokument;
+    }
+
+    @Override
+    public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request, boolean forsøkEndeligJfr) {
+        return journalpostapiConsumer.opprettJournalpost(request, forsøkEndeligJfr);
     }
 
     @Override

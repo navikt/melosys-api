@@ -18,6 +18,7 @@ import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
+import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.DokumentInformasjonMangler;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
@@ -58,6 +59,8 @@ public class JoarkServiceTest {
     private JournalConsumer journalConsumer;
     @Mock
     private JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
+    @Mock
+    private JournalpostapiConsumer journalpostapiConsumer;
     @Captor
     private ArgumentCaptor<PutJournalpostRequest> oppdaterJournalpostCaptor;
     @Captor
@@ -67,7 +70,7 @@ public class JoarkServiceTest {
 
     @Before
     public void setUp() {
-        this.joarkService = new JoarkService(inngaaendeJournalConsumer, journalConsumer, journalfoerInngaaendeConsumer);
+        this.joarkService = new JoarkService(inngaaendeJournalConsumer, journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer);
     }
 
     @Test
