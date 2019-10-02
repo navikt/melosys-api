@@ -130,7 +130,7 @@ public class DokumentdataGrunnlagTest {
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getNavn()).isEqualTo(maritimtArbeidISøknad.foretakNavn);
+        assertThat(arbeidssted.getNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);
         assertThat(arbeidssted.getIdnummer()).isEqualTo(maritimtArbeidISøknad.foretakOrgnr);
         assertThat(arbeidssted.getOmråde()).isEqualTo(avklartMaritimtArbeid.getLand());
         assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
@@ -150,7 +150,7 @@ public class DokumentdataGrunnlagTest {
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getNavn()).isNullOrEmpty();
+        assertThat(arbeidssted.getNavn()).isEqualTo("Dunfjæder");
         assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
         assertThat(arbeidssted.getOmråde()).isEqualTo("GB");
     }

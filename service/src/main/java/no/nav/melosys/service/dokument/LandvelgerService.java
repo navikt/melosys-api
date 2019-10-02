@@ -7,14 +7,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,12 +33,15 @@ public class LandvelgerService {
 
     private AvklartefaktaService avklartefaktaService;
     private VilkaarsresultatRepository vilkaarsresultatRepository;
+    private BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
     public LandvelgerService(AvklartefaktaService avklartefaktaService,
-                             VilkaarsresultatRepository vilkaarsresultatRepository) {
+                             VilkaarsresultatRepository vilkaarsresultatRepository,
+                            BehandlingsresultatService behandlingsresultatService) {
         this.avklartefaktaService = avklartefaktaService;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     public Landkoder hentArbeidsland(Behandling behandling) throws TekniskException, FunksjonellException {
@@ -46,12 +54,28 @@ public class LandvelgerService {
 
     public Collection<Landkoder> hentAlleArbeidsland(Behandling behandling) throws TekniskException {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
-        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-        alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
+        if (!ignorererSøknadslandForMaritimtArbeid(behandling)) {
+            SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+            alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
+        }
 
         Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandling.getId());
         alleArbeidsland.removeAll(landMedMarginaltArbeid);
         return alleArbeidsland;
+    }
+
+    private boolean ignorererSøknadslandForMaritimtArbeid(Behandling behandling) {
+        try {
+            Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+            if (behandlingsresultat != null && behandlingsresultat.hentValidertLovvalgsperiode() != null) {
+                LovvalgBestemmelse lovvalgBestemmelse = behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse();
+                return lovvalgBestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2
+                        || lovvalgBestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1;
+            }
+        } catch (IkkeFunnetException e) {
+            // Ignorer
+        }
+        return false;
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(Behandling behandling) throws TekniskException {

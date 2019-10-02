@@ -11,7 +11,7 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     private final AvklartMaritimtArbeid avklartMaritimtArbeid;
 
     public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid, AvklartMaritimtArbeid avklartMaritimtArbeid) {
-        super(maritimtArbeid.foretakNavn, maritimtArbeid.foretakOrgnr, avklartMaritimtArbeid.getLand());
+        super(maritimtArbeid.enhetNavn, maritimtArbeid.foretakOrgnr, avklartMaritimtArbeid.getLand());
         this.avklartMaritimtArbeid = avklartMaritimtArbeid;
     }
 
