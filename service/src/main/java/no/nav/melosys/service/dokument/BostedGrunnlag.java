@@ -30,46 +30,37 @@ public class BostedGrunnlag {
     }
 
     public StrukturertAdresse hentBostedsadresse() throws TekniskException {
-        StrukturertAdresse bostedsadresse = hentBostedsadresseFraDokument();
-
-        if (bostedsadresse == null) {
-            throw new TekniskException("Bostedsadressen finnes ikke eller mangler landkode");
-        }
-        return bostedsadresse;
+        return finnBostedsadresseFraDokument().orElseThrow(() ->
+            new TekniskException("Bostedsadressen finnes ikke eller mangler landkode"));
     }
 
     public Optional<StrukturertAdresse> finnAdresse() throws TekniskException {
-        StrukturertAdresse adresse = hentBostedsadresseFraDokument();
-
-        if (adresse == null) {
-            adresse = hentPostadresse();
-        }
-
-        return Optional.ofNullable(adresse);
+        Optional<StrukturertAdresse> adresse = finnBostedsadresseFraDokument();
+        return adresse.isPresent() ? adresse : finnPostadresse();
     }
 
-    private StrukturertAdresse hentBostedsadresseFraDokument() throws TekniskException {
+    private Optional<StrukturertAdresse> finnBostedsadresseFraDokument() throws TekniskException {
         StrukturertAdresse bostedsadresse = søknad != null ? SoeknadUtils.hentBostedsadresse(søknad) : null;
         if (bostedsadresse == null) {
-            return hentBostedsadresseFraRegister();
+            return finnBostedsadresseFraRegister();
         }
-        return bostedsadresse;
+        return Optional.of(bostedsadresse);
     }
 
-    private StrukturertAdresse hentBostedsadresseFraRegister() throws TekniskException {
+    private Optional<StrukturertAdresse> finnBostedsadresseFraRegister() throws TekniskException {
         Bostedsadresse bostedsadresse = person.bostedsadresse;
         if (StringUtils.isEmpty(bostedsadresse.getLand().getKode())) {
-            return null;
+            return Optional.empty();
         }
         bostedsadresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, bostedsadresse.getPostnr(), LocalDate.now()));
-        return StrukturertAdresse.av(bostedsadresse);
+        return Optional.of(StrukturertAdresse.av(bostedsadresse));
     }
 
-    private StrukturertAdresse hentPostadresse() throws TekniskException {
+    private Optional<StrukturertAdresse> finnPostadresse() throws TekniskException {
         UstrukturertAdresse ustrukturertAdresse = person.postadresse;
 
         if (ustrukturertAdresse.erTom()) {
-            return null;
+            return Optional.empty();
         }
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
@@ -79,6 +70,6 @@ public class BostedGrunnlag {
         strukturertAdresse.region = ustrukturertAdresse.adresselinje4;
         strukturertAdresse.landkode = LandkoderUtils.tilIso2(ustrukturertAdresse.land.getKode()).getKode();
 
-        return strukturertAdresse;
+        return Optional.of(strukturertAdresse);
     }
 }
