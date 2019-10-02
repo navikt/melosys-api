@@ -28,7 +28,6 @@ public class BrevDataByggerVideresend implements BrevDataBygger {
             throw new FunksjonellException("Bostedslandet kan ikke være Norge ved videresending av søknad");
         }
 
-        // Bruker skal ha A1 som vedlegg - Arbeidsgiver skal ikke
         BrevDataVideresend brevdata = new BrevDataVideresend(brevbestillingDto, saksbehandler);
         brevdata.bostedsland = bostedsland.getBeskrivelse();
         brevdata.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
