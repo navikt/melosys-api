@@ -1,0 +1,16 @@
+<ns2:hentPeriodeListeResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/medlemskap/v2">
+    <response>
+        <periodeListe opprinneligOpprettetAv="PMEDL003" sistEndretAv="BASIS-319" tidspunktOpprinneligOpprettet="2010-03-25T09:43:15.026+01:00" tidspunktSistEndret="2012-03-24T04:00:14.069+01:00">
+            <fraOgMed>2009-09-01</fraOgMed>
+            <tilOgMed>2009-10-01</tilOgMed>
+            <id>1374052</id>
+            <versjon>0</versjon>
+            <status term="Gyldig">GYLD</status>
+            <helsedel>false</helsedel>
+            <type term="Periode uten medlemskap">PUMEDSKP</type>
+            <lovvalg term="Endelig">ENDL</lovvalg>
+            <kilde term="Infotrygd">INFOTR</kilde>
+            <grunnlagstype term="Ikke medlem, EØS-avtalen">IMEDEOS</grunnlagstype>
+        </periodeListe>
+    </response>
+</ns2:hentPeriodeListeResponse>
