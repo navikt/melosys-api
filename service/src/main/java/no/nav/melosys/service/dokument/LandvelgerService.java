@@ -52,7 +52,7 @@ public class LandvelgerService {
 
     public Collection<Landkoder> hentAlleArbeidsland(Behandling behandling) throws TekniskException {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
-        if (erArtikkel13(behandling)) {
+        if (alleArbeidsland.isEmpty() || erArtikkel13(behandling)) {
             SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
             alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
         }
