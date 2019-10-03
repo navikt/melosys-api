@@ -13,7 +13,7 @@ public final class OppgaveFactory {
 
     private OppgaveFactory() {}
 
-    public static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
+    static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
         return hentOppgaveParametere(behandlingstype).oppgavetype;
     }
 
