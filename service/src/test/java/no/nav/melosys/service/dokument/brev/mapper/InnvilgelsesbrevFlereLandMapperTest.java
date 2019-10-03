@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.dok.melosysbrev._000083.EndretPeriodeBegrunnelseKode;
+import no.nav.dok.melosysbrev._000083.SakstypeKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
@@ -13,7 +15,11 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
@@ -26,7 +32,9 @@ import org.junit.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.*;
+import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
+import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.hentAlleVerdierFraKodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InnvilgelsesbrevFlereLandMapperTest {
@@ -35,6 +43,23 @@ public class InnvilgelsesbrevFlereLandMapperTest {
 
     public InnvilgelsesbrevFlereLandMapperTest() {
         instans = new InnvilgelsesbrevFlereLandMapper();
+    }
+
+    @Test
+    public void testSakstypeKode() throws Exception {
+        Kodeverk[] koder = hentAlleVerdierFraKodeverk(Sakstyper.class);
+        for (Kodeverk kode : koder) {
+            if (kode.getKode().equals("UKJENT")) continue;  // Vet ikke om det er aktuelt med brev for denne
+            SakstypeKode.fromValue(kode.getKode());
+        }
+    }
+
+    @Test
+    public void testEndretBegrunnelseKoder() throws Exception {
+        Kodeverk[] koder = hentAlleVerdierFraKodeverk(Endretperiode.class);
+        for (Kodeverk kode : koder) {
+            EndretPeriodeBegrunnelseKode.fromValue(kode.getKode());
+        }
     }
 
     @Test

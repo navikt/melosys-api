@@ -3,20 +3,23 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.NorskPostadresse;
+import no.nav.dok.melosysbrev._000072.HenleggelseGrunnKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.hentAlleVerdierFraKodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
-import static org.jeasy.random.FieldPredicates.named;
 
 public class HenleggelsesbrevMapperTest {
 
@@ -75,4 +78,11 @@ public class HenleggelsesbrevMapperTest {
         return easyRandom.nextObject(FellesType.class);
     }
 
+    @Test
+    public void testHenleggelsegrunnKode() throws Exception {
+        Kodeverk[] koder = hentAlleVerdierFraKodeverk(Henleggelsesgrunner.class);
+        for (Kodeverk kode : koder) {
+            HenleggelseGrunnKode.fromValue(kode.getKode());
+        }
+    }
 }
