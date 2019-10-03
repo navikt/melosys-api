@@ -54,6 +54,7 @@ public class GsakService implements GsakFasade {
                     .put(UTL_MYND_UTPEKT_NORGE, "ae0112")
                     .put(NY_VURDERING, "ae0028")
                     .put(UTL_MYND_UTPEKT_SEG_SELV, "ae0113")
+                    .put(ANMODNING_OM_UNNTAK_HOVEDREGEL, "ae0110")
                     .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
                     .put(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, "ae0235")
                     .put(ØVRIGE_SED, "ukjent")

@@ -284,27 +284,6 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.BEH_SED;
     }
 
-    public static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
-        switch (behandlingstype) {
-            case SOEKNAD:
-                return Oppgavetyper.BEH_SAK_MK;
-            case ENDRET_PERIODE:
-                return Oppgavetyper.VUR;
-            case UTL_MYND_UTPEKT_SEG_SELV:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
-                return Oppgavetyper.BEH_SED;
-            case ANKE:
-            case KLAGE:
-            case UTL_MYND_UTPEKT_NORGE:
-            case NY_VURDERING:
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-            case ØVRIGE_SED:
-            default:
-                throw new UnsupportedOperationException();
-        }
-    }
-
     /**
      * Sorter oppgaver basert på prioritet (først) og frist.
      */

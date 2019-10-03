@@ -107,7 +107,7 @@ public class Oppgaveplukker {
 
     Set<Oppgavetyper> hentOppgavetyper(Set<Behandlingstyper> behandlingstypeListe) {
         return behandlingstypeListe.stream()
-            .map(Oppgave::hentOppgavetype)
+            .map(OppgaveFactory::hentOppgavetype)
             .collect(Collectors.toSet());
     }
 
