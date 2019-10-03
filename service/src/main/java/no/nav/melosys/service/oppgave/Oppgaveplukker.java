@@ -87,7 +87,7 @@ public class Oppgaveplukker {
             }
         }
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, sakstyper, Collections.emptySet(), behandlingstemaer);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, sakstyper, behandlingstyper, behandlingstemaer);
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
