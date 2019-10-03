@@ -5,6 +5,7 @@ import java.util.List;
 public class OpprettJournalpost extends Journalpost {
 
     private String journalførendeEnhet;
+    private String korrespondansepartIdType;
     private FysiskDokument hoveddokument;
     private List<FysiskDokument> vedlegg;
 
@@ -18,6 +19,14 @@ public class OpprettJournalpost extends Journalpost {
 
     public void setJournalførendeEnhet(String journalførendeEnhet) {
         this.journalførendeEnhet = journalførendeEnhet;
+    }
+
+    public String getKorrespondansepartIdType() {
+        return korrespondansepartIdType;
+    }
+
+    public void setKorrespondansepartIdType(String korrespondansepartIdType) {
+        this.korrespondansepartIdType = korrespondansepartIdType;
     }
 
     @Override
