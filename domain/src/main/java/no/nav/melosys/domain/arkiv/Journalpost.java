@@ -21,6 +21,7 @@ public class Journalpost {
     private Journalposttype journalposttype;
     private List<ArkivDokument> vedleggListe;
     private String mottaksKanal;
+    private String tema;
 
     public Journalpost(String journalpostId) {
         this.journalpostId = journalpostId;
@@ -125,5 +126,13 @@ public class Journalpost {
 
     public boolean mottaksKanalErEessi() {
         return "EESSI".equals(mottaksKanal);
+    }
+
+    public String getTema() {
+        return tema;
+    }
+
+    public void setTema(String tema) {
+        this.tema = tema;
     }
 }

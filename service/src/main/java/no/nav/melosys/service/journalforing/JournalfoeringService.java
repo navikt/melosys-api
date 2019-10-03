@@ -1,8 +1,5 @@
 package no.nav.melosys.service.journalforing;
 
-import java.util.Map;
-
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
@@ -12,8 +9,6 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
@@ -123,20 +118,6 @@ public class JournalfoeringService {
 
         prosessinstansService.lagre(prosessinstans);
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
-    }
-
-    public String opprettJournalpostSedSomBrev(Fagsak fagsak, String tema, String fnr, String mottakernavn,
-                                               String mottakerland, String journalpostTittel, String dokumentTittel,
-                                               byte[] dokument, Map<String, byte[]> vedlegg) throws TekniskException {
-        OpprettJournalpostRequest request = OpprettJournalpostRequestMapper.opprettJournalpostSedSomBrev(
-            fagsak.getGsakSaksnummer(), tema, fnr, mottakernavn, mottakerland, journalpostTittel, dokumentTittel,  dokument, vedlegg);
-
-        OpprettJournalpostResponse response = joarkFasade.opprettJournalpost(request, true);
-        if (!response.erFerdigstilt()) {
-            throw new TekniskException("Opprettelse av journalpost ble ikke ferdigstilt: " + response.getMelding());
-        }
-
-        return response.getJournalpostId();
     }
 
     // Denne er package-visible kun for at det skal være lettere å teste den isolert

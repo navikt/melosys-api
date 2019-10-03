@@ -9,10 +9,7 @@ import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
@@ -210,8 +207,15 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request, boolean forsøkEndeligJfr) {
-        return journalpostapiConsumer.opprettJournalpost(request, forsøkEndeligJfr);
+    public String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) throws TekniskException {
+        OpprettJournalpostResponse response =
+            journalpostapiConsumer.opprettJournalpost(OpprettJournalpostRequest.av(opprettJournalpost), forsøkEndeligJfr);
+
+        if (forsøkEndeligJfr && !response.erFerdigstilt()) {
+            throw new TekniskException("Opprettelse av journalpost ble ikke ferdigstilt: " + response.getMelding());
+        }
+
+        return response.getJournalpostId();
     }
 
     @Override

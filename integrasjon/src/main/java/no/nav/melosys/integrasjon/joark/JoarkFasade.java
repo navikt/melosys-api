@@ -4,12 +4,8 @@ import java.util.List;
 
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse;
+import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.exception.*;
 
 public interface JoarkFasade {
 
@@ -36,7 +32,7 @@ public interface JoarkFasade {
     /**
      * Oppretter en journalpost  i Joark
      */
-    OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request, boolean forsøkEndeligJfr);
+    String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) throws TekniskException;
 
     /**
      * Oppdaterer en journalpost i Joark
