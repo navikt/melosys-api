@@ -311,7 +311,7 @@ public final class Oppgave {
     public LocalDate lagFristFerdigstillelse(LocalDate fraDato) throws FunksjonellException {
         if (erJournalFøring()) {
             return fraDato.plusDays(FRIST_JFR_DAGER);
-        } else if (erBehandling() || erSedBehandling()) {
+        } else if (erBehandling()) {
             return fraDato.plusWeeks(FRIST_BEH_UKER);
         } else if (erVurderDokument()) {
             return fraDato.plusWeeks(FRIST_VUR_DAGER);

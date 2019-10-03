@@ -32,9 +32,9 @@ public final class OppgaveFactory {
     private static OppgaveParametere hentOppgaveParametere(Behandlingstyper behandlingstype) {
         switch (behandlingstype) {
             case SOEKNAD:
-                return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristUker(2), Behandlingstema.EU_EOS);
+                return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristUker(12), Behandlingstema.EU_EOS);
             case ENDRET_PERIODE:
-                return new OppgaveParametere(Tema.MED, Oppgavetyper.VUR, fristUker(2), Behandlingstema.EU_EOS);
+                return new OppgaveParametere(Tema.MED, Oppgavetyper.VUR, fristDager(1), Behandlingstema.EU_EOS);
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
             case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
                 return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2), Behandlingstema.EU_EOS);
@@ -57,6 +57,10 @@ public final class OppgaveFactory {
 
     private static LocalDate fristUker(int uker) {
         return LocalDate.now().plusWeeks(uker);
+    }
+
+    private static LocalDate fristDager(int dager) {
+        return LocalDate.now().plusDays(dager);
     }
 
     private static class OppgaveParametere {
