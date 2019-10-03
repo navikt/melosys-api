@@ -64,6 +64,7 @@ public class LandvelgerServiceTest {
         søknad.maritimtArbeid.add(maritimtArbeid);
 
         lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
@@ -127,16 +128,6 @@ public class LandvelgerServiceTest {
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
         søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
-
-        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandling);
-        assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK);
-    }
-
-    @Test
-    public void hentAlleArbeidsland_medArtikkel12_1AvklartArbeidslandOgSøknadsland_girKunArbeidsland() throws TekniskException {
-        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
-        søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
         Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandling);
         assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK);

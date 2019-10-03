@@ -7,13 +7,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -54,7 +52,7 @@ public class LandvelgerService {
 
     public Collection<Landkoder> hentAlleArbeidsland(Behandling behandling) throws TekniskException {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
-        if (!ignorererSøknadslandForMaritimtArbeid(behandling)) {
+        if (erArtikkel13(behandling)) {
             SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
             alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
         }
@@ -64,14 +62,10 @@ public class LandvelgerService {
         return alleArbeidsland;
     }
 
-    private boolean ignorererSøknadslandForMaritimtArbeid(Behandling behandling) {
+    private boolean erArtikkel13(Behandling behandling) {
         try {
-            Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-            if (behandlingsresultat != null && behandlingsresultat.hentValidertLovvalgsperiode() != null) {
-                LovvalgBestemmelse lovvalgBestemmelse = behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse();
-                return lovvalgBestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2
-                        || lovvalgBestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1;
-            }
+            Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode();
+            return lovvalgsperiode.erArtikkel13();
         } catch (IkkeFunnetException e) {
             // Ignorer
         }

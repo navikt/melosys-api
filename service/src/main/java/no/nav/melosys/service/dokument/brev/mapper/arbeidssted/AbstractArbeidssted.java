@@ -1,19 +1,19 @@
 package no.nav.melosys.service.dokument.brev.mapper.arbeidssted;
 
 public abstract class AbstractArbeidssted implements Arbeidssted {
-    protected final String navn;
+    protected final String foretakNavn;
     protected final String landkode;
     protected final String idnummer;
 
-    public AbstractArbeidssted(String navn, String idnummer, String landkode) {
-        this.navn = navn;
+    protected AbstractArbeidssted(String foretakNavn, String idnummer, String landkode) {
+        this.foretakNavn = foretakNavn;
         this.idnummer = idnummer;
         this.landkode = landkode;
     }
 
     @Override
-    public String getNavn() {
-        return navn;
+    public String getForetakNavn() {
+        return foretakNavn;
     }
 
     @Override

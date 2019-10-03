@@ -105,7 +105,7 @@ public class SedDataBygger {
 
     private Arbeidssted mapArbeidssted(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted arb) {
         Arbeidssted arbeidssted = new Arbeidssted();
-        arbeidssted.setNavn(arb.getNavn());
+        arbeidssted.setNavn(arb.getForetakNavn());
         arbeidssted.setFysisk(arb.erFysisk());
         if (arb.erFysisk()) {
             FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted)arb;

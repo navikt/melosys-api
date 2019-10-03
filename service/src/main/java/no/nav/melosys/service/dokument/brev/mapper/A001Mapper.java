@@ -193,7 +193,7 @@ class A001Mapper {
 
     private ArbeidsstedType mapFysiskArbeidssted(FysiskArbeidssted arbeidssted) throws TekniskException {
         ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
-        arbeidsstedBrev.setNavn(arbeidssted.getNavn());
+        arbeidsstedBrev.setNavn(arbeidssted.getForetakNavn());
         arbeidsstedBrev.setIkkeFysiskArbeidssted("false");
         arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.ORDINAER);
 
@@ -212,7 +212,7 @@ class A001Mapper {
 
     private ArbeidsstedType mapIkkeFysiskArbeidssted(Arbeidssted arbeidssted) throws TekniskException {
         ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
-        arbeidsstedBrev.setNavn(arbeidssted.getNavn());
+        arbeidsstedBrev.setNavn(arbeidssted.getForetakNavn());
         arbeidsstedBrev.setIkkeFysiskArbeidssted("true");
         arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.fromValue(arbeidssted.getYrkesgruppe().getKode()));
 
