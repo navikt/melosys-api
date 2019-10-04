@@ -24,6 +24,7 @@ public class LovvalgTilBestemmelseDtoMapper {
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B, Bestemmelse.ART_11_3_b);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C, Bestemmelse.ART_11_3_c);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E, Bestemmelse.ART_11_3_e);
+        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, Bestemmelse.ART_11_4_2);
         mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5, Bestemmelse.ART_11_5);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Bestemmelse.ART_12_1);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2, Bestemmelse.ART_12_2);

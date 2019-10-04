@@ -56,11 +56,11 @@ public class BrevDataByggerA1 implements BrevDataBygger {
     }
 
     private boolean arbeidsstedHarForetak(Arbeidssted arbeidssted) {
-        return StringUtils.isNotEmpty(arbeidssted.getNavn()) ||
+        return StringUtils.isNotEmpty(arbeidssted.getForetakNavn()) ||
             StringUtils.isNotEmpty(arbeidssted.getIdnummer());
     }
 
     private AvklartVirksomhet utledVirksomhetFraArbeidssted(Arbeidssted arbeidssted) {
-        return new AvklartVirksomhet(arbeidssted.getNavn(), arbeidssted.getIdnummer(), null, null);
+        return new AvklartVirksomhet(arbeidssted.getForetakNavn(), arbeidssted.getIdnummer(), null, null);
     }
 }

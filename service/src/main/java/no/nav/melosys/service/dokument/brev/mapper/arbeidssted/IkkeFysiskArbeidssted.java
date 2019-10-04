@@ -7,4 +7,6 @@ public interface IkkeFysiskArbeidssted extends Arbeidssted {
      * Eks: for sokkel "offshore, <landkode>"
      **/
     String getOmråde();
+    
+    String getEnhetNavn();
 }

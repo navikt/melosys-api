@@ -166,7 +166,7 @@ class A1Mapper {
 
     private AdresseType mapFysiskArbeidssted(FysiskArbeidssted fysiskArbeidssted) {
         AdresseType adresseType = new AdresseType();
-        adresseType.setNavn(fysiskArbeidssted.getNavn());
+        adresseType.setNavn(fysiskArbeidssted.getForetakNavn());
         UstrukturertAdresse adresse = UstrukturertAdresse.av(fysiskArbeidssted.getAdresse());
         adresseType.setAdresselinje1(adresse.getAdresselinje(1));
         adresseType.setAdresselinje2(adresse.getAdresselinje(2));
@@ -178,7 +178,7 @@ class A1Mapper {
 
     private AdresseType mapIkkeFysiskArbeidssted(IkkeFysiskArbeidssted ikkeFysiskArbeidssted) {
         AdresseType adresseType = new AdresseType();
-        adresseType.setNavn(ikkeFysiskArbeidssted.getNavn());
+        adresseType.setNavn(ikkeFysiskArbeidssted.getEnhetNavn());
         adresseType.setLand(ikkeFysiskArbeidssted.getOmråde());
         return adresseType;
     }
