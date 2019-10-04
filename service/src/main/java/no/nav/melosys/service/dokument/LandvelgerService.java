@@ -60,12 +60,12 @@ public class LandvelgerService {
             alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
         }
 
-        Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingId);
+        Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         alleArbeidsland.removeAll(landMedMarginaltArbeid);
         return alleArbeidsland;
     }
 
-    private boolean erArtikkel13(long behandlingID) {
+    private boolean erArtikkel13(long behandlingId) {
         try {
             Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingId).hentValidertLovvalgsperiode();
             return lovvalgsperiode.erArtikkel13();

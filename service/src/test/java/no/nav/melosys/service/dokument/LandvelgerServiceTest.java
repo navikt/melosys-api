@@ -128,12 +128,12 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentAlleArbeidsland_medArtikkel11_4_2AvklartArbeidslandOgSøknadsland_girKunArbeidsland() throws TekniskException {
+    public void hentAlleArbeidsland_medArtikkel11_4_2AvklartArbeidslandOgSøknadsland_girKunArbeidsland() throws TekniskException, IkkeFunnetException {
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
         søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
 
-        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandling);
+        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID);
         assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK);
     }
 

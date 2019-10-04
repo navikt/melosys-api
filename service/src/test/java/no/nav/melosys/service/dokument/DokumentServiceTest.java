@@ -339,7 +339,7 @@ public final class DokumentServiceTest {
         JoarkService joarkService = mock(JoarkService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         BehandlingService behandlingService = mock(BehandlingService.class);
-        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingService, vilkaarsresultatRepository);
+        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingService, vilkaarsresultatRepository, behandlingsresultatService);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
             utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService, landvelgerService);
     }

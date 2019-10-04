@@ -33,7 +33,6 @@ public class BrevDataByggerVelgerTest {
         JoarkService joarkService = mock(JoarkService.class);
         LandvelgerService landvelgerService = mock(LandvelgerService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        LandvelgerService landvelgerService = mock(LandvelgerService.class);
 
         brevDataByggerVelger = new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService,
             lovvalgsperiodeService, utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService, landvelgerService);
