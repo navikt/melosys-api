@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
 
 /**
  * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
@@ -307,16 +306,4 @@ public final class Oppgave {
         }
         return res;
     };
-
-    public LocalDate lagFristFerdigstillelse(LocalDate fraDato) throws FunksjonellException {
-        if (erJournalFøring()) {
-            return fraDato.plusDays(FRIST_JFR_DAGER);
-        } else if (erBehandling()) {
-            return fraDato.plusWeeks(FRIST_BEH_UKER);
-        } else if (erVurderDokument()) {
-            return fraDato.plusWeeks(FRIST_VUR_DAGER);
-        } else {
-            throw new FunksjonellException("Type " + oppgavetype.getKode() + " støttes ikke.");
-        }
-    }
 }

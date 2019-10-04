@@ -23,6 +23,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -307,7 +308,10 @@ public class OppgaveplukkerTest {
 
         Set<Behandlingstema> behandlingstemaSet = oppgaveplukker.hentBehandlingstema(sakstyper);
 
-        assertThat(behandlingstemaSet).containsExactlyInAnyOrder(Behandlingstema.values());
+        List<Behandlingstema> forventedeBehandlingstema = Lists.newArrayList(Behandlingstema.values());
+        forventedeBehandlingstema.remove(Behandlingstema.EU_EOS_GAMMEL_KODE);
+
+        assertThat(behandlingstemaSet).containsExactlyInAnyOrder(forventedeBehandlingstema.toArray(new Behandlingstema[0]));
     }
 
     @Test

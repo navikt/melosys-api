@@ -166,11 +166,13 @@ public class GsakService implements GsakFasade {
             oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode());
         }
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
+
         if (oppgave.getFristFerdigstillelse() != null) {
             oppgaveDto.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         } else {
-            oppgaveDto.setFristFerdigstillelse(oppgave.lagFristFerdigstillelse(idag));
+            throw new FunksjonellException("Frist ferdigstillelse er påkrevd for oppgave");
         }
+
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
         oppgaveDto.setPrioritet(oppgave.getPrioritet().toString());
