@@ -24,7 +24,7 @@ public class TilgangService {
     }
 
     public void sjekkRedigerbarOgTilgang(long behandlingsId) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingService.hentBehandling(behandlingsId);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
 
         if(!behandling.erRedigerbar()) {
             throw new FunksjonellException(String.format("Forsøk på å endre en ikke-redigerbar behandling med id %s", behandlingsId));
@@ -35,7 +35,7 @@ public class TilgangService {
 
     // Behandling
     public void sjekkTilgang(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
-        Behandling behandling = behandlingService.hentBehandling(behandlingsId);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
 
         sjekkTilgang(behandling);
     }

@@ -173,6 +173,11 @@ public class BehandlingService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
     }
 
+    public Behandling hentBehandlingUtenSaksopplysninger(long behandlingId) throws IkkeFunnetException {
+        return behandlingRepository.findById(behandlingId)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+    }
+
     public void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {
         if (aktivBehandling.getStatus() == Behandlingsstatus.OPPRETTET) {
             aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);

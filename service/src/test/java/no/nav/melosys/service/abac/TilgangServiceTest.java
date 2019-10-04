@@ -64,7 +64,7 @@ public class TilgangServiceTest {
     public void testBehandlingsIdIkketilgang() throws Exception {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
 
         tilgangService.sjekkTilgang(102323934);
     }
@@ -73,7 +73,7 @@ public class TilgangServiceTest {
     public void testBehandlingsIdOk() throws Exception {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
 
         tilgangService.sjekkTilgang(102323934);
     }
@@ -83,7 +83,7 @@ public class TilgangServiceTest {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
 
         when(behandlingMocked.erRedigerbar()).thenReturn(true);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
 
         tilgangService.sjekkRedigerbarOgTilgang(123123123);
     }
@@ -91,7 +91,7 @@ public class TilgangServiceTest {
     @Test(expected = FunksjonellException.class)
     public void sjekkRedigerbar_behandlingIkkeRedigerbar_girFeil() throws FunksjonellException, TekniskException {
         when(behandlingMocked.erRedigerbar()).thenReturn(false);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingMocked);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
 
         tilgangService.sjekkRedigerbarOgTilgang(123123123);
     }
