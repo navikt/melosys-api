@@ -7,8 +7,8 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.saksflyt.felles.OpprettOppgaveFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,12 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
-        Oppgave oppgave = OpprettOppgaveFelles.lagOppgaveForManuellSedbehandling(saksnummer, aktørId, journalpostId);
+
+        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(prosessinstans.getBehandling().getType())
+            .setJournalpostId(journalpostId)
+            .setAktørId(aktørId)
+            .setSaksnummer(saksnummer)
+            .build();
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
         log.info("Opprettet oppgave {} til manuell behandling for sak {}", oppgaveId, saksnummer);

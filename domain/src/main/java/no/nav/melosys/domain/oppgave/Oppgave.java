@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
 
 /**
  * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
@@ -284,27 +283,6 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.BEH_SED;
     }
 
-    public static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
-        switch (behandlingstype) {
-            case SOEKNAD:
-                return Oppgavetyper.BEH_SAK_MK;
-            case ENDRET_PERIODE:
-                return Oppgavetyper.VUR;
-            case UTL_MYND_UTPEKT_SEG_SELV:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
-                return Oppgavetyper.BEH_SED;
-            case ANKE:
-            case KLAGE:
-            case UTL_MYND_UTPEKT_NORGE:
-            case NY_VURDERING:
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-            case ØVRIGE_SED:
-            default:
-                throw new UnsupportedOperationException();
-        }
-    }
-
     /**
      * Sorter oppgaver basert på prioritet (først) og frist.
      */
@@ -328,16 +306,4 @@ public final class Oppgave {
         }
         return res;
     };
-
-    public LocalDate lagFristFerdigstillelse(LocalDate fraDato) throws FunksjonellException {
-        if (erJournalFøring()) {
-            return fraDato.plusDays(FRIST_JFR_DAGER);
-        } else if (erBehandling() || erSedBehandling()) {
-            return fraDato.plusWeeks(FRIST_BEH_UKER);
-        } else if (erVurderDokument()) {
-            return fraDato.plusWeeks(FRIST_VUR_DAGER);
-        } else {
-            throw new FunksjonellException("Type " + oppgavetype.getKode() + " støttes ikke.");
-        }
-    }
 }

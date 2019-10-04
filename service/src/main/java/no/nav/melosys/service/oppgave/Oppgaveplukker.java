@@ -87,7 +87,7 @@ public class Oppgaveplukker {
             }
         }
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, sakstyper, Collections.emptySet(), behandlingstemaer);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstyper, behandlingstemaer);
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
@@ -107,7 +107,7 @@ public class Oppgaveplukker {
 
     Set<Oppgavetyper> hentOppgavetyper(Set<Behandlingstyper> behandlingstypeListe) {
         return behandlingstypeListe.stream()
-            .map(Oppgave::hentOppgavetype)
+            .map(OppgaveFactory::hentOppgavetype)
             .collect(Collectors.toSet());
     }
 

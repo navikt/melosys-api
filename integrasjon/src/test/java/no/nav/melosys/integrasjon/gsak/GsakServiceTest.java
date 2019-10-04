@@ -27,7 +27,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ØVRIGE_SED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
@@ -64,10 +65,11 @@ public final class GsakServiceTest {
 
     @Test
     public void opprettOppgave_vurderDokument_setterData() throws Exception {
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgavetype(Oppgavetyper.VUR);
-        oppgaveBuilder.setTema(Tema.MED);
-        oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder()
+            .setOppgavetype(Oppgavetyper.VUR)
+            .setTema(Tema.MED)
+            .setBehandlingstema(Behandlingstema.EU_EOS)
+            .setFristFerdigstillelse(LocalDate.now());
         gsakService.opprettOppgave(oppgaveBuilder.build());
 
         ArgumentCaptor<OpprettOppgaveDto> captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);

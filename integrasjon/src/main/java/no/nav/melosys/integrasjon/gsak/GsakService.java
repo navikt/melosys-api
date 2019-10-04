@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -54,6 +53,7 @@ public class GsakService implements GsakFasade {
                     .put(UTL_MYND_UTPEKT_NORGE, "ae0112")
                     .put(NY_VURDERING, "ae0028")
                     .put(UTL_MYND_UTPEKT_SEG_SELV, "ae0113")
+                    .put(ANMODNING_OM_UNNTAK_HOVEDREGEL, "ae0110")
                     .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
                     .put(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, "ae0235")
                     .put(ØVRIGE_SED, "ukjent")
@@ -117,8 +117,14 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Set<Oppgavetyper> oppgavetyper, Set<Sakstyper> sakstyper, Set<Behandlingstyper> behandlingstyper, Set<Behandlingstema> behandlingstemaer)
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Set<Oppgavetyper> oppgavetyper, Set<Behandlingstyper> behandlingstyper, Set<Behandlingstema> behandlingstemaer)
         throws FunksjonellException, TekniskException {
+
+        if (oppgavetyper.contains(Oppgavetyper.BEH_SAK_MK) && behandlingstemaer.contains(Behandlingstema.EU_EOS)) {
+            //Byttet kode for EU/EØS 4.10.2019. Må fortsatt kunne plukke med gammelt tema
+            behandlingstemaer.add(Behandlingstema.EU_EOS_GAMMEL_KODE);
+        }
+
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(oppgavetyper.stream().map(Oppgavetyper::getKode).toArray(String[]::new))
             .medBehandlingsTyper(behandlingstyper.stream().map(GsakService::hentFellesKode).toArray(String[]::new))
@@ -159,11 +165,13 @@ public class GsakService implements GsakFasade {
             oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode());
         }
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
+
         if (oppgave.getFristFerdigstillelse() != null) {
             oppgaveDto.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         } else {
-            oppgaveDto.setFristFerdigstillelse(oppgave.lagFristFerdigstillelse(idag));
+            throw new FunksjonellException("Frist ferdigstillelse er påkrevd for oppgave");
         }
+
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
         oppgaveDto.setPrioritet(oppgave.getPrioritet().toString());
