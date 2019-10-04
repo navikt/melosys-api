@@ -21,6 +21,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -184,7 +185,7 @@ class A001Mapper {
                 arbeidsstedBrev = mapFysiskArbeidssted((FysiskArbeidssted)arbeidssted);
             }
             else {
-                arbeidsstedBrev = mapIkkeFysiskArbeidssted(arbeidssted);
+                arbeidsstedBrev = mapIkkeFysiskArbeidssted((IkkeFysiskArbeidssted)arbeidssted);
             }
             arbeidsstedListe.getArbeidssted().add(arbeidsstedBrev);
         }
@@ -193,7 +194,7 @@ class A001Mapper {
 
     private ArbeidsstedType mapFysiskArbeidssted(FysiskArbeidssted arbeidssted) throws TekniskException {
         ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
-        arbeidsstedBrev.setNavn(arbeidssted.getNavn());
+        arbeidsstedBrev.setNavn(arbeidssted.getForetakNavn());
         arbeidsstedBrev.setIkkeFysiskArbeidssted("false");
         arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.ORDINAER);
 
@@ -210,9 +211,9 @@ class A001Mapper {
         return arbeidsstedBrev;
     }
 
-    private ArbeidsstedType mapIkkeFysiskArbeidssted(Arbeidssted arbeidssted) throws TekniskException {
+    private ArbeidsstedType mapIkkeFysiskArbeidssted(IkkeFysiskArbeidssted arbeidssted) throws TekniskException {
         ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
-        arbeidsstedBrev.setNavn(arbeidssted.getNavn());
+        arbeidsstedBrev.setNavn(arbeidssted.getEnhetNavn());
         arbeidsstedBrev.setIkkeFysiskArbeidssted("true");
         arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.fromValue(arbeidssted.getYrkesgruppe().getKode()));
 

@@ -9,10 +9,12 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     private static final String OFFSHORE = "offshore";
 
     private final AvklartMaritimtArbeid avklartMaritimtArbeid;
+    private final String enhetNavn;
 
     public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid, AvklartMaritimtArbeid avklartMaritimtArbeid) {
         super(maritimtArbeid.foretakNavn, maritimtArbeid.foretakOrgnr, avklartMaritimtArbeid.getLand());
         this.avklartMaritimtArbeid = avklartMaritimtArbeid;
+        this.enhetNavn = maritimtArbeid.enhetNavn;
     }
 
     @Override
@@ -27,5 +29,10 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     @Override
     public Yrkesgrupper getYrkesgruppe() {
         return Yrkesgrupper.SOKKEL_ELLER_SKIP;
+    }
+
+    @Override
+    public String getEnhetNavn() {
+        return enhetNavn;
     }
 }

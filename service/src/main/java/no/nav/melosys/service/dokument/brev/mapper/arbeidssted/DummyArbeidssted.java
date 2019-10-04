@@ -9,4 +9,9 @@ public final class DummyArbeidssted extends AbstractArbeidssted implements IkkeF
     public String getOmråde() {
         return "";
     }
+
+    @Override
+    public String getEnhetNavn() {
+        return "";
+    }
 }

@@ -2,17 +2,17 @@ package no.nav.melosys.service.dokument;
 
 import java.util.*;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,8 +34,13 @@ public class LandvelgerServiceTest {
     VilkaarsresultatRepository vilkaarsresultatRepository;
 
     @Mock
+    BehandlingsresultatService behandlingsresultatService;
+    
+    @Mock
     Behandling behandling;
 
+    Lovvalgsperiode lovvalgsperiode;
+    
     private SoeknadDokument søknad;
     private LandvelgerService landvelgerService;
     private List<Vilkaarsresultat> vilkaar = new ArrayList<>();
@@ -47,7 +52,7 @@ public class LandvelgerServiceTest {
     private Landkoder territorialfarvannLand = Landkoder.GB;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IkkeFunnetException {
         søknad = new SoeknadDokument();
         Saksopplysning soeknad = new Saksopplysning();
         soeknad.setDokument(søknad);
@@ -58,10 +63,15 @@ public class LandvelgerServiceTest {
         maritimtArbeid.territorialfarvann = territorialfarvannLand.getKode();
         søknad.maritimtArbeid.add(maritimtArbeid);
 
+        lovvalgsperiode = new Lovvalgsperiode();
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
         when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(vilkaar);
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Collections.singletonList(soeknad)));
 
-        landvelgerService = new LandvelgerService(avklartefaktaService, vilkaarsresultatRepository);
+        landvelgerService = new LandvelgerService(avklartefaktaService, vilkaarsresultatRepository, behandlingsresultatService);
     }
 
     private void oppfyll(Vilkaar vilkaarType) {
@@ -94,9 +104,10 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentAlleArbeidsland_medAvklartArbeidslandOgSøknadsland_girAlleUnikeArbeidsland() throws TekniskException {
+    public void hentAlleArbeidsland_medArt13AvklartArbeidslandOgSøknadsland_girAlleUnikeArbeidsland() throws TekniskException {
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
         søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
         Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandling);
         assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK, Landkoder.SE);
@@ -110,6 +121,16 @@ public class LandvelgerServiceTest {
 
         Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandling);
         assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.DK);
+    }
+
+    @Test
+    public void hentAlleArbeidsland_medArtikkel11_4_2AvklartArbeidslandOgSøknadsland_girKunArbeidsland() throws TekniskException {
+        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
+        søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
+
+        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandling);
+        assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK);
     }
 
     @Test

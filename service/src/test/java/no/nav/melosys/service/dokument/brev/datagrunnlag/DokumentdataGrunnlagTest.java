@@ -32,8 +32,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -130,7 +128,8 @@ public class DokumentdataGrunnlagTest {
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getNavn()).isEqualTo(maritimtArbeidISøknad.foretakNavn);
+        assertThat(arbeidssted.getForetakNavn()).isEqualTo(maritimtArbeidISøknad.foretakNavn);
+        assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);
         assertThat(arbeidssted.getIdnummer()).isEqualTo(maritimtArbeidISøknad.foretakOrgnr);
         assertThat(arbeidssted.getOmråde()).isEqualTo(avklartMaritimtArbeid.getLand());
         assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
@@ -150,7 +149,8 @@ public class DokumentdataGrunnlagTest {
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getNavn()).isNullOrEmpty();
+        assertThat(arbeidssted.getForetakNavn()).isNullOrEmpty();
+        assertThat(arbeidssted.getEnhetNavn()).isEqualTo("Dunfjæder");
         assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
         assertThat(arbeidssted.getOmråde()).isEqualTo("GB");
     }

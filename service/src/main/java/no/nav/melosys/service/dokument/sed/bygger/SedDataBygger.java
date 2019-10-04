@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -105,12 +106,14 @@ public class SedDataBygger {
 
     private Arbeidssted mapArbeidssted(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted arb) {
         Arbeidssted arbeidssted = new Arbeidssted();
-        arbeidssted.setNavn(arb.getNavn());
         arbeidssted.setFysisk(arb.erFysisk());
         if (arb.erFysisk()) {
             FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted)arb;
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
+            arbeidssted.setNavn(arb.getForetakNavn());
         } else {
+            IkkeFysiskArbeidssted ikkeFysiskArbeidssted = (IkkeFysiskArbeidssted)arb; 
+            arbeidssted.setNavn(ikkeFysiskArbeidssted.getEnhetNavn());
             arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
         }
         return arbeidssted;
