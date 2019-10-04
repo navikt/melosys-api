@@ -17,7 +17,7 @@ public final class OppgaveFactory {
         return hentOppgaveParametere(behandlingstype).oppgavetype;
     }
 
-    public static Oppgave.Builder behandlingsOppgaveForType(Behandlingstyper behandlingstype) {
+    public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstyper behandlingstype) {
         OppgaveParametere parametere = hentOppgaveParametere(behandlingstype);
 
         return new Oppgave.Builder()

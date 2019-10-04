@@ -74,7 +74,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
 
-        Oppgave.Builder oppgaveBuilder = OppgaveFactory.behandlingsOppgaveForType(behandlingstype)
+        Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstype)
             .setAktørId(aktørID)
             .setJournalpostId(journalpostID)
             .setPrioritet(PrioritetType.NORM)

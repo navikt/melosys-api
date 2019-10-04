@@ -6,7 +6,7 @@ public enum Behandlingstema implements Kodeverk {
     FTRL("ab0387", "Arbeidstakere annen avtale"),
     TRYGDEAVTALE("ab0388", "Arbeidstakere folketrygdloven"),
     EU_EOS("ab0424", "Arbeidstakere innen EØS"),
-    EU_EOS_GAMMEL_KODE("ab0390", "Arbeidstakere innen EØS");
+    EU_EOS_GAMMEL_KODE("ab0390", "EU/EØS");
 
     private final String kode;
     private final String beskrivelse;

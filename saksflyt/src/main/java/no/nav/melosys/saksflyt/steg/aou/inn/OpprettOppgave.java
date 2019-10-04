@@ -40,7 +40,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
 
-        Oppgave oppgave = OppgaveFactory.behandlingsOppgaveForType(prosessinstans.getBehandling().getType())
+        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(prosessinstans.getBehandling().getType())
             .setJournalpostId(journalpostId)
             .setAktørId(aktørId)
             .setSaksnummer(saksnummer)
