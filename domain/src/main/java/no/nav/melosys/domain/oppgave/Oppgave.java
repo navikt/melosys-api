@@ -284,26 +284,27 @@ public final class Oppgave {
     }
 
     /**
-     * Sorter oppgaver basert på prioritet (først) og frist.
+     *  aktiv datoSorter oppgaver basert på prioritet (først), frist og
      */
     public static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
-        // Merk: Bryter med konvensjonen (a == b og b == c → a == c), men dette er ok.
         int res = 0;
-        if (a.getPrioritet() == b.getPrioritet())
-            res = 0;
-        else if (a.getPrioritet() == PrioritetType.HOY)
-            res = -1;
-        else if (b.getPrioritet() == PrioritetType.HOY)
-            res = 1;
-        else if (a.getPrioritet() == PrioritetType.NORM)
-            res = -1;
-        else if (b.getPrioritet() == PrioritetType.NORM)
-            res = 1;
+
+        res = a.getPrioritet().compareTo(b.getPrioritet());
+
         if (res == 0) {
-            if (a.getFristFerdigstillelse() == null || b.getFristFerdigstillelse() == null)
-                return 0;
-            return a.getFristFerdigstillelse().compareTo(b.getFristFerdigstillelse());
+            res = Math.negateExact(compareNullableLocaldate(a.getFristFerdigstillelse(), b.getFristFerdigstillelse()));
+            if (res == 0) {
+                res = Math.negateExact(compareNullableLocaldate(a.getAktivDato(), b.getAktivDato()));
+            }
         }
+
         return res;
     };
+
+    private static int compareNullableLocaldate(LocalDate a, LocalDate b) {
+        if (a != null && b != null) return a.compareTo(b);
+        else if (a == null && b == null) return 0;
+        else if (a == null) return -1;
+        else return 1;
+    }
 }
