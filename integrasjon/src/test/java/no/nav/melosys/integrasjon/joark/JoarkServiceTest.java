@@ -352,14 +352,11 @@ public class JoarkServiceTest {
 
     @Test(expected = TekniskException.class)
     public void opprettJournalpost_validerFelt_forventException() throws TekniskException {
-        when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
-            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
-
         OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
         opprettJournalpost.setArkivSakId(null);
         String journalpostId = joarkService.opprettJournalpost(opprettJournalpost, true);
 
-        verify(journalpostapiConsumer).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
+        verify(journalpostapiConsumer, never()).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
         assertThat(journalpostId).isNotEmpty();
     }
 
