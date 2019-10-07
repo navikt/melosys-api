@@ -97,11 +97,10 @@ public class OppgaveService {
         return gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
     }
 
-    public Long hentAktivBehandlingId(String saksnummer) throws IkkeFunnetException, TekniskException {
+    public Behandling hentAktivBehandling(String saksnummer) throws IkkeFunnetException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         return Optional.ofNullable(fagsak.getAktivBehandling())
-            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"))
-            .getId();
+            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"));
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {

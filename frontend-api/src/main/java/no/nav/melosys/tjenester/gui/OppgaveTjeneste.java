@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -62,9 +63,11 @@ public class OppgaveTjeneste extends RestTjeneste {
             if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling()) {
                 dto.setSaksnummer(oppgave.getSaksnummer());
             }
-            dto.setOppgavetype(oppgave.getOppgavetype().getKode());
+
+            Behandling behandling = oppgaveService.hentAktivBehandling(oppgave.getSaksnummer());
+            dto.setBehandlingID(behandling.getId());
+            dto.setBehandlingstype(behandling.getType().getKode());
             dto.setJournalpostID(oppgave.getJournalpostId());
-            dto.setBehandlingID(oppgaveService.hentAktivBehandlingId(oppgave.getSaksnummer()));
 
             return Response.ok(dto).build();
         } else {
