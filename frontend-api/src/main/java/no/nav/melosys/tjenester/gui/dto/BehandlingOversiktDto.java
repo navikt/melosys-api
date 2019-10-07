@@ -12,7 +12,7 @@ public class BehandlingOversiktDto {
     private Long behandlingID;
     private Behandlingsstatus behandlingsstatus;
     private Behandlingstyper behandlingstype;
-    private PeriodeDto soknadsperiode;
+    private PeriodeDto periode;
     private List<String> land;
     private Instant opprettetDato;
 
@@ -40,12 +40,12 @@ public class BehandlingOversiktDto {
         this.behandlingstype = behandlingstype;
     }
 
-        public PeriodeDto getSoknadsperiode() {
-        return soknadsperiode;
+    public PeriodeDto getPeriode() {
+        return periode;
     }
 
-    public void setSoknadsperiode(PeriodeDto søknadsperiode) {
-        this.soknadsperiode = søknadsperiode;
+    public void setPeriode(PeriodeDto søknadsperiode) {
+        this.periode = søknadsperiode;
     }
 
     public List<String> getLand() {
