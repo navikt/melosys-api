@@ -17,7 +17,7 @@ public interface FagsakRepository extends CrudRepository<Fagsak, Long> {
 
     Optional<Fagsak> findByGsakSaksnummer(Long gsakSaksnummer);
 
-    @Query("select f from Fagsak f, Aktoer a where a.fagsak = f and a.rolle = :rolle  and a.aktørId = :id") //$NON-NLS-1$
+    @Query("select distinct f from Fagsak f, Aktoer a where a.fagsak = f and a.rolle = :rolle  and a.aktørId = :id")
     List<Fagsak> findByRolleAndAktør(@Param("rolle") Aktoersroller rolle, @Param("id") String aktørID);
 
     @Query(value = "SELECT saksnummer_seq.nextval FROM dual", nativeQuery = true)
