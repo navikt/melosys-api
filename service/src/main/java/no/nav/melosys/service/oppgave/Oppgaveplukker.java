@@ -159,7 +159,7 @@ public class Oppgaveplukker {
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
 
-        Optional<Oppgave> valg = oppgaver.stream().min(Oppgave.høyestTilLavestPrioritet);
+        Optional<Oppgave> valg = oppgaver.stream().max(Oppgave.lavestTilHøyestPrioritet);
         // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();

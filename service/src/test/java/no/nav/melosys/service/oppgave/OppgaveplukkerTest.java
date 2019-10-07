@@ -73,12 +73,12 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_høy_prio() throws MelosysException {
+    public void plukkOppgave_toOppgaverMedPriHOYForskjelligFrist_plukkoppgaveHøyestFrist() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), "MEL-1"));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), "MEL-12"));
-        oppgaver.add(opprettOppgave("3", Oppgavetyper.JFR, PrioritetType.NORM, LocalDate.of(2018, 8, 10), "MEL-123"));
-        oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 5), "MEL-1234"));
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-12"));
+        oppgaver.add(opprettOppgave("3", Oppgavetyper.JFR, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123"));
+        oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 5), LocalDate.now(), "MEL-1234"));
 
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anySet(), anySet())).thenReturn(oppgaver);
 
@@ -109,10 +109,40 @@ public class OppgaveplukkerTest {
     }
 
     @Test
+    public void plukkOppgave_toOppgaverMedPriHOYSammeFristForskjelligAktivDato_plukkoppgaveOpprettetSenest() throws MelosysException {
+        List<Oppgave> oppgaver = new ArrayList<>();
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV,  LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-12"));
+        oppgaver.add(opprettOppgave("3", Oppgavetyper.JFR, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123"));
+        oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now().plusDays(1L), "MEL-1234"));
+
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anySet(), anySet())).thenReturn(oppgaver);
+
+        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(new ArrayList<>(), Oppgavetyper.BEH_SAK_MK.getKode());
+        plukkOppgaveInnDto.setBehandlingstyper(new ArrayList<>());
+
+        Fagsak fagsak = new Fagsak();
+
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+
+        behandling.setFagsak(fagsak);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
+
+        assertThat(oppgave.isPresent()).isTrue();
+        oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
+    }
+
+    @Test
     public void plukkOppgave_avventerDokumentast_og_med_utløptsvarfrist() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), "MEL-1"));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2018, 8, 7), "MEL-1"));
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1"));
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anySet(), anySet())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
@@ -145,9 +175,9 @@ public class OppgaveplukkerTest {
     @Test
     public void plukkOppgave_1_tilbakelagt() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), "MEL-1"));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 8), "MEL-2"));
-        oppgaver.add(opprettOppgave("3", Oppgavetyper.VUR, PrioritetType.NORM, LocalDate.of(2018, 8, 9), "MEL-3"));
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 8), LocalDate.now(), "MEL-2"));
+        oppgaver.add(opprettOppgave("3", Oppgavetyper.VUR, PrioritetType.NORM, LocalDate.of(2018, 8, 9), LocalDate.now(), "MEL-3"));
 
         Fagsak fagsak = new Fagsak();
 
@@ -186,9 +216,9 @@ public class OppgaveplukkerTest {
     @Test
     public void plukkOppgave_alle_tilbakelagt() throws MelosysException{
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2018, 8, 7), "MEL-1"));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), "MEL-2"));
-        oppgaver.add(opprettOppgave("3", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), "MEL-3"));
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
+        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-2"));
+        oppgaver.add(opprettOppgave("3", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-3"));
 
         Fagsak fagsak = new Fagsak();
 
@@ -274,7 +304,7 @@ public class OppgaveplukkerTest {
     @Test
     public void plukkOppgave_brukerBehandlingstema_finnerOppgave() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), "MEL-1"));
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Sakstyper.EU_EOS.getKode());
@@ -331,7 +361,7 @@ public class OppgaveplukkerTest {
     @Test
     public void plukkOppgave_behandlingSomVenterHarSvarfristSomikkeHarGåttUt_plukkerIkkeBehandlingen() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), "MEL-1"));
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Sakstyper.EU_EOS.getKode());
@@ -360,7 +390,7 @@ public class OppgaveplukkerTest {
     @Test
     public void plukkOppgave_oppgaveSomVenterHarIkkeSvarfrist_KasterException() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), "MEL-1"));
+        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), any())).thenReturn(oppgaver);
 
@@ -381,7 +411,7 @@ public class OppgaveplukkerTest {
         oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
     }
 
-    private Oppgave opprettOppgave(String oppgaveId, Oppgavetyper oppgavetype, PrioritetType prioritet, LocalDate fristFerdigstillelse, String saksnummer) {
+    private Oppgave opprettOppgave(String oppgaveId, Oppgavetyper oppgavetype, PrioritetType prioritet, LocalDate fristFerdigstillelse, LocalDate aktivDato, String saksnummer) {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgavetype(oppgavetype);
         oppgaveBuilder.setOppgaveId(oppgaveId);
