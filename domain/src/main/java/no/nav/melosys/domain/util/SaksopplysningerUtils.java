@@ -80,10 +80,8 @@ public final class SaksopplysningerUtils {
             .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
     }
 
-    public static UtbetalingDokument hentUtbetalingDokument(Behandling behandling) throws TekniskException {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.UTBETAL);
-        return (UtbetalingDokument) saksopplysning
-            .orElseThrow(() -> new TekniskException("Finner ikke utbetalingdokument"));
+    public static Optional<UtbetalingDokument> finnUtbetalingDokument(Behandling behandling) throws TekniskException {
+        return hentDokument(behandling, SaksopplysningType.UTBETAL).map(d -> (UtbetalingDokument) d);
     }
 
     public static String hentSammensattNavn(Behandling behandling) {

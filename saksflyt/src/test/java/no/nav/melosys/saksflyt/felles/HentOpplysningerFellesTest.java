@@ -27,8 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HentOpplysningerFellesTest {
@@ -156,6 +155,19 @@ public class HentOpplysningerFellesTest {
 
         verify(behandlingService).hentBehandling(anyLong());
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), any(), any());
+    }
+
+    @Test
+    public void hentOgLagreUtbetalingsopplysninger_periode5ÅrTilbakeITid_kanIkkeHenteUtbetalOpplysninger() throws FunksjonellException, TekniskException {
+        LocalDate fom = LocalDate.now().minusYears(5);
+        LocalDate tom = LocalDate.now().minusYears(4);
+        Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(hentBehandling(saksopplysning));
+
+        hentOpplysningerFelles.hentOgLagreUtbetalingsopplysninger(2L, FNR);
+
+        verify(behandlingService).hentBehandling(anyLong());
+        verify(utbetaldataService, never()).hentUtbetalingerBarnetrygd(anyString(), any(), any());
     }
 
     private Behandling hentBehandling(Saksopplysning saksopplysning) {

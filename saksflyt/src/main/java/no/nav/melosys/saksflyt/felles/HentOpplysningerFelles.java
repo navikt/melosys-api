@@ -110,12 +110,23 @@ public class HentOpplysningerFelles {
 
     public void hentOgLagreUtbetalingsopplysninger(long behandlingId, String fnr) throws FunksjonellException, TekniskException {
 
-        Instant nå = Instant.now();
 
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
         LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
         LocalDate tom = sedDokument.getLovvalgsperiode().getTom();
+
+        LocalDate treÅrTilbake = LocalDate.now().minusYears(3);
+        if (fom.isBefore(treÅrTilbake)) {
+            if (tom != null && tom.isBefore(treÅrTilbake)) {
+                log.info("Kunne ikke hente utbetlingsdokument for behandling {} da periode er for langt tilbake i tid", behandlingId);
+                return;
+            }
+
+            fom = treÅrTilbake;
+        }
+
+        Instant nå = Instant.now();
 
         Periode periode = hentPeriodeForYtelser(fom, tom);
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd(fnr, periode.fom.atDay(1), periode.tom.atDay(1));
