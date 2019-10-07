@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -83,17 +82,6 @@ public class OppgaveService {
     public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
         Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
         gsakFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
-    }
-
-    public List<BehandlingsoppgaveDto> hentBehandlingsoppgaverMedBruker(String brukerIdent) throws FunksjonellException, TekniskException {
-        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
-        if (aktørId == null) {
-            throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
-        }
-        List<Oppgave> oppgaverFraDomain = gsakFasade.finnBehandlingsoppgaverMedBruker(aktørId);
-        return oppgaverTilDtoer(oppgaverFraDomain).stream()
-                .map(oppgave -> (BehandlingsoppgaveDto) oppgave)
-                .collect(Collectors.toList());
     }
 
     public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {

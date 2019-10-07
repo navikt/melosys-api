@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
@@ -122,17 +121,5 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         assertThat(tilbakelegging).isNotNull();
 
         valider(tilbakelegging, OPPGAVER_TILBAKELEGGE_SCHEMA, logger);
-    }
-
-    @Test
-    public void sokEtterBehandlingsoppgave() throws FunksjonellException, TekniskException, IOException {
-        BehandlingsoppgaveDto behandlingsoppgaveDto = defaultEasyRandom().nextObject(BehandlingsoppgaveDto.class);
-        List<BehandlingsoppgaveDto> oppgaver = Arrays.asList(behandlingsoppgaveDto);
-
-        when(oppgaveService.hentBehandlingsoppgaverMedBruker(anyString())).thenReturn(oppgaver);
-
-        List<BehandlingsoppgaveDto> oppgave = (List<BehandlingsoppgaveDto>) tjeneste.hentOppgaver("").getEntity();
-        assertThat(oppgave).isNotNull();
-        validerArray(oppgave, OPPGAVER_SOK_SCHEMA, logger);
     }
 }

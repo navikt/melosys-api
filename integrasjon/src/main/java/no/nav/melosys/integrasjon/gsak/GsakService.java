@@ -236,22 +236,6 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws FunksjonellException, TekniskException {
-        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medAktørId(aktørId)
-            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode()})
-            .medSorteringsfelt(SORTERINGSFELT)
-            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
-            .medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode())
-            .build();
-
-        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
-            .filter(Objects::nonNull)
-            .map(GsakService::oppgaveMappingDtoTilDomain)
-            .collect(Collectors.toList());
-    }
-
-    @Override
     public Oppgave hentOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
         List<Oppgave> oppgaver = finnOppgaverMedSaksnummer(saksnummer);
 

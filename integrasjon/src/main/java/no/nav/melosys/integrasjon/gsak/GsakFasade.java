@@ -52,12 +52,6 @@ public interface GsakFasade {
     List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException;
 
     /**
-     * Finner Behandlingsoppgaver basert på bruker.
-     * Oppgave sorterer oppgavene stigende etter frist.
-     */
-    List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws TekniskException, FunksjonellException;
-
-    /**
      * Hent oppgave fra Oppgave på en gitt oppgaveId
      */
     Oppgave hentOppgave(String oppgaveId) throws TekniskException, FunksjonellException;
