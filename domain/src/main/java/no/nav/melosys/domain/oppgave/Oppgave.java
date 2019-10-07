@@ -284,7 +284,7 @@ public final class Oppgave {
     }
 
     /**
-     *  aktiv datoSorter oppgaver basert på prioritet (først), frist og
+     *  Sorter oppgaver basert på prioritet (først), frist og aktiv dato
      */
     public static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
         int res = 0;
