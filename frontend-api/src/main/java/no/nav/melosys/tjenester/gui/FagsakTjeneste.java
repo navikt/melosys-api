@@ -1,9 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -18,9 +15,11 @@ import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
@@ -163,15 +162,29 @@ public class FagsakTjeneste extends RestTjeneste {
             behandlingOversiktDto.setBehandlingstype(behandling.getType());
             behandlingOversiktDto.setOpprettetDato(behandling.getRegistrertDato());
 
-            hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(
-                saksopplysningDokument -> {
+            setPeriodeOpplysninger(behandling, behandlingOversiktDto);
+        }
+        return behandlingOversiktDto;
+    }
+
+    private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
+        if (behandling.getType() == Behandlingstyper.SOEKNAD) {
+            hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                     SoeknadDokument soeknadDokument = (SoeknadDokument) saksopplysningDokument;
                     behandlingOversiktDto.setLand(hentSøknadsland(soeknadDokument));
                     Periode periode = hentPeriode(soeknadDokument);
-                    behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
                 });
-            }
-        return behandlingOversiktDto;
+        } else {
+            hentDokument(behandling, SaksopplysningType.SEDOPPL).ifPresent(saksopplysningDokument -> {
+                SedDokument sedDokument = (SedDokument) saksopplysningDokument;
+                behandlingOversiktDto.setLand(Collections.singletonList(sedDokument.getLovvalgslandKode() != null
+                    ? sedDokument.getLovvalgslandKode().getKode() : null));
+                behandlingOversiktDto.setPeriode(new PeriodeDto(
+                    sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
+                );
+            });
+        }
     }
 
     private void setSammensattNavn(FagsakOppsummeringDto fagsakOppsummeringDto, Behandling behandling) {

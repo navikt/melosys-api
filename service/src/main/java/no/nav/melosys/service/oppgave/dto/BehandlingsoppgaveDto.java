@@ -9,11 +9,11 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
     private List<String> land;
     private String saksnummer;
     private Sakstyper sakstype;
-    private PeriodeDto soknadsperiode;
+    private PeriodeDto periode;
 
     public BehandlingsoppgaveDto() {
         this.behandling = new BehandlingDto();
-        this.soknadsperiode = new PeriodeDto();
+        this.periode = new PeriodeDto();
     }
 
     public BehandlingDto getBehandling() {
@@ -48,11 +48,11 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
         this.sakstype = sakstype;
     }
 
-    public PeriodeDto getSoknadsperiode() {
-        return soknadsperiode;
+    public PeriodeDto getPeriode() {
+        return periode;
     }
 
-    public void setSoknadsperiode(PeriodeDto soknadsperiode) {
-        this.soknadsperiode = soknadsperiode;
+    public void setPeriode(PeriodeDto periode) {
+        this.periode = periode;
     }
 }

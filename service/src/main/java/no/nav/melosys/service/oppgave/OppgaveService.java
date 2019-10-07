@@ -2,16 +2,18 @@ package no.nav.melosys.service.oppgave;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -82,17 +84,6 @@ public class OppgaveService {
         gsakFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
-    public List<BehandlingsoppgaveDto> hentBehandlingsoppgaverMedBruker(String brukerIdent) throws FunksjonellException, TekniskException {
-        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
-        if (aktørId == null) {
-            throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
-        }
-        List<Oppgave> oppgaverFraDomain = gsakFasade.finnBehandlingsoppgaverMedBruker(aktørId);
-        return oppgaverTilDtoer(oppgaverFraDomain).stream()
-                .map(oppgave -> (BehandlingsoppgaveDto) oppgave)
-                .collect(Collectors.toList());
-    }
-
     public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         return gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
     }
@@ -142,11 +133,22 @@ public class OppgaveService {
             behandling = behandlingService.hentBehandling(behandling.getId());
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
-            hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
-                SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
-                behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
-                behOppgaveDto.setSoknadsperiode(mapPeriode(søknadDokument));
-            });
+            if (behandling.getType() == Behandlingstyper.SOEKNAD) {
+                hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
+                    SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
+                    behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
+                    behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
+                });
+            } else {
+                hentDokument(behandling, SaksopplysningType.SEDOPPL).ifPresent(saksopplysningDokument -> {
+                    SedDokument sedDokument = (SedDokument) saksopplysningDokument;
+                    behOppgaveDto.setLand(Collections.singletonList(sedDokument.getLovvalgslandKode() != null
+                        ? sedDokument.getLovvalgslandKode().getKode() : null));
+                    behOppgaveDto.setPeriode(new PeriodeDto(
+                        sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
+                    );
+                });
+            }
             hentDokument(behandling, SaksopplysningType.PERSOPL).ifPresent(
                 saksopplysningDokument -> {
                     PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
