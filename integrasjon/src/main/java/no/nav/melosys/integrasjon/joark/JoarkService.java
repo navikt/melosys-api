@@ -9,15 +9,14 @@ import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
+import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.binding.*;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
@@ -44,14 +43,17 @@ public class JoarkService implements JoarkFasade {
     private final InngaaendeJournalConsumer inngåendeJournalConsumer;
     private final JournalConsumer journalConsumer;
     private final JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
+    private final JournalpostapiConsumer journalpostapiConsumer;
 
     @Autowired
     public JoarkService(InngaaendeJournalConsumer inngåendeJournal,
                         JournalConsumer journal,
-                        JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer) {
+                        JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer,
+                        JournalpostapiConsumer journalpostapiConsumer) {
         this.inngåendeJournalConsumer = inngåendeJournal;
         this.journalConsumer = journal;
         this.journalfoerInngaaendeConsumer = journalfoerInngaaendeConsumer;
+        this.journalpostapiConsumer = journalpostapiConsumer;
     }
 
     @Override
@@ -201,6 +203,16 @@ public class JoarkService implements JoarkFasade {
         detaljertDokumentinformasjon.getSkannetInnholdListe()
             .forEach(vedlegg -> arkivDokument.getInterneVedlegg().add(new ArkivDokumentVedlegg(vedlegg.getVedleggInnhold())));
         return arkivDokument;
+    }
+
+    @Override
+    public String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) throws TekniskException {
+        OpprettJournalpostRequest request = OpprettJournalpostRequest.av(opprettJournalpost);
+        if (forsøkEndeligJfr && !ValiderJournalpostUtil.validerJournalpostForEndeligJfr(request)) {
+            throw new TekniskException("Opprettelse av journalpost kan ikke ferdigstilles");
+        }
+
+        return journalpostapiConsumer.opprettJournalpost(request, forsøkEndeligJfr).getJournalpostId();
     }
 
     @Override

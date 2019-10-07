@@ -35,11 +35,11 @@ public class JournalfoeringServiceTest {
     @Mock
     private ProsessinstansService prosessinstansService;
 
-   @Mock
+    @Mock
     private OppgaveService oppgaveService;
 
-   @Mock
-   private EessiService eessiService;
+    @Mock
+    private EessiService eessiService;
 
     private JournalfoeringService journalfoeringService;
 
@@ -108,7 +108,7 @@ public class JournalfoeringServiceTest {
         when(eessiService.støtterAutomatiskBehandling(anyString(), anyString())).thenReturn(Boolean.TRUE);
 
         journalfoeringService.opprettOgJournalfør(opprettDto);
-        verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(),anyString());
+        verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(), anyString());
     }
 
     @Test
