@@ -127,7 +127,7 @@ public class DokumentService {
     public void produserDokumentISaksflyt(Produserbaredokumenter produserbartDokument, Aktoersroller mottaker, long behandlingID, BrevData brevdata)
         throws FunksjonellException {
         Assert.notNull(mottaker, "Dokument uten mottaker.");
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
             prosessinstansService.opprettProsessinstansMangelbrev(behandling, mottaker, brevdata);

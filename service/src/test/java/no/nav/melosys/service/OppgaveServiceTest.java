@@ -52,17 +52,20 @@ public class OppgaveServiceTest {
     private TpsFasade tpsFasade;
     @Mock
     private SaksopplysningerService saksopplysningerService;
+    @Mock
+    private SoeknadService soeknadService;
 
     private OppgaveService oppgaveService;
 
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
         this.oppgaveService = new OppgaveService(
-                gsakFasade,
-                fagsakService,
                 behandlingService,
-                tpsFasade,
-            saksopplysningerService);
+                fagsakService,
+                gsakFasade,
+                saksopplysningerService,
+                soeknadService,
+                tpsFasade);
 
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
@@ -107,8 +110,9 @@ public class OppgaveServiceTest {
         List<Behandling> behandlinger = new ArrayList<>();
         behandlinger.add(lagBehandling());
         fagsak.setBehandlinger(behandlinger);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        when(saksopplysningerService.finnPersonOpplysninger(anyLong())).thenReturn(Optional.of(lagPersonDokument()));
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
@@ -134,15 +138,33 @@ public class OppgaveServiceTest {
 
     private static Behandling lagBehandling() {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "fnr";
-        personDokument.sammensattNavn = "sammensattNavn";
 
         Saksopplysning personOpplysning = new Saksopplysning();
         personOpplysning.setType(SaksopplysningType.PERSOPL);
-        personOpplysning.setDokument(personDokument);
+        personOpplysning.setDokument(lagPersonDokument());
         saksopplysninger.add(personOpplysning);
 
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SØKNAD);
+        saksopplysning.setDokument(lagSoeknadDokument());
+        saksopplysninger.add(saksopplysning);
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setEndretDato(Instant.now());
+        behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        return behandling;
+    }
+
+    private static PersonDokument lagPersonDokument() {
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.fnr = "fnr";
+        personDokument.sammensattNavn = "sammensattNavn";
+        return personDokument;
+    }
+
+    private static SoeknadDokument lagSoeknadDokument() {
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse.landkode = new Land(Land.NORGE).getKode();
@@ -152,17 +174,6 @@ public class OppgaveServiceTest {
         soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));
 
         soeknadDokument.soeknadsland.landkoder.add(Landkoder.BE.getKode());
-
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-        saksopplysning.setDokument(soeknadDokument);
-        saksopplysninger.add(saksopplysning);
-
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setEndretDato(Instant.now());
-        behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        return behandling;
+        return soeknadDokument;
     }
 }

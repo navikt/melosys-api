@@ -47,7 +47,7 @@ public class UnntaksperiodeServiceTest {
         unntaksperiodeService = new UnntaksperiodeService(behandlingService, oppgaveService, prosessinstansService);
         behandling.setFagsak(new Fagsak());
         behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
     }
 
     @Test(expected = FunksjonellException.class)

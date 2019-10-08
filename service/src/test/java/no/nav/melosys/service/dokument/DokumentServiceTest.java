@@ -40,10 +40,7 @@ import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.*;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -337,9 +334,9 @@ public final class DokumentServiceTest {
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         JoarkService joarkService = mock(JoarkService.class);
-        BehandlingService behandlingService = mock(BehandlingService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingService, behandlingsresultatService, vilkaarsresultatRepository);
+        SoeknadService soeknadService = mock(SoeknadService.class);
+        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, soeknadService, vilkaarsresultatRepository);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
             utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService, landvelgerService);
     }
@@ -434,7 +431,9 @@ public final class DokumentServiceTest {
     private static BehandlingService mockBehandlingService(Behandling behandling) throws IkkeFunnetException {
         BehandlingService behandlingService = mock(BehandlingService.class);
         when(behandlingService.hentBehandling(eq(BEHANDLINGSID))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLINGSID))).thenReturn(behandling);
         when(behandlingService.hentBehandling(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
         return behandlingService;
     }
 
