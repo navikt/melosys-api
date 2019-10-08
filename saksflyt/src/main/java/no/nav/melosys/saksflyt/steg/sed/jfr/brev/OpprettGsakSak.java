@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.jfr;
+package no.nav.melosys.saksflyt.steg.sed.jfr.brev;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
@@ -9,7 +9,7 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@Component("SedMottakOpprettGsakSak")
+@Component("JournalførAouBrevOpprettGsakSak")
 public class OpprettGsakSak extends AbstraktStegBehandler {
     private final OppgaveService oppgaveService;
 
@@ -19,7 +19,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.SED_MOTTAK_OPPRETT_SAK;
+        return ProsessSteg.JFR_AOU_BREV_OPPRETT_GSAK_SAK;
     }
 
     @Override
@@ -31,6 +31,6 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
         );
 
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
-        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPDATER_SAKSRELASJON);
+        prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST);
     }
 }

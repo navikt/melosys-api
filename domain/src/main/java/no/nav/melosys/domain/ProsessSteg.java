@@ -105,6 +105,12 @@ public enum ProsessSteg implements Kodeverk {
     SED_MOTTAK_OPPDATER_SAKSRELASJON("SED_MOTTAK_OPPDATER_SAKSRELASJON","Oppdaterer saksrelasjon for ny gsak-sak"),
     SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
 
+    // Journalføring av mottatt anmodning om unntak (brev)
+    JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING("JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING", "Opprett fagsak og behandling"),
+    JFR_AOU_BREV_OPPRETT_SEDDOKUMENT("JFR_AOU_BREV_OPPRETT_SEDDOKUMENT", "Oppretter sed-dokument"),
+    JFR_AOU_BREV_OPPRETT_GSAK_SAK("JFR_AOU_BREV_OPPRETT_GSAK_SAK", "Oppretter Sak i GSAK"),
+    JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST("JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST", "Journalføring av anmodning om unntak brev"),
+
     //Unntak medlemskap
     REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
     REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),

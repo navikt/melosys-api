@@ -1,9 +1,6 @@
-package no.nav.melosys.saksflyt.steg.sed.jfr;
+package no.nav.melosys.saksflyt.steg.sed.jfr.brev;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -16,6 +13,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,27 +31,19 @@ public class OpprettGsakSakTest {
 
     @Test
     public void utfør() throws MelosysException {
-
-        String saksnummer = "saksnr";
-        Behandlingstyper behandlingstype = Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
-        String aktørID = "aktør";
-        Long gsakSaksnummer = 12233L;
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(saksnummer);
-
         Behandling behandling = new Behandling();
-        behandling.setType(behandlingstype);
-        behandling.setFagsak(fagsak);
+        behandling.setFagsak(new Fagsak());
+        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, "123");
 
-        when(oppgaveService.opprettSakForFagsak(any(), any(), anyString())).thenReturn(gsakSaksnummer);
+        when(oppgaveService.opprettSakForFagsak(any(Fagsak.class), any(Behandlingstyper.class), anyString())).thenReturn(1234L);
         opprettGsakSak.utfør(prosessinstans);
 
-        assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class)).isEqualTo(gsakSaksnummer);
+        verify(oppgaveService).opprettSakForFagsak(any(Fagsak.class), any(Behandlingstyper.class), anyString());
+        assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isEqualTo("1234");
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST);
     }
-
 }

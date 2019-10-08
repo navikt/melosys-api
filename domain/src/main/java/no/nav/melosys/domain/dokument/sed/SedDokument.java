@@ -43,6 +43,8 @@ public class SedDokument implements SaksopplysningDokument {
 
     private List<String> statsborgerskapKoder = new ArrayList<>();
 
+    private boolean erElektronisk;
+
     public String getRinaSaksnummer() {
         return rinaSaksnummer;
     }
@@ -139,5 +141,13 @@ public class SedDokument implements SaksopplysningDokument {
 
     public void setBucType(BucType bucType) {
         this.bucType = bucType;
+    }
+
+    public boolean getErElektronisk() {
+        return erElektronisk;
+    }
+
+    public void setErElektronisk(boolean erElektronisk) {
+        this.erElektronisk = erElektronisk;
     }
 }

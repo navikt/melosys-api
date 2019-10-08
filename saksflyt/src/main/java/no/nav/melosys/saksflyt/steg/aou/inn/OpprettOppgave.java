@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.aou.inn;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
@@ -14,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 
 @Component("AnmodningUnntakMottakOpprettOppgave")
 public class OpprettOppgave extends AbstraktStegBehandler {
@@ -39,8 +43,10 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
+        boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
 
         Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(prosessinstans.getBehandling().getType())
+            .setTilordnetRessurs(skalTilordnes ? prosessinstans.getData(SAKSBEHANDLER) : null)
             .setJournalpostId(journalpostId)
             .setAktørId(aktørId)
             .setSaksnummer(saksnummer)

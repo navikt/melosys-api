@@ -29,6 +29,8 @@ public enum ProsessDataKey {
     JFR_INGEN_VURDERING("ingenVurdering"),
     JOURNALPOST_ID("journalpostID"),
     LOGISKE_VEDLEGG_TITLER("logiskeVedleggTitler"),
+    LOVVALGSBESTEMMELSE("lovvalgsbestemmelse"),
+    LOVVALGSLAND("lovvalgsland"),
     MOTTAKER("mottaker"),
     OPPHOLDSLAND("oppholdsland"),
     OPPGAVE_ID("oppgaveID"),
@@ -42,7 +44,9 @@ public enum ProsessDataKey {
     STATSBORGERSKAP("statsborgerskap"),
     SØKNADSLAND("land"),
     SØKNADSPERIODE("søknadsperiode"),
-    TEMA("tema");
+    TEMA("tema"),
+    UNNTAK_FRA_LOVVALGSBESTEMMELSE("unntakFraLovvalgsbestemmelse"),
+    UNNTAK_FRA_LOVVALGSLAND("unntakFraLovvalgsland");
 
     private String kode;
 
