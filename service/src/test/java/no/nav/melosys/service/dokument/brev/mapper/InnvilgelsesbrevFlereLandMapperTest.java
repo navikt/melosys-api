@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.dok.melosysbrev._000083.EndretPeriodeBegrunnelseKode;
 import no.nav.dok.melosysbrev._000083.SakstypeKode;
@@ -15,7 +12,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -34,7 +30,7 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStruktur
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
-import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.hentAlleVerdierFraKodeverk;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InnvilgelsesbrevFlereLandMapperTest {
@@ -47,19 +43,19 @@ public class InnvilgelsesbrevFlereLandMapperTest {
 
     @Test
     public void testSakstypeKode() throws Exception {
-        Kodeverk[] koder = hentAlleVerdierFraKodeverk(Sakstyper.class);
-        for (Kodeverk kode : koder) {
-            if (kode.getKode().equals("UKJENT")) continue;  // Vet ikke om det er aktuelt med brev for denne
-            SakstypeKode.fromValue(kode.getKode());
-        }
+        List<String> koderSomIkkeErAktuelleForBrev = Arrays.asList(
+            "UKJENT" // Vet ikke om det er aktuelt med brev for denne
+        );
+
+        hentAlleVerdierFraKodeverk(Sakstyper.class)
+            .filter(k -> !koderSomIkkeErAktuelleForBrev.contains(k))
+            .forEach(SakstypeKode::fromValue);
     }
 
     @Test
     public void testEndretBegrunnelseKoder() throws Exception {
-        Kodeverk[] koder = hentAlleVerdierFraKodeverk(Endretperiode.class);
-        for (Kodeverk kode : koder) {
-            EndretPeriodeBegrunnelseKode.fromValue(kode.getKode());
-        }
+        hentAlleVerdierFraKodeverk(Endretperiode.class)
+            .forEach(EndretPeriodeBegrunnelseKode::fromValue);
     }
 
     @Test

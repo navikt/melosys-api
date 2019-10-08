@@ -10,14 +10,13 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 
-import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.hentAlleVerdierFraKodeverk;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 
@@ -80,9 +79,7 @@ public class HenleggelsesbrevMapperTest {
 
     @Test
     public void testHenleggelsegrunnKode() throws Exception {
-        Kodeverk[] koder = hentAlleVerdierFraKodeverk(Henleggelsesgrunner.class);
-        for (Kodeverk kode : koder) {
-            HenleggelseGrunnKode.fromValue(kode.getKode());
-        }
+        hentAlleVerdierFraKodeverk(Henleggelsesgrunner.class)
+            .forEach(HenleggelseGrunnKode::fromValue);
     }
 }

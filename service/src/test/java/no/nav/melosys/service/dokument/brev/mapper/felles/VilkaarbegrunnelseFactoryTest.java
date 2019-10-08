@@ -1,14 +1,14 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
-import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.*;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
 
 public class VilkaarbegrunnelseFactoryTest {
 
@@ -44,21 +44,13 @@ public class VilkaarbegrunnelseFactoryTest {
         VilkaarbegrunnelseFactory.mapArt122NormalVirksomhetBegrunnelseType(begrunnelser);
     }
 
-
-    public static Set<VilkaarBegrunnelse> lagAlleVilkaarBegrunnelser(Class kodeverkClass) throws Exception {
-        Kodeverk[] kodeverk = hentAlleVerdierFraKodeverk(kodeverkClass);
-        Set<VilkaarBegrunnelse> begrunnelser = new HashSet<>();
-        for (Kodeverk kode : kodeverk) {
-            VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
-            begrunnelse.setKode(kode.getKode());
-            begrunnelser.add(begrunnelse);
-        }
-        return begrunnelser;
-    }
-
-    public static Kodeverk[] hentAlleVerdierFraKodeverk(Class enumClass) throws Exception {
-        Method getValues = enumClass.getDeclaredMethod("values");
-        Object result = getValues.invoke(null);
-        return (Kodeverk[]) result;
+    public static Set<VilkaarBegrunnelse> lagAlleVilkaarBegrunnelser(Class kodeverk) throws Exception {
+        return hentAlleVerdierFraKodeverk(kodeverk)
+            .map(k -> {
+                VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
+                vilkaarBegrunnelse.setKode(k);
+                return vilkaarBegrunnelse;
+            })
+            .collect(Collectors.toSet());
     }
 }
