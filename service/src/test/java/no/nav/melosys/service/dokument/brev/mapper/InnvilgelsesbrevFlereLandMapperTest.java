@@ -1,11 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import no.nav.dok.melosysbrev._000083.EndretPeriodeBegrunnelseKode;
+import no.nav.dok.melosysbrev._000083.SakstypeKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
@@ -13,7 +12,10 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
@@ -26,7 +28,9 @@ import org.junit.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.*;
+import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
+import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InnvilgelsesbrevFlereLandMapperTest {
@@ -35,6 +39,23 @@ public class InnvilgelsesbrevFlereLandMapperTest {
 
     public InnvilgelsesbrevFlereLandMapperTest() {
         instans = new InnvilgelsesbrevFlereLandMapper();
+    }
+
+    @Test
+    public void testSakstypeKode() throws Exception {
+        List<String> koderSomIkkeErAktuelleForBrev = Arrays.asList(
+            "UKJENT" // Vet ikke om det er aktuelt med brev for denne
+        );
+
+        hentAlleVerdierFraKodeverk(Sakstyper.class)
+            .filter(k -> !koderSomIkkeErAktuelleForBrev.contains(k))
+            .forEach(SakstypeKode::fromValue);
+    }
+
+    @Test
+    public void testEndretBegrunnelseKoder() throws Exception {
+        hentAlleVerdierFraKodeverk(Endretperiode.class)
+            .forEach(EndretPeriodeBegrunnelseKode::fromValue);
     }
 
     @Test
