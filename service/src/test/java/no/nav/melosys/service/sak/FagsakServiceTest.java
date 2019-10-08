@@ -47,22 +47,16 @@ public class FagsakServiceTest {
 
     @Mock
     private FagsakRepository fagsakRepo;
-
     @Mock
     private BehandlingService behandlingService;
-
     @Mock
     private KontaktopplysningService kontaktopplysningService;
-
     @Mock
     private OppgaveService oppgaveService;
-
     @Mock
     private TpsFasade tps;
-
     @Mock
     private ProsessinstansService prosessinstansService;
-
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 

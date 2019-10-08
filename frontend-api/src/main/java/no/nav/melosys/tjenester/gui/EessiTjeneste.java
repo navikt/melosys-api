@@ -74,7 +74,7 @@ public class EessiTjeneste extends RestTjeneste {
     public Response hentBucer(@PathParam("behandlingID") long behandlingID,
                               @QueryParam("statuser") List<String> statuser) throws MelosysException {
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
 
         log.info("Henter tilknyttede bucer for gsak {}", gsakSaksnummer);

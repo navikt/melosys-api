@@ -269,7 +269,7 @@ public class FagsakService {
         Fagsak fagsak = hentFagsak(saksnummer);
 
         long behandlingId = fagsak.getAktivBehandling().getId();
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingId);
 
         fagsak.setStatus(Saksstatuser.VIDERESENDT);

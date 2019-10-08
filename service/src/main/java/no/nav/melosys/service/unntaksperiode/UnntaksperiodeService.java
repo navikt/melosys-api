@@ -66,7 +66,7 @@ public class UnntaksperiodeService {
     }
 
     private Behandling hentOgValiderBehandling(long behandlingID) throws FunksjonellException {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandling(behandling);
         return behandling;
     }

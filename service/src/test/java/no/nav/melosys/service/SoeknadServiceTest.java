@@ -73,11 +73,9 @@ public class SoeknadServiceTest {
 
     @Test
     public void hentSoeknad() throws Exception {
-        Behandling b = lagBehandling();
+        when(saksopplysningRepo.findByBehandling_IdAndType(1L, SaksopplysningType.SØKNAD)).thenReturn(Optional.of(lagSøknadssaksopplysning(SaksopplysningType.SØKNAD)));
 
-        when(behandlingRepo.findWithSaksopplysningerById(1L)).thenReturn(b);
-
-        SoeknadDokument res = soeknadService.hentSoeknad(1L);
+        SoeknadDokument res = soeknadService.hentSøknad(1L);
 
         assertThat(res.arbeidNorge.arbeidsforholdOpprettholdIHelePerioden).isEqualTo(true);
     }
@@ -85,7 +83,7 @@ public class SoeknadServiceTest {
     @Test
     public void hentBehandlingUtenSøknadKasterUnntak() throws Exception {
         when(behandlingRepo.findWithSaksopplysningerById(1L)).thenReturn(lagBehandling(Collections.emptySet()));
-        Throwable unntak = catchThrowable(() -> soeknadService.hentSoeknad(1L));
+        Throwable unntak = catchThrowable(() -> soeknadService.hentSøknad(1L));
         assertThat(unntak).isInstanceOf(IkkeFunnetException.class)
                 .hasMessageContaining("ikke funnet for behandlingsid 1");
     }

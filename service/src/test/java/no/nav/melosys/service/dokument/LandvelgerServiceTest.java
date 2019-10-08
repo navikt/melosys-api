@@ -12,8 +12,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
-import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,9 +31,9 @@ public class LandvelgerServiceTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
-    BehandlingService behandlingService;
-    @Mock
     BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    SoeknadService soeknadService;
     @Mock
     VilkaarsresultatRepository vilkaarsresultatRepository;
 
@@ -66,14 +66,14 @@ public class LandvelgerServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setSaksopplysninger(new HashSet<>(Collections.singletonList(soeknad)));
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        when(soeknadService.hentSøknad(eq(behandlingID))).thenReturn(søknad);
 
         lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
-        landvelgerService = new LandvelgerService(avklartefaktaService, behandlingService, behandlingsresultatService, vilkaarsresultatRepository);
+        landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, soeknadService, vilkaarsresultatRepository);
     }
 
     private void oppfyll(Vilkaar vilkaarType) {

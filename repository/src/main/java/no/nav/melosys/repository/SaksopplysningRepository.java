@@ -11,5 +11,7 @@ public interface SaksopplysningRepository extends JpaRepository<Saksopplysning, 
 
     Optional<Saksopplysning> findByBehandlingAndType(Behandling behandling, SaksopplysningType type);
 
+    Optional<Saksopplysning> findByBehandling_IdAndType(long behandlingID, SaksopplysningType type);
+
     void deleteAllByBehandling(Behandling behandling);
 }

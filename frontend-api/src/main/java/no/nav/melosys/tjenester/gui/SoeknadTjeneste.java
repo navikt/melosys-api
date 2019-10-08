@@ -52,7 +52,7 @@ public class SoeknadTjeneste extends RestTjeneste {
     public Response hentSøknad(@ApiParam @PathParam("behandlingID") long behandlingID) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
         SoeknadDokument soeknadDokument;
         tilgangService.sjekkTilgang(behandlingID);
-        soeknadDokument = soeknadService.hentSoeknad(behandlingID);
+        soeknadDokument = soeknadService.hentSøknad(behandlingID);
         SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         SoeknadDto soeknadDto;
         soeknadDto = new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);
