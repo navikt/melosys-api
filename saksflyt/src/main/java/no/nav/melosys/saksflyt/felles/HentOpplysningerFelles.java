@@ -119,7 +119,7 @@ public class HentOpplysningerFelles {
         LocalDate treÅrTilbake = LocalDate.now().minusYears(3);
         if (fom.isBefore(treÅrTilbake)) {
             if (tom != null && tom.isBefore(treÅrTilbake)) {
-                log.info("Kunne ikke hente utbetlingsdokument for behandling {} da periode er for langt tilbake i tid", behandlingId);
+                log.info("Kunne ikke hente utbetalingsdokument for behandling {} da periode er for langt tilbake i tid", behandlingId);
                 return;
             }
 
