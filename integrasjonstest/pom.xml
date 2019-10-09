@@ -22,13 +22,20 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>frontend-api</artifactId>
+            <artifactId>melosys-domain</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>saksflyt</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-repository</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-service</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc8</artifactId>
@@ -76,6 +83,24 @@
             <version>4.3.12.RELEASE</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
