@@ -28,25 +28,18 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JournalfoeringServiceTest {
-
     @Mock
     private JoarkFasade joarkFasade;
-
     @Mock
     private ProsessinstansService prosessinstansService;
-
-   @Mock
+    @Mock
     private OppgaveService oppgaveService;
-
-   @Mock
-   private EessiService eessiService;
+    @Mock
+    private EessiService eessiService;
 
     private JournalfoeringService journalfoeringService;
-
     private JournalfoeringOpprettDto opprettDto;
-
     private JournalfoeringTilordneDto tilordneDto;
-
     private Journalpost journalpost;
 
     @Before
@@ -92,6 +85,19 @@ public class JournalfoeringServiceTest {
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
         verify(oppgaveService).ferdigstillOppgave(anyString());
+
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void opprettSakOgJournalfør_fomEtterTom_feiler() throws MelosysException {
+        FagsakDto fagsakDto = new FagsakDto();
+        PeriodeDto periode = new PeriodeDto();
+        periode.setFom(LocalDate.MAX);
+        periode.setTom(LocalDate.MIN);
+        fagsakDto.setSoknadsperiode(periode);
+        fagsakDto.setLand(Arrays.asList("DK"));
+        opprettDto.setFagsak(fagsakDto);
+        journalfoeringService.opprettOgJournalfør(opprettDto);
 
     }
 
