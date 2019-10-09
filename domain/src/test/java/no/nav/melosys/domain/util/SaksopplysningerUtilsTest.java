@@ -153,7 +153,7 @@ public class SaksopplysningerUtilsTest {
     }
 
     @Test
-    public void hentUtbetalingDokument() throws TekniskException {
+    public void finnUtbetalingDokument() throws TekniskException {
         Behandling behandling = new Behandling();
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
         behandling.setSaksopplysninger(saksopplysninger);
@@ -164,23 +164,8 @@ public class SaksopplysningerUtilsTest {
         saksopplysning.setType(SaksopplysningType.UTBETAL);
         saksopplysninger.add(saksopplysning);
 
-        SaksopplysningDokument saksopplysningdokument = SaksopplysningerUtils.hentUtbetalingDokument(behandling);
-        assertThat(saksopplysningdokument).isEqualTo(utbetDok);
-    }
-
-    @Test(expected = TekniskException.class)
-    public void hentUtbetalingDokumentSkalIkkeLevereMedlemskapsDok() throws TekniskException {
-        Behandling behandling = new Behandling();
-        Set<Saksopplysning> saksopplysninger = new HashSet<>();
-        behandling.setSaksopplysninger(saksopplysninger);
-
-        MedlemskapDokument medlDok = new MedlemskapDokument();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(medlDok);
-        saksopplysning.setType(SaksopplysningType.MEDL);
-        saksopplysninger.add(saksopplysning);
-
-        SaksopplysningDokument saksopplysningdokument = SaksopplysningerUtils.hentUtbetalingDokument(behandling);
-        assertThat(saksopplysningdokument).isNotEqualTo(medlDok);
+        Optional<UtbetalingDokument> saksopplysningdokument = SaksopplysningerUtils.finnUtbetalingDokument(behandling);
+        assertThat(saksopplysningdokument).isPresent();
+        assertThat(saksopplysningdokument.get()).isEqualTo(utbetDok);
     }
 }
