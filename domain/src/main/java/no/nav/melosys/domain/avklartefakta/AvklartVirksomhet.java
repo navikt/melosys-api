@@ -17,7 +17,8 @@ public class AvklartVirksomhet {
         this.orgnr = foretak.orgnr;
         this.adresse = foretak.adresse;
         this.adresseErOgsåArbeidssted = false;
-        this.yrkesaktivitet = null;
+        this.yrkesaktivitet = (Boolean.TRUE.equals(foretak.selvstendigNæringsvirksomhet)) ?
+            Yrkesaktivitetstyper.SELVSTENDIG : Yrkesaktivitetstyper.LOENNET_ARBEID;
     }
 
     public AvklartVirksomhet(String navn, String orgnr, Adresse adresse, Yrkesaktivitetstyper yrkesaktivitet) {
