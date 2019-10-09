@@ -8,9 +8,6 @@ public class FysiskDokument extends ArkivDokument {
     private String brevkode;
     private String dokumentKategori;
 
-    public FysiskDokument() {
-    }
-
     public byte[] getData() {
         return data;
     }

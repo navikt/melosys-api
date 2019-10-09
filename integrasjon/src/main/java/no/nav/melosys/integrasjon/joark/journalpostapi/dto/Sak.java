@@ -1,9 +1,8 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 
 public class Sak {
-
+    private static final String arkivsaksystem = "GSAK";
     private String arkivsaksnummer;
-    private final String arkivsaksystem = "GSAK";
 
     public Sak(String arkivsaksnummer) {
         this.arkivsaksnummer = arkivsaksnummer;

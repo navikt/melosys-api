@@ -12,10 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
  * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
  */
 public final class Oppgave {
-    private static final int FRIST_JFR_DAGER = 1;
-    private static final int FRIST_VUR_DAGER = 1;
-    private static final int FRIST_BEH_UKER = 12;
-
     private final String aktørId;
     private final Behandlingstema behandlingstema;
     private final Behandlingstyper behandlingstype;
