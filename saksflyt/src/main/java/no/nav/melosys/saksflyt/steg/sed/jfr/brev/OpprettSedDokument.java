@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.sed.jfr.brev;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
@@ -58,7 +59,8 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         saksopplysningRepository.save(saksopplysning);
         log.info("Saksopplysning: SedDokument opprettet for behandling {}", prosessinstans.getBehandling().getId());
 
-        prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_OPPRETT_GSAK_SAK);
+        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE);
+        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK);
     }
 
     private static SaksopplysningDokument opprettSedDokument(Prosessinstans prosessinstans) {
@@ -67,6 +69,7 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         String brukerId = prosessinstans.getData(ProsessDataKey.BRUKER_ID);
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
 
+        Landkoder unntakFraLovvalgsland = Landkoder.valueOf(prosessinstans.getData(ProsessDataKey.UNNTAK_FRA_LOVVALGSLAND));
         LovvalgBestemmelse lovvalgsbestemmelse = konverterer.convertToEntityAttribute(
             prosessinstans.getData(ProsessDataKey.LOVVALGSBESTEMMELSE));
         LovvalgBestemmelse unntakFraLovvalgBestemmelse = konverterer.convertToEntityAttribute(
@@ -78,20 +81,18 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         sedDokument.setSedType(SedType.A001);
         sedDokument.setFnr(brukerId);
         sedDokument.setLovvalgsperiode(periode);
-        sedDokument.setLovvalgslandKode(hentFørste(ProsessDataKey.LOVVALGSLAND, prosessinstans));
-        sedDokument.setUnntakFraLovvalgslandKode(hentFørste(ProsessDataKey.UNNTAK_FRA_LOVVALGSLAND, prosessinstans));
+        sedDokument.setLovvalgslandKode(hentFørsteLovvalgsland(prosessinstans));
+        sedDokument.setUnntakFraLovvalgslandKode(unntakFraLovvalgsland);
         sedDokument.setLovvalgBestemmelse(lovvalgsbestemmelse);
         sedDokument.setUnntakFraLovvalgBestemmelse(unntakFraLovvalgBestemmelse);
 
         return sedDokument;
     }
 
-    private static Landkoder hentFørste(ProsessDataKey land, Prosessinstans prosessinstans) {
-        List landliste = prosessinstans.getData(land, List.class);
-        if (landliste.isEmpty() || landliste.iterator().next() == null) {
-            return null;
-        }
+    private static Landkoder hentFørsteLovvalgsland(Prosessinstans prosessinstans) {
+        List<String> landliste = prosessinstans.getData(ProsessDataKey.LOVVALGSLAND, List.class);
+        Optional<String> landkode = landliste.stream().findFirst();
 
-        return Landkoder.valueOf(landliste.iterator().next().toString());
+        return landkode.map(Landkoder::valueOf).orElse(null);
     }
 }

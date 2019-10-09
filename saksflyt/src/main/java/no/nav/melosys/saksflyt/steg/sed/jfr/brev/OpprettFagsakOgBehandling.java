@@ -3,8 +3,11 @@ package no.nav.melosys.saksflyt.steg.sed.jfr.brev;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
@@ -20,12 +23,15 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     private final FagsakService fagsakService;
     private final TpsFasade tpsFasade;
+    private final GsakFasade gsakFasade;
 
     @Autowired
     public OpprettFagsakOgBehandling(FagsakService fagsakService,
-                                     TpsFasade tpsFasade) {
+                                     TpsFasade tpsFasade,
+                                     GsakFasade gsakFasade) {
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
+        this.gsakFasade = gsakFasade;
     }
 
     @Override
@@ -48,7 +54,11 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         log.info("Fagsak {} opprettet med behandling {}", fagsak.getSaksnummer(), behandling.getId());
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_OPPRETT_SEDDOKUMENT);
+
+        long gsakSaksnummer = opprettGsakSak(fagsak, behandling.getType(), aktørId);
+        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
+
+        prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST);
     }
 
     private String hentAktørId(Prosessinstans prosessinstans) throws IkkeFunnetException {
@@ -63,5 +73,14 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     private String hentAktørIdFraTps(String brukerId) throws IkkeFunnetException {
         return tpsFasade.hentAktørIdForIdent(brukerId);
+    }
+
+    private long opprettGsakSak(Fagsak fagsak, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
+        Long gsakSaksnummer = gsakFasade.opprettSak(fagsak.getSaksnummer(), behandlingstype, aktørId);
+        fagsak.setGsakSaksnummer(gsakSaksnummer);
+        fagsakService.lagre(fagsak);
+
+        log.info("Sak {} opprettet i gsak for fagsak {}", gsakSaksnummer, fagsak.getSaksnummer());
+        return gsakSaksnummer;
     }
 }

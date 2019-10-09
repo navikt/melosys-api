@@ -107,9 +107,8 @@ public enum ProsessSteg implements Kodeverk {
 
     // Journalføring av mottatt anmodning om unntak (brev)
     JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING("JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING", "Opprett fagsak og behandling"),
-    JFR_AOU_BREV_OPPRETT_SEDDOKUMENT("JFR_AOU_BREV_OPPRETT_SEDDOKUMENT", "Oppretter sed-dokument"),
-    JFR_AOU_BREV_OPPRETT_GSAK_SAK("JFR_AOU_BREV_OPPRETT_GSAK_SAK", "Oppretter Sak i GSAK"),
     JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST("JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST", "Journalføring av anmodning om unntak brev"),
+    JFR_AOU_BREV_OPPRETT_SEDDOKUMENT("JFR_AOU_BREV_OPPRETT_SEDDOKUMENT", "Oppretter sed-dokument"),
 
     //Unntak medlemskap
     REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),

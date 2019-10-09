@@ -94,14 +94,6 @@ public class OppgaveService {
             .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"));
     }
 
-    public Long opprettSakForFagsak(Fagsak fagsak, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
-        Long gsakSaksnummer = gsakFasade.opprettSak(fagsak.getSaksnummer(), behandlingstype, aktørId);
-        fagsak.setGsakSaksnummer(gsakSaksnummer);
-        fagsakService.lagre(fagsak);
-
-        return gsakSaksnummer;
-    }
-
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
         List<OppgaveDto> res = new ArrayList<>();
         for (Oppgave o : oppgaverFraDomain) {

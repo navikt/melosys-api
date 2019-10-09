@@ -43,7 +43,7 @@ public class SedDokument implements SaksopplysningDokument {
 
     private List<String> statsborgerskapKoder = new ArrayList<>();
 
-    private boolean erElektronisk;
+    private boolean erElektronisk = true;
 
     public String getRinaSaksnummer() {
         return rinaSaksnummer;

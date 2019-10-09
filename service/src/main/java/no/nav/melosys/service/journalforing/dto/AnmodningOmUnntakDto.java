@@ -1,10 +1,8 @@
 package no.nav.melosys.service.journalforing.dto;
 
-import java.util.List;
-
 public class AnmodningOmUnntakDto {
     private String lovvalgsbestemmelse;
-    private List<String> unntakFraLovvalgsland;
+    private String unntakFraLovvalgsland;
     private String unntakFraLovvalgsbestemmelse;
 
     public String getLovvalgsbestemmelse() {
@@ -15,11 +13,11 @@ public class AnmodningOmUnntakDto {
         this.lovvalgsbestemmelse = lovvalgsbestemmelse;
     }
 
-    public List<String> getUnntakFraLovvalgsland() {
+    public String getUnntakFraLovvalgsland() {
         return unntakFraLovvalgsland;
     }
 
-    public void setUnntakFraLovvalgsland(List<String> unntakFraLovvalgsland) {
+    public void setUnntakFraLovvalgsland(String unntakFraLovvalgsland) {
         this.unntakFraLovvalgsland = unntakFraLovvalgsland;
     }
 

@@ -99,6 +99,9 @@ public class JournalfoeringService {
 
     private void opprettProsessinstansBrevAouMottak(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
         validerBrukerIDFinnes(journalfoeringDto);
+        validerOpprettSakFelter(journalfoeringDto);
+        validerBehandleAnmodningOmUnntakFelter(journalfoeringDto);
+
         FagsakDto fagsakDto = journalfoeringDto.getFagsak();
         AnmodningOmUnntakDto anmodningOmUnntakDto = journalfoeringDto.getAnmodningOmUnntak();
 
@@ -181,6 +184,21 @@ public class JournalfoeringService {
         }
         if (journalfoeringDto.getFagsak().getLand().size() > 1) { // Melosys støtter bare ett land i Leveranse 1.
             throw new FunksjonellException("Kun ett land er støttet i denne versjonen av Melosys");
+        }
+    }
+
+    private void validerBehandleAnmodningOmUnntakFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+        if (journalfoeringDto.getAnmodningOmUnntak() == null) {
+            throw new FunksjonellException("Opplysninger for å opprette behandling av anmodning om unntak mangler");
+        }
+        if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getLovvalgsbestemmelse())) {
+            throw new FunksjonellException("Lovvalgsbestemmelse mangler");
+        }
+        if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getUnntakFraLovvalgsbestemmelse())) {
+            throw new FunksjonellException("Unntak fra lovvalgsbestemmelse mangler");
+        }
+        if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getUnntakFraLovvalgsland())) {
+            throw new FunksjonellException("Unntak fra lovvalgsland mangler");
         }
     }
 }

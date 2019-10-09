@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
@@ -39,7 +38,6 @@ import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -132,19 +130,6 @@ public class OppgaveServiceTest {
     @Test(expected = TekniskException.class)
     public void hentOppgaveForFagsaksnummer_medOppgaveSomIkkeFinnes_forventException() throws MelosysException {
         oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12346");
-    }
-
-    @Test
-    public void opprettOppgaveForFagsak() throws FunksjonellException, TekniskException {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-12345");
-        when(gsakFasade.opprettSak(anyString(), any(Behandlingstyper.class), anyString())).thenReturn(123L);
-
-        Long gsakSaksnummer = oppgaveService.opprettSakForFagsak(fagsak, Behandlingstyper.SOEKNAD, "1234");
-
-        verify(gsakFasade).opprettSak(eq("MEL-12345"), eq(Behandlingstyper.SOEKNAD), eq("1234"));
-        verify(fagsakService).lagre(eq(fagsak));
-        assertThat(gsakSaksnummer).isEqualTo(123L);
     }
 
     private static Behandling lagBehandling() {

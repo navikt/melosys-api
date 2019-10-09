@@ -22,6 +22,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -116,13 +118,17 @@ public class JournalfoeringServiceTest {
     @Test
     public void opprettOgJournalfør_erAnmodningUnntakHovedregel_prosessinstansOpprettet() throws MelosysException {
         AnmodningOmUnntakDto anmodningOmUnntakDto = new AnmodningOmUnntakDto();
-        anmodningOmUnntakDto.setLovvalgsbestemmelse("FO_883_2004_ART16_1");
-        anmodningOmUnntakDto.setUnntakFraLovvalgsbestemmelse("FO_883_2004_ART12_1");
-        anmodningOmUnntakDto.setUnntakFraLovvalgsland(Collections.singletonList("DE"));
+        anmodningOmUnntakDto.setLovvalgsbestemmelse(FO_883_2004_ART16_1.getKode());
+        anmodningOmUnntakDto.setUnntakFraLovvalgsbestemmelse(FO_883_2004_ART12_1.getKode());
+        anmodningOmUnntakDto.setUnntakFraLovvalgsland("DE");
         opprettDto.setAnmodningOmUnntak(anmodningOmUnntakDto);
 
         FagsakDto fagsakDto = new FagsakDto();
-        fagsakDto.setSoknadsperiode(new PeriodeDto());
+        PeriodeDto periode = new PeriodeDto();
+        periode.setFom(LocalDate.now());
+        periode.setTom(LocalDate.now().plusYears(1));
+        fagsakDto.setSoknadsperiode(periode);
+        fagsakDto.setLand(Collections.singletonList("NO"));
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstypeKode("ANMODNING_OM_UNNTAK_HOVEDREGEL");
 

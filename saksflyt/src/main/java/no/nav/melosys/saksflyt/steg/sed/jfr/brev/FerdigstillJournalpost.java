@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.sed.jfr.brev;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -39,7 +38,6 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         );
 
         log.info("Journalpost {} ferdigstilt for gsak-sak {}", journalpostId, prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID));
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE);
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK);
+        prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_OPPRETT_SEDDOKUMENT);
     }
 }

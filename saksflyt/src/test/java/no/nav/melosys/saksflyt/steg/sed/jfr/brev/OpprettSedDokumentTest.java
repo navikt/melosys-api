@@ -19,6 +19,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -48,10 +50,10 @@ public class OpprettSedDokumentTest {
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "123");
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now().plusYears(1)));
-        prosessinstans.setData(ProsessDataKey.LOVVALGSBESTEMMELSE, "FO_883_2004_ART16_1");
-        prosessinstans.setData(ProsessDataKey.UNNTAK_FRA_LOVVALGSBESTEMMELSE, "FO_883_2004_ART12_1");
+        prosessinstans.setData(ProsessDataKey.LOVVALGSBESTEMMELSE, FO_883_2004_ART16_1.getKode());
+        prosessinstans.setData(ProsessDataKey.UNNTAK_FRA_LOVVALGSBESTEMMELSE, FO_883_2004_ART12_1.getKode());
         prosessinstans.setData(ProsessDataKey.LOVVALGSLAND, Collections.singletonList("DE"));
-        prosessinstans.setData(ProsessDataKey.UNNTAK_FRA_LOVVALGSLAND, Collections.singletonList("NO"));
+        prosessinstans.setData(ProsessDataKey.UNNTAK_FRA_LOVVALGSLAND, "NO");
         when(dokumentFactory.lagInternXml(any())).thenReturn("xml");
 
         opprettSedDokument.utfør(prosessinstans);
@@ -67,6 +69,7 @@ public class OpprettSedDokumentTest {
         assertThat(sedDokument.getLovvalgslandKode()).isEqualTo(Landkoder.DE);
         assertThat(sedDokument.getUnntakFraLovvalgslandKode()).isEqualTo(Landkoder.NO);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AOU_BREV_OPPRETT_GSAK_SAK);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE);
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK);
     }
 }

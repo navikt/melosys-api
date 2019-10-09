@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.sed.jfr.brev;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -39,7 +38,6 @@ public class FerdigstillJournalpostTest {
         ferdigstillJournalpost.utfør(prosessinstans);
 
         verify(joarkFasade).oppdaterJournalpostMedSaksnummerOgBruker(eq("123"), eq("1234"), eq(111L), eq(true));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE);
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AOU_BREV_OPPRETT_SEDDOKUMENT);
     }
 }
