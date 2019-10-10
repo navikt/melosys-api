@@ -15,6 +15,7 @@ import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("JournalførAouBrevOpprettFagsakOgBehandling")
@@ -28,7 +29,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     @Autowired
     public OpprettFagsakOgBehandling(FagsakService fagsakService,
                                      TpsFasade tpsFasade,
-                                     GsakFasade gsakFasade) {
+                                     @Qualifier("system") GsakFasade gsakFasade) {
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
         this.gsakFasade = gsakFasade;
