@@ -77,7 +77,7 @@
                         <version>${flyway.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>com.oracle.ojdbc</groupId>
+                        <groupId>com.oracle.jdbc</groupId>
                         <artifactId>ojdbc8</artifactId>
                         <version>${ojdbc.version}</version>
                     </dependency>
