@@ -74,6 +74,14 @@
         <intensjonOmRetur>false</intensjonOmRetur>
         <antallMaanederINorge>0</antallMaanederINorge>
         <adresseIUtlandet>false</adresseIUtlandet>
-        <oppgittAdresse/>
+        <antallMaanederINorge>0</antallMaanederINorge>
+        <oppgittAdresse>
+            <landkode>DK</landkode>
+            <gatenavn>Langelinje</gatenavn>
+            <husnummer>1</husnummer>
+            <region/>
+            <postnummer>2100</postnummer>
+            <poststed>København Ø</poststed>
+        </oppgittAdresse>
     </bosted>
 </soeknadDokument>
