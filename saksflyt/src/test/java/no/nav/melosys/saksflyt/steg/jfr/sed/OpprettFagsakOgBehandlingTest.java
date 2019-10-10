@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.jfr;
+package no.nav.melosys.saksflyt.steg.jfr.sed;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;

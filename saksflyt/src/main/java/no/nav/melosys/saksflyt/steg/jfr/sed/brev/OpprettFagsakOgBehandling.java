@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.jfr.brev;
+package no.nav.melosys.saksflyt.steg.jfr.sed.brev;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
