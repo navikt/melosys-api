@@ -5,14 +5,18 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.jpa.HibernateXmlType;
 import no.nav.melosys.domain.jpa.SaksopplysningListener;
-import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
-
+@TypeDefs(@TypeDef(name = Saksopplysning.XMLTYPE, typeClass = HibernateXmlType.class))
 @Entity
 @EntityListeners({SaksopplysningListener.class})
 @Table(name = "saksopplysning")
 public class Saksopplysning {
+    public static final String XMLTYPE = "xmltype";
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,14 +43,12 @@ public class Saksopplysning {
     @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
-    @ColumnTransformer(read = "NVL2(dokument_xml, (dokument_xml).getClobVal(), NULL)", write = "XMLType.createxml(?)")
-    @Lob
-    @Column(name = "dokument_xml", columnDefinition = "XMLType")
+    @Type(type = XMLTYPE)
+    @Column(name = "dokument_xml")
     private String dokumentXml;
 
-    @ColumnTransformer(read = "NVL2(intern_xml, (intern_xml).getClobVal(), NULL)", write = "XMLType.createxml(?)")
-    @Lob
-    @Column(name = "intern_xml", columnDefinition = "XMLType")
+    @Type(type = XMLTYPE)
+    @Column(name = "intern_xml")
     private String internXml;
 
     @Transient
