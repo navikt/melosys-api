@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.felles;
+package no.nav.melosys.domain.dokument.adresse;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

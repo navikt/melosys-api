@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 
 public class Bosted {
     public Boolean intensjonOmRetur;

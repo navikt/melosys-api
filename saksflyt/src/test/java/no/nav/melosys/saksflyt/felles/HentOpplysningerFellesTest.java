@@ -57,7 +57,7 @@ public class HentOpplysningerFellesTest {
     public void setUp() throws Exception {
         hentOpplysningerFelles = new HentOpplysningerFelles(tpsFasade, fagsakService, behandlingService, medlFasade, inntektService, utbetaldataService, saksopplysningRepository);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(FNR);
-        when(tpsFasade.hentPerson(anyString())).thenReturn(new Saksopplysning());
+        when(tpsFasade.hentPersonMedAdresse(anyString())).thenReturn(new Saksopplysning());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class HentOpplysningerFellesTest {
 
         verify(tpsFasade).hentIdentForAktørId(eq(AKTØR_ID));
         verify(fagsakService).leggTilAktør(eq("123"), eq(Aktoersroller.BRUKER), eq(AKTØR_ID));
-        verify(tpsFasade).hentPerson(FNR);
+        verify(tpsFasade).hentPersonMedAdresse(FNR);
         verify(saksopplysningRepository).save(any(Saksopplysning.class));
     }
 

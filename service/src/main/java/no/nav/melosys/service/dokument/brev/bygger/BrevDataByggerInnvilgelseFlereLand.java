@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -16,7 +15,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 
 public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     private final AvklartefaktaService avklartefaktaService;
@@ -39,8 +38,8 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
-        Behandling behandling = dataGrunnlag.getBehandling();
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+        long behandlingID = dataGrunnlag.getBehandling().getId();
         SoeknadDokument søknad = dataGrunnlag.getSøknad();
 
         BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(dataGrunnlag, saksbehandler);
@@ -48,23 +47,23 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         brevdata.norskeArbeidsgivere = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere();
         brevdata.norskeSelvstendigVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige();
 
-        brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
-        brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandling).stream()
+        brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
+        brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID).stream()
             .map(Landkoder::getBeskrivelse)
             .collect(Collectors.toList());
 
-        brevdata.bostedsland = landvelgerService.hentBostedsland(behandling, søknad).getBeskrivelse();
+        brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, søknad).getBeskrivelse();
 
-        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
+        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandlingID);
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
 
-        brevdata.erMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(behandling.getId());
+        brevdata.erMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(behandlingID);
         brevdata.erBegrensetPeriode = true;
 
         return brevdata;
     }
 
-    private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(brevbestillingDto, saksbehandler);
         brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         return brevdata;

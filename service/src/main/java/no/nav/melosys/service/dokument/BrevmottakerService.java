@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -38,7 +38,7 @@ public class BrevmottakerService {
         this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
-    public Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
+    Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
         Aktoersroller mottakerRolle;
         if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
             mottakerRolle = BRUKER;
@@ -52,11 +52,11 @@ public class BrevmottakerService {
         return mottakerRolle;
     }
 
-    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
+    List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
         return avklarMottakere(produserbartDokument, mottaker, behandling, false);
     }
 
-    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning)
+    List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning)
         throws FunksjonellException, TekniskException {
         List<Aktoer> mottakere;
         Aktoersroller mottakerRolle = mottaker.getRolle();
@@ -144,7 +144,7 @@ public class BrevmottakerService {
                         .map(Map.Entry::getValue)
                         .collect(Collectors.toList());
             } else {
-                return new ArrayList<>(utenlandskMyndighetAktoerMap.values());                
+                return new ArrayList<>(utenlandskMyndighetAktoerMap.values());
             }
         }
     }
@@ -156,7 +156,7 @@ public class BrevmottakerService {
                 .map(Preferanse::getPreferanse)
                 .noneMatch(RESERVERT_FRA_A1::equals);
     }
-    
+
     public Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
         if (mottaker == null) {
             return null;

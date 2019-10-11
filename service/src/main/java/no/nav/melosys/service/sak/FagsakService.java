@@ -13,6 +13,7 @@ import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -72,7 +73,6 @@ public class FagsakService {
     @Transactional(rollbackFor = MelosysException.class)
     public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException, FunksjonellException {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-
         if (fagsak.getBehandlinger().isEmpty()) {
             throw new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen tilknyttede behandlinger.");
         }
@@ -86,7 +86,6 @@ public class FagsakService {
         }
 
         Behandling sisteIkkeAvsluttedeBehandling = getSisteIkkeAvsluttedeBehandling(fagsak);
-
         prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(sisteIkkeAvsluttedeBehandling.getFagsak().getSaksnummer());
     }
@@ -123,6 +122,7 @@ public class FagsakService {
 
     // Sletter aktører som ikke ligger i oppgitt liste og legger til de som mangler.
     // Oppdaterer IKKE de som allerede finnes i database
+
     @Transactional
     public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
@@ -135,7 +135,6 @@ public class FagsakService {
         fagsak.getAktører().addAll(nyeMyndigheter);
         fagsakRepository.save(fagsak);
     }
-
     @Transactional
     public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
@@ -206,7 +205,7 @@ public class FagsakService {
 
         Instant nå = Instant.now();
 
-        fagsak.setType(opprettSakRequest.getSakstype());
+        fagsak.setType(opprettSakRequest.getSakstype() == null ? Sakstyper.UKJENT : opprettSakRequest.getSakstype());
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
@@ -263,5 +262,20 @@ public class FagsakService {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
         behandlingService.avsluttBehandling(behandling.getId());
+    }
+
+    @Transactional(rollbackFor = MelosysException.class)
+    public void henleggOgVideresend(String saksnummer) throws FunksjonellException, TekniskException {
+        Fagsak fagsak = hentFagsak(saksnummer);
+
+        long behandlingId = fagsak.getAktivBehandling().getId();
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingId);
+
+        fagsak.setStatus(Saksstatuser.VIDERESENDT);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+
+        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

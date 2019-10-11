@@ -21,8 +21,8 @@ import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlagFactory;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.w3c.dom.Element;
 
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 
 @Service
@@ -47,7 +48,7 @@ public class DokumentService {
     private final ProsessinstansService prosessinstansService;
     private final BrevmottakerService brevmottakerService;
     private final BrevDataByggerVelger brevDataByggerVelger;
-    private final DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory;
+    private final BrevdataGrunnlagFactory brevdataGrunnlagFactory;
 
     @Autowired
     public DokumentService(BehandlingService behandlingService,
@@ -55,14 +56,14 @@ public class DokumentService {
                            ProsessinstansService prosessinstansService,
                            BrevmottakerService brevmottakerService,
                            BrevDataByggerVelger brevDataByggerVelger,
-                           DokumentdataGrunnlagFactory dokumentdataGrunnlagFactory) {
+                           BrevdataGrunnlagFactory brevdataGrunnlagFactory) {
         this.behandlingService = behandlingService;
         this.brevDataService = brevDataService;
         this.dokSysFasade = dokSysFasade;
         this.prosessinstansService = prosessinstansService;
         this.brevmottakerService = brevmottakerService;
         this.brevDataByggerVelger = brevDataByggerVelger;
-        this.dokumentdataGrunnlagFactory = dokumentdataGrunnlagFactory;
+        this.brevdataGrunnlagFactory = brevdataGrunnlagFactory;
     }
 
     /**
@@ -76,7 +77,7 @@ public class DokumentService {
     public byte[] produserUtkast(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        DokumentdataGrunnlag brevdataRessurser = dokumentdataGrunnlagFactory.av(behandling);
+        BrevDataGrunnlag brevdataRessurser = brevdataGrunnlagFactory.av(behandling);
         BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
         BrevData brevData = bygger.lag(brevdataRessurser, SubjectHandler.getInstance().getUserID());
 
@@ -99,7 +100,7 @@ public class DokumentService {
         Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument.");
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(brevbestilling.getDokumentType());
-        BrevData brevData = brevDataBygger.lag(dokumentdataGrunnlagFactory.av(behandling), brevbestilling.getAvsender());
+        BrevData brevData = brevDataBygger.lag(brevdataGrunnlagFactory.av(behandling), brevbestilling.getAvsender());
         brevData.begrunnelseKode = brevbestilling.getBegrunnelseKode();
         brevData.fritekst = brevbestilling.getFritekst();
 
@@ -130,6 +131,8 @@ public class DokumentService {
 
         if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
             prosessinstansService.opprettProsessinstansMangelbrev(behandling, mottaker, brevdata);
+        } else if (produserbartDokument == MELDING_FORVENTET_SAKSBEHANDLINGSTID) {
+            prosessinstansService.opprettProsessinstansForvaltningsmelding(behandling);            
         } else {
             throw new FunksjonellException("Produserbaredokumenter " + produserbartDokument + " er ikke støttet.");
         }

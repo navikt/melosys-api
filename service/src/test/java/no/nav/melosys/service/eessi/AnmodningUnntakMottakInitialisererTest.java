@@ -45,10 +45,10 @@ public class AnmodningUnntakMottakInitialisererTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererStatusAvsluttet_nyBehandling() {
+    public void finnSakOgBestemRuting_sakEksistererStatusLovvalgAvklart_nyBehandling() {
         final Long gsakSaksnummer = 123L;
         Fagsak fagsak = new Fagsak();
-        fagsak.setStatus(Saksstatuser.AVSLUTTET);
+        fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
         when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
         RutingResultat resultat = anmodningUnntakMottakInitialiserer.finnSakOgBestemRuting(new Prosessinstans(), gsakSaksnummer);
         assertThat(resultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);

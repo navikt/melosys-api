@@ -7,9 +7,11 @@ import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.BostedGrunnlag;
+import no.nav.melosys.service.dokument.DataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public class DokumentdataGrunnlag {
+public class BrevDataGrunnlag implements DataGrunnlag {
     private final Behandling behandling;
     private final SoeknadDokument søknad;
     private PersonDokument person;
@@ -18,10 +20,10 @@ public class DokumentdataGrunnlag {
     private final BostedGrunnlag bostedGrunnlag;
     private final ArbeidsstedGrunnlag arbeidssteder;
 
-    public DokumentdataGrunnlag(Behandling behandling,
-                                KodeverkService kodeverkService,
-                                AvklarteVirksomheterService avklarteVirksomheterService,
-                                AvklartefaktaService avklartefaktaService) throws TekniskException {
+    public BrevDataGrunnlag(Behandling behandling,
+                            KodeverkService kodeverkService,
+                            AvklarteVirksomheterService avklarteVirksomheterService,
+                            AvklartefaktaService avklartefaktaService) throws TekniskException {
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);

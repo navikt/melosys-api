@@ -1,28 +1,32 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class SedDataDto {
     //Søknaddok.
-    private List<Ident> utenlandskIdent;
+    private List<Ident> utenlandskIdent = new ArrayList<>(1);
 
     //Persondok.
-    private List<FamilieMedlem> familieMedlem;
+    private List<FamilieMedlem> familieMedlem = new ArrayList<>();
     private Bruker bruker;
 
     //Andre medlemsvariabler
     private Adresse bostedsadresse;
-    private List<Virksomhet> arbeidsgivendeVirksomheter;
-    private List<Virksomhet> selvstendigeVirksomheter;
-    private List<Arbeidssted> arbeidssteder;
-    private List<Virksomhet> utenlandskeVirksomheter;
+    private List<Virksomhet> arbeidsgivendeVirksomheter = new ArrayList<>();
+    private List<Virksomhet> selvstendigeVirksomheter = new ArrayList<>();
+    private List<Arbeidssted> arbeidssteder = new ArrayList<>();
+    private List<Virksomhet> utenlandskeVirksomheter = new ArrayList<>();
+
+    //Videresending av søknad
+    private String avklartBostedsland;
 
     private Long gsakSaksnummer;
 
     //Lovvalg
-    private List<Lovvalgsperiode> lovvalgsperioder;
-    private List<Lovvalgsperiode> tidligereLovvalgsperioder;
+    private List<Lovvalgsperiode> lovvalgsperioder = new ArrayList<>();
+    private List<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();
 
     private String mottakerLand;
     private String mottakerId;
@@ -89,6 +93,14 @@ public class SedDataDto {
 
     public void setUtenlandskeVirksomheter(List<Virksomhet> utenlandskeVirksomheter) {
         this.utenlandskeVirksomheter = utenlandskeVirksomheter;
+    }
+
+    public String getAvklartBostedsland() {
+        return avklartBostedsland;
+    }
+
+    public void setAvklartBostedsland(String avklartBostedsland) {
+        this.avklartBostedsland = avklartBostedsland;
     }
 
     public List<Lovvalgsperiode> getLovvalgsperioder() {

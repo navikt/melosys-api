@@ -25,7 +25,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
@@ -87,8 +87,8 @@ public class BrevDataByggerInnvilgelseTest {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
 
-        when(landvelgerService.hentArbeidsland(any())).thenReturn(Landkoder.AT);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(any())).thenReturn(Collections.singletonList(Landkoder.DE));
+        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
             landvelgerService,
@@ -98,8 +98,8 @@ public class BrevDataByggerInnvilgelseTest {
             brevDataByggerA1);
     }
 
-    public DokumentdataGrunnlag lagBrevdataGrunnlag() throws TekniskException {
-        return new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+    public BrevDataGrunnlag lagBrevdataGrunnlag() throws TekniskException {
+        return new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test

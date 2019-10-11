@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
+
 /**
  * Representerer svar fra personregisteret (TPS)
  *
@@ -73,4 +74,9 @@ public class PersonDokument implements SaksopplysningDokument {
     @JsonProperty(defaultValue = "false" )
     public boolean erEgenAnsatt; // MELOSYS-1580
 
+    public boolean harIkkeRegistrertAdresse() {
+        return bostedsadresse.erTom() &&
+            postadresse.erTom() &&
+            midlertidigPostadresse.land == null;
+    }
 }

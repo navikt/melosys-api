@@ -2,7 +2,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 
 public class BrevDataByggerStandard implements BrevDataBygger {
 
@@ -13,7 +13,7 @@ public class BrevDataByggerStandard implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         return new BrevData(brevbestillingDto, saksbehandler);
     }
 }

@@ -15,9 +15,12 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -84,9 +87,17 @@ public class BrevDataService {
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
         metadata.utenlandskMyndighet = mottaker.erUtenlandskMyndighet() ? hentMyndighetFraAktoer(mottaker) : null;
-        metadata.utledRegisterInfo = dokprodUtlederRegisterInfo(mottaker);
 
-        if (!metadata.utledRegisterInfo) {
+        if (mottaker.getRolle() == BRUKER) {
+            boolean brukerharIkkeAdresseIRegister = brukerHarIkkeTpsAdresse(behandling);
+            if (brukerharIkkeAdresseIRegister) {
+                StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
+                if (!oppgittAdresse.erTom()) {
+                    metadata.postadresse = oppgittAdresse;
+                    metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
+                }
+            }
+        } else if (mottaker.erUtenlandskMyndighet()) {
             metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
         }
         return metadata;
@@ -120,17 +131,11 @@ public class BrevDataService {
             .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
-    // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
-    // Melosys setter adressen sammen for utelandske myndigheter.
-    private boolean dokprodUtlederRegisterInfo(Aktoer mottaker) {
-        return !mottaker.erUtenlandskMyndighet();
-    }
-
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
     @Transactional(propagation = Propagation.MANDATORY, readOnly = true)
-    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) throws TekniskException {
+    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) throws TekniskException, FunksjonellException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid " + behandling.getId()));
 
@@ -167,12 +172,12 @@ public class BrevDataService {
     }
 
     private MelosysNAVFelles mapNAVFelles(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData)
-        throws TekniskException {
+        throws TekniskException, FunksjonellException {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setBehandlendeEnhet(lagNavEnhet());
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
-        navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning));
+        navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
         navFelles.setSakspart(lagSakspart(behandling));
         navFelles.setSignerendeBeslutter(lagSaksbehandler(brevData.saksbehandler));
         navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevData.saksbehandler));
@@ -180,16 +185,13 @@ public class BrevDataService {
         return navFelles;
     }
 
-    Mottaker lagMottaker(Aktoer mottaker, Kontaktopplysning kontaktopplysning) throws TekniskException {
+    Mottaker lagMottaker(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) throws TekniskException, FunksjonellException {
         Aktoersroller mottakerRolle = mottaker.getRolle();
         String mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
 
         Mottaker mottakerBrev;
-
         if (mottakerRolle == BRUKER) {
-            mottakerBrev = new Person();
-            mottakerBrev.setTypeKode(AktoerType.PERSON);
-            mottakerBrev.setId(mottakerID);
+            return lagMottakerForBruker(behandling, mottakerID);
         } else if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
             mottakerBrev = new Organisasjon();
             mottakerBrev.setTypeKode(AktoerType.ORGANISASJON);
@@ -217,10 +219,36 @@ public class BrevDataService {
         }
 
         mottakerBrev.setNavn(PLASSHOLDER_TEKST);
-        mottakerBrev.setMottakeradresse(lagNorskPostadresse());
         mottakerBrev.setKortNavn(PLASSHOLDER_TEKST);
+        mottakerBrev.setMottakeradresse(lagNorskPostadresse());
         mottakerBrev.setSpraakkode(Spraakkode.NB);
 
+        return mottakerBrev;
+    }
+
+    private Mottaker lagMottakerForBruker(Behandling behandling, String mottakerID) throws TekniskException, FunksjonellException {
+        Mottaker mottakerBrev;
+        mottakerBrev = new Person();
+        mottakerBrev.setTypeKode(AktoerType.PERSON);
+        mottakerBrev.setSpraakkode(Spraakkode.NB);
+        mottakerBrev.setId(mottakerID);
+
+        String navn = tpsFasade.hentSammensattNavn(mottakerID);
+        if (brukerHarIkkeTpsAdresse(behandling)) {
+            StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
+            if (oppgittAdresse.erTom()) {
+                throw new TekniskException("Bruker har verken adresse i TPS eller oppgitt adresse i søknad");
+            }
+            mottakerBrev.setMottakeradresse(lagAdresse(oppgittAdresse));
+            mottakerBrev.setBerik(false);
+            mottakerBrev.setNavn(navn);
+            mottakerBrev.setKortNavn(navn);
+        } else {
+            mottakerBrev.setMottakeradresse(lagNorskPostadresse());
+            mottakerBrev.setBerik(true);
+            mottakerBrev.setNavn(PLASSHOLDER_TEKST);
+            mottakerBrev.setKortNavn(PLASSHOLDER_TEKST);
+        }
         return mottakerBrev;
     }
 
@@ -230,7 +258,6 @@ public class BrevDataService {
         saksbehandler.setNavAnsatt(lagNavAnsatt(userId));
         return saksbehandler;
     }
-
 
     private Sakspart lagSakspart(Behandling behandling) throws TekniskException {
         Sakspart sakspart = new Sakspart();
@@ -248,5 +275,10 @@ public class BrevDataService {
         sakspart.setTypeKode(AktoerType.PERSON);
         sakspart.setNavn(PLASSHOLDER_TEKST);
         return sakspart;
+    }
+
+    private boolean brukerHarIkkeTpsAdresse(Behandling behandling) throws TekniskException {
+        PersonDokument person = SaksopplysningerUtils.hentPersonDokument(behandling);
+        return person.harIkkeRegistrertAdresse();
     }
 }

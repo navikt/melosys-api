@@ -7,9 +7,9 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.*;
@@ -56,6 +56,10 @@ public class DataByggerStubs {
         arbeidUtland.foretakNavn = "foretaknavn";
         arbeidUtland.foretakOrgnr = "32132133";
         søknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
+        UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
+        utenlandskIdent.ident = "439205843";
+        utenlandskIdent.landkode = "SE";
+        søknadDokument.personOpplysninger.utenlandskIdent.add(utenlandskIdent);
         saksopplysning.setDokument(søknadDokument);
         saksopplysning.setType(SaksopplysningType.SØKNAD);
         saksopplysninger.add(saksopplysning);

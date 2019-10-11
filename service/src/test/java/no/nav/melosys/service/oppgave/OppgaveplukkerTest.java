@@ -16,7 +16,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
@@ -354,7 +353,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_oppgaveSomVenterHarIkkeSvarfrist_KasterException() throws MelosysException {
+    public void plukkOppgave_oppgaveSomVenterHarIkkeSvarfrist_plukkerIkkeBehandlingen() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), "MEL-1"));
 
@@ -373,8 +372,8 @@ public class OppgaveplukkerTest {
 
         when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
 
-        expectedException.expect(TekniskException.class);
-        oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
+        assertThat(oppgave.isPresent()).isFalse();
     }
 
     private Oppgave opprettOppgave(String oppgaveId, Oppgavetyper oppgavetype, PrioritetType prioritet, LocalDate fristFerdigstillelse, String saksnummer) {

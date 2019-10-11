@@ -2,10 +2,8 @@ package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
-import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -31,14 +29,14 @@ public class BrevDataByggerVelger {
                                 UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
                                 JoarkService joarkService,
-                                BehandlingsresultatService behandlingsresultatService) {
+                                LandvelgerService landvelgerService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.joarkService = joarkService;
-        this.landvelgerService = new LandvelgerService(avklartefaktaService, vilkaarsresultatRepository, behandlingsresultatService);
+        this.landvelgerService = landvelgerService;
     }
 
     // For brevbygging i saksflyt

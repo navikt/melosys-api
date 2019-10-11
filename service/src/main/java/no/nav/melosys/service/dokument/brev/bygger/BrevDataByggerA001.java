@@ -22,7 +22,7 @@ import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -32,7 +32,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
-    private DokumentdataGrunnlag dataGrunnlag;
+    private BrevDataGrunnlag dataGrunnlag;
     private Behandling behandling;
 
     public BrevDataByggerA001(LovvalgsperiodeService lovvalgsperiodeService,
@@ -46,7 +46,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(DokumentdataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         this.dataGrunnlag = dataGrunnlag;
         this.behandling = dataGrunnlag.getBehandling();
 

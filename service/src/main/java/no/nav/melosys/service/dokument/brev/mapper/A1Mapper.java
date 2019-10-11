@@ -1,7 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
@@ -11,7 +14,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
@@ -163,11 +167,11 @@ class A1Mapper {
     private AdresseType mapFysiskArbeidssted(FysiskArbeidssted fysiskArbeidssted) {
         AdresseType adresseType = new AdresseType();
         adresseType.setNavn(fysiskArbeidssted.getForetakNavn());
-        StrukturertAdresse adresse = fysiskArbeidssted.getAdresse();
-        adresseType.setAdresselinje1(Objects.toString(adresse.gatenavn, "") + " " + Objects.toString(adresse.husnummer, ""));
-        adresseType.setAdresselinje2(adresse.postnummer);
-        adresseType.setAdresselinje3(adresse.poststed);
-        adresseType.setAdresselinje4(adresse.region);
+        UstrukturertAdresse adresse = UstrukturertAdresse.av(fysiskArbeidssted.getAdresse());
+        adresseType.setAdresselinje1(adresse.getAdresselinje(1));
+        adresseType.setAdresselinje2(adresse.getAdresselinje(2));
+        adresseType.setAdresselinje3(adresse.getAdresselinje(3));
+        adresseType.setAdresselinje4(adresse.getAdresselinje(4));
         adresseType.setLand(adresse.landkode);
         return adresseType;
     }

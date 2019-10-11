@@ -106,6 +106,7 @@ public class FagsakServiceTest {
         verify(fagsakRepo).save(any(Fagsak.class));
         verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.SOEKNAD), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
+        assertThat(fagsak.getType()).isEqualTo(Sakstyper.UKJENT);
     }
 
     @Test

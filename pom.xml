@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.6.RELEASE</version>
+        <version>2.1.8.RELEASE</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -38,10 +38,11 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>1.1.4-SNAPSHOT</melosys.frontend.version>
-        <melosys.jsonschema.version>1.31.0-26</melosys.jsonschema.version>
+        <melosys.frontend.version>1.2.2-27</melosys.frontend.version>
+        <melosys.jsonschema.version>1.32.0-29</melosys.jsonschema.version>
+
         <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
-        <melosys.internt.kodeverk.version>5.11.3-458</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.13.1-592</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -49,7 +50,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.1.12</dokprod.melosysbrev.version>
+        <dokprod.melosysbrev.version>1.1.13</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
@@ -66,7 +67,7 @@
         <assertj.version>3.8.0</assertj.version>
         <cxf.version>3.1.11</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-lang.version>3.2.1</commons-lang.version>
+        <commons-lang.version>3.9</commons-lang.version>
         <everit.jsonschema.validator.version>1.9.1</everit.jsonschema.validator.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>21.0</guava.version>
@@ -86,8 +87,7 @@
         <easy-random.version>4.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <spring-boot.version>2.1.6.RELEASE</spring-boot.version>
-        <spring-kafka.version>2.2.3.RELEASE</spring-kafka.version>
+        <spring-boot.version>2.1.8.RELEASE</spring-boot.version>
         <spring-security-pac4j.version>4.1.0</spring-security-pac4j.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
@@ -183,9 +183,11 @@
                 <version>${logback.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
                 <version>${jackson.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>

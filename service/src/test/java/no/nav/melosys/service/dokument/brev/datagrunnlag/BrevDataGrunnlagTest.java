@@ -7,8 +7,8 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DokumentdataGrunnlagTest {
+public class BrevDataGrunnlagTest {
     @Mock
     private KodeverkService kodeverkService;
     @Mock
@@ -46,7 +46,7 @@ public class DokumentdataGrunnlagTest {
     private PersonDokument person;
     private SoeknadDokument søknad;
     private Behandling behandling;
-    private DokumentdataGrunnlag dataGrunnlag;
+    private BrevDataGrunnlag dataGrunnlag;
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -68,7 +68,7 @@ public class DokumentdataGrunnlagTest {
         søknad = new SoeknadDokument();
         behandling = lagBehandling(søknad, person);
 
-        dataGrunnlag = new DokumentdataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     private Behandling lagBehandling(SoeknadDokument søknad, PersonDokument person) {

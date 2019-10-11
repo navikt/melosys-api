@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -15,9 +15,12 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.DokumentdataGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -29,31 +32,74 @@ import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 @Service
 public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final LandvelgerService landvelgerService;
 
     @Autowired
-    public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService) {
+    public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService, LandvelgerService landvelgerService) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.landvelgerService = landvelgerService;
     }
 
-    public SedDataDto lag(DokumentdataGrunnlag datagrunnlag, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
-        SedDataDto sedDataDto = lagPersonopplysninger(datagrunnlag);
-        sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat)));
-        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(datagrunnlag.getBehandling()));
-        sedDataDto.setMottakerLand(datagrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
-        return sedDataDto;
-    }
-
-    public SedDataDto lagUtkast(DokumentdataGrunnlag dataGrunnlag) throws TekniskException, FunksjonellException {
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        if (!lovvalgsperiodeService.hentLovvalgsperioder(dataGrunnlag.getBehandling().getId()).isEmpty()) {
-            sedDataDto.setLovvalgsperioder(Collections.singletonList(lagLovvalgsperiodeDto(lovvalgsperiodeService.hentLovvalgsperiode(dataGrunnlag.getBehandling().getId()))));
-        } else {
-            sedDataDto.setLovvalgsperioder(Collections.emptyList());
+    public SedDataDto lag(SedDataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        if (dataGrunnlag instanceof SedDataGrunnlagMedSoknad) {
+            return lag((SedDataGrunnlagMedSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        } else if (dataGrunnlag instanceof SedDataGrunnlagUtenSoknad) {
+            return lag((SedDataGrunnlagUtenSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
         }
+        throw new IllegalArgumentException("Ukjent datagrunnlag: " + dataGrunnlag.getClass().getSimpleName());
+    }
+
+    private SedDataDto lag(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
+        sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
         return sedDataDto;
     }
 
-    private SedDataDto lagPersonopplysninger(DokumentdataGrunnlag dataGrunnlag) throws TekniskException, FunksjonellException {
+    private SedDataDto lag(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
+        return sedDataDto;
+    }
+
+    public SedDataDto lagUtkast(SedDataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        if (dataGrunnlag instanceof SedDataGrunnlagMedSoknad) {
+            return lagUtkast((SedDataGrunnlagMedSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        } else if (dataGrunnlag instanceof SedDataGrunnlagUtenSoknad) {
+            return lagUtkast((SedDataGrunnlagUtenSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        }
+        throw new IllegalArgumentException("Ukjent datagrunnlag: " + dataGrunnlag.getClass().getSimpleName());
+    }
+
+    private SedDataDto lagUtkast(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        return sedDataDto;
+    }
+
+    private SedDataDto lagUtkast(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        return sedDataDto;
+    }
+
+    private SedDataDto lagPersonopplysninger(SedDataGrunnlagUtenSoknad dataGrunnlag) throws TekniskException {
+        SedDataDto sedDataDto = new SedDataDto();
+
+        sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
+
+        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().familiemedlemmer.stream()
+            .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
+            .map(this::hentFamilieMedlem).collect(Collectors.toList()));
+
+        sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getBostedGrunnlag().hentBostedsadresse()));
+
+        return sedDataDto;
+    }
+
+    private SedDataDto lagPersonopplysninger(SedDataGrunnlagMedSoknad dataGrunnlag) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = new SedDataDto();
 
         sedDataDto.setArbeidsgivendeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere()));
@@ -63,10 +109,14 @@ public class SedDataBygger {
 
         sedDataDto.setBostedsadresse(fraBostedsadresse(dataGrunnlag.getBostedGrunnlag().hentBostedsadresse()));
 
+        sedDataDto.setAvklartBostedsland(
+            landvelgerService.hentBostedsland(dataGrunnlag.getBehandling().getId(), dataGrunnlag.getSøknad()).getKode()
+        );
+
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
 
         sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().familiemedlemmer.stream()
-            .filter(f -> f.familierelasjon.equals(Familierelasjon.FARA) || f.familierelasjon.equals(Familierelasjon.MORA))
+            .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
         sedDataDto.setSelvstendigeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige()));
@@ -108,7 +158,7 @@ public class SedDataBygger {
         Arbeidssted arbeidssted = new Arbeidssted();
         arbeidssted.setFysisk(arb.erFysisk());
         if (arb.erFysisk()) {
-            FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted)arb;
+            FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arb;
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
             arbeidssted.setNavn(arb.getForetakNavn());
         } else {
@@ -142,24 +192,32 @@ public class SedDataBygger {
         return adresse;
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(Behandlingsresultat behandlingsresultat) {
+    private List<Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
 
-        if (!behandlingsresultat.getLovvalgsperioder().isEmpty()) {
-            return lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode());
+        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
+        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(),
+                hentUnntaksBegrunnelse(behandlingsresultat)));
         }
 
-        Anmodningsperiode anmodningsperiode = behandlingsresultat.hentValidertAnmodningsperiode();
-        return lagLovvalgsperiodeDto(anmodningsperiode, hentUnntaksBegrunnelse(behandlingsresultat));
+        return Collections.emptyList();
     }
 
-    private Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode periodeMedBestemmelse) {
-        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
-        lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
-        lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
-        lovvalgsperiodeDto.setLovvalgsland(periodeMedBestemmelse.getLovvalgsland() != null ? periodeMedBestemmelse.getLovvalgsland().getKode() : null);
-        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(periodeMedBestemmelse.getBestemmelse()));
-        return lovvalgsperiodeDto;
+    private List<Lovvalgsperiode> lagLovvalgsperioderDtoHvisFinnes(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
+
+        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE && !behandlingsresultat.getLovvalgsperioder().isEmpty()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.getLovvalgsperioder().iterator().next()));
+        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE && !behandlingsresultat.getAnmodningsperioder().isEmpty()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(
+                    behandlingsresultat.getAnmodningsperioder().iterator().next(),
+                    hentUnntaksBegrunnelse(behandlingsresultat)
+                ));
+        }
+
+        return Collections.emptyList();
     }
+
 
     private Lovvalgsperiode lagLovvalgsperiodeDto(Anmodningsperiode anmodningsperiode, String unntaksBegrunnelse) {
         Lovvalgsperiode lovvalgsperiodeDto = lagLovvalgsperiodeDto(anmodningsperiode);
@@ -172,17 +230,24 @@ public class SedDataBygger {
         return lovvalgsperiodeDto;
     }
 
+    private Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode periodeMedBestemmelse) {
+        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
+        lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
+        lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
+        lovvalgsperiodeDto.setLovvalgsland(periodeMedBestemmelse.getLovvalgsland() != null ? periodeMedBestemmelse.getLovvalgsland().getKode() : null);
+        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(periodeMedBestemmelse.getBestemmelse()));
+        return lovvalgsperiodeDto;
+    }
+
     private List<Lovvalgsperiode> lagTidligereLovvalgsperioderDto(Behandling behandling)
         throws TekniskException {
-        List<Lovvalgsperiode> tidligereLovvalgsperioderDto = new ArrayList<>();
+
         Collection<no.nav.melosys.domain.Lovvalgsperiode> tidligereLovvalgsperioder =
             lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
 
-        tidligereLovvalgsperioder.stream()
+        return tidligereLovvalgsperioder.stream()
             .map(this::lagLovvalgsperiodeDto)
-            .forEach(tidligereLovvalgsperioderDto::add);
-
-        return tidligereLovvalgsperioderDto;
+            .collect(Collectors.toList());
     }
 
     private String hentUnntaksBegrunnelse(Behandlingsresultat behandlingsresultat) {
@@ -208,7 +273,7 @@ public class SedDataBygger {
         String[] navn = splitFulltNavn(f.navn);
         familieMedlem.setFornavn(navn[0]);
         familieMedlem.setEtternavn(navn[1]);
-        familieMedlem.setRelasjon(f.familierelasjon.equals(Familierelasjon.FARA) ? "FAR" : "MOR");
+        familieMedlem.setRelasjon(f.familierelasjon == Familierelasjon.FARA ? "FAR" : "MOR");
         return familieMedlem;
     }
 
@@ -216,7 +281,7 @@ public class SedDataBygger {
         Virksomhet virksomhet = new Virksomhet();
         virksomhet.setNavn(uVirksomhet.navn);
         virksomhet.setOrgnr(uVirksomhet.orgnr);
-        virksomhet.setType("registrering"); //TODO - riktig?
+        virksomhet.setType("registrering");
         virksomhet.setAdresse(fraStrukturertAdresse((StrukturertAdresse) uVirksomhet.adresse));
         return virksomhet;
     }

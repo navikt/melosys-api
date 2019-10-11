@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.BucInformasjon;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -21,7 +22,6 @@ import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
@@ -43,11 +43,9 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private EessiService eessiService;
-
     @Mock
     private BehandlingService behandlingService;
 
-    @InjectMocks
     private EessiTjeneste eessiTjeneste;
 
     @Before
@@ -58,11 +56,13 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         behandling.setFagsak(fagsak);
 
         when(behandlingService.hentBehandling(eq(123L))).thenReturn(behandling);
+
+        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService);
     }
 
     @Test
     public void hentMottakerInstitusjoner() throws IOException, MelosysException {
-        when(eessiService.hentMottakerinstitusjoner(anyString()))
+        when(eessiService.hentEessiMottakerinstitusjoner(anyString()))
             .thenReturn(Arrays.asList(
                 defaultEasyRandom().nextObject(Institusjon.class),
                 defaultEasyRandom().nextObject(Institusjon.class),
@@ -80,9 +80,9 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void opprettBuc() throws IOException, MelosysException {
-        when(eessiService.opprettBucOgSed(any(), anyString(), anyString(), anyString())).thenReturn(MOCK_RINA_URL);
+        when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyString(), anyString())).thenReturn(MOCK_RINA_URL);
 
-        BucBestillingDto nyBucDto = new BucBestillingDto("LA_BUC_01", "NAVT002", "NO");
+        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, "NAVT002", "NO");
         Response response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         assertThat(response.getEntity()).isExactlyInstanceOf(OpprettBucSvarDto.class);
         OpprettBucSvarDto opprettBucSvarDto = (OpprettBucSvarDto) response.getEntity();
@@ -103,7 +103,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         Response response = eessiTjeneste.hentBucer(123L, "utkast");
         assertThat(response.getEntity()).isInstanceOf(BucerTilknyttetBehandlingDto.class);
 
-        BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto)  response.getEntity();
+        BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto) response.getEntity();
         assertThat(dto.getBucer()).hasOnlyElementsOfType(BucInformasjon.class);
 
         valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);

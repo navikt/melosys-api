@@ -63,11 +63,40 @@ public class OpprettOppgaveTest {
 
         agent.utførSteg(p);
 
-        verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
+        verify(gsakFasade).opprettOppgave(oppgave.capture());
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
         assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(EU_EOS);
         assertThat(p.getSteg()).isEqualTo(SEND_FORVALTNINGSMELDING);
+    }
+
+    @Test
+    public void utfoerSteg_skalSendesForvaltningsmeldingFalse_ikkeSendForvaltningsmelding() throws FunksjonellException, TekniskException {
+        Fagsak fagsak = new Fagsak();
+        String saksnummer = "MEL-TESTx";
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setType(Sakstyper.EU_EOS);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans p = new Prosessinstans();
+        p.setBehandling(behandling);
+
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
+        p.setType(ProsessType.JFR_NY_SAK);
+        p.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, false);
+
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        agent.utførSteg(p);
+
+        verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
+
+        assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(EU_EOS);
+        assertThat(p.getSteg()).isEqualTo(FERDIG);
     }
 
     @Test
@@ -152,7 +181,7 @@ public class OpprettOppgaveTest {
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
         assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(EU_EOS);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        assertThat(p.getSteg()).isEqualTo(FERDIG);
     }
 
     @Test

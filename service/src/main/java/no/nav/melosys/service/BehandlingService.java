@@ -71,6 +71,10 @@ public class BehandlingService {
         tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
     }
 
+    public void lagre(Behandling behandling) {
+        behandlingRepository.save(behandling);
+    }
+
     /**
      * Oppdaterer status for en behandling med ID {@code behandlingID}.
      * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.

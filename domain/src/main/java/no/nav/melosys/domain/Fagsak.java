@@ -83,9 +83,6 @@ public class Fagsak extends RegistreringsInfo {
      * Returnerer den aktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
      */
     public Behandling getAktivBehandling() throws TekniskException {
-        if (getBehandlinger() == null) {
-            return null;
-        }
         List<Behandling> behandlingListe = getBehandlinger().stream()
             .filter(Behandling::isAktiv).collect(Collectors.toList());
         if (behandlingListe.size() > 1) {
@@ -108,11 +105,7 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     public Aktoer hentBruker() throws TekniskException {
-        return hentAktørMedRolleType(Aktoersroller.BRUKER);
-    }
-
-    public Aktoer hentArbeidsgiver() throws TekniskException {
-        return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
+        return hentAktørMedRolleTypeBruker();
     }
 
     public List<Aktoer> hentMyndigheter() {
@@ -128,10 +121,10 @@ public class Fagsak extends RegistreringsInfo {
             .orElse(null);
     }
 
-    private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
-        Collection<Aktoer> kandidater = hentAktørerMedRolleType(rolleType);
+    private Aktoer hentAktørMedRolleTypeBruker() throws TekniskException {
+        Collection<Aktoer> kandidater = hentAktørerMedRolleType(Aktoersroller.BRUKER);
         if (kandidater.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
+            throw new TekniskException("Det finnes mer enn en aktør med rollen " + Aktoersroller.BRUKER.getBeskrivelse() + " for sak " + saksnummer);
         }
         return kandidater.stream().findFirst().orElse(null);
     }

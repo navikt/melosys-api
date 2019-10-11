@@ -46,7 +46,7 @@ public class EessiTjeneste extends RestTjeneste {
     )
     public Response hentMottakerinstitusjoner(@PathParam("bucType") String bucType) throws MelosysException {
         log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
-        return Response.ok(eessiService.hentMottakerinstitusjoner(bucType)).build();
+        return Response.ok(eessiService.hentEessiMottakerinstitusjoner(bucType)).build();
     }
 
     @POST

@@ -35,7 +35,7 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
 @Service
 public class ProsessinstansService {
-    private static Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
 
     private final ProsessinstansRepository prosessinstansRepo;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -64,6 +64,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
+        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, journalfoeringDto.isSkalSendesForvaltningsmelding());
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
             final String hovedDokumentID = journalfoeringDto.getDokumentID();
@@ -210,6 +211,14 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    public void opprettProsessinstansForvaltningsmelding(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.FORVALTNINGSMELDING_SEND);
+        prosessinstans.setSteg(ProsessSteg.SEND_FORVALTNINGSMELDING);
+        prosessinstans.setBehandling(behandling);
+        lagre(prosessinstans);
+    }
+
     @Transactional
     public void opprettProsessinstansSedMottak(MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -230,6 +239,15 @@ public class ProsessinstansService {
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansVideresendSoknad(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.VIDERESEND_SOKNAD);
+        prosessinstans.setSteg(ProsessSteg.VS_OPPDATER_RESULTAT);
+        prosessinstans.setBehandling(behandling);
+
         lagre(prosessinstans);
     }
 }

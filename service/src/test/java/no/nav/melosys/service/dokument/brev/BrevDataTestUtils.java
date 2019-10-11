@@ -5,7 +5,10 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
@@ -31,6 +34,25 @@ public class BrevDataTestUtils {
         addr.postnummer = "4321";
         addr.landkode = Landkoder.BG.getKode();
         return addr;
+    }
+
+    public static Bostedsadresse lagBostedsadresse() {
+        Bostedsadresse badr = new Bostedsadresse();
+        badr.setLand(new Land(Land.BELGIA));
+        badr.setPoststed("Sted");
+        badr.setPostnr("1234");
+        Gateadresse gadr = lagGateAdresse();
+        badr.setGateadresse(gadr);
+        return badr;
+    }
+
+    private static Gateadresse lagGateAdresse() {
+        Gateadresse gadr = new Gateadresse();
+        gadr.setGatenavn("Gate");
+        gadr.setGatenummer(1);
+        gadr.setHusbokstav("A");
+        gadr.setHusnummer(123);
+        return gadr;
     }
 
     public static AvklartVirksomhet lagNorskVirksomhet() {

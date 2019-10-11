@@ -113,7 +113,7 @@ public class AvklartefaktaServiceTest {
     @Test
     public void hentYrkesgruppe_forventerFlyende() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setFakta("FLYENDE_PERSONELL");
+        avklartefakta.setFakta("YRKESAKTIV_FLYVENDE");
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
 

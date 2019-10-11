@@ -9,6 +9,7 @@ public enum ProsessType implements Kodeverk {
     ANMODNING_OM_UNNTAK_MOTTAK("ANMODNING_OM_UNNTAK_MOTTAK", "Mottar anmodning om unntak"),
     ANMODNING_OM_UNNTAK_MOTTAK_SVAR("ANMODNING_OM_UNNTAK_MOTTAK_SVAR", "Svar på mottatt anmodning om unntak"),
     ANMODNING_OM_UNNTAK_SVAR("ANMODNING_OM_UNNTAK_SVAR", "Mottar svar på anmodning om unntak"),
+    FORVALTNINGSMELDING_SEND("FORVALTNINGSMELDING_SEND", "Sender forvaltningsmelding"),
     HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
     IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),
     IVERKSETT_VEDTAK_FORKORT_PERIODE("IVERKSETT_VEDTAK_FORKORT_PERIODE", "Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet"),
@@ -19,7 +20,8 @@ public enum ProsessType implements Kodeverk {
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
     OPPFRISKNING("OPPFRISKNING", "Oppfriskning av saksopplysninger"),
-    REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak");
+    REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak"),
+    VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
 
     private String kode;
     private String beskrivelse;

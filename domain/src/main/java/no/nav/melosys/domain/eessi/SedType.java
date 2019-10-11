@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.sed;
+package no.nav.melosys.domain.eessi;
 
 public enum SedType {
     X001,

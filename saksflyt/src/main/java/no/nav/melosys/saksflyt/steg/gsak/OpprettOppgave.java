@@ -108,7 +108,12 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         String oppgaveId = gsakFasade.opprettOppgave(oppgaveBuilder.build());
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
-            prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
+            boolean skalSendesForvaltningsmelding = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).orElse(true);
+            if (skalSendesForvaltningsmelding) {
+                prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
+            } else {
+                prosessinstans.setSteg(ProsessSteg.FERDIG);
+            }
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
         } else {

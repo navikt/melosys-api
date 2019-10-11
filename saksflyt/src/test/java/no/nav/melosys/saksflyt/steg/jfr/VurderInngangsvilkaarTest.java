@@ -27,7 +27,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -98,7 +97,9 @@ public class VurderInngangsvilkaarTest {
         // Sett opp input...
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
-        p.getBehandling().setFagsak(new Fagsak());
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.UKJENT);
+        p.getBehandling().setFagsak(fagsak);
         PersonDokument pDok = new PersonDokument();
         pDok.statsborgerskap = new Land("NOR");
         Saksopplysning sopp = new Saksopplysning();

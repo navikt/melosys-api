@@ -16,6 +16,10 @@ public final class Serverinfo {
 
     private static ServerinfoDto serverinfoDto;
 
+    private Serverinfo() {
+        throw new UnsupportedOperationException();
+    }
+
     static ServerinfoDto tilDto() {
         if (serverinfoDto == null) {
             serverinfoDto = hentServerinfo();

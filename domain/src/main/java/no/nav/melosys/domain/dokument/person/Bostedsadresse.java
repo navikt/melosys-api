@@ -2,6 +2,7 @@ package no.nav.melosys.domain.dokument.person;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.felles.Land;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -67,6 +68,14 @@ public class Bostedsadresse {
 
     public void setLand(Land land) {
         this.land = land;
+    }
+
+    @JsonIgnore
+    public boolean erTom() {
+        return gateadresse.erTom() &&
+            StringUtils.isEmpty(postnr) &&
+            StringUtils.isEmpty(poststed) &&
+            StringUtils.isEmpty(land.getKode());
     }
 
     @Override

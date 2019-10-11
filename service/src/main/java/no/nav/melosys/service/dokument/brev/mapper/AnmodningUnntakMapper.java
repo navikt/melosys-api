@@ -68,10 +68,13 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
         Collection<VilkaarBegrunnelse> art16Begrunnelser = brevData.art16Vilkaar.map(Vilkaarsresultat::getBegrunnelser)
             .orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1"));
-        VilkaarBegrunnelse vilkaarBegrunnelse = art16Begrunnelser.iterator().next();
-        fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(vilkaarBegrunnelse.getKode()));
 
-        brevData.art16Vilkaar.map(Vilkaarsresultat::getBegrunnelseFritekst).ifPresent(fag::setAnmodningFritekst);
+        art16Begrunnelser.stream()
+            .map(VilkaarBegrunnelse::getKode)
+            .map(Art161AnmodningBegrunnelseKode::valueOf)
+            .filter(begrunnelse -> begrunnelse != Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN)
+            .findFirst()
+        .ifPresent(fag::setArt161AnmodningBegrunnelse);
 
         return fag;
     }

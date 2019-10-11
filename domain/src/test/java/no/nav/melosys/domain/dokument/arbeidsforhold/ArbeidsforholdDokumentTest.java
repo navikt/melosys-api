@@ -12,22 +12,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ArbeidsforholdDokumentTest {
     private ArbeidsforholdDokument arbeidsforholdDokument;
-    private List<Periode> perioderIDokument = new ArrayList<>();
+    private Periode eksisterendePeriode;
 
     private final String orgNr1 = "12345678910";
     private final String orgNr2 = "10987654321";
 
     public ArbeidsforholdDokumentTest() {
         arbeidsforholdDokument = new ArbeidsforholdDokument();
-
-        leggTilArbeidsforhold(orgNr1, new Periode(LocalDate.now(), LocalDate.now()));
+        eksisterendePeriode = new Periode(LocalDate.now(), LocalDate.now());
+        leggTilArbeidsforhold(orgNr1, null, eksisterendePeriode);
     }
 
-    public Arbeidsforhold leggTilArbeidsforhold(String orgNummer, Periode periode) {
-        perioderIDokument.add(periode);
-
+    public Arbeidsforhold leggTilArbeidsforhold(String arbeidsgiverID, String opplysningspliktigID, Periode periode) {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = orgNummer;
+        arbeidsforhold.arbeidsgiverID = arbeidsgiverID;
+        arbeidsforhold.opplysningspliktigID = opplysningspliktigID;
         arbeidsforhold.ansettelsesPeriode = periode;
         arbeidsforholdDokument.arbeidsforhold.add(arbeidsforhold);
         return arbeidsforhold;
@@ -42,11 +41,22 @@ public class ArbeidsforholdDokumentTest {
 
     @Test
     public void hentAnsettelsesperioderKunUtvalgteOrgnumre() {
-        Periode forventetPeriode = perioderIDokument.get(0);
-        leggTilArbeidsforhold(orgNr2, new Periode(LocalDate.now(), LocalDate.now()));
+        leggTilArbeidsforhold(orgNr2, null, new Periode(LocalDate.now(), LocalDate.now()));
 
         List<String> orgnumre = new ArrayList<>();
         orgnumre.add(orgNr1);
+
+        Set<Periode> perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre);
+        assertThat(perioder).containsOnly(eksisterendePeriode);
+    }
+
+    @Test
+    public void hentAnsettelsesperioderOpplysningspliktigOrgnumre() {
+        Periode forventetPeriode = new Periode(LocalDate.now().minusYears(1), LocalDate.now());
+        leggTilArbeidsforhold(null, orgNr2, forventetPeriode);
+
+        List<String> orgnumre = new ArrayList<>();
+        orgnumre.add(orgNr2);
 
         Set<Periode> perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre);
         assertThat(perioder).containsOnly(forventetPeriode);
@@ -54,36 +64,36 @@ public class ArbeidsforholdDokumentTest {
 
     @Test
     public void hentAnsettelsesperioder() {
-        leggTilArbeidsforhold(orgNr2, new Periode(LocalDate.now(), LocalDate.now()));
+        Periode nyPeriode = new Periode(LocalDate.now(), LocalDate.now());
+        leggTilArbeidsforhold(orgNr2, null, nyPeriode);
 
         List<String> orgnumre = new ArrayList<>();
         orgnumre.add(orgNr1);
         orgnumre.add(orgNr2);
 
         Set<Periode> perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre);
-        assertThat(perioder).containsAll(perioderIDokument);
+        assertThat(perioder).contains(eksisterendePeriode, nyPeriode);
     }
 
     @Test
     public void hentAnsettelsesperioderFiltrererUdefinertePerioder() {
-        Periode forventetPeriode = perioderIDokument.get(0);
-        leggTilArbeidsforhold(orgNr2, null);
+        leggTilArbeidsforhold(orgNr2, null, null);
 
         List<String> orgnumre = new ArrayList<>();
         orgnumre.add(orgNr1);
         orgnumre.add(orgNr2);
 
         Set<Periode> perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre);
-        assertThat(perioder).containsOnly(forventetPeriode);
+        assertThat(perioder).hasSize(1);
+        assertThat(perioder).containsOnly(eksisterendePeriode);
     }
 
     @Test
     public void hentAlleOrgnumre() {
-        Arbeidsforhold arbeidsforhold =
-                leggTilArbeidsforhold(orgNr2, new Periode(LocalDate.now(), LocalDate.now()));
+        String orgNr3 = "123123123";
+        leggTilArbeidsforhold(orgNr2, orgNr3, new Periode(LocalDate.now(), LocalDate.now()));
 
-        arbeidsforhold.opplysningspliktigID = "123123123";
         Set<String> orgnumre = arbeidsforholdDokument.hentOrgnumre();
-        assertThat(orgnumre).containsExactlyInAnyOrder(orgNr1, orgNr2, arbeidsforhold.opplysningspliktigID);
+        assertThat(orgnumre).containsExactlyInAnyOrder(orgNr1, orgNr2, orgNr3);
     }
 }

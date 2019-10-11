@@ -1,9 +1,9 @@
-package no.nav.melosys.service.dokument.brev.datagrunnlag;
+package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -27,7 +27,7 @@ public class BostedGrunnlag {
     }
 
     public StrukturertAdresse hentBostedsadresse() throws TekniskException {
-        StrukturertAdresse bostedsadresse = SoeknadUtils.hentBostedsadresse(søknad);
+        StrukturertAdresse bostedsadresse = søknad != null ? SoeknadUtils.hentBostedsadresse(søknad) : null;
         if (bostedsadresse == null) {
             bostedsadresse = hentBostedsadresseFraRegister();
         }

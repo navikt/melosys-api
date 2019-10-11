@@ -17,6 +17,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,43 +29,45 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadslandkoder;
 
 @Service
 public class LandvelgerService {
-
     private AvklartefaktaService avklartefaktaService;
+    private BehandlingService behandlingService;
     private VilkaarsresultatRepository vilkaarsresultatRepository;
     private BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
     public LandvelgerService(AvklartefaktaService avklartefaktaService,
-                             VilkaarsresultatRepository vilkaarsresultatRepository,
-                            BehandlingsresultatService behandlingsresultatService) {
+                                BehandlingService behandlingService,
+                                VilkaarsresultatRepository vilkaarsresultatRepository,
+                                BehandlingsresultatService behandlingsresultatService) {
+        this.behandlingService = behandlingService;
         this.avklartefaktaService = avklartefaktaService;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public Landkoder hentArbeidsland(Behandling behandling) throws TekniskException, FunksjonellException {
-        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandling);
+    public Landkoder hentArbeidsland(long behandlingID) throws FunksjonellException, TekniskException {
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
         if (alleArbeidsland.size() != 1) {
             throw new FunksjonellException("Fant ingen eller flere enn ett arbeidsland");
         }
         return alleArbeidsland.iterator().next();
     }
 
-    public Collection<Landkoder> hentAlleArbeidsland(Behandling behandling) throws TekniskException {
-        Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
-        if (alleArbeidsland.isEmpty() || erArtikkel13(behandling)) {
-            SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+    public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException, TekniskException {
+        Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
+        if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
+            SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandlingService.hentBehandling(behandlingID));
             alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
         }
 
-        Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandling.getId());
+        Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         alleArbeidsland.removeAll(landMedMarginaltArbeid);
         return alleArbeidsland;
     }
 
-    private boolean erArtikkel13(Behandling behandling) {
+    private boolean erArtikkel13(long behandlingId) {
         try {
-            Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode();
+            Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingId).hentValidertLovvalgsperiode();
             return lovvalgsperiode.erArtikkel13();
         } catch (IkkeFunnetException e) {
             // Ignorer
@@ -72,33 +75,34 @@ public class LandvelgerService {
         return false;
     }
 
-    public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(Behandling behandling) throws TekniskException {
-        Collection<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandling);
+    public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException, TekniskException {
+        Collection<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandlingID);
 
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         if (oppfylteVilkår.contains(FO_883_2004_ART11_3A)) {
-            return Collections.singletonList(hentBostedsland(behandling, søknad));
+            return Collections.singletonList(hentBostedsland(behandlingID, søknad));
         }
 
-        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandling);
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
         alleArbeidsland.remove(Landkoder.NO);
         return new ArrayList<>(alleArbeidsland);
     }
 
-    private Collection<Vilkaar> hentOppfylteVilkår(Behandling behandling) {
-        return vilkaarsresultatRepository.findByBehandlingsresultatId(behandling.getId()).stream()
+    private Collection<Vilkaar> hentOppfylteVilkår(long behandlingID) {
+        return vilkaarsresultatRepository.findByBehandlingsresultatId(behandlingID).stream()
             .filter(Vilkaarsresultat::isOppfylt)
             .map(Vilkaarsresultat::getVilkaar)
             .collect(Collectors.toSet());
     }
 
-    public Landkoder hentBostedsland(Behandling behandling, SoeknadDokument søknad) {
-        Optional<Landkoder> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandling, søknad);
+    public Landkoder hentBostedsland(long behandlingID, SoeknadDokument søknad) {
+        Optional<Landkoder> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandlingID, søknad);
         return bostedslandOppgittAvSaksbehandler.orElse(Landkoder.NO);
     }
 
-    private Optional<Landkoder> hentBostedslandOppgittAvSaksbehandler(Behandling behandling, SoeknadDokument søknad) {
-        Optional<Landkoder> bostedsland = avklartefaktaService.hentBostedland(behandling.getId());
+    private Optional<Landkoder> hentBostedslandOppgittAvSaksbehandler(long behandlingID, SoeknadDokument søknad) {
+        Optional<Landkoder> bostedsland = avklartefaktaService.hentBostedland(behandlingID);
         if (bostedsland.isPresent()) {
             return bostedsland;
         } else {
