@@ -38,4 +38,11 @@ public interface Medlemskapsperiode extends ErPeriode {
             || getBestemmelse()== FO_883_2004_ART11_4_1
             || getBestemmelse()== FO_883_2004_ART11_5;
     }
+
+    default boolean harGyldigBestemmelse() {
+        return getBestemmelse()== FO_883_2004_ART11_3A || getBestemmelse()== FO_883_2004_ART11_3B || getBestemmelse()== FO_883_2004_ART11_4_2
+            || getBestemmelse()== FO_883_2004_ART12_1 || getBestemmelse()== FO_883_2004_ART12_2 || getBestemmelse()== FO_883_2004_ART16_1
+            || getBestemmelse()== FO_883_2004_ART13_1A
+            || getBestemmelse()== FO_883_2004_ART13_1B1 || getBestemmelse()== FO_883_2004_ART13_1B2 || getBestemmelse()== FO_883_2004_ART13_1B3 || getBestemmelse()== FO_883_2004_ART13_1B4;
+    }
 }
