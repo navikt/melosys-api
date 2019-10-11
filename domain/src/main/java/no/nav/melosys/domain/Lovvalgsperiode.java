@@ -8,10 +8,6 @@ import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*;
-
 @Entity
 @Table(name = "lovvalg_periode")
 public class Lovvalgsperiode implements Medlemskapsperiode {
@@ -179,33 +175,6 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
             ", dekning=" + dekning +
             ", medlPeriodeID=" + medlPeriodeID +
             '}';
-    }
-
-    public boolean harGyldigBestemmelse() {
-        return bestemmelse == FO_883_2004_ART11_3A || bestemmelse == FO_883_2004_ART11_3B || bestemmelse == FO_883_2004_ART11_4_2
-            || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1
-            || bestemmelse == FO_883_2004_ART13_1A
-            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1B2 || bestemmelse == FO_883_2004_ART13_1B3 || bestemmelse == FO_883_2004_ART13_1B4;
-    }
-
-    public boolean erArtikkel13() {
-        return bestemmelse == FO_883_2004_ART13_1A
-            || bestemmelse == FO_883_2004_ART13_1B1 || bestemmelse == FO_883_2004_ART13_1B2 || bestemmelse == FO_883_2004_ART13_1B3 || bestemmelse == FO_883_2004_ART13_1B4
-            || bestemmelse == FO_883_2004_ART13_2A || bestemmelse == FO_883_2004_ART13_2B
-            || bestemmelse == FO_883_2004_ART13_3
-            || bestemmelse == FO_883_2004_ART13_4;
-    }
-
-    public boolean erArtikkel11() {
-        return bestemmelse == FO_883_2004_ART11_1
-                || bestemmelse == FO_883_2004_ART11_3A
-                || bestemmelse == FO_883_2004_ART11_3B
-                || bestemmelse == FO_883_2004_ART11_3C
-                || bestemmelse == FO_883_2004_ART11_3E
-                || bestemmelse == FO_883_2004_ART11_4_2
-                || bestemmelse == FO_883_2004_ART11_2
-                || bestemmelse == FO_883_2004_ART11_4_1
-                || bestemmelse == FO_883_2004_ART11_5;
     }
 
     public boolean erInnvilget() {

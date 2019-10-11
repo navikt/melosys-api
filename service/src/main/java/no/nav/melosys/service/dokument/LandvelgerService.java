@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -67,8 +67,8 @@ public class LandvelgerService {
             return Collections.singletonList(hentBostedsland(behandlingID, søknad));
         }
 
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertLovvalgsperiode();
-        if (lovvalgsperiode.erArtikkel13()) {
+        Medlemskapsperiode medlemskapsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertMedlemskapsperiode();
+        if (medlemskapsperiode.erArtikkel13()) {
             Landkoder bostedsland = hentBostedsland(behandlingID, søknad);
             if (bostedsland != Landkoder.NO) {
                 return Collections.singletonList(bostedsland);
