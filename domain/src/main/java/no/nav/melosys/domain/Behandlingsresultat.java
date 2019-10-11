@@ -10,7 +10,6 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -239,13 +238,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return lovvalgsperioder.stream().anyMatch(l -> l.getMedlPeriodeID() != null);
     }
 
-    public LovvalgBestemmelse hentBestemmelse() {
-        if (erAnmodningOmUnntak()) {
-            Anmodningsperiode anmodningsperiode = hentValidertAnmodningsperiode();
-            return anmodningsperiode.getBestemmelse();
+    public Medlemskapsperiode hentValidertMedlemskapsperiode() {
+        if (!lovvalgsperioder.isEmpty()) {
+            return hentValidertLovvalgsperiode();
         } else {
-            Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
-            return lovvalgsperiode.getBestemmelse();
+            return hentValidertAnmodningsperiode();
         }
     }
 
