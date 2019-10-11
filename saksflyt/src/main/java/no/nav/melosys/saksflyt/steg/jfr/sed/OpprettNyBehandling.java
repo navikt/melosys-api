@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.sed.jfr;
+package no.nav.melosys.saksflyt.steg.jfr.sed;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -62,7 +62,7 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
         Fagsak fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)
             .orElseThrow(() -> new TekniskException("Finnes en kobling til gsakSaksnummer " +
                 gsakSaksnummer + ", men finner ingen fagsak!"));
-        
+
         avsluttTidligereBehandling(fagsak);
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, behandlingsType,
             prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));

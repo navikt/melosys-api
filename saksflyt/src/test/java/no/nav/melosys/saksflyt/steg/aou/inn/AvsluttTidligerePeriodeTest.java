@@ -41,7 +41,7 @@ public class AvsluttTidligerePeriodeTest {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
 
         avsluttTidligerePeriode.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_SEDDOKUMENT);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_HENT_PERSON);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class AvsluttTidligerePeriodeTest {
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligerePeriode.utfør(prosessinstans);
         verify(oppdaterMedlFelles).avsluttTidligerMedlPeriode(any(Fagsak.class));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_SEDDOKUMENT);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_HENT_PERSON);
     }
 
     private Fagsak hentFagsak() {
