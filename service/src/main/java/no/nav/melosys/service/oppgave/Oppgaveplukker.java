@@ -107,7 +107,7 @@ public class Oppgaveplukker {
     private Collection<Oppgave> hentOppgaverGammeltBehandlingstema() throws FunksjonellException, TekniskException {
         //Byttet behandlingstema-kode for EU/EØS 4.10.2019. Må fortsatt kunne plukke med gammelt tema
         return gsakFasade.finnUtildelteOppgaverEtterFrist(Sets.newHashSet(Oppgavetyper.BEH_SAK_MK),
-            Sets.newHashSet(Behandlingstyper.SOEKNAD), Sets.newHashSet(Behandlingstema.EU_EOS_GAMMEL_KODE));
+            Collections.emptySet(), Sets.newHashSet(Behandlingstema.EU_EOS_GAMMEL_KODE));
     }
 
     Set<Behandlingstema> hentBehandlingstema(Set<Sakstyper> fagsakstypeListe) {
