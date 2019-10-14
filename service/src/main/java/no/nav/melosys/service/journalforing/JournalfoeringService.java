@@ -170,11 +170,15 @@ public class JournalfoeringService {
         if (journalfoeringDto.getFagsak() == null) {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }
-        if (journalfoeringDto.getFagsak().getSoknadsperiode() == null) {
+        final PeriodeDto søknadsperiode = journalfoeringDto.getFagsak().getSoknadsperiode();
+        if (søknadsperiode == null) {
             throw new FunksjonellException("Søknadsperiode mangler");
         }
-        if (journalfoeringDto.getFagsak().getSoknadsperiode().getFom() == null) {
+        if (søknadsperiode.getFom() == null) {
             throw new FunksjonellException("Søknadsperiodes fra og med dato mangler");
+        }
+        if (søknadsperiode.getTom() != null && søknadsperiode.getFom().isAfter(søknadsperiode.getTom())) {
+            throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
         }
         if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().isEmpty()) {
             throw new FunksjonellException("Land mangler");

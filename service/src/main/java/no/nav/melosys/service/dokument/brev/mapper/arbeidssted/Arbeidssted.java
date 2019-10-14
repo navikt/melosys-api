@@ -8,7 +8,7 @@ public interface Arbeidssted {
         return false;
     }
 
-    String getNavn();
+    String getForetakNavn();
 
     String getLandkode();
 

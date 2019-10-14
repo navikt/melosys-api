@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -52,12 +53,24 @@ public class LandvelgerService {
 
     public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
-        SoeknadDokument søknad = søknadService.hentSøknad(behandlingID);
-        alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
+        if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
+            SoeknadDokument søknad = søknadService.hentSøknad(behandlingID);
+            alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
+        }
 
         Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         alleArbeidsland.removeAll(landMedMarginaltArbeid);
         return alleArbeidsland;
+    }
+
+    private boolean erArtikkel13(long behandlingId) {
+        try {
+            Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingId).hentValidertLovvalgsperiode();
+            return lovvalgsperiode.erArtikkel13();
+        } catch (IkkeFunnetException e) {
+            // Ignorer
+        }
+        return false;
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {

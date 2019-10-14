@@ -63,6 +63,11 @@ public class LandvelgerServiceTest {
         maritimtArbeid.territorialfarvann = territorialfarvannLand.getKode();
         søknad.maritimtArbeid.add(maritimtArbeid);
 
+        lovvalgsperiode = new Lovvalgsperiode();
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
         when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(vilkaar);
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -126,6 +131,7 @@ public class LandvelgerServiceTest {
         lagBehandlingsresultat(lovvalgsperiode);
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
         søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
         Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID);
         assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK, Landkoder.SE);
@@ -140,6 +146,16 @@ public class LandvelgerServiceTest {
 
         Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID);
         assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.DK);
+    }
+
+    @Test
+    public void hentAlleArbeidsland_medArtikkel11_4_2AvklartArbeidslandOgSøknadsland_girKunArbeidsland() throws FunksjonellException {
+        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
+        søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
+
+        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID);
+        assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK);
     }
 
     @Test
