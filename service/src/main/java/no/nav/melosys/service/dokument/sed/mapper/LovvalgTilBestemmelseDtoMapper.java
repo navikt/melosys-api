@@ -36,12 +36,12 @@ public final class LovvalgTilBestemmelseDtoMapper {
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, Bestemmelse.ART_13_3);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, Bestemmelse.ART_13_4);
         mapper.put(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11, Bestemmelse.ART_14_11);
-//        mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART15, Bestemmelse.ART_15); fixme: finnes ikke i melosys. 15 legges inn i kodeverk?
+        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART15, Bestemmelse.ART_15);830
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, Bestemmelse.ART_16_1);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Bestemmelse.ART_16_2);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET, Bestemmelse.ANNET);
         mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A, Bestemmelse.ART_87_a);
-//        mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_7, Bestemmelse.ART_87_8); fixme: finnes ikke i melosys venter på avklaring
+        mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8, Bestemmelse.ART_87_8);
     }
 
     public static Bestemmelse mapMelosysLovvalgTilBestemmelseDto(LovvalgBestemmelse lovvalgBestemmelse) {
