@@ -120,11 +120,6 @@ public class GsakService implements GsakFasade {
     public List<Oppgave> finnUtildelteOppgaverEtterFrist(Set<Oppgavetyper> oppgavetyper, Set<Behandlingstyper> behandlingstyper, Set<Behandlingstema> behandlingstemaer)
         throws FunksjonellException, TekniskException {
 
-        if (oppgavetyper.contains(Oppgavetyper.BEH_SAK_MK) && behandlingstemaer.contains(Behandlingstema.EU_EOS)) {
-            //Byttet kode for EU/EØS 4.10.2019. Må fortsatt kunne plukke med gammelt tema
-            behandlingstemaer.add(Behandlingstema.EU_EOS_GAMMEL_KODE);
-        }
-
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(oppgavetyper.stream().map(Oppgavetyper::getKode).toArray(String[]::new))
             .medBehandlingsTyper(behandlingstyper.stream().map(GsakService::hentFellesKode).toArray(String[]::new))

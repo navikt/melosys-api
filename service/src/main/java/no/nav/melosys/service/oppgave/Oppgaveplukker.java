@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -88,6 +89,10 @@ public class Oppgaveplukker {
         }
 
         List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstyper, behandlingstemaer);
+        if (oppgavetyper.contains(Oppgavetyper.BEH_SAK_MK) && behandlingstyper.contains(Behandlingstyper.SOEKNAD)) {
+            ufordelteOppgaver.addAll(hentOppgaverGammeltBehandlingstema());
+        }
+
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
@@ -97,6 +102,12 @@ public class Oppgaveplukker {
             gsakFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
         }
         return valg;
+    }
+
+    private Collection<Oppgave> hentOppgaverGammeltBehandlingstema() throws FunksjonellException, TekniskException {
+        //Byttet behandlingstema-kode for EU/EØS 4.10.2019. Må fortsatt kunne plukke med gammelt tema
+        return gsakFasade.finnUtildelteOppgaverEtterFrist(Sets.newHashSet(Oppgavetyper.BEH_SAK_MK),
+            Collections.emptySet(), Sets.newHashSet(Behandlingstema.EU_EOS_GAMMEL_KODE));
     }
 
     Set<Behandlingstema> hentBehandlingstema(Set<Sakstyper> fagsakstypeListe) {
