@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.8.RELEASE</version>
+        <version>2.1.9.RELEASE</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -38,11 +38,10 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>1.2.0-23</melosys.frontend.version>
-        <melosys.jsonschema.version>1.30.0-PR-80</melosys.jsonschema.version>
-
+        <melosys.frontend.version>1.2.2-SNAPSHOT</melosys.frontend.version>
+        <melosys.jsonschema.version>1.32.1-33</melosys.jsonschema.version>
         <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
-        <melosys.internt.kodeverk.version>5.13.1-592</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.14.1</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -50,7 +49,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.1.13</dokprod.melosysbrev.version>
+        <dokprod.melosysbrev.version>1.1.19</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
@@ -81,13 +80,15 @@
         <micrometer-jvm-extras.version>0.1.4</micrometer-jvm-extras.version>
         <mockito.version>2.20.0</mockito.version>
         <mockrunner.version>2.0.1</mockrunner.version>
-        <ojdbc.version>12.2.0.1</ojdbc.version>
+        <ojdbc.version>18.3.0.0</ojdbc.version>
+        <oracle.version>18</oracle.version>
         <org.json.version>20180813</org.json.version>
+        <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <pac4j.version>3.7.0</pac4j.version>
         <easy-random.version>4.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <spring-boot.version>2.1.8.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.9.RELEASE</spring-boot.version>
         <spring-security-pac4j.version>4.1.0</spring-security-pac4j.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
@@ -196,6 +197,16 @@
             </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
+                <artifactId>xdb6</artifactId>
+                <version>${oracle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>xmlparserv2</artifactId>
+                <version>${oxmlparserv2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle.jdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>${ojdbc.version}</version>
             </dependency>

@@ -38,7 +38,7 @@ public class OpprettSedDokumentFelles {
         this.saksopplysningRepository = saksopplysningRepository;
     }
 
-    public void opprettSedSaksopplysning(MelosysEessiMelding melosysEessiMelding, Behandling behandling) {
+    public Saksopplysning opprettSedSaksopplysning(MelosysEessiMelding melosysEessiMelding, Behandling behandling) {
         Instant nå = Instant.now();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(opprettSedDokument(melosysEessiMelding));
@@ -54,6 +54,7 @@ public class OpprettSedDokumentFelles {
 
         saksopplysningRepository.save(saksopplysning);
         log.info("Saksopplysning: SedDokument opprettet for behandling {}", behandling.getId());
+        return saksopplysning;
     }
 
     private static SedDokument opprettSedDokument(MelosysEessiMelding melosysEessiMelding) {
@@ -75,6 +76,7 @@ public class OpprettSedDokumentFelles {
         sedDokument.setErEndring(melosysEessiMelding.getErEndring());
         sedDokument.setSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
         sedDokument.setBucType(BucType.valueOf(melosysEessiMelding.getBucType()));
+        sedDokument.setErElektronisk(true);
 
         return sedDokument;
     }

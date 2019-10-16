@@ -31,6 +31,8 @@ public class SedDataDto {
     private String mottakerLand;
     private String mottakerId;
 
+    private SvarAnmodningUnntakDto svarAnmodningUnntak;
+
     public List<Ident> getUtenlandskIdent() {
         return utenlandskIdent;
     }
@@ -141,5 +143,13 @@ public class SedDataDto {
 
     public void setMottakerId(String mottakerId) {
         this.mottakerId = mottakerId;
+    }
+
+    public SvarAnmodningUnntakDto getSvarAnmodningUnntak() {
+        return svarAnmodningUnntak;
+    }
+
+    public void setSvarAnmodningUnntak(SvarAnmodningUnntakDto svarAnmodningUnntak) {
+        this.svarAnmodningUnntak = svarAnmodningUnntak;
     }
 }

@@ -2,16 +2,15 @@ package no.nav.melosys.service.oppgave;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -20,6 +19,7 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
@@ -36,24 +35,27 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 public class OppgaveService {
     private static final Logger log = LoggerFactory.getLogger(OppgaveService.class);
 
-    private final GsakFasade gsakFasade;
-    private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
-    private final TpsFasade tpsFasade;
+    private final FagsakService fagsakService;
+    private final GsakFasade gsakFasade;
     private final SaksopplysningerService saksopplysningerService;
+    private final SoeknadService søknadService;
+    private final TpsFasade tpsFasade;
     private static final String UKJENT = "UKJENT";
 
     @Autowired
-    public OppgaveService(GsakFasade gsakFasade,
+    public OppgaveService(BehandlingService behandlingService,
                           FagsakService fagsakService,
-                          BehandlingService behandlingService,
-                          TpsFasade tpsFasade,
-                          SaksopplysningerService saksopplysningerService) {
-        this.gsakFasade = gsakFasade;
-        this.fagsakService = fagsakService;
+                          GsakFasade gsakFasade,
+                          SaksopplysningerService saksopplysningerService,
+                          SoeknadService søknadService,
+                          TpsFasade tpsFasade) {
         this.behandlingService = behandlingService;
-        this.tpsFasade = tpsFasade;
+        this.fagsakService = fagsakService;
+        this.gsakFasade = gsakFasade;
         this.saksopplysningerService = saksopplysningerService;
+        this.tpsFasade = tpsFasade;
+        this.søknadService = søknadService;
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
@@ -82,26 +84,14 @@ public class OppgaveService {
         gsakFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
-    public List<BehandlingsoppgaveDto> hentBehandlingsoppgaverMedBruker(String brukerIdent) throws FunksjonellException, TekniskException {
-        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
-        if (aktørId == null) {
-            throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
-        }
-        List<Oppgave> oppgaverFraDomain = gsakFasade.finnBehandlingsoppgaverMedBruker(aktørId);
-        return oppgaverTilDtoer(oppgaverFraDomain).stream()
-                .map(oppgave -> (BehandlingsoppgaveDto) oppgave)
-                .collect(Collectors.toList());
-    }
-
     public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         return gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
     }
 
-    public Long hentAktivBehandlingId(String saksnummer) throws IkkeFunnetException, TekniskException {
+    public Behandling hentAktivBehandling(String saksnummer) throws IkkeFunnetException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         return Optional.ofNullable(fagsak.getAktivBehandling())
-            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"))
-            .getId();
+            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"));
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
@@ -139,18 +129,25 @@ public class OppgaveService {
             if (behandling == null) {
                 throw new TekniskException("Det finnes ingen aktiv behandling for " + fagsak.getSaksnummer() + ".");
             }
-            // Henter saksopplysninger
-            behandling = behandlingService.hentBehandling(behandling.getId());
+            behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
-            hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
-                SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
+            if (behandling.getType() == Behandlingstyper.SOEKNAD) {
+                SoeknadDokument søknadDokument = søknadService.hentSøknad(behandling.getId());
                 behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
-                behOppgaveDto.setSoknadsperiode(mapPeriode(søknadDokument));
-            });
-            hentDokument(behandling, SaksopplysningType.PERSOPL).ifPresent(
-                saksopplysningDokument -> {
-                    PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
+                behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
+            } else {
+                saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
+                    sedDokument -> {
+                        behOppgaveDto.setLand(Collections.singletonList(sedDokument.getLovvalgslandKode() != null
+                            ? sedDokument.getLovvalgslandKode().getKode() : null));
+                        behOppgaveDto.setPeriode(new PeriodeDto(
+                            sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
+                        );
+                    });
+            }
+            saksopplysningerService.finnPersonOpplysninger(behandling.getId()).ifPresent(
+                personDokument -> {
                     behOppgaveDto.setSammensattNavn(personDokument.sammensattNavn);
                     behOppgaveDto.setFnr(personDokument.fnr);
                 }

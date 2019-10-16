@@ -52,6 +52,10 @@ final class UnntaksperiodeKontroller {
     }
 
     static Unntak_periode_begrunnelser utbetaltBarnetrygdytelser(KontrollData kontrollData) {
+        if (kontrollData.utbetalingDokument == null) {
+            return null;
+        }
+
         return YtelseKontroller.utbetaltBarnetrygdytelser(kontrollData.utbetalingDokument) ?
             Unntak_periode_begrunnelser.MOTTAR_YTELSER : null;
     }

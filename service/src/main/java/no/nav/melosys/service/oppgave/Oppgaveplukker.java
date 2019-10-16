@@ -87,7 +87,7 @@ public class Oppgaveplukker {
             }
         }
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, sakstyper, Collections.emptySet(), behandlingstemaer);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstyper, behandlingstemaer);
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
@@ -107,7 +107,7 @@ public class Oppgaveplukker {
 
     Set<Oppgavetyper> hentOppgavetyper(Set<Behandlingstyper> behandlingstypeListe) {
         return behandlingstypeListe.stream()
-            .map(Oppgave::hentOppgavetype)
+            .map(OppgaveFactory::hentOppgavetype)
             .collect(Collectors.toSet());
     }
 
@@ -126,11 +126,13 @@ public class Oppgaveplukker {
                 throw new TekniskException("Fant ingen aktiv behandling på fagsak " + saksnummer);
             }
 
-            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato() == null) {
-                throw new TekniskException("Behandling " + behandling.getId() + " tilhørende " + saksnummer + " avventer dokumentasjon, men har ingen svarfristdato");
-            }
-            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
-                iter.remove();
+            if (behandling.erVenterForDokumentasjon()) {
+                if (behandling.getDokumentasjonSvarfristDato() == null) {
+                    log.error("Behandling " + behandling.getId() + " tilhørende " + saksnummer + " avventer dokumentasjon, men har ingen svarfristdato");
+                    iter.remove();
+                } else if (behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
+                    iter.remove();
+                }
             }
         }
     }
@@ -159,7 +161,7 @@ public class Oppgaveplukker {
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
 
-        Optional<Oppgave> valg = oppgaver.stream().min(Oppgave.høyestTilLavestPrioritet);
+        Optional<Oppgave> valg = oppgaver.stream().max(Oppgave.lavestTilHøyestPrioritet);
         // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();

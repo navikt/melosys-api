@@ -34,7 +34,7 @@ public class RegisterkontrollService {
         PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
         MedlemskapDokument medlemskapDokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
         InntektDokument inntektDokument = SaksopplysningerUtils.hentInntektDokument(behandling);
-        UtbetalingDokument utbetalingDokument = SaksopplysningerUtils.hentUtbetalingDokument(behandling);
+        UtbetalingDokument utbetalingDokument = SaksopplysningerUtils.finnUtbetalingDokument(behandling).orElse(null);
         KontrollData kontrollData = new KontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
 
         return utførKontroller(kontrollData, kontrollFactory.hentKontrollerForSedType(sedDokument.getSedType()));

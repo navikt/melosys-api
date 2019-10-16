@@ -74,9 +74,9 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException {
-        exchange(String.format("/buc/LA_BUC_01/%s/svar", rinaSaksnummer), HttpMethod.POST,
-            new HttpEntity<>(svarAnmodningUnntakDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
+    public void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) throws MelosysException {
+        exchange(String.format("/buc/%s/sed/%s", rinaSaksnummer, sedType), HttpMethod.POST,
+            new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
             });
     }
 
@@ -121,23 +121,14 @@ public class EessiConsumerImpl implements EessiConsumer {
 
     @Override
     public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException {
-
         String uri = UriComponentsBuilder.fromPath(String.format("/sak/%s/bucer/", gsakSaksnummer))
-            .queryParam(STATUSER, lagStatuserString(statuser)).toUriString();
+            .queryParam(STATUSER, statuser.toArray()).toUriString();
 
         List<BucinfoDto> bucinfoDtoList = exchange(uri, HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucinfoDto>>() {
         });
 
         return bucinfoDtoList.stream().map(BucinfoDto::tilDomene).collect(Collectors.toList());
-    }
-
-    private static String lagStatuserString(List<String> statuser) {
-        if (statuser == null) {
-            return "";
-        } else {
-            return String.join(",", statuser);
-        }
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {

@@ -56,7 +56,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9)));
 
         soeknadDokument = random.nextObject(SoeknadDokument.class);
-        when(soeknadService.hentSoeknad(anyLong())).thenReturn(soeknadDokument);
+        when(soeknadService.hentSøknad(anyLong())).thenReturn(soeknadDokument);
 
         OrganisasjonDokument organisasjonDokument = random.nextObject(OrganisasjonDokument.class);
         when(registerOppslagService.hentOrganisasjoner(anySet())).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));

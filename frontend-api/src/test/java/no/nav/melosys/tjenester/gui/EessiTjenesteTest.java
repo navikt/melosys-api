@@ -55,7 +55,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         fagsak.setGsakSaksnummer(123L);
         behandling.setFagsak(fagsak);
 
-        when(behandlingService.hentBehandling(eq(123L))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(123L))).thenReturn(behandling);
 
         eessiTjeneste = new EessiTjeneste(eessiService, behandlingService);
     }

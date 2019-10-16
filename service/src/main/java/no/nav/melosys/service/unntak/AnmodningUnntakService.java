@@ -43,7 +43,7 @@ public class AnmodningUnntakService {
     public void anmodningOmUnntak(long behandlingID) throws FunksjonellException, TekniskException {
         behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling);
@@ -52,7 +52,7 @@ public class AnmodningUnntakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void anmodningOmUnntakSvar(long behandlingID) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstypeUnntak(behandling);
         validerPerioder(behandling);
         prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling);

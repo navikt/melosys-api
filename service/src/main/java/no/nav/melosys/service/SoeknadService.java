@@ -20,13 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SoeknadService {
-
-    private final BehandlingRepository behandlingRepo;
-
     private static final String SØKNAD_VERSJON = "1.2";
 
+    private final BehandlingRepository behandlingRepo;
     private final SaksopplysningRepository saksopplysningRepo;
-
     private final DokumentFactory dokumentFactory;
 
     @Autowired
@@ -36,18 +33,10 @@ public class SoeknadService {
         this.dokumentFactory = dokumentFactory;
     }
 
-    public SoeknadDokument hentSoeknad(long behandlingID) throws IkkeFunnetException {
-        Behandling behandling = behandlingRepo.findWithSaksopplysningerById(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException("Behandling ikke funnet");
-        }
+    public SoeknadDokument hentSøknad(long behandlingID) throws IkkeFunnetException {
+        Saksopplysning saksopplysning = saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.SØKNAD)
+            .orElseThrow(() -> new IkkeFunnetException(String.format("Søknad ikke funnet for behandlingsid %s.", behandlingID)));
 
-        Optional<Saksopplysning> saksopplysningOpt = behandling.getSaksopplysninger().stream()
-                .filter(s -> s.getType().equals(SaksopplysningType.SØKNAD))
-                .findFirst();
-
-        Saksopplysning saksopplysning = saksopplysningOpt.orElseThrow(() ->
-            new IkkeFunnetException(String.format("Søknad ikke funnet for behandlingsid %s.", behandlingID)));
         return (SoeknadDokument) saksopplysning.getDokument();
     }
 

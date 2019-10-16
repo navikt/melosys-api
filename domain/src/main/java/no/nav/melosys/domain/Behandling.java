@@ -110,7 +110,11 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean erAktiv() {
-        return !status.equals(Behandlingsstatus.AVSLUTTET);
+        return !erAvsluttet();
+    }
+
+    public boolean erAvsluttet() {
+        return status == Behandlingsstatus.AVSLUTTET;
     }
 
     public String getInitierendeJournalpostId() {

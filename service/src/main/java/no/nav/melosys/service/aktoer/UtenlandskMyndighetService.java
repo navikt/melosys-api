@@ -57,7 +57,7 @@ public class UtenlandskMyndighetService {
         return institusjonsider;
     }
 
-    public Map<UtenlandskMyndighet, Aktoer> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) throws TekniskException {
+    public Map<UtenlandskMyndighet, Aktoer> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) {
         Collection<Landkoder> utenlandskeMyndigheterLandkoder = new ArrayList<>();
         try {
             utenlandskeMyndigheterLandkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());

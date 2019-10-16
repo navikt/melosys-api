@@ -3,16 +3,16 @@ package no.nav.melosys.saksflyt.steg.aou.inn;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.eessi.melding.AnmodningUnntak;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.eessi.melding.Periode;
-import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,66 +21,81 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettAnmodningsperiodeTest {
 
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
+    @Mock
+    private OpprettSedDokumentFelles opprettSedDokumentFelles;
+    @Mock
+    private BehandlingService behandlingService;
 
     private OpprettAnmodningsperiode opprettAnmodningsperiode;
 
     @Before
     public void setup() {
-        opprettAnmodningsperiode = new OpprettAnmodningsperiode(anmodningsperiodeService);
+        opprettAnmodningsperiode = new OpprettAnmodningsperiode(anmodningsperiodeService, opprettSedDokumentFelles, behandlingService);
     }
 
     @Test
-    public void utfør() throws FunksjonellException, TekniskException {
+    public void utfør_medEksisterendeSedDokument_forventKall() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        saksopplysning.setDokument(lagSedDokument());
+        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
 
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         opprettAnmodningsperiode.utfør(prosessinstans);
 
+        verify(behandlingService).hentBehandling(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), any());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_PERIODE_MEDL);
     }
 
-    private MelosysEessiMelding hentMelosysEessiMelding() {
-        MelosysEessiMelding melding = new MelosysEessiMelding();
-        melding.setAktoerId("123");
-        melding.setArtikkel("12_1");
-        melding.setDokumentId("123321");
-        melding.setGsakSaksnummer(432432L);
-        melding.setJournalpostId("j123");
-        melding.setLovvalgsland("SE");
+    @Test
+    public void utfør_utenEksisterendeSedDokument_forventOpprettSedDokument() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, new MelosysEessiMelding());
 
-        Periode periode = new Periode();
-        periode.setFom(LocalDate.of(2012, 12, 12));
-        periode.setTom(LocalDate.of(2012, 12, 13));
-        melding.setPeriode(periode);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        saksopplysning.setDokument(lagSedDokument());
+        when(opprettSedDokumentFelles.opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class))).thenReturn(saksopplysning);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        Statsborgerskap statsborgerskap = new Statsborgerskap();
-        statsborgerskap.setLandkode("SE");
+        opprettAnmodningsperiode.utfør(prosessinstans);
 
-        melding.setRinaSaksnummer("r123");
-        melding.setSedId("s123");
-        melding.setStatsborgerskap(
-            Collections.singletonList(statsborgerskap));
-        melding.setSedType("A009");
-        melding.setBucType("LA_BUC_04");
+        verify(behandlingService).hentBehandling(anyLong());
+        verify(opprettSedDokumentFelles).opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class));
+        verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), any());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_PERIODE_MEDL);
+    }
 
-        AnmodningUnntak anmodningUnntak = new AnmodningUnntak();
-        anmodningUnntak.setUnntakFraLovvalgsland("NO");
-        anmodningUnntak.setUnntakFraLovvalgsbestemmelse("16_1");
-        melding.setAnmodningUnntak(anmodningUnntak);
+    @Test(expected = FunksjonellException.class)
+    public void utfør_ingenBehandling_forventException() throws FunksjonellException, TekniskException {
+        opprettAnmodningsperiode.utfør(new Prosessinstans());
+    }
 
-        return melding;
+    private SedDokument lagSedDokument() {
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().plusYears(1)));
+        sedDokument.setLovvalgBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        sedDokument.setLovvalgslandKode(Landkoder.DE);
+        sedDokument.setUnntakFraLovvalgBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        sedDokument.setUnntakFraLovvalgslandKode(Landkoder.NO);
+
+        return sedDokument;
     }
 }

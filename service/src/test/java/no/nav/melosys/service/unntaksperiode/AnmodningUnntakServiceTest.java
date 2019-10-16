@@ -59,7 +59,7 @@ public class AnmodningUnntakServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID);
 
@@ -73,13 +73,13 @@ public class AnmodningUnntakServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(new Lovvalgsperiode()));
 
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
 
-        verify(behandlingService).hentBehandling(eq(1L));
+        verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(1L));
         verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(eq(1L));
         verify(lovvalgsperiodeService).hentLovvalgsperioder(eq(1L));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq("MEL-111"));
@@ -88,7 +88,7 @@ public class AnmodningUnntakServiceTest {
     @Test(expected = BadRequestException.class)
     public void anmodningOmUnntakSvar_feilBehandlingstype_forventException() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
         verify(behandlingService).hentBehandling(eq(1L));
@@ -99,7 +99,7 @@ public class AnmodningUnntakServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
         verify(behandlingService).hentBehandling(eq(1L));
@@ -110,7 +110,7 @@ public class AnmodningUnntakServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
         verify(behandlingService).hentBehandling(eq(1L));
@@ -122,7 +122,7 @@ public class AnmodningUnntakServiceTest {
         behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
 
         anmodningUnntakService.anmodningOmUnntakSvar(1L);

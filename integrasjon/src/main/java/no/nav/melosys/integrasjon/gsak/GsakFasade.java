@@ -5,7 +5,6 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -25,7 +24,6 @@ public interface GsakFasade {
      * Oppgave sorterer oppgavene stigende etter frist.
      */
     List<Oppgave> finnUtildelteOppgaverEtterFrist(Set<Oppgavetyper> oppgavetype,
-                                                  Set<Sakstyper> sakstyper,
                                                   Set<Behandlingstyper> behandlingstyper,
                                                   Set<Behandlingstema> behandlingstemaer
     ) throws TekniskException, FunksjonellException;
@@ -52,12 +50,6 @@ public interface GsakFasade {
      * Finner alle oppgaver med gitt saksnummer.
      */
     List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException;
-
-    /**
-     * Finner Behandlingsoppgaver basert på bruker.
-     * Oppgave sorterer oppgavene stigende etter frist.
-     */
-    List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws TekniskException, FunksjonellException;
 
     /**
      * Hent oppgave fra Oppgave på en gitt oppgaveId

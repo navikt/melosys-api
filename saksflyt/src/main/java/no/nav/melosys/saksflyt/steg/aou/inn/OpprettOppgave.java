@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.aou.inn;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
@@ -7,16 +9,19 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.saksflyt.felles.OpprettOppgaveFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
+
 @Component("AnmodningUnntakMottakOpprettOppgave")
 public class OpprettOppgave extends AbstraktStegBehandler {
+
     private static final Logger log = LoggerFactory.getLogger(OpprettOppgave.class);
 
     private final GsakFasade gsakFasade;
@@ -38,7 +43,14 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
-        Oppgave oppgave = OpprettOppgaveFelles.lagOppgaveForManuellSedbehandling(saksnummer, aktørId, journalpostId);
+        boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
+
+        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(prosessinstans.getBehandling().getType())
+            .setTilordnetRessurs(skalTilordnes ? prosessinstans.getData(SAKSBEHANDLER) : null)
+            .setJournalpostId(journalpostId)
+            .setAktørId(aktørId)
+            .setSaksnummer(saksnummer)
+            .build();
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
         log.info("Opprettet oppgave {} til manuell behandling for sak {}", oppgaveId, saksnummer);

@@ -29,14 +29,12 @@ public class JerseyConfig extends ResourceConfig {
         register(AktoerTjeneste.class);
         register(AnmodningsperiodeTjeneste.class);
         register(AnmodningUnntakTjeneste.class);
-        register(ArbeidsforholdHistorikkTjeneste.class);
         register(AvklartefaktaTjeneste.class);
         register(BehandlingTjeneste.class);
         register(BehandlingsresultatTjeneste.class);
         register(DokumentTjeneste.class);
         register(FagsakTjeneste.class);
         register(FrontendLoggingTjeneste.class);
-        register(InngangTjeneste.class);
         register(JournalfoeringTjeneste.class);
         register(KontaktopplysningTjeneste.class);
         register(LovvalgsperiodeTjeneste.class);

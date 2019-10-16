@@ -2,7 +2,6 @@ package no.nav.melosys.service.kodeverk;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,17 +23,13 @@ import org.springframework.util.StringUtils;
  */
 @Service
 public class KodeverkService {
-
-    private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
-
-    private static final long KLOKKESLETT_FOR_CACHE_REFRESH = 6;
-
     private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
 
+    private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
+    private static final long KLOKKESLETT_FOR_CACHE_REFRESH = 6;
     private static final String UKJENT = "UKJENT";
 
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
-
     private KodeverkRegister kodeverkRegister;
 
     @Autowired
@@ -46,24 +41,6 @@ public class KodeverkService {
     @EventListener
     public void onApplicationEvent(ApplicationReadyEvent event) {
         new TømCacheScheduler().start();
-    }
-
-    /**
-     * Henter alle gyldige verdier for et kodeverk på et gitt tidspunkt.
-     */
-    public List<KodeDto> gyldigeVerdier(FellesKodeverk kodeverk, LocalDate dato) {
-        Map<String, List<Kode>> koder = hentKodeverk(kodeverk.getNavn()).getKoder();
-        List<KodeDto> res = new ArrayList<>(koder.size());
-        for (List<Kode> kodeperioder : koder.values()) {
-            // Kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
-            for (Kode kandidat : kodeperioder) {
-                if (!kandidat.getGyldigFom().isAfter(dato) && !kandidat.getGyldigTom().isBefore(dato)) {
-                    res.add(new KodeDto(kandidat.getKode(), kandidat.getNavn()));
-                    break; // Inner
-                }
-            }
-        }
-        return res;
     }
 
     /**
@@ -81,13 +58,13 @@ public class KodeverkService {
      */
     public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
         if (StringUtils.isEmpty(kode)) {
-            log.error("Metode dekod kalt med kode {}", kode);
+            log.error("Metode dekod kalt for kodeverk {} med kode {}", kodeverk, kode);
             return UKJENT;
         }
 
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
-            log.warn("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
+            log.warn("Fant ikke term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
             return UKJENT;
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
@@ -96,7 +73,7 @@ public class KodeverkService {
                 return kandidat.getNavn();
             }
         }
-        log.warn("Finner ingen term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
+        log.warn("Fant ingen gyldig term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
         return UKJENT;
     }
 

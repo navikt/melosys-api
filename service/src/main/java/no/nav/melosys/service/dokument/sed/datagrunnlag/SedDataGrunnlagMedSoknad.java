@@ -8,7 +8,10 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataGrunnlagMedSoknad extends BrevDataGrunnlag implements SedDataGrunnlag {
-    public SedDataGrunnlagMedSoknad(Behandling behandling, KodeverkService kodeverkService, AvklarteVirksomheterService avklarteVirksomheterService, AvklartefaktaService avklartefaktaService) throws TekniskException {
+    public SedDataGrunnlagMedSoknad(Behandling behandling,
+                                    KodeverkService kodeverkService,
+                                    AvklarteVirksomheterService avklarteVirksomheterService,
+                                    AvklartefaktaService avklartefaktaService) throws TekniskException {
         super(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 }

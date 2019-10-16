@@ -53,9 +53,9 @@ public final class LovvalgBestemmelseUtils {
                 return BucType.LA_BUC_04;
             case FO_883_2004_ART13_1A:
             case FO_883_2004_ART13_1B1:
-            case FO_883_2004_ART13_1_B2:
-            case FO_883_2004_ART13_1_B3:
-            case FO_883_2004_ART13_1_B4:
+            case FO_883_2004_ART13_1B2:
+            case FO_883_2004_ART13_1B3:
+            case FO_883_2004_ART13_1B4:
             case FO_883_2004_ART13_2A:
             case FO_883_2004_ART13_2B:
             case FO_883_2004_ART13_3:
