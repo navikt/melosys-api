@@ -43,7 +43,7 @@ public class FagsakBehandlingFactory {
         b2.setRegistrertDato(Instant.parse("2018-11-12T10:37:30.00Z"));
 
         Behandling b3 = new Behandling();
-        b2.setId(3L);
+        b3.setId(3L);
         b3.setStatus(BehandlingsstatusTredje);
         b3.setRegistrertDato(Instant.parse("2018-09-11T10:37:30.00Z"));
         b3.setEndretDato(Instant.parse("2018-09-12T10:37:30.00Z"));
@@ -55,7 +55,7 @@ public class FagsakBehandlingFactory {
         return fagsak;
     }
 
-    private static Saksopplysning lagPersonSaksopplysning() {
+    public static Saksopplysning lagPersonSaksopplysning() {
         Saksopplysning saksopplysningPerson = new Saksopplysning();
         saksopplysningPerson.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
@@ -64,7 +64,7 @@ public class FagsakBehandlingFactory {
         return saksopplysningPerson;
     }
 
-    private static Saksopplysning lagSøknadOpplysning() {
+    public static Saksopplysning lagSøknadOpplysning() {
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse.landkode = "SE";

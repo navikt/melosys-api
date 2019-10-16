@@ -12,16 +12,14 @@ import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
@@ -32,10 +30,8 @@ import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
@@ -43,17 +39,22 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 @Path("/fagsaker")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
-@Transactional
 public class FagsakTjeneste extends RestTjeneste {
-
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
+    private final SaksopplysningerService saksopplysningerService;
+    private final SoeknadService søknadService;
     private final TilgangService tilgangService;
 
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService, TilgangService tilgangService) {
+    public FagsakTjeneste(FagsakService fagsakService,
+                          SaksopplysningerService saksopplysningerService,
+                          SoeknadService soeknadService,
+                          TilgangService tilgangService) {
         this.fagsakService = fagsakService;
+        this.saksopplysningerService = saksopplysningerService;
+        this.søknadService = soeknadService;
         this.tilgangService = tilgangService;
     }
 
@@ -147,7 +148,7 @@ public class FagsakTjeneste extends RestTjeneste {
                 .map(this::tilBehandlingOversiktDto)
                 .collect(Collectors.toList());
 
-            setSammensattNavn(fagsakOppsummeringDto, behandlinger.get(0));
+            fagsakOppsummeringDto.setSammensattNavn(hentSammensattNavn(behandlinger));
             fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
             fagsakListe.add(fagsakOppsummeringDto);
         }
@@ -169,15 +170,13 @@ public class FagsakTjeneste extends RestTjeneste {
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
         if (behandling.getType() == Behandlingstyper.SOEKNAD) {
-            hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
-                    SoeknadDokument soeknadDokument = (SoeknadDokument) saksopplysningDokument;
+            søknadService.finnSøknad(behandling.getId()).ifPresent(soeknadDokument -> {
                     behandlingOversiktDto.setLand(hentSøknadsland(soeknadDokument));
                     Periode periode = hentPeriode(soeknadDokument);
                     behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
                 });
         } else {
-            hentDokument(behandling, SaksopplysningType.SEDOPPL).ifPresent(saksopplysningDokument -> {
-                SedDokument sedDokument = (SedDokument) saksopplysningDokument;
+            saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
                 behandlingOversiktDto.setLand(Collections.singletonList(sedDokument.getLovvalgslandKode() != null
                     ? sedDokument.getLovvalgslandKode().getKode() : null));
                 behandlingOversiktDto.setPeriode(new PeriodeDto(
@@ -187,14 +186,16 @@ public class FagsakTjeneste extends RestTjeneste {
         }
     }
 
-    private void setSammensattNavn(FagsakOppsummeringDto fagsakOppsummeringDto, Behandling behandling) {
-        Optional<SaksopplysningDokument> saksopplysningDokumentPerson = hentDokument(behandling, SaksopplysningType.PERSOPL);
+    private String hentSammensattNavn(List<Behandling> behandlinger) {
+        if (behandlinger.isEmpty()) {
+            return UKJENT_SAMMENSATT_NAVN;
+        }
 
-        if( saksopplysningDokumentPerson.isPresent()) {
-                PersonDokument personDokument = (PersonDokument) saksopplysningDokumentPerson.get();
-                fagsakOppsummeringDto.setSammensattNavn(personDokument.sammensattNavn);
+        Optional<PersonDokument> saksopplysningPerson = saksopplysningerService.finnPersonOpplysninger(behandlinger.get(0).getId());
+        if (saksopplysningPerson.isPresent()) {
+            return saksopplysningPerson.get().sammensattNavn;
         } else {
-            fagsakOppsummeringDto.setSammensattNavn(UKJENT_SAMMENSATT_NAVN);
+            return UKJENT_SAMMENSATT_NAVN;
         }
     }
 }

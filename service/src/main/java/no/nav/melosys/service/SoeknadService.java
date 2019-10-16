@@ -33,6 +33,11 @@ public class SoeknadService {
         this.dokumentFactory = dokumentFactory;
     }
 
+    public Optional<SoeknadDokument> finnSøknad(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.SØKNAD)
+            .map(s -> (SoeknadDokument) s.getDokument());
+    }
+
     public SoeknadDokument hentSøknad(long behandlingID) throws IkkeFunnetException {
         Saksopplysning saksopplysning = saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.SØKNAD)
             .orElseThrow(() -> new IkkeFunnetException(String.format("Søknad ikke funnet for behandlingsid %s.", behandlingID)));
