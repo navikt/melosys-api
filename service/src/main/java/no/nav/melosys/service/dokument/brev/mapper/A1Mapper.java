@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -24,6 +23,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.DummyArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
+import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
@@ -46,8 +46,7 @@ class A1Mapper {
 
         a1.setPerson(mapPerson(brevData.person));
 
-        List<LovvalgsperiodeType> lovvalgsperioder = Collections.singletonList(mapLovvalgsperiode(resultat.hentValidertLovvalgsperiode()));
-        a1.setLovvalgsperiode(lovvalgsperioder.get(0));    // Alle lovvalgsperiodene har samme bestemmelse og land i Lev1
+        a1.setLovvalgsperiode(mapLovvalgsperiode(resultat.hentValidertLovvalgsperiode()));
 
         a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));
 
@@ -100,7 +99,10 @@ class A1Mapper {
     private HovedvirksomhetType mapHovedvirksomhet(AvklartVirksomhet virksomhet) {
         HovedvirksomhetType hovedvirksomhetBrev = new HovedvirksomhetType();
         StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
-        hovedvirksomhetBrev.setOrgnummer(virksomhet.orgnr);
+
+        // Utenlandsk virksomhet kan oppgis uten orgnr
+        String orgnr = StringUtils.isNotEmpty(virksomhet.orgnr) ? virksomhet.orgnr : " ";
+        hovedvirksomhetBrev.setOrgnummer(orgnr);
         hovedvirksomhetBrev.setNavn(virksomhet.navn);
         hovedvirksomhetBrev.setGatenavn(adresse.gatenavn);
         hovedvirksomhetBrev.setPostnr(adresse.postnummer);

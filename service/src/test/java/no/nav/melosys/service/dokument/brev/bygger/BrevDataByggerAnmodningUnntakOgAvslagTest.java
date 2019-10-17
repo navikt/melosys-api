@@ -99,7 +99,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         BrevDataAnmodningUnntakOgAvslag brevData = (BrevDataAnmodningUnntakOgAvslag) brevDataByggerAnmodningUnntakOgAvslag.lag(lagBrevressurser(behandling), saksbehandler);
 
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
-        assertThat(brevData.hovedvirksomhet.isSelvstendigForetak()).isEqualTo(true);
+        assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isEqualTo(true);
         assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
         assertThat(brevData.anmodningsperiodeSvar.get()).isEqualToComparingFieldByField(anmodningsperiodeSvar);
     }

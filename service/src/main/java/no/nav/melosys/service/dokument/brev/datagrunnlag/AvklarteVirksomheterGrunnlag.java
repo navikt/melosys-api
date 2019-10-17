@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
@@ -66,12 +67,20 @@ public class AvklarteVirksomheterGrunnlag {
         return utenlandskeVirksomheter;
     }
 
-    public Set<String> hentNorskeArbeidsgivendeOrgnumre() throws TekniskException {
-        return avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
+    public List<AvklartVirksomhet> hentUtenlandskeArbeidsgivere() throws TekniskException {
+        return hentUtenlandskeVirksomheter().stream()
+            .filter(AvklartVirksomhet::erArbeidsgiver)
+            .collect(Collectors.toList());
     }
 
-    public Set<String> hentNorskeSelvstendigeForetakOrgnumre() throws TekniskException {
-        return avklarteVirksomheterService.hentNorskeSelvstendigeForetakOrgnumre(behandling);
+    public List<AvklartVirksomhet> hentUtenlandskeSelvstendige() throws TekniskException {
+        return hentUtenlandskeVirksomheter().stream()
+            .filter(AvklartVirksomhet::erSelvstendigForetak)
+            .collect(Collectors.toList());
+    }
+
+    public Set<String> hentNorskeArbeidsgivendeOrgnumre() throws TekniskException {
+        return avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
     }
 
     public AvklartVirksomhet hentHovedvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -80,6 +89,11 @@ public class AvklarteVirksomheterGrunnlag {
         } else {
             return hentUtenlandskeVirksomheter().iterator().next();
         }
+    }
+
+    public int antallVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        return hentAlleNorskeVirksomheterMedAdresse().size() +
+               hentUtenlandskeVirksomheter().size();
     }
 
     public Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {

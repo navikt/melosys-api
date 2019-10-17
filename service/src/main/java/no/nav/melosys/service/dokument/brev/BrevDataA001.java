@@ -28,7 +28,7 @@ public class BrevDataA001 extends BrevData {
     public StrukturertAdresse bostedsadresse;
     public Optional<String> utenlandskIdent;
 
-    public List<AvklartVirksomhet> arbeidsgivendeVirkomsheter;
+    public List<AvklartVirksomhet> arbeidsgivendeVirksomheter;
     public List<AvklartVirksomhet> selvstendigeVirksomheter;
 
     public List<Arbeidssted> arbeidssteder;

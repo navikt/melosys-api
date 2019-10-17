@@ -23,6 +23,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 
+import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
@@ -41,15 +42,8 @@ class A001Mapper {
 
         seda001.setPerson(mapPerson(brevData.personDokument, brevData.bostedsadresse, brevData.utenlandskIdent));
 
-        List<AvklartVirksomhet> selvstendigeVirksomheter = brevData.selvstendigeVirksomheter;
-
-        //A001 Skal ikke inneholde både Identifikasjon av arbeidsgiveren og Identifikasjon av selvstendig næringsvirksomhet
-        if (!selvstendigeVirksomheter.isEmpty()) {
-            seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(selvstendigeVirksomheter));
-        } else {
-            // Foretakliste = Identifikasjon av arbeidsgiver (Kun arbeidsgivere)
-            seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirkomsheter));
-        }
+        seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(brevData.selvstendigeVirksomheter));
+        seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirksomheter));
 
         seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.arbeidssteder));
 
@@ -246,12 +240,11 @@ class A001Mapper {
 
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
             AdresseType adresseBrev = new AdresseType();
-
-            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
-            adresseBrev.setAdresselinje1(adresse.gatenavn);
+            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
             adresseBrev.setAdresselinje2(adresse.poststed);
             adresseBrev.setAdresselinje3(adresse.postnummer);
-
+            adresseBrev.setAdresselinje4(adresse.region);
+            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
             foretak.setAdresse(adresseBrev);
             foretakListe.getForetak().add(foretak);
         }
@@ -269,11 +262,11 @@ class A001Mapper {
 
             AdresseType2 adresseBrev = new AdresseType2();
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
-
-            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
-            adresseBrev.setAdresselinje1(adresse.gatenavn);
+            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
             adresseBrev.setAdresselinje2(adresse.poststed);
             adresseBrev.setAdresselinje3(adresse.postnummer);
+            adresseBrev.setAdresselinje4(adresse.region);
+            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
 
             selvstendigVirksomhet.setAdresse(adresseBrev);
             selvstendigeVirksomheter.getSelvstendigNæringsvirksomhet().add(selvstendigVirksomhet);

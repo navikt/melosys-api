@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
@@ -17,10 +14,7 @@ import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -52,6 +46,9 @@ public class BrevDataByggerA1Test {
     private Behandling behandling;
 
     private Set<String> avklarteOrganisasjoner;
+
+    @Mock
+    RegisterOppslagSystemService registerOppslagService;
 
     private SoeknadDokument søknad;
     private BrevDataGrunnlag dataGrunnlag;
@@ -95,32 +92,29 @@ public class BrevDataByggerA1Test {
         person.setDokument(personDok);
         person.setType(SaksopplysningType.PERSOPL);
 
-        Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(Collections.singletonList(orgnr1));
-
+        Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(Collections.singletonList(orgnr2));
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(soeknad, person, arbeidsforhold)));
-
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.gatenavn = "gate 12";
-        strukturertAdresse.postnummer = "123";
-
-        OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
-        when(detaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
-
-        Set<OrganisasjonDokument> organisasjonDokumenter = new HashSet<>();
-
-        organisasjonDokumenter.add(leggTilTestorganisasjon("navn1", orgnr1, detaljer));
-        organisasjonDokumenter.add(leggTilTestorganisasjon("navn2", orgnr2, detaljer));
 
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
-        RegisterOppslagSystemService registerOppslagService = mock(RegisterOppslagSystemService.class);
-        when(registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner))
-            .thenReturn(organisasjonDokumenter);
-
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
         brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService);
+    }
+
+    private void lagAvklartOrganisasjoner(List<String> orgnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
+        when(detaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
+
+        Set<OrganisasjonDokument> organisasjonDokumenter = new HashSet<>();
+        for (String orgnr : orgnumre) {
+            organisasjonDokumenter.add(leggTilTestorganisasjon("navn"+orgnr, orgnr, detaljer));
+        }
+
+        avklarteOrganisasjoner.addAll(orgnumre);
+        when(registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner))
+            .thenReturn(organisasjonDokumenter);
     }
 
     private OrganisasjonDokument leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
@@ -136,31 +130,23 @@ public class BrevDataByggerA1Test {
 
     @Test
     public void testHentAvklarteSelvstendigeForetak() throws FunksjonellException, TekniskException {
-        avklarteOrganisasjoner.add("12345678910");
+        lagAvklartOrganisasjoner(Collections.singletonList("999"));
 
         SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = "12345678910";
+        foretak.orgnr = "999";
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
 
-        SelvstendigForetak foretak2 = new SelvstendigForetak();
-        foretak2.orgnr = "10987654321";
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak2);
-
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.selvstendigeForetak).containsOnly(foretak.orgnr);
+        assertThat(brevDataDto.hovedvirksomhet.orgnr).isEqualTo(foretak.orgnr);
     }
 
-
     @Test
-    public void testIngenAvklarteforetak() throws FunksjonellException, TekniskException {
-        SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = orgnr1;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
+    public void testHentAvklarteArbeidsgivere() throws FunksjonellException, TekniskException {
+        lagAvklartOrganisasjoner(Collections.singletonList("7777"));
+        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add("7777");
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.selvstendigeForetak).isEmpty();
-        // TODO: Orgnr ikke obligatorisk registrert for utenlandske foretak
-        //assertThat(brevDataDto.utenlandskeVirksomheter).isEmpty();
+        assertThat(brevDataDto.hovedvirksomhet.orgnr).isEqualTo("7777");
     }
 
     private StrukturertAdresse lagStrukturertAdresse() {
@@ -175,6 +161,8 @@ public class BrevDataByggerA1Test {
 
     @Test
     public void testArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws FunksjonellException, TekniskException {
+        lagAvklartOrganisasjoner(Collections.singletonList(orgnr2));
+
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.foretakNavn = "Utenlandsk Oppdragsgiver LTD";
         arbeidUtland.adresse = lagStrukturertAdresse();

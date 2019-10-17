@@ -2,7 +2,10 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -14,13 +17,14 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -126,7 +130,7 @@ public class A001MapperTest {
         vilkår.getBegrunnelser().add(begrunnelse);
 
         brevData = new BrevDataA001();
-        brevData.arbeidsgivendeVirkomsheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
+        brevData.arbeidsgivendeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeVirksomheter = new ArrayList<>();
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
         brevData.personDokument = person;
@@ -149,25 +153,6 @@ public class A001MapperTest {
 
         String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
         assertThat(xml).isNotNull();
-    }
-
-    @Test
-    public void mapTilBrevXML_MedSelvstendigVirksomhet_tarIkkeMedArbeidsgivendeVirkomsheter() throws Exception {
-        FellesType fellesType = new FellesType();
-        fellesType.setFagsaksnummer("MELTEST-2");
-
-        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
-        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
-        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
-
-        AvklartVirksomhet avklartVirksomhet = new AvklartVirksomhet("Ranselbygg AS",
-            "998877665",
-            lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevData.selvstendigeVirksomheter = Collections.singletonList(avklartVirksomhet);
-
-        String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
-        assertThat(xml).doesNotContain("JARLSBERG AS");
-        assertThat(xml).contains("Ranselbygg AS");
     }
 
     private StrukturertAdresse lagStrukturertAdresse() {

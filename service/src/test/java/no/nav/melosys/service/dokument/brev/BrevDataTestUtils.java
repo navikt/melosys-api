@@ -59,13 +59,14 @@ public class BrevDataTestUtils {
         return new AvklartVirksomhet("Bedrift AS", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
     }
 
-    public static ForetakUtland lagForetakUtland() {
+    public static ForetakUtland lagForetakUtland(Boolean selvstendig) {
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.navn = "Company International Ltd.";
         foretakUtland.orgnr = "12345678910";
         foretakUtland.uuid = "49m8gf-9dk4j0";
         foretakUtland.adresse = lagStrukturertAdresse();
         foretakUtland.adresse.landkode = "NO";
+        foretakUtland.selvstendigNæringsvirksomhet = selvstendig;
         return foretakUtland;
     }
 

@@ -52,7 +52,9 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
         AvklartVirksomhet hovedvirksomhet = brevdata.hovedvirksomhet;
-        fag.setArbeidsgiver(hovedvirksomhet.navn);
+        if (hovedvirksomhet.erArbeidsgiver()) {
+            fag.setArbeidsgiver(hovedvirksomhet.navn);
+        }
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(hovedvirksomhet.yrkesaktivitet.getKode()));
 
         fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);

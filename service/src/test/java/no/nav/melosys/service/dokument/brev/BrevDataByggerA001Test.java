@@ -204,7 +204,7 @@ public class BrevDataByggerA001Test {
         BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(),"Z12345");
         assertThat(brevDataDto.selvstendigeVirksomheter.stream()
                 .map(nv -> nv.orgnr)).containsOnly(orgnr1);
-        assertThat(brevDataDto.arbeidsgivendeVirkomsheter.stream()
+        assertThat(brevDataDto.arbeidsgivendeVirksomheter.stream()
                 .map(nv -> nv.orgnr)).containsOnly(orgnr1);
     }
 

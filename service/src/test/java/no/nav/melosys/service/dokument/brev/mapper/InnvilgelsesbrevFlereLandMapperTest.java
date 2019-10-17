@@ -78,7 +78,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         BrevDataInnvilgelseFlereLand brevdataInnvilgelse = new BrevDataInnvilgelseFlereLand(new BrevbestillingDto(), "SAKSBEHANDLER");
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
-        brevdataInnvilgelse.norskeArbeidsgivere = norskeVirksomheter;
+        brevdataInnvilgelse.arbeidsgivere = norskeVirksomheter;
         brevdataInnvilgelse.bostedsland = "Norge";
         brevdataInnvilgelse.alleArbeidsland = Collections.singletonList("Sverige");
         brevdataInnvilgelse.erMarginaltArbeid = true;
@@ -96,7 +96,6 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         brevdataA1.bivirksomheter = new ArrayList<>(virksomheter);
         brevdataA1.bivirksomheter.remove(0);
 
-        brevdataA1.selvstendigeForetak = Collections.emptySet();
         brevdataA1.arbeidssteder = new ArrayList<>();
         return brevdataA1;
     }

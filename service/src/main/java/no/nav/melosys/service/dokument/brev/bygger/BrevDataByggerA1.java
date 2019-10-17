@@ -22,16 +22,13 @@ public class BrevDataByggerA1 implements BrevDataBygger {
 
     @Override
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
-        List<AvklartVirksomhet> utenlandskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter();
-        List<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
-        if (norskeVirksomheter.isEmpty() && utenlandskeVirksomheter.isEmpty()) {
+        if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() < 1) {
             throw new FunksjonellException("Trenger minst en avklart virksomhet - utenlandsk eller norsk");
         }
 
         BrevDataA1 brevData = new BrevDataA1();
         brevData.person = dataGrunnlag.getPerson();
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(dataGrunnlag.getBehandling().getId());
-        brevData.selvstendigeForetak = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendigeForetakOrgnumre();
         brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
 
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();

@@ -1,10 +1,8 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -78,8 +76,11 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             .map(Landkoder::getBeskrivelse)
             .orElse(null);
 
-        List<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
-        brevdata.hovedvirksomhet = norskeVirksomheter.get(0);
+        if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {
+            throw new FunksjonellException("Ingen eller flere enn én norsk eller utenlandsk virksomhet forsøkt brukt i innvilgelsesbrev");
+        }
+
+        brevdata.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandlingID);
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);

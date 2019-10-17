@@ -29,7 +29,11 @@ public class AvklartVirksomhet {
         this.yrkesaktivitet = yrkesaktivitet;
     }
 
-    public boolean isSelvstendigForetak() {
+    public boolean erSelvstendigForetak() {
         return yrkesaktivitet == Yrkesaktivitetstyper.SELVSTENDIG;
+    }
+
+    public boolean erArbeidsgiver() {
+        return yrkesaktivitet == Yrkesaktivitetstyper.LOENNET_ARBEID;
     }
 }

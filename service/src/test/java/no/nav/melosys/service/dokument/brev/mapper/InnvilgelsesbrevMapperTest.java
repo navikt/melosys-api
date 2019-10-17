@@ -81,7 +81,6 @@ public class InnvilgelsesbrevMapperTest {
         brevdataA1.bivirksomheter = Collections.singletonList(virksomhet);
         brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
-        brevdataA1.selvstendigeForetak = Collections.emptySet();
         brevdataA1.person = lagPersonDokument();
         brevdataA1.arbeidssteder = new ArrayList<>();
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(),"SAKSBEHANDLER");
