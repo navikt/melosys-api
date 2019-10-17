@@ -9,7 +9,7 @@ public enum Bestemmelse {
     ART_11_3_c("11_3_c"),
     ART_11_3_d("11_3_d"),
     ART_11_3_e("11_3_e"),
-    ART_11_4_2("11_4_2"),
+    ART_11_4("11_4"),
     ART_11_5("11_5"),
     ART_12_1("12_1"),
     ART_12_2("12_2"),
@@ -23,8 +23,12 @@ public enum Bestemmelse {
     ART_13_3("13_3"),
     ART_13_4("13_4"),
     ART_14_11("14_11"),
+    ART_15("15"),
     ART_16_1("16_1"),
-    ART_16_2("16_2");
+    ART_16_2("16_2"),
+    ART_87_8("87_8"),
+    ART_87_a("87_a"),
+    ANNET("annet");
 
     private String value;
 
