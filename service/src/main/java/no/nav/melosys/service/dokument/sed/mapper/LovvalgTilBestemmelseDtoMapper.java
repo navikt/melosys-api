@@ -48,7 +48,7 @@ public final class LovvalgTilBestemmelseDtoMapper {
         Assert.notNull(lovvalgBestemmelse, "LovvalgBestemmelse er null.");
 
         if (lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1) {
-            return Bestemmelse.ART_11_3_a; //fixme: Venter på endelig avklaring om hva vi skal mappe 11_4_1 til
+            return Bestemmelse.ART_11_3_a;
         }
 
         if (mapper.containsKey(lovvalgBestemmelse)) {
