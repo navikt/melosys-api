@@ -161,11 +161,11 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansJournalføring_skalTilordnesTrue_settesIProsessinstans() {
+    public void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingFalse_settesIProsessinstans() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
 
-        journalfoeringDto.setSkalSendesForvaltningsmelding(true);
+        journalfoeringDto.setIkkeSendForvaltingsmelding(false);
 
         Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
 
@@ -173,11 +173,11 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansJournalføring_skalTilordnesFalse_settesIProsessinstans() {
+    public void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingTrue_settesIProsessinstans() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
 
-        journalfoeringDto.setSkalSendesForvaltningsmelding(false);
+        journalfoeringDto.setIkkeSendForvaltingsmelding(true);
 
         Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
 
@@ -185,7 +185,7 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansJournalføring_skalSendesForvaltningsmeldingTrue_settesIProsessinstans() {
+    public void opprettProsessinstansJournalføring_skalTilordnesTrue_settesIProsessinstans() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
 
@@ -197,7 +197,7 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansJournalføring_skalSendesForvaltningsmeldingFalse_settesIProsessinstans() {
+    public void opprettProsessinstansJournalføring_skalTilordnesFalse_settesIProsessinstans() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
 

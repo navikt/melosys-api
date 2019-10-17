@@ -64,7 +64,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
-        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, journalfoeringDto.isSkalSendesForvaltningsmelding());
+        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, !journalfoeringDto.isIkkeSendForvaltingsmelding());
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
             final String hovedDokumentID = journalfoeringDto.getDokumentID();
