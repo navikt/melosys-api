@@ -22,7 +22,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -98,12 +98,12 @@ public class AvslagYrkesaktivMapperTest {
             Art16_1_avslag.SAERLIG_AVSLAGSGRUNN);
         vilkaarsresultat16_1.setBegrunnelseFritekst("Fritekst");
 
-        BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
+        BrevDataAvslagYrkesaktiv brevData = new BrevDataAvslagYrkesaktiv("Z999999");
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevData.anmodningsperiodeSvar = Optional.empty();
         brevData.yrkesaktivitet = Yrkesaktivitetstyper.LOENNET_ARBEID;
-        brevData.art16Vilkaar = Optional.of(vilkaarsresultat16_1);
+        brevData.art16Vilkaar = vilkaarsresultat16_1;
 
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
@@ -115,14 +115,14 @@ public class AvslagYrkesaktivMapperTest {
     public void mapTilBrevXML_medOppfyltArt16OgAnmodningsperiode_brukerAnmodningsperiode() throws JAXBException, SAXException, TekniskException {
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
 
-        BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
+        BrevDataAvslagYrkesaktiv brevData = new BrevDataAvslagYrkesaktiv("Z999999");
         brevData.arbeidsland = Landkoder.ES.getBeskrivelse();
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevData.anmodningsperiodeSvar = Optional.of(lagAnmodningsperiodeSvarAvslag());
         brevData.yrkesaktivitet = Yrkesaktivitetstyper.LOENNET_ARBEID;
 
         Vilkaarsresultat vilkår16_1_oppfylt = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, Art16_1_anmodning.ERSTATTER_EN_ANNEN_UNDER_5_AAR);
-        brevData.art16Vilkaar = Optional.of(vilkår16_1_oppfylt);
+        brevData.art16Vilkaar = vilkår16_1_oppfylt;
 
         Behandlingsresultat resultat = lagBehandlingsresultat();
         Vilkaarsresultat vilkår12_1_avslått = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET);
@@ -135,13 +135,13 @@ public class AvslagYrkesaktivMapperTest {
     @Test
     public void mapTilBrevXml_kanMappeAlleKodeverksverdierForArt16_1_avslag() throws Exception {
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
-        BrevDataAnmodningUnntakOgAvslag brevdata = new BrevDataAnmodningUnntakOgAvslag("");
+        BrevDataAvslagYrkesaktiv brevdata = new BrevDataAvslagYrkesaktiv("");
         Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_avslag.class);
         for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
             Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
             vilkaarsresultat.setBegrunnelser(Collections.singleton(begrunnelse));
             vilkaarsresultat.setBegrunnelseFritekst("Fritekst");
-            brevdata.art16Vilkaar = Optional.of(vilkaarsresultat);
+            brevdata.art16Vilkaar = vilkaarsresultat;
             spy.mapArt161Avslag(new Fag(), brevdata);
         }
     }

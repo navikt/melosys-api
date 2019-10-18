@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
@@ -15,7 +14,6 @@ public class VilkaarbegrunnelseFactoryTest {
     @Test
     public void mapArt121BegrunnelseType() throws Exception {
         Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art12_1_begrunnelser.class);
-        begrunnelser.removeIf(vb -> "IKKE_NORSK_AG_REGNING".equals(vb.getKode()));
         VilkaarbegrunnelseFactory.mapArt121BegrunnelseType(begrunnelser);
     }
 
@@ -41,6 +39,18 @@ public class VilkaarbegrunnelseFactoryTest {
     public void mapArt122NormaltDriverVirksomhetBegrunnelser() throws Exception {
         Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art12_2_normalt_virksomhet.class);
         VilkaarbegrunnelseFactory.mapArt122NormalVirksomhetBegrunnelseType(begrunnelser);
+    }
+
+    @Test
+    public void mapArt161AnmodningBegrunnelser() throws Exception {
+        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_anmodning.class);
+        VilkaarbegrunnelseFactory.mapAnmodningBegrunnelser(begrunnelser);
+    }
+
+    @Test
+    public void mapArt161AnmodningUtenArt12Begrunnelser() throws Exception {
+        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_anmodning_uten_art12.class);
+        VilkaarbegrunnelseFactory.mapAnmodningUtenArt12Begrunnelser(begrunnelser);
     }
 
     public static Set<VilkaarBegrunnelse> lagAlleVilkaarBegrunnelser(Class kodeverk) throws Exception {

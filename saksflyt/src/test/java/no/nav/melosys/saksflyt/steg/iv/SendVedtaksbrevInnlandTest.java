@@ -28,10 +28,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
+import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -74,8 +71,8 @@ public class SendVedtaksbrevInnlandTest {
         brevdataVedlegg.brevDataA1 = brevdata;
         BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
         when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(brevdataVedlegg);
-        BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAvslagYrkesaktiv = mock(BrevDataByggerAnmodningUnntakOgAvslag.class);
-        BrevDataAnmodningUnntakOgAvslag brevdataAvslag = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
+        BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv = mock(BrevDataByggerAvslagYrkesaktiv.class);
+        BrevDataAvslagYrkesaktiv brevdataAvslag = new BrevDataAvslagYrkesaktiv(saksbehandler);
         when(brevDataByggerAvslagYrkesaktiv.lag(any(), any())).thenReturn(brevdataAvslag);
 
         BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver(saksbehandler);

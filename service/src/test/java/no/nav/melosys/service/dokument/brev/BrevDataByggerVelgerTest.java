@@ -65,12 +65,12 @@ public class BrevDataByggerVelgerTest {
 
     @Test
     public final void hent_Avslag_girBrevDataByggerAvslagOgAnmodningUnntak() {
-        testHent(Produserbaredokumenter.AVSLAG_YRKESAKTIV, BrevDataByggerAnmodningUnntakOgAvslag.class);
+        testHent(Produserbaredokumenter.AVSLAG_YRKESAKTIV, BrevDataByggerAvslagYrkesaktiv.class);
     }
 
     @Test
     public final void hent_medDokumentTypeAnmodningUnntak_girBrevDataByggerAvslagOgAnmodningUnntak() {
-        testHent(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntakOgAvslag.class);
+        testHent(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntak.class);
     }
 
     @Test

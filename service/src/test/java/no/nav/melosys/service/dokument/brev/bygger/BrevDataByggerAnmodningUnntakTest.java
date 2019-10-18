@@ -1,0 +1,158 @@
+package no.nav.melosys.service.dokument.brev.bygger;
+
+import java.util.*;
+
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.LandvelgerService;
+import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import no.nav.melosys.service.kodeverk.KodeverkService;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
+public class BrevDataByggerAnmodningUnntakTest {
+    @Mock
+    AvklartefaktaService avklartefaktaService;
+    @Mock
+    RegisterOppslagService registerOppslagService;
+    @Mock
+    VilkaarsresultatRepository vilkaarsresultatRepository;
+    @Mock
+    LandvelgerService landvelgerService;
+    @Mock
+    KodeverkService kodeverkService;
+
+    private BrevDataByggerAnmodningUnntak brevDataByggerAnmodningUnntak;
+
+    private String saksbehandler = "saksbehandler";
+
+    @Before
+    public void setUp() {
+        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
+        brevDataByggerAnmodningUnntak = new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatRepository);
+
+        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
+            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART16_1, true, lagVilkaarBegrunnelse("KORT_OPPDRAG_RETUR_NORSK_AG"))));
+    }
+
+    @Test
+    public void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws Exception {
+        Behandling behandling = lagBehandling();
+
+        BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
+        assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
+        assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isEqualTo(true);
+        assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
+    }
+
+    private Behandling lagBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        behandling.setFagsak(fagsak);
+
+        List<String> selvstendigeForetak = Collections.singletonList("987654321");
+        List<String> arbeidsgivereRegister = Collections.singletonList("123456789");
+
+        Set<Saksopplysning> saksopplysninger =
+            lagSøknadOgArbeidsforholdOpplysninger(selvstendigeForetak, Collections.emptyList(), arbeidsgivereRegister);
+        behandling.setSaksopplysninger(saksopplysninger);
+        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
+
+        return behandling;
+    }
+
+    public BrevDataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException, FunksjonellException {
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+
+        Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
+
+        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.DE);
+        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        organisasjonDokument.setOrgnummer("999");
+        OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
+        when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
+        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
+
+        when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
+
+        return new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+    }
+
+    @Test
+    public void lag_brevDataUtenArt12_girAnmodningUtenArt12Begrunnelser() throws TekniskException, FunksjonellException {
+        Behandling behandling = lagBehandling();
+        BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
+        assertThat(brevData.anmodningBegrunnelser).isEmpty();
+        assertThat(brevData.anmodningUtenArt12Begrunnelser).isNotEmpty();
+    }
+
+    @Test
+    public void lag_brevDataMedArt121_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
+        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
+            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART12_2, false, lagVilkaarBegrunnelse("UTSENDELSE_OVER_24_MN"))));
+
+        Behandling behandling = lagBehandling();
+        BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
+        assertThat(brevData.anmodningBegrunnelser).isNotEmpty();
+        assertThat(brevData.anmodningUtenArt12Begrunnelser).isEmpty();
+    }
+
+    @Test
+    public void lag_brevDataMedArt122_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
+        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
+            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART12_2, false, lagVilkaarBegrunnelse("UTSENDELSE_OVER_24_MN"))));
+
+        Behandling behandling = lagBehandling();
+        BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
+        assertThat(brevData.anmodningBegrunnelser).isNotEmpty();
+        assertThat(brevData.anmodningUtenArt12Begrunnelser).isEmpty();
+    }
+
+    @Test
+    public void lag_brevDataMedOppfyltArt121_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
+        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
+            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART12_2, true, Collections.emptySet())));
+
+        Behandling behandling = lagBehandling();
+        BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
+        assertThat(brevData.anmodningBegrunnelser).isNotEmpty();
+        assertThat(brevData.anmodningUtenArt12Begrunnelser).isEmpty();
+    }
+
+    @Test
+    public void lag_brevDataMedFritekst() throws TekniskException, FunksjonellException {
+        Vilkaarsresultat vilkaar = lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART16_1, true, lagVilkaarBegrunnelse("KORT_OPPDRAG_RETUR_NORSK_AG"));
+        vilkaar.setBegrunnelseFritekst("FRITEKST");
+        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1))).thenReturn(Optional.of(vilkaar));
+
+        Behandling behandling = lagBehandling();
+        BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
+        assertThat(brevData.fritekst).isEqualTo("FRITEKST");
+    }
+}
