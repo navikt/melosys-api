@@ -13,7 +13,7 @@ public class JournalfoeringDto {
     private String hoveddokumentTittel;
     private List<DokumentDto> vedlegg;
     private boolean skalTilordnes;
-    private boolean ikkeSendForvaltingsmelding;
+    private Boolean ikkeSendForvaltingsmelding;
 
     public String getBehandlingstypeKode() {
         return behandlingstypeKode;
@@ -95,11 +95,11 @@ public class JournalfoeringDto {
         this.skalTilordnes = skalTilordnes;
     }
 
-    public boolean isIkkeSendForvaltingsmelding() {
+    public Boolean isIkkeSendForvaltingsmelding() {
         return ikkeSendForvaltingsmelding;
     }
 
-    public void setIkkeSendForvaltingsmelding(boolean ikkeSendForvaltingsmelding) {
+    public void setIkkeSendForvaltingsmelding(Boolean ikkeSendForvaltingsmelding) {
         this.ikkeSendForvaltingsmelding = ikkeSendForvaltingsmelding;
     }
     
