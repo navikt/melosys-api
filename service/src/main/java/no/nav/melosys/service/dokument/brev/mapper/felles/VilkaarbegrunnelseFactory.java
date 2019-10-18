@@ -1,7 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
-import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
