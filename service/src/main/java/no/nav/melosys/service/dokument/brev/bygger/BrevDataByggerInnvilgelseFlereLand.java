@@ -16,6 +16,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import org.apache.commons.collections4.ListUtils;
 
 public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     private final AvklartefaktaService avklartefaktaService;
@@ -44,8 +45,9 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
 
         BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(dataGrunnlag, saksbehandler);
 
-        brevdata.norskeArbeidsgivere = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere();
-        brevdata.norskeSelvstendigVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige();
+        brevdata.arbeidsgivere =
+            ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
+                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
 
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
         brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID).stream()

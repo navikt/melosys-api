@@ -1,13 +1,11 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
@@ -36,9 +34,8 @@ public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
         long behandlingID = dataGrunnlag.getBehandling().getId();
-        List<AvklartVirksomhet> avklarteVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentAlleNorskeVirksomheterMedAdresse();
-        if (avklarteVirksomheter.size() != 1) {
-            throw new TekniskException("Trenger minst en norsk virksomhet for avslag og ART16.1");
+        if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {
+            throw new TekniskException("Ingen eller flere enn én norsk eller utenlandsk virksomhet oppgitt for avslag eller ART16.1");
         }
 
         brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();

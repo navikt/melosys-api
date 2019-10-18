@@ -25,6 +25,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 
 public class BrevDataByggerA001 implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -56,8 +57,14 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = dataGrunnlag.getPerson();
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere();
-        brevData.selvstendigeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige();
+
+        brevData.arbeidsgivendeVirksomheter =
+            ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
+                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
+
+        brevData.selvstendigeVirksomheter =
+            ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige(),
+                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
         brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         brevData.arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();

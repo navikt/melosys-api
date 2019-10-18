@@ -50,7 +50,7 @@ public class SaksopplysningStubs {
     }
 
     public static Set<Saksopplysning> lagSøknadOgArbeidsforholdOpplysninger(List<String> selvstendigeForetak, List<String> ekstraArbeidsgivere, List<String> registrerteArbeidsgivere) {
-        Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, null, ekstraArbeidsgivere);
+        Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, Collections.emptyList(), ekstraArbeidsgivere);
         Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(registrerteArbeidsgivere);
         return new HashSet<>(Arrays.asList(søknad, arbeidsforhold));
     }

@@ -49,13 +49,13 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
         // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
-        int antallArbeidsgivere = brevdata.norskeArbeidsgivere.size();
+        int antallArbeidsgivere = brevdata.arbeidsgivere.size();
         fag.setAntallArbeidsgivere(BigInteger.valueOf(antallArbeidsgivere));
         if (antallArbeidsgivere == 1) {
-            AvklartVirksomhet avklartVirksomhet = brevdata.norskeArbeidsgivere.iterator().next();
+            AvklartVirksomhet avklartVirksomhet = brevdata.arbeidsgivere.iterator().next();
             fag.setArbeidsgiver(avklartVirksomhet.navn);
         }
-        fag.setArbeidsgiverListe(mapArbeidsgiverListe(brevdata.norskeArbeidsgivere));
+        fag.setArbeidsgiverListe(mapArbeidsgiverListe(brevdata.arbeidsgivere));
 
         // AntallArbeidsland avgjør om brevet bruker arbeidsland eller arbeidslandListe
         int antallArbeidsland = brevdata.alleArbeidsland.size();

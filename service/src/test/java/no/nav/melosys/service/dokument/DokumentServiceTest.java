@@ -193,7 +193,6 @@ public final class DokumentServiceTest {
         brevDataA1.hovedvirksomhet = arbeidsgiver;
         brevDataA1.bostedsadresse = lagStrukturertAdresse();
         brevDataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
-        brevDataA1.selvstendigeForetak = Collections.emptySet();
         brevDataA1.bivirksomheter = Collections.emptyList();
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
