@@ -31,6 +31,6 @@ public class RegisterKontroll extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         registerKontrollFelles.utførKontrollerOgRegistrerFeil(prosessinstans.getBehandling().getId());
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_OPPGAVE);
+        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_PERIODE_MEDL);
     }
 }

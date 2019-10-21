@@ -35,6 +35,6 @@ public class RegisterKontrollTest {
         registerKontroll.utfør(prosessinstans);
 
         verify(registerKontrollFelles).utførKontrollerOgRegistrerFeil(anyLong());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_OPPGAVE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_PERIODE_MEDL);
     }
 }

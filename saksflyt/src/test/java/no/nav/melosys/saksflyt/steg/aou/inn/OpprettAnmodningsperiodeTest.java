@@ -58,7 +58,7 @@ public class OpprettAnmodningsperiodeTest {
 
         verify(behandlingService).hentBehandling(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_PERIODE_MEDL);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class OpprettAnmodningsperiodeTest {
         verify(behandlingService).hentBehandling(anyLong());
         verify(opprettSedDokumentFelles).opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class));
         verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_PERIODE_MEDL);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 
     @Test(expected = FunksjonellException.class)
