@@ -28,7 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.melosys.metrics.MetrikkerNavn.*;
+import static no.nav.melosys.metrics.MetrikkerNavn.BEHANDLINGER_AVSLUTTET;
+import static no.nav.melosys.metrics.MetrikkerNavn.BEHANDLINGER_OPPRETTET;
 
 @Service
 public class BehandlingService {
@@ -79,7 +80,7 @@ public class BehandlingService {
      * Oppdaterer status for en behandling med ID {@code behandlingID}.
      * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
      */
-    public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException {
+    public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
 
@@ -90,6 +91,10 @@ public class BehandlingService {
         }
         behandling.setStatus(status);
         behandlingRepository.save(behandling);
+
+        if (status == Behandlingsstatus.AVSLUTTET) {
+            oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        }
     }
 
     private boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
