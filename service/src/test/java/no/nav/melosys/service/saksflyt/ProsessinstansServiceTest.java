@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
@@ -253,6 +254,18 @@ public class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, List.class))
             .contains(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name());
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isEqualTo("fritekst");
+    }
+
+    @Test
+    public void opprettProsessinstansGenerellSedBehandling() {
+        JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
+        journalfoeringDto.setBehandlingstypeKode(Behandlingstyper.VURDER_TRYGDETID.getKode());
+        service.opprettProsessinstansGenerellSedBehandling(journalfoeringDto);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.SED_GENERELL_SAK);
     }
 
     @Test

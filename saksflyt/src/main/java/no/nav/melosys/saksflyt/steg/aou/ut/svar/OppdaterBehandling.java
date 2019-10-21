@@ -83,7 +83,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
         vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
-    private void oppdaterBehandlingsstatusUnderBehandling(Prosessinstans prosessinstans) throws FunksjonellException {
+    private void oppdaterBehandlingsstatusUnderBehandling(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         behandlingService.oppdaterStatus(prosessinstans.getBehandling().getId(), Behandlingsstatus.UNDER_BEHANDLING);
     }
 

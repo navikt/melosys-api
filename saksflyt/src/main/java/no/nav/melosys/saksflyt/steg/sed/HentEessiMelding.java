@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
@@ -35,6 +36,11 @@ public class HentEessiMelding extends AbstraktStegBehandler {
         String aktørID = tpsService.hentAktørIdForIdent(brukerID);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
 
-        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_RUTING);
+        if (prosessinstans.getType() == ProsessType.SED_GENERELL_SAK) {
+            //SED'er journalført manuelt - oppretter ny generell sak
+            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH);
+        } else {
+            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_RUTING);
+        }
     }
 }

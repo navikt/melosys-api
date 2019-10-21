@@ -10,4 +10,8 @@ public class IkkeFunnetException extends FunksjonellException {
         super(t);
     }
 
+    public IkkeFunnetException(String message, Throwable t) {
+        super(message, t);
+    }
+
 }

@@ -50,7 +50,7 @@ public class UnntaksperiodeService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void behandlingUnderAvklaring(long behandlingID) throws FunksjonellException {
+    public void behandlingUnderAvklaring(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
         validerBehandling(behandling);
         prosessinstansService.opprettProsessinstansUnntaksperiodeUnderAvklaring(behandling);
