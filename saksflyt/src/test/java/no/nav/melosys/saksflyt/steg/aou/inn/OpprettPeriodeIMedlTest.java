@@ -51,6 +51,6 @@ public class OpprettPeriodeIMedlTest {
         verify(oppdaterMedlFelles).hentFnr(any());
         verify(medlFasade).opprettPeriodeUnderAvklaring(anyString(), any(), any());
         verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(Anmodningsperiode.class), anyLong());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_OPPGAVE);
     }
 }
