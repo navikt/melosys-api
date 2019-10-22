@@ -9,6 +9,7 @@ import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -63,6 +64,7 @@ public class JournalfoeringServiceTest {
         opprettDto.setBrukerID("setBrukerID");
         opprettDto.setHoveddokumentTittel("setDokumenttittel");
         opprettDto.setArbeidsgiverID("123456789");
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.SOEKNAD.getKode());
         this.opprettDto = opprettDto;
 
         JournalfoeringTilordneDto tilordneDto = new JournalfoeringTilordneDto();
@@ -113,6 +115,7 @@ public class JournalfoeringServiceTest {
 
     @Test
     public void opprettOgJournalfør_erSed_prosessinstansOpprettet() throws MelosysException {
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode());
         journalpost.setMottaksKanal("EESSI");
         journalpost.getHoveddokument().setNavSkjemaID("A009");
         when(eessiService.støtterAutomatiskBehandling(anyString(), anyString())).thenReturn(Boolean.TRUE);
@@ -146,6 +149,15 @@ public class JournalfoeringServiceTest {
         Prosessinstans prosessinstans = captor.getValue();
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING);
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.JFR_AOU_BREV);
+    }
+
+    @Test
+    public void opprettOgJournalfør_erVurderTrygdetid_prosessinstansOpprettet() throws MelosysException {
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.VURDER_TRYGDETID.getKode());
+        journalpost.setMottaksKanal("EESSI");
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+        verify(prosessinstansService).opprettProsessinstansGenerellSedBehandling(opprettDto);
     }
 
     @Test

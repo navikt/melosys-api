@@ -54,12 +54,16 @@ public class JournalfoeringService {
     public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         Journalpost journalpost = hentJournalpost(journalfoeringDto.getJournalpostID());
 
-        if (journalpost.mottaksKanalErEessi() && eessiService.støtterAutomatiskBehandling(journalfoeringDto.getJournalpostID(), journalpost.getHoveddokument().getNavSkjemaID())) {
-            opprettProsessinstansSedMottak(journalfoeringDto);
+        if (Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(journalfoeringDto.getBehandlingstypeKode())){
+            opprettSakOgJournalfør(journalfoeringDto);
+        } else if (journalpost.mottaksKanalErEessi()) {
+            opprettSakForSed(journalpost, journalfoeringDto);
         } else if (Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(journalfoeringDto.getBehandlingstypeKode())) {
             opprettProsessinstansBrevAouMottak(journalfoeringDto);
         } else {
-            opprettSakOgJournalfør(journalfoeringDto);
+            throw new IllegalArgumentException(
+                String.format("Manuell journalføring av behandlingstype %s støttes ikke", journalfoeringDto.getBehandlingstypeKode())
+            );
         }
 
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
@@ -114,6 +118,22 @@ public class JournalfoeringService {
 
         prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING);
         prosessinstansService.lagre(prosessinstans);
+    }
+
+    private void opprettSakForSed(Journalpost journalpost, JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+        validerBrukerIDFinnes(journalfoeringDto);
+        if (eessiService.støtterAutomatiskBehandling(journalfoeringDto.getJournalpostID(), journalpost.getHoveddokument().getNavSkjemaID())) {
+            opprettProsessinstansSedMottak(journalfoeringDto);
+        } else {
+            validerBehandlingstypeForSed(journalfoeringDto.getBehandlingstypeKode());
+            prosessinstansService.opprettProsessinstansGenerellSedBehandling(journalfoeringDto);
+        }
+    }
+
+    private void validerBehandlingstypeForSed(String behandlingstypeKode) throws FunksjonellException {
+        if (!Behandlingstyper.VURDER_TRYGDETID.getKode().equals(behandlingstypeKode)) {
+            throw new FunksjonellException(String.format("Opprettelse av behandling med type %s støttes ikke", behandlingstypeKode));
+        }
     }
 
     private void validerBrukerIDFinnes(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
