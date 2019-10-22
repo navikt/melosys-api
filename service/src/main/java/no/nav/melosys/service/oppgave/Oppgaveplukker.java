@@ -139,7 +139,7 @@ public class Oppgaveplukker {
 
             if (behandling.erVenterForDokumentasjon()) {
                 if (behandling.getDokumentasjonSvarfristDato() == null) {
-                    log.error("Behandling " + behandling.getId() + " tilhørende " + saksnummer + " avventer dokumentasjon, men har ingen svarfristdato");
+                    log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.", behandling.getId(), saksnummer);
                     iter.remove();
                 } else if (behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
                     iter.remove();

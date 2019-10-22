@@ -40,6 +40,7 @@ public class BehandlingService {
 
     private final Counter behandlingerOpprettet = Metrics.counter(BEHANDLINGER_OPPRETTET);
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
+    private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
 
     @Autowired
     public BehandlingService(BehandlingRepository behandlingRepository,
@@ -162,7 +163,7 @@ public class BehandlingService {
 
     public void avsluttBehandling(long behandlingId) throws IkkeFunnetException {
         Behandling behandling = behandlingRepository.findById(behandlingId)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();
@@ -170,12 +171,12 @@ public class BehandlingService {
 
     public Behandling hentBehandling(long behandlingId) throws IkkeFunnetException {
         return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
     public Behandling hentBehandlingUtenSaksopplysninger(long behandlingId) throws IkkeFunnetException {
         return behandlingRepository.findById(behandlingId)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
     public void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {

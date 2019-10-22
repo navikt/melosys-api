@@ -2,17 +2,15 @@ package no.nav.melosys.integrasjon.tps.aktoer;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.namespace.QName;
 
-import org.apache.cxf.feature.LoggingFeature;
+import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
+import no.nav.tjeneste.virksomhet.aktoer.v2.binding.AktoerV2;
+import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
-import no.nav.tjeneste.virksomhet.aktoer.v2.binding.AktoerV2;
 
 @Component
 public class AktorConsumerConfig {
