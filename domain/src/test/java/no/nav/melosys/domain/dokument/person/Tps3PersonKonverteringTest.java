@@ -17,6 +17,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class Tps3PersonKonverteringTest implements KonverteringTest {
     private static final String TPS_PERSON_3_0_MOCK = "person/tps_person_3.0_mock.xml";
@@ -37,7 +38,8 @@ public class Tps3PersonKonverteringTest implements KonverteringTest {
 
         PersonDokument p2 = (PersonDokument) test.getDokument();
         // Verifiser...
-        assertEquals("MILI", p2.diskresjonskode.getKode());
+        assertEquals("SPFO", p2.diskresjonskode.getKode());
+        assertTrue(p2.diskresjonskode.erKode7());
         assertEquals(LocalDate.of(2011, 11, 11), p2.fødselsdato);
         assertThat(p2.bostedsadresse.getGateadresse().getGatenummer()).isNull(); // tomt felt skal blir null, ikke 0
         assertThat(p2.bostedsadresse.getGateadresse().getHusnummer()).isEqualTo(7);

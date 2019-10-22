@@ -44,9 +44,7 @@
             <geografiskTilknytning c:type="a:Bydel">
                 <geografiskTilknytning>120104</geografiskTilknytning>
             </geografiskTilknytning>
-            <diskresjonskode>
-                <diskresjonskode>MILI</diskresjonskode>
-            </diskresjonskode>
+            <diskresjonskode>SPFO</diskresjonskode>
         </person>
     </response>
 </b:hentPersonResponse>

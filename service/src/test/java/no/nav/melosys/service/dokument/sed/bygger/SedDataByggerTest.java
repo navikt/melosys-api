@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -136,6 +137,39 @@ public class SedDataByggerTest {
 
         assertThat(sedData).isNotNull();
         assertThat(sedData.getLovvalgsperioder()).isEmpty();
+    }
+
+    @Test
+    public void lag_brukerErKode6_forventHarSensitiveOpplysninger() throws TekniskException, FunksjonellException {
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
+        sedDataGrunnlagMedSoknad.getPerson().diskresjonskode = new Diskresjonskode("SPSF");
+        SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData).isNotNull();
+        assertThat(sedData.getBruker()).isNotNull();
+        assertThat(sedData.getBruker().isHarSensitiveOpplysninger()).isTrue();
+    }
+
+    @Test
+    public void lag_brukerHarKode7_forventHarIkkeSensitiveOpplysninger() throws TekniskException, FunksjonellException {
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
+        sedDataGrunnlagMedSoknad.getPerson().diskresjonskode = new Diskresjonskode("SPSO");
+        SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData).isNotNull();
+        assertThat(sedData.getBruker()).isNotNull();
+        assertThat(sedData.getBruker().isHarSensitiveOpplysninger()).isFalse();
+    }
+
+    @Test
+    public void lag_brukerHarIngenDiskresjonskode_forventHarIkkeSensitiveOpplysninger() throws TekniskException, FunksjonellException {
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
+        sedDataGrunnlagMedSoknad.getPerson().diskresjonskode = null;
+        SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData).isNotNull();
+        assertThat(sedData.getBruker()).isNotNull();
+        assertThat(sedData.getBruker().isHarSensitiveOpplysninger()).isFalse();
     }
 
     @Test
