@@ -71,7 +71,7 @@ public class Bruker {
         this.fnr = fnr;
     }
 
-    public boolean isHarSensitiveOpplysninger() {
+    public boolean harSensitiveOpplysninger() {
         return harSensitiveOpplysninger;
     }
 

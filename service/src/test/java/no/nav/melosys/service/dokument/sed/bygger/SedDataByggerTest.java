@@ -147,7 +147,7 @@ public class SedDataByggerTest {
 
         assertThat(sedData).isNotNull();
         assertThat(sedData.getBruker()).isNotNull();
-        assertThat(sedData.getBruker().isHarSensitiveOpplysninger()).isTrue();
+        assertThat(sedData.getBruker().harSensitiveOpplysninger()).isTrue();
     }
 
     @Test
@@ -158,7 +158,7 @@ public class SedDataByggerTest {
 
         assertThat(sedData).isNotNull();
         assertThat(sedData.getBruker()).isNotNull();
-        assertThat(sedData.getBruker().isHarSensitiveOpplysninger()).isFalse();
+        assertThat(sedData.getBruker().harSensitiveOpplysninger()).isFalse();
     }
 
     @Test
@@ -169,7 +169,7 @@ public class SedDataByggerTest {
 
         assertThat(sedData).isNotNull();
         assertThat(sedData.getBruker()).isNotNull();
-        assertThat(sedData.getBruker().isHarSensitiveOpplysninger()).isFalse();
+        assertThat(sedData.getBruker().harSensitiveOpplysninger()).isFalse();
     }
 
     @Test

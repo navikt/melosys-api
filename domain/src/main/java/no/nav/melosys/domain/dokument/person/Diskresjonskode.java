@@ -13,8 +13,8 @@ public class Diskresjonskode extends AbstraktKodeverkHjelper {
         return FellesKodeverk.DISKRESJONSKODER;
     }
 
-    // Brukes av JAXB
     public Diskresjonskode() {
+        // Brukes av JAXB
     }
 
     public Diskresjonskode(String diskresjonskode) {
