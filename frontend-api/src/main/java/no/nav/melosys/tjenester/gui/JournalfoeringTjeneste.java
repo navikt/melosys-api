@@ -51,7 +51,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
 
         if (journalpost.mottaksKanalErEessi()) {
             journalføringService.finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID)
-                .ifPresent(b -> journalpostDto.setSedBehandling(new SedBehandling(true, Sakstyper.EU_EOS, b)));
+                .ifPresent(b -> journalpostDto.setSedBehandling(new SedBehandling(Sakstyper.EU_EOS, b)));
         }
         return Response.ok(journalpostDto).build();
     }

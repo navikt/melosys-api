@@ -5,18 +5,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class SedBehandling {
 
-    private boolean automatisk;
     private Sakstyper sakstype;
     private Behandlingstyper behandlingstyper;
 
-    public SedBehandling(boolean automatisk, Sakstyper sakstype, Behandlingstyper behandlingstyper) {
-        this.automatisk = automatisk;
+    public SedBehandling(Sakstyper sakstype, Behandlingstyper behandlingstyper) {
         this.sakstype = sakstype;
         this.behandlingstyper = behandlingstyper;
-    }
-
-    public boolean isAutomatisk() {
-        return automatisk;
     }
 
     public Sakstyper getSakstype() {
