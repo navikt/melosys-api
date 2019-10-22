@@ -21,6 +21,7 @@ public class Bruker {
     private String kjoenn;
     private String statsborgerskap;
     private String fnr;
+    private boolean harSensitiveOpplysninger;
 
     public String getFornavn() {
         return fornavn;
@@ -68,5 +69,13 @@ public class Bruker {
 
     public void setFnr(String fnr) {
         this.fnr = fnr;
+    }
+
+    public boolean harSensitiveOpplysninger() {
+        return harSensitiveOpplysninger;
+    }
+
+    public void setHarSensitiveOpplysninger(boolean harSensitiveOpplysninger) {
+        this.harSensitiveOpplysninger = harSensitiveOpplysninger;
     }
 }
