@@ -1,0 +1,2 @@
+INSERT INTO PROSESS_STEG(KODE, NAVN) VALUES ('SED_GENERELL_SAK_OPPRETT_OPPGAVE', 'Oppretter oppgave for behandling');
+INSERT INTO PROSESS_TYPE(KODE, NAVN) VALUES('SED_GENERELL_SAK', 'Oppretter sak for SED for generell behandling');

@@ -24,7 +24,7 @@
             <fødselsdato><xsl:value-of select="foedselsdato/foedselsdato"/></fødselsdato>
             <dødsdato><xsl:value-of select="doedsdato/doedsdato"/></dødsdato>
             <diskresjonskode>
-                <kode><xsl:value-of select="diskresjonskode/diskresjonskode"/></kode>
+                <kode><xsl:value-of select="diskresjonskode"/></kode>
             </diskresjonskode>
             <personstatus><xsl:value-of select="personstatus/personstatus"/></personstatus>
             <xsl:apply-templates />

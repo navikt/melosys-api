@@ -14,6 +14,7 @@ class KontrollFactory {
     List<Function<KontrollData, Unntak_periode_begrunnelser>> hentKontrollerForSedType(final SedType sedType) {
         switch (sedType) {
             case A001:
+                return a001Kontroller();
             case A003:
                 return a003Kontroller();
             case A009:
@@ -23,6 +24,21 @@ class KontrollFactory {
             default:
                 throw new UnsupportedOperationException("SedType: " + sedType + " er ikke støttet for automatiske kontroller");
         }
+    }
+
+    private List<Function<KontrollData, Unntak_periode_begrunnelser>> a001Kontroller() {
+        return Lists.newArrayList(
+            UnntaksperiodeKontroller::periodeErÅpen,
+            UnntaksperiodeKontroller::periodeEldreEnn3År,
+            UnntaksperiodeKontroller::periodeOver5År,
+            UnntaksperiodeKontroller::periodeOver1ÅrFremITid,
+            UnntaksperiodeKontroller::overlappendeMedlemsperiode,
+            UnntaksperiodeKontroller::statsborgerskapIkkeMedlemsland,
+            UnntaksperiodeKontroller::personDød,
+            UnntaksperiodeKontroller::personBosattINorge,
+            UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode,
+            UnntaksperiodeKontroller::utbetaltBarnetrygdytelser
+        );
     }
 
     private List<Function<KontrollData, Unntak_periode_begrunnelser>> a003Kontroller() {

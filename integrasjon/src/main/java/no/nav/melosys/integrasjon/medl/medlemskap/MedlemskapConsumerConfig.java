@@ -1,16 +1,16 @@
 package no.nav.melosys.integrasjon.medl.medlemskap;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.xml.namespace.QName;
+
 import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.MedlemskapV2;
-import org.apache.cxf.feature.LoggingFeature;
+import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.xml.namespace.QName;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class MedlemskapConsumerConfig {

@@ -79,7 +79,7 @@ public class GsakService implements GsakFasade {
     public Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
         SakDto sakDto = new SakDto();
 
-        if (SOEKNAD == behandlingstype) {
+        if (SOEKNAD == behandlingstype || VURDER_TRYGDETID == behandlingstype) {
             sakDto.setTema(Tema.MED.getKode());
         } else if (GYLDIGE_BEHANDLINGSTYPER_UFM.contains(behandlingstype)) {
             sakDto.setTema(Tema.UFM.getKode());

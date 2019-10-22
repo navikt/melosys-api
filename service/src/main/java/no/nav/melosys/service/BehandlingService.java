@@ -28,7 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.melosys.metrics.MetrikkerNavn.*;
+import static no.nav.melosys.metrics.MetrikkerNavn.BEHANDLINGER_AVSLUTTET;
+import static no.nav.melosys.metrics.MetrikkerNavn.BEHANDLINGER_OPPRETTET;
 
 @Service
 public class BehandlingService {
@@ -40,6 +41,7 @@ public class BehandlingService {
 
     private final Counter behandlingerOpprettet = Metrics.counter(BEHANDLINGER_OPPRETTET);
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
+    private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
 
     @Autowired
     public BehandlingService(BehandlingRepository behandlingRepository,
@@ -77,9 +79,10 @@ public class BehandlingService {
 
     /**
      * Oppdaterer status for en behandling med ID {@code behandlingID}.
-     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
+     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas,
+     *  eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
      */
-    public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException {
+    public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
 
@@ -90,6 +93,10 @@ public class BehandlingService {
         }
         behandling.setStatus(status);
         behandlingRepository.save(behandling);
+
+        if (status == Behandlingsstatus.AVSLUTTET) {
+            oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        }
     }
 
     private boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
@@ -162,7 +169,7 @@ public class BehandlingService {
 
     public void avsluttBehandling(long behandlingId) throws IkkeFunnetException {
         Behandling behandling = behandlingRepository.findById(behandlingId)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();
@@ -170,12 +177,12 @@ public class BehandlingService {
 
     public Behandling hentBehandling(long behandlingId) throws IkkeFunnetException {
         return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
     public Behandling hentBehandlingUtenSaksopplysninger(long behandlingId) throws IkkeFunnetException {
         return behandlingRepository.findById(behandlingId)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
     public void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {

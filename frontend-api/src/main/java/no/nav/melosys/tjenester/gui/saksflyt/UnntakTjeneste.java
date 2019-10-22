@@ -49,7 +49,7 @@ public class UnntakTjeneste extends RestTjeneste {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/{behandlingID}/innhentinfo")
-    public Response innhentInformasjonUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws FunksjonellException {
+    public Response innhentInformasjonUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws FunksjonellException, TekniskException {
         unntaksperiodeService.behandlingUnderAvklaring(behandlingId);
         return Response.noContent().build();
     }

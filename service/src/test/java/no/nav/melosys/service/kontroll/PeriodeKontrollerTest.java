@@ -55,7 +55,7 @@ public class PeriodeKontrollerTest {
 
     @Test
     public void periodeOver5År_periode4År_registrerTreff() {
-        assertThat(PeriodeKontroller.periodeOver5År(LocalDate.now(), LocalDate.now().plusYears(4))).isFalse();
+        assertThat(PeriodeKontroller.periodeOver5År(LocalDate.now(), LocalDate.now().plusYears(4).plusMonths(11))).isFalse();
     }
 
     @Test

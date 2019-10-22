@@ -31,24 +31,28 @@ public final class ExceptionMapper {
     }
 
     public static MelosysException springExTilMelosysEx(RestClientException ex) {
+        return springExTilMelosysEx(ex, ex.getMessage());
+    }
+
+    public static MelosysException springExTilMelosysEx(RestClientException ex, String feilmelding) {
         if (ex instanceof HttpStatusCodeException) {
             switch (((HttpStatusCodeException)ex).getStatusCode()) {
                 case UNAUTHORIZED:
                 case FORBIDDEN:
-                    return new SikkerhetsbegrensningException(ex);
+                    return new SikkerhetsbegrensningException(feilmelding, ex);
                 case NOT_FOUND:
-                    return new IkkeFunnetException(ex);
+                    return new IkkeFunnetException(feilmelding, ex);
                 case INTERNAL_SERVER_ERROR:
                 case BAD_REQUEST:
                 case METHOD_NOT_ALLOWED:
                 case SERVICE_UNAVAILABLE:
-                    return new IntegrasjonException(ex);
+                    return new IntegrasjonException(feilmelding, ex);
                 default:
-                    return new TekniskException(ex);
+                    return new TekniskException(feilmelding, ex);
             }
         }
 
-        return new TekniskException(ex);
+        return new TekniskException(feilmelding, ex);
     }
     
 }

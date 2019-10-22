@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -176,7 +177,7 @@ public class SedDataBygger {
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
             arbeidssted.setNavn(arb.getForetakNavn());
         } else {
-            IkkeFysiskArbeidssted ikkeFysiskArbeidssted = (IkkeFysiskArbeidssted)arb; 
+            IkkeFysiskArbeidssted ikkeFysiskArbeidssted = (IkkeFysiskArbeidssted)arb;
             arbeidssted.setNavn(ikkeFysiskArbeidssted.getEnhetNavn());
             arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
         }
@@ -191,9 +192,18 @@ public class SedDataBygger {
         bruker.setFoedseldato(personDokument.fødselsdato);
         bruker.setKjoenn(personDokument.kjønn.getKode());
         bruker.setStatsborgerskap(personDokument.statsborgerskap.getKode());
+        bruker.setHarSensitiveOpplysninger(hentHarSensitiveOpplysninger(personDokument.diskresjonskode));
 
         return bruker;
 
+    }
+
+    private static boolean hentHarSensitiveOpplysninger(Diskresjonskode diskresjonskode) {
+        if (diskresjonskode == null) {
+            return false;
+        }
+
+        return diskresjonskode.erKode6();
     }
 
     private static Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
