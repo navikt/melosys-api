@@ -34,6 +34,12 @@ final class UnntaksperiodeKontroller {
             Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD : null;
     }
 
+    static Unntak_periode_begrunnelser periodeOver5År(KontrollData kontrollData) {
+        return PeriodeKontroller.periodeOver5År(
+            kontrollData.sedDokument.getLovvalgsperiode().getFom(), kontrollData.sedDokument.getLovvalgsperiode().getTom()) ?
+                Unntak_periode_begrunnelser.PERIODEN_OVER_5_AR : null;
+    }
+
     static Unntak_periode_begrunnelser periodeEldreEnn3År(KontrollData kontrollData) {
         return PeriodeKontroller.datoEldreEnn3År(kontrollData.sedDokument.getLovvalgsperiode().getFom()) ?
             Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL : null;
