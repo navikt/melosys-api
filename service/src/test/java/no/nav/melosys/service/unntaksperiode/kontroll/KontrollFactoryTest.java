@@ -14,6 +14,12 @@ public class KontrollFactoryTest {
     private final KontrollFactory kontrollFactory = new KontrollFactory();
 
     @Test
+    public void hentKontrollerA001_verifiserKontroller() {
+        List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A001);
+        assertThat(kontroller).hasSize(10);
+    }
+
+    @Test
     public void hentKontrollerA003_verifiserKontroller() {
         List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A003);
         assertThat(kontroller).hasSize(10);
