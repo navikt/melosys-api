@@ -159,6 +159,17 @@ public class LandvelgerServiceTest {
     }
 
     @Test
+    public void hentAlleArbeidsland_medArt161_girSøknadsland() throws Exception {
+        Behandlingsresultat resultat = lagBehandlingsresultat(anmodningsperiode);
+        resultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+
+        oppfyll(Vilkaar.FO_883_2004_ART16_1);
+        søknad.soeknadsland.landkoder.add(søknadsland.getKode());
+        Collection<Landkoder> land = landvelgerService.hentAlleArbeidsland(behandlingID);
+        assertThat(land).containsExactly(søknadsland);
+    }
+
+    @Test
     public void hentTrygdemyndighetsland_medArt121_girSøknadsland() throws FunksjonellException {
         lagBehandlingsresultat(lovvalgsperiode);
         oppfyll(Vilkaar.FO_883_2004_ART12_1);
