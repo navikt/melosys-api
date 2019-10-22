@@ -78,7 +78,8 @@ public class BehandlingService {
 
     /**
      * Oppdaterer status for en behandling med ID {@code behandlingID}.
-     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
+     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas,
+     *  eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
      */
     public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingRepository.findById(behandlingID)
