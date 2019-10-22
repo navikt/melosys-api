@@ -203,9 +203,10 @@ public class ProsessinstansService {
         lagre(nyprosessinstans);
     }
 
-    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode) {
+    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode, String fritekst) {
         Prosessinstans nyprosessinstans = new Prosessinstans();
         nyprosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiode);
+        nyprosessinstans.setData(ProsessDataKey.OPPGAVE_ID);
         nyprosessinstans.setBehandling(behandling);
         nyprosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
         nyprosessinstans.setSteg(ProsessSteg.IV_FORKORT_PERIODE);
