@@ -115,7 +115,7 @@ public class JournalfoeringServiceTest {
     public void opprettOgJournalfør_erSed_prosessinstansOpprettet() throws MelosysException {
         journalpost.setMottaksKanal("EESSI");
         journalpost.getHoveddokument().setNavSkjemaID("A009");
-        when(eessiService.støtterAutomatiskBehandling(anyString(), anyString())).thenReturn(Boolean.TRUE);
+        when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.TRUE);
 
         journalfoeringService.opprettOgJournalfør(opprettDto);
         verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(), anyString());

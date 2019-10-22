@@ -1,5 +1,7 @@
 package no.nav.melosys.service.journalforing;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
@@ -54,7 +56,7 @@ public class JournalfoeringService {
     public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         Journalpost journalpost = hentJournalpost(journalfoeringDto.getJournalpostID());
 
-        if (journalpost.mottaksKanalErEessi() && eessiService.støtterAutomatiskBehandling(journalfoeringDto.getJournalpostID(), journalpost.getHoveddokument().getNavSkjemaID())) {
+        if (journalpost.mottaksKanalErEessi() && eessiService.støtterAutomatiskBehandling(journalfoeringDto.getJournalpostID())) {
             opprettProsessinstansSedMottak(journalfoeringDto);
         } else if (Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(journalfoeringDto.getBehandlingstypeKode())) {
             opprettProsessinstansBrevAouMottak(journalfoeringDto);
@@ -204,5 +206,24 @@ public class JournalfoeringService {
         if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getUnntakFraLovvalgsland())) {
             throw new FunksjonellException("Unntak fra lovvalgsland mangler");
         }
+    }
+
+    public void journalførSed(JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
+        validerJournalfoerSed(journalfoeringSedDto);
+        prosessinstansService.opprettProsessinstansSedMottak(journalfoeringSedDto.getJournalpostID(), journalfoeringSedDto.getBrukerID());
+    }
+
+    private void validerJournalfoerSed(JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
+
+        if (!eessiService.støtterAutomatiskBehandling(journalfoeringSedDto.getJournalpostID())) {
+            throw new FunksjonellException("Sed tilknyttet journalpost " + journalfoeringSedDto.getJournalpostID()
+                + " støtter ikke automatisk behandling!");
+        } else if (StringUtils.isEmpty(journalfoeringSedDto.getBrukerID())) {
+            throw new FunksjonellException("BrukerID er påkrevd!");
+        }
+    }
+
+    public Optional<Behandlingstyper> finnBehandlingstypeForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
+        return eessiService.finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID);
     }
 }

@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +14,7 @@ import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
@@ -42,10 +41,6 @@ public class EessiService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final boolean skalSendeSed;
-
-    private static final List<SedType> AUTOMATISK_BEHANDLING_SED_TYPER = Arrays.asList(
-        SedType.A001, SedType.A003, SedType.A009, SedType.A010
-    );
 
     public EessiService(@Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed, SedDataBygger sedDataBygger,
                         SedDataGrunnlagFactory dataGrunnlagFactory, EessiConsumer eessiConsumer,
@@ -114,22 +109,15 @@ public class EessiService {
         return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, statuser);
     }
 
-    public boolean støtterAutomatiskBehandling(String journalpostID, String sedType) throws MelosysException {
-        if (sedType == null || Arrays.stream(SedType.values()).map(SedType::name).noneMatch(s -> s.equals(sedType))) {
-            return false;
-        }
-        SedType sedTypeEnum = SedType.valueOf(sedType);
-
-        if (sedTypeEnum == SedType.A003) {
-            return !norgeErUtpekt(journalpostID);
-        }
-
-        return AUTOMATISK_BEHANDLING_SED_TYPER.contains(sedTypeEnum);
+    public boolean støtterAutomatiskBehandling(String journalpostID) throws MelosysException {
+        return finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID).isPresent();
     }
 
-    private boolean norgeErUtpekt(String journalpostID) throws MelosysException {
+    public Optional<Behandlingstyper> finnBehandlingstypeForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = hentSedTilknyttetJournalpost(journalpostID);
-        return Landkoder.NO.name().equals(melosysEessiMelding.getLovvalgsland());
+        String sedType = melosysEessiMelding.getSedType();
+        String lovvalgsland = melosysEessiMelding.getLovvalgsland();
+        return SedTypeTilBehandlingstypeMapper.finnBehandlingstypeForSedType(sedType, lovvalgsland);
     }
 
     public MelosysEessiMelding hentSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
