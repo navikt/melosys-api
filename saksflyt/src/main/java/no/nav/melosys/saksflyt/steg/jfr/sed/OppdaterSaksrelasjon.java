@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
@@ -31,9 +30,8 @@ public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
 
-        Long gsakSaksnummer = fagsak.getGsakSaksnummer();
+        Long gsakSaksnummer = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
         String rinaSaksnummer = melosysEessiMelding.getRinaSaksnummer();
         String bucType = melosysEessiMelding.getBucType();
 
