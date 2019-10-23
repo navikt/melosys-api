@@ -7,11 +7,14 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,18 +34,31 @@ public class SaksopplysningerService {
     private final ProsessinstansService prosessinstansService;
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final SaksopplysningRepository saksopplysningRepo;
 
     @Autowired
     public SaksopplysningerService(TpsFasade tpsFasade,
                                    AaregFasade aaregFasade,
                                    ProsessinstansService prosessinstansService,
                                    BehandlingRepository behandlingRepository,
-                                   BehandlingsresultatService behandlingsresultatService) {
+                                   BehandlingsresultatService behandlingsresultatService,
+                                   SaksopplysningRepository saksopplysningRepo) {
         this.tpsFasade = tpsFasade;
         this.aaregFasade = aaregFasade;
         this.prosessinstansService = prosessinstansService;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.saksopplysningRepo = saksopplysningRepo;
+    }
+
+    public Optional<PersonDokument> finnPersonOpplysninger(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSOPL)
+            .map(s -> (PersonDokument) s.getDokument());
+    }
+
+    public Optional<SedDokument> finnSedOpplysninger(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.SEDOPPL)
+            .map(s -> (SedDokument) s.getDokument());
     }
 
     /***

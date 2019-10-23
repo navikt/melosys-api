@@ -25,6 +25,7 @@ class BrevDataMapperRuter {
         mappere.put(Produserbaredokumenter.MELDING_HENLAGT_SAK, HenleggelsesbrevMapper.class);
         mappere.put(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class);
         mappere.put(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, AnmodningUnntakMapper.class);
+        mappere.put(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD, VideresendSoknadMapper.class);
     }
 
     private BrevDataMapperRuter() {

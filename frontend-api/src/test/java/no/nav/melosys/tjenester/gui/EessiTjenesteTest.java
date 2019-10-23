@@ -55,7 +55,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         fagsak.setGsakSaksnummer(123L);
         behandling.setFagsak(fagsak);
 
-        when(behandlingService.hentBehandling(eq(123L))).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(123L))).thenReturn(behandling);
 
         eessiTjeneste = new EessiTjeneste(eessiService, behandlingService);
     }
@@ -92,15 +92,15 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentBucerUnderArbeid() throws IOException, MelosysException {
-        when(eessiService.hentTilknyttedeBucer(anyLong(), anyString()))
+    public void hentBucer() throws IOException, MelosysException {
+        when(eessiService.hentTilknyttedeBucer(anyLong(), anyList()))
             .thenReturn(Arrays.asList(
                 bucInformasjon(),
                 bucInformasjon(),
                 bucInformasjon()
             ));
 
-        Response response = eessiTjeneste.hentBucer(123L, "utkast");
+        Response response = eessiTjeneste.hentBucer(123L, Arrays.asList("utkast", "sendt"));
         assertThat(response.getEntity()).isInstanceOf(BucerTilknyttetBehandlingDto.class);
 
         BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto) response.getEntity();

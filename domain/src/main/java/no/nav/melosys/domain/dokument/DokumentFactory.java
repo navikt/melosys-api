@@ -92,8 +92,7 @@ public class DokumentFactory {
     public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
-        String dokumentXml = saksopplysning.getDokumentXml();
-        if (dokumentXml == null) {
+        if (saksopplysning.getDokumentXml() == null) {
             saksopplysning.setDokument(null);
             return null;
         }

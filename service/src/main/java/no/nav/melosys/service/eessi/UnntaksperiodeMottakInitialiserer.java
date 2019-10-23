@@ -69,8 +69,10 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
     }
 
     private Behandlingstyper hentBehandlingstypeForSedType(SedType sedType) {
-        if (sedType == SedType.A009 || sedType == SedType.A010) {
-            return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD;
+        if (sedType == SedType.A009) {
+            return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+        } else if (sedType == SedType.A010) {
+            return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
         } else if (sedType == SedType.A003) {
             return Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV;
         }

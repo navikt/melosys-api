@@ -4,10 +4,8 @@ import java.util.List;
 
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.exception.*;
 
 public interface JoarkFasade {
 
@@ -30,6 +28,11 @@ public interface JoarkFasade {
      * Henter en liste med journalposter knyttet til en sak.
      */
     List<Journalpost> hentKjerneJournalpostListe(Long gsakSakID) throws IntegrasjonException, SikkerhetsbegrensningException;
+
+    /**
+     * Oppretter en journalpost  i Joark
+     */
+    String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) throws TekniskException;
 
     /**
      * Oppdaterer en journalpost i Joark

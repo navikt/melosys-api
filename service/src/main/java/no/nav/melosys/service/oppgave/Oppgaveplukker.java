@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -87,7 +88,11 @@ public class Oppgaveplukker {
             }
         }
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, sakstyper, Collections.emptySet(), behandlingstemaer);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstyper, behandlingstemaer);
+        if (oppgavetyper.contains(Oppgavetyper.BEH_SAK_MK) && behandlingstyper.contains(Behandlingstyper.SOEKNAD)) {
+            ufordelteOppgaver.addAll(hentOppgaverGammeltBehandlingstema());
+        }
+
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
@@ -99,6 +104,12 @@ public class Oppgaveplukker {
         return valg;
     }
 
+    private Collection<Oppgave> hentOppgaverGammeltBehandlingstema() throws FunksjonellException, TekniskException {
+        //Byttet behandlingstema-kode for EU/EØS 4.10.2019. Må fortsatt kunne plukke med gammelt tema
+        return gsakFasade.finnUtildelteOppgaverEtterFrist(Sets.newHashSet(Oppgavetyper.BEH_SAK_MK),
+            Collections.emptySet(), Sets.newHashSet(Behandlingstema.EU_EOS_GAMMEL_KODE));
+    }
+
     Set<Behandlingstema> hentBehandlingstema(Set<Sakstyper> fagsakstypeListe) {
         return fagsakstypeListe.stream()
             .map(sakstyper -> Behandlingstema.valueOf(sakstyper.name()))
@@ -107,7 +118,7 @@ public class Oppgaveplukker {
 
     Set<Oppgavetyper> hentOppgavetyper(Set<Behandlingstyper> behandlingstypeListe) {
         return behandlingstypeListe.stream()
-            .map(Oppgave::hentOppgavetype)
+            .map(OppgaveFactory::hentOppgavetype)
             .collect(Collectors.toSet());
     }
 
@@ -161,7 +172,7 @@ public class Oppgaveplukker {
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
 
-        Optional<Oppgave> valg = oppgaver.stream().min(Oppgave.høyestTilLavestPrioritet);
+        Optional<Oppgave> valg = oppgaver.stream().max(Oppgave.lavestTilHøyestPrioritet);
         // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();

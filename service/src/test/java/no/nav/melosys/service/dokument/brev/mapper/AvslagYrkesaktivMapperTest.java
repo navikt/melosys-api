@@ -5,6 +5,7 @@ import java.util.*;
 import javax.xml.bind.JAXBException;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
+import no.nav.dok.melosysbrev._000081.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
@@ -12,7 +13,10 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
@@ -28,6 +32,7 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodnin
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.lagAlleVilkaarBegrunnelser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AvslagYrkesaktivMapperTest {
@@ -125,6 +130,20 @@ public class AvslagYrkesaktivMapperTest {
 
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
+    }
+
+    @Test
+    public void mapTilBrevXml_kanMappeAlleKodeverksverdierForArt16_1_avslag() throws Exception {
+        AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
+        BrevDataAnmodningUnntakOgAvslag brevdata = new BrevDataAnmodningUnntakOgAvslag("");
+        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_avslag.class);
+        for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
+            Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+            vilkaarsresultat.setBegrunnelser(Collections.singleton(begrunnelse));
+            vilkaarsresultat.setBegrunnelseFritekst("Fritekst");
+            brevdata.art16Vilkaar = Optional.of(vilkaarsresultat);
+            spy.mapArt161Avslag(new Fag(), brevdata);
+        }
     }
 
     private Vilkaarsresultat lagVilkaarsresultat(Vilkaar vilkaar, boolean oppfylt, Kodeverk... vilkårbegrunnelser) {

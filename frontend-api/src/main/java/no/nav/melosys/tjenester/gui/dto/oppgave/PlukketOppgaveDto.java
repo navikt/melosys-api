@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto.oppgave;
 public class PlukketOppgaveDto {
 
     private String oppgaveID;
-    private String oppgavetype;
+    private String behandlingstype;
     private String saksnummer;
     private String journalpostID;
     private Long behandlingID;
@@ -16,12 +16,12 @@ public class PlukketOppgaveDto {
         this.oppgaveID = oppgaveId;
     }
 
-    public String getOppgavetype() {
-        return oppgavetype;
+    public String getBehandlingstype() {
+        return behandlingstype;
     }
 
-    public void setOppgavetype(String oppgavetype) {
-        this.oppgavetype = oppgavetype;
+    public void setBehandlingstype(String behandlingstype) {
+        this.behandlingstype = behandlingstype;
     }
 
     public String getSaksnummer() {

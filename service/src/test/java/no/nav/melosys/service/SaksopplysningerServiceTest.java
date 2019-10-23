@@ -15,6 +15,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,27 +30,25 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SaksopplysningerServiceTest {
+    @Mock
+    private TpsFasade tpsFasade;
+    @Mock
+    private AaregFasade aaregFasade;
+    @Mock
+    private ProsessinstansService prosessinstansService;
+    @Mock
+    private BehandlingRepository behandlingRepo;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private SaksopplysningRepository saksopplysningRepository;
 
     private SaksopplysningerService saksopplysningerService;
 
-    @Mock
-    private TpsFasade tpsFasade;
-
-    @Mock
-    private AaregFasade aaregFasade;
-
-    @Mock
-    private ProsessinstansService prosessinstansService;
-
-    @Mock
-    private BehandlingRepository behandlingRepo;
-
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-
     @Before
     public void setUp() {
-        saksopplysningerService = new SaksopplysningerService(tpsFasade, aaregFasade, prosessinstansService, behandlingRepo, behandlingsresultatService);
+        saksopplysningerService = new SaksopplysningerService(tpsFasade, aaregFasade, prosessinstansService,
+            behandlingRepo, behandlingsresultatService, saksopplysningRepository);
     }
 
     @Test

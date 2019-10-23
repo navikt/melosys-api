@@ -9,6 +9,9 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer;
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Person;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.UtenlandskPostadresse;
@@ -35,12 +38,14 @@ public class DokSysServiceTest {
 
     @Mock
     private DokumentproduksjonConsumer dokumentproduksjonConsumer;
+    @Mock
+    private DistribuerJournalpostConsumer distribuerJournalpostConsumer;
 
     private DoksysService dokSysService;
 
     @Before
     public void setUp() {
-        dokSysService = new DoksysService(dokumentproduksjonConsumer);
+        dokSysService = new DoksysService(dokumentproduksjonConsumer, distribuerJournalpostConsumer);
     }
 
     @Test
@@ -166,5 +171,49 @@ public class DokSysServiceTest {
         Document doc = builder.newDocument();
 
         return doc.createElement("brevData");
+    }
+
+    @Test
+    public void distribuerJournalpost_norskAdresse() {
+        StrukturertAdresse mottakeradresse = new StrukturertAdresse();
+        mottakeradresse.landkode = "NO";
+        mottakeradresse.gatenavn = "gate";
+        mottakeradresse.postnummer = "0463";
+        mottakeradresse.region = "Oslo";
+        mottakeradresse.husnummer = "4B";
+        mottakeradresse.poststed = "Oslo";
+
+        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
+            .thenReturn(new DistribuerJournalpostResponse("123"));
+
+        dokSysService.distribuerJournalpost("123456", mottakeradresse);
+
+        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
+        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
+
+        assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
+        assertThat(captor.getValue().getAdresse().getAdressetype()).isEqualTo("norskPostadresse");
+    }
+
+    @Test
+    public void distribuerJournalpost_utenlandskAdresse() {
+        StrukturertAdresse mottakeradresse = new StrukturertAdresse();
+        mottakeradresse.landkode = "SE";
+        mottakeradresse.gatenavn = "svensk gate";
+        mottakeradresse.postnummer = "9999";
+        mottakeradresse.region = "Sverige";
+        mottakeradresse.husnummer = "4B";
+        mottakeradresse.poststed = "Stockholm";
+
+        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
+            .thenReturn(new DistribuerJournalpostResponse("123"));
+
+        dokSysService.distribuerJournalpost("123456", mottakeradresse);
+
+        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
+        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
+
+        assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
+        assertThat(captor.getValue().getAdresse().getAdressetype()).isEqualTo("utenlandskPostadresse");
     }
 }

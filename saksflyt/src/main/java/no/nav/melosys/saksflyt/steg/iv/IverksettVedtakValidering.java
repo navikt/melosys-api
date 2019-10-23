@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import java.util.EnumSet;
-import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -89,9 +88,9 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
 
     private void validerLovalgsperioder(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
         if (Behandlingsresultattyper.valueOf(prosessinstans.getData(BEHANDLINGSRESULTATTYPE)) == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
-            Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
-            if (lovvalgsperioder.isEmpty()) {
-                throw new FunksjonellException("Lovvalgsperiode mangler for behandlingsresultat " + behandlingsresultat.getId());
+            Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+            if (!lovvalgsperiode.harGyldigTilstand()) {
+                throw new FunksjonellException("Lovvalgsperioden har en ugyldig kombinasjon av lovvalgsresultat og lovvalgsland");
             }
         }
     }

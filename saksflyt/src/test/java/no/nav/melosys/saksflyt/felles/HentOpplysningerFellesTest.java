@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -19,7 +18,6 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,8 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HentOpplysningerFellesTest {
@@ -38,8 +35,6 @@ public class HentOpplysningerFellesTest {
 
     @Mock
     private TpsFasade tpsFasade;
-    @Mock
-    private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -55,7 +50,7 @@ public class HentOpplysningerFellesTest {
 
     @Before
     public void setUp() throws Exception {
-        hentOpplysningerFelles = new HentOpplysningerFelles(tpsFasade, fagsakService, behandlingService, medlFasade, inntektService, utbetaldataService, saksopplysningRepository);
+        hentOpplysningerFelles = new HentOpplysningerFelles(tpsFasade, behandlingService, medlFasade, inntektService, utbetaldataService, saksopplysningRepository);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(FNR);
         when(tpsFasade.hentPersonMedAdresse(anyString())).thenReturn(new Saksopplysning());
     }
@@ -70,7 +65,6 @@ public class HentOpplysningerFellesTest {
         hentOpplysningerFelles.hentOgLagrePersonopplysninger(AKTØR_ID, behandling);
 
         verify(tpsFasade).hentIdentForAktørId(eq(AKTØR_ID));
-        verify(fagsakService).leggTilAktør(eq("123"), eq(Aktoersroller.BRUKER), eq(AKTØR_ID));
         verify(tpsFasade).hentPersonMedAdresse(FNR);
         verify(saksopplysningRepository).save(any(Saksopplysning.class));
     }
@@ -156,6 +150,19 @@ public class HentOpplysningerFellesTest {
 
         verify(behandlingService).hentBehandling(anyLong());
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), any(), any());
+    }
+
+    @Test
+    public void hentOgLagreUtbetalingsopplysninger_periode5ÅrTilbakeITid_kanIkkeHenteUtbetalOpplysninger() throws FunksjonellException, TekniskException {
+        LocalDate fom = LocalDate.now().minusYears(5);
+        LocalDate tom = LocalDate.now().minusYears(4);
+        Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(hentBehandling(saksopplysning));
+
+        hentOpplysningerFelles.hentOgLagreUtbetalingsopplysninger(2L, FNR);
+
+        verify(behandlingService).hentBehandling(anyLong());
+        verify(utbetaldataService, never()).hentUtbetalingerBarnetrygd(anyString(), any(), any());
     }
 
     private Behandling hentBehandling(Saksopplysning saksopplysning) {

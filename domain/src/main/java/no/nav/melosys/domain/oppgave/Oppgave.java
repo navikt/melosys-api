@@ -5,18 +5,13 @@ import java.util.Comparator;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 /**
  * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
  */
 public final class Oppgave {
-    private static final int FRIST_JFR_DAGER = 1;
-    private static final int FRIST_VUR_DAGER = 1;
-    private static final int FRIST_BEH_UKER = 12;
-
     private final String aktørId;
     private final Behandlingstema behandlingstema;
     private final Behandlingstyper behandlingstype;
@@ -284,59 +279,28 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.BEH_SED;
     }
 
-    public static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
-        switch (behandlingstype) {
-            case SOEKNAD:
-                return Oppgavetyper.BEH_SAK_MK;
-            case ENDRET_PERIODE:
-                return Oppgavetyper.VUR;
-            case UTL_MYND_UTPEKT_SEG_SELV:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD:
-                return Oppgavetyper.BEH_SED;
-            case ANKE:
-            case KLAGE:
-            case UTL_MYND_UTPEKT_NORGE:
-            case NY_VURDERING:
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-            case ØVRIGE_SED:
-            default:
-                throw new UnsupportedOperationException();
-        }
-    }
-
     /**
-     * Sorter oppgaver basert på prioritet (først) og frist.
+     *  Sorter oppgaver basert på prioritet (først), frist og aktiv dato
      */
-    public static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
-        // Merk: Bryter med konvensjonen (a == b og b == c → a == c), men dette er ok.
+    public static final Comparator<Oppgave> lavestTilHøyestPrioritet = (a, b) -> {
         int res = 0;
-        if (a.getPrioritet() == b.getPrioritet())
-            res = 0;
-        else if (a.getPrioritet() == PrioritetType.HOY)
-            res = -1;
-        else if (b.getPrioritet() == PrioritetType.HOY)
-            res = 1;
-        else if (a.getPrioritet() == PrioritetType.NORM)
-            res = -1;
-        else if (b.getPrioritet() == PrioritetType.NORM)
-            res = 1;
+
+        res = a.getPrioritet().compareTo(b.getPrioritet());
+
         if (res == 0) {
-            if (a.getFristFerdigstillelse() == null || b.getFristFerdigstillelse() == null)
-                return 0;
-            return a.getFristFerdigstillelse().compareTo(b.getFristFerdigstillelse());
+            res = Math.negateExact(compareNullableLocaldate(a.getFristFerdigstillelse(), b.getFristFerdigstillelse()));
+            if (res == 0) {
+                res = Math.negateExact(compareNullableLocaldate(a.getAktivDato(), b.getAktivDato()));
+            }
         }
+
         return res;
     };
 
-    public LocalDate lagFristFerdigstillelse(LocalDate fraDato) throws FunksjonellException {
-        if (erJournalFøring()) {
-            return fraDato.plusDays(FRIST_JFR_DAGER);
-        } else if (erBehandling() || erSedBehandling()) {
-            return fraDato.plusWeeks(FRIST_BEH_UKER);
-        } else if (erVurderDokument()) {
-            return fraDato.plusWeeks(FRIST_VUR_DAGER);
-        } else {
-            throw new FunksjonellException("Type " + oppgavetype.getKode() + " støttes ikke.");
-        }
+    private static int compareNullableLocaldate(LocalDate a, LocalDate b) {
+        if (a != null && b != null) return a.compareTo(b);
+        else if (a == null && b == null) return 0;
+        else if (a == null) return -1;
+        else return 1;
     }
 }

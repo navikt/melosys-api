@@ -6,19 +6,16 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
-import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,22 +27,22 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadslandkoder;
 @Service
 public class LandvelgerService {
     private AvklartefaktaService avklartefaktaService;
-    private BehandlingService behandlingService;
-    private VilkaarsresultatRepository vilkaarsresultatRepository;
     private BehandlingsresultatService behandlingsresultatService;
+    private SoeknadService søknadService;
+    private VilkaarsresultatRepository vilkaarsresultatRepository;
 
     @Autowired
     public LandvelgerService(AvklartefaktaService avklartefaktaService,
-                                BehandlingService behandlingService,
-                                VilkaarsresultatRepository vilkaarsresultatRepository,
-                                BehandlingsresultatService behandlingsresultatService) {
-        this.behandlingService = behandlingService;
+                             BehandlingsresultatService behandlingsresultatService,
+                             SoeknadService søknadService,
+                             VilkaarsresultatRepository vilkaarsresultatRepository) {
         this.avklartefaktaService = avklartefaktaService;
-        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.søknadService = søknadService;
+        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
-    public Landkoder hentArbeidsland(long behandlingID) throws FunksjonellException, TekniskException {
+    public Landkoder hentArbeidsland(long behandlingID) throws FunksjonellException {
         Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
         if (alleArbeidsland.size() != 1) {
             throw new FunksjonellException("Fant ingen eller flere enn ett arbeidsland");
@@ -53,10 +50,10 @@ public class LandvelgerService {
         return alleArbeidsland.iterator().next();
     }
 
-    public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException, TekniskException {
+    public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
-            SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandlingService.hentBehandling(behandlingID));
+            SoeknadDokument søknad = søknadService.hentSøknad(behandlingID);
             alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
         }
 
@@ -65,23 +62,23 @@ public class LandvelgerService {
         return alleArbeidsland;
     }
 
-    private boolean erArtikkel13(long behandlingId) {
-        try {
-            Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingId).hentValidertLovvalgsperiode();
-            return lovvalgsperiode.erArtikkel13();
-        } catch (IkkeFunnetException e) {
-            // Ignorer
-        }
-        return false;
+    private boolean erArtikkel13(long behandlingId) throws IkkeFunnetException {
+        Medlemskapsperiode medlemskapsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingId).hentValidertMedlemskapsperiode();
+        return medlemskapsperiode.erArtikkel13();
     }
 
-    public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException, TekniskException {
+    public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
         Collection<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandlingID);
-
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        SoeknadDokument søknad = søknadService.hentSøknad(behandlingID);
         if (oppfylteVilkår.contains(FO_883_2004_ART11_3A)) {
             return Collections.singletonList(hentBostedsland(behandlingID, søknad));
+        }
+
+        if (erArtikkel13(behandlingID)) {
+            Landkoder bostedsland = hentBostedsland(behandlingID, søknad);
+            if (bostedsland != Landkoder.NO) {
+                return Collections.singletonList(bostedsland);
+            }
         }
 
         Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);

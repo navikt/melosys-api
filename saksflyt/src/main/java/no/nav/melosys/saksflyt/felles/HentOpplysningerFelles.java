@@ -7,7 +7,6 @@ import java.time.YearMonth;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.inntk.InntektService;
@@ -16,7 +15,6 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,6 @@ public class HentOpplysningerFelles {
     private static final Logger log = LoggerFactory.getLogger(HentOpplysningerFelles.class);
 
     private final TpsFasade tpsFasade;
-    private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final MedlFasade medlFasade;
     private final InntektService inntektService;
@@ -37,14 +34,12 @@ public class HentOpplysningerFelles {
 
     @Autowired
     public HentOpplysningerFelles(@Qualifier("system") TpsFasade tpsFasade,
-                                  FagsakService fagsakService,
                                   BehandlingService behandlingService,
                                   MedlFasade medlFasade,
                                   InntektService inntektService,
                                   UtbetaldataService utbetaldataService,
                                   SaksopplysningRepository saksopplysningRepository) {
         this.tpsFasade = tpsFasade;
-        this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.medlFasade = medlFasade;
         this.inntektService = inntektService;
@@ -54,8 +49,6 @@ public class HentOpplysningerFelles {
 
     public String hentOgLagrePersonopplysninger(String aktørId, Behandling behandling) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         String ident = tpsFasade.hentIdentForAktørId(aktørId);
-
-        fagsakService.leggTilAktør(behandling.getFagsak().getSaksnummer(), Aktoersroller.BRUKER, aktørId);
 
         Instant nå = Instant.now();
 
@@ -110,12 +103,23 @@ public class HentOpplysningerFelles {
 
     public void hentOgLagreUtbetalingsopplysninger(long behandlingId, String fnr) throws FunksjonellException, TekniskException {
 
-        Instant nå = Instant.now();
 
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
         LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
         LocalDate tom = sedDokument.getLovvalgsperiode().getTom();
+
+        LocalDate treÅrTilbake = LocalDate.now().minusYears(3);
+        if (fom.isBefore(treÅrTilbake)) {
+            if (tom != null && tom.isBefore(treÅrTilbake)) {
+                log.info("Kunne ikke hente utbetalingsdokument for behandling {} da periode er for langt tilbake i tid", behandlingId);
+                return;
+            }
+
+            fom = treÅrTilbake;
+        }
+
+        Instant nå = Instant.now();
 
         Periode periode = hentPeriodeForYtelser(fom, tom);
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd(fnr, periode.fom.atDay(1), periode.tom.atDay(1));

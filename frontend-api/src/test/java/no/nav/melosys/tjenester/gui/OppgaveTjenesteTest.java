@@ -2,14 +2,14 @@ package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
 
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -75,6 +75,11 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void plukkOppgave() throws FunksjonellException, TekniskException, IOException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setId(1L);
+        when(oppgaveService.hentAktivBehandling(anyString())).thenReturn(behandling);
+
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
         innData.setOppgavetype("BEH_SAK_MK");
@@ -116,17 +121,5 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         assertThat(tilbakelegging).isNotNull();
 
         valider(tilbakelegging, OPPGAVER_TILBAKELEGGE_SCHEMA, logger);
-    }
-
-    @Test
-    public void sokEtterBehandlingsoppgave() throws FunksjonellException, TekniskException, IOException {
-        BehandlingsoppgaveDto behandlingsoppgaveDto = defaultEasyRandom().nextObject(BehandlingsoppgaveDto.class);
-        List<BehandlingsoppgaveDto> oppgaver = Arrays.asList(behandlingsoppgaveDto);
-
-        when(oppgaveService.hentBehandlingsoppgaverMedBruker(anyString())).thenReturn(oppgaver);
-
-        List<BehandlingsoppgaveDto> oppgave = (List<BehandlingsoppgaveDto>) tjeneste.hentOppgaver("").getEntity();
-        assertThat(oppgave).isNotNull();
-        validerArray(oppgave, OPPGAVER_SOK_SCHEMA, logger);
     }
 }

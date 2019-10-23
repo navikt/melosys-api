@@ -2,15 +2,14 @@ package no.nav.melosys.integrasjon.eessi;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -38,6 +37,7 @@ public class EessiConsumerImpl implements EessiConsumer {
     private static final String VEDLEGG_FILNAVN = "vedlegg";
 
     private static final String SEND_AUTOMATISK = "sendAutomatisk";
+    private static final String STATUSER = "statuser";
 
     EessiConsumerImpl(RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
@@ -74,9 +74,9 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public void sendAnmodningUnntakSvar(SvarAnmodningUnntakDto svarAnmodningUnntakDto, String rinaSaksnummer) throws MelosysException {
-        exchange(String.format("/buc/LA_BUC_01/%s/svar", rinaSaksnummer), HttpMethod.POST,
-            new HttpEntity<>(svarAnmodningUnntakDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
+    public void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) throws MelosysException {
+        exchange(String.format("/buc/%s/sed/%s", rinaSaksnummer, sedType), HttpMethod.POST,
+            new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
             });
     }
 
@@ -120,10 +120,11 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, String status) throws MelosysException {
-        status = Optional.ofNullable(status).orElse("");
+    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException {
+        String uri = UriComponentsBuilder.fromPath(String.format("/sak/%s/bucer/", gsakSaksnummer))
+            .queryParam(STATUSER, statuser.toArray()).toUriString();
 
-        List<BucinfoDto> bucinfoDtoList = exchange(String.format("/sak/%s/bucer/?status=%s", gsakSaksnummer, status), HttpMethod.GET,
+        List<BucinfoDto> bucinfoDtoList = exchange(uri, HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucinfoDto>>() {
         });
 

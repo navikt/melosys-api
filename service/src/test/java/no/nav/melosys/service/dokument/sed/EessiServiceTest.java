@@ -80,6 +80,11 @@ public class EessiServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.SK);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
+        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
+        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
@@ -127,23 +132,23 @@ public class EessiServiceTest {
 
     @Test
     public void hentTilknyttedeBucer_forventListeMedRettType() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyString())).thenReturn(Arrays.asList(
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(Arrays.asList(
             easyRandom.nextObject(BucInformasjon.class),
             easyRandom.nextObject(BucInformasjon.class),
             easyRandom.nextObject(BucInformasjon.class)
         ));
 
-        List<BucInformasjon> tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, "utkast");
+        List<BucInformasjon> tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, Arrays.asList("utkast", "sendt"));
 
-        verify(eessiConsumer).hentTilknyttedeBucer(anyLong(), anyString());
+        verify(eessiConsumer).hentTilknyttedeBucer(anyLong(), anyList());
         assertThat(tilknyttedeBucer).hasSize(3);
         assertThat(tilknyttedeBucer).hasOnlyElementsOfType(BucInformasjon.class);
     }
 
     @Test(expected = MelosysException.class)
     public void hentTilknyttedeBucer_medFeilIConsumer_forventException() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyString())).thenThrow(new IntegrasjonException("Error!"));
-        eessiService.hentTilknyttedeBucer(123L, "utkast");
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList())).thenThrow(new IntegrasjonException("Error!"));
+        eessiService.hentTilknyttedeBucer(123L, Collections.singletonList("utkast"));
     }
 
     @Test
@@ -226,12 +231,12 @@ public class EessiServiceTest {
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        eessiService.sendAnmodningUnntakSvar(anmodningsperiodeSvar, 1L);
+        eessiService.sendAnmodningUnntakSvar(1L);
 
         verify(behandlingService).hentBehandling(eq(1L));
-        verify(eessiConsumer).sendAnmodningUnntakSvar(any(), any());
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
+        verify(dokumentdataGrunnlagFactory).av(any());
+        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A002));
     }
 
     @Test

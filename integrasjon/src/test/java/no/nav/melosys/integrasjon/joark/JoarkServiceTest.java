@@ -7,17 +7,19 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Status;
-import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
+import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.DokumentInformasjonMangler;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
@@ -58,6 +60,8 @@ public class JoarkServiceTest {
     private JournalConsumer journalConsumer;
     @Mock
     private JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
+    @Mock
+    private JournalpostapiConsumer journalpostapiConsumer;
     @Captor
     private ArgumentCaptor<PutJournalpostRequest> oppdaterJournalpostCaptor;
     @Captor
@@ -67,7 +71,7 @@ public class JoarkServiceTest {
 
     @Before
     public void setUp() {
-        this.joarkService = new JoarkService(inngaaendeJournalConsumer, journalConsumer, journalfoerInngaaendeConsumer);
+        this.joarkService = new JoarkService(inngaaendeJournalConsumer, journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer);
     }
 
     @Test
@@ -322,5 +326,62 @@ public class JoarkServiceTest {
         mangler.setTema(Status.MANGLER_IKKE);
         mangler.setTittel(Status.MANGLER);
         return mangler;
+    }
+
+    @Test
+    public void opprettJournalpost_ikkeValider_forventMetodekall() throws TekniskException {
+        when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
+            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
+
+        String journalpostId = joarkService.opprettJournalpost(lagOpprettJournalpost(), false);
+
+        verify(journalpostapiConsumer).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
+        assertThat(journalpostId).isNotEmpty();
+    }
+
+    @Test
+    public void opprettJournalpost_validerFelt_forventValidert() throws TekniskException {
+        when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
+            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
+
+        String journalpostId = joarkService.opprettJournalpost(lagOpprettJournalpost(), true);
+
+        verify(journalpostapiConsumer).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
+        assertThat(journalpostId).isNotEmpty();
+    }
+
+    @Test(expected = TekniskException.class)
+    public void opprettJournalpost_validerFelt_forventException() throws TekniskException {
+        OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
+        opprettJournalpost.setArkivSakId(null);
+        String journalpostId = joarkService.opprettJournalpost(opprettJournalpost, true);
+
+        verify(journalpostapiConsumer, never()).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
+        assertThat(journalpostId).isNotEmpty();
+    }
+
+    private OpprettJournalpost lagOpprettJournalpost() {
+        OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
+        opprettJournalpost.setJournalposttype(Journalposttype.UT);
+        opprettJournalpost.setJournalførendeEnhet("9999");
+        opprettJournalpost.setTema("tema");
+        opprettJournalpost.setMottaksKanal("kanal");
+        opprettJournalpost.setInnhold("innhold");
+        opprettJournalpost.setArkivSakId("12345");
+        opprettJournalpost.setBrukerId("12345678901");
+        opprettJournalpost.setKorrespondansepartNavn("navn");
+        opprettJournalpost.setKorrespondansepartId("id");
+        opprettJournalpost.setKorrespondansepartIdType("UTL_ORG");
+
+        FysiskDokument hoveddokument = new FysiskDokument();
+        hoveddokument.setTittel("tittel");
+        hoveddokument.setBrevkode("brevkode");
+        hoveddokument.setFiltype(FysiskDokument.Filtype.PDFA);
+        hoveddokument.setVariantFormat("ARKIV");
+        hoveddokument.setData("dokument".getBytes());
+        hoveddokument.setDokumentKategori(DokumentKategoriKode.SED.name());
+        opprettJournalpost.setHoveddokument(hoveddokument);
+
+        return opprettJournalpost;
     }
 }

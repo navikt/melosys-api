@@ -70,7 +70,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
         }
 
-        brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
+        brevdata.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
         brevdata.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
 
         brevdata.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()

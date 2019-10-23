@@ -65,6 +65,8 @@ public class BrevDataByggerVelger {
                                                     lovvalgsperiodeService,
                                                     anmodningsperiodeService,
                                                     brevbestillingDto);
+            case ORIENTERING_VIDERESENDT_SOEKNAD:
+                return new BrevDataByggerVideresend(landvelgerService, brevbestillingDto);
             case MELDING_HENLAGT_SAK:
                 return new BrevDataByggerHenleggelse(joarkService, brevbestillingDto);
             case MELDING_MANGLENDE_OPPLYSNINGER:

@@ -7,6 +7,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer;
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.Adresse;
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.*;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.ObjectFactory;
@@ -40,12 +43,14 @@ public class DoksysService implements DoksysFasade {
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
     private final DokumentproduksjonConsumer dokumentproduksjonConsumer;
+    private final DistribuerJournalpostConsumer distribuerJournalpostConsumer;
 
     private ObjectFactory objectFactory;
 
     @Autowired
-    public DoksysService(DokumentproduksjonConsumer dokumentproduksjonConsumer) {
+    public DoksysService(DokumentproduksjonConsumer dokumentproduksjonConsumer, DistribuerJournalpostConsumer distribuerJournalpostConsumer) {
         this.dokumentproduksjonConsumer = dokumentproduksjonConsumer;
+        this.distribuerJournalpostConsumer = distribuerJournalpostConsumer;
         this.objectFactory = new ObjectFactory();
     }
 
@@ -139,6 +144,41 @@ public class DoksysService implements DoksysFasade {
             | ProduserIkkeRedigerbartDokumentInputValideringFeilet e) {
             throw new IntegrasjonException(e);
         }
+    }
+
+    @Override
+    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse) {
+        DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
+            .journalpostId(journalpostId)
+            .bestillendeFagsystem(MELOSYS.getKode())
+            .dokumentProdApp(MELOSYS.getKode())
+            .adresse("NO".equalsIgnoreCase(mottakeradresse.landkode)
+                ? norskAdresse(mottakeradresse)
+                : utenlandskAdresse(mottakeradresse))
+            .build();
+
+        return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingId();
+    }
+
+    private static Adresse norskAdresse(StrukturertAdresse strukturertAdresse) {
+        return Adresse.builder()
+            .adressetype("norskPostadresse")
+            .adresselinje1(sammenslå(strukturertAdresse.gatenavn, strukturertAdresse.husnummer))
+            .adresselinje2(strukturertAdresse.region)
+            .postnummer(strukturertAdresse.postnummer)
+            .poststed(strukturertAdresse.poststed)
+            .land(strukturertAdresse.landkode)
+            .build();
+    }
+
+    private static Adresse utenlandskAdresse(StrukturertAdresse strukturertAdresse) {
+        return Adresse.builder()
+            .adressetype("utenlandskPostadresse")
+            .adresselinje1(sammenslå(strukturertAdresse.gatenavn, strukturertAdresse.husnummer))
+            .adresselinje2(sammenslå(strukturertAdresse.postnummer, strukturertAdresse.poststed))
+            .adresselinje3(strukturertAdresse.region)
+            .land(strukturertAdresse.landkode)
+            .build();
     }
 
     private UtenlandskPostadresse lagUtenlandskAdresse(UtenlandskMyndighet utenlandskMyndighet) {

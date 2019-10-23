@@ -27,6 +27,8 @@ public enum DokumenttypeIdMapper {
                 return "000125";
             case ORIENTERING_ANMODNING_UNNTAK:
                 return "000084";
+            case ORIENTERING_VIDERESENDT_SOEKNAD:
+                return "000146";
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
                 return "000082";
             case MELDING_HENLAGT_SAK:

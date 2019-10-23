@@ -4,8 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -16,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 
 @Service
 public class UnntaksperiodeService {
@@ -31,13 +34,15 @@ public class UnntaksperiodeService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void godkjennPeriode(Behandling behandling) throws FunksjonellException, TekniskException {
+    public void godkjennPeriode(long behandlingID) throws FunksjonellException, TekniskException {
+        Behandling behandling = hentOgValiderBehandling(behandlingID);
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(behandling);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void ikkeGodkjennPeriode(Behandling behandling, Set<String> begrunnelser, String fritekst) throws FunksjonellException, TekniskException {
+    public void ikkeGodkjennPeriode(long behandlingID, Set<String> begrunnelser, String fritekst) throws FunksjonellException, TekniskException {
+        Behandling behandling = hentOgValiderBehandling(behandlingID);
         Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);
         validerBegrunnelser(ikkeGodkjentBegrunnelser, fritekst);
         prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, ikkeGodkjentBegrunnelser, fritekst);
@@ -45,7 +50,9 @@ public class UnntaksperiodeService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void behandlingUnderAvklaring(Behandling behandling) throws FunksjonellException {
+    public void behandlingUnderAvklaring(long behandlingID) throws FunksjonellException {
+        Behandling behandling = hentOgValiderBehandling(behandlingID);
+        validerBehandling(behandling);
         prosessinstansService.opprettProsessinstansUnntaksperiodeUnderAvklaring(behandling);
         behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.AVVENT_DOK_UTL);
     }
@@ -56,6 +63,27 @@ public class UnntaksperiodeService {
             ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.valueOf(b));
         }
         return ikkeGodkjentBegrunnelser;
+    }
+
+    private Behandling hentOgValiderBehandling(long behandlingID) throws FunksjonellException {
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        validerBehandling(behandling);
+        return behandling;
+    }
+
+    private void validerBehandling(Behandling behandling) throws FunksjonellException {
+        Behandlingstyper behandlingstype = behandling.getType();
+
+        if (behandlingstype != REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+            && behandlingstype != REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+            && behandlingstype != UTL_MYND_UTPEKT_SEG_SELV) {
+            throw new FunksjonellException(
+                String.format("Behandling er ikke av type %s, %s eller %s", REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+                    REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, UTL_MYND_UTPEKT_SEG_SELV)
+            );
+        } else if (behandling.erAvsluttet()) {
+            throw new FunksjonellException("Behandlingen er avsluttet");
+        }
     }
 
     private void validerBegrunnelser(Set<Ikke_godkjent_begrunnelser> begrunnelser, String fritekst) throws FunksjonellException {

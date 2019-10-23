@@ -88,7 +88,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         return fag;
     }
 
-    private void mapArt161Avslag(Fag fag, BrevDataAnmodningUnntakOgAvslag brevdata) throws TekniskException {
+    void mapArt161Avslag(Fag fag, BrevDataAnmodningUnntakOgAvslag brevdata) throws TekniskException {
         Optional<Vilkaarsresultat> vilkaarsresultat = brevdata.art16Vilkaar;
         Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet());
         Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagTomArt161AvslagBegrunnelse();

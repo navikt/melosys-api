@@ -6,15 +6,14 @@ import java.util.Optional;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
@@ -62,9 +61,11 @@ public class OppgaveTjeneste extends RestTjeneste {
             if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling()) {
                 dto.setSaksnummer(oppgave.getSaksnummer());
             }
-            dto.setOppgavetype(oppgave.getOppgavetype().getKode());
+
+            Behandling behandling = oppgaveService.hentAktivBehandling(oppgave.getSaksnummer());
+            dto.setBehandlingID(behandling.getId());
+            dto.setBehandlingstype(behandling.getType().getKode());
             dto.setJournalpostID(oppgave.getJournalpostId());
-            dto.setBehandlingID(oppgaveService.hentAktivBehandlingId(oppgave.getSaksnummer()));
 
             return Response.ok(dto).build();
         } else {
@@ -106,20 +107,5 @@ public class OppgaveTjeneste extends RestTjeneste {
         oversiktDto.setJournalforing(journalføring);
         oversiktDto.setSaksbehandling(saksbehandling);
         return Response.ok(oversiktDto).build();
-    }
-
-    @GET
-    @Path("/sok")
-    @ApiOperation(
-        value = "Henter alle behandlingsoppgaver knyttet til en gitt bruker.",
-        response = BehandlingsoppgaveDto.class,
-        responseContainer = "List")
-    public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) throws FunksjonellException, TekniskException {
-        try {
-            List<BehandlingsoppgaveDto> oppgaver = oppgaveService.hentBehandlingsoppgaverMedBruker(fnr);
-            return Response.ok(oppgaver).build();
-        } catch (IkkeFunnetException e) {
-            return Response.ok(new ArrayList<>()).build();
-        }
     }
 }
