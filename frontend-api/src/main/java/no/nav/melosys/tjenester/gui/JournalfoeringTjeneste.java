@@ -18,8 +18,8 @@ import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
+import no.nav.melosys.tjenester.gui.dto.journalforing.BehandlingsInformasjon;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
-import no.nav.melosys.tjenester.gui.dto.journalforing.SedBehandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
 
         if (journalpost.mottaksKanalErEessi()) {
             journalføringService.finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID)
-                .ifPresent(b -> journalpostDto.setSedBehandling(new SedBehandling(Sakstyper.EU_EOS, b)));
+                .ifPresent(b -> journalpostDto.setBehandlingsInformasjon(new BehandlingsInformasjon(Sakstyper.EU_EOS, b)));
         }
         return Response.ok(journalpostDto).build();
     }

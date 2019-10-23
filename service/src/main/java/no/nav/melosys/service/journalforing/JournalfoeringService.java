@@ -129,7 +129,7 @@ public class JournalfoeringService {
 
     private void validerBehandlingstypeForSed(String behandlingstypeKode) throws FunksjonellException {
         if (!Behandlingstyper.VURDER_TRYGDETID.getKode().equals(behandlingstypeKode)
-            || !Behandlingstyper.ØVRIGE_SED.getKode().equalsIgnoreCase(behandlingstypeKode)) {
+            && !Behandlingstyper.ØVRIGE_SED.getKode().equalsIgnoreCase(behandlingstypeKode)) {
             throw new FunksjonellException(String.format("Opprettelse av behandling med type %s støttes ikke", behandlingstypeKode));
         }
     }

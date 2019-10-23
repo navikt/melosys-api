@@ -123,6 +123,25 @@ public class JournalfoeringServiceTest {
         when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.TRUE);
 
         journalfoeringService.opprettOgJournalfør(opprettDto);
+    }
+
+    @Test
+    public void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_korrektBehandlingstype() throws MelosysException {
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.VURDER_TRYGDETID.getKode());
+        journalpost.setMottaksKanal("EESSI");
+        when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.FALSE);
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+        verify(prosessinstansService).opprettProsessinstansGenerellSedBehandling(any(JournalfoeringDto.class));
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_feilBehandlingstype() throws MelosysException {
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode());
+        journalpost.setMottaksKanal("EESSI");
+        when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.FALSE);
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
         verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(), anyString());
     }
 

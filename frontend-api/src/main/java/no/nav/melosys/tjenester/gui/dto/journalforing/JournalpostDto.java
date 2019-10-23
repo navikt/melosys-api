@@ -16,7 +16,7 @@ public final class JournalpostDto {
     private boolean erBrukerAvsender;
     private DokumentDto hoveddokument;
     private List<DokumentDto> vedlegg = new ArrayList<>();
-    private SedBehandling sedBehandling;
+    private BehandlingsInformasjon behandlingsInformasjon;
 
     private JournalpostDto(Instant mottattDato, String brukerID, String avsenderID, String avsenderNavn, boolean erBrukerAvsender) {
         this.mottattDato = mottattDato;
@@ -75,11 +75,11 @@ public final class JournalpostDto {
         this.vedlegg = vedlegg;
     }
 
-    public SedBehandling getSedBehandling() {
-        return sedBehandling;
+    public BehandlingsInformasjon getBehandlingsInformasjon() {
+        return behandlingsInformasjon;
     }
 
-    public void setSedBehandling(SedBehandling sedBehandling) {
-        this.sedBehandling = sedBehandling;
+    public void setBehandlingsInformasjon(BehandlingsInformasjon behandlingsInformasjon) {
+        this.behandlingsInformasjon = behandlingsInformasjon;
     }
 }

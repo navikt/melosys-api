@@ -3,12 +3,12 @@ package no.nav.melosys.tjenester.gui.dto.journalforing;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
-public class SedBehandling {
+public class BehandlingsInformasjon {
 
     private Sakstyper sakstype;
     private Behandlingstyper behandlingstyper;
 
-    public SedBehandling(Sakstyper sakstype, Behandlingstyper behandlingstyper) {
+    public BehandlingsInformasjon(Sakstyper sakstype, Behandlingstyper behandlingstyper) {
         this.sakstype = sakstype;
         this.behandlingstyper = behandlingstyper;
     }
