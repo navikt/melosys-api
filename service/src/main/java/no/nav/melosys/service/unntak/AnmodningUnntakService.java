@@ -1,7 +1,8 @@
 package no.nav.melosys.service.unntak;
 
-import javax.ws.rs.BadRequestException;
+import java.util.Optional;
 
+import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -54,26 +55,38 @@ public class AnmodningUnntakService {
     public void anmodningOmUnntakSvar(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstypeUnntak(behandling);
-        validerPerioder(behandling);
+        validerSvar(behandling);
         prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private static void validerBehandlingstypeUnntak(Behandling behandling) {
+    private static void validerBehandlingstypeUnntak(Behandling behandling) throws FunksjonellException {
         if (behandling.getType() != Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
-            throw new BadRequestException("Behandling er ikke av type ANMODNING_OM_UNNTAK_HOVEDREGEL");
+            throw new FunksjonellException("Behandling er ikke av type ANMODNING_OM_UNNTAK_HOVEDREGEL");
         } else if (behandling.getStatus() == Behandlingsstatus.AVSLUTTET) {
-            throw new BadRequestException("Behandlingen er avsluttet");
+            throw new FunksjonellException("Behandlingen er avsluttet");
         }
     }
 
-    private void validerPerioder(Behandling behandling) throws FunksjonellException {
-        if (anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(behandling.getId()).isEmpty()) {
+    private void validerSvar(Behandling behandling) throws FunksjonellException {
+        Optional<AnmodningsperiodeSvar> anmodningsperiodeSvar = anmodningsperiodeService
+            .hentAnmodningsperiodeSvarForBehandling(behandling.getId()).stream().findFirst();
+        if (!anmodningsperiodeSvar.isPresent()) {
             throw new FunksjonellException("Finner ingen AnmodningsperiodeSvar for behandling " + behandling.getId());
         }
 
         if (lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId()).isEmpty()) {
             throw new FunksjonellException("Finner ingen Lovvalgsperioder for behandling " + behandling.getId());
+        }
+
+        if (anmodningsperiodeSvar.get().erAvslag()) {
+            validerFritekstLengde(anmodningsperiodeSvar.get());
+        }
+    }
+
+    private void validerFritekstLengde(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+        if (anmodningsperiodeSvar.getBegrunnelseFritekst() != null && anmodningsperiodeSvar.getBegrunnelseFritekst().length() >= 255) {
+            throw new FunksjonellException("Kan ikke ha fritekst lengre enn 255 for avslag på anmodning om unntak");
         }
     }
 }
