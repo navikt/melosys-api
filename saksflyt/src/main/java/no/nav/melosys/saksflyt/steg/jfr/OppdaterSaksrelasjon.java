@@ -33,7 +33,11 @@ public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
         Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
         if (journalpost.mottaksKanalErEessi()) {
             MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpostID);
-            Long gsakSaksnummer = prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
+            Long gsakSaksnummer = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
+            if (gsakSaksnummer == null) {
+                //Vil ikke ligge i data ved prosesstype JFR_NY_BEHANDLING eller JFR_KNYTT
+                gsakSaksnummer = prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
+            }
             eessiService.lagreSaksrelasjon(gsakSaksnummer, melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getBucType());
         }
 
