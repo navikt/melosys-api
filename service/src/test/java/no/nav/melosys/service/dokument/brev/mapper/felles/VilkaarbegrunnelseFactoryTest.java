@@ -12,7 +12,6 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeM
 
 public class VilkaarbegrunnelseFactoryTest {
 
-    @Ignore
     @Test
     public void mapArt121BegrunnelseType() throws Exception {
         Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art12_1_begrunnelser.class);
