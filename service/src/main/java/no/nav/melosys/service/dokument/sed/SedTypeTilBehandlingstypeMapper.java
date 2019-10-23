@@ -7,9 +7,12 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
-public final class SedTypeTilBehandlingstypeMapper {
+final class SedTypeTilBehandlingstypeMapper {
 
-    public static Optional<Behandlingstyper> finnBehandlingstypeForSedType(String sedType, String lovvalgsland) {
+    private SedTypeTilBehandlingstypeMapper() {
+    }
+
+    static Optional<Behandlingstyper> finnBehandlingstypeForSedType(String sedType, String lovvalgsland) {
         SedType sedTypeEnum = finnSedType(sedType);
 
         if (sedTypeEnum == null) {

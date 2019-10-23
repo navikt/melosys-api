@@ -194,6 +194,14 @@ public class EessiServiceTest {
     }
 
     @Test
+    public void støtterAutomatiskBehandling_nullVerdi_forventFalse() throws Exception {
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setSedType(null);
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        assertThat(eessiService.støtterAutomatiskBehandling("123")).isFalse();
+    }
+
+    @Test
     public void støtterAutomatiskBehandling_a003ikkeUtpekt_verifiserStøtterAutomatiskBehandling() throws Exception {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.SE.name());
