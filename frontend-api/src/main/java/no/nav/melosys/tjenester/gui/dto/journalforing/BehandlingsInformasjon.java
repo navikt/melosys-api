@@ -6,18 +6,18 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 public class BehandlingsInformasjon {
 
     private Sakstyper sakstype;
-    private Behandlingstyper behandlingstyper;
+    private Behandlingstyper behandlingstype;
 
-    public BehandlingsInformasjon(Sakstyper sakstype, Behandlingstyper behandlingstyper) {
+    public BehandlingsInformasjon(Sakstyper sakstype, Behandlingstyper behandlingstype) {
         this.sakstype = sakstype;
-        this.behandlingstyper = behandlingstyper;
+        this.behandlingstype = behandlingstype;
     }
 
     public Sakstyper getSakstype() {
         return sakstype;
     }
 
-    public Behandlingstyper getBehandlingstyper() {
-        return behandlingstyper;
+    public Behandlingstyper getBehandlingstype() {
+        return behandlingstype;
     }
 }
