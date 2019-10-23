@@ -4,8 +4,9 @@ import java.io.IOException;
 import javax.ws.rs.BadRequestException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class VedtakTjenesteTest extends JsonSchemaTestParent {
     private static final String FATT_VEDTAK_SCHEMA = "saksflyt-vedtak-fatt-post-schema.json";
-    private static final String ENDRE_PERIODE_SCHEMA = "saksflyt-vedtak-endreperiode-post-schema.json";
+    private static final String ENDRE_PERIODE_SCHEMA = "saksflyt-vedtak-endre-post-schema.json";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -61,7 +62,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode());
+        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), null);
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
@@ -77,10 +78,11 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
         endreVedtakDto.setBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
+        endreVedtakDto.setBehandlingstype(Behandlingstyper.ENDRET_PERIODE);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakService).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
+        verify(vedtakService).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, Behandlingstyper.ENDRET_PERIODE, null);
 
         valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }

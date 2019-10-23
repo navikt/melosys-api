@@ -107,6 +107,8 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2);
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
 
+        fag.setBegrunnelseFritekst(brevdata.fritekst);
+
         return fag;
     }
 

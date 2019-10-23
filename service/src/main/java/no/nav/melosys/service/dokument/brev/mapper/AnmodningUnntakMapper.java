@@ -75,7 +75,7 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
         mapAnmodningUtenArt12Begrunnelser(brevData.anmodningUtenArt12Begrunnelser).ifPresent(fag::setArt161AnmodningUtenArt12Begrunnelse);
 
-        fag.setAnmodningFritekst(brevData.fritekst);
+        fag.setAnmodningFritekst(brevData.anmodningFritekst);
 
         return fag;
     }

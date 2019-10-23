@@ -58,7 +58,7 @@ public class VedtakTjeneste extends RestTjeneste {
             throw new BadRequestException("Mangler Behandlingstype");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst());
+        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getBehandlingstype(), endreVedtakDto.getFritekst());
         return Response.ok().build();
     }
 }

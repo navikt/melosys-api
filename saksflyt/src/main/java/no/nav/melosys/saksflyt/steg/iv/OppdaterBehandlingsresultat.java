@@ -53,6 +53,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
             behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
             behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+            behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST));
         }
 
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));

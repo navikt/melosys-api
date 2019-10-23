@@ -50,9 +50,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Enumerated(EnumType.STRING)
     @Column(name = "utfall_registrering_unntak")
     private Utfallregistreringunntak utfallRegistreringUnntak;
-    
-    @Column(name = "fritekst")
-    private String fritekst;
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
@@ -139,14 +136,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setUtfallRegistreringUnntak(Utfallregistreringunntak utfallRegistreringUnntak) {
         this.utfallRegistreringUnntak = utfallRegistreringUnntak;
-    }
-
-    public String getFritekst() {
-        return fritekst;
-    }
-
-    public void setFritekst(String fritekst) {
-        this.fritekst = fritekst;
     }
 
     public Set<Lovvalgsperiode> getLovvalgsperioder() {

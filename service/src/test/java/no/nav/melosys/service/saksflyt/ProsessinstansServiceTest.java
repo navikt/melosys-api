@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -108,7 +108,7 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansIverksettVedtak_medBehandlingOgBehandlingsresultat() {
         Behandling behandling = new Behandling();
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-        service.opprettProsessinstansIverksettVedtak(behandling, resultatType);
+        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -154,7 +154,7 @@ public class ProsessinstansServiceTest {
         String saksbehandler = settInnloggetSaksbehandler();
 
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE);
+        service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE, null);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 

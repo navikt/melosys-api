@@ -60,7 +60,8 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             .medAvsender(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(MYNDIGHET))
             .medBehandling(behandling)
-            .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans)).build();
+            .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans))
+            .build();
     }
 
     @Override

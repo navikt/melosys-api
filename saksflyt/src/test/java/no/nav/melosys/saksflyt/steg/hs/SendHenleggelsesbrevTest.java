@@ -45,7 +45,7 @@ public class SendHenleggelsesbrevTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.HENLEGG_SAK);
         prosessinstans.setData(BEGRUNNELSEKODE, Henleggelsesgrunner.ANNET);
-        prosessinstans.setData(FRITEKST, "fritekst");
+        prosessinstans.setData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, "fritekst");
         Behandling behandling = new Behandling();
         behandling.setId(behandlingId);
         behandling.setFagsak(fagsak);

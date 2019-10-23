@@ -4,6 +4,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000125.BrevdataType;
+import no.nav.dok.melosysbrev._000125.Fag;
 import no.nav.dok.melosysbrev._000125.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
@@ -19,6 +20,9 @@ public class AvslagManglendeOpplysningerMapper implements BrevDataMapper {
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles);
+        Fag fag = new Fag();
+        fag.setFritekst(brevData.fritekst);
+
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
