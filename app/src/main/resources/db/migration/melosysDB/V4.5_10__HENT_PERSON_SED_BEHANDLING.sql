@@ -1,0 +1,1 @@
+INSERT INTO PROSESS_STEG(KODE, NAVN) VALUES('SED_GENERELL_SAK_HENT_PERSON', 'Henter person tilknyttet behandling');

@@ -104,6 +104,7 @@ public enum ProsessSteg implements Kodeverk {
     SED_MOTTAK_OPPDATER_SAKSRELASJON("SED_MOTTAK_OPPDATER_SAKSRELASJON","Oppdaterer saksrelasjon for ny gsak-sak"),
     SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
 
+    SED_GENERELL_SAK_HENT_PERSON("SED_GENERELL_SAK_HENT_PERSON", "Henter person tilknyttet behandling"),
     SED_GENERELL_SAK_OPPRETT_OPPGAVE("SED_GENERELL_SAK_OPPRETT_OPPGAVE", "Oppretter oppgave for behandling"),
 
     // Journalføring av mottatt anmodning om unntak (brev)
@@ -157,7 +158,7 @@ public enum ProsessSteg implements Kodeverk {
             case ANMODNING_OM_UNNTAK_MOTTAK:
                 return AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE;
             case SED_GENERELL_SAK:
-                return SED_GENERELL_SAK_OPPRETT_OPPGAVE;
+                return SED_GENERELL_SAK_HENT_PERSON;
 
             default:
                 throw new TekniskException("Første steg for prosesstype" + prosessType + " er ukjent");
