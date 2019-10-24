@@ -8,12 +8,12 @@ import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.springframework.stereotype.Component;
 
-@Component
-public class HentPerson extends AbstraktStegBehandler {
+@Component("sedGenerellBehandlingHentPersonOpplysninger")
+public class HentPersonopplysninger extends AbstraktStegBehandler {
 
     private final HentOpplysningerFelles hentOpplysningerFelles;
 
-    public HentPerson(HentOpplysningerFelles hentOpplysningerFelles) {
+    public HentPersonopplysninger(HentOpplysningerFelles hentOpplysningerFelles) {
         this.hentOpplysningerFelles = hentOpplysningerFelles;
     }
 
