@@ -224,6 +224,7 @@ public class JournalfoeringService {
         }
     }
 
+    @Transactional(rollbackFor = MelosysException.class)
     public void journalførSed(JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
         validerJournalfoerSed(journalfoeringSedDto);
         prosessinstansService.opprettProsessinstansSedMottak(journalfoeringSedDto.getJournalpostID(), journalfoeringSedDto.getBrukerID());
