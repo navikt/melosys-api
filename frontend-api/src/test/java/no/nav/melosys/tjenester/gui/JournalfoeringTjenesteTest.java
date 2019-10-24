@@ -3,13 +3,14 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import javax.ws.rs.core.Response;
 
-import org.jeasy.random.EasyRandom;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
+import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.json.JSONException;
 import org.junit.Before;
@@ -30,6 +31,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     private static final String JOURNALFOERING_SCHEMA = "journalforing-schema.json";
     private static final String JOURNALFOERING_TILORDNE_SCHEMA = "journalforing-tilordne-post-schema.json";
     private static final String JOURNALFOERING_OPPRETT_SCHEMA = "journalforing-opprett-post-schema.json";
+    private static final String JOURNALFOERING_SED_SCHEMA = "journalforing-sed-post-schema.json";
     private static final String SAMPLE_ORGNR = "899655123";
     private static final String SAMPLE_FNR = "77777777772";
 
@@ -62,12 +64,14 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void journalføringTilordneSchemaValidering() throws IOException, JSONException {
         JournalfoeringTilordneDto journalfoeringDto = random.nextObject(JournalfoeringTilordneDto.class);
+        journalfoeringDto.setBrukerID(SAMPLE_FNR);
         valider(journalfoeringDto, JOURNALFOERING_TILORDNE_SCHEMA, log);
     }
 
     @Test
     public void journalføringOpprettSchemaValidering() throws IOException, JSONException {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
+        journalfoeringDto.setBrukerID(SAMPLE_FNR);
         journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalfoeringDto.setRepresentantID(SAMPLE_ORGNR);
         valider(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
@@ -76,9 +80,19 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void journalføringOpprettSchemaValideringMedRepresentantIDNull() throws IOException, JSONException {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
+        journalfoeringDto.setBrukerID(SAMPLE_FNR);
         journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalfoeringDto.setRepresentantID(null);
         valider(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
+    }
+
+    @Test
+    public void journalførSedSchemaValidering() throws IOException {
+        JournalfoeringSedDto journalfoeringSedDto = new JournalfoeringSedDto();
+        journalfoeringSedDto.setOppgaveID("123123");
+        journalfoeringSedDto.setBrukerID(SAMPLE_FNR);
+        journalfoeringSedDto.setJournalpostID("1231231232");
+        valider(journalfoeringSedDto, JOURNALFOERING_SED_SCHEMA, log);
     }
 
 }
