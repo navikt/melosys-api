@@ -5,6 +5,7 @@ import no.nav.melosys.exception.TekniskException;
 
 public enum AvklartYrkesgruppeType {
     ORDINAER,
+    ORDINAER_UTEN_ART12,
     YRKESAKTIV_FLYVENDE,
     SOKKEL_ELLER_SKIP,
     IKKE_YRKESAKTIV,
@@ -13,6 +14,7 @@ public enum AvklartYrkesgruppeType {
     public Yrkesgrupper tilYrkesgruppeType() throws TekniskException {
         switch(this) {
             case ORDINAER:
+            case ORDINAER_UTEN_ART12:
                 return Yrkesgrupper.ORDINAER;
             case YRKESAKTIV_FLYVENDE:
                 return Yrkesgrupper.FLYENDE_PERSONELL;

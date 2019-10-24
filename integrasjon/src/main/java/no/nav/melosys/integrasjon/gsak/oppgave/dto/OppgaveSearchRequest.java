@@ -8,14 +8,14 @@ public class OppgaveSearchRequest {
     @JsonProperty("aktoerId")
     private String aktørId;
     private String[] oppgavetype;
-    private String[] behandlingstype;
+    private String behandlingstype;
     private String tilordnetRessurs;
     private String[] tema;
     private String sorteringsfelt;
     private String statusKategori;
     private String[] saksreferanse;
     private String behandlesAvApplikasjon;
-    private String[] behandlingstema;
+    private String behandlingstema;
 
     private OppgaveSearchRequest(Builder builder) {
         this.tildeltEnhetsnr = builder.enhetId;
@@ -36,7 +36,7 @@ public class OppgaveSearchRequest {
         return oppgavetype;
     }
 
-    public String[] getBehandlingstype() {
+    public String getBehandlingstype() {
         return behandlingstype;
     }
 
@@ -76,7 +76,7 @@ public class OppgaveSearchRequest {
         return behandlesAvApplikasjon;
     }
 
-    public String[] getBehandlingstema() {
+    public String getBehandlingstema() {
         return behandlingstema;
     }
 
@@ -85,7 +85,7 @@ public class OppgaveSearchRequest {
         private String enhetId;
         private String aktørId;
         private String[] oppgavetype;
-        private String[] behandlingstype;
+        private String behandlingstype;
         private String tilordnetRessurs;
         private Boolean tildeltRessurs;
         private String[] tema;
@@ -93,7 +93,7 @@ public class OppgaveSearchRequest {
         private String statusKategori;
         private String[] saksreferanse;
         private String behandlesAvApplikasjon;
-        private String[] behandlingstema;
+        private String behandlingstema;
 
         public Builder(String enhetId) {
             this.enhetId = enhetId;
@@ -104,8 +104,8 @@ public class OppgaveSearchRequest {
             return this;
         }
 
-        public Builder medBehandlingsTyper(String[] behandlingstyper) {
-            this.behandlingstype = behandlingstyper;
+        public Builder medBehandlingsType(String behandlingstype) {
+            this.behandlingstype = behandlingstype;
             return this;
         }
 
@@ -149,7 +149,7 @@ public class OppgaveSearchRequest {
             return this;
         }
 
-        public Builder medBehandlingstema(String[] behandlingstema) {
+        public Builder medBehandlingstema(String behandlingstema) {
             this.behandlingstema = behandlingstema;
             return this;
         }

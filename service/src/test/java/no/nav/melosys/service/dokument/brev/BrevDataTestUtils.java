@@ -1,8 +1,9 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import java.util.HashSet;
+import java.util.Set;
+
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -119,5 +121,21 @@ public class BrevDataTestUtils {
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
         anmodningsperiodeSvar.setBegrunnelseFritekst("OK");
         return anmodningsperiodeSvar;
+    }
+
+    public static Vilkaarsresultat lagVilkaarsresultatMedBegrunnelse(Vilkaar vilkaar, boolean oppfylt, Set<VilkaarBegrunnelse> begrunnelser) {
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setBegrunnelser(begrunnelser);
+        vilkaarsresultat.setVilkaar(vilkaar);
+        vilkaarsresultat.setOppfylt(oppfylt);
+        return vilkaarsresultat;
+    }
+
+    public static Set<VilkaarBegrunnelse> lagVilkaarBegrunnelse(String kode) {
+        Set<VilkaarBegrunnelse> begrunnelser = new HashSet<>();
+        VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
+        begrunnelse.setKode(kode);
+        begrunnelser.add(begrunnelse);
+        return begrunnelser;
     }
 }
