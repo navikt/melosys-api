@@ -104,8 +104,8 @@ public class OppgaveSearchRequest {
             return this;
         }
 
-        public Builder medBehandlingsTyper(String behandlingstyper) {
-            this.behandlingstype = behandlingstyper;
+        public Builder medBehandlingsType(String behandlingstype) {
+            this.behandlingstype = behandlingstype;
             return this;
         }
 

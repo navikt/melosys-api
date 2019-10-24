@@ -122,8 +122,8 @@ public class GsakService implements GsakFasade {
 
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(oppgavetyper.stream().map(Oppgavetyper::getKode).toArray(String[]::new))
-            .medBehandlingsTyper(behandlingstype == null ? null : GsakService.hentFellesKode(behandlingstype))
-            .medBehandlingstema(behandlingstema.getKode())
+            .medBehandlingsType(behandlingstype == null ? null : GsakService.hentFellesKode(behandlingstype))
+            .medBehandlingstema(behandlingstema == null ? null : behandlingstema.getKode())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTildeltRessurs(false);

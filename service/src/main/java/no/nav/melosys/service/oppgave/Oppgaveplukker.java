@@ -60,7 +60,7 @@ public class Oppgaveplukker {
 
         Behandlingstema behandlingstema = hentBehandlingstema(plukkDto.getSakstype());
         Behandlingstyper behandlingstype = KodeverkUtils.dekod(Behandlingstyper.class, plukkDto.getBehandlingstype());
-        Set<Oppgavetyper> oppgavetyper = Collections.singleton(hentOppgavetyper(behandlingstype));
+        Set<Oppgavetyper> oppgavetyper = Collections.singleton(OppgaveFactory.hentOppgavetype(behandlingstype));
 
         List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstype, behandlingstema);
         ufordelteOppgaver.addAll(hentOppgaverGammeltBehandlingstema(oppgavetyper, behandlingstype));
@@ -94,10 +94,6 @@ public class Oppgaveplukker {
 
     private static Behandlingstema hentBehandlingstema(String sakstype) throws IkkeFunnetException {
         return Behandlingstema.valueOf(KodeverkUtils.dekod(Sakstyper.class, sakstype).name());
-    }
-
-    private static Oppgavetyper hentOppgavetyper(Behandlingstyper behandlingstype) {
-        return OppgaveFactory.hentOppgavetype(behandlingstype);
     }
 
     private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException {
