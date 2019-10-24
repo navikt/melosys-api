@@ -143,7 +143,7 @@ public class AnmodningUnntakServiceTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
 
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setBegrunnelseFritekst(RandomStringUtils.random(266));
+        anmodningsperiodeSvar.setBegrunnelseFritekst(RandomStringUtils.random(256));
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
