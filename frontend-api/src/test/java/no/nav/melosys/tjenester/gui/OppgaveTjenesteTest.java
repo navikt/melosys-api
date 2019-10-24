@@ -82,15 +82,11 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
-        innData.setOppgavetype("BEH_SAK_MK");
+        String sakstype = Sakstyper.EU_EOS.getKode();
+        innData.setSakstype(sakstype);
 
-        List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Sakstyper.EU_EOS.getKode());
-        innData.setSakstyper(sakstyper);
-
-        List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
-        innData.setBehandlingstyper(behandlingstyper);
+        String behandlingstype = Behandlingstyper.SOEKNAD.getKode();
+        innData.setBehandlingstype(behandlingstype);
 
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
