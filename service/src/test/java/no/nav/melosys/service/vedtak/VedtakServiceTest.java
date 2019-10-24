@@ -62,10 +62,10 @@ public class VedtakServiceTest {
         oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 
-        vedtakService.fattVedtak(behandlingID, resultatType, any());
+        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST");
 
         verify(behandlingRepository).findById(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), any());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"));
 
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
 
@@ -77,12 +77,12 @@ public class VedtakServiceTest {
     @Test(expected = IkkeFunnetException.class)
     public void fattVedtak_behandlingIkkeFunnet() throws FunksjonellException, TekniskException {
         long behandlingID = 0L;
-        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, any());
+        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "FRITEKST");
     }
 
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
-        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, Behandlingstyper.SOEKNAD, any());
+        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, Behandlingstyper.ENDRET_PERIODE, "FRITEKST");
 
         verify(behandlingRepository).findById(behandlingID);
         verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), any());

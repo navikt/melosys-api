@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.steg.iv;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -23,9 +25,9 @@ import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.IKKE_NORSK_AG_REGNING;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.HELFO;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
+import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 
 
 /**
@@ -80,6 +82,9 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
 
     private void sendAvslagsbrev(Prosessinstans prosessinstans, Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String saksbehandler)
         throws FunksjonellException, TekniskException {
+
+        String fritekst = hentBegrunnelseFritekst(prosessinstans);
+
         Produserbaredokumenter avslagTypeBruker = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
             ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
 
@@ -87,7 +92,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(Mottaker.av(BRUKER), FastMottaker.av(HELFO), FastMottaker.av(SKATT))
-            .medFritekst(hentBegrunnelseFritekst(prosessinstans))
+            .medFritekst(fritekst)
             .build();
         brevBestiller.bestill(brevbestilling);
 
@@ -96,10 +101,11 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
                 ? AVSLAG_ARBEIDSGIVER : AVSLAG_MANGLENDE_OPPLYSNINGER;
 
             Brevbestilling.Builder brevbestillingArbeidsgiver = new Brevbestilling.Builder()
+                .medDokumentType(avslagTypeArbeidsgiver)
                 .medAvsender(saksbehandler)
-                .medMottakere(Mottaker.av(ARBEIDSGIVER))
                 .medBehandling(behandling)
-                .medDokumentType(avslagTypeArbeidsgiver);
+                .medMottakere(Mottaker.av(ARBEIDSGIVER))
+                .medFritekst(fritekst);
 
             brevBestiller.bestill(brevbestillingArbeidsgiver.build());
         }

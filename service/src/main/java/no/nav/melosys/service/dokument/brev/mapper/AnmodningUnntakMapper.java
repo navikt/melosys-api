@@ -77,6 +77,8 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
         fag.setAnmodningFritekst(brevData.anmodningFritekst);
 
+        fag.setBegrunnelseFritekst(brevData.fritekst);
+
         return fag;
     }
 

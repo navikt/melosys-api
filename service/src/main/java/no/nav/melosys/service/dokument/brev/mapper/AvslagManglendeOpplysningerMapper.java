@@ -19,17 +19,18 @@ public class AvslagManglendeOpplysningerMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
-        JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles);
         Fag fag = new Fag();
         fag.setFritekst(brevData.fritekst);
 
+        JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles) {
+    private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
         BrevdataType brevdataType = BrevdataType.builder()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
+            .withFag(fag)
             .build();
         return new ObjectFactory().createBrevdata(brevdataType);
     }
