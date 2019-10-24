@@ -39,7 +39,7 @@
 
         <!-- Melosys -->
         <melosys.frontend.version>1.3.0-PR-38A-SNAPSHOT</melosys.frontend.version>
-        <melosys.jsonschema.version>1.32.4-38</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.32.6-41</melosys.jsonschema.version>
         <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
         <melosys.internt.kodeverk.version>5.14.4</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>

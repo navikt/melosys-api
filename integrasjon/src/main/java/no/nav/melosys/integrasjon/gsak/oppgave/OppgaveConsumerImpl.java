@@ -105,12 +105,12 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .queryParam("statuskategori", oppgaveSearchRequest.getStatusKategori())
             .queryParam("behandlesAvApplikasjon", oppgaveSearchRequest.getBehandlesAvApplikasjon())
             .queryParam("limit", OPPGAVE_ANTALL_LIMIT)
-            .queryParam("offset", offset);
+            .queryParam("offset", offset)
+            .queryParam("behandlingstype", oppgaveSearchRequest.getBehandlingstype())
+            .queryParam("behandlingstema", oppgaveSearchRequest.getBehandlingstema());
 
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "oppgavetype", oppgaveSearchRequest.getOppgavetype());
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "behandlingstype", oppgaveSearchRequest.getBehandlingstype());
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "behandlingstema", oppgaveSearchRequest.getBehandlingstema());
 
         try {
             return lokalTarget.request()
