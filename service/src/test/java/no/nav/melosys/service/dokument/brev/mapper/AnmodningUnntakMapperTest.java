@@ -1,7 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.common.collect.Sets;
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
@@ -18,7 +21,7 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,7 +56,7 @@ public class AnmodningUnntakMapperTest {
         begrunnelse_16_1.setKode(Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode());
         vilkaarsresultat16_1.setBegrunnelser(Collections.singleton(begrunnelse_16_1));
 
-        BrevDataAnmodningUnntakOgAvslag brevData = lagBrevData(resultat, vilkaarsresultat16_1);
+        BrevDataAnmodningUnntak brevData = lagBrevData(resultat);
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
@@ -71,13 +74,13 @@ public class AnmodningUnntakMapperTest {
         for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
             Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
             vilkaarsresultat.setBegrunnelser(Collections.singleton(begrunnelse));
-            BrevDataAnmodningUnntakOgAvslag brevdata = lagBrevData(resultat, vilkaarsresultat);
+            BrevDataAnmodningUnntak brevdata = lagBrevData(resultat);
             mapper.mapFag(behandling, resultat, brevdata);
         }
     }
 
-    private BrevDataAnmodningUnntakOgAvslag lagBrevData(Behandlingsresultat resultat, Vilkaarsresultat vilkaarsresultat16_1) {
-        BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
+    private BrevDataAnmodningUnntak lagBrevData(Behandlingsresultat resultat) {
+        BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak("Z999999");
         Anmodningsperiode anmodningsperiode =
             new Anmodningsperiode(LocalDate.now(), LocalDate.now(),
                 Landkoder.NO, null, null, Landkoder.DK,
@@ -87,7 +90,8 @@ public class AnmodningUnntakMapperTest {
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
         brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
         brevData.yrkesaktivitet = Yrkesaktivitetstyper.SELVSTENDIG;
-        brevData.art16Vilkaar = Optional.of(vilkaarsresultat16_1);
+        brevData.anmodningBegrunnelser = Collections.emptySet();
+        brevData.anmodningUtenArt12Begrunnelser = Collections.emptySet();
         return brevData;
     }
 

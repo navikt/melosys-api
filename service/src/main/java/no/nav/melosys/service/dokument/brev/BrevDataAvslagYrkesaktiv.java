@@ -7,14 +7,14 @@ import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 
-public class BrevDataAnmodningUnntakOgAvslag extends BrevData {
+public class BrevDataAvslagYrkesaktiv extends BrevData {
     public String arbeidsland;
     public AvklartVirksomhet hovedvirksomhet;
     public Yrkesaktivitetstyper yrkesaktivitet;
     public Optional<AnmodningsperiodeSvar> anmodningsperiodeSvar;
-    public Optional<Vilkaarsresultat> art16Vilkaar;
+    public Vilkaarsresultat art16Vilkaar;
 
-    public BrevDataAnmodningUnntakOgAvslag(String saksbehandler) {
+    public BrevDataAvslagYrkesaktiv(String saksbehandler) {
         super(saksbehandler);
     }
 }

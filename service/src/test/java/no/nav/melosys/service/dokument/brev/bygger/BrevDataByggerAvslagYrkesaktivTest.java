@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -12,13 +9,14 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
-import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -29,16 +27,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerAnmodningUnntakOgAvslagTest {
+public class BrevDataByggerAvslagYrkesaktivTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
@@ -52,7 +48,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     @Mock
     KodeverkService kodeverkService;
 
-    private BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAnmodningUnntakOgAvslag;
+    private BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv;
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
     @Before
@@ -63,8 +59,11 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         anmodningsperiode.setSendtUtland(true);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
 
+        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
+            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART16_1, true,lagVilkaarBegrunnelse("KORT_OPPDRAG_RETUR_NORSK_AG"))));
+
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(landvelgerService, anmodningsperiodeService, vilkaarsresultatRepository);
+        brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, vilkaarsresultatRepository);
     }
 
     @Test
@@ -96,7 +95,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
 
         String saksbehandler = "saksbehandler";
-        BrevDataAnmodningUnntakOgAvslag brevData = (BrevDataAnmodningUnntakOgAvslag) brevDataByggerAnmodningUnntakOgAvslag.lag(lagBrevressurser(behandling), saksbehandler);
+        BrevDataAvslagYrkesaktiv brevData = (BrevDataAvslagYrkesaktiv) brevDataByggerAvslagYrkesaktiv.lag(lagBrevressurser(behandling), saksbehandler);
 
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
         assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isEqualTo(true);
