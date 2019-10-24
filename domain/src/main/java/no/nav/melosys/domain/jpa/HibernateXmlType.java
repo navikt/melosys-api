@@ -26,9 +26,6 @@ public class HibernateXmlType implements UserType, Serializable {
      */
     public static final HibernateXMLTypeDelegate delegate = HibernateSqlXmlTypeDelegate.INSTANCE;
 
-    public HibernateXmlType() {
-    }
-
     @Override
     public int[] sqlTypes() {
         return delegate.sqlTypes();
@@ -65,11 +62,7 @@ public class HibernateXmlType implements UserType, Serializable {
 
     @Override
     public Object deepCopy(Object value) {
-        if (value == null) {
-            return null;
-        } else {
-            return value;
-        }
+        return value;
     }
 
     @Override

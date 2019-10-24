@@ -3,8 +3,6 @@
                 xmlns:ns2="http://nav.no/tjeneste/virksomhet/medlemskap/v2">
 
     <xsl:output method="xml" indent="no"/>
-    <xsl:variable name="smallCase" select="'abcdefghijklmnopqrstuvwxyzåæø'"/>
-    <xsl:variable name="upperCase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZÅÆØ'"/>
 
     <xsl:template match="/|ns2:hentPeriodeListeResponse|response">
         <xsl:apply-templates/>
@@ -30,7 +28,7 @@
 
     <xsl:template match="grunnlagstype">
         <xsl:element name="{name()}">
-            <xsl:value-of select="translate(., $smallCase, $upperCase)"/>
+            <xsl:value-of select="."/>
         </xsl:element>
     </xsl:template>
 

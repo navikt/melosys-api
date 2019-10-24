@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -63,14 +62,9 @@ public class LandvelgerService {
         return alleArbeidsland;
     }
 
-    private boolean erArtikkel13(long behandlingId) {
-        try {
-            Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingId).hentValidertLovvalgsperiode();
-            return lovvalgsperiode.erArtikkel13();
-        } catch (IkkeFunnetException e) {
-            // Ignorer
-        }
-        return false;
+    private boolean erArtikkel13(long behandlingId) throws IkkeFunnetException {
+        Medlemskapsperiode medlemskapsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingId).hentValidertMedlemskapsperiode();
+        return medlemskapsperiode.erArtikkel13();
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
@@ -80,8 +74,7 @@ public class LandvelgerService {
             return Collections.singletonList(hentBostedsland(behandlingID, søknad));
         }
 
-        Medlemskapsperiode medlemskapsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertMedlemskapsperiode();
-        if (medlemskapsperiode.erArtikkel13()) {
+        if (erArtikkel13(behandlingID)) {
             Landkoder bostedsland = hentBostedsland(behandlingID, søknad);
             if (bostedsland != Landkoder.NO) {
                 return Collections.singletonList(bostedsland);
