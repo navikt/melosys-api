@@ -33,7 +33,7 @@ public class AvsluttFagsakOgBehandlingTest {
     private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(behandlingsresultatRepository, fagsakService);
         when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
     }
@@ -41,8 +41,12 @@ public class AvsluttFagsakOgBehandlingTest {
     @Test
     public void utfør() throws Exception {
 
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("123");
+        when(fagsakService.hentFagsak(eq(fagsak.getSaksnummer()))).thenReturn(fagsak);
+
         Behandling behandling = new Behandling();
-        behandling.setFagsak(new Fagsak());
+        behandling.setFagsak(fagsak);
         behandling.setId(1L);
 
         Prosessinstans prosessinstans = new Prosessinstans();
