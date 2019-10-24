@@ -196,14 +196,20 @@ public final class VilkaarbegrunnelseFactory {
         return art122NormalVirksomhetBegrunnelseType;
     }
 
-    public static Optional<Art161AnmodningBegrunnelseKode> mapAnmodningBegrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) {
+    public static Optional<Art161AnmodningBegrunnelseKode> mapAnmodningBegrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) throws TekniskException {
+        if (anmodningbegrunnelser.size() > 1) {
+            throw new TekniskException("Mer enn én art16-anmodningbegrunnelse");
+        }
         return anmodningbegrunnelser.stream()
             .map(VilkaarBegrunnelse::getKode)
             .map(Art161AnmodningBegrunnelseKode::valueOf)
             .findFirst();
     }
 
-    public static Optional<Art161AnmodningUtenArt12BegrunnelseKode> mapAnmodningUtenArt12Begrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) {
+    public static Optional<Art161AnmodningUtenArt12BegrunnelseKode> mapAnmodningUtenArt12Begrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) throws TekniskException {
+        if (anmodningbegrunnelser.size() > 1) {
+            throw new TekniskException("Mer enn én art16-anmodningbegrunnelse");
+        }
         return anmodningbegrunnelser.stream()
             .map(VilkaarBegrunnelse::getKode)
             .map(Art161AnmodningUtenArt12BegrunnelseKode::valueOf)

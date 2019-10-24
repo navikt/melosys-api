@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,13 +45,17 @@ public class VilkaarbegrunnelseFactoryTest {
     @Test
     public void mapArt161AnmodningBegrunnelser() throws Exception {
         Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_anmodning.class);
-        VilkaarbegrunnelseFactory.mapAnmodningBegrunnelser(begrunnelser);
+        for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
+            VilkaarbegrunnelseFactory.mapAnmodningBegrunnelser(Collections.singleton(begrunnelse));
+        }
     }
 
     @Test
     public void mapArt161AnmodningUtenArt12Begrunnelser() throws Exception {
         Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_anmodning_uten_art12.class);
-        VilkaarbegrunnelseFactory.mapAnmodningUtenArt12Begrunnelser(begrunnelser);
+        for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
+            VilkaarbegrunnelseFactory.mapAnmodningUtenArt12Begrunnelser(Collections.singleton(begrunnelse));
+        }
     }
 
     public static Set<VilkaarBegrunnelse> lagAlleVilkaarBegrunnelser(Class kodeverk) throws Exception {

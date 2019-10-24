@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -48,11 +49,8 @@ public class BrevDataByggerAvslagArbeidsgiver implements BrevDataBygger {
         return brevData;
     }
 
-    private Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(long behandlingID, Vilkaar vilkaarType) throws TekniskException {
+    private Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(long behandlingID, Vilkaar vilkaarType) {
         Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, vilkaarType);
-        Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
-            new TekniskException("Fant ingen vilkårbegrunnelse for " + vilkaarType));
-
-        return resultat.getBegrunnelser();
+        return vilkårsresultat.map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet());
     }
 }
