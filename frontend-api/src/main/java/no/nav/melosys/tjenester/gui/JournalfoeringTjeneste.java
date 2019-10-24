@@ -9,13 +9,16 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
+import no.nav.melosys.tjenester.gui.dto.journalforing.BehandlingsInformasjon;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +44,15 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @GET
     @Path("{journalpostID}")
     @ApiOperation(value = "Hent journalpost opplysninger.", response = JournalpostDto.class)
-    public Response hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) throws IntegrasjonException, FunksjonellException {
+    public Response hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) throws MelosysException {
         log.debug("Journalpost med ID {} hentes.", journalpostID);
-        JournalpostDto journalpostDto = JournalpostDto.av(journalføringService.hentJournalpost(journalpostID));
+        Journalpost journalpost = journalføringService.hentJournalpost(journalpostID);
+        JournalpostDto journalpostDto = JournalpostDto.av(journalpost);
+
+        if (journalpost.mottaksKanalErEessi()) {
+            journalføringService.finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID)
+                .ifPresent(b -> journalpostDto.setBehandlingsInformasjon(new BehandlingsInformasjon(Sakstyper.EU_EOS, b)));
+        }
         return Response.ok(journalpostDto).build();
     }
 
@@ -52,6 +61,13 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @ApiOperation(value = "Opprett sak og journalfør.")
     public void opprettSakOgJournalfør(@ApiParam JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         journalføringService.opprettOgJournalfør(journalfoeringDto);
+    }
+
+    @POST
+    @Path("sed")
+    @ApiOperation(value = "Opprett sak og journalfør.")
+    public void journalførSed(@ApiParam JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
+        journalføringService.journalførSed(journalfoeringSedDto);
     }
 
     @POST

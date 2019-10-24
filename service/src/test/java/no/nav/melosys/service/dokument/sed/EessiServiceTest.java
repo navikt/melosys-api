@@ -159,8 +159,13 @@ public class EessiServiceTest {
             SedType.A010.name()
         );
 
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setLovvalgsland(Landkoder.DE.name());
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+
         for (String sedType : sedTyperAutomatiskBehandling) {
-            assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isTrue();
+            melosysEessiMelding.setSedType(sedType);
+            assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
         }
     }
 
@@ -178,25 +183,40 @@ public class EessiServiceTest {
             SedType.A012.name()
         );
 
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setLovvalgsland(Landkoder.DE.name());
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+
         for (String sedType : sedTyperIkkeAutomatiskBehandling) {
-            assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isFalse();
+            melosysEessiMelding.setSedType(sedType);
+            assertThat(eessiService.støtterAutomatiskBehandling("123")).isFalse();
         }
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_nullVerdi_forventFalse() throws Exception {
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setSedType(null);
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        assertThat(eessiService.støtterAutomatiskBehandling("123")).isFalse();
     }
 
     @Test
     public void støtterAutomatiskBehandling_a003ikkeUtpekt_verifiserStøtterAutomatiskBehandling() throws Exception {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.SE.name());
+        melosysEessiMelding.setSedType("A003");
         when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
-        assertThat(eessiService.støtterAutomatiskBehandling("123", "A003")).isTrue();
+        assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
     }
 
     @Test
     public void støtterAutomatiskBehandling_a003erUtpekt_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.name());
+        melosysEessiMelding.setSedType("A003");
         when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
-        assertThat(eessiService.støtterAutomatiskBehandling("123", "A003")).isFalse();
+        assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
     }
 
     @Test

@@ -26,8 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +45,7 @@ public class JournalfoeringServiceTest {
     private JournalfoeringOpprettDto opprettDto;
     private JournalfoeringTilordneDto tilordneDto;
     private Journalpost journalpost;
+    private JournalfoeringSedDto journalfoeringSedDto;
 
     @Before
     public void setup() throws SikkerhetsbegrensningException, IntegrasjonException {
@@ -55,7 +55,7 @@ public class JournalfoeringServiceTest {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService);
-        JournalfoeringOpprettDto opprettDto = new JournalfoeringOpprettDto();
+        opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setDokumentID("setDokumentID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -65,9 +65,8 @@ public class JournalfoeringServiceTest {
         opprettDto.setHoveddokumentTittel("setDokumenttittel");
         opprettDto.setArbeidsgiverID("123456789");
         opprettDto.setBehandlingstypeKode(Behandlingstyper.SOEKNAD.getKode());
-        this.opprettDto = opprettDto;
 
-        JournalfoeringTilordneDto tilordneDto = new JournalfoeringTilordneDto();
+        tilordneDto = new JournalfoeringTilordneDto();
         tilordneDto.setJournalpostID("setJournalpostID");
         tilordneDto.setDokumentID("setDokumentID");
         tilordneDto.setOppgaveID("setOppgaveID");
@@ -75,7 +74,11 @@ public class JournalfoeringServiceTest {
         tilordneDto.setAvsenderID("setAvsenderID");
         tilordneDto.setBrukerID("setBrukerID");
         tilordneDto.setHoveddokumentTittel("setDokumenttittel");
-        this.tilordneDto = tilordneDto;
+
+        journalfoeringSedDto = new JournalfoeringSedDto();
+        journalfoeringSedDto.setBrukerID("brukerID");
+        journalfoeringSedDto.setJournalpostID("journalpostID");
+        journalfoeringSedDto.setOppgaveID("321");
     }
 
     @Test
@@ -113,12 +116,30 @@ public class JournalfoeringServiceTest {
         journalfoeringService.opprettOgJournalfør(opprettDto);
     }
 
-    @Test
-    public void opprettOgJournalfør_erSed_prosessinstansOpprettet() throws MelosysException {
+    @Test(expected = FunksjonellException.class)
+    public void opprettOgJournalfør_støtterAutomatiskBehandling_forventException() throws MelosysException {
         opprettDto.setBehandlingstypeKode(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode());
         journalpost.setMottaksKanal("EESSI");
-        journalpost.getHoveddokument().setNavSkjemaID("A009");
-        when(eessiService.støtterAutomatiskBehandling(anyString(), anyString())).thenReturn(Boolean.TRUE);
+        when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.TRUE);
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+    }
+
+    @Test
+    public void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_korrektBehandlingstype() throws MelosysException {
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.VURDER_TRYGDETID.getKode());
+        journalpost.setMottaksKanal("EESSI");
+        when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.FALSE);
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+        verify(prosessinstansService).opprettProsessinstansGenerellSedBehandling(any(JournalfoeringDto.class));
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_feilBehandlingstype() throws MelosysException {
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode());
+        journalpost.setMottaksKanal("EESSI");
+        when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.FALSE);
 
         journalfoeringService.opprettOgJournalfør(opprettDto);
         verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(), anyString());
@@ -185,5 +206,36 @@ public class JournalfoeringServiceTest {
     public void valider_brukerID_mangler() throws FunksjonellException {
         opprettDto.setBrukerID(null);
         journalfoeringService.valider(opprettDto);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void journalførSed_støtterIkkeAutomatiskBehandling_forventException() throws MelosysException {
+        when(eessiService.støtterAutomatiskBehandling(eq(journalfoeringSedDto.getJournalpostID()))).thenReturn(false);
+        journalfoeringService.journalførSed(journalfoeringSedDto);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void journalførSed_manglerBrukerID_forventException() throws MelosysException {
+        journalfoeringSedDto.setBrukerID(null);
+        journalfoeringService.journalførSed(journalfoeringSedDto);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void journalførSed_manglerJournalpostID_forventException() throws MelosysException {
+        journalfoeringSedDto.setJournalpostID(null);
+        journalfoeringService.journalførSed(journalfoeringSedDto);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void journalførSed_manglerOppgaveID_forventException() throws MelosysException {
+        journalfoeringSedDto.setOppgaveID(null);
+        journalfoeringService.journalførSed(journalfoeringSedDto);
+    }
+
+    @Test
+    public void journalførSed_støtterAutomatiskBehandling_prosessinstansOpprettetOppgaveFerdigstilt() throws MelosysException {
+        when(eessiService.støtterAutomatiskBehandling(eq(journalfoeringSedDto.getJournalpostID()))).thenReturn(true);
+        journalfoeringService.journalførSed(journalfoeringSedDto);
+        verify(prosessinstansService).opprettProsessinstansSedMottak(eq(journalfoeringSedDto.getJournalpostID()), eq(journalfoeringSedDto.getBrukerID()));
     }
 }

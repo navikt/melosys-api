@@ -125,6 +125,7 @@ public class JoarkService implements JoarkFasade {
 
         if (response.getAvsender() != null) {
             journalpost.setAvsenderId(response.getAvsender().getIdentifikator());
+            journalpost.setAvsenderNavn(response.getAvsender().getNavn());
         }
         if (response.getArkivSak() != null) {
             journalpost.setArkivSakId(response.getArkivSak().getArkivSakId());

@@ -11,6 +11,7 @@ public class Journalpost {
     private final String journalpostId;
     private String arkivSakId;
     private String avsenderId;
+    private String avsenderNavn;
     private String brukerId;
     private String korrespondansepartNavn;
     private String korrespondansepartId;
@@ -46,6 +47,14 @@ public class Journalpost {
 
     public void setAvsenderId(String avsenderId) {
         this.avsenderId = avsenderId;
+    }
+
+    public String getAvsenderNavn() {
+        return avsenderNavn;
+    }
+
+    public void setAvsenderNavn(String avsenderNavn) {
+        this.avsenderNavn = avsenderNavn;
     }
 
     public String getBrukerId() {
