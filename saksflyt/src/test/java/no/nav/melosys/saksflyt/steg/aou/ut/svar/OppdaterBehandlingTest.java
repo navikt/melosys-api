@@ -56,7 +56,7 @@ public class OppdaterBehandlingTest {
     }
 
     @Test
-    public void utfør_anmodningsperiodeIkkeInnvilget_statusUnderBehandlingDokument() throws Exception {
+    public void utfør_anmodningsperiodeIkkeInnvilget_statusSvarAouMottattBehandling() throws Exception {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setYtterligereInformasjon("hei");
@@ -71,7 +71,7 @@ public class OppdaterBehandlingTest {
 
         oppdaterBehandling.utfør(prosessinstans);
 
-        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.UNDER_BEHANDLING));
+        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
 
@@ -110,7 +110,7 @@ public class OppdaterBehandlingTest {
     }
 
     @Test
-    public void utfør_anmodningsperiodeInnvilgetMedYtteligereInfo_statusUnderBehandlingDokument() throws Exception {
+    public void utfør_anmodningsperiodeInnvilgetMedYtteligereInfo_statusSvarAouMottattBehandling() throws Exception {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setYtterligereInformasjon("hei");
@@ -125,7 +125,7 @@ public class OppdaterBehandlingTest {
 
         oppdaterBehandling.utfør(prosessinstans);
 
-        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.UNDER_BEHANDLING));
+        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
 
