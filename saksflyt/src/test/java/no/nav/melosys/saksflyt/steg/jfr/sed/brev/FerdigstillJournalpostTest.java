@@ -34,10 +34,11 @@ public class FerdigstillJournalpostTest {
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "1234");
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, "111");
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, "tittel");
 
         ferdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpostMedSaksnummerOgBruker(eq("123"), eq("1234"), eq(111L), eq(true));
+        verify(joarkFasade).oppdaterJournalpost(eq("123"), eq("1234"), eq(111L), eq("tittel"), eq(true));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AOU_BREV_OPPRETT_SEDDOKUMENT);
     }
 }

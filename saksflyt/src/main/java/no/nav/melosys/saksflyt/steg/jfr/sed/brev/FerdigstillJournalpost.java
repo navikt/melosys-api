@@ -30,10 +30,11 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
-        joarkFasade.oppdaterJournalpostMedSaksnummerOgBruker(
+        joarkFasade.oppdaterJournalpost(
             journalpostId,
             prosessinstans.getData(ProsessDataKey.BRUKER_ID),
             prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class),
+            prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL),
             true
         );
 
