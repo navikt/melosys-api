@@ -27,15 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class JournalfoeringService {
-
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringService.class);
 
     private final JoarkFasade joarkFasade;
-
     private final OppgaveService oppgaveService;
-
     private final ProsessinstansService prosessinstansService;
-
     private final EessiService eessiService;
 
     @Autowired
@@ -81,7 +77,7 @@ public class JournalfoeringService {
         valider(journalfoeringDto);
         validerOpprettSakFelter(journalfoeringDto);
 
-        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
         // Land trenges av regelmodulen for å vurdere inngangsvilkår
         prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
@@ -110,7 +106,7 @@ public class JournalfoeringService {
         FagsakDto fagsakDto = journalfoeringDto.getFagsak();
         AnmodningOmUnntakDto anmodningOmUnntakDto = journalfoeringDto.getAnmodningOmUnntak();
 
-        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_AOU_BREV, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_AOU_BREV, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, fagsakDto.getSoknadsperiode());
         prosessinstans.setData(ProsessDataKey.LOVVALGSLAND, fagsakDto.getLand());
         prosessinstans.setData(ProsessDataKey.LOVVALGSBESTEMMELSE, anmodningOmUnntakDto.getLovvalgsbestemmelse());
@@ -150,7 +146,7 @@ public class JournalfoeringService {
             throw new FunksjonellException("Saksnummer mangler");
         }
 
-        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
 
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());

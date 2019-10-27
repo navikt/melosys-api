@@ -1,7 +1,6 @@
 package no.nav.melosys.service.journalforing;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collections;
 
 import no.nav.melosys.domain.ProsessSteg;
@@ -88,13 +87,15 @@ public class JournalfoeringServiceTest {
         periode.setFom(LocalDate.MIN);
         periode.setTom(LocalDate.MAX);
         fagsakDto.setSoknadsperiode(periode);
-        fagsakDto.setLand(Arrays.asList("DK"));
+        fagsakDto.setLand(Collections.singletonList("DK"));
         opprettDto.setFagsak(fagsakDto);
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
+            .thenReturn(new Prosessinstans());
+
         journalfoeringService.opprettOgJournalfør(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
         verify(oppgaveService).ferdigstillOppgave(anyString());
-
     }
 
     @Test(expected = FunksjonellException.class)
@@ -104,7 +105,7 @@ public class JournalfoeringServiceTest {
         periode.setFom(LocalDate.MAX);
         periode.setTom(LocalDate.MIN);
         fagsakDto.setSoknadsperiode(periode);
-        fagsakDto.setLand(Arrays.asList("DK"));
+        fagsakDto.setLand(Collections.singletonList("DK"));
         opprettDto.setFagsak(fagsakDto);
         journalfoeringService.opprettOgJournalfør(opprettDto);
 
@@ -162,6 +163,8 @@ public class JournalfoeringServiceTest {
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstypeKode("ANMODNING_OM_UNNTAK_HOVEDREGEL");
 
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_AOU_BREV), any()))
+            .thenReturn(new Prosessinstans());
         journalfoeringService.opprettOgJournalfør(opprettDto);
 
         ArgumentCaptor<Prosessinstans> captor = ArgumentCaptor.forClass(Prosessinstans.class);
@@ -169,7 +172,6 @@ public class JournalfoeringServiceTest {
 
         Prosessinstans prosessinstans = captor.getValue();
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING);
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.JFR_AOU_BREV);
     }
 
     @Test
@@ -184,6 +186,8 @@ public class JournalfoeringServiceTest {
     @Test
     public void tilordneSakOgJournalfør() throws FunksjonellException, TekniskException {
         tilordneDto.setSaksnummer("MEL-0123");
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_KNYTT), any()))
+            .thenReturn(new Prosessinstans());
         journalfoeringService.tilordneSakOgJournalfør(tilordneDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
