@@ -11,15 +11,23 @@ public class BehandlingsresultatDto {
     private final String behandlingsresultatTypeKode;
     private final List<String> begrunnelseKoder;
     private final String begrunnelseFritekst;
+    private final String utfallRegistreringUnntak;
 
-    private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode, String begrunnelseFritekst) {
+    private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
+                                   String begrunnelseFritekst,
+                                   String utfallRegistreringUnntak) {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode.getKode();
         this.begrunnelseKoder = new ArrayList<>();
         this.begrunnelseFritekst = begrunnelseFritekst;
+        this.utfallRegistreringUnntak = utfallRegistreringUnntak;
     }
 
     public static BehandlingsresultatDto av(Behandlingsresultat resultat) {
-        BehandlingsresultatDto dto = new BehandlingsresultatDto(resultat.getType(), resultat.getBegrunnelseFritekst());
+        BehandlingsresultatDto dto = new BehandlingsresultatDto(
+            resultat.getType(),
+            resultat.getBegrunnelseFritekst(),
+            resultat.getUtfallRegistreringUnntak() != null ? resultat.getUtfallRegistreringUnntak().getKode() : null
+        );
 
         resultat.getBehandlingsresultatBegrunnelser().stream()
             .map(BehandlingsresultatBegrunnelse::getKode)
@@ -38,5 +46,9 @@ public class BehandlingsresultatDto {
 
     public String getBegrunnelseFritekst() {
         return begrunnelseFritekst;
+    }
+
+    public String getUtfallRegistreringUnntak() {
+        return utfallRegistreringUnntak;
     }
 }
