@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.steg.iv;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -22,9 +24,9 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.IKKE_NORSK_AG_REGNING;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.HELFO;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
+import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 
 
 /**
@@ -118,6 +120,22 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
                 brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
             }
         }
+
+        if (erLønnetAvUtenlandskKonsern(resultat)) {
+            Brevbestilling a1SkatteoppkreverUtland = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
+                .medAvsender(saksbehandler)
+                .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
+                .medBehandling(behandling)
+                .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans)).build();
+            brevBestiller.bestill(a1SkatteoppkreverUtland);
+        }
+    }
+
+    private boolean erLønnetAvUtenlandskKonsern(Behandlingsresultat resultat) {
+        return resultat.hentVilkaarbegrunnelser(Vilkaar.FO_883_2004_ART12_1).stream()
+            .map(VilkaarBegrunnelse::getKode)
+            .map(Art12_1_begrunnelser::valueOf)
+            .anyMatch(kode -> kode == IKKE_NORSK_AG_REGNING);
     }
 
     private String hentBegrunnelseKode(Prosessinstans prosessinstans) {

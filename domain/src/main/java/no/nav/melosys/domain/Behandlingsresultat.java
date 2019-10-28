@@ -2,15 +2,14 @@ package no.nav.melosys.domain;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -266,6 +265,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
                 + " anmodningsperiode er ikke støttet i første leveranse");
         }
         return anmodningsperioder.iterator().next();
+    }
+
+    public Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar vilkaarType) {
+        return getVilkaarsresultater().stream()
+            .filter(vr -> vr.getVilkaar() == vilkaarType)
+            .flatMap(vr -> vr.getBegrunnelser().stream())
+            .collect(Collectors.toSet());
     }
 
     public boolean erAutomatisert() {

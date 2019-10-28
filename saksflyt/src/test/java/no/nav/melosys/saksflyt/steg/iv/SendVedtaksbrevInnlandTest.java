@@ -9,6 +9,7 @@ import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -28,16 +29,20 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
-import no.nav.melosys.service.dokument.brev.bygger.*;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagYrkesaktiv;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.IKKE_NORSK_AG_REGNING;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.HELFO;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
+import static no.nav.melosys.saksflyt.SaksflytTestUtils.lagVilkaarsresultat;
+import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -49,6 +54,7 @@ public class SendVedtaksbrevInnlandTest {
     private static final long BEHANDLINGSID_UTEN_PERIODER = -43L;
     private static final long BEHANDLINGSID_MED_FLERE_PERIODER = 43L;
     private static final long ART16_1_INNVILGET_BEHANDLINGSID = 44L;
+    private static final long ART16_1_INNVILGET_LOENNUTENLANDSKKONSERN_BEHANDLINGSID = -44L;
     private static final long BEHANDLINGSID_UTENLANDSK_LOVVALG = 45L;
     private static final long BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE = 46L;
     private static final long ART12_1_INNVILGET_BEHANDLINGSID = 47L;
@@ -105,8 +111,13 @@ public class SendVedtaksbrevInnlandTest {
         Fagsak fagsak = lagFagsak();
         Behandling behandling = lagBehandling(fagsak);
         BehandlingService behandlingService = mock(BehandlingService.class);
-        List<Long> behandlingReferanser = Arrays.asList(ART16_1_INNVILGET_BEHANDLINGSID, ART12_1_INNVILGET_BEHANDLINGSID,
-            ART12_1_AVSLÅTT_BEHANDLINGSID, ART12_2_INNVILGET_BEHANDLINGSID, BEHANDLINGSID_MANGLENDE_OPPL, ART13_1A_INNVILGET_BEHANDLINGSID);
+        List<Long> behandlingReferanser = Arrays.asList(ART16_1_INNVILGET_BEHANDLINGSID,
+            ART16_1_INNVILGET_LOENNUTENLANDSKKONSERN_BEHANDLINGSID,
+            ART12_1_INNVILGET_BEHANDLINGSID,
+            ART12_1_AVSLÅTT_BEHANDLINGSID,
+            ART12_2_INNVILGET_BEHANDLINGSID,
+            BEHANDLINGSID_MANGLENDE_OPPL,
+            ART13_1A_INNVILGET_BEHANDLINGSID);
         when(behandlingService.hentBehandling(longThat(behandlingReferanser::contains))).thenReturn(behandling);
         return behandlingService;
     }
@@ -130,7 +141,7 @@ public class SendVedtaksbrevInnlandTest {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(periode, Landkoder.AT, Behandlingsresultattyper.IKKE_FASTSATT);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID)).thenReturn(behandlingsresultat);
         Lovvalgsperiode periode2 = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
-        Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(new HashSet<>(Arrays.asList(periode, periode2)), null, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(new HashSet<>(Arrays.asList(periode, periode2)), Collections.emptySet(), null, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         assertThat(behandlingsresultatMedFlerePerioder.getLovvalgsperioder().size()).isGreaterThan(1);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_MED_FLERE_PERIODER)).thenReturn(behandlingsresultatMedFlerePerioder);
 
@@ -140,8 +151,12 @@ public class SendVedtaksbrevInnlandTest {
         Behandlingsresultat behandlingsresultatManglendeOppl = lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_MANGLENDE_OPPL)).thenReturn(behandlingsresultatManglendeOppl);
 
-        Behandlingsresultat innvilgetBehandlingsResultat = lagBehandlingsresultat(periode);
-        when(behandlingsresultatService.hentBehandlingsresultat(ART16_1_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetBehandlingsResultat);
+        Behandlingsresultat behandlingsresultatInnvilgetArt16 = lagBehandlingsresultat(periode);
+        when(behandlingsresultatService.hentBehandlingsresultat(ART16_1_INNVILGET_BEHANDLINGSID)).thenReturn(behandlingsresultatInnvilgetArt16);
+
+        Vilkaarsresultat ikkeNorskAGRegning = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, IKKE_NORSK_AG_REGNING);
+        Behandlingsresultat behandlingsresultatInnvilgetArt16LoennetUtenlandskKonsern = lagBehandlingsresultat(periode, ikkeNorskAGRegning);
+        when(behandlingsresultatService.hentBehandlingsresultat(ART16_1_INNVILGET_LOENNUTENLANDSKKONSERN_BEHANDLINGSID)).thenReturn(behandlingsresultatInnvilgetArt16LoennetUtenlandskKonsern);
 
         Behandlingsresultat innvilgetResultat12_1 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1));
         when(behandlingsresultatService.hentBehandlingsresultat(ART12_1_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat12_1);
@@ -214,28 +229,33 @@ public class SendVedtaksbrevInnlandTest {
         return periode;
     }
 
+    private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Vilkaarsresultat vilkaarsresultat) {
+        return lagBehandlingsresultat(Collections.singleton(periode), Collections.singleton(vilkaarsresultat), Landkoder.NO, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+    }
+
     private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode) {
-        return lagBehandlingsresultat(Collections.singleton(periode), Landkoder.NO, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        return lagBehandlingsresultat(Collections.singleton(periode), Collections.emptySet(), Landkoder.NO, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Landkoder land) {
-        return lagBehandlingsresultat(Collections.singleton(periode), land, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        return lagBehandlingsresultat(Collections.singleton(periode), Collections.emptySet(), land, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Landkoder land, Behandlingsresultattyper type) {
-        return lagBehandlingsresultat(Collections.singleton(periode), land, type);
+        return lagBehandlingsresultat(Collections.singleton(periode), Collections.emptySet(), land, type);
     }
 
-    private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder, Landkoder land, Behandlingsresultattyper type) {
+    private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder, Set<Vilkaarsresultat> vilkaarsresultater, Landkoder land, Behandlingsresultattyper type) {
         Behandlingsresultat utenlandskLovvalgResultat = new Behandlingsresultat();
         utenlandskLovvalgResultat.setLovvalgsperioder(perioder);
         utenlandskLovvalgResultat.setType(type);
         utenlandskLovvalgResultat.setFastsattAvLand(land);
+        utenlandskLovvalgResultat.setVilkaarsresultater(vilkaarsresultater);
         return utenlandskLovvalgResultat;
     }
 
     private static Behandlingsresultat lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper behandlingstype) {
-        return lagBehandlingsresultat(Collections.emptySet(), Landkoder.NO, behandlingstype);
+        return lagBehandlingsresultat(Collections.emptySet(), Collections.emptySet(), Landkoder.NO, behandlingstype);
     }
 
     @Test
@@ -327,6 +347,25 @@ public class SendVedtaksbrevInnlandTest {
 
         verify(dokService, never()).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
     }
+
+    @Test
+    public void utførSteg_innvilgelses161IkkeNorskAGRegning_senderA1TilSkatteoppkreverUtland() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_LOENNUTENLANDSKKONSERN_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService).produserDokument(eq(ATTEST_A1), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+    }
+
+    @Test
+    public void utførSteg_innvilgelses161_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+    }
+
 
     @Test
     public void utførSteg_innvilgelses12_senderInnvilgelseTilArbeidsgiver() throws Exception {
