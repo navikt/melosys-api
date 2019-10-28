@@ -19,14 +19,15 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,9 +51,11 @@ public class OppgaveplukkerTest {
 
     @Mock
     private OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
-
     @Mock
-    private FagsakRepository fagsakRepository;
+    private FagsakService fagsakService;
+    @Mock
+    private BehandlingService behandlingService;
+
 
     private Oppgaveplukker oppgaveplukker;
 
@@ -61,9 +64,8 @@ public class OppgaveplukkerTest {
     private final static String SAKSNUMMER = "MOCK-1";
 
     @Before
-    public void setUp() {
-        BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, fagsakRepository, behandlingRepository);
+    public void setUp() throws IkkeFunnetException {
+        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService);
 
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
@@ -71,7 +73,7 @@ public class OppgaveplukkerTest {
         fagsak.setGsakSaksnummer(GSAK_SAKSNUMMER);
         behandling.setFagsak(fagsak);
 
-        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
     }
 
     @Test
@@ -95,7 +97,7 @@ public class OppgaveplukkerTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
@@ -124,7 +126,7 @@ public class OppgaveplukkerTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
@@ -150,7 +152,7 @@ public class OppgaveplukkerTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
@@ -175,7 +177,7 @@ public class OppgaveplukkerTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
 
@@ -207,7 +209,7 @@ public class OppgaveplukkerTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
 
@@ -290,7 +292,7 @@ public class OppgaveplukkerTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
@@ -319,7 +321,7 @@ public class OppgaveplukkerTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
@@ -344,7 +346,7 @@ public class OppgaveplukkerTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
         assertThat(oppgave.isPresent()).isFalse();
@@ -370,7 +372,7 @@ public class OppgaveplukkerTest {
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
@@ -382,11 +384,12 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_søknad_sjekkGammelKode() throws FunksjonellException, TekniskException {
+    public void plukkOppgave_søknadStatusSvarAou_sjekkGammelKodeOppdaterStatus() throws FunksjonellException, TekniskException {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
         ArgumentCaptor<Behandlingstema> captor = ArgumentCaptor.forClass(Behandlingstema.class);
+        ArgumentCaptor<Behandling> behandlingCaptor = ArgumentCaptor.forClass(Behandling.class);
 
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), eq(null), captor.capture())).thenReturn(oppgaver);
 
@@ -396,20 +399,22 @@ public class OppgaveplukkerTest {
 
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        behandling.setStatus(Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
 
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
         verify(gsakFasade).finnUtildelteOppgaverEtterFrist(anySet(), any(Behandlingstyper.class), any());
         verify(gsakFasade).finnUtildelteOppgaverEtterFrist(anySet(), eq(null), any());
+        verify(behandlingService).lagre(behandlingCaptor.capture());
 
         assertThat(oppgave.isPresent()).isTrue();
         assertThat(captor.getValue()).isEqualTo(Behandlingstema.EU_EOS_GAMMEL_KODE);
+        assertThat(behandlingCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
     }
 
     @Test(expected = FunksjonellException.class)
