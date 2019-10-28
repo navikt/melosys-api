@@ -126,6 +126,16 @@ public class JoarkService implements JoarkFasade {
         if (response.getAvsender() != null) {
             journalpost.setAvsenderId(response.getAvsender().getIdentifikator());
             journalpost.setAvsenderNavn(response.getAvsender().getNavn());
+
+            final Avsender.AvsenderType avsenderType = response.getAvsender().getAvsenderType();
+            if (avsenderType != null) {
+                if (avsenderType == Avsender.AvsenderType.ORGANISASJON) {
+                    journalpost.setAvsenderType(AvsenderType.ORGANISASJON);
+                }
+                if (avsenderType == Avsender.AvsenderType.PERSON) {
+                    journalpost.setAvsenderType(AvsenderType.PERSON);
+                }
+            }
         }
         if (response.getArkivSak() != null) {
             journalpost.setArkivSakId(response.getArkivSak().getArkivSakId());
@@ -218,7 +228,7 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public void oppdaterJournalpost(String journalpostID, String hovedDokumentID, JournalpostOppdatering journalpostOppdatering)
-        throws SikkerhetsbegrensningException, IntegrasjonException {
+        throws SikkerhetsbegrensningException, TekniskException {
 
         oppdaterDokument(journalpostID, hovedDokumentID, journalpostOppdatering.getTittel(), journalpostOppdatering.isMedDokumentkategori());
         Map<String, String> fysiskeVedlegg = journalpostOppdatering.getFysiskeVedlegg();
@@ -251,7 +261,21 @@ public class JoarkService implements JoarkFasade {
         journalpost.setBruker(bruker);
 
         no.nav.dok.tjenester.journalfoerinngaaende.Avsender avsender = new no.nav.dok.tjenester.journalfoerinngaaende.Avsender();
-        avsender.setAvsenderType(no.nav.dok.tjenester.journalfoerinngaaende.Avsender.AvsenderType.PERSON);
+        switch (journalpostOppdatering.getAvsenderType()) {
+            case PERSON:
+                avsender.setAvsenderType(no.nav.dok.tjenester.journalfoerinngaaende.Avsender.AvsenderType.PERSON);
+                break;
+            case ORGANISASJON:
+                avsender.setAvsenderType(Avsender.AvsenderType.ORGANISASJON);
+                break;
+            case UTENLANDSK_MYNDIGHET:
+                // Dette er litt feil og fikses når journalpostapi tas i bruk.
+                avsender.setAvsenderType(Avsender.AvsenderType.ORGANISASJON);
+                break;
+            default:
+                throw new TekniskException("AvsenderType er påkrevd.");
+        }
+
         avsender.setIdentifikator(journalpostOppdatering.getAvsenderID());
         avsender.setNavn(journalpostOppdatering.getAvsenderNavn());
         journalpost.setAvsender(avsender);

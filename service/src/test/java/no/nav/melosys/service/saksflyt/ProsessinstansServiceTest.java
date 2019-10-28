@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.arkiv.AvsenderType;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Periode;
@@ -168,6 +169,7 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansJournalføring_utendlandskMyndighet_settesIProsessinstans() throws TekniskException {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
+        journalfoeringDto.setAvsenderType(AvsenderType.UTENLANDSK_MYNDIGHET);
         journalfoeringDto.setAvsenderID("DK");
         final String institusjonsIdForDk = "ID_FOR_DK";
         when(utenlandskMyndighetService.lagInstitusjonsId(Landkoder.DK)).thenReturn(institusjonsIdForDk);

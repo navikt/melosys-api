@@ -12,6 +12,7 @@ public class Journalpost {
     private String arkivSakId;
     private String avsenderId;
     private String avsenderNavn;
+    private AvsenderType avsenderType;
     private String brukerId;
     private String korrespondansepartNavn;
     private String korrespondansepartId;
@@ -55,6 +56,14 @@ public class Journalpost {
 
     public void setAvsenderNavn(String avsenderNavn) {
         this.avsenderNavn = avsenderNavn;
+    }
+
+    public AvsenderType getAvsenderType() {
+        return avsenderType;
+    }
+
+    public void setAvsenderType(AvsenderType avsenderType) {
+        this.avsenderType = avsenderType;
     }
 
     public String getBrukerId() {

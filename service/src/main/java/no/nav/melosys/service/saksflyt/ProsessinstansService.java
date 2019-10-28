@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.arkiv.AvsenderType;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -69,11 +70,11 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
 
-        final String avsenderID = journalfoeringDto.getAvsenderID();
-        if (erAvsenderErUtenlandskTrygemyndighet(avsenderID)) {
-            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, lagInstitusjonsId(avsenderID));
+        prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringDto.getAvsenderType());
+        if (journalfoeringDto.getAvsenderType() == AvsenderType.UTENLANDSK_MYNDIGHET) {
+            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, lagInstitusjonsId(journalfoeringDto.getAvsenderID()));
         } else {
-            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, avsenderID);
+            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
         }
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());

@@ -154,7 +154,8 @@ public class JoarkServiceTest {
         String fysiskVedleggTittel = "Fysisk vedlegg";
         vedleggMedTitler.put("vedleggDokID", fysiskVedleggTittel);
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(1L).medBrukerID("12345")
-            .medAvsenderID("12").medAvsenderNavn("321").medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
+            .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(AvsenderType.ORGANISASJON)
+            .medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
             .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).medDokumentkategori(true).build();
         joarkService.oppdaterJournalpost("123", "1234", journalpostOppdatering);
 
@@ -165,6 +166,7 @@ public class JoarkServiceTest {
         assertThat(request.getTittel()).isEqualTo(tittel);
         assertThat(request.getAvsender()).isNotNull();
         assertThat(request.getAvsender().getNavn()).isNotNull();
+        assertThat(request.getAvsender().getAvsenderType()).isEqualTo(Avsender.AvsenderType.ORGANISASJON);
 
         assertThat(request.getBruker()).isNotNull();
         assertThat(request.getBruker().getIdentifikator()).isNotNull();
@@ -192,7 +194,7 @@ public class JoarkServiceTest {
     public void oppdaterJournalpost_utenVedlegg_fungerer() throws Exception {
         String tittel = "tittel";
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(1L).medBrukerID("12345")
-            .medAvsenderID("12").medAvsenderNavn("321").medTittel(tittel).medFysiskeVedlegg(null)
+            .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(AvsenderType.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
             .medLogiskeVedleggTitler(null).medDokumentkategori(true).build();
         joarkService.oppdaterJournalpost("123", "1234", journalpostOppdatering);
 

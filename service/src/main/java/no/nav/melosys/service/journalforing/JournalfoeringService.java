@@ -172,6 +172,9 @@ public class JournalfoeringService {
         if (StringUtils.isEmpty(journalfoeringDto.getAvsenderNavn())) {
             throw new FunksjonellException("AvsenderNavn mangler");
         }
+        if (journalfoeringDto.getAvsenderType() == null) {
+            throw new FunksjonellException("AvsenderType mangler");
+        }
         if (StringUtils.isEmpty(journalfoeringDto.getBrukerID())) {
             throw new FunksjonellException("BrukerID mangler");
         }

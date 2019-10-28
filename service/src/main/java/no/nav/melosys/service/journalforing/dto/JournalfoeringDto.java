@@ -2,6 +2,8 @@ package no.nav.melosys.service.journalforing.dto;
 
 import java.util.List;
 
+import no.nav.melosys.domain.arkiv.AvsenderType;
+
 public class JournalfoeringDto {
     private String behandlingstypeKode;
     private String journalpostID;
@@ -9,6 +11,7 @@ public class JournalfoeringDto {
     private String brukerID;
     private String avsenderID;
     private String avsenderNavn;
+    private AvsenderType avsenderType;
     private String dokumentID;
     private String hoveddokumentTittel;
     private List<DokumentDto> vedlegg;
@@ -61,6 +64,14 @@ public class JournalfoeringDto {
 
     public void setAvsenderNavn(String avsenderNavn) {
         this.avsenderNavn = avsenderNavn;
+    }
+
+    public AvsenderType getAvsenderType() {
+        return avsenderType;
+    }
+
+    public void setAvsenderType(AvsenderType avsenderType) {
+        this.avsenderType = avsenderType;
     }
 
     public String getDokumentID() {

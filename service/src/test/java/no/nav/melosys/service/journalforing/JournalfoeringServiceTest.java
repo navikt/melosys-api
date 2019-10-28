@@ -7,6 +7,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.AvsenderType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.*;
@@ -60,6 +61,7 @@ public class JournalfoeringServiceTest {
         opprettDto.setOppgaveID("setOppgaveID");
         opprettDto.setAvsenderNavn("setAvsenderNavn");
         opprettDto.setAvsenderID("setAvsenderID");
+        opprettDto.setAvsenderType(AvsenderType.UTENLANDSK_MYNDIGHET);
         opprettDto.setBrukerID("setBrukerID");
         opprettDto.setHoveddokumentTittel("setDokumenttittel");
         opprettDto.setArbeidsgiverID("123456789");
@@ -71,6 +73,7 @@ public class JournalfoeringServiceTest {
         tilordneDto.setOppgaveID("setOppgaveID");
         tilordneDto.setAvsenderNavn("setAvsenderNavn");
         tilordneDto.setAvsenderID("setAvsenderID");
+        tilordneDto.setAvsenderType(AvsenderType.PERSON);
         tilordneDto.setBrukerID("setBrukerID");
         tilordneDto.setHoveddokumentTittel("setDokumenttittel");
 
