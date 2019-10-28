@@ -203,7 +203,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws FunksjonellException, TekniskException {
+    public Set<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTilordnetRessurs(tilordnetRessurs)
             .medSorteringsfelt(SORTERINGSFELT)
@@ -212,7 +212,7 @@ public class GsakService implements GsakFasade {
         return hentOppgaverAlleTyper(oppgaveSearchRequestBuilder);
     }
 
-    private List<Oppgave> hentOppgaverAlleTyper(OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder) throws FunksjonellException, TekniskException {
+    private Set<Oppgave> hentOppgaverAlleTyper(OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder) throws FunksjonellException, TekniskException {
         // Henter oppgaver opprettet av melosys, hvor melosys har satt behandlesAvApplikasjon
         List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
             oppgaveSearchRequestBuilder.medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode()).build()
@@ -227,7 +227,7 @@ public class GsakService implements GsakFasade {
         return Stream.of(finnJfrOppgaveListeResponse, finnOppgaveListeResponse)
             .flatMap(Collection::stream)
             .map(GsakService::oppgaveMappingDtoTilDomain)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     }
 
     @Override

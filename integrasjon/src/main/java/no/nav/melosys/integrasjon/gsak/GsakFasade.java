@@ -34,7 +34,7 @@ public interface GsakFasade {
      * Finner Oppgaver basert på ansvarlig saksbehandler
      * Oppgave sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
+    Set<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
 
     /**
      * Finner Oppgave med gitt saksnummer.
