@@ -56,7 +56,7 @@ public class UtbetaldataServiceTest {
 
     @Test
     public void hentUtbetalingerBarnetrygd_medTreff_verifiserSaksopplysning() throws Exception {
-        when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(hentResponse());
+        when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(hentResponse("77777777776"));
 
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd("123", null, null);
 
@@ -73,6 +73,29 @@ public class UtbetaldataServiceTest {
         assertThat(utbetalingDokument.utbetalinger.size()).isEqualTo(1);
         assertThat(utbetalingDokument.utbetalinger.iterator().next().ytelser.size()).isEqualTo(1);
         assertThat(utbetalingDokument.utbetalinger.iterator().next().ytelser.iterator().next().type).isEqualToIgnoringCase("Barnetrygd");
+    }
+
+    @Test
+    public void hentUtbetalingerBarnetrygd_medForskjelligeYtelserIEnUtbetaling_verifiserSaksopplysning() throws Exception {
+        when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(hentResponse("77777777777"));
+
+        Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd("123", null, null);
+
+        verify(utbetalingConsumer).hentUtbetalingsinformasjon(any());
+
+        assertThat(saksopplysning).isNotNull();
+        assertThat(saksopplysning.getDokumentXml()).isNotEmpty();
+        assertThat(saksopplysning.getType()).isEqualTo(SaksopplysningType.UTBETAL);
+        assertThat(saksopplysning.getVersjon()).isEqualTo("1.0");
+        assertThat(saksopplysning.getKilde()).isEqualTo(SaksopplysningKilde.UTBETALDATA);
+
+        UtbetalingDokument utbetalingDokument = (UtbetalingDokument) saksopplysning.getDokument();
+        assertThat(utbetalingDokument).isNotNull();
+        assertThat(utbetalingDokument.utbetalinger.size()).isEqualTo(2);
+        assertThat(utbetalingDokument.utbetalinger.get(0).ytelser.size()).isEqualTo(1);
+        assertThat(utbetalingDokument.utbetalinger.get(0).ytelser.iterator().next().type).isEqualToIgnoringCase("Barnetrygd");
+        assertThat(utbetalingDokument.utbetalinger.get(1).ytelser.size()).isEqualTo(1);
+        assertThat(utbetalingDokument.utbetalinger.get(1).ytelser.iterator().next().type).isEqualToIgnoringCase("Barnetrygd");
     }
 
     @Test(expected = IkkeFunnetException.class)
@@ -96,12 +119,12 @@ public class UtbetaldataServiceTest {
         verify(utbetalingConsumer).hentUtbetalingsinformasjon(any());
     }
 
-    private HentUtbetalingsinformasjonResponse hentResponse() throws JAXBException {
+    private HentUtbetalingsinformasjonResponse hentResponse(String fnr) throws JAXBException {
         Unmarshaller unmarshaller = JAXBContext.newInstance(
             no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse.class).createUnmarshaller();
 
         return ((no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse)
-            unmarshaller.unmarshal(ClassLoader.getSystemResource("mock/utbetaldata/77777777776.xml"))
+            unmarshaller.unmarshal(ClassLoader.getSystemResource(String.format("mock/utbetaldata/%s.xml", fnr)))
         ).getHentUtbetalingsinformasjonResponse();
     }
 }
