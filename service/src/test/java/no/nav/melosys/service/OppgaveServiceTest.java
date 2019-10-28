@@ -86,7 +86,7 @@ public class OppgaveServiceTest {
     @Test
     public void hentOppgaverMedAnsvarlig() throws MelosysException {
 
-        List<Oppgave> oppgaver = new ArrayList<>();
+        Collection<Oppgave> oppgaver = new HashSet<>();
         Oppgave.Builder oppgave1 = new Oppgave.Builder();
         oppgave1.setOppgaveId("1");
         oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
@@ -97,9 +97,9 @@ public class OppgaveServiceTest {
         oppgaver.add(oppgave1.build());
 
         when(gsakFasade.finnOppgaveListeMedAnsvarlig(anyString())).
-                thenAnswer((Answer<List<Oppgave>>) invocation -> {
+                thenAnswer((Answer<Collection<Oppgave>>) invocation -> {
                     String string = invocation.getArgument(0);//AnsvarligID
-                    return (string.equals("12345678901")) ? oppgaver : new ArrayList<>();
+                    return (string.equals("12345678901")) ? oppgaver : new HashSet<>();
                 });
 
         when(saksopplysningerService.harAktivOppfrisking(anyLong())).thenReturn(true);

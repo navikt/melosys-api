@@ -1,9 +1,7 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
@@ -117,6 +115,23 @@ public final class GsakServiceTest {
         assertThat(requests.get(0).getOppgavetype()).isNullOrEmpty();
         assertThat(requests.get(1).getBehandlesAvApplikasjon()).isNullOrEmpty();
         assertThat(requests.get(1).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
+    }
+
+    @Test
+    public void finnOppgaveListeMedAnsvarlig_toDuplikateOppgaver_filtrererUtDuplikater() throws Exception {
+        final String oppgaveID = "123duplikat";
+
+        OppgaveDto oppgaveDto1 = new OppgaveDto();
+        oppgaveDto1.setId(oppgaveID);
+        OppgaveDto oppgaveDto2 = new OppgaveDto();
+        oppgaveDto2.setId(oppgaveID);
+
+        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Arrays.asList(oppgaveDto1, oppgaveDto2));
+
+        Set<Oppgave> oppgaver = gsakService.finnOppgaveListeMedAnsvarlig("123");
+
+        assertThat(oppgaver.size()).isEqualTo(1);
+        assertThat(oppgaver.iterator().next().getOppgaveId()).isEqualTo(oppgaveID);
     }
     
     @Test
