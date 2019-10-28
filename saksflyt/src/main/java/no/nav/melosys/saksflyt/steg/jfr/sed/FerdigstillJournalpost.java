@@ -48,7 +48,8 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         String brukerID = hentBrukerID(prosessinstans);
         Long gsakSaksnummer = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
-        joarkFasade.oppdaterJournalpostMedSaksnummerOgBruker(journalpostId, brukerID, gsakSaksnummer, true);
+        String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
+        joarkFasade.oppdaterJournalpost(journalpostId, brukerID, gsakSaksnummer, tittel, true);
         log.info("Journalpost {} ferdigstilt for gsak-sak {}", journalpostId, prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID));
     }
 

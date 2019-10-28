@@ -28,6 +28,7 @@ public class FerdigstillJournalpostTest {
     private static final String BRUKER_ID = "bruker123";
     private static final String AKTØR_ID = "aktør123";
     private static final Long GSAK_SAKSNUMMER = 123L;
+    private static final String TITTEL = "tittel123";
 
     @Before
     public void setUp() {
@@ -42,7 +43,7 @@ public class FerdigstillJournalpostTest {
         when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
         ferdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpostMedSaksnummerOgBruker(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(true));
+        verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(TITTEL), eq(true));
         verify(tpsFasade).hentIdentForAktørId(eq(AKTØR_ID));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.hentFørsteProsessStegForType(prosessinstans.getType()));
     }
@@ -56,7 +57,7 @@ public class FerdigstillJournalpostTest {
         when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
         ferdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpostMedSaksnummerOgBruker(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(true));
+        verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(TITTEL), eq(true));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 
@@ -65,6 +66,7 @@ public class FerdigstillJournalpostTest {
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, AKTØR_ID);
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, TITTEL);
         prosessinstans.setBehandling(new Behandling());
         return prosessinstans;
     }

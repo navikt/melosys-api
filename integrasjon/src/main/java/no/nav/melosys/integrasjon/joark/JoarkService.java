@@ -262,7 +262,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJournalpostMedSaksnummerOgBruker(String journalpostID, String brukerID, Long gsakSaksnummer, boolean forsokFerdigstill) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void oppdaterJournalpost(String journalpostID, String brukerID, Long gsakSaksnummer, String tittel, boolean forsokFerdigstill) throws SikkerhetsbegrensningException, IntegrasjonException {
         PutJournalpostRequest request = new PutJournalpostRequest();
 
         ArkivSakWithArkivsakSystemEnum arkivsak = new ArkivSakWithArkivsakSystemEnum();
@@ -275,6 +275,7 @@ public class JoarkService implements JoarkFasade {
         bruker.setIdentifikator(brukerID);
         request.setBruker(bruker);
 
+        request.setTittel(tittel);
         request.setJournalfEnhet(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
         request.setForsoekEndeligJF(forsokFerdigstill);
         journalfoerInngaaendeConsumer.oppdaterJournalpost(request, journalpostID);
