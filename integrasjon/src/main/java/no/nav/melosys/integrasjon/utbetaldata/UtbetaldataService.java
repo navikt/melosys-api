@@ -146,6 +146,8 @@ public class UtbetaldataService implements UtbetaldataFasade {
     }
 
     private static boolean erBarnetrygdytelse(Ytelse ytelse) {
-        return ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);
+        return ytelse.getYtelsestype() != null
+            && ytelse.getYtelsestype().getValue() != null
+            && ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);
     }
 }
