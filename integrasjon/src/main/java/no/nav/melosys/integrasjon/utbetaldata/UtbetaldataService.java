@@ -16,10 +16,7 @@ import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumer;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.ForespurtPeriode;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.Ident;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.Identroller;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.Periodetyper;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.*;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonRequest;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,9 +134,20 @@ public class UtbetaldataService implements UtbetaldataFasade {
     }
 
     private static HentUtbetalingsinformasjonResponse filtrerYtelserAvTypeBarnetrygd(HentUtbetalingsinformasjonResponse response) {
+        // Fjerner utbetalinger uten barnetrygd
         response.getUtbetalingListe().removeIf(utbetaling ->  utbetaling.getYtelseListe().stream()
-            .noneMatch(ytelse -> ytelse.getYtelsestype().getValue().equalsIgnoreCase(BARNETRYGD)));
+            .noneMatch(UtbetaldataService::erBarnetrygdytelse));
+
+        // Fjerner ytelser i utbetalinger som ikke er barnetrygd
+        response.getUtbetalingListe().forEach(utbetaling -> utbetaling.getYtelseListe()
+            .removeIf(ytelse -> !erBarnetrygdytelse(ytelse)));
 
         return response;
+    }
+
+    private static boolean erBarnetrygdytelse(Ytelse ytelse) {
+        return ytelse.getYtelsestype() != null
+            && ytelse.getYtelsestype().getValue() != null
+            && ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);
     }
 }
