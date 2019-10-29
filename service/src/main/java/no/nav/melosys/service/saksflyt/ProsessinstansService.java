@@ -10,13 +10,17 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
@@ -37,18 +41,22 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 public class ProsessinstansService {
     private static final Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
 
-    private final ProsessinstansRepository prosessinstansRepo;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final ProsessinstansRepository prosessinstansRepo;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
 
     @Autowired
-    public ProsessinstansService(ProsessinstansRepository prosessinstansRepo, ApplicationEventPublisher applicationEventPublisher) {
-        this.prosessinstansRepo = prosessinstansRepo;
+    public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
+                                 ProsessinstansRepository prosessinstansRepo,
+                                 UtenlandskMyndighetService utenlandskMyndighetService) {
         this.applicationEventPublisher = applicationEventPublisher;
+        this.prosessinstansRepo = prosessinstansRepo;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
-    public static Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringDto journalfoeringDto) {
+    public Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringDto journalfoeringDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(type);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -60,7 +68,13 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
+
+        prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringDto.getAvsenderType());
+        if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
+            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, lagInstitusjonsId(journalfoeringDto.getAvsenderID()));
+        } else {
+            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
+        }
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
@@ -75,6 +89,16 @@ public class ProsessinstansService {
         }
 
         return prosessinstans;
+    }
+
+    private String lagInstitusjonsId(String avsenderID) {
+        try {
+            return utenlandskMyndighetService.lagInstitusjonsId(Landkoder.valueOf(avsenderID));
+        } catch (TekniskException e) {
+            logger.warn(e.getMessage());
+            logger.warn("Bruker {}: som avsenderID", avsenderID);
+            return avsenderID + ":";
+        }
     }
 
     private static boolean skalSendesForvaltningsmelding(JournalfoeringDto journalfoeringDto) {

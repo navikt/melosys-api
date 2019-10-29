@@ -38,7 +38,7 @@ public interface JoarkFasade {
      * Oppdaterer en journalpost i Joark
      */
     void oppdaterJournalpost(String journalpostID, String hovedDokumentID, JournalpostOppdatering journalpostOppdatering)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 
     /**
      * Oppdaterer journalpost med gsakSaksnummer.

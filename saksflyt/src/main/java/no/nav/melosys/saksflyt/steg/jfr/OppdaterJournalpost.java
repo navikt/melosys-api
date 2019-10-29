@@ -8,9 +8,10 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
@@ -53,7 +54,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         boolean medDokumentkategori = false;
@@ -83,6 +84,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         String brukerID = prosessinstans.getData(BRUKER_ID);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
+        Avsendertyper avsenderType = prosessinstans.getData(AVSENDER_TYPE, Avsendertyper.class);
         if (avsenderNavn == null) {
             if (avsenderID == null) {
                 throw new FunksjonellException("Både avsenderID og AvsenderNavn er null. AvsenderNavn er påkrevd for å journalføre.");
@@ -96,7 +98,8 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
 
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(gsakSakID).medBrukerID(brukerID)
-            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medTittel(tittel).medFysiskeVedlegg(fysiskeVedleggMedTitler)
+            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType)
+            .medTittel(tittel).medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler).medDokumentkategori(medDokumentkategori).build();
         joarkFasade.oppdaterJournalpost(journalpostID, dokumentID, journalpostOppdatering);
 

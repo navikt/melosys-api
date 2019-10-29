@@ -77,13 +77,14 @@ public class UtenlandskMyndighetService {
         return aktoer;
     }
 
-    private String lagInstitusjonsId(Landkoder landkode) throws TekniskException {
+    public String lagInstitusjonsId(Landkoder landkode) throws TekniskException {
         UtenlandskMyndighet myndighet = utenlandskMyndighetRepository.findByLandkode(landkode)
             .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
         return lagInstitusjonsId(myndighet);
     }
 
     private String lagInstitusjonsId(UtenlandskMyndighet utenlandskMyndighet) {
-        return utenlandskMyndighet.landkode + ":" + utenlandskMyndighet.institusjonskode;
+        return utenlandskMyndighet.landkode
+            + (utenlandskMyndighet.institusjonskode == null ? "" : ":" + utenlandskMyndighet.institusjonskode);
     }
 }
