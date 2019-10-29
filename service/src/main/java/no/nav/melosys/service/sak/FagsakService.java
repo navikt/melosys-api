@@ -59,7 +59,7 @@ public class FagsakService {
                          KontaktopplysningService kontaktopplysningService,
                          @Lazy OppgaveService oppgaveService,
                          TpsFasade tpsFasade,
-                         ProsessinstansService prosessinstansService,
+                         @Lazy ProsessinstansService prosessinstansService,
                          BehandlingsresultatService behandlingsresultatService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
