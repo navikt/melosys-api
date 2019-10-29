@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
+
 /**
  * Journalpostopplysninger fra Joark. Transient for Melosys.
  */
@@ -12,6 +14,7 @@ public class Journalpost {
     private String arkivSakId;
     private String avsenderId;
     private String avsenderNavn;
+    private Avsendertyper avsenderType;
     private String brukerId;
     private String korrespondansepartNavn;
     private String korrespondansepartId;
@@ -55,6 +58,14 @@ public class Journalpost {
 
     public void setAvsenderNavn(String avsenderNavn) {
         this.avsenderNavn = avsenderNavn;
+    }
+
+    public Avsendertyper getAvsenderType() {
+        return avsenderType;
+    }
+
+    public void setAvsenderType(Avsendertyper avsenderType) {
+        this.avsenderType = avsenderType;
     }
 
     public String getBrukerId() {

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.tjenester.gui.dto.dokument.DokumentDto;
 
 public final class JournalpostDto {
@@ -13,16 +14,20 @@ public final class JournalpostDto {
     private String brukerID;
     private String avsenderID;
     private String avsenderNavn;
+    private Avsendertyper avsenderType;
     private boolean erBrukerAvsender;
     private DokumentDto hoveddokument;
     private List<DokumentDto> vedlegg = new ArrayList<>();
     private BehandlingsInformasjon behandlingsInformasjon;
 
-    private JournalpostDto(Instant mottattDato, String brukerID, String avsenderID, String avsenderNavn, boolean erBrukerAvsender) {
+    private JournalpostDto(Instant mottattDato, String brukerID,
+                           String avsenderID, String avsenderNavn,
+                           Avsendertyper avsenderType, boolean erBrukerAvsender) {
         this.mottattDato = mottattDato;
         this.brukerID = brukerID;
         this.avsenderID = avsenderID;
         this.avsenderNavn = avsenderNavn;
+        this.avsenderType = avsenderType;
         this.erBrukerAvsender = erBrukerAvsender;
     }
 
@@ -31,8 +36,9 @@ public final class JournalpostDto {
         String brukerID = journalpost.getBrukerId();
         String avsenderID = journalpost.getAvsenderId();
         String avsenderNavn = journalpost.getAvsenderNavn();
+        Avsendertyper avsenderType = journalpost.getAvsenderType();
         boolean erBrukerAvsender = brukerID != null && brukerID.equalsIgnoreCase(avsenderID);
-        JournalpostDto dto = new JournalpostDto(mottatDato, brukerID, avsenderID, avsenderNavn, erBrukerAvsender);
+        JournalpostDto dto = new JournalpostDto(mottatDato, brukerID, avsenderID, avsenderNavn, avsenderType, erBrukerAvsender);
         DokumentDto dokumentDto = new DokumentDto(journalpost.getHoveddokument().getDokumentId(), journalpost.getHoveddokument().getTittel());
         dto.setHoveddokument(dokumentDto);
         dto.setVedlegg(journalpost.getVedleggListe().stream().map(v -> new DokumentDto(v.getDokumentId(), v.getTittel())).collect(Collectors.toList()));
@@ -57,6 +63,10 @@ public final class JournalpostDto {
 
     public String getAvsenderNavn() {
         return avsenderNavn;
+    }
+
+    public Avsendertyper getAvsenderType() {
+        return avsenderType;
     }
 
     public DokumentDto getHoveddokument() {
