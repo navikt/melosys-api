@@ -7,16 +7,19 @@ import org.springframework.util.Assert;
 
 public enum FastMottaker {
     HELFO,
-    SKATT;
+    SKATT,
+    SKATTEOPPKREVER_UTLAND;
 
     private static final String HELFO_ORGNR = "986965610";
     private static final String SKATTEETATEN_ORGNR = "974761076";
+    private static final String SKATTEOPPKREVER_UTLAND_ORGNR = "992187298";
 
     public static Mottaker av(FastMottaker mottaker) {
         Assert.notNull(mottaker, "FastMottaker trengs.");
         switch (mottaker) {
             case HELFO: return Mottaker.av(lagAktør(HELFO_ORGNR));
             case SKATT: return Mottaker.av(lagAktør(SKATTEETATEN_ORGNR));
+            case SKATTEOPPKREVER_UTLAND: return Mottaker.av(lagAktør(SKATTEOPPKREVER_UTLAND_ORGNR));
             default: throw new IllegalArgumentException(mottaker + " støttes ikke.");
         }
     }
