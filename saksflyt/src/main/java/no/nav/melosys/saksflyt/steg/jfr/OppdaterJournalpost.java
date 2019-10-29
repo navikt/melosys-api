@@ -7,8 +7,8 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.arkiv.AvsenderType;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -84,7 +84,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         String brukerID = prosessinstans.getData(BRUKER_ID);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
-        AvsenderType avsenderType = prosessinstans.getData(AVSENDER_TYPE, AvsenderType.class);
+        Avsendertyper avsenderType = prosessinstans.getData(AVSENDER_TYPE, Avsendertyper.class);
         if (avsenderNavn == null) {
             if (avsenderID == null) {
                 throw new FunksjonellException("Både avsenderID og AvsenderNavn er null. AvsenderNavn er påkrevd for å journalføre.");

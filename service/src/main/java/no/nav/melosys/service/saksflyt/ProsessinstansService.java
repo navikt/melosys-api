@@ -1,17 +1,16 @@
 package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.arkiv.AvsenderType;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
@@ -71,7 +70,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
 
         prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringDto.getAvsenderType());
-        if (journalfoeringDto.getAvsenderType() == AvsenderType.UTENLANDSK_MYNDIGHET) {
+        if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, lagInstitusjonsId(journalfoeringDto.getAvsenderID()));
         } else {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
@@ -90,10 +89,6 @@ public class ProsessinstansService {
         }
 
         return prosessinstans;
-    }
-
-    private static boolean erAvsenderErUtenlandskTrygemyndighet(String avsenderID) {
-        return Arrays.stream(Landkoder.values()).anyMatch(l -> l.getKode().equals(avsenderID));
     }
 
     private String lagInstitusjonsId(String avsenderID) {

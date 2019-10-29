@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.melosys.domain.arkiv.AvsenderType;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import org.springframework.util.CollectionUtils;
 
 public final class JournalpostOppdatering {
@@ -13,7 +13,7 @@ public final class JournalpostOppdatering {
     private final String brukerID;
     private final String avsenderID;
     private final String avsenderNavn;
-    private final AvsenderType avsenderType;
+    private final Avsendertyper avsenderType;
     private final String tittel;
     private final Map<String, String> fysiskeVedlegg;
     private final List<String> logiskeVedleggTitler;
@@ -25,7 +25,7 @@ public final class JournalpostOppdatering {
         private String brukerID;
         private String avsenderID;
         private String avsenderNavn;
-        private AvsenderType avsenderType;
+        private Avsendertyper avsenderType;
         private String tittel;
         private Map<String, String> fysiskeVedlegg = new HashMap<>();
         private List<String> logiskeVedleggTitler = new ArrayList<>();
@@ -51,7 +51,7 @@ public final class JournalpostOppdatering {
             return this;
         }
 
-        public Builder medAvsenderType(AvsenderType avsenderType) {
+        public Builder medAvsenderType(Avsendertyper avsenderType) {
             this.avsenderType = avsenderType;
             return this;
         }
@@ -113,7 +113,7 @@ public final class JournalpostOppdatering {
         return avsenderNavn;
     }
 
-    public AvsenderType getAvsenderType() {
+    public Avsendertyper getAvsenderType() {
         return avsenderType;
     }
 

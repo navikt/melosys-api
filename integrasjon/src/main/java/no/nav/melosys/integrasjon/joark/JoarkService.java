@@ -9,6 +9,7 @@ import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -130,10 +131,10 @@ public class JoarkService implements JoarkFasade {
             final Avsender.AvsenderType avsenderType = response.getAvsender().getAvsenderType();
             if (avsenderType != null) {
                 if (avsenderType == Avsender.AvsenderType.ORGANISASJON) {
-                    journalpost.setAvsenderType(AvsenderType.ORGANISASJON);
+                    journalpost.setAvsenderType(Avsendertyper.ORGANISASJON);
                 }
                 if (avsenderType == Avsender.AvsenderType.PERSON) {
-                    journalpost.setAvsenderType(AvsenderType.PERSON);
+                    journalpost.setAvsenderType(Avsendertyper.PERSON);
                 }
             }
         }
@@ -268,7 +269,7 @@ public class JoarkService implements JoarkFasade {
             case ORGANISASJON:
                 avsender.setAvsenderType(Avsender.AvsenderType.ORGANISASJON);
                 break;
-            case UTENLANDSK_MYNDIGHET:
+            case UTENLANDSK_TRYGDEMYNDIGHET:
                 // Dette er litt feil og fikses når journalpostapi tas i bruk.
                 avsender.setAvsenderType(Avsender.AvsenderType.ORGANISASJON);
                 break;
