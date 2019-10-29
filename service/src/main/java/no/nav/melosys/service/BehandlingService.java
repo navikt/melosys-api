@@ -1,7 +1,9 @@
 package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.Period;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -92,6 +94,10 @@ public class BehandlingService {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
         }
         behandling.setStatus(status);
+        if (behandling.erVenterForDokumentasjon()) {
+            behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Period.ofWeeks(2)));
+        }
+
         behandlingRepository.save(behandling);
 
         if (status == Behandlingsstatus.AVSLUTTET) {

@@ -73,12 +73,13 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void oppdaterStatus() throws FunksjonellException, TekniskException {
+    public void oppdaterStatus_statusAvventDok_dokumentasjonSvarfristOppdatert() throws FunksjonellException, TekniskException {
         long behandlingID = 11L;
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
+        assertThat(behandling.getDokumentasjonSvarfristDato()).isNotNull();
     }
 
     @Test(expected = IkkeFunnetException.class)
