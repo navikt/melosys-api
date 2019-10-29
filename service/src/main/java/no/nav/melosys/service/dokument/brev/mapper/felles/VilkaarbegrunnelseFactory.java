@@ -3,12 +3,9 @@ package no.nav.melosys.service.dokument.brev.mapper.felles;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.*;
 import no.nav.melosys.exception.TekniskException;
 
@@ -214,12 +211,5 @@ public final class VilkaarbegrunnelseFactory {
             .map(VilkaarBegrunnelse::getKode)
             .map(Art161AnmodningUtenArt12BegrunnelseKode::valueOf)
             .findFirst();
-    }
-
-    public static Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, Vilkaar vilkaarType) {
-        return resultat.getVilkaarsresultater().stream()
-            .filter(vr -> vr.getVilkaar() == vilkaarType)
-            .flatMap(vr -> vr.getBegrunnelser().stream())
-            .collect(Collectors.toSet());
     }
 }
