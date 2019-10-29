@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,16 +33,18 @@ public class HentMedlemskapsopplysningerTest {
 
     @Test
     public void utfør() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now(), LocalDate.now()),false);
+        Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now(),false);
         hentMedlemskapsopplysninger.utfør(prosessinstans);
         verify(hentOpplysningerFelles).hentOgLagreMedlemskapsopplysninger(anyLong(), anyString());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_HENT_YTELSER);
     }
 
-    private Prosessinstans hentProsessinstans(Saksopplysning saksopplysning, boolean erEndring) {
+    private Prosessinstans hentProsessinstans(LocalDate fom, LocalDate tom, boolean erEndring) {
+        Saksopplysning saksopplysning = hentSedSaksopplysning(fom ,tom);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, erEndring);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "123123");
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessimelding(fom, tom));
 
         Behandling behandling = new Behandling();
         behandling.setId(2L);
@@ -62,6 +66,13 @@ public class HentMedlemskapsopplysningerTest {
         sedDokument.setLovvalgsperiode(new no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom));
         sedDokument.setFnr("tada");
         return sedDokument;
+    }
 
+    private MelosysEessiMelding hentMelosysEessimelding(LocalDate fom, LocalDate tom) {
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setPeriode(new Periode());
+        melosysEessiMelding.getPeriode().setFom(fom);
+        melosysEessiMelding.getPeriode().setTom(tom);
+        return melosysEessiMelding;
     }
 }
