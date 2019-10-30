@@ -18,6 +18,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -40,7 +41,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.UTSENDELSE_OVER_24_MN;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.NORMALT_IKKE_DRIFT_NORGE;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.ERSTATTER_EN_ANNEN_UNDER_5_AAR;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12.SJOEMANNSKIRKEN;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagVilkaarsresultat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
@@ -78,8 +84,6 @@ public class BrevDataByggerA001Test {
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-
-
         avklarteOrganisasjoner = new HashSet<>();
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
 
@@ -92,12 +96,7 @@ public class BrevDataByggerA001Test {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         when(myndighetsRepo.findByLandkode(any())).thenReturn(Optional.of(utenlandskMyndighet));
 
-        VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
-        begrunnelse.setKode("God grunn");
-        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
-        vilkaarsresultat.setBegrunnelser(new HashSet<>(Arrays.asList(begrunnelse)));
-        when(vilkårRepo.findByBehandlingsresultatIdAndVilkaar(anyLong(), any())).thenReturn(Optional.of(vilkaarsresultat));
+        lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
         oppgittAdresse.gatenavn = "HjemmeGata";
@@ -144,6 +143,11 @@ public class BrevDataByggerA001Test {
         leggTilTestorganisasjon("navn2", orgnr2, detaljer);
 
         brevDataByggerA001 = new BrevDataByggerA001(lovvalgsperiodeService, anmodningsperiodeService, myndighetsRepo, vilkårRepo);
+    }
+
+    private void lagVilkårResultat(Vilkaar vilkaarType, boolean oppfylt, Kodeverk begrunnelseKode) {
+        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(vilkaarType, oppfylt, begrunnelseKode);;
+        when(vilkårRepo.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(vilkaarType))).thenReturn(Optional.of(vilkaarsresultat));
     }
 
     private BrevDataGrunnlag lagDokumentressurs() throws TekniskException {
@@ -217,6 +221,45 @@ public class BrevDataByggerA001Test {
         BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
         assertThat(brevDataDto.ansettelsesperiode).isEmpty();
     }
+
+    @Test
+    public void lag_art16MedArt121_harKunArt16Begrunnelser() throws MelosysException {
+        lagVilkårResultat(Vilkaar.FO_883_2004_ART12_1, false, UTSENDELSE_OVER_24_MN);
+        lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+
+        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
+        assertThat(brevDataDto.anmodningUtenArt12Begrunnelser).isEmpty();
+
+        assertThat(brevDataDto.anmodningBegrunnelser).hasSize(1);
+        assertThat(brevDataDto.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+            .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
+    }
+
+    @Test
+    public void lag_art16MedArt122_harKunArt16Begrunnelser() throws MelosysException {
+        lagVilkårResultat(Vilkaar.FO_883_2004_ART12_2, false, NORMALT_IKKE_DRIFT_NORGE);
+        lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+
+        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
+        assertThat(brevDataDto.anmodningUtenArt12Begrunnelser).isEmpty();
+
+        assertThat(brevDataDto.anmodningBegrunnelser).hasSize(1);
+        assertThat(brevDataDto.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+            .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
+    }
+
+    @Test
+    public void lag_art16UtenArt12_harKunArt16UtenArt12Begrunnelser() throws MelosysException {
+        lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
+
+        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
+        assertThat(brevDataDto.anmodningBegrunnelser).isEmpty();
+
+        assertThat(brevDataDto.anmodningUtenArt12Begrunnelser).hasSize(1);
+        assertThat(brevDataDto.anmodningUtenArt12Begrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+            .containsExactly(SJOEMANNSKIRKEN.getKode());
+    }
+
 
     @Test
     public void testAnsettelsesperiode() throws MelosysException {

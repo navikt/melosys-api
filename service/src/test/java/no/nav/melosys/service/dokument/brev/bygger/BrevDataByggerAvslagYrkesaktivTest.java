@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.KORT_OPPDRAG_RETUR_NORSK_AG;
 import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -60,7 +61,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
 
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
-            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART16_1, true,lagVilkaarBegrunnelse("KORT_OPPDRAG_RETUR_NORSK_AG"))));
+            .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
 
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
         brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, vilkaarsresultatRepository);

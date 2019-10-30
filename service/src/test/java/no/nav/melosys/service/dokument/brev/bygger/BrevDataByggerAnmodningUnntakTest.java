@@ -25,6 +25,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.UTSENDELSE_OVER_24_MN;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.KORT_OPPDRAG_RETUR_NORSK_AG;
 import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -55,7 +57,7 @@ public class BrevDataByggerAnmodningUnntakTest {
         brevDataByggerAnmodningUnntak = new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatRepository);
 
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
-            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART16_1, true, lagVilkaarBegrunnelse("KORT_OPPDRAG_RETUR_NORSK_AG"))));
+            .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
     }
 
     @Test
@@ -115,7 +117,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     @Test
     public void lag_brevDataMedArt121_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
-            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART12_2, false, lagVilkaarBegrunnelse("UTSENDELSE_OVER_24_MN"))));
+            .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
@@ -126,7 +128,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     @Test
     public void lag_brevDataMedArt122_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
-            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART12_2, false, lagVilkaarBegrunnelse("UTSENDELSE_OVER_24_MN"))));
+            .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
@@ -137,7 +139,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     @Test
     public void lag_brevDataMedOppfyltArt121_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
-            .thenReturn(Optional.of(lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART12_2, true, Collections.emptySet())));
+            .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, true)));
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
@@ -147,7 +149,7 @@ public class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     public void lag_brevDataMedFritekst() throws TekniskException, FunksjonellException {
-        Vilkaarsresultat vilkaar = lagVilkaarsresultatMedBegrunnelse(Vilkaar.FO_883_2004_ART16_1, true, lagVilkaarBegrunnelse("KORT_OPPDRAG_RETUR_NORSK_AG"));
+        Vilkaarsresultat vilkaar = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG);
         vilkaar.setBegrunnelseFritekst("FRITEKST");
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1))).thenReturn(Optional.of(vilkaar));
 
