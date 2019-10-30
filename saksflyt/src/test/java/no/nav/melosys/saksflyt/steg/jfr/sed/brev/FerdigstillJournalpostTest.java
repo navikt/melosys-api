@@ -5,6 +5,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,11 +18,16 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FerdigstillJournalpostTest {
-
     @Mock
     private JoarkFasade joarkFasade;
 
     private FerdigstillJournalpost ferdigstillJournalpost;
+
+    private static final String JOURNALPOST_ID = "jp123";
+    private static final String BRUKER_ID = "bruker1234";
+    private static final String AKTØR_ID = "aktør123";
+    private static final Long GSAK_SAKSNUMMER = 111L;
+    private static final String TITTEL = "tittel";
 
     @Before
     public void setup() {
@@ -31,14 +37,16 @@ public class FerdigstillJournalpostTest {
     @Test
     public void utfør() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, "1234");
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, "111");
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, "tittel");
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, BRUKER_ID);
+        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER.toString());
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, TITTEL);
 
         ferdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpost(eq("123"), eq("1234"), eq(111L), eq("tittel"), eq(true));
+        JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
+            .medBrukerID(BRUKER_ID).medArkivSakID(GSAK_SAKSNUMMER).medTittel(TITTEL).build();
+        verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(forventetOppdatering), eq(true));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AOU_BREV_OPPRETT_SEDDOKUMENT);
     }
 }
