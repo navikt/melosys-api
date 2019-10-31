@@ -265,16 +265,14 @@ public class JoarkService implements JoarkFasade {
         journalpostRequest.setBruker(bruker);
 
         if (journalpostOppdatering.getAvsenderType() != null) {
-            no.nav.dok.tjenester.journalfoerinngaaende.Avsender avsender = new no.nav.dok.tjenester.journalfoerinngaaende.Avsender();
+            Avsender avsender = new Avsender();
             switch (journalpostOppdatering.getAvsenderType()) {
                 case PERSON:
-                    avsender.setAvsenderType(no.nav.dok.tjenester.journalfoerinngaaende.Avsender.AvsenderType.PERSON);
+                    avsender.setAvsenderType(Avsender.AvsenderType.PERSON);
                     break;
                 case ORGANISASJON:
-                    avsender.setAvsenderType(Avsender.AvsenderType.ORGANISASJON);
-                    break;
-                case UTENLANDSK_TRYGDEMYNDIGHET:
                     // Dette er litt feil og fikses når journalpostapi tas i bruk.
+                case UTENLANDSK_TRYGDEMYNDIGHET:
                     avsender.setAvsenderType(Avsender.AvsenderType.ORGANISASJON);
                     break;
                 default:
