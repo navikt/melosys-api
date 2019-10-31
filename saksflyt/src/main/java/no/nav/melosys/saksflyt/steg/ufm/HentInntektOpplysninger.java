@@ -3,11 +3,13 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +24,12 @@ public class HentInntektOpplysninger extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(HentInntektOpplysninger.class);
 
     private final HentOpplysningerFelles hentOpplysningerFelles;
+    private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
-    HentInntektOpplysninger(HentOpplysningerFelles hentOpplysningerFelles) {
+    HentInntektOpplysninger(HentOpplysningerFelles hentOpplysningerFelles, SaksopplysningerService saksopplysningerService) {
         this.hentOpplysningerFelles = hentOpplysningerFelles;
+        this.saksopplysningerService = saksopplysningerService;
     }
 
     @Override
@@ -37,9 +41,12 @@ public class HentInntektOpplysninger extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        LocalDate fom = melosysEessiMelding.getPeriode().getFom();
-        LocalDate tom = melosysEessiMelding.getPeriode().getTom();
+        final long behandlingID = prosessinstans.getBehandling().getId();
+        SedDokument sedDokument = saksopplysningerService.finnSedOpplysninger(behandlingID)
+            .orElseThrow(() -> new TekniskException("Finner ikke SedDokument for behandling " + behandlingID));
+
+        LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
+        LocalDate tom = sedDokument.getLovvalgsperiode().getTom();
 
         if (!PeriodeKontroller.feilIPeriode(fom, tom)) {
             long behandlingId = prosessinstans.getBehandling().getId();
