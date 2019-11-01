@@ -2,13 +2,16 @@ package no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto;
 
 public final class DistribuerJournalpostResponse {
 
-    private final String bestillingId;
+    private String bestillingsId;
 
-    public DistribuerJournalpostResponse(String bestillingId) {
-        this.bestillingId = bestillingId;
+    public DistribuerJournalpostResponse() {
     }
 
-    public String getBestillingId() {
-        return bestillingId;
+    public DistribuerJournalpostResponse(String bestillingsId) {
+        this.bestillingsId = bestillingsId;
+    }
+
+    public String getBestillingsId() {
+        return bestillingsId;
     }
 }

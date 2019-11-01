@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto;
 
 public final class Adresse {
 
-    private String adressetype;
+    private String adresseType;
     private String adresselinje1;
     private String adresselinje2;
     private String adresselinje3;
@@ -10,8 +10,8 @@ public final class Adresse {
     private String poststed;
     private String land;
 
-    public Adresse(String adressetype, String adresselinje1, String adresselinje2, String adresselinje3, String postnummer, String poststed, String land) {
-        this.adressetype = adressetype;
+    public Adresse(String adresseType, String adresselinje1, String adresselinje2, String adresselinje3, String postnummer, String poststed, String land) {
+        this.adresseType = adresseType;
         this.adresselinje1 = adresselinje1;
         this.adresselinje2 = adresselinje2;
         this.adresselinje3 = adresselinje3;
@@ -27,8 +27,8 @@ public final class Adresse {
         return new AdresseBuilder();
     }
 
-    public String getAdressetype() {
-        return adressetype;
+    public String getAdresseType() {
+        return adresseType;
     }
 
     public String getAdresselinje1() {

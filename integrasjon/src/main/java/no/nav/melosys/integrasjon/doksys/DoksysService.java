@@ -157,7 +157,7 @@ public class DoksysService implements DoksysFasade {
                 : utenlandskAdresse(mottakeradresse))
             .build();
 
-        return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingId();
+        return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
     }
 
     private static Adresse norskAdresse(StrukturertAdresse strukturertAdresse) {

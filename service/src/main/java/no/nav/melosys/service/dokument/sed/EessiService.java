@@ -16,6 +16,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
@@ -146,10 +147,10 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public byte[] genererSedForhåndsvisning(long behandingID, SedType sedType) throws MelosysException {
-        Behandling behandling = behandlingService.hentBehandling(behandingID);
+    public byte[] genererSedForhåndsvisning(long behandlingID, SedType sedType) throws MelosysException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         MedlemsperiodeType medlemsperiodeType;
         if (sedType == SedType.A001) {
@@ -159,8 +160,12 @@ public class EessiService {
         }
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
-        log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandingID);
+        log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
         return eessiConsumer.genererSedForhåndsvisning(sedDataDto, sedType);
+    }
+
+    public SedType hentSedTypeForAnmodningUnntakSvar(Long behandlingID) throws IkkeFunnetException {
+        return hentSedTypeForAnmodningUnntakSvar(behandlingsresultatService.hentBehandlingsresultat(behandlingID));
     }
 
     private static SedType hentSedTypeForAnmodningUnntakSvar(Behandlingsresultat behandlingsresultat) {

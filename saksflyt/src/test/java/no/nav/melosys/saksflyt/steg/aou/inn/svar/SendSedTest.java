@@ -38,6 +38,6 @@ public class SendSedTest {
         sendSed.utfør(prosessinstans);
 
         verify(eessiService).sendAnmodningUnntakSvar(anyLong());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_OPPDATER_MEDL);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }
