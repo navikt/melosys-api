@@ -1,12 +1,12 @@
 package no.nav.melosys.saksflyt.steg.aou.inn;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
 import no.nav.melosys.service.SaksopplysningerService;
 import org.junit.Before;
@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HentMedlemskapsopplysningerTest {
-
     @Mock
     private HentOpplysningerFelles hentOpplysningerFelles;
     @Mock
@@ -39,8 +38,8 @@ public class HentMedlemskapsopplysningerTest {
     @Test
     public void utfør() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans(false);
-        when(saksopplysningerService.finnSedOpplysninger(anyLong()))
-            .thenReturn(Optional.of(hentSedDokument(LocalDate.now(), LocalDate.now().plusMonths(2))));
+        when(saksopplysningerService.hentSedOpplysninger(anyLong()))
+            .thenReturn(hentSedDokument(LocalDate.now(), LocalDate.now().plusMonths(2)));
 
         hentMedlemskapsopplysninger.utfør(prosessinstans);
         verify(hentOpplysningerFelles).hentOgLagreMedlemskapsopplysninger(anyLong(), anyString());

@@ -61,6 +61,12 @@ public class SaksopplysningerService {
             .map(s -> (SedDokument) s.getDokument());
     }
 
+    public SedDokument hentSedOpplysninger(long behandlingID) throws IkkeFunnetException {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.SEDOPPL)
+            .map(s -> (SedDokument) s.getDokument())
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke SedDokument for behandling " + behandlingID));
+    }
+
     /***
      * Metoden sjekker om en behandling med ID {@code behandlingID} har en oppfrisking i gang.
      * Oppfrisking betyr å hente saksopplysninger på nytt for en gitt behandling.

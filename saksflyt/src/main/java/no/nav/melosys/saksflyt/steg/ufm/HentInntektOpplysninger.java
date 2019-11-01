@@ -1,10 +1,11 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
@@ -16,11 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-
 @Component("UnntakFraMedlemskapHentInntektOpplysninger")
 public class HentInntektOpplysninger extends AbstraktStegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(HentInntektOpplysninger.class);
 
     private final HentOpplysningerFelles hentOpplysningerFelles;
@@ -42,8 +40,7 @@ public class HentInntektOpplysninger extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         final long behandlingID = prosessinstans.getBehandling().getId();
-        SedDokument sedDokument = saksopplysningerService.finnSedOpplysninger(behandlingID)
-            .orElseThrow(() -> new TekniskException("Finner ikke SedDokument for behandling " + behandlingID));
+        SedDokument sedDokument = saksopplysningerService.hentSedOpplysninger(behandlingID);
 
         LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
         LocalDate tom = sedDokument.getLovvalgsperiode().getTom();

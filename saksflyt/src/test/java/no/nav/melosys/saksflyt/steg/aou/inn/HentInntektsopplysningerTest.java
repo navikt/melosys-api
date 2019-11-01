@@ -1,29 +1,24 @@
 package no.nav.melosys.saksflyt.steg.aou.inn;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
 import no.nav.melosys.service.SaksopplysningerService;
-import org.apache.tomcat.jni.Local;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.useDefaultDateFormatsOnly;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -31,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HentInntektsopplysningerTest {
-
     @Mock
     private HentOpplysningerFelles hentOpplysningerFelles;
     @Mock
@@ -52,7 +46,7 @@ public class HentInntektsopplysningerTest {
         Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusMonths(1));
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgsperiode(periode);
-        when(saksopplysningerService.finnSedOpplysninger(anyLong())).thenReturn(Optional.of(sedDokument));
+        when(saksopplysningerService.hentSedOpplysninger(anyLong())).thenReturn(sedDokument);
 
         Behandling behandling = new Behandling();
         behandling.setId(2L);
