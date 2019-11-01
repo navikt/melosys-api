@@ -112,12 +112,17 @@ public class OpprettJournalpostRequest {
             .tittel(dokument.getTittel())
             .brevkode(dokument.getBrevkode())
             .dokumentKategori(dokument.getDokumentKategori())
-            .dokumentvarianter(Collections.singletonList(
-                DokumentVariant.builder()
-                    .filtype(JournalpostFiltype.valueOf(dokument.getFiltype().name()))
-                    .variantformat(dokument.getVariantFormat())
-                    .fysiskDokument(dokument.getData())
-                    .build()))
+            .dokumentvarianter(dokument.getDokumentVarianter().stream()
+                .map(OpprettJournalpostRequest::dokumentVariant)
+                .collect(Collectors.toList()))
+            .build();
+    }
+
+    private static DokumentVariant dokumentVariant(no.nav.melosys.domain.arkiv.DokumentVariant dokumentVariant) {
+        return DokumentVariant.builder()
+            .filtype(JournalpostFiltype.valueOf(dokumentVariant.getFiltype().name()))
+            .variantformat(dokumentVariant.getVariantFormat())
+            .fysiskDokument(dokumentVariant.getData())
             .build();
     }
 

@@ -192,7 +192,7 @@ public class DokSysServiceTest {
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
 
         assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
-        assertThat(captor.getValue().getAdresse().getAdressetype()).isEqualTo("norskPostadresse");
+        assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("norskPostadresse");
     }
 
     @Test
@@ -214,6 +214,6 @@ public class DokSysServiceTest {
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
 
         assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
-        assertThat(captor.getValue().getAdresse().getAdressetype()).isEqualTo("utenlandskPostadresse");
+        assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("utenlandskPostadresse");
     }
 }

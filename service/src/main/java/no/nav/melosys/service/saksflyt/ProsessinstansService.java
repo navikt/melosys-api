@@ -144,7 +144,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansAnmodningOmUnntakMottakSvar(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR);
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_SEND_SED);
+        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_OPPDATER_MEDL);
         prosessinstans.setBehandling(behandling);
 
         lagre(prosessinstans);
