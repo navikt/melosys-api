@@ -259,10 +259,12 @@ public class JoarkService implements JoarkFasade {
         arkivsak.setArkivSakId(Long.toString(journalpostOppdatering.getArkivSakID()));
         journalpostRequest.setArkivSak(arkivsak);
 
-        Bruker bruker = new Bruker();
-        bruker.setIdentifikator(journalpostOppdatering.getBrukerID());
-        bruker.setBrukerType(Bruker.BrukerType.PERSON);
-        journalpostRequest.setBruker(bruker);
+        if (journalpostOppdatering.getBrukerID() != null) {
+            Bruker bruker = new Bruker();
+            bruker.setIdentifikator(journalpostOppdatering.getBrukerID());
+            bruker.setBrukerType(Bruker.BrukerType.PERSON);
+            journalpostRequest.setBruker(bruker);
+        }
 
         if (journalpostOppdatering.getAvsenderType() != null) {
             Avsender avsender = new Avsender();

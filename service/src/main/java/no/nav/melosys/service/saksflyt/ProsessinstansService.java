@@ -271,15 +271,8 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansGenerellSedBehandling(JournalfoeringDto journalfoeringDto) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.SED_GENERELL_SAK);
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.SED_GENERELL_SAK, journalfoeringDto);
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()));
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
-
         lagre(prosessinstans);
     }
 
