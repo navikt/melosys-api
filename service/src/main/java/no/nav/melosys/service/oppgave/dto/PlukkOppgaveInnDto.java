@@ -1,34 +1,23 @@
 package no.nav.melosys.service.oppgave.dto;
 
-import java.util.List;
-
 public class PlukkOppgaveInnDto {
 
-    private String oppgavetype;
-    private List<String> sakstyper;
-    private List<String> behandlingstyper;
+    private String sakstype;
+    private String behandlingstype;
 
-    public String getOppgavetype() {
-        return oppgavetype;
+    public String getSakstype() {
+        return sakstype;
     }
 
-    public void setOppgavetype(String oppgavetype) {
-        this.oppgavetype = oppgavetype;
+    public void setSakstype(String sakstype) {
+        this.sakstype = sakstype;
     }
 
-    public List<String> getSakstyper() {
-        return sakstyper;
+    public String getBehandlingstype() {
+        return behandlingstype;
     }
 
-    public void setSakstyper(List<String> sakstyper) {
-        this.sakstyper = sakstyper;
-    }
-
-    public List<String> getBehandlingstyper() {
-        return behandlingstyper;
-    }
-
-    public void setBehandlingstyper(List<String> behandlingstyper) {
-        this.behandlingstyper = behandlingstyper;
+    public void setBehandlingstype(String behandlingstype) {
+        this.behandlingstype = behandlingstype;
     }
 }

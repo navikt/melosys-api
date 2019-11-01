@@ -1,21 +1,19 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import java.util.HashSet;
+
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -59,13 +57,14 @@ public class BrevDataTestUtils {
         return new AvklartVirksomhet("Bedrift AS", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
     }
 
-    public static ForetakUtland lagForetakUtland() {
+    public static ForetakUtland lagForetakUtland(Boolean selvstendig) {
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.navn = "Company International Ltd.";
         foretakUtland.orgnr = "12345678910";
         foretakUtland.uuid = "49m8gf-9dk4j0";
         foretakUtland.adresse = lagStrukturertAdresse();
         foretakUtland.adresse.landkode = "NO";
+        foretakUtland.selvstendigNæringsvirksomhet = selvstendig;
         return foretakUtland;
     }
 
@@ -118,5 +117,18 @@ public class BrevDataTestUtils {
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
         anmodningsperiodeSvar.setBegrunnelseFritekst("OK");
         return anmodningsperiodeSvar;
+    }
+
+    public static Vilkaarsresultat lagVilkaarsresultat(Vilkaar vilkaar, boolean oppfylt, Kodeverk... vilkårbegrunnelser) {
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setOppfylt(oppfylt);
+        vilkaarsresultat.setVilkaar(vilkaar);
+        vilkaarsresultat.setBegrunnelser(new HashSet<>());
+        for (Kodeverk begrunnelseKode : vilkårbegrunnelser) {
+            VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
+            begrunnelse.setKode(begrunnelseKode.getKode());
+            vilkaarsresultat.getBegrunnelser().add(begrunnelse);
+        }
+        return vilkaarsresultat;
     }
 }

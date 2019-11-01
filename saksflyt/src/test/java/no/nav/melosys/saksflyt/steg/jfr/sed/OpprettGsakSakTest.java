@@ -54,6 +54,9 @@ public class OpprettGsakSakTest {
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
 
+        Fagsak fagsakIDb = new Fagsak();
+        fagsakIDb.setSaksnummer(saksnummer);
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakIDb);
         when(gsakFasade.opprettSak(any(), any(), any())).thenReturn(gsakSaksnummer);
         opprettGsakSak.utfør(prosessinstans);
 
@@ -63,7 +66,8 @@ public class OpprettGsakSakTest {
             eq(aktørID)
         );
 
-        verify(fagsakService).lagre(eq(fagsak));
+        assertThat(fagsakIDb.getGsakSaksnummer()).isEqualTo(gsakSaksnummer);
+        verify(fagsakService).lagre(eq(fagsakIDb));
         assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class)).isEqualTo(gsakSaksnummer);
     }
 

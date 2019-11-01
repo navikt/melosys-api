@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
@@ -18,6 +19,8 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDet
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -25,12 +28,15 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
+import no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -119,13 +125,15 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public final void hentFagsakerGirIkkeTomListe() throws Exception {
         Fagsak fagsak = lagFagsak();
-        fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(FNR);
-        List<FagsakOppsummeringDto> forventet = Collections.singletonList(lagFagsakOppsummeringDto());
+        List<FagsakOppsummeringDto> forventet = Collections.singletonList(lagFagsakOppsummeringDto(behandling));
         assertThat(forventet.size()).isEqualTo(resultat.size());
         for (int i = 0; i < forventet.size(); i++) {
-            assertThat(forventet.get(i)).isEqualToComparingFieldByFieldRecursively(resultat.get(i));
+            assertThat(resultat.get(i)).isEqualToComparingFieldByFieldRecursively(forventet.get(i));
         }
     }
 
@@ -238,18 +246,25 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
         tilgangService = mock(TilgangService.class);
         fagsakService = mock(FagsakService.class);
+        SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
+        SoeknadService søknadService = mock(SoeknadService.class);
+        PersonDokument personDokument = (PersonDokument)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
+        when(saksopplysningerService.finnPersonOpplysninger(eq(1L))).thenReturn(Optional.ofNullable(personDokument));
+        SoeknadDokument søknadDokument = (SoeknadDokument) FagsakBehandlingFactory.lagSøknadOpplysning().getDokument();
+        when(søknadService.finnSøknad(eq(1L))).thenReturn(Optional.ofNullable(søknadDokument));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(fagsakService.hentFagsak("Finnes ikke")).thenThrow(new IkkeFunnetException("Finnes ikke"));
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, tilgangService);
+        return new FagsakTjeneste(fagsakService, saksopplysningerService, søknadService, tilgangService);
     }
 
-    private static FagsakOppsummeringDto lagFagsakOppsummeringDto() {
+    private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {
         FagsakOppsummeringDto result = new FagsakOppsummeringDto();
         result.setSammensattNavn("UKJENT");
         BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
+        behandlingOversiktDto.setBehandlingID(behandling.getId());
         result.setBehandlingOversikter(Collections.singletonList(behandlingOversiktDto));
         return result;
     }

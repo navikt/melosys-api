@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -37,14 +39,9 @@ public class OppdaterSaksrelasjonTest {
         melosysEessiMelding.setRinaSaksnummer(rinaSaksnummer);
         melosysEessiMelding.setBucType(bucType);
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(gsakSaksnummer);
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
 
         oppdaterSaksrelasjon.utfør(prosessinstans);
 

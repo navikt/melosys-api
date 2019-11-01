@@ -2,6 +2,7 @@ package no.nav.melosys.domain.oppgave;
 
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.Objects;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
@@ -277,6 +278,19 @@ public final class Oppgave {
 
     public boolean erSedBehandling() {
         return oppgavetype == Oppgavetyper.BEH_SED;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Oppgave oppgave = (Oppgave) o;
+        return Objects.equals(oppgaveId, oppgave.oppgaveId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(oppgaveId);
     }
 
     /**

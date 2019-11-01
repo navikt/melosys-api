@@ -1,15 +1,9 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
@@ -28,7 +22,7 @@ public class BrevDataA001 extends BrevData {
     public StrukturertAdresse bostedsadresse;
     public Optional<String> utenlandskIdent;
 
-    public List<AvklartVirksomhet> arbeidsgivendeVirkomsheter;
+    public List<AvklartVirksomhet> arbeidsgivendeVirksomheter;
     public List<AvklartVirksomhet> selvstendigeVirksomheter;
 
     public List<Arbeidssted> arbeidssteder;
@@ -40,7 +34,9 @@ public class BrevDataA001 extends BrevData {
 
     public Collection<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();
 
-    public Vilkaarsresultat vilkårsresultat161;
-
     public Optional<Periode> ansettelsesperiode;
+
+    public Set<VilkaarBegrunnelse> anmodningUtenArt12Begrunnelser;
+    public Set<VilkaarBegrunnelse> anmodningBegrunnelser;
+    public String anmodningFritekst;
 }

@@ -43,6 +43,11 @@ public class UnntaksperiodeKontrollerTest {
     }
 
     @Test
+    public void periodeOver5År_erFeil_verifiserBegrunnelse() {
+        assertThat(UnntaksperiodeKontroller.periodeOver5År(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.PERIODEN_OVER_5_AR);
+    }
+
+    @Test
     public void periodeEldreEnn5År_erFeil_verifiserBegrunnelse() {
         assertThat(UnntaksperiodeKontroller.periodeEldreEnn3År(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL);
     }

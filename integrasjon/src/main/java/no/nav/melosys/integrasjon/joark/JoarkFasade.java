@@ -35,17 +35,10 @@ public interface JoarkFasade {
     String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) throws TekniskException;
 
     /**
-     * Oppdaterer en journalpost i Joark
+     * Oppdaterer en journalpost og forsøker å ferdigstille hvis forsøkFerdigstill er satt
      */
-    void oppdaterJournalpost(String journalpostID, String hovedDokumentID, JournalpostOppdatering journalpostOppdatering)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
-
-    /**
-     * Oppdaterer journalpost med gsakSaksnummer.
-     * Forsøker å ferdigstille journalpost hvis forsøkFerdigstill er satt
-     */
-    void oppdaterJournalpostMedSaksnummerOgBruker(String journalpostID, String brukerID, Long gsakSaksnummer, boolean forsøkFerdigstill)
-        throws SikkerhetsbegrensningException, IntegrasjonException;
+    void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
+        throws SikkerhetsbegrensningException, TekniskException;
 
     /**
      * Returnerer en liste av mangler i journalposten med den oppgitte IDen

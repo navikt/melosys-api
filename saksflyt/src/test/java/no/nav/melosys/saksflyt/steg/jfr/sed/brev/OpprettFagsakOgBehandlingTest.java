@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.jfr.sed.brev;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -44,6 +45,8 @@ public class OpprettFagsakOgBehandlingTest {
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, "321");
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "1234");
+        prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
+        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, "123");
 
         Behandling aktivBehandling = new Behandling();
         aktivBehandling.setStatus(Behandlingsstatus.OPPRETTET);

@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OppdaterJournalpostTest {
+    public class OppdaterJournalpostTest {
     @Mock
     private JoarkFasade joarkFasade;
     @Mock
@@ -47,7 +47,7 @@ public class OppdaterJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade).utledJournalfoeringsbehov(any());
-        verify(joarkFasade).oppdaterJournalpost(any(), any(), oppdateringArgumentCaptor.capture());
+        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(false));
         assertThat(oppdateringArgumentCaptor.getValue().isMedDokumentkategori()).isFalse();
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
     }
@@ -65,7 +65,7 @@ public class OppdaterJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade).utledJournalfoeringsbehov(any());
-        verify(joarkFasade).oppdaterJournalpost(any(), any(), oppdateringArgumentCaptor.capture());
+        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(false));
         assertThat(oppdateringArgumentCaptor.getValue().isMedDokumentkategori()).isTrue();
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
     }
@@ -85,8 +85,8 @@ public class OppdaterJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade).utledJournalfoeringsbehov(any());
-        verify(joarkFasade).oppdaterJournalpost(any(), any(), oppdateringArgumentCaptor.capture());
+        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(false));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
-        assertThat(oppdateringArgumentCaptor.getValue().getGsakSaksnummer()).isEqualTo(gsakSaksnummer);
+        assertThat(oppdateringArgumentCaptor.getValue().getArkivSakID()).isEqualTo(gsakSaksnummer);
     }
 }

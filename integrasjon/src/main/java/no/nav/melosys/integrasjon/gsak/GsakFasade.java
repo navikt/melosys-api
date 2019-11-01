@@ -23,9 +23,9 @@ public interface GsakFasade {
      * Finner aktive og utildelte oppgaver som svarer til noen gitt kriterier.
      * Oppgave sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnUtildelteOppgaverEtterFrist(Set<Oppgavetyper> oppgavetype,
-                                                  Set<Behandlingstyper> behandlingstyper,
-                                                  Set<Behandlingstema> behandlingstemaer
+    List<Oppgave> finnUtildelteOppgaverEtterFrist(Set<Oppgavetyper> oppgavetyper,
+                                                  Behandlingstyper behandlingstype,
+                                                  Behandlingstema behandlingstema
     ) throws TekniskException, FunksjonellException;
 
     void oppdaterOppgavePrioritet(String oppgaveId, PrioritetType prioritet) throws FunksjonellException, TekniskException;
@@ -34,7 +34,7 @@ public interface GsakFasade {
      * Finner Oppgaver basert på ansvarlig saksbehandler
      * Oppgave sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
+    Set<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
 
     /**
      * Finner Oppgave med gitt saksnummer.

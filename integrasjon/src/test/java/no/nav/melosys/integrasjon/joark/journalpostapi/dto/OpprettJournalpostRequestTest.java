@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 
+import java.util.Collections;
+
+import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
@@ -14,10 +17,12 @@ public class OpprettJournalpostRequestTest {
         FysiskDokument hoveddokument = new FysiskDokument();
         hoveddokument.setTittel("tittel");
         hoveddokument.setBrevkode("brevkode");
-        hoveddokument.setData("pdf".getBytes());
         hoveddokument.setDokumentKategori("kategori");
-        hoveddokument.setVariantFormat("ARKIV");
-        hoveddokument.setFiltype(FysiskDokument.Filtype.PDFA);
+        no.nav.melosys.domain.arkiv.DokumentVariant dokumentVariant = new no.nav.melosys.domain.arkiv.DokumentVariant();
+        dokumentVariant.setData("pdf".getBytes());
+        dokumentVariant.setFiltype(DokumentVariant.Filtype.PDFA);
+        dokumentVariant.setVariantFormat("ARKIV");
+        hoveddokument.setDokumentVarianter(Collections.singletonList(dokumentVariant));
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(hoveddokument);

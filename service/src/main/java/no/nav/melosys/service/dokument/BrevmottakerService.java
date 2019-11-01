@@ -129,7 +129,9 @@ public class BrevmottakerService {
         return arbeidsgiver;
     }
 
-    private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker, Behandling behandling, Produserbaredokumenter produserbartDokument) throws TekniskException {
+    private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker,
+                                                       Behandling behandling,
+                                                       Produserbaredokumenter produserbartDokument) {
         if (mottaker.getAktør().getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
             return Collections.singletonList(mottaker.getAktør());

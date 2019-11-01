@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -72,16 +73,17 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void oppdaterStatus() throws FunksjonellException {
+    public void oppdaterStatus_statusAvventDok_dokumentasjonSvarfristOppdatert() throws FunksjonellException, TekniskException {
         long behandlingID = 11L;
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
+        assertThat(behandling.getDokumentasjonSvarfristDato()).isNotNull();
     }
 
     @Test(expected = IkkeFunnetException.class)
-    public void oppdaterStatus_behIkkeFunnet() throws FunksjonellException {
+    public void oppdaterStatus_behIkkeFunnet() throws FunksjonellException, TekniskException {
         long behandlingID = 11L;
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
@@ -90,11 +92,24 @@ public class BehandlingServiceTest {
     }
 
     @Test(expected = FunksjonellException.class)
-    public void oppdaterStatus_ugyldig() throws FunksjonellException {
+    public void oppdaterStatus_ugyldig() throws FunksjonellException, TekniskException {
         long behandlingID = 11L;
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVSLUTTET);
+    }
+
+    @Test
+    public void oppdaterStatus_statusAvsluttet_ferdigstillOppgave() throws FunksjonellException, TekniskException {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("23132");
+        long behandlingID = 11L;
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setFagsak(fagsak);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVSLUTTET);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
     }
 
     @Test

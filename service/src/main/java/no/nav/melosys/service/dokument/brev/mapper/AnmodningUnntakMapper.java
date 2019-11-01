@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Collection;
 import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -10,12 +9,18 @@ import no.nav.dok.melosysbrev._000084.BrevdataType;
 import no.nav.dok.melosysbrev._000084.Fag;
 import no.nav.dok.melosysbrev._000084.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000084.ObjectFactory;
-import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-import no.nav.melosys.domain.*;
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -33,13 +38,13 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
                                 BrevData brevDataFelles) throws JAXBException, SAXException, TekniskException {
-        BrevDataAnmodningUnntakOgAvslag brevdata = (BrevDataAnmodningUnntakOgAvslag) brevDataFelles;
+        BrevDataAnmodningUnntak brevdata = (BrevDataAnmodningUnntak) brevDataFelles;
         Fag fag = mapFag(behandling, resultat, brevdata);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {
+    Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntak brevData) throws TekniskException {
         Fag fag = new Fag();
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
             // Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004 (MELOSYS-1863)
@@ -54,27 +59,23 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         fag.setArbeidsland(brevData.arbeidsland);
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
-        Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
+        Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
-        Set<VilkaarBegrunnelse> art121ForutgåendeBegrunnelser = hentVilkaarbegrunnelser(resultat, ART12_1_FORUTGAAENDE_MEDLEMSKAP);
+        Set<VilkaarBegrunnelse> art121ForutgåendeBegrunnelser = resultat.hentVilkaarbegrunnelser(ART12_1_FORUTGAAENDE_MEDLEMSKAP);
         fag.setArt121ForutgåendeBegrunnelse(mapArt121ForutgaaendeBegrunnelseType(art121ForutgåendeBegrunnelser));
 
-        Set<VilkaarBegrunnelse> art122Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_2);
+        Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2);
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
 
-        Set<VilkaarBegrunnelse> art122NormalVirksomhetBegrunnelse = hentVilkaarbegrunnelser(resultat, ART12_2_NORMALT_DRIVER_VIRKSOMHET);
+        Set<VilkaarBegrunnelse> art122NormalVirksomhetBegrunnelse = resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET);
         fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelse));
 
-        Collection<VilkaarBegrunnelse> art16Begrunnelser = brevData.art16Vilkaar.map(Vilkaarsresultat::getBegrunnelser)
-            .orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1"));
+        mapAnmodningBegrunnelser(brevData.anmodningBegrunnelser).ifPresent(fag::setArt161AnmodningBegrunnelse);
 
-        art16Begrunnelser.stream()
-            .map(VilkaarBegrunnelse::getKode)
-            .map(Art161AnmodningBegrunnelseKode::valueOf)
-            .filter(begrunnelse -> begrunnelse != Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN)
-            .findFirst()
-        .ifPresent(fag::setArt161AnmodningBegrunnelse);
+        mapAnmodningUtenArt12Begrunnelser(brevData.anmodningUtenArt12Begrunnelser).ifPresent(fag::setArt161AnmodningUtenArt12Begrunnelse);
+
+        fag.setAnmodningFritekst(brevData.fritekst);
 
         return fag;
     }

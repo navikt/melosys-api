@@ -6,11 +6,12 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
 import org.springframework.util.Assert;
 
-public class LovvalgTilBestemmelseDtoMapper {
+public final class LovvalgTilBestemmelseDtoMapper {
 
     private static final BiMap<LovvalgBestemmelse, Bestemmelse> mapper = HashBiMap.create();
 
@@ -24,7 +25,7 @@ public class LovvalgTilBestemmelseDtoMapper {
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B, Bestemmelse.ART_11_3_b);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C, Bestemmelse.ART_11_3_c);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E, Bestemmelse.ART_11_3_e);
-        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, Bestemmelse.ART_11_4_2);
+        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, Bestemmelse.ART_11_4);
         mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5, Bestemmelse.ART_11_5);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Bestemmelse.ART_12_1);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2, Bestemmelse.ART_12_2);
@@ -32,12 +33,23 @@ public class LovvalgTilBestemmelseDtoMapper {
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, Bestemmelse.ART_13_1_b_1);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, Bestemmelse.ART_13_2_a);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B, Bestemmelse.ART_13_2_b);
+        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, Bestemmelse.ART_13_3);
+        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, Bestemmelse.ART_13_4);
+        mapper.put(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11, Bestemmelse.ART_14_11);
+        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART15, Bestemmelse.ART_15);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, Bestemmelse.ART_16_1);
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Bestemmelse.ART_16_2);
+        mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET, Bestemmelse.ANNET);
+        mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A, Bestemmelse.ART_87_a);
+        mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8, Bestemmelse.ART_87_8);
     }
 
     public static Bestemmelse mapMelosysLovvalgTilBestemmelseDto(LovvalgBestemmelse lovvalgBestemmelse) {
         Assert.notNull(lovvalgBestemmelse, "LovvalgBestemmelse er null.");
+
+        if (lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1) {
+            return Bestemmelse.ART_11_3_a;
+        }
 
         if (mapper.containsKey(lovvalgBestemmelse)) {
             return mapper.get(lovvalgBestemmelse);

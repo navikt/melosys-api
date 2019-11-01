@@ -51,12 +51,12 @@ public class ManuellSedBehandlingInitialiserer {
             Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer.get());
             Behandling behandling = fagsak.getAktivBehandling() != null ? fagsak.getAktivBehandling() : fagsak.getSistOppdaterteBehandling();
 
-            if (behandling.getStatus() == Behandlingsstatus.UNDER_BEHANDLING) {
+            if (behandling.erAktiv()) {
                 behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
             }
 
             if (SedType.X009 == sedType) {
-                mottattPurring(fagsak.getSaksnummer());
+                oppdaterOppgavePrioritet(fagsak.getSaksnummer());
             }
 
             prosessinstans.setBehandling(behandling);
@@ -65,7 +65,7 @@ public class ManuellSedBehandlingInitialiserer {
         }
     }
 
-    private void mottattPurring(String saksnummer) throws FunksjonellException, TekniskException {
+    private void oppdaterOppgavePrioritet(String saksnummer) throws FunksjonellException, TekniskException {
         Optional<Oppgave> oppgave = gsakFasade.finnOppgaverMedSaksnummer(saksnummer).stream().findFirst();
         if (oppgave.isPresent()) {
             log.info("Setter prioritet til HØY for oppgave {}", oppgave.get().getOppgaveId());

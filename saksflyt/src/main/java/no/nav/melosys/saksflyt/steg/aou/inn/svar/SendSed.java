@@ -34,6 +34,6 @@ public class SendSed extends AbstraktStegBehandler {
         eessiService.sendAnmodningUnntakSvar(behandlingId);
 
         log.info("Svar på anmodning om unntak sendt for behandling {}", behandlingId);
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_OPPDATER_MEDL);
+        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }

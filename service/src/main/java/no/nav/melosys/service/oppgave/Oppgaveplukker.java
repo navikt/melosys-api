@@ -3,13 +3,12 @@ package no.nav.melosys.service.oppgave;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -20,12 +19,12 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
-import org.apache.commons.collections4.CollectionUtils;
+import no.nav.melosys.service.sak.FagsakService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,20 +35,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class Oppgaveplukker {
     private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
-    static final List<Oppgavetyper> KJENTE_OPPGAVETYPER = Arrays.asList(Oppgavetyper.BEH_SAK_MK, Oppgavetyper.VUR, Oppgavetyper.BEH_SED);
-
     private final GsakFasade gsakFasade;
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
-    private final FagsakRepository fagsakRepository;
-    private final BehandlingRepository behandlingRepository;
+    private final FagsakService fagsakService;
+    private final BehandlingService behandlingService;
 
     @Autowired
     public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
-                          FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
+                          FagsakService fagsakService, BehandlingService behandlingService) {
         this.gsakFasade = gsakFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
-        this.fagsakRepository = fagsakRepository;
-        this.behandlingRepository = behandlingRepository;
+        this.fagsakService = fagsakService;
+        this.behandlingService = behandlingService;
     }
 
     /**
@@ -60,38 +57,14 @@ public class Oppgaveplukker {
      */
     @Transactional(rollbackFor = MelosysException.class)
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
-        String type = plukkDto.getOppgavetype();
-        Oppgavetyper oppgavetype = type == null ? null : KodeverkUtils.dekod(Oppgavetyper.class, type);
+        validerPlukkOppgave(plukkDto);
 
-        Set<Sakstyper> sakstyper = new HashSet<>();
-        Set<Behandlingstema> behandlingstemaer = new HashSet<>();
-        Set<Behandlingstyper> behandlingstyper = new HashSet<>();
-        Set<Oppgavetyper> oppgavetyper = new HashSet<>();
-        if (oppgavetype == Oppgavetyper.JFR) {
-            oppgavetyper = Collections.singleton(Oppgavetyper.JFR);
-        } else {
-            List<String> sakstypeKoder = plukkDto.getSakstyper();
-            for (String s : sakstypeKoder) {
-                sakstyper.add(KodeverkUtils.dekod(Sakstyper.class, s));
-            }
-            behandlingstemaer.addAll(hentBehandlingstema(sakstyper));
+        Behandlingstema behandlingstema = hentBehandlingstema(plukkDto.getSakstype());
+        Behandlingstyper behandlingstype = KodeverkUtils.dekod(Behandlingstyper.class, plukkDto.getBehandlingstype());
+        Set<Oppgavetyper> oppgavetyper = Collections.singleton(OppgaveFactory.hentOppgavetype(behandlingstype));
 
-            List<String> behandlingstypeKoder = plukkDto.getBehandlingstyper();
-            if (CollectionUtils.isNotEmpty(behandlingstypeKoder)) {
-                for (String behandlingstype : behandlingstypeKoder) {
-                    behandlingstyper.add(KodeverkUtils.dekod(Behandlingstyper.class, behandlingstype));
-                }
-                oppgavetyper.addAll(hentOppgavetyper(behandlingstyper));
-            } else {
-                // Når behandlingstype ikke velges skal alle behandlingsoppgaver klare til behandling plukkes uansett behandlingstype.
-                oppgavetyper.addAll(KJENTE_OPPGAVETYPER);
-            }
-        }
-
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstyper, behandlingstemaer);
-        if (oppgavetyper.contains(Oppgavetyper.BEH_SAK_MK) && behandlingstyper.contains(Behandlingstyper.SOEKNAD)) {
-            ufordelteOppgaver.addAll(hentOppgaverGammeltBehandlingstema());
-        }
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstype, behandlingstema);
+        ufordelteOppgaver.addAll(hentOppgaverGammeltBehandlingstema(oppgavetyper, behandlingstype));
 
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
@@ -99,35 +72,47 @@ public class Oppgaveplukker {
 
         if (valg.isPresent()) {
             // Tildeler oppgaven
+            oppdaterBehandlingsstatus(valg.get().getSaksnummer());
             gsakFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
         }
         return valg;
     }
 
-    private Collection<Oppgave> hentOppgaverGammeltBehandlingstema() throws FunksjonellException, TekniskException {
+    private void oppdaterBehandlingsstatus(String saksnummer) throws IkkeFunnetException, TekniskException {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        Behandling behandling = fagsak.getAktivBehandling();
+        if (behandling.getStatus() == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.getStatus() == Behandlingsstatus.OPPRETTET) {
+            behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+            behandlingService.lagre(behandling);
+        }
+    }
+
+    private Collection<Oppgave> hentOppgaverGammeltBehandlingstema(Set<Oppgavetyper> oppgavetyper, Behandlingstyper behandlingstype) throws FunksjonellException, TekniskException {
+        if (oppgavetyper.contains(Oppgavetyper.BEH_SAK_MK) && behandlingstype == Behandlingstyper.SOEKNAD) {
+            return hentOppgaverGammeltBehandlingstema(Oppgavetyper.BEH_SAK_MK);
+        } else if (oppgavetyper.contains(Oppgavetyper.VUR) && behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
+            return hentOppgaverGammeltBehandlingstema(Oppgavetyper.VUR);
+        } else {
+            return Collections.emptySet();
+        }
+    }
+
+    private Collection<Oppgave> hentOppgaverGammeltBehandlingstema(Oppgavetyper oppgavetype) throws FunksjonellException, TekniskException {
         //Byttet behandlingstema-kode for EU/EØS 4.10.2019. Må fortsatt kunne plukke med gammelt tema
-        return gsakFasade.finnUtildelteOppgaverEtterFrist(Sets.newHashSet(Oppgavetyper.BEH_SAK_MK),
-            Collections.emptySet(), Sets.newHashSet(Behandlingstema.EU_EOS_GAMMEL_KODE));
+        return gsakFasade.finnUtildelteOppgaverEtterFrist(Collections.singleton(oppgavetype),
+            null, Behandlingstema.EU_EOS_GAMMEL_KODE);
     }
 
-    Set<Behandlingstema> hentBehandlingstema(Set<Sakstyper> fagsakstypeListe) {
-        return fagsakstypeListe.stream()
-            .map(sakstyper -> Behandlingstema.valueOf(sakstyper.name()))
-            .collect(Collectors.toSet());
+    private static Behandlingstema hentBehandlingstema(String sakstype) throws IkkeFunnetException {
+        return Behandlingstema.valueOf(KodeverkUtils.dekod(Sakstyper.class, sakstype).name());
     }
 
-    Set<Oppgavetyper> hentOppgavetyper(Set<Behandlingstyper> behandlingstypeListe) {
-        return behandlingstypeListe.stream()
-            .map(OppgaveFactory::hentOppgavetype)
-            .collect(Collectors.toSet());
-    }
-
-    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException {
+    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException, IkkeFunnetException {
         Iterator<Oppgave> iter = oppgaver.iterator();
         while (iter.hasNext()) {
             Oppgave oppgave = iter.next();
             String saksnummer = oppgave.getSaksnummer();
-            Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+            Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
             if (fagsak == null) {
                 log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
                 throw new TekniskException("Fant ikke fagsak " + saksnummer);
@@ -139,7 +124,7 @@ public class Oppgaveplukker {
 
             if (behandling.erVenterForDokumentasjon()) {
                 if (behandling.getDokumentasjonSvarfristDato() == null) {
-                    log.error("Behandling " + behandling.getId() + " tilhørende " + saksnummer + " avventer dokumentasjon, men har ingen svarfristdato");
+                    log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.", behandling.getId(), saksnummer);
                     iter.remove();
                 } else if (behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
                     iter.remove();
@@ -150,8 +135,7 @@ public class Oppgaveplukker {
 
     @Transactional(rollbackFor = MelosysException.class)
     public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingRepository.findById(tilbakelegging.getBehandlingID())
-            .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID()));
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(tilbakelegging.getBehandlingID());
 
         Fagsak fagsak = behandling.getFagsak();
         Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(fagsak.getSaksnummer());
@@ -189,5 +173,14 @@ public class Oppgaveplukker {
     private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
         List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();
+    }
+
+    private static void validerPlukkOppgave(PlukkOppgaveInnDto plukkDto) throws FunksjonellException {
+        if (StringUtils.isEmpty(plukkDto.getSakstype())) {
+            throw new FunksjonellException("Sakstype er påkrevd");
+        }
+        if (StringUtils.isEmpty(plukkDto.getBehandlingstype())) {
+            throw new FunksjonellException("Behandlingstype er påkrevd");
+        }
     }
 }

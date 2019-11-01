@@ -7,13 +7,15 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000115.*;
 import no.nav.dok.melosysbrev._000115.BostedsadresseType;
+import no.nav.dok.melosysbrev._000115.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
@@ -23,8 +25,11 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 
+import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapAnmodningBegrunnelser;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapAnmodningUtenArt12Begrunnelser;
 
 class A001Mapper {
 
@@ -41,15 +46,8 @@ class A001Mapper {
 
         seda001.setPerson(mapPerson(brevData.personDokument, brevData.bostedsadresse, brevData.utenlandskIdent));
 
-        List<AvklartVirksomhet> selvstendigeVirksomheter = brevData.selvstendigeVirksomheter;
-
-        //A001 Skal ikke inneholde både Identifikasjon av arbeidsgiveren og Identifikasjon av selvstendig næringsvirksomhet
-        if (!selvstendigeVirksomheter.isEmpty()) {
-            seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(selvstendigeVirksomheter));
-        } else {
-            // Foretakliste = Identifikasjon av arbeidsgiver (Kun arbeidsgivere)
-            seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirkomsheter));
-        }
+        seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(brevData.selvstendigeVirksomheter));
+        seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirksomheter));
 
         seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.arbeidssteder));
 
@@ -71,11 +69,15 @@ class A001Mapper {
 
         seda001.setTidligereLovvalgsperiodeListe(mapTidligereLovvalgsperioder(brevData.tidligereLovvalgsperioder));
 
-        seda001.setVilkårBegrunnelse(mapVilkårBegrunnelse(brevData.vilkårsresultat161));
+        mapAnmodningBegrunnelser(brevData.anmodningBegrunnelser).map(A001Mapper::mapArt16Anmodning)
+            .ifPresent(seda001::setVilkårBegrunnelse);
+
+        mapAnmodningUtenArt12Begrunnelser(brevData.anmodningUtenArt12Begrunnelser).map(A001Mapper::mapArt161AnmodningUtenArt12)
+            .ifPresent(seda001::setVilkårBegrunnelseUtenArt12);
+
+        seda001.setFritekst(brevData.anmodningFritekst);
 
         brevData.ansettelsesperiode.ifPresent(periode -> seda001.setAnsettelsesPeriode(mapAnsettelsesperiode(periode)));
-
-        seda001.setFritekst(brevData.vilkårsresultat161.getBegrunnelseFritekst());
 
         return seda001;
     }
@@ -164,14 +166,14 @@ class A001Mapper {
         return statsborgerskapListe;
     }
 
-    private VilkaarBegrunnelseType mapVilkårBegrunnelse(Vilkaarsresultat resultat) {
+    private static VilkaarBegrunnelseType mapArt16Anmodning(Art161AnmodningBegrunnelseKode begrunnelseKode) {
         VilkaarBegrunnelseType vilkårbegrunnelse = new VilkaarBegrunnelseType();
+        vilkårbegrunnelse.setStandardBegrunnelse(begrunnelseKode);
+        return vilkårbegrunnelse;
+    }
 
-        VilkaarBegrunnelse begrunnelse = resultat.getBegrunnelser().stream()
-            .filter(v -> Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN.value().equals(v.getKode()))
-            .findFirst().orElse(resultat.getBegrunnelser().iterator().next());
-
-        Art161AnmodningBegrunnelseKode begrunnelseKode = Art161AnmodningBegrunnelseKode.fromValue(begrunnelse.getKode());
+    private static VilkaarBegrunnelseUtenArt12Type mapArt161AnmodningUtenArt12(Art161AnmodningUtenArt12BegrunnelseKode begrunnelseKode) {
+        VilkaarBegrunnelseUtenArt12Type vilkårbegrunnelse = new VilkaarBegrunnelseUtenArt12Type();
         vilkårbegrunnelse.setStandardBegrunnelse(begrunnelseKode);
         return vilkårbegrunnelse;
     }
@@ -246,12 +248,11 @@ class A001Mapper {
 
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
             AdresseType adresseBrev = new AdresseType();
-
-            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
-            adresseBrev.setAdresselinje1(adresse.gatenavn);
+            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
             adresseBrev.setAdresselinje2(adresse.poststed);
             adresseBrev.setAdresselinje3(adresse.postnummer);
-
+            adresseBrev.setAdresselinje4(adresse.region);
+            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
             foretak.setAdresse(adresseBrev);
             foretakListe.getForetak().add(foretak);
         }
@@ -269,11 +270,11 @@ class A001Mapper {
 
             AdresseType2 adresseBrev = new AdresseType2();
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
-
-            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
-            adresseBrev.setAdresselinje1(adresse.gatenavn);
+            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
             adresseBrev.setAdresselinje2(adresse.poststed);
             adresseBrev.setAdresselinje3(adresse.postnummer);
+            adresseBrev.setAdresselinje4(adresse.region);
+            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
 
             selvstendigVirksomhet.setAdresse(adresseBrev);
             selvstendigeVirksomheter.getSelvstendigNæringsvirksomhet().add(selvstendigVirksomhet);

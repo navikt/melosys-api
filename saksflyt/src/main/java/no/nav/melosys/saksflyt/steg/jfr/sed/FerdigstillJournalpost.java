@@ -8,6 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.apache.commons.lang3.StringUtils;
@@ -47,8 +48,12 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
 
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         String brukerID = hentBrukerID(prosessinstans);
-        Long gsakSaksnummer = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
-        joarkFasade.oppdaterJournalpostMedSaksnummerOgBruker(journalpostId, brukerID, gsakSaksnummer, true);
+        Long arkivSakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
+        String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
+        String dokumentID = prosessinstans.getData(ProsessDataKey.DOKUMENT_ID);
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+            .medBrukerID(brukerID).medArkivSakID(arkivSakID).medHovedDokumentID(dokumentID).medTittel(tittel).build();
+        joarkFasade.oppdaterJournalpost(journalpostId, journalpostOppdatering, true);
         log.info("Journalpost {} ferdigstilt for gsak-sak {}", journalpostId, prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID));
     }
 

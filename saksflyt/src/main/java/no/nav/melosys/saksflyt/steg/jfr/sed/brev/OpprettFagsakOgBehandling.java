@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed.brev;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -59,6 +61,12 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         long gsakSaksnummer = opprettGsakSak(fagsak, behandling.getType(), aktørId);
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
 
+        lagreAvsender(
+            fagsak.getSaksnummer(),
+            prosessinstans.getData(ProsessDataKey.AVSENDER_ID),
+            prosessinstans.getData(ProsessDataKey.AVSENDER_TYPE, Avsendertyper.class)
+        );
+
         prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST);
     }
 
@@ -83,5 +91,23 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
         log.info("Sak {} opprettet i gsak for fagsak {}", gsakSaksnummer, fagsak.getSaksnummer());
         return gsakSaksnummer;
+    }
+
+    private void lagreAvsender(String saksnummer, String avsenderID, Avsendertyper avsenderType) throws FunksjonellException {
+        Aktoersroller aktørrolle;
+        switch (avsenderType) {
+            case PERSON:
+                return;
+            case ORGANISASJON:
+                aktørrolle = Aktoersroller.ARBEIDSGIVER;
+                break;
+            case UTENLANDSK_TRYGDEMYNDIGHET:
+                aktørrolle = Aktoersroller.MYNDIGHET;
+                break;
+            default:
+                throw new FunksjonellException("Kan ikke legge til aktør for avsenderType " + avsenderType);
+        }
+
+        fagsakService.leggTilAktør(saksnummer, aktørrolle, avsenderID);
     }
 }

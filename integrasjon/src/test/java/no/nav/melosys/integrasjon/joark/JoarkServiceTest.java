@@ -8,6 +8,7 @@ import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Status;
 import no.nav.melosys.domain.arkiv.*;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -153,10 +154,12 @@ public class JoarkServiceTest {
         Map<String, String> vedleggMedTitler = new HashMap<>();
         String fysiskVedleggTittel = "Fysisk vedlegg";
         vedleggMedTitler.put("vedleggDokID", fysiskVedleggTittel);
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(1L).medBrukerID("12345")
-            .medAvsenderID("12").medAvsenderNavn("321").medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
+            .medHovedDokumentID("1234").medBrukerID("12345")
+            .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.ORGANISASJON)
+            .medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
             .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).medDokumentkategori(true).build();
-        joarkService.oppdaterJournalpost("123", "1234", journalpostOppdatering);
+        joarkService.oppdaterJournalpost("123",journalpostOppdatering, false);
 
         verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
         PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
@@ -165,6 +168,7 @@ public class JoarkServiceTest {
         assertThat(request.getTittel()).isEqualTo(tittel);
         assertThat(request.getAvsender()).isNotNull();
         assertThat(request.getAvsender().getNavn()).isNotNull();
+        assertThat(request.getAvsender().getAvsenderType()).isEqualTo(Avsender.AvsenderType.ORGANISASJON);
 
         assertThat(request.getBruker()).isNotNull();
         assertThat(request.getBruker().getIdentifikator()).isNotNull();
@@ -191,10 +195,11 @@ public class JoarkServiceTest {
     @Test
     public void oppdaterJournalpost_utenVedlegg_fungerer() throws Exception {
         String tittel = "tittel";
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(1L).medBrukerID("12345")
-            .medAvsenderID("12").medAvsenderNavn("321").medTittel(tittel).medFysiskeVedlegg(null)
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
+            .medBrukerID("12345").medHovedDokumentID("1234")
+            .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
             .medLogiskeVedleggTitler(null).medDokumentkategori(true).build();
-        joarkService.oppdaterJournalpost("123", "1234", journalpostOppdatering);
+        joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);
 
         verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
         PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
@@ -376,9 +381,13 @@ public class JoarkServiceTest {
         FysiskDokument hoveddokument = new FysiskDokument();
         hoveddokument.setTittel("tittel");
         hoveddokument.setBrevkode("brevkode");
-        hoveddokument.setFiltype(FysiskDokument.Filtype.PDFA);
-        hoveddokument.setVariantFormat("ARKIV");
-        hoveddokument.setData("dokument".getBytes());
+
+        DokumentVariant dokumentVariant = new DokumentVariant();
+        dokumentVariant.setFiltype(DokumentVariant.Filtype.PDFA);
+        dokumentVariant.setVariantFormat("ARKIV");
+        dokumentVariant.setData("dokument".getBytes());
+        hoveddokument.setDokumentVarianter(Collections.singletonList(dokumentVariant));
+
         hoveddokument.setDokumentKategori(DokumentKategoriKode.SED.name());
         opprettJournalpost.setHoveddokument(hoveddokument);
 

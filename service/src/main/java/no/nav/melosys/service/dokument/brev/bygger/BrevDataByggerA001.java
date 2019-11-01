@@ -1,15 +1,9 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -25,6 +19,10 @@ import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_2;
 
 public class BrevDataByggerA001 implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -56,19 +54,50 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = dataGrunnlag.getPerson();
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere();
-        brevData.selvstendigeVirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige();
+
+        brevData.arbeidsgivendeVirksomheter =
+            ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
+                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
+
+        brevData.selvstendigeVirksomheter =
+            ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige(),
+                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
         brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         brevData.arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
 
-        brevData.vilkårsresultat161 = hentVilkårsresultat();
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
         brevData.anmodningsperioder = anmodningsperioder;
         brevData.tidligereLovvalgsperioder = lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
         brevData.ansettelsesperiode = hentAnsettelsesperiode();
 
+        Vilkaarsresultat art16Vilkaar = hentVilkårsresultat();
+        Set<VilkaarBegrunnelse> art16VilkaarBegrunnelser = art16Vilkaar.getBegrunnelser();
+        if (harVilkaarForArtikkel12(behandling.getId())) {
+            brevData.anmodningBegrunnelser = art16VilkaarBegrunnelser;
+            brevData.anmodningUtenArt12Begrunnelser = Collections.emptySet();
+        } else {
+            brevData.anmodningBegrunnelser = Collections.emptySet();
+            brevData.anmodningUtenArt12Begrunnelser = art16VilkaarBegrunnelser;
+        }
+
+        if (harSærligGrunn(art16VilkaarBegrunnelser)) {
+            brevData.anmodningFritekst = art16Vilkaar.getBegrunnelseFritekst();
+        }
+
         return brevData;
+    }
+
+    private boolean harSærligGrunn(Set<VilkaarBegrunnelse> art16VilkaarBegrunnelser) {
+        return art16VilkaarBegrunnelser.stream()
+            .map(VilkaarBegrunnelse::getKode)
+            .anyMatch("SAERLIG_GRUNN"::equals);
+    }
+
+    private boolean harVilkaarForArtikkel12(long behandlingID) {
+        Optional<Vilkaarsresultat> art121Vilkaar = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART12_1);
+        Optional<Vilkaarsresultat> art122Vilkaar = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART12_2);
+        return art121Vilkaar.isPresent() || art122Vilkaar.isPresent();
     }
 
     private UtenlandskMyndighet hentUtenlandsMyndighet(Landkoder landkode) throws TekniskException {

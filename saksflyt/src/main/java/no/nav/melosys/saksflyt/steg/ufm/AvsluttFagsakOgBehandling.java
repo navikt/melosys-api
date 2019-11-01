@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -38,8 +39,9 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+        Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
         fagsakService.avsluttFagsakOgBehandling(
-            prosessinstans.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART, prosessinstans.getBehandling()
+            fagsak, Saksstatuser.LOVVALG_AVKLART, prosessinstans.getBehandling()
         );
 
         oppdaterUtfallRegistreringUnntak(prosessinstans.getBehandling().getId());

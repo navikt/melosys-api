@@ -16,6 +16,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
@@ -107,7 +108,7 @@ public class EessiServiceTest {
         when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean())).thenReturn(opprettSedDto);
 
         eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, "SE", "SE:001");
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class),any(), eq(BucType.LA_BUC_01), eq(false));
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_01), eq(false));
     }
 
     @Test
@@ -159,8 +160,13 @@ public class EessiServiceTest {
             SedType.A010.name()
         );
 
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setLovvalgsland(Landkoder.DE.name());
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+
         for (String sedType : sedTyperAutomatiskBehandling) {
-            assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isTrue();
+            melosysEessiMelding.setSedType(sedType);
+            assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
         }
     }
 
@@ -178,25 +184,40 @@ public class EessiServiceTest {
             SedType.A012.name()
         );
 
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setLovvalgsland(Landkoder.DE.name());
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+
         for (String sedType : sedTyperIkkeAutomatiskBehandling) {
-            assertThat(eessiService.støtterAutomatiskBehandling("123", sedType)).isFalse();
+            melosysEessiMelding.setSedType(sedType);
+            assertThat(eessiService.støtterAutomatiskBehandling("123")).isFalse();
         }
+    }
+
+    @Test
+    public void støtterAutomatiskBehandling_nullVerdi_forventFalse() throws Exception {
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setSedType(null);
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        assertThat(eessiService.støtterAutomatiskBehandling("123")).isFalse();
     }
 
     @Test
     public void støtterAutomatiskBehandling_a003ikkeUtpekt_verifiserStøtterAutomatiskBehandling() throws Exception {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.SE.name());
+        melosysEessiMelding.setSedType("A003");
         when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
-        assertThat(eessiService.støtterAutomatiskBehandling("123", "A003")).isTrue();
+        assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
     }
 
     @Test
     public void støtterAutomatiskBehandling_a003erUtpekt_verifiserStøtterIkkeAutomatiskBehandling() throws Exception {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.name());
+        melosysEessiMelding.setSedType("A003");
         when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
-        assertThat(eessiService.støtterAutomatiskBehandling("123", "A003")).isFalse();
+        assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
     }
 
     @Test
@@ -251,5 +272,41 @@ public class EessiServiceTest {
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).genererSedForhåndsvisning(any(), any());
         assertThat(pdf).isEqualTo(PDF);
+    }
+
+    @Test
+    public void hentSedTypeForAnmodningUnntakSvar_forventA002() throws IkkeFunnetException {
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
+
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(1L);
+
+        assertThat(sedType).isEqualTo(SedType.A002);
+    }
+
+    @Test
+    public void hentSedTypeForAnmodningUnntakSvar_forventA011() throws IkkeFunnetException {
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(1L);
+
+        assertThat(sedType).isEqualTo(SedType.A011);
     }
 }

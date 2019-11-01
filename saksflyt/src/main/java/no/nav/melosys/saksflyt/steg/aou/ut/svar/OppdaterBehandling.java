@@ -72,7 +72,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Endrer behandlingsstatus til {}",
                 anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType(),
                 behandlingID,
-                Behandlingsstatus.VURDER_DOKUMENT);
+                Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
             oppdaterBehandlingsstatusUnderBehandling(prosessinstans);
         }
         prosessinstans.setSteg(ProsessSteg.FERDIG);
@@ -83,8 +83,8 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
         vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
-    private void oppdaterBehandlingsstatusUnderBehandling(Prosessinstans prosessinstans) throws FunksjonellException {
-        behandlingService.oppdaterStatus(prosessinstans.getBehandling().getId(), Behandlingsstatus.UNDER_BEHANDLING);
+    private void oppdaterBehandlingsstatusUnderBehandling(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
+        behandlingService.oppdaterStatus(prosessinstans.getBehandling().getId(), Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
     }
 
     private boolean inneholderYtterligereInformasjon(MelosysEessiMelding melosysEessiMelding) {

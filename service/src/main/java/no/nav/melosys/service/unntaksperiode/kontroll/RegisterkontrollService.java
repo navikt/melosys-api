@@ -16,9 +16,8 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.springframework.stereotype.Service;
-
-import static no.nav.melosys.service.unntaksperiode.kontroll.UnntaksperiodeKontroller.feilIPeriode;
 
 @Service
 public class RegisterkontrollService {
@@ -31,6 +30,10 @@ public class RegisterkontrollService {
 
     public List<Unntak_periode_begrunnelser> utførKontroller(Behandling behandling) throws TekniskException {
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+        if (feilIPeriode(sedDokument)) {
+            return Collections.singletonList(Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
+        }
+
         PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
         MedlemskapDokument medlemskapDokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
         InntektDokument inntektDokument = SaksopplysningerUtils.hentInntektDokument(behandling);
@@ -42,15 +45,15 @@ public class RegisterkontrollService {
 
     private List<Unntak_periode_begrunnelser> utførKontroller(KontrollData kontrollData,
                                                                      Collection<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller) {
-
-        Unntak_periode_begrunnelser feilIPeriode = feilIPeriode(kontrollData);
-        if (feilIPeriode != null) {
-            return Collections.singletonList(feilIPeriode);
-        }
-
         return kontroller.stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
+
+    private boolean feilIPeriode(SedDokument sedDokument) {
+        return PeriodeKontroller.feilIPeriode(
+            sedDokument.getLovvalgsperiode().getFom(),
+            sedDokument.getLovvalgsperiode().getTom());
     }
 }

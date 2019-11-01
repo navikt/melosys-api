@@ -1,12 +1,12 @@
 package no.nav.melosys.service.unntaksperiode;
 
 import java.util.Collections;
-import javax.ws.rs.BadRequestException;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -17,6 +17,7 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,38 +86,42 @@ public class AnmodningUnntakServiceTest {
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq("MEL-111"));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void anmodningOmUnntakSvar_feilBehandlingstype_forventException() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Behandling er ikke av type ANMODNING_OM_UNNTAK_HOVEDREGEL");
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
-        verify(behandlingService).hentBehandling(eq(1L));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void anmodningOmUnntakSvar_behandlingErAvsluttet_forventException() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Behandlingen er avsluttet");
+
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
-        verify(behandlingService).hentBehandling(eq(1L));
     }
 
-    @Test(expected = FunksjonellException.class)
+    @Test
     public void anmodningOmUnntakSvar_behandlingHarIngenAnmodningsperiodeSvar_forventException() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Finner ingen AnmodningsperiodeSvar for behandling 1");
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
-        verify(behandlingService).hentBehandling(eq(1L));
     }
 
-    @Test(expected = FunksjonellException.class)
+    @Test
     public void anmodningOmUnntakSvar_behandlingHarIngenLovvalgsperiode_forventException() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
@@ -125,9 +130,30 @@ public class AnmodningUnntakServiceTest {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
 
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Finner ingen Lovvalgsperioder for behandling 1");
+
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
-        verify(behandlingService).hentBehandling(eq(1L));
-        verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(eq(1L));
+    }
+
+    @Test
+    public void anmodningOmUnntakSvar_avslagForLangFritekst_forventException() throws FunksjonellException, TekniskException {
+        Behandling behandling = lagBehandling();
+        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setBegrunnelseFritekst(RandomStringUtils.random(256));
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(anmodningsperiodeSvar));
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(new Lovvalgsperiode()));
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Kan ikke ha fritekst lengre enn 255 for avslag på anmodning om unntak");
+
+        anmodningUnntakService.anmodningOmUnntakSvar(1L);
     }
 
     private static Behandling lagBehandling() {

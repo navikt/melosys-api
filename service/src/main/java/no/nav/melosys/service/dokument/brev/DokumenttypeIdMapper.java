@@ -36,7 +36,7 @@ public enum DokumenttypeIdMapper {
             case MELDING_MANGLENDE_OPPLYSNINGER:
                 return "000074";
             case ANMODNING_UNNTAK:
-                return "000116"; // Attestene bruker samme dokumentmal med ulikt innhold
+                return "000153";
             default:
                 throw new TekniskException("Fant ikke dokumentTypeID for produserbartDokument " + produserbartDokument);
         }

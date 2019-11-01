@@ -1,7 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -17,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
@@ -33,7 +31,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
                                 BrevData brevDataFelles) throws JAXBException, SAXException, TekniskException {
-        BrevDataAnmodningUnntakOgAvslag brevdata = (BrevDataAnmodningUnntakOgAvslag) brevDataFelles;
+        BrevDataAvslagYrkesaktiv brevdata = (BrevDataAvslagYrkesaktiv) brevDataFelles;
         Fag fag = mapFag(behandling, resultat, brevdata);
 
         if (brevdata.anmodningsperiodeSvar.isPresent()) {
@@ -54,7 +52,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         fag.setArt161AvslagBegrunnelse(avslagBegrunnelse);
     }
 
-    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAvslagYrkesaktiv brevData) throws TekniskException {
         Fag fag = new Fag();
 
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
@@ -71,16 +69,16 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         fag.setArbeidsland(brevData.arbeidsland);
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
-        Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
+        Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
-        Set<VilkaarBegrunnelse> art121ForutgåendeBegrunnelser = hentVilkaarbegrunnelser(resultat, ART12_1_FORUTGAAENDE_MEDLEMSKAP);
+        Set<VilkaarBegrunnelse> art121ForutgåendeBegrunnelser = resultat.hentVilkaarbegrunnelser(ART12_1_FORUTGAAENDE_MEDLEMSKAP);
         fag.setArt121ForutgåendeBegrunnelse(mapArt121ForutgaaendeBegrunnelseType(art121ForutgåendeBegrunnelser));
 
-        Set<VilkaarBegrunnelse> art122Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_2);
+        Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2);
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
 
-        Set<VilkaarBegrunnelse> art122NormalVirksomhetBegrunnelse = hentVilkaarbegrunnelser(resultat, ART12_2_NORMALT_DRIVER_VIRKSOMHET);
+        Set<VilkaarBegrunnelse> art122NormalVirksomhetBegrunnelse = resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET);
         fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelse));
 
         fag.setAvslag(JA);
@@ -88,9 +86,9 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         return fag;
     }
 
-    void mapArt161Avslag(Fag fag, BrevDataAnmodningUnntakOgAvslag brevdata) throws TekniskException {
-        Optional<Vilkaarsresultat> vilkaarsresultat = brevdata.art16Vilkaar;
-        Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet());
+    void mapArt161Avslag(Fag fag, BrevDataAvslagYrkesaktiv brevdata) throws TekniskException {
+        Vilkaarsresultat vilkaarsresultat = brevdata.art16Vilkaar;
+        Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.getBegrunnelser();
         Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagTomArt161AvslagBegrunnelse();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : art161Begrunnelser) {
             Art16_1_avslag artikkel161AvslagKode = Art16_1_avslag.valueOf(vilkaarBegrunnelse.getKode());
@@ -104,8 +102,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
                     break;
                 case SAERLIG_AVSLAGSGRUNN:
                     art161AvslagBegrunnelser.setSaerligAvslagsgrunn(JA);
-                    Vilkaarsresultat v = vilkaarsresultat.orElseThrow(IllegalStateException::new);
-                    fag.setBegrunnelseFritekst(validerFritekstbegrunnelse(v.getBegrunnelseFritekst()));
+                    fag.setBegrunnelseFritekst(validerFritekstbegrunnelse(vilkaarsresultat.getBegrunnelseFritekst()));
                     break;
                 case SOEKT_FOR_SENT:
                     art161AvslagBegrunnelser.setSoektForSent(JA);

@@ -45,6 +45,6 @@ public class OpprettPeriodeIMedl extends AbstraktStegBehandler {
         oppdaterMedlFelles.lagreMedlPeriodeId(medlPeriodeId, anmodningsperiode, behandling.getId());
 
         log.info("Periode under avklaring opprettet i Medl for behandling {}", behandling.getId());
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET);
+        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_OPPGAVE);
     }
 }

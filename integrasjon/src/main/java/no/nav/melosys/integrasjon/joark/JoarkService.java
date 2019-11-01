@@ -9,6 +9,7 @@ import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -125,6 +126,17 @@ public class JoarkService implements JoarkFasade {
 
         if (response.getAvsender() != null) {
             journalpost.setAvsenderId(response.getAvsender().getIdentifikator());
+            journalpost.setAvsenderNavn(response.getAvsender().getNavn());
+
+            final Avsender.AvsenderType avsenderType = response.getAvsender().getAvsenderType();
+            if (avsenderType != null) {
+                if (avsenderType == Avsender.AvsenderType.ORGANISASJON) {
+                    journalpost.setAvsenderType(Avsendertyper.ORGANISASJON);
+                }
+                if (avsenderType == Avsender.AvsenderType.PERSON) {
+                    journalpost.setAvsenderType(Avsendertyper.PERSON);
+                }
+            }
         }
         if (response.getArkivSak() != null) {
             journalpost.setArkivSakId(response.getArkivSak().getArkivSakId());
@@ -216,10 +228,13 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJournalpost(String journalpostID, String hovedDokumentID, JournalpostOppdatering journalpostOppdatering)
-        throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
+        throws SikkerhetsbegrensningException, TekniskException {
+        final String hovedDokumentID = journalpostOppdatering.getHovedDokumentID();
+        if (hovedDokumentID != null) {
+            oppdaterDokument(journalpostID, hovedDokumentID, journalpostOppdatering.getTittel(), journalpostOppdatering.isMedDokumentkategori());
+        }
 
-        oppdaterDokument(journalpostID, hovedDokumentID, journalpostOppdatering.getTittel(), journalpostOppdatering.isMedDokumentkategori());
         Map<String, String> fysiskeVedlegg = journalpostOppdatering.getFysiskeVedlegg();
         if (!CollectionUtils.isEmpty(fysiskeVedlegg)) {
             for (Map.Entry<String, String> vedleggIdMedTittel : fysiskeVedlegg.entrySet()) {
@@ -228,7 +243,7 @@ public class JoarkService implements JoarkFasade {
         }
 
         List<String> logiskeVedleggTitler = journalpostOppdatering.getLogiskeVedleggTitler();
-        if (!CollectionUtils.isEmpty(logiskeVedleggTitler)) {
+        if (hovedDokumentID != null && !CollectionUtils.isEmpty(logiskeVedleggTitler)) {
             for (String vedleggTittel : logiskeVedleggTitler) {
                 PostLogiskVedleggRequest logiskVedleggRequest = new PostLogiskVedleggRequest();
                 logiskVedleggRequest.setTittel(vedleggTittel);
@@ -236,47 +251,43 @@ public class JoarkService implements JoarkFasade {
             }
         }
 
-        PutJournalpostRequest journalpost = new PutJournalpostRequest();
-        journalpost.setTittel(journalpostOppdatering.getTittel());
-
-        ArkivSakWithArkivsakSystemEnum arkivsak = new ArkivSakWithArkivsakSystemEnum();
-        arkivsak.setArkivSakId(Long.toString(journalpostOppdatering.getGsakSaksnummer()));
-        arkivsak.setArkivSakSystem(ArkivSakWithArkivsakSystemEnum.ArkivSakSystem.GSAK);
-        journalpost.setArkivSak(arkivsak);
-
-        Bruker bruker = new Bruker();
-        bruker.setIdentifikator(journalpostOppdatering.getBrukerID());
-        bruker.setBrukerType(Bruker.BrukerType.PERSON);
-        journalpost.setBruker(bruker);
-
-        no.nav.dok.tjenester.journalfoerinngaaende.Avsender avsender = new no.nav.dok.tjenester.journalfoerinngaaende.Avsender();
-        avsender.setAvsenderType(no.nav.dok.tjenester.journalfoerinngaaende.Avsender.AvsenderType.PERSON);
-        avsender.setIdentifikator(journalpostOppdatering.getAvsenderID());
-        avsender.setNavn(journalpostOppdatering.getAvsenderNavn());
-        journalpost.setAvsender(avsender);
-
-        journalpost.setForsoekEndeligJF(false);
-
-        journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpost, journalpostID);
-    }
-
-    @Override
-    public void oppdaterJournalpostMedSaksnummerOgBruker(String journalpostID, String brukerID, Long gsakSaksnummer, boolean forsokFerdigstill) throws SikkerhetsbegrensningException, IntegrasjonException {
-        PutJournalpostRequest request = new PutJournalpostRequest();
+        PutJournalpostRequest journalpostRequest = new PutJournalpostRequest();
+        journalpostRequest.setTittel(journalpostOppdatering.getTittel());
 
         ArkivSakWithArkivsakSystemEnum arkivsak = new ArkivSakWithArkivsakSystemEnum();
         arkivsak.setArkivSakSystem(ArkivSakWithArkivsakSystemEnum.ArkivSakSystem.GSAK);
-        arkivsak.setArkivSakId(Long.toString(gsakSaksnummer));
-        request.setArkivSak(arkivsak);
+        arkivsak.setArkivSakId(Long.toString(journalpostOppdatering.getArkivSakID()));
+        journalpostRequest.setArkivSak(arkivsak);
 
-        Bruker bruker = new Bruker();
-        bruker.setBrukerType(Bruker.BrukerType.PERSON);
-        bruker.setIdentifikator(brukerID);
-        request.setBruker(bruker);
+        if (journalpostOppdatering.getBrukerID() != null) {
+            Bruker bruker = new Bruker();
+            bruker.setIdentifikator(journalpostOppdatering.getBrukerID());
+            bruker.setBrukerType(Bruker.BrukerType.PERSON);
+            journalpostRequest.setBruker(bruker);
+        }
 
-        request.setJournalfEnhet(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
-        request.setForsoekEndeligJF(forsokFerdigstill);
-        journalfoerInngaaendeConsumer.oppdaterJournalpost(request, journalpostID);
+        if (journalpostOppdatering.getAvsenderType() != null) {
+            Avsender avsender = new Avsender();
+            switch (journalpostOppdatering.getAvsenderType()) {
+                case PERSON:
+                    avsender.setAvsenderType(Avsender.AvsenderType.PERSON);
+                    break;
+                case ORGANISASJON:
+                    // Dette er litt feil og fikses når journalpostapi tas i bruk.
+                case UTENLANDSK_TRYGDEMYNDIGHET:
+                    avsender.setAvsenderType(Avsender.AvsenderType.ORGANISASJON);
+                    break;
+                default:
+                    throw new TekniskException("AvsenderType " + journalpostOppdatering.getAvsenderType() + " støttes ikke.");
+            }
+            avsender.setIdentifikator(journalpostOppdatering.getAvsenderID());
+            avsender.setNavn(journalpostOppdatering.getAvsenderNavn());
+            journalpostRequest.setAvsender(avsender);
+        }
+
+        journalpostRequest.setJournalfEnhet(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
+        journalpostRequest.setForsoekEndeligJF(forsøkFerdigstill);
+        journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpostRequest, journalpostID);
     }
 
     private void oppdaterDokument(String journalpostId, String dokumentID, String tittel, boolean medDokumentkategori) throws SikkerhetsbegrensningException, IntegrasjonException {

@@ -11,8 +11,7 @@ public class BrevDataInnvilgelseFlereLand extends BrevData {
     public Lovvalgsperiode lovvalgsperiode;
     public List<String> alleArbeidsland;
     public Maritimtyper avklartMaritimType;
-    public Collection<AvklartVirksomhet> norskeArbeidsgivere;
-    public Collection<AvklartVirksomhet> norskeSelvstendigVirksomheter;
+    public Collection<AvklartVirksomhet> arbeidsgivere;
     public String bostedsland;
     public boolean erBegrensetPeriode;
     public boolean erMarginaltArbeid;

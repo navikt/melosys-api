@@ -24,10 +24,7 @@ public class HibernateXmlType implements UserType, Serializable {
      * XmlType.
      * <p>
      */
-    public static HibernateXMLTypeDelegate delegate = HibernateSqlXmlTypeDelegate.INSTANCE;
-
-    public HibernateXmlType() {
-    }
+    public static final HibernateXMLTypeDelegate delegate = HibernateSqlXmlTypeDelegate.INSTANCE;
 
     @Override
     public int[] sqlTypes() {
@@ -54,22 +51,18 @@ public class HibernateXmlType implements UserType, Serializable {
     }
 
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
+    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws SQLException {
         return delegate.nullSafeGet(rs, names, session, owner);
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws SQLException {
         delegate.nullSafeSet(st, value, index, session);
     }
 
     @Override
     public Object deepCopy(Object value) {
-        if (value == null) {
-            return null;
-        } else {
-            return value;
-        }
+        return value;
     }
 
     @Override

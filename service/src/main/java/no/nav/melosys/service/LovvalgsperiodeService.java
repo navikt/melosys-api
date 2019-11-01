@@ -3,7 +3,6 @@ package no.nav.melosys.service;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -67,10 +66,9 @@ public class LovvalgsperiodeService {
         lovvalgsperiodeRepo.deleteByBehandlingsresultat(behandlingsresultat);
         lovvalgsperiodeRepo.flush();
         List<Lovvalgsperiode> perioderMedBehandling = lovvalgsperioder.stream()
-                .map(l -> kopierLovvalgsperiodeMedBehandlingsResultat(l, behandlingsresultat))
-                .collect(Collectors.toList());
-        return StreamSupport.stream(lovvalgsperiodeRepo.saveAll(perioderMedBehandling).spliterator(), false)
-                .collect(Collectors.toList());
+            .map(l -> kopierLovvalgsperiodeMedBehandlingsResultat(l, behandlingsresultat))
+            .collect(Collectors.toList());
+        return new ArrayList<>(lovvalgsperiodeRepo.saveAll(perioderMedBehandling));
     }
 
     private Lovvalgsperiode kopierLovvalgsperiodeMedBehandlingsResultat(Lovvalgsperiode periode, Behandlingsresultat behandlingsresultat) {
@@ -86,13 +84,13 @@ public class LovvalgsperiodeService {
 
     public Collection<Lovvalgsperiode> hentTidligereLovvalgsperioder(Behandling behandling) throws TekniskException {
         Set<Long> utvalgtePeriodeIDer = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandling.getId()).stream()
-                .map(utvalgtPeriode -> utvalgtPeriode.getId().getPeriodeId())
-                .collect(Collectors.toSet());
+            .map(utvalgtPeriode -> utvalgtPeriode.getId().getPeriodeId())
+            .collect(Collectors.toSet());
 
         MedlemskapDokument medlemskapdokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
         Set<Medlemsperiode> perioder = medlemskapdokument.getMedlemsperiode().stream()
-                .filter(periode -> utvalgtePeriodeIDer.contains(periode.id))
-                .collect(Collectors.toSet());
+            .filter(periode -> utvalgtePeriodeIDer.contains(periode.id))
+            .collect(Collectors.toSet());
 
         List<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();
         for (Medlemsperiode periode : perioder) {
@@ -100,11 +98,11 @@ public class LovvalgsperiodeService {
             lovvalgsperiode.setFom(periode.periode.getFom());
             lovvalgsperiode.setTom(periode.periode.getTom());
             lovvalgsperiode.setMedlPeriodeID(periode.id);
-            if (EnumUtils.isValidEnum(GrunnlagMedl.class, periode.getGrunnlagstype())) {
-                GrunnlagMedl grunnlagMedlKode = GrunnlagMedl.valueOf(periode.getGrunnlagstype());
+            if (periode.getGrunnlagstype() != null
+                && EnumUtils.isValidEnum(GrunnlagMedl.class, periode.getGrunnlagstype().toUpperCase())) {
+                GrunnlagMedl grunnlagMedlKode = GrunnlagMedl.valueOf(periode.getGrunnlagstype().toUpperCase());
                 lovvalgsperiode.setBestemmelse(tilLovvalgBestemmelse(grunnlagMedlKode));
-            }
-            else {
+            } else {
                 lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET);
             }
             tidligereLovvalgsperioder.add(lovvalgsperiode);
@@ -125,7 +123,7 @@ public class LovvalgsperiodeService {
             .orElseThrow(() -> new IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for " + behandlingId));
     }
 
-    public Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) {
+    Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) {
         return behandlingRepository.findById(behandlingId).map(Behandling::getOpprinneligBehandling)
             .flatMap(behandling -> lovvalgsperiodeRepo.findByBehandlingsresultatId(behandling.getId()).stream().findFirst());
     }

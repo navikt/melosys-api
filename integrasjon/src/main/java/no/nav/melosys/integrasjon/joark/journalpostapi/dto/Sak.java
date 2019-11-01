@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 
 public class Sak {
-    private static final String arkivsaksystem = "GSAK";
+    private static final String ARKIVSAKSYSTEM = "GSAK";
     private String arkivsaksnummer;
 
     public Sak(String arkivsaksnummer) {
@@ -20,7 +20,7 @@ public class Sak {
     }
 
     public String getArkivsaksystem() {
-        return this.arkivsaksystem;
+        return ARKIVSAKSYSTEM;
     }
 
     public static class SakBuilder {

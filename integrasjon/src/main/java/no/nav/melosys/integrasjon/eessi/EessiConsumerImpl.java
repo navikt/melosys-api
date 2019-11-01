@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
@@ -16,6 +17,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
@@ -24,11 +27,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 public class EessiConsumerImpl implements EessiConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(EessiConsumerImpl.class);
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -134,8 +139,8 @@ public class EessiConsumerImpl implements EessiConsumer {
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {
         try {
             return restTemplate.exchange(uri, method, entity, responseType).getBody();
-        } catch (RestClientException e) {
-            throw ExceptionMapper.springExTilMelosysEx(e);
+        } catch (RestClientResponseException e) {
+            throw ExceptionMapper.springExTilMelosysEx(e, hentFeilmelding(e));
         }
     }
 
@@ -153,5 +158,15 @@ public class EessiConsumerImpl implements EessiConsumer {
                 return filnavn;
             }
         };
+    }
+
+    private String hentFeilmelding(RestClientResponseException ex) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(ex.getResponseBodyAsString()).path("message");
+            return jsonNode.isMissingNode() ? ex.getMessage() : jsonNode.toString();
+        } catch (Exception e) {
+            log.warn("Kunne ikke hente ut feilmelding etter kall mot melosys-eessi");
+            return ex.getMessage();
+        }
     }
 }

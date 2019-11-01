@@ -138,4 +138,8 @@ public class AnmodningsperiodeSvar {
         return Anmodningsperiodesvartyper.DELVIS_INNVILGELSE == getAnmodningsperiodeSvarType()
             && getInnvilgetFom() != null && getInnvilgetTom() != null;
     }
+
+    public boolean erAvslag() {
+        return anmodningsperiodeSvarType == Anmodningsperiodesvartyper.AVSLAG;
+    }
 }

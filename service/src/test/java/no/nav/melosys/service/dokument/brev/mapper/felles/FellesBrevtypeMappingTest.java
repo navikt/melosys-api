@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper.felles;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -20,16 +21,22 @@ public class FellesBrevtypeMappingTest {
 
     @Test
     public void testLovvalgsbestemmelseKode() throws Exception {
+        List<String> uimplementerteEllerUgyldigeKoder = Collections.singletonList(
+            "FO_883_2004_ART15"
+        );
+
         Stream<String> koder;
         koder = Stream.concat(hentAlleVerdierFraKodeverk(Lovvalgbestemmelser_883_2004.class),
                               hentAlleVerdierFraKodeverk(Lovvalgbestemmelser_987_2009.class));
-        koder.forEach(LovvalgsbestemmelseKode::fromValue);
+
+        koder.filter(k -> !uimplementerteEllerUgyldigeKoder.contains(k))
+            .forEach(LovvalgsbestemmelseKode::fromValue);
     }
 
     @Test
     public void testTilleggsbestemmelseKoder() throws Exception {
         List<String> uimplementerteEllerUgyldigeKoder = Arrays.asList(
-            "FO_883_2004_ART87_7"
+            "FO_883_2004_ART87_8"
         );
 
         hentAlleVerdierFraKodeverk(Tilleggsbestemmelser_883_2004.class)

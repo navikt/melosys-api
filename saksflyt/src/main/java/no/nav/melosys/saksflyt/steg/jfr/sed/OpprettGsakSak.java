@@ -29,7 +29,8 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
+        Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
+
         Long gsakSaksnummer = gsakFasade.opprettSak(
             fagsak.getSaksnummer(),
             prosessinstans.getBehandling().getType(),

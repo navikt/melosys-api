@@ -1,12 +1,11 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
+import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.*;
 import no.nav.melosys.exception.TekniskException;
 
@@ -42,6 +41,9 @@ public final class VilkaarbegrunnelseFactory {
                 case IKKE_VESENTLIG_VIRKSOMHET:
                     art121BegrunnelseType.setIkkeVesentligVirksomhet(JA);
                     break;
+                case IKKE_NORSK_AG_REGNING:
+                    art121BegrunnelseType.setIkkeNorskAgRegning(JA);
+                    break;
                 default:
                     throw new TekniskException(artikkel12_1 + IKKE_STØTTET);
             }
@@ -57,6 +59,7 @@ public final class VilkaarbegrunnelseFactory {
         art121BegrunnelseType.setIkkeOmfattetLengeNokINorgeFør("");
         art121BegrunnelseType.setUnder2MnSidenForrigeUtsendingTilSammeLand("");
         art121BegrunnelseType.setIkkeVesentligVirksomhet("");
+        art121BegrunnelseType.setIkkeNorskAgRegning("");
         return art121BegrunnelseType;
     }
 
@@ -190,10 +193,23 @@ public final class VilkaarbegrunnelseFactory {
         return art122NormalVirksomhetBegrunnelseType;
     }
 
-    public static Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, Vilkaar vilkaarType) {
-        return resultat.getVilkaarsresultater().stream()
-            .filter(vr -> vr.getVilkaar() == vilkaarType)
-            .flatMap(vr -> vr.getBegrunnelser().stream())
-            .collect(Collectors.toSet());
+    public static Optional<Art161AnmodningBegrunnelseKode> mapAnmodningBegrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) throws TekniskException {
+        if (anmodningbegrunnelser.size() > 1) {
+            throw new TekniskException("Mer enn én art16-anmodningbegrunnelse");
+        }
+        return anmodningbegrunnelser.stream()
+            .map(VilkaarBegrunnelse::getKode)
+            .map(Art161AnmodningBegrunnelseKode::valueOf)
+            .findFirst();
+    }
+
+    public static Optional<Art161AnmodningUtenArt12BegrunnelseKode> mapAnmodningUtenArt12Begrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) throws TekniskException {
+        if (anmodningbegrunnelser.size() > 1) {
+            throw new TekniskException("Mer enn én art16-anmodningbegrunnelse");
+        }
+        return anmodningbegrunnelser.stream()
+            .map(VilkaarBegrunnelse::getKode)
+            .map(Art161AnmodningUtenArt12BegrunnelseKode::valueOf)
+            .findFirst();
     }
 }
