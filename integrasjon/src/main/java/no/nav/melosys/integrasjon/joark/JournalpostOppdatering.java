@@ -1,15 +1,13 @@
 package no.nav.melosys.integrasjon.joark;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import org.springframework.util.CollectionUtils;
 
 public final class JournalpostOppdatering {
-    private final Long gsakSaksnummer;
+    private final Long arkivSakID;
+    private final String hovedDokumentID;
     private final String brukerID;
     private final String avsenderID;
     private final String avsenderNavn;
@@ -21,7 +19,8 @@ public final class JournalpostOppdatering {
     private final boolean medDokumentkategori;
 
     public static class Builder {
-        private Long gsakSaksnummer;
+        private Long arkivSakID;
+        private String hovedDokumentID;
         private String brukerID;
         private String avsenderID;
         private String avsenderNavn;
@@ -31,8 +30,13 @@ public final class JournalpostOppdatering {
         private List<String> logiskeVedleggTitler = new ArrayList<>();
         private boolean medDokumentkategori;
 
-        public Builder medGsakSaksnummer(Long gsakSaksnummer) {
-            this.gsakSaksnummer = gsakSaksnummer;
+        public Builder medArkivSakID(Long arkivSakID) {
+            this.arkivSakID = arkivSakID;
+            return this;
+        }
+
+        public Builder medHovedDokumentID(String hovedDokumentID) {
+            this.hovedDokumentID = hovedDokumentID;
             return this;
         }
 
@@ -86,7 +90,8 @@ public final class JournalpostOppdatering {
     }
 
     private JournalpostOppdatering(Builder builder) {
-        this.gsakSaksnummer = builder.gsakSaksnummer;
+        this.arkivSakID = builder.arkivSakID;
+        this.hovedDokumentID = builder.hovedDokumentID;
         this.brukerID = builder.brukerID;
         this.avsenderID = builder.avsenderID;
         this.avsenderNavn = builder.avsenderNavn;
@@ -97,23 +102,27 @@ public final class JournalpostOppdatering {
         this.medDokumentkategori = builder.medDokumentkategori;
     }
 
-    public Long getGsakSaksnummer() {
-        return gsakSaksnummer;
+    public Long getArkivSakID() {
+        return arkivSakID;
+    }
+
+    public String getHovedDokumentID() {
+        return hovedDokumentID;
     }
 
     public String getBrukerID() {
         return brukerID;
     }
 
-    public String getAvsenderID() {
+    String getAvsenderID() {
         return avsenderID;
     }
 
-    public String getAvsenderNavn() {
+    String getAvsenderNavn() {
         return avsenderNavn;
     }
 
-    public Avsendertyper getAvsenderType() {
+    Avsendertyper getAvsenderType() {
         return avsenderType;
     }
 
@@ -131,5 +140,28 @@ public final class JournalpostOppdatering {
 
     public boolean isMedDokumentkategori() {
         return medDokumentkategori;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JournalpostOppdatering)) return false;
+        JournalpostOppdatering that = (JournalpostOppdatering) o;
+        return isMedDokumentkategori() == that.isMedDokumentkategori() &&
+            Objects.equals(getArkivSakID(), that.getArkivSakID()) &&
+            Objects.equals(getHovedDokumentID(), that.getHovedDokumentID()) &&
+            Objects.equals(getBrukerID(), that.getBrukerID()) &&
+            Objects.equals(getAvsenderID(), that.getAvsenderID()) &&
+            Objects.equals(getAvsenderNavn(), that.getAvsenderNavn()) &&
+            getAvsenderType() == that.getAvsenderType() &&
+            Objects.equals(getTittel(), that.getTittel()) &&
+            Objects.equals(getFysiskeVedlegg(), that.getFysiskeVedlegg()) &&
+            Objects.equals(getLogiskeVedleggTitler(), that.getLogiskeVedleggTitler());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getArkivSakID(), getHovedDokumentID(), getBrukerID(), getAvsenderID(), getAvsenderNavn(),
+            getAvsenderType(), getTittel(), getFysiskeVedlegg(), getLogiskeVedleggTitler(), isMedDokumentkategori());
     }
 }

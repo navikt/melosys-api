@@ -65,16 +65,16 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         }
 
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
-        Long gsakSakID = null;
+        Long arkivSakID = null;
         if (prosessinstans.getType() == ProsessType.JFR_KNYTT || Behandlingstyper.ENDRET_PERIODE.equals(behandlingstype)) {
             Fagsak sak = fagsakRepo.findBySaksnummer(prosessinstans.getData(SAKSNUMMER));
             if (sak != null) {
-                gsakSakID = sak.getGsakSaksnummer();
+                arkivSakID = sak.getGsakSaksnummer();
             }
         } else {
-            gsakSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
+            arkivSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
         }
-        if (gsakSakID == null) {
+        if (arkivSakID == null) {
             String feilmelding = "Prosessinstansen er ikke knyttet til en gsak sak";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
@@ -92,19 +92,20 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
             avsenderNavn = avsenderID; //Avsendernavn er påkrevd
         }
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
-        String dokumentID = prosessinstans.getData(DOKUMENT_ID);
+        String hovedDokumentID = prosessinstans.getData(DOKUMENT_ID);
 
         List<String> logiskeVedleggTitler = prosessinstans.getData(LOGISKE_VEDLEGG_TITLER, List.class);
         Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
 
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(gsakSakID).medBrukerID(brukerID)
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(arkivSakID)
+            .medBrukerID(brukerID).medHovedDokumentID(hovedDokumentID)
             .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType)
             .medTittel(tittel).medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler).medDokumentkategori(medDokumentkategori).build();
-        joarkFasade.oppdaterJournalpost(journalpostID, dokumentID, journalpostOppdatering);
+        joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, false);
 
         prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);
-        log.info("Prosessinstans {} har oppdatert journalpost {}. SakId: {}", prosessinstans.getId(), journalpostID, gsakSakID);
+        log.info("Prosessinstans {} har oppdatert journalpost {}. SakId: {}", prosessinstans.getId(), journalpostID, arkivSakID);
     }
 }
 

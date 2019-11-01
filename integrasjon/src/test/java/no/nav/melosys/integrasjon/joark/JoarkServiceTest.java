@@ -154,11 +154,12 @@ public class JoarkServiceTest {
         Map<String, String> vedleggMedTitler = new HashMap<>();
         String fysiskVedleggTittel = "Fysisk vedlegg";
         vedleggMedTitler.put("vedleggDokID", fysiskVedleggTittel);
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(1L).medBrukerID("12345")
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
+            .medHovedDokumentID("1234").medBrukerID("12345")
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.ORGANISASJON)
             .medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
             .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).medDokumentkategori(true).build();
-        joarkService.oppdaterJournalpost("123", "1234", journalpostOppdatering);
+        joarkService.oppdaterJournalpost("123",journalpostOppdatering, false);
 
         verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
         PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
@@ -194,10 +195,11 @@ public class JoarkServiceTest {
     @Test
     public void oppdaterJournalpost_utenVedlegg_fungerer() throws Exception {
         String tittel = "tittel";
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medGsakSaksnummer(1L).medBrukerID("12345")
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
+            .medBrukerID("12345").medHovedDokumentID("1234")
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
             .medLogiskeVedleggTitler(null).medDokumentkategori(true).build();
-        joarkService.oppdaterJournalpost("123", "1234", journalpostOppdatering);
+        joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);
 
         verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
         PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();

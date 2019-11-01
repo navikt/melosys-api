@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr.sed;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +17,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FerdigstillJournalpostTest {
-
     @Mock
     private JoarkFasade joarkFasade;
     @Mock
@@ -43,7 +43,9 @@ public class FerdigstillJournalpostTest {
         when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
         ferdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(TITTEL), eq(true));
+        JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
+            .medBrukerID(BRUKER_ID).medArkivSakID(GSAK_SAKSNUMMER).medTittel(TITTEL).build();
+        verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(forventetOppdatering), eq(true));
         verify(tpsFasade).hentIdentForAktørId(eq(AKTØR_ID));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.hentFørsteProsessStegForType(prosessinstans.getType()));
     }
@@ -57,11 +59,13 @@ public class FerdigstillJournalpostTest {
         when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
         ferdigstillJournalpost.utfør(prosessinstans);
 
-        verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(BRUKER_ID), eq(GSAK_SAKSNUMMER), eq(TITTEL), eq(true));
+        JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
+            .medBrukerID(BRUKER_ID).medArkivSakID(GSAK_SAKSNUMMER).medTittel(TITTEL).build();
+        verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(forventetOppdatering), eq(true));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 
-    private Prosessinstans hentProsessinstans() {
+    private static Prosessinstans hentProsessinstans() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, AKTØR_ID);
