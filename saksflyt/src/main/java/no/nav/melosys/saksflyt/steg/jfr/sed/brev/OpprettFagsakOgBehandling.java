@@ -97,8 +97,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         Aktoersroller aktørrolle;
         switch (avsenderType) {
             case PERSON:
-                aktørrolle = Aktoersroller.BRUKER;
-                break;
+                return;
             case ORGANISASJON:
                 aktørrolle = Aktoersroller.ARBEIDSGIVER;
                 break;
