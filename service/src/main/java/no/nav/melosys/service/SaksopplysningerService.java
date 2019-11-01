@@ -3,15 +3,14 @@ package no.nav.melosys.service;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.aareg.AaregFasade;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -30,7 +29,6 @@ public class SaksopplysningerService {
     private static final Logger log = LoggerFactory.getLogger(SaksopplysningerService.class);
 
     private final TpsFasade tpsFasade;
-    private final AaregFasade aaregFasade;
     private final ProsessinstansService prosessinstansService;
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -38,13 +36,11 @@ public class SaksopplysningerService {
 
     @Autowired
     public SaksopplysningerService(TpsFasade tpsFasade,
-                                   AaregFasade aaregFasade,
                                    ProsessinstansService prosessinstansService,
                                    BehandlingRepository behandlingRepository,
                                    BehandlingsresultatService behandlingsresultatService,
                                    SaksopplysningRepository saksopplysningRepo) {
         this.tpsFasade = tpsFasade;
-        this.aaregFasade = aaregFasade;
         this.prosessinstansService = prosessinstansService;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -74,11 +70,6 @@ public class SaksopplysningerService {
     public boolean harAktivOppfrisking(Long behandlingID) {
         Assert.notNull(behandlingID, "behandlingID må ikke være null");
         return prosessinstansService.erUnderOppfriskning(behandlingID);
-    }
-
-    public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
-        Saksopplysning saksopplysning = aaregFasade.hentArbeidsforholdHistorikk(arbeidsforholdsID);
-        return (ArbeidsforholdDokument) saksopplysning.getDokument();
     }
 
     @Transactional(rollbackFor = MelosysException.class)
