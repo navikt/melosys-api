@@ -1,23 +1,19 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -123,19 +119,16 @@ public class BrevDataTestUtils {
         return anmodningsperiodeSvar;
     }
 
-    public static Vilkaarsresultat lagVilkaarsresultatMedBegrunnelse(Vilkaar vilkaar, boolean oppfylt, Set<VilkaarBegrunnelse> begrunnelser) {
+    public static Vilkaarsresultat lagVilkaarsresultat(Vilkaar vilkaar, boolean oppfylt, Kodeverk... vilkårbegrunnelser) {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setBegrunnelser(begrunnelser);
-        vilkaarsresultat.setVilkaar(vilkaar);
         vilkaarsresultat.setOppfylt(oppfylt);
+        vilkaarsresultat.setVilkaar(vilkaar);
+        vilkaarsresultat.setBegrunnelser(new HashSet<>());
+        for (Kodeverk begrunnelseKode : vilkårbegrunnelser) {
+            VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
+            begrunnelse.setKode(begrunnelseKode.getKode());
+            vilkaarsresultat.getBegrunnelser().add(begrunnelse);
+        }
         return vilkaarsresultat;
-    }
-
-    public static Set<VilkaarBegrunnelse> lagVilkaarBegrunnelse(String kode) {
-        Set<VilkaarBegrunnelse> begrunnelser = new HashSet<>();
-        VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
-        begrunnelse.setKode(kode);
-        begrunnelser.add(begrunnelse);
-        return begrunnelser;
     }
 }

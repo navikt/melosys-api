@@ -2,10 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -25,6 +22,7 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -40,7 +38,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagMaritimtArbeidssted;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12.SJOEMANNSKIRKEN;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,12 +122,8 @@ public class A001MapperTest {
         myndighet.poststed ="Stockholm";
         myndighet.landkode = Landkoder.SK;
 
-        Vilkaarsresultat vilkår = new Vilkaarsresultat();
-        vilkår.setBegrunnelseFritekst("Fritekst");
-        vilkår.setOppfylt(true);
-        VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
-        begrunnelse.setKode("UTSENDELSE_MELLOM_24_MN_OG_5_AAR");
-        vilkår.getBegrunnelser().add(begrunnelse);
+        Vilkaarsresultat vilkår16 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, UTSENDELSE_MELLOM_24_MN_OG_5_AAR);
+        Vilkaarsresultat vilkår16Uten12 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
 
         brevData = new BrevDataA001();
         brevData.arbeidsgivendeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
@@ -137,9 +133,40 @@ public class A001MapperTest {
         brevData.bostedsadresse = boAdresse;
         brevData.utenlandskMyndighet = myndighet;
         brevData.anmodningsperioder = Arrays.asList(anmodningsperiode);
-        brevData.vilkårsresultat161 = vilkår;
+        brevData.anmodningBegrunnelser = vilkår16.getBegrunnelser();
+        brevData.anmodningUtenArt12Begrunnelser = vilkår16Uten12.getBegrunnelser();
         brevData.utenlandskIdent = Optional.empty();
         brevData.ansettelsesperiode = Optional.empty();
+    }
+
+    @Test
+    public void mapTilBrevXMLArt16Begrunnelser() throws Exception {
+        FellesType fellesType = new FellesType();
+        fellesType.setFagsaksnummer("MELTEST-2");
+
+        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
+        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
+        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
+
+        brevData.anmodningUtenArt12Begrunnelser.clear();
+
+        String xml = mapTilBrevXML(fellesType, navFelles, brevData);
+        assertThat(xml).isNotNull();
+    }
+
+    @Test
+    public void mapTilBrevXMLArt16UtenArt12Begrunnelser() throws Exception {
+        FellesType fellesType = new FellesType();
+        fellesType.setFagsaksnummer("MELTEST-2");
+
+        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
+        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
+        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
+
+        brevData.anmodningBegrunnelser.clear();
+
+        String xml = mapTilBrevXML(fellesType, navFelles, brevData);
+        assertThat(xml).isNotNull();
     }
 
     @Test
@@ -151,22 +178,12 @@ public class A001MapperTest {
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
-        String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
+        String xml = mapTilBrevXML(fellesType, navFelles, brevData);
         assertThat(xml).isNotNull();
     }
 
-    private StrukturertAdresse lagStrukturertAdresse() {
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummer = "25";
-        strukturertAdresse.gatenavn = "Gatenavn";
-        strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.poststed = "Poststed";
-        strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = Landkoder.NO.getKode();
-        return strukturertAdresse;
-    }
 
-    private String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+    private String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, BrevData brevData) throws JAXBException, SAXException, TekniskException {
         final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
 
         Fag fag = mapFag();
