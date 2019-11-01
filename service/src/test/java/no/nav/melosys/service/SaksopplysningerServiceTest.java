@@ -10,9 +10,7 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -24,7 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,8 +31,6 @@ import static org.mockito.Mockito.when;
 public class SaksopplysningerServiceTest {
     @Mock
     private TpsFasade tpsFasade;
-    @Mock
-    private AaregFasade aaregFasade;
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
@@ -47,16 +44,8 @@ public class SaksopplysningerServiceTest {
 
     @Before
     public void setUp() {
-        saksopplysningerService = new SaksopplysningerService(tpsFasade, aaregFasade, prosessinstansService,
+        saksopplysningerService = new SaksopplysningerService(tpsFasade, prosessinstansService,
             behandlingRepo, behandlingsresultatService, saksopplysningRepository);
-    }
-
-    @Test
-    public void hentArbeidsforholdHistorikk() throws MelosysException {
-        final Long arbeidsforholdsID = 12608035L;
-        when(aaregFasade.hentArbeidsforholdHistorikk(eq(arbeidsforholdsID))).thenReturn(new Saksopplysning());
-        saksopplysningerService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
-        verify(aaregFasade).hentArbeidsforholdHistorikk(eq(arbeidsforholdsID));
     }
 
     @Test

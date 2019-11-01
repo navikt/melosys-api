@@ -1,30 +1,33 @@
 package no.nav.melosys.saksflyt.steg.aou.inn;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-
 @Component("AnmodningUnntakMottakHentInntektsopplysninger")
 public class HentInntektsopplysninger extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(HentInntektsopplysninger.class);
 
     private final HentOpplysningerFelles hentOpplysningerFelles;
+    private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
-    public HentInntektsopplysninger(HentOpplysningerFelles hentOpplysningerFelles) {
+    public HentInntektsopplysninger(HentOpplysningerFelles hentOpplysningerFelles, SaksopplysningerService saksopplysningerService) {
         this.hentOpplysningerFelles = hentOpplysningerFelles;
+        this.saksopplysningerService = saksopplysningerService;
     }
 
     @Override
@@ -36,9 +39,11 @@ public class HentInntektsopplysninger extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        LocalDate fom = melosysEessiMelding.getPeriode().getFom();
-        LocalDate tom = melosysEessiMelding.getPeriode().getTom();
+        final long behandlingID = prosessinstans.getBehandling().getId();
+        SedDokument sedDokument = saksopplysningerService.hentSedOpplysninger(behandlingID);
+
+        LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
+        LocalDate tom = sedDokument.getLovvalgsperiode().getTom();
 
         if (!PeriodeKontroller.feilIPeriode(fom, tom)) {
             long behandlingId = prosessinstans.getBehandling().getId();
