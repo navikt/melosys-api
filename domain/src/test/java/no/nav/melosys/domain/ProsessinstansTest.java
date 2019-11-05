@@ -6,10 +6,11 @@ import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 
 public class ProsessinstansTest {
 

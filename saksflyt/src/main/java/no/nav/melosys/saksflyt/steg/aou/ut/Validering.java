@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.aou.ut;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_RESULTAT;
-import static no.nav.melosys.domain.ProsessSteg.AOU_VALIDERING;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_OPPDATER_RESULTAT;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_VALIDERING;
 import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**

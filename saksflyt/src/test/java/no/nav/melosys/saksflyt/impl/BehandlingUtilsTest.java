@@ -4,15 +4,14 @@ import java.time.LocalDateTime;
 
 import org.junit.Test;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.saksflyt.impl.Utils;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import static no.nav.melosys.domain.ProsessSteg.JFR_AKTØR_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_AKTØR_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_PERS_OPPL;
 
 public class BehandlingUtilsTest {
 

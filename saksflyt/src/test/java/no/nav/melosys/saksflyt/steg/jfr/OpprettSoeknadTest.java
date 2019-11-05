@@ -2,6 +2,9 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.SoeknadService;
 import org.junit.Before;

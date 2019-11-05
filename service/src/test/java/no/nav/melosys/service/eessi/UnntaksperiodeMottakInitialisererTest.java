@@ -11,6 +11,8 @@ import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.sak.FagsakService;

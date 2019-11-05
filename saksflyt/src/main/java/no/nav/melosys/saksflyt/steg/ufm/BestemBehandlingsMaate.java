@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsmaate;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;

@@ -2,8 +2,8 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;

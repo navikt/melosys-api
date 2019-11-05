@@ -6,6 +6,8 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;

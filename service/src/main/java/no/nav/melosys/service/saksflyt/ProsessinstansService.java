@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;

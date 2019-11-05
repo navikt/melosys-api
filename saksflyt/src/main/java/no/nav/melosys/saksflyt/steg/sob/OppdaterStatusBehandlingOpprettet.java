@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.sob;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_SAKSRELASJON;
-import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.AKTØR_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSNUMMER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_SAKSRELASJON;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.STATUS_BEH_OPPR;
 
 /**
  * Steget sørger for å skrive til Sak og Behandling når behandling opprettes

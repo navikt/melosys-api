@@ -4,8 +4,8 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -57,4 +57,4 @@ public class AvsluttFagsakOgBehandlingTest {
         assertThat(p.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
 
     }
-} 
+}

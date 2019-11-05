@@ -1,8 +1,8 @@
 package no.nav.melosys.service.eessi;
 
 
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;

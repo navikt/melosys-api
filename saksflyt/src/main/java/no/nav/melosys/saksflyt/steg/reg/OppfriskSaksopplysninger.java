@@ -3,9 +3,9 @@ package no.nav.melosys.saksflyt.steg.reg;
 import java.time.Instant;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
-import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 
 /**
  * Oppdatere behandling med siste opplysninger hentet dato

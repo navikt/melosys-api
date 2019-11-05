@@ -10,6 +10,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;

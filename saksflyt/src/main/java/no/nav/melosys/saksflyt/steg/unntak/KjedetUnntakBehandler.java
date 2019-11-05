@@ -3,13 +3,13 @@ package no.nav.melosys.saksflyt.steg.unntak;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 
 public class KjedetUnntakBehandler implements UnntakBehandler {
 
     private List<UnntakBehandler> kjede = new ArrayList<>();
-    
+
     private KjedetUnntakBehandler() {
     }
 
@@ -17,7 +17,7 @@ public class KjedetUnntakBehandler implements UnntakBehandler {
         KjedetUnntakBehandler res = new KjedetUnntakBehandler();
         return res.så(ub);
     }
-    
+
     public KjedetUnntakBehandler så(UnntakBehandler ub) {
         kjede.add(ub);
         return this;

@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
 
 /**
  * Oppdaterer en journalpost i Joark.

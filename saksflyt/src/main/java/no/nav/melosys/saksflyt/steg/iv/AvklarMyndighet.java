@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktAvklarMyndighet;
@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_ARBEIDSGIVER;
-import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_MYNDIGHET;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_AVKLAR_ARBEIDSGIVER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_AVKLAR_MYNDIGHET;
 
 /**
  * Avklarer hvilken utenlandsk myndighet er part i saken.

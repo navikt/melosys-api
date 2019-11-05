@@ -3,9 +3,9 @@ package no.nav.melosys.saksflyt.steg.jfr.sed.brev;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 
 @Component("JournalførAouBrevFerdigstillJournalpost")
 public class FerdigstillJournalpost extends AbstraktStegBehandler {

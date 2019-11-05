@@ -4,8 +4,8 @@ import java.time.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import org.junit.Before;
@@ -16,7 +16,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.FERDIG;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -34,7 +34,7 @@ public class OppdaterOppgaveTest {
     private ArgumentCaptor<Oppgave> oppgaveCaptor;
 
     private OppdaterOppgave agent;
-    
+
     private Prosessinstans prosessinstans = new Prosessinstans();
 
     @Before
@@ -48,7 +48,7 @@ public class OppdaterOppgaveTest {
         behandling.setFagsak(fagsak);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID);
-        
+
     }
 
     @Test
