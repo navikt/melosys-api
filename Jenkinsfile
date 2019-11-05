@@ -25,6 +25,9 @@ node {
     def mvnSettings = "navMavenSettingsUtenProxy"
     def branchName, commit, commitId, imageVersion
     def application = "melosys", springProfiles = "nais"
+    def javaHome = tool "jdk-11"
+    def mvnHome = tool "maven-3.6.0"
+    env.PATH = "${javaHome}/bin:${mvnHome}/bin:${env.PATH}"
 
     if (environment == 'p') {
         namespace = 'default'
@@ -38,10 +41,6 @@ node {
     }
 
     try {
-        tools {
-            maven 'maven-3.6.0'
-            jdk 'jdk-11'
-        }
 
         stage("Checkout") {
             scmInfo = checkout scm
