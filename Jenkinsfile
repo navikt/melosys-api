@@ -38,6 +38,11 @@ node {
     }
 
     try {
+        tools {
+            maven 'maven-3.6.0'
+            jdk 'jdk-11'
+        }
+
         stage("Checkout") {
             scmInfo = checkout scm
 
