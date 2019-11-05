@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.aou.inn;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.felles.RegisterKontrollFelles;
 import org.junit.Before;
 import org.junit.Test;

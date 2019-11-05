@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.api;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 
 
 /**

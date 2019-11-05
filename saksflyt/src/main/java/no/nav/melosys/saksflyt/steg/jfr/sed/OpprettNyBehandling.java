@@ -8,6 +8,9 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -21,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.DOKUMENT_ID;
-import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DOKUMENT_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.JOURNALPOST_ID;
 
 @Component
 public class OpprettNyBehandling extends AbstraktStegBehandler {

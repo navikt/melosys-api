@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.exception.FunksjonellException;
@@ -11,7 +11,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
 import org.junit.Test;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_VALIDERING;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

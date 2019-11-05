@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDING;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 
@@ -31,7 +31,7 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(SendForvaltningsmelding.class);
 
     private final BrevBestiller brevBestiller;
-    
+
     private final BehandlingService behandlingService;
 
     @Autowired
@@ -51,10 +51,10 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
 
         // Henter ut behandling med saksopplysninger
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        
+
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);
-        
+
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());
     }

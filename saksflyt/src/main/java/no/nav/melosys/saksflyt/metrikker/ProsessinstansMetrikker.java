@@ -4,7 +4,7 @@ import javax.annotation.PostConstruct;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

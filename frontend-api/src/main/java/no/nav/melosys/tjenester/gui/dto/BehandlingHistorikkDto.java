@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
 
 public class BehandlingHistorikkDto {
 

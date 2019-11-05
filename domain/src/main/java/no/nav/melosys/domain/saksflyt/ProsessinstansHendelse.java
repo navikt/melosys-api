@@ -1,4 +1,4 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.saksflyt;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +26,7 @@ public class ProsessinstansHendelse {
 
     @Column(name = "type", updatable = false)
     private String type;
-    
+
     @Column(name = "melding", nullable = false, updatable = false)
     private String melding;
 
@@ -40,7 +40,7 @@ public class ProsessinstansHendelse {
         this.type = type;
         this.melding = melding;
     }
-    
+
     public Long getId() {
         return id;
     }

@@ -1,5 +1,6 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.saksflyt;
 
+import no.nav.melosys.domain.Behandling;
 import org.apache.commons.lang3.StringUtils;
 
 public class ProsessinstansBuilder {

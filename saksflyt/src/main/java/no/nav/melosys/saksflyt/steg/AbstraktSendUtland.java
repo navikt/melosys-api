@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -16,7 +16,7 @@ import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 
 public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
     private final EessiService eessiService;

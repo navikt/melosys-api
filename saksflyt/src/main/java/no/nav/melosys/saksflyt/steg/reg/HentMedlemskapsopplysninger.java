@@ -5,6 +5,9 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -17,9 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
-import static no.nav.melosys.domain.ProsessSteg.HENT_MEDL_OPPL;
-import static no.nav.melosys.domain.ProsessSteg.HENT_SOB_SAKER;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_MEDL_OPPL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_SOB_SAKER;
 
 /**
  * Steget sørger for å hente medlemskapsinfo fra MEDL

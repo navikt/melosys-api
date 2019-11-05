@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.gsak;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -16,9 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
-import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.STATUS_BEH_OPPR;
 
 /**
  * Oppretter en sak i GSAK.

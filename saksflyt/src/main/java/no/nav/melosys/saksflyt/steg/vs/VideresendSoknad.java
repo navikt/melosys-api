@@ -2,8 +2,8 @@ package no.nav.melosys.saksflyt.steg.vs;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.exception.FunksjonellException;
@@ -21,8 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
-import static no.nav.melosys.domain.ProsessSteg.VS_SEND_SOKNAD;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_SOKNAD;
 
 /**
  * Sender et brev med søknad som vedlegg til utenlandsk myndighet

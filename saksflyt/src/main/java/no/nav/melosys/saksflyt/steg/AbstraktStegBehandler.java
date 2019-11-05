@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.api.StegBehandler;
@@ -17,24 +17,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 public abstract class AbstraktStegBehandler implements StegBehandler {
-    
+
     private static final Logger log = LoggerFactory.getLogger(AbstraktStegBehandler.class);
-    
+
     private Predicate<Prosessinstans> inngangsvilkår;
-    
+
     private Map<Feilkategori, UnntakBehandler> unntakBehandlere;
 
     private static final String PID_MELDING = "{}: {}";
-    
+
     protected abstract ProsessSteg inngangsSteg();
-    
+
     /**
-     * Returnerer en Map som definerer unntakshåndtering for steget. 
+     * Returnerer en Map som definerer unntakshåndtering for steget.
      */
     protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
         return FeilStrategi.standardFeilHåndtering();
     }
-    
+
     public AbstraktStegBehandler() {
         inngangsvilkår = Utils.medSteg(inngangsSteg()).and(Utils.somIkkeSover);
         unntakBehandlere = unntaksHåndtering();
@@ -47,7 +47,7 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
         UnntakBehandler ub = unntakBehandlere.get(kategori);
         ub.behandleUnntak(prosessinstans, melding, e); // OK med NPE hvis ub er null
     }
-    
+
     @Override
     public Predicate<Prosessinstans> inngangsvilkår() {
         return inngangsvilkår;

@@ -1,4 +1,4 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.saksflyt;
 
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.exception.TekniskException;

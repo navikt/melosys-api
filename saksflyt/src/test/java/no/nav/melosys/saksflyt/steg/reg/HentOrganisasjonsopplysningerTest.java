@@ -6,6 +6,8 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -29,13 +31,13 @@ public class HentOrganisasjonsopplysningerTest {
 
     @Mock
     private EregFasade eregFasade;
-    
+
     @Mock
     private SaksopplysningRepository soppRepo;
 
     @Mock
     private BehandlingRepository behRepo;
-    
+
     private HentOrganisasjonsopplysninger agent;
 
     @Before
@@ -65,7 +67,7 @@ public class HentOrganisasjonsopplysningerTest {
 
         when(behRepo.findWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
         when(eregFasade.hentOrganisasjon(eq(orgnr1))).thenReturn(new Saksopplysning());
-        
+
         agent.utførSteg(p);
 
         verify(soppRepo).save(any(Saksopplysning.class));

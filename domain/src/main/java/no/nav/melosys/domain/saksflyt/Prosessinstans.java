@@ -1,4 +1,4 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.saksflyt;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
@@ -54,19 +55,19 @@ public class Prosessinstans {
 
     @Column(name = "antall_retry", nullable = false)
     private int antallRetry;
-   
+
     @Column(name = "sist_forsoekt")
     private LocalDateTime sistForsøkt;
 
     @Column(name = "sover_til")
     private Instant soverTil;
-    
+
     @Column(name = "endret_dato", nullable = false)
     private LocalDateTime endretDato;
 
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProsessinstansHendelse> hendelser;
-    
+
     private static ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
 
@@ -99,7 +100,7 @@ public class Prosessinstans {
         return data.getProperty(key.getKode());
     }
 
-    /** 
+    /**
      * Returnerer et dataelement som et Object (etter JSON deserialisering)
      */
     public <T> T getData(ProsessDataKey key, Class<T> type) {
@@ -181,7 +182,7 @@ public class Prosessinstans {
     }
 
     private static final int VARCHAR2_MAX_BYTES = 4000;
-    
+
     private void leggTilHendelse(ProsessinstansHendelse piHend) {
         if (!this.equals(piHend.getProsessinstans())) {
             // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
@@ -192,7 +193,7 @@ public class Prosessinstans {
         }
         hendelser.add(piHend);
     }
-        
+
     public void leggTilHendelse(String type, String melding) {
         ProsessinstansHendelse pih = new ProsessinstansHendelse(this, LocalDateTime.now(), steg, type, melding);
         leggTilHendelse(pih);
@@ -209,7 +210,7 @@ public class Prosessinstans {
             leggTilHendelse(type, melding);
         }
     }
-    
+
     @Override
     public int hashCode() {
         return 31;

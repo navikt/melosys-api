@@ -1,7 +1,7 @@
 package no.nav.melosys.repository;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
 
 public class ProsessinstansAntall {
     private ProsessType prosessType;

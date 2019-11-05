@@ -4,6 +4,9 @@ import java.util.EnumSet;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
@@ -14,10 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import static no.nav.melosys.domain.ProsessDataKey.BEHANDLINGSRESULTATTYPE;
-import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_RESULTAT;
-import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTATTYPE;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_RESULTAT;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_VALIDERING;
 
 /**
  * Validerer opplysning bli brukt for iverksett vedtak.
