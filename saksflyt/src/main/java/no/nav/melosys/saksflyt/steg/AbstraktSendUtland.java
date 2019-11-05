@@ -1,16 +1,14 @@
 package no.nav.melosys.saksflyt.steg;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -20,16 +18,13 @@ import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 
 public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
     private final EessiService eessiService;
-    private final BrevBestiller brevBestiller;
     protected final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
 
     protected AbstraktSendUtland(EessiService eessiService,
-                                 BrevBestiller brevBestiller,
                                  BehandlingsresultatService behandlingsresultatService,
                                  LandvelgerService landvelgerService) {
         this.eessiService = eessiService;
-        this.brevBestiller = brevBestiller;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
     }
@@ -45,7 +40,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
             if (erEessiKlar(behandlingsresultat, bucType)) {
                 eessiService.opprettOgSendSed(behandlingID, bucType, vedlegg);
             } else {
-                brevBestiller.bestill(lagBrevBestilling(prosessinstans));
+                sendBrev(prosessinstans);
             }
         }
     }
@@ -56,7 +51,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         return eessiService.hentEessiMottakerinstitusjoner(bucType.toString()).stream().anyMatch(i -> i.getLandkode().equals(landkode));
     }
 
-    protected abstract Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException;
+    protected abstract void sendBrev(Prosessinstans prosessinstans) throws MelosysException;
 
     protected abstract boolean skalSendesUtland(Behandlingsresultat behandlingsresultat);
 

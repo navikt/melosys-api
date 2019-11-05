@@ -2,14 +2,24 @@ package no.nav.melosys.saksflyt.steg.vs;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.arkiv.FysiskDokument;
+import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.domain.arkiv.OpprettJournalpostUtils;
+import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.brev.Brevbestilling;
-import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -21,8 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_SOKNAD;
+import java.util.Collections;
+import java.util.List;
+
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 /**
  * Sender et brev med søknad som vedlegg til utenlandsk myndighet
@@ -35,13 +47,24 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
     private static final Logger log = LoggerFactory.getLogger(VideresendSoknad.class);
 
+    private final EessiService eessiService;
+    private final LandvelgerService landvelgerService;
+    private final TpsFasade tpsFasade;
+    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final JoarkFasade joarkFasade;
 
     @Autowired
-    protected VideresendSoknad(EessiService eessiService, BrevBestiller brevBestiller,
+    protected VideresendSoknad(EessiService eessiService,
                                BehandlingsresultatService behandlingsresultatService,
-                               LandvelgerService landvelgerService, @Qualifier("system") JoarkFasade joarkFasade) {
-        super(eessiService, brevBestiller, behandlingsresultatService, landvelgerService);
+                               LandvelgerService landvelgerService,
+                               TpsFasade tpsFasade,
+                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
+                               @Qualifier("system") JoarkFasade joarkFasade) {
+        super(eessiService, behandlingsresultatService, landvelgerService);
+        this.eessiService = eessiService;
+        this.landvelgerService = landvelgerService;
+        this.tpsFasade = tpsFasade;
+        this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.joarkFasade = joarkFasade;
     }
 
@@ -55,7 +78,10 @@ public class VideresendSoknad extends AbstraktSendUtland {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         sendUtland(BucType.LA_BUC_03, prosessinstans, hentSøknadDokument(prosessinstans.getBehandling()));
-        prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
+
+        if (prosessinstans.getSteg() != VS_DISTRIBUER_JOURNALPOST) {
+            prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
+        }
     }
 
     private byte[] hentSøknadDokument(Behandling behandling) throws FunksjonellException {
@@ -72,12 +98,48 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     @Override
-    protected Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
-        throw new UnsupportedOperationException("Videresending av søknad er ikke implementert!");
+    protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
+        return true;
     }
 
     @Override
-    protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
-        return true;
+    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+        Behandling behandling = prosessinstans.getBehandling();
+        Fagsak fagsak = behandling.getFagsak();
+
+        String fnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
+        Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId()).stream().findFirst()
+            .orElseThrow(() -> new FunksjonellException("Fant ikke trygdemyndighetsland for behandling " + behandling.getId()));
+        String institusjonID = fagsak.hentMyndigheter().stream().findFirst()
+            .orElseThrow(() -> new TekniskException("Finner ingen myndighet for fagsak " + fagsak.getSaksnummer())).getInstitusjonId();
+        String institusjonNavn = utenlandskMyndighetRepository.findByLandkode(landkode).map(u -> u.navn).orElse("");
+
+        OpprettJournalpost opprettJournalpost = OpprettJournalpostUtils.lagJournalpostForSendingAvSedSomBrev(
+            fagsak.getGsakSaksnummer(), fnr, SedType.A008, eessiService.genererSedForhåndsvisning(behandling.getId(), SedType.A008),
+            institusjonID, institusjonNavn, lagSøknadVedlegg(behandling)
+        );
+
+        String journalpostID = joarkFasade.opprettJournalpost(opprettJournalpost, true);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+        prosessinstans.setSteg(VS_DISTRIBUER_JOURNALPOST);
+    }
+
+    private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
+        byte[] vedleggData = hentSøknadDokument(behandling);
+
+        FysiskDokument fysiskDokument = new FysiskDokument();
+        fysiskDokument.setBrevkode(SedType.A008.name());
+        fysiskDokument.setDokumentKategori(DokumentKategoriKode.SOK.getKode());
+        fysiskDokument.setDokumentVarianter(Collections.singletonList(OpprettJournalpostUtils.lagArkivVariant(vedleggData)));
+        fysiskDokument.setTittel(hentSøknadTittel(behandling));
+        return Collections.singletonList(fysiskDokument);
+    }
+
+    private String hentSøknadTittel(Behandling behandling) throws FunksjonellException, IntegrasjonException {
+        String journalpostID = behandling.getInitierendeJournalpostId();
+        if (StringUtils.isEmpty(journalpostID)) {
+            throw new FunksjonellException("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");
+        }
+        return joarkFasade.hentJournalpost(journalpostID).getHoveddokument().getTittel();
     }
 }

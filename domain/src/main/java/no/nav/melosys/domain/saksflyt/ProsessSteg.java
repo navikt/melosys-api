@@ -95,6 +95,7 @@ public enum ProsessSteg implements Kodeverk {
     VS_OPPDATER_RESULTAT("VS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
     VS_SEND_ORIENTERINGSBREV("VS_SEND_ORIENTERINGSBREV", "Opprett orienteringsbrev og brev med vedlagt søknad"),
     VS_SEND_SOKNAD("VS_SEND_SOKNAD", "Opprett brev med vedlagt søknad"),
+    VS_DISTRIBUER_JOURNALPOST("VS_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten"),
 
     //Mottak av SED
     SED_MOTTAK_OPPRETT_JFR_OPPG("SED_MOTTAK_OPPRETT_JFR_OPPG", "Oppretter journalføringsoppgave for SED som ikke skal behandles automatisk"),
