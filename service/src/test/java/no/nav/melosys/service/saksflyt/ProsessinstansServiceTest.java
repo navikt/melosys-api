@@ -108,7 +108,7 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansIverksettVedtak_medBehandlingOgBehandlingsresultat() {
         Behandling behandling = new Behandling();
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-        service.opprettProsessinstansIverksettVedtak(behandling, resultatType);
+        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -154,7 +154,7 @@ public class ProsessinstansServiceTest {
         String saksbehandler = settInnloggetSaksbehandler();
 
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE);
+        service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE, null);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 

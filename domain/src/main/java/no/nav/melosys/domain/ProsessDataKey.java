@@ -23,7 +23,6 @@ public enum ProsessDataKey {
     DOKUMENT_ID("dokumentID"),
     EESSI_MELDING("eessiMelding"),
     ER_OPPDATERT_SED("erOppdatertSed"),
-    FRITEKST("fritekst"),
     FYSISKE_VEDLEGG("fysiskeVedlegg"),
     GSAK_SAK_ID("gsakSakID"),
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),

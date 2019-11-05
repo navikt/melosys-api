@@ -81,6 +81,8 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         Set<VilkaarBegrunnelse> art122NormalVirksomhetBegrunnelse = resultat.hentVilkaarbegrunnelser(ART12_2_NORMALT_DRIVER_VIRKSOMHET);
         fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelse));
 
+        fag.setFritekst(brevData.fritekst);
+
         fag.setAvslag(JA);
 
         return fag;

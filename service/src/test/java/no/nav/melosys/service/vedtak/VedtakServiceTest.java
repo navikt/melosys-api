@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -61,10 +62,10 @@ public class VedtakServiceTest {
         oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 
-        vedtakService.fattVedtak(behandlingID, resultatType);
+        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST");
 
         verify(behandlingRepository).findById(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"));
 
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
 
@@ -76,15 +77,15 @@ public class VedtakServiceTest {
     @Test(expected = IkkeFunnetException.class)
     public void fattVedtak_behandlingIkkeFunnet() throws FunksjonellException, TekniskException {
         long behandlingID = 0L;
-        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "FRITEKST");
     }
 
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
-        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
+        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, Behandlingstyper.ENDRET_PERIODE, "FRITEKST");
 
         verify(behandlingRepository).findById(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON));
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), any());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }

@@ -80,7 +80,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
 
     private void fattVedtak(long behandlingID) throws FunksjonellException, TekniskException {
         behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
-        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, null);
     }
 
     private void oppdaterBehandlingsstatusUnderBehandling(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {

@@ -51,14 +51,15 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         String begrunnelseKode = prosessinstans.getData(BEGRUNNELSEKODE, Henleggelsesgrunner.class).getKode();
-        String fritekst = prosessinstans.getData(FRITEKST);
+        String fritekst = prosessinstans.getData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(MELDING_HENLAGT_SAK)
             .medAvsender(saksbehandler)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)
-            .medFritekst(fritekst).build();
+            .medFritekst(fritekst)
+            .build();
         brevBestiller.bestill(brevbestilling);
 
         prosessinstans.setSteg(IV_STATUS_BEH_AVSL);

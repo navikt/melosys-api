@@ -54,7 +54,7 @@ public class OppdaterBehandlingsresultatTest {
         Henleggelsesgrunner henleggelsesgrunn = Henleggelsesgrunner.ANNET;
         prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, henleggelsesgrunn);
         String henleggelsesfritekst = "henleggelsesfritekst";
-        prosessinstans.setData(ProsessDataKey.FRITEKST, henleggelsesfritekst);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, henleggelsesfritekst);
 
         Optional<Behandlingsresultat> behandlingsresultat = Optional.of(new Behandlingsresultat());
         doReturn(behandlingsresultat).when(behandlingsresultatRepository).findById(behandlingId);

@@ -23,7 +23,8 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.IKKE_NORSK_AG_REGNING;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
@@ -64,7 +65,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
 
         if (resultat.erAvslag()) {
-            sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler);
+            sendAvslagsbrev(prosessinstans, behandling, behandlingsresultatType, saksbehandler);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
         } else if (resultat.erInnvilgelse()) {
@@ -79,24 +80,34 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         }
     }
 
-    private void sendAvslagsbrev(Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String saksbehandler)
+    private void sendAvslagsbrev(Prosessinstans prosessinstans, Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String saksbehandler)
         throws FunksjonellException, TekniskException {
-        Produserbaredokumenter avslagType = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
+
+        String fritekst = hentBegrunnelseFritekst(prosessinstans);
+
+        Produserbaredokumenter avslagTypeBruker = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
             ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
 
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(avslagType)
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(avslagTypeBruker)
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(Mottaker.av(BRUKER), FastMottaker.av(HELFO), FastMottaker.av(SKATT))
+            .medFritekst(fritekst)
             .build();
         brevBestiller.bestill(brevbestilling);
 
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)) {
-            if (avslagType == AVSLAG_MANGLENDE_OPPLYSNINGER) {
-                brevBestiller.bestill(AVSLAG_MANGLENDE_OPPLYSNINGER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
-            } else {
-                brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
-            }
+            Produserbaredokumenter avslagTypeArbeidsgiver = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
+                ? AVSLAG_ARBEIDSGIVER : AVSLAG_MANGLENDE_OPPLYSNINGER;
+
+            Brevbestilling.Builder brevbestillingArbeidsgiver = new Brevbestilling.Builder()
+                .medDokumentType(avslagTypeArbeidsgiver)
+                .medAvsender(saksbehandler)
+                .medBehandling(behandling)
+                .medMottakere(Mottaker.av(ARBEIDSGIVER))
+                .medFritekst(fritekst);
+
+            brevBestiller.bestill(brevbestillingArbeidsgiver.build());
         }
     }
 
@@ -110,6 +121,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
             .medBehandling(behandling)
             .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans))
             .medMottakere(Mottaker.av(BRUKER), FastMottaker.av(SKATT))
+            .medFritekst(hentBegrunnelseFritekst(prosessinstans))
             .build();
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
 
@@ -145,6 +157,10 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
             begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
         }
         return begrunnelseKode;
+    }
+
+    private String hentBegrunnelseFritekst(Prosessinstans prosessinstans) {
+        return prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
     }
 
     private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {

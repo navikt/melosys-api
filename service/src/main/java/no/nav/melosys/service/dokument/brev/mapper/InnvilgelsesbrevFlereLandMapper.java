@@ -102,6 +102,8 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
             fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.begrunnelseKode));
         }
 
+        fag.setFritekst(brevdata.fritekst);
+
         return fag;
     }
 
