@@ -144,16 +144,7 @@ public class AvklarArbeidsgiverTest {
     }
 
     @Test
-    public void utfør_iverksettVedtakAvslagManglendeOpplArt13_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
-        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
-        behandlingsresultat.setLovvalgsperioder(new HashSet<>());
-
-        steg.utfør(p);
-        verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());
-    }
-
-    @Test
-    public void utfør_iverksettVedtakAvslagManglendeOpplArt12_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
+    public void utfør_iverksettVedtakAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
 
