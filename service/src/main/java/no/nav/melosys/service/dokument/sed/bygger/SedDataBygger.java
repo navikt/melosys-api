@@ -179,7 +179,10 @@ public class SedDataBygger {
         } else {
             IkkeFysiskArbeidssted ikkeFysiskArbeidssted = (IkkeFysiskArbeidssted)arb;
             arbeidssted.setNavn(ikkeFysiskArbeidssted.getEnhetNavn());
-            arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
+            Adresse adresse = new Adresse();
+            adresse.setLand(ikkeFysiskArbeidssted.getLandkode());
+            adresse.setPoststed("N/A");
+            arbeidssted.setHjemmebase(""); //TODO skal ikke brukes?
         }
         return arbeidssted;
     }
