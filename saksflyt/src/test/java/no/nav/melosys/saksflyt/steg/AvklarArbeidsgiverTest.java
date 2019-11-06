@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import no.nav.melosys.domain.*;
@@ -138,6 +139,32 @@ public class AvklarArbeidsgiverTest {
     @Test
     public void utfør_iverksettVedtakArt13_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        steg.utfør(p);
+        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
+    }
+
+    @Test
+    public void utfør_iverksettVedtakAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
+        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+        behandlingsresultat.setLovvalgsperioder(new HashSet<>());
+
+        steg.utfør(p);
+        verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());
+    }
+
+    @Test
+    public void utfør_iverksettVedtakForkortPeriodeArt13_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
+        steg.utfør(p);
+        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
+    }
+
+    @Test
+    public void utfør_iverksettVedtakForkortPeriodeArt12_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
+
         steg.utfør(p);
         verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
     }
