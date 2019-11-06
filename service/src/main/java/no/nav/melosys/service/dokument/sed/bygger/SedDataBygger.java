@@ -185,7 +185,7 @@ public class SedDataBygger {
             adresse.setPoststed("N/A");
 
             arbeidssted.setAdresse(adresse);
-            arbeidssted.setHjemmebase(""); //TODO skal ikke brukes?
+            arbeidssted.setHjemmebase(ikkeFysiskArbeidssted.getLandkode());
         }
         return arbeidssted;
     }
