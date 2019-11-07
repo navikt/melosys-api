@@ -65,7 +65,7 @@ class A1Mapper {
     private PersonType mapPerson(PersonDokument personDokument) throws TekniskException {
         PersonType person = new PersonType();
         person.setKjoenn(KjoennKode.fromValue(personDokument.kjønn.getKode()));
-        person.setStatsborgerskap(LandkoderUtils.tilIso2(personDokument.statsborgerskap.getKode()).getKode());
+        person.setStatsborgerskap(LandkoderUtils.tilIso2(personDokument.statsborgerskap.getKode()));
 
         person.setPersonnavn(lagPersonnavn(personDokument));
 

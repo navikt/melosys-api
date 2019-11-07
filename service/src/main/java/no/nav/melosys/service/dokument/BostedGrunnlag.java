@@ -68,7 +68,7 @@ public class BostedGrunnlag {
         strukturertAdresse.poststed = ustrukturertAdresse.adresselinje2;
         strukturertAdresse.postnummer = ustrukturertAdresse.adresselinje3;
         strukturertAdresse.region = ustrukturertAdresse.adresselinje4;
-        strukturertAdresse.landkode = LandkoderUtils.tilIso2(ustrukturertAdresse.land.getKode()).getKode();
+        strukturertAdresse.landkode = LandkoderUtils.tilIso2(ustrukturertAdresse.land.getKode());
 
         return Optional.of(strukturertAdresse);
     }

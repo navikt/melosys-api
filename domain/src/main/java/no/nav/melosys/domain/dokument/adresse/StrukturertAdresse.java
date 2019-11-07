@@ -33,7 +33,7 @@ public class StrukturertAdresse extends Adresse {
         adresse.postnummer = bostedsadresse.getPostnr();
         adresse.poststed = bostedsadresse.getPoststed();
         if (StringUtils.isNotEmpty(bostedsadresse.getLand().getKode())) {
-            adresse.landkode = LandkoderUtils.tilIso2(bostedsadresse.getLand().getKode()).getKode();
+            adresse.landkode = LandkoderUtils.tilIso2(bostedsadresse.getLand().getKode());
         }
 
         return adresse;
