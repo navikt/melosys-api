@@ -14,8 +14,10 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateTimeXmlAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class StatsborgerskapPeriode implements HarPeriode {
-
     public Periode periode;
+
+    // Attributtet endretAv er på formen "KODE_SYSTEM_KILDE" eller "ENDRET_AV, KODE_SYSTEM_KILDE"
+    public String endretAv;
 
     @XmlJavaTypeAdapter(LocalDateTimeXmlAdapter.class)
     public LocalDateTime endringstidspunkt;
