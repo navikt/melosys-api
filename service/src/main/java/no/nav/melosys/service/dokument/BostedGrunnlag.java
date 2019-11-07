@@ -30,16 +30,11 @@ public class BostedGrunnlag {
     }
 
     public StrukturertAdresse hentBostedsadresse() throws TekniskException {
-        return finnBostedsadresseFraDokument().orElseThrow(() ->
+        return finnBostedsadresse().orElseThrow(() ->
             new TekniskException("Bostedsadressen finnes ikke eller mangler landkode"));
     }
 
-    public Optional<StrukturertAdresse> finnAdresse() throws TekniskException {
-        Optional<StrukturertAdresse> adresse = finnBostedsadresseFraDokument();
-        return adresse.isPresent() ? adresse : finnPostadresse();
-    }
-
-    private Optional<StrukturertAdresse> finnBostedsadresseFraDokument() throws TekniskException {
+    public Optional<StrukturertAdresse> finnBostedsadresse() throws TekniskException {
         StrukturertAdresse bostedsadresse = søknad != null ? SoeknadUtils.hentBostedsadresse(søknad) : null;
         if (bostedsadresse == null) {
             return finnBostedsadresseFraRegister();
@@ -56,7 +51,7 @@ public class BostedGrunnlag {
         return Optional.of(StrukturertAdresse.av(bostedsadresse));
     }
 
-    private Optional<StrukturertAdresse> finnPostadresse() throws TekniskException {
+    public Optional<StrukturertAdresse> finnPostadresse() throws TekniskException {
         UstrukturertAdresse ustrukturertAdresse = person.postadresse;
 
         if (ustrukturertAdresse.erTom()) {
