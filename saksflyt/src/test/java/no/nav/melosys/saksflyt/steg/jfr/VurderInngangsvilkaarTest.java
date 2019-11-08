@@ -5,7 +5,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
@@ -15,12 +18,13 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.RegelmodulService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,25 +38,22 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VurderInngangsvilkaarTest {
-
     @Mock
     private RegelmodulService regelmodulService;
-
     @Mock
     private FagsakRepository fagsakRepository;
-
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private SaksopplysningerService saksopplysningerService;
 
     private VurderInngangsvilkaar agent;
 
     @Before
     public void setUp() {
-        agent = new VurderInngangsvilkaar(regelmodulService, fagsakRepository, behandlingRepository);
+        agent = new VurderInngangsvilkaar(regelmodulService, fagsakRepository, saksopplysningerService);
     }
 
     @Test
-    public void utfoerSteg_funker() {
+    public void utfoerSteg_funker() throws IkkeFunnetException {
         // Sett opp input...
         Prosessinstans p = lagProsessinstans();
 
@@ -61,7 +62,7 @@ public class VurderInngangsvilkaarTest {
         res.feilmeldinger = Collections.emptyList();
         res.kvalifisererForEf883_2004 = true;
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
-        when(behandlingRepository.findWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
+        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(lagPersoppl());
 
         agent.utførSteg(p);
 
@@ -73,7 +74,7 @@ public class VurderInngangsvilkaarTest {
     }
 
     @Test
-    public void utfoerSteg_feiler() {
+    public void utfoerSteg_feiler() throws IkkeFunnetException {
         // Sett opp input...
         Prosessinstans p = lagProsessinstans();
 
@@ -84,7 +85,7 @@ public class VurderInngangsvilkaarTest {
         VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
         res.feilmeldinger = Collections.singletonList(fm);
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
-        when(behandlingRepository.findWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
+        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(lagPersoppl());
 
         agent.utførSteg(p);
 
@@ -96,10 +97,12 @@ public class VurderInngangsvilkaarTest {
     }
 
     @Test
-    public void utfoerStegMedHistorikkStatsborgerskap() {
+    public void utfoerStegMedHistorikkStatsborgerskap() throws IkkeFunnetException {
         // Sett opp input...
         Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
+        Behandling behandling = new Behandling();
+        behandling.setId(2L);
+        p.setBehandling(behandling);
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.UKJENT);
         p.getBehandling().setFagsak(fagsak);
@@ -130,7 +133,7 @@ public class VurderInngangsvilkaarTest {
         res.feilmeldinger = Collections.emptyList();
         res.kvalifisererForEf883_2004 = true;
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
-        when(behandlingRepository.findWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
+        when(saksopplysningerService.hentPersonhistorikk(anyLong())).thenReturn(personhistorikkDokument);
 
         agent.utførSteg(p);
 
@@ -143,17 +146,24 @@ public class VurderInngangsvilkaarTest {
 
     public static Prosessinstans lagProsessinstans() {
         Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        p.setBehandling(behandling);
         p.getBehandling().setFagsak(new Fagsak());
-        PersonDokument pDok = new PersonDokument();
-        pDok.statsborgerskap = new Land("NOR");
+
         Saksopplysning sopp = new Saksopplysning();
         sopp.setType(SaksopplysningType.PERSOPL);
-        sopp.setDokument(pDok);
+        sopp.setDokument(lagPersoppl());
         p.getBehandling().setSaksopplysninger(Collections.singleton(sopp));
         p.setData(ProsessDataKey.SØKNADSLAND, Collections.singletonList(Landkoder.PL.getKode()));
         p.setData(ProsessDataKey.SØKNADSPERIODE, new PeriodeDto(LocalDate.now(), null));
         return p;
+    }
+
+    private static PersonDokument lagPersoppl() {
+        PersonDokument pDok = new PersonDokument();
+        pDok.statsborgerskap = new Land("NOR");
+        return pDok;
     }
 
 }

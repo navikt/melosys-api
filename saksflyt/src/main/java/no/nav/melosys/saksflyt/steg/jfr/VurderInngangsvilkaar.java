@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
@@ -13,15 +13,15 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.LandkoderUtils;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.RegelmodulService;
+import no.nav.melosys.service.SaksopplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,18 +38,19 @@ import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
  */
 @Component
 public class VurderInngangsvilkaar extends AbstraktStegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
 
     private final RegelmodulService regelmodulService;
     private final FagsakRepository fagsakRepository;
-    private final BehandlingRepository behandlingRepository;
+    private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
-    public VurderInngangsvilkaar(RegelmodulService regelmodulService, FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
+    public VurderInngangsvilkaar(RegelmodulService regelmodulService,
+                                 FagsakRepository fagsakRepository,
+                                 SaksopplysningerService saksopplysningerService) {
         this.regelmodulService = regelmodulService;
         this.fagsakRepository = fagsakRepository;
-        this.behandlingRepository = behandlingRepository;
+        this.saksopplysningerService = saksopplysningerService;
         log.debug("InngangsvilkaarAgent initialisert");
     }
 
@@ -60,9 +61,9 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException {
+    public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
+        long behandlingID = prosessinstans.getBehandling().getId();
 
         // Hent statsborgerskap fra saksopplysningene...
         // Ved søknad tilbake i tid brukes historisk statsborgerskap
@@ -75,10 +76,10 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
         Land statsborgerskap;
         if (brukHistoriskStatsborgerskap) {
-            List<StatsborgerskapPeriode> statsborgerskapListe = SaksopplysningerUtils.hentPersonhistorikkDokument(behandling).statsborgerskapListe;
-            statsborgerskap = statsborgerskapListe.isEmpty() ? null : statsborgerskapListe.get(0).statsborgerskap;
+            statsborgerskap = avgjørStatsborgerskapForPeriode(
+                saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode);
         } else {
-            statsborgerskap = SaksopplysningerUtils.hentPersonDokument(behandling).statsborgerskap;
+            statsborgerskap = saksopplysningerService.hentPersonOpplysninger(behandlingID).statsborgerskap;
         }
 
         if (statsborgerskap == null) {
@@ -117,7 +118,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
 
         // Sett sakstype...
-        Fagsak fagsak = behandling.getFagsak();
+        Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
         Sakstyper nyFagsakstype;
         if (Boolean.TRUE.equals(res.kvalifisererForEf883_2004)) {
             nyFagsakstype = Sakstyper.EU_EOS;
@@ -134,6 +135,13 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
         log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakstype, prosessinstans.getId());
+    }
+
+    private Land avgjørStatsborgerskapForPeriode(List<StatsborgerskapPeriode> statsborgerskapListe, Periode periode) {
+        if (statsborgerskapListe.isEmpty()) {
+            return null;
+        }
+        return statsborgerskapListe.isEmpty() ? null : statsborgerskapListe.get(0).statsborgerskap;
     }
 
     private static List<String> tilIso3Landkoder(List<String> land) throws TekniskException {
