@@ -16,17 +16,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class LandkoderUtilsTest {
 
     @Test
-    public void valiateLandkoderTest() throws TekniskException, IkkeFunnetException {
+    public void valiateLandkoderTest() {
         assertThat(LandkoderUtils.tilIso3(Landkoder.NO.getKode())).isEqualTo(Land.NORGE);
     }
 
     @Test
-    public void validerSammenhengMellomTypeOgKonvertering() throws TekniskException, IllegalAccessException {
+    public void validerSammenhengMellomTypeOgKonvertering() throws IllegalAccessException {
         // Sjekker at alle iso2-koder er inkludert begge mappere
         for (Landkoder landkodeIso2 : Landkoder.values()) {
             String landkodeIso3 = LandkoderUtils.tilIso3(landkodeIso2.getKode());
-            Landkoder resultatSomIso2 = LandkoderUtils.tilIso2(landkodeIso3);
-            assertThat(landkodeIso2.getKode()).isEqualTo(resultatSomIso2.getKode());
+            String resultatSomIso2 = LandkoderUtils.tilIso2(landkodeIso3);
+            assertThat(landkodeIso2.getKode()).isEqualTo(resultatSomIso2);
         }
 
         // Sjekker at alle iso3-koder er inkludert i mappere (Bortsett fra Statsløs og Ukjent)
@@ -34,8 +34,8 @@ public class LandkoderUtilsTest {
             if (landkodeIso3 == Land.STATSLØS) continue;
             if (landkodeIso3 == Land.UKJENT) continue;
 
-            Landkoder landkodeIso2 = LandkoderUtils.tilIso2(landkodeIso3);
-            String resultatSomIso3 = LandkoderUtils.tilIso3(landkodeIso2.getKode());
+            String landkodeIso2 = LandkoderUtils.tilIso2(landkodeIso3);
+            String resultatSomIso3 = LandkoderUtils.tilIso3(landkodeIso2);
             assertThat(landkodeIso3).isEqualTo(resultatSomIso3);
         }
     }
