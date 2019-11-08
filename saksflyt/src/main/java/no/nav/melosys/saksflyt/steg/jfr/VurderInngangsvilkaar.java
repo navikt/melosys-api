@@ -2,7 +2,9 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -76,8 +78,8 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
         Land statsborgerskap;
         if (brukHistoriskStatsborgerskap) {
-            statsborgerskap = avgjørStatsborgerskapForPeriode(
-                saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode);
+            statsborgerskap = avgjørStatsborgerskapPåStartDato(
+                saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
         } else {
             statsborgerskap = saksopplysningerService.hentPersonOpplysninger(behandlingID).statsborgerskap;
         }
@@ -137,11 +139,25 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakstype, prosessinstans.getId());
     }
 
-    private Land avgjørStatsborgerskapForPeriode(List<StatsborgerskapPeriode> statsborgerskapListe, Periode periode) {
+    Land avgjørStatsborgerskapPåStartDato(List<StatsborgerskapPeriode> statsborgerskapListe, LocalDate startDato) {
         if (statsborgerskapListe.isEmpty()) {
             return null;
         }
-        return statsborgerskapListe.isEmpty() ? null : statsborgerskapListe.get(0).statsborgerskap;
+        List<StatsborgerskapPeriode> gyldigeStasborgerskap = statsborgerskapListe.stream()
+            .filter(p -> p.getPeriode().inkluderer(startDato))
+            .collect(Collectors.toList());
+        if (gyldigeStasborgerskap.isEmpty()) {
+            return null;
+        } else if (gyldigeStasborgerskap.size() == 1) {
+            return gyldigeStasborgerskap.get(0).statsborgerskap;
+        } else {
+            // Hvis det finnes flere kilder for samme dato så ønsker vi å se bort fra det som kommer fra Skattedirektoratet
+            // pga. dårlig datakvalitet. Vi filterer også ukjent statsborgerskap siden det ikke hjelper å vurdere inngangsvilkår.
+            return gyldigeStasborgerskap.stream().filter(p -> !p.erFraSkattedirektoratet())
+                .filter(p -> !p.statsborgerskap.erUkjent())
+                .max(Comparator.comparing(p -> p.endringstidspunkt))
+                .map(p -> p.statsborgerskap).orElse(null);
+        }
     }
 
     private static List<String> tilIso3Landkoder(List<String> land) throws TekniskException {
