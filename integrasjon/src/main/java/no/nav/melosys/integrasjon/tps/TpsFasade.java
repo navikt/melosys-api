@@ -18,10 +18,7 @@ public interface TpsFasade {
     Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException;
 
     /**
-     * @param aktørId tilsvarende til FNR
-     * @return Antall personer som bor på samme bostedsadresse inkludert ident det spørres på.
      */
-    int hentAntallPersonerSomBorPåBostedsadresse(String aktørId) throws IntegrasjonException, IkkeFunnetException, SikkerhetsbegrensningException;
 
     String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException;
 }

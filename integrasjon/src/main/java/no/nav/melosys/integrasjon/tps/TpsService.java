@@ -219,26 +219,6 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public int hentAntallPersonerSomBorPåBostedsadresse(String argAktørId) throws IntegrasjonException, IkkeFunnetException, SikkerhetsbegrensningException {
-        //Hvis adressedato ikke gitt som request paramerter da tjensten antar at adresseDato er dagensdato.
-        HentPersonerMedSammeAdresseRequest request = new HentPersonerMedSammeAdresseRequest();
-        AktoerId aktørId = new AktoerId();
-        aktørId.setAktoerId(argAktørId);
-        try {
-            HentPersonerMedSammeAdresseResponse response = personConsumer.hentPersonerMedSammeAdresse(request);
-            if (response != null) {
-                return response.getPersonBorHerListe().size();
-            } else {
-                throw new IntegrasjonException("Feil ved henting av antall personer bor på bostedsadresse");
-            }
-        } catch (HentPersonerMedSammeAdresseSikkerhetsbegrensning e) {
-            throw new SikkerhetsbegrensningException(e);
-        } catch (HentPersonerMedSammeAdresseIkkeFunnet e) {
-            throw new IkkeFunnetException(e);
-        }
-    }
-
-    @Override
     public String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException {
         Saksopplysning tpsOpplysning = hentPerson(fnr);
         PersonDokument personDokument = (PersonDokument) tpsOpplysning.getDokument();
