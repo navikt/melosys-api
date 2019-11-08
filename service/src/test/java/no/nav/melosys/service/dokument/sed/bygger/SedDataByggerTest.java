@@ -226,7 +226,7 @@ public class SedDataByggerTest {
         lagUtkastAssertions(sedData);
         assertThat(sedData.getBostedsadresse().getLand()).isEqualTo("NOR");
         assertThat(sedData.getBostedsadresse().getGateadresse()).isEqualTo("gate ");
-        assertThat(sedData.getBostedsadresse().getAdressetype()).isEqualTo(Adressetype.KONTAKTADRESSE);
+        assertThat(sedData.getBostedsadresse().getAdressetype()).isEqualTo(Adressetype.POSTADRESSE);
     }
 
     @Test

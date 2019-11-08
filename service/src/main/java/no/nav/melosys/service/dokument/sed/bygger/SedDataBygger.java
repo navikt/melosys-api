@@ -53,7 +53,7 @@ public class SedDataBygger {
 
     private SedDataDto lag(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setBostedsadresse(lagAdresse(dataGrunnlag.getBostedGrunnlag())
+        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
             .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
@@ -64,7 +64,7 @@ public class SedDataBygger {
 
     private SedDataDto lag(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setBostedsadresse(lagAdresse(dataGrunnlag.getBostedGrunnlag())
+        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
             .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
@@ -83,7 +83,7 @@ public class SedDataBygger {
 
     private SedDataDto lagUtkast(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setBostedsadresse(lagAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
+        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
@@ -91,7 +91,7 @@ public class SedDataBygger {
 
     private SedDataDto lagUtkast(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setBostedsadresse(lagAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
+        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
@@ -144,21 +144,21 @@ public class SedDataBygger {
             .collect(Collectors.toList());
     }
 
-    private static Optional<Adresse> lagAdresse(BostedGrunnlag bostedGrunnlag) throws TekniskException {
+    private static Optional<Adresse> finnAdresse(BostedGrunnlag bostedGrunnlag) throws TekniskException {
         Optional<StrukturertAdresse> bostedsadresse = bostedGrunnlag.finnBostedsadresse();
         if (bostedsadresse.isPresent()) {
-            return Optional.of(fraBostedsadresse(bostedsadresse.get(), Adressetype.BOSTEDSADRESSE));
+            return Optional.of(lagAdresse(bostedsadresse.get(), Adressetype.BOSTEDSADRESSE));
         }
 
         Optional<StrukturertAdresse> postadresse = bostedGrunnlag.finnPostadresse();
         if (postadresse.isPresent()) {
-            return Optional.of(fraBostedsadresse(postadresse.get(), Adressetype.KONTAKTADRESSE));
+            return Optional.of(lagAdresse(postadresse.get(), Adressetype.POSTADRESSE));
         }
 
         return Optional.empty();
     }
 
-    private static Adresse fraBostedsadresse(StrukturertAdresse bostedsadresse, Adressetype adressetype) throws TekniskException {
+    private static Adresse lagAdresse(StrukturertAdresse bostedsadresse, Adressetype adressetype) throws TekniskException {
         if (bostedsadresse == null) {
             return new Adresse();
         }
