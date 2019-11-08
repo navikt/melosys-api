@@ -282,11 +282,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansVideresendSoknad(Behandling behandling) {
+    public void opprettProsessinstansVideresendSoknad(Behandling behandling, String fritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
+            .medBegrunnelseFritekst(fritekst)
             .build();
 
         lagre(prosessinstans);
