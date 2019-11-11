@@ -77,7 +77,7 @@ public class SendVedtakUtlandTest {
         Institusjon institusjon2 = new Institusjon("YZ:123", "???", "YZ");
         List<Institusjon> institusjoner = Arrays.asList(institusjon1, institusjon2);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.AX));
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(institusjoner);
+        when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyString())).thenReturn(institusjoner);
 
         sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, landvelgerService);
     }
@@ -99,7 +99,7 @@ public class SendVedtakUtlandTest {
 
     @Test
     public void utførSteg_ingenInstitusjonEessiKlar_senderBrev() throws Exception{
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(Collections.emptyList());
+        when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyString())).thenReturn(Collections.emptyList());
         sendVedtakUtland.utfør(prosessinstans);
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));

@@ -53,7 +53,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
     private boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
         final String landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingsresultat.getId()).stream().findFirst().map(Landkoder::getKode)
             .orElseThrow(() -> new FunksjonellException("Fant ikke trygdemyndighetsland for behandling " + behandlingsresultat.getBehandling().getId()));
-        return eessiService.hentEessiMottakerinstitusjoner(bucType.toString()).stream().anyMatch(i -> i.getLandkode().equals(landkode));
+        return !eessiService.hentEessiMottakerinstitusjoner(bucType.toString(), landkode).isEmpty();
     }
 
     protected abstract Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException;

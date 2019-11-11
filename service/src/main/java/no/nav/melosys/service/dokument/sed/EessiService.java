@@ -98,9 +98,9 @@ public class EessiService {
         throw new IllegalStateException("Ikke mulig å sende sed");
     }
 
-    public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType) throws MelosysException {
+    public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, String landkode) throws MelosysException {
         if (skalSendeSed) {
-            return eessiConsumer.hentMottakerinstitusjoner(bucType);
+            return eessiConsumer.hentMottakerinstitusjoner(bucType, landkode);
         } else {
             return new ArrayList<>();
         }

@@ -113,22 +113,22 @@ public class EessiServiceTest {
 
     @Test
     public void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
-        when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenReturn(Arrays.asList(
+        when(eessiConsumer.hentMottakerinstitusjoner(anyString(), anyString())).thenReturn(Arrays.asList(
             easyRandom.nextObject(Institusjon.class),
             easyRandom.nextObject(Institusjon.class)
         ));
 
-        List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01");
+        List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", "FR");
 
-        verify(eessiConsumer).hentMottakerinstitusjoner(anyString());
+        verify(eessiConsumer).hentMottakerinstitusjoner(anyString(), anyString());
         assertThat(mottakerinstitusjoner).hasSize(2);
         assertThat(mottakerinstitusjoner).hasOnlyElementsOfType(Institusjon.class);
     }
 
     @Test(expected = MelosysException.class)
     public void hentMottakerinstitusjoner_medFeilIConsumer_forventTomListe() throws MelosysException {
-        when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenThrow(new IntegrasjonException("Error!"));
-        eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01");
+        when(eessiConsumer.hentMottakerinstitusjoner(anyString(), anyString())).thenThrow(new IntegrasjonException("Error!"));
+        eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", "NO");
     }
 
     @Test

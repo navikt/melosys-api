@@ -101,7 +101,7 @@ public class VideresendSoknadTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong()))
             .thenReturn(Collections.singleton(Landkoder.FR));
-        when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_03.name())))
+        when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_03.name()), eq("FR")))
             .thenReturn(Collections.singletonList(new Institusjon("2", "frankrike", "FR")));
 
         videresendSoknad.utfør(prosessinstans);

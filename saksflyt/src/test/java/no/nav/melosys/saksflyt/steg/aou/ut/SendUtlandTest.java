@@ -71,7 +71,7 @@ public class SendUtlandTest {
         Institusjon institusjon2 = new Institusjon("SJ:123", "???", "SJ");
         List<Institusjon> institusjoner = Arrays.asList(institusjon1, institusjon2);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SJ));
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(institusjoner);
+        when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyString())).thenReturn(institusjoner);
 
         sendUtland = new SendUtland(eessiService, brevBestiller, behandlingService, behandlingsresultatService, landvelgerService, anmodningsperiodeService);
     }
@@ -90,7 +90,7 @@ public class SendUtlandTest {
 
     @Test
     public void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(Collections.emptyList());
+        when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyString())).thenReturn(Collections.emptyList());
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
 
