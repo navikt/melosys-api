@@ -7,16 +7,16 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.Kodeverk;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
 
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class SaksflytTestUtils {
@@ -35,12 +35,31 @@ public final class SaksflytTestUtils {
 
     public static LovvalgsperiodeDto lagLovvalgsperiodeDto(LovvalgBestemmelse lovvalgsbestemmelse, Landkoder landkode, InnvilgelsesResultat innvilgelsesResultat) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
         lovvalgsperiode.setLovvalgsland(landkode);
         lovvalgsperiode.setBestemmelse(lovvalgsbestemmelse);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
+        lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
+        if (innvilgelsesResultat == InnvilgelsesResultat.INNVILGET) {
+            lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
+            lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
+        }
         return LovvalgsperiodeDto.av(lovvalgsperiode);
+    }
+
+    public static AktoerDto lagAktørBrukerDto(String aktoerID) {
+        AktoerDto aktoerDto = new AktoerDto();
+        aktoerDto.setRolleKode(BRUKER.getKode());
+        aktoerDto.setAktoerID(aktoerID);
+        return aktoerDto;
+    }
+
+    public static AktoerDto lagAktørRepresentantDto(String orgnr, Representerer representerer) {
+        AktoerDto aktoerDto = new AktoerDto();
+        aktoerDto.setRolleKode(REPRESENTANT.getKode());
+        aktoerDto.setOrgnr(orgnr);
+        aktoerDto.setRepresentererKode(representerer.getKode());
+        return aktoerDto;
     }
 
     public static List<ProsessSteg> hentProsessStegForBehandling(ProsessinstansRepository repository, long behandlingsid) {

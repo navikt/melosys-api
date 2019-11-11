@@ -14,9 +14,14 @@ public class ForventetDokumentBestilling {
     public String mottakerID;
 
     public static ForventetDokumentBestilling forventDokument(Produserbaredokumenter dok, Aktoersroller rolle) {
+        return forventDokument(dok, rolle, null);
+    }
+
+    public static ForventetDokumentBestilling forventDokument(Produserbaredokumenter dok, Aktoersroller rolle, String mottakerId) {
         ForventetDokumentBestilling dokumentBestilling = new ForventetDokumentBestilling();
         dokumentBestilling.produserbaredokumenter = dok;
         dokumentBestilling.aktoersroller = rolle;
+        dokumentBestilling.mottakerID = mottakerId;
         return dokumentBestilling;
     }
 
@@ -35,7 +40,7 @@ public class ForventetDokumentBestilling {
 
     @Override
     public String toString() {
-        return produserbaredokumenter + "-" + aktoersroller.getKode();
+        return produserbaredokumenter + "-" + aktoersroller.getKode() + "-" + mottakerID;
     }
 
 }

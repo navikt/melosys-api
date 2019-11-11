@@ -24,7 +24,7 @@ public class ResultatPoller {
     }
 
     public static ResultatPoller Resultatpoller() {
-        return new ResultatPoller(50);
+        return new ResultatPoller(120);
     }
 
     public static ResultatPoller Resultatpoller(int sekunderTilTimout) {

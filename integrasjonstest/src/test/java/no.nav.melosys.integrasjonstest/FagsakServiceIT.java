@@ -89,7 +89,7 @@ public class FagsakServiceIT {
 
     @Test
     public void fagsak_henleggFagsak() throws FunksjonellException, TekniskException, InterruptedException {
-        behandlingsdata.setUnderBehandling(Testbehandlinger.FAKTAUTFYLT_BEHANDLING_ART12);
+        behandlingsdata.setUnderBehandling(Testbehandlinger.TOM_BEHANDLING);
 
         Journalpost journalpost = new Journalpost("123123");
         journalpost.setForsendelseMottatt(Instant.now());
