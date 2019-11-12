@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -27,7 +28,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
-public class Behandlingsdata {
+public class MelosysTjenesteGrensesnitt {
 
     @MockBean
     TilgangService tilgangService;
@@ -65,14 +66,19 @@ public class Behandlingsdata {
     @Autowired
     BehandlingRepository behandlingRepository;
 
+    @Autowired
+    private ProsessinstansRepository prosessinstansRepository;
+
     public void nullstill(long behandlingsId) {
         vilkårRepo.deleteAllInBatch();
         avklartefaktaRepo.deleteAllInBatch();
         anmodningsperiodeRepo.deleteAllInBatch();
         lovvalgsperiodeRepo.deleteAllInBatch();
         aktoerRepository.deleteAllInBatch();
+        prosessinstansRepository.deleteAllInBatch();
 
         setUnderBehandling(behandlingsId);
+        setFagsakOpprettet(behandlingsId);
     }
 
     public void opprettAvklartefakta(long behandlingsId, AvklartefaktaDto... avklartefaktaDtoer) throws FunksjonellException, TekniskException {
@@ -108,6 +114,14 @@ public class Behandlingsdata {
         Optional<Behandling> behandling = behandlingRepository.findById(behandlingsid);
         behandling.ifPresent(b -> {
             b.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+            behandlingRepository.save(b);
+        });
+    }
+
+    public void setFagsakOpprettet(long behandlingsid) {
+        behandlingRepository.findById(behandlingsid)
+        .ifPresent(b -> {
+            b.getFagsak().setStatus(Saksstatuser.OPPRETTET);
             behandlingRepository.save(b);
         });
     }

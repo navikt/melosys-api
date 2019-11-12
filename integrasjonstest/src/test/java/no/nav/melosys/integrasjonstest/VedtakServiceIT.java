@@ -12,11 +12,11 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakSystemService;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjonstest.felles.TestSubjectHandler;
-import no.nav.melosys.integrasjonstest.felles.opplysninger.Behandlingsdata;
-import no.nav.melosys.integrasjonstest.felles.opplysninger.Faktagrunnlag;
+import no.nav.melosys.integrasjonstest.felles.opplysninger.MelosysTjenesteGrensesnitt;
 import no.nav.melosys.integrasjonstest.felles.opplysninger.Testbehandlinger;
+import no.nav.melosys.integrasjonstest.felles.opplysninger.TestdataUtfyller;
 import no.nav.melosys.integrasjonstest.felles.verifisering.DokumentSjekker;
-import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.integrasjonstest.felles.verifisering.ProsessinstansTestService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.vedtak.VedtakService;
@@ -36,9 +36,7 @@ import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemm
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
-import static no.nav.melosys.integrasjonstest.felles.utils.SaksflytTestUtils.sjekkProsessteg;
 import static no.nav.melosys.integrasjonstest.felles.verifisering.ForventetDokumentBestilling.forventDokument;
-import static no.nav.melosys.integrasjonstest.felles.verifisering.ResultatPoller.Resultatpoller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -53,9 +51,6 @@ public class VedtakServiceIT {
 
     private static final String INSTITUSJONSKODE_ØSTERRIKET = "AT:9600";
     private static final String AVKLART_ARBEIDSGIVER_ORGNR = "982683955";
-
-    @Autowired
-    private ProsessinstansRepository prosessinstansRepository;
 
     @MockBean
     JoarkService joarkService;
@@ -76,10 +71,13 @@ public class VedtakServiceIT {
     private VedtakService vedtakService;
 
     @Autowired
-    private Behandlingsdata behandlingsdata;
+    private MelosysTjenesteGrensesnitt melosysGrensesnitt;
 
     @Autowired
     private DokumentSjekker dokumentSjekker;
+
+    @Autowired
+    private ProsessinstansTestService prosessinstansTestService;
 
     @BeforeEach
     public void setup() throws MelosysException {
@@ -87,98 +85,112 @@ public class VedtakServiceIT {
         when(eessiService.hentEessiMottakerinstitusjoner(any())).thenReturn(Collections.emptyList());
         when(gsakFasade.opprettOppgave(any())).thenReturn("");
 
-        prosessinstansRepository.deleteAll();
+        prosessinstansTestService.nullstill();
     }
 
     @Test
-    public void fattVedtak_innvilgelse_art12() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(Testbehandlinger.TOM_BEHANDLING, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.vilkaarForArt12Innvilgelse();
-        faktagrunnlag.utfyllInnvilgetLovvalgsperiode(FO_883_2004_ART12_1);
+    public void fattVedtak_innvilgelse_art12() throws FunksjonellException, TekniskException {
+        TestdataUtfyller utfyller = TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllVilkaarForArt12Innvilgelse()
+        .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART12_1);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
+        vedtakService.fattVedtak(utfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
 
-        dokumentSjekker.erBrevBestilt(
+        prosessinstansTestService.ventPå(utfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(utfyller.getBehandlingsid(), FERDIG);
+
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR));
-
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
     }
 
     @Test
-    public void fattVedtak_innvilgelse_art13() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(Testbehandlinger.TOM_BEHANDLING, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.utfyllInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A);
+    public void fattVedtak_innvilgelse_art13() throws FunksjonellException, TekniskException {
+        TestdataUtfyller testDataUtfyller = new TestdataUtfyller(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
+        .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
+        vedtakService.fattVedtak(testDataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        prosessinstansTestService.ventPå(testDataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testDataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             // HELFO skal ikke ha kopi ved Art13 (MELOSYS-3039)
             forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
-
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
     }
 
     @Test
-    public void fattVedtak_avslag_art12() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(Testbehandlinger.TOM_BEHANDLING, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.vilkaarForArt12Avslag();
-        faktagrunnlag.utfyllAvslåttLovvalgsperiode(FO_883_2004_ART12_1);
+    public void fattVedtak_avslag_art12() throws FunksjonellException, TekniskException {
+        TestdataUtfyller testDataUtfyller = new TestdataUtfyller(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllVilkaarForArt12Avslag()
+        .opprettAvslåttLovvalgsperiode(FO_883_2004_ART12_1);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
+        vedtakService.fattVedtak(testDataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        prosessinstansTestService.ventPå(testDataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testDataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.MYNDIGHET, HELFO_ORGNR),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(AVSLAG_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR));
-
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
     }
 
     @Test
-    public void fattVedtak_avslag_manglende_opplysninger() throws FunksjonellException, TekniskException, InterruptedException {
-        behandlingsdata.nullstill(Testbehandlinger.TOM_BEHANDLING);
-        vedtakService.fattVedtak(Testbehandlinger.TOM_BEHANDLING, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
-        Resultatpoller().følg(prosessinstansRepository, Testbehandlinger.TOM_BEHANDLING);
+    public void fattVedtak_avslagManglendeOpplysninger_ingenAvklartArbeidsgiver() throws FunksjonellException, TekniskException {
+        new TestdataUtfyller(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt);
 
-        dokumentSjekker.erBrevBestilt(
+        vedtakService.fattVedtak(Testbehandlinger.TOM_BEHANDLING, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
+        prosessinstansTestService.ventPå(Testbehandlinger.TOM_BEHANDLING);
+        prosessinstansTestService.sjekkProsessteg(Testbehandlinger.TOM_BEHANDLING, FERDIG);
+
+        dokumentSjekker.sjekkBrevBestilt(
+            forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.BRUKER),
+            forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, HELFO_ORGNR),
+            forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR));
+    }
+
+    @Test
+    public void fattVedtak_avslagManglendeOpplysningerMedArbeidsgiver_sendesOgsåTilArbGiver() throws FunksjonellException, TekniskException {
+        new TestdataUtfyller(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
+            .utfyllAvklartefaktaForArt12(Landkoder.SE, AVKLART_ARBEIDSGIVER_ORGNR);
+
+        vedtakService.fattVedtak(Testbehandlinger.TOM_BEHANDLING, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
+        prosessinstansTestService.ventPå(Testbehandlinger.TOM_BEHANDLING);
+        prosessinstansTestService.sjekkProsessteg(Testbehandlinger.TOM_BEHANDLING, FERDIG);
+
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.BRUKER),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, HELFO_ORGNR),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR));
-
-        sjekkProsessteg(prosessinstansRepository, Testbehandlinger.TOM_BEHANDLING, FERDIG);
     }
 
     @Test
-    public void fattVedtak_anmodningOmUnntak_skalFeile() throws FunksjonellException, TekniskException, InterruptedException {
-        behandlingsdata.setUnderBehandling(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+    public void fattVedtak_anmodningOmUnntak_skalFeile() throws FunksjonellException, TekniskException {
+        melosysGrensesnitt.setUnderBehandling(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+
         vedtakService.fattVedtak(Testbehandlinger.UTFYLT_BEHANDLING_ART12, Behandlingsresultattyper.ANMODNING_OM_UNNTAK, "");
-        Resultatpoller().følg(prosessinstansRepository, Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+        prosessinstansTestService.ventPå(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+        prosessinstansTestService.sjekkProsessteg(Testbehandlinger.UTFYLT_BEHANDLING_ART12, FEILET_MASKINELT);
 
         verify(dokumentSjekker.getDoksysService(), never()).produserIkkeredigerbartDokument(any());
-        sjekkProsessteg(prosessinstansRepository, Testbehandlinger.UTFYLT_BEHANDLING_ART12, FEILET_MASKINELT);
     }
 
     @Test
-    public void fattVedtak_henleggelse_skalFeile() throws FunksjonellException, TekniskException, InterruptedException {
-        behandlingsdata.setUnderBehandling(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+    public void fattVedtak_henleggelse_skalFeile() throws FunksjonellException, TekniskException {
+        melosysGrensesnitt.setUnderBehandling(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
         vedtakService.fattVedtak(Testbehandlinger.UTFYLT_BEHANDLING_ART12, Behandlingsresultattyper.HENLEGGELSE, "");
 
-        Resultatpoller().følg(prosessinstansRepository, Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+        prosessinstansTestService.ventPå(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+        prosessinstansTestService.sjekkProsessteg(Testbehandlinger.UTFYLT_BEHANDLING_ART12, FEILET_MASKINELT);
 
         verify(dokumentSjekker.getDoksysService(), never()).produserIkkeredigerbartDokument(any());
-        sjekkProsessteg(prosessinstansRepository, Testbehandlinger.UTFYLT_BEHANDLING_ART12, FEILET_MASKINELT);
     }
 }

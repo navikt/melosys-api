@@ -30,7 +30,7 @@ public class DokumentSjekker {
 
     ArgumentCaptor<Dokumentbestilling> dokumentbestillingCaptor = ArgumentCaptor.forClass(Dokumentbestilling.class);
 
-    public void erBrevBestilt(ForventetDokumentBestilling... forventedeDokumentBestillinger) throws FunksjonellException, TekniskException {
+    public void sjekkBrevBestilt(ForventetDokumentBestilling... forventedeDokumentBestillinger) throws FunksjonellException, TekniskException {
         verify(doksysService, atLeast(0)).produserIkkeredigerbartDokument(dokumentbestillingCaptor.capture());
         dokumentbestillingCaptor.getAllValues().stream()
             .map(Dokumentbestilling::getMetadata)
@@ -41,7 +41,7 @@ public class DokumentSjekker {
     }
 
     public void ingenBrevSendt() throws FunksjonellException, TekniskException {
-        erBrevBestilt();
+        sjekkBrevBestilt();
     }
 
     public DoksysSystemService getDoksysService() {

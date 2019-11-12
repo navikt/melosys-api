@@ -91,6 +91,7 @@
         <spring-security-pac4j.version>4.1.0</spring-security-pac4j.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
+        <failsafe.version>2.22.0</failsafe.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -508,6 +509,12 @@
                 <artifactId>pac4j-core</artifactId>
                 <version>${pac4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -559,6 +566,13 @@
                     <configuration>
                         <outputFile>utdatert_avhengigheter.txt</outputFile>
                         <generateBackupPoms>false</generateBackupPoms>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${failsafe.version}</version>
+                    <configuration>
+                        <skipITs>true</skipITs>
                     </configuration>
                 </plugin>
             </plugins>

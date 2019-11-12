@@ -6,8 +6,8 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 
-public final class AvklartefaktaUtils {
-    private AvklartefaktaUtils() {}
+public final class AvklartefaktaTestUtils {
+    private AvklartefaktaTestUtils() {}
 
     public static AvklartefaktaDto lagAvklartVirksomhet(String orgnr) {
         Avklartefakta avklartefakta = new Avklartefakta();
@@ -31,6 +31,15 @@ public final class AvklartefaktaUtils {
         avklartefakta.setFakta(yrkesgruppe.getKode());
         avklartefakta.setType(Avklartefaktatyper.YRKESGRUPPE);
         avklartefakta.setReferanse(Avklartefaktatyper.YRKESGRUPPE.getKode());
+        avklartefakta.setSubjekt(null);
+        return new AvklartefaktaDto(avklartefakta);
+    }
+
+    public static AvklartefaktaDto lagAvklartBostedsland(Landkoder bostedsland) {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta(bostedsland.getKode());
+        avklartefakta.setType(Avklartefaktatyper.BOSTEDSLAND);
+        avklartefakta.setReferanse(Avklartefaktatyper.BOSTEDSLAND.getKode());
         avklartefakta.setSubjekt(null);
         return new AvklartefaktaDto(avklartefakta);
     }

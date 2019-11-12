@@ -9,9 +9,10 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakSystemService;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjonstest.felles.TestSubjectHandler;
-import no.nav.melosys.integrasjonstest.felles.opplysninger.Behandlingsdata;
+import no.nav.melosys.integrasjonstest.felles.opplysninger.MelosysTjenesteGrensesnitt;
 import no.nav.melosys.integrasjonstest.felles.opplysninger.Testbehandlinger;
 import no.nav.melosys.integrasjonstest.felles.verifisering.DokumentSjekker;
+import no.nav.melosys.integrasjonstest.felles.verifisering.ProsessinstansTestService;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -30,8 +31,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
-import static no.nav.melosys.integrasjonstest.felles.utils.SaksflytTestUtils.sjekkProsessteg;
-import static no.nav.melosys.integrasjonstest.felles.verifisering.ResultatPoller.Resultatpoller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -64,10 +63,13 @@ public class AnmodningUnntakIT {
     private ProsessinstansRepository prosessinstansRepository;
 
     @Autowired
-    private Behandlingsdata behandlingsdata;
+    private MelosysTjenesteGrensesnitt behandlingsUtfyller;
 
     @Autowired
     private DokumentSjekker dokumentSjekker;
+
+    @Autowired
+    private ProsessinstansTestService prosessinstansTestService;
 
     @BeforeEach
     public void saksflytAnmodningTilVedtakTest() throws MelosysException {
@@ -80,12 +82,12 @@ public class AnmodningUnntakIT {
 
     @Test
     public void anmodningOmUnntak_anmodningOmUnntakUtenPeriode_skalFeile() throws FunksjonellException, TekniskException, InterruptedException {
-        behandlingsdata.setUnderBehandling(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+        behandlingsUtfyller.setUnderBehandling(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
 
         anmodningUnntakService.anmodningOmUnntak(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
-        Resultatpoller().følg(prosessinstansRepository, Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+        prosessinstansTestService.ventPå(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+        prosessinstansTestService.sjekkProsessteg(Testbehandlinger.UTFYLT_BEHANDLING_ART12, FEILET_MASKINELT);
 
         dokumentSjekker.ingenBrevSendt();
-        sjekkProsessteg(prosessinstansRepository, Testbehandlinger.UTFYLT_BEHANDLING_ART12, FEILET_MASKINELT);
     }
 }

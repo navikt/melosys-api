@@ -13,9 +13,10 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakSystemService;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjonstest.felles.TestSubjectHandler;
-import no.nav.melosys.integrasjonstest.felles.opplysninger.Behandlingsdata;
-import no.nav.melosys.integrasjonstest.felles.opplysninger.Faktagrunnlag;
+import no.nav.melosys.integrasjonstest.felles.opplysninger.MelosysTjenesteGrensesnitt;
+import no.nav.melosys.integrasjonstest.felles.opplysninger.TestdataUtfyller;
 import no.nav.melosys.integrasjonstest.felles.verifisering.DokumentSjekker;
+import no.nav.melosys.integrasjonstest.felles.verifisering.ProsessinstansTestService;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -37,9 +38,7 @@ import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemm
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
 import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testbehandlinger.TOM_BEHANDLING_REPRESENTANT;
 import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testsubjekter.*;
-import static no.nav.melosys.integrasjonstest.felles.utils.SaksflytTestUtils.sjekkProsessteg;
 import static no.nav.melosys.integrasjonstest.felles.verifisering.ForventetDokumentBestilling.forventDokument;
-import static no.nav.melosys.integrasjonstest.felles.verifisering.ResultatPoller.Resultatpoller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -71,10 +70,13 @@ public class VedtakServiceRepresentantIT {
     private VedtakService vedtakService;
 
     @Autowired
-    private Behandlingsdata behandlingsdata;
+    private MelosysTjenesteGrensesnitt melosysGrensesnitt;
 
     @Autowired
     private DokumentSjekker dokumentSjekker;
+
+    @Autowired
+    private ProsessinstansTestService prosessinstansTestService;
 
     @BeforeEach
     public void setup() throws MelosysException {
@@ -87,79 +89,76 @@ public class VedtakServiceRepresentantIT {
 
     @Test
     public void fattVedtak_innvilgelseArt12_representantArbeidsgiver() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.vilkaarForArt12Innvilgelse();
-        faktagrunnlag.utfyllInnvilgetLovvalgsperiode(FO_883_2004_ART12_1);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
+        TestdataUtfyller faktagrunnlag = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllVilkaarForArt12Innvilgelse()
+        .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)
+        .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
 
         vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
+        prosessinstansTestService.ventPå(faktagrunnlag.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(faktagrunnlag.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR));
-
     }
 
     @Test
     public void fattVedtak_innvilgelseArt12_representantBruker() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.vilkaarForArt12Innvilgelse();
-        faktagrunnlag.utfyllInnvilgetLovvalgsperiode(FO_883_2004_ART12_1);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
+        TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllVilkaarForArt12Innvilgelse()
+        .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)
+        .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR),
             forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
-
     }
 
     @Test
     public void fattVedtak_innvilgelseArt12_representantBegge() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.vilkaarForArt12Innvilgelse();
-        faktagrunnlag.utfyllInnvilgetLovvalgsperiode(FO_883_2004_ART12_1);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
+        TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+            .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+            .utfyllVilkaarForArt12Innvilgelse()
+            .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)
+            .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
-        forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
-
+            forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
     }
 
 
     @Test
     public void fattVedtak_innvilgelseArt13_representantArbeidsgiver() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.utfyllInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
+        TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
+        .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)
+        .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             // HELFO skal ikke ha kopi ved Art13 (MELOSYS-3039)
@@ -168,16 +167,16 @@ public class VedtakServiceRepresentantIT {
 
     @Test
     public void fattVedtak_innvilgelseArt13_representantBruker() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.utfyllInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
+        TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
+        .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)
+        .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
@@ -186,17 +185,17 @@ public class VedtakServiceRepresentantIT {
     }
 
     @Test
-    public void fattVedtak_innvilgelseArt13_representantBegge() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.utfyllInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
+    public void fattVedtak_innvilgelseArt13_representantBegge() throws FunksjonellException, TekniskException {
+        TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
+        .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)
+        .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
@@ -205,18 +204,18 @@ public class VedtakServiceRepresentantIT {
     }
 
     @Test
-    public void fattVedtak_avslagArt12_representantArbeidsgiver() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.vilkaarForArt12Avslag();
-        faktagrunnlag.utfyllAvslåttLovvalgsperiode(FO_883_2004_ART12_1);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
+    public void fattVedtak_avslagArt12_representantArbeidsgiver() throws FunksjonellException, TekniskException {
+        TestdataUtfyller faktagrunnlag = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllVilkaarForArt12Avslag()
+        .opprettAvslåttLovvalgsperiode(FO_883_2004_ART12_1)
+        .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
 
         vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
+        prosessinstansTestService.ventPå(faktagrunnlag.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(faktagrunnlag.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.MYNDIGHET, HELFO_ORGNR),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
@@ -225,75 +224,74 @@ public class VedtakServiceRepresentantIT {
     }
 
     @Test
-    public void fattVedtak_avslagArt12_representantBruker() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.vilkaarForArt12Avslag();
-        faktagrunnlag.utfyllAvslåttLovvalgsperiode(FO_883_2004_ART12_1);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
+    public void fattVedtak_avslagArt12_representantBruker() throws FunksjonellException, TekniskException {
+        TestdataUtfyller testdataUtfyller = new TestdataUtfyller(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllVilkaarForArt12Avslag()
+        .opprettAvslåttLovvalgsperiode(FO_883_2004_ART12_1)
+        .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.MYNDIGHET, HELFO_ORGNR),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(AVSLAG_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR));
-
     }
 
     @Test
-    public void fattVedtak_avslagArt12_representantBegge() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.avklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR);
-        faktagrunnlag.vilkaarForArt12Avslag();
-        faktagrunnlag.utfyllAvslåttLovvalgsperiode(FO_883_2004_ART12_1);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
+    public void fattVedtak_avslagArt12_representantBegge() throws FunksjonellException, TekniskException {
+        TestdataUtfyller faktagrunnlag = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+        .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllVilkaarForArt12Avslag()
+        .opprettAvslåttLovvalgsperiode(FO_883_2004_ART12_1)
+        .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
 
         vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
-        Resultatpoller().følg(prosessinstansRepository, faktagrunnlag.getBehandlingsid());
-        sjekkProsessteg(prosessinstansRepository, faktagrunnlag.getBehandlingsid(), FERDIG);
+        prosessinstansTestService.ventPå(faktagrunnlag.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(faktagrunnlag.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.MYNDIGHET, HELFO_ORGNR),
             forventDokument(AVSLAG_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(AVSLAG_ARBEIDSGIVER, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR));
-
     }
 
 
     @Test
-    public void fattVedtak_avslagManglendeOpplysninger_representantArbeidsgiver() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
+    public void fattVedtak_avslagManglendeOpplysninger_representantArbeidsgiver() throws FunksjonellException, TekniskException {
+        TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+            .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+            .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(TOM_BEHANDLING_REPRESENTANT, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
-        Resultatpoller().følg(prosessinstansRepository, TOM_BEHANDLING_REPRESENTANT);
-        sjekkProsessteg(prosessinstansRepository, TOM_BEHANDLING_REPRESENTANT, FERDIG);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
+        prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.BRUKER),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, HELFO_ORGNR),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR));
-
     }
 
     @Test
-    public void fattVedtak_avslagManglendeOpplysninger_representantBruker() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
+    public void fattVedtak_avslagManglendeOpplysninger_representantBruker() throws FunksjonellException, TekniskException {
+        TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+            .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+            .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(TOM_BEHANDLING_REPRESENTANT, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
-        Resultatpoller().følg(prosessinstansRepository, TOM_BEHANDLING_REPRESENTANT);
-        sjekkProsessteg(prosessinstansRepository, TOM_BEHANDLING_REPRESENTANT, FERDIG);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
+        prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.BRUKER),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, HELFO_ORGNR),
@@ -302,15 +300,16 @@ public class VedtakServiceRepresentantIT {
     }
 
     @Test
-    public void fattVedtak_avslagManglendeOpplysninger_representantBegge() throws FunksjonellException, TekniskException, InterruptedException {
-        Faktagrunnlag faktagrunnlag = new Faktagrunnlag(TOM_BEHANDLING_REPRESENTANT, behandlingsdata);
-        faktagrunnlag.opprettAktørForBrukerOgRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
+    public void fattVedtak_avslagManglendeOpplysninger_representantBegge() throws FunksjonellException, TekniskException {
+        TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
+            .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
+            .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(TOM_BEHANDLING_REPRESENTANT, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
-        Resultatpoller().følg(prosessinstansRepository, TOM_BEHANDLING_REPRESENTANT);
-        sjekkProsessteg(prosessinstansRepository, TOM_BEHANDLING_REPRESENTANT, FERDIG);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
+        prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
-        dokumentSjekker.erBrevBestilt(
+        dokumentSjekker.sjekkBrevBestilt(
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.BRUKER),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, HELFO_ORGNR),

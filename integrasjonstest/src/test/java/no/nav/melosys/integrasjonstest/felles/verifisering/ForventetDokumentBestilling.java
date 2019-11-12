@@ -1,14 +1,20 @@
 package no.nav.melosys.integrasjonstest.felles.verifisering;
 
+import java.util.Arrays;
+
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import org.junit.platform.commons.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static no.nav.melosys.service.dokument.brev.DokumenttypeIdMapper.hentID;
 
 public class ForventetDokumentBestilling {
+    private static final Logger logger = LoggerFactory.getLogger(ForventetDokumentBestilling.class);
+
     public Produserbaredokumenter produserbaredokumenter;
     public Aktoersroller aktoersroller;
     public String mottakerID;
@@ -34,7 +40,7 @@ public class ForventetDokumentBestilling {
                     }
                 }
             }
-        } catch (TekniskException e) { e.printStackTrace(); }
+        } catch (TekniskException e) { logger.info(Arrays.toString(e.getStackTrace())); }
         return false;
     }
 
