@@ -96,7 +96,7 @@ public class FagsakTjeneste extends RestTjeneste {
         return Response.ok().build();
     }
 
-    @PUT
+    @POST
     @Path("{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
     public Response videresend(@PathParam("saksnr") String saksnummer, @ApiParam("henleggelseDto") HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
