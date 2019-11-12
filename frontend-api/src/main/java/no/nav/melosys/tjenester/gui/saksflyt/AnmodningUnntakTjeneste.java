@@ -33,7 +33,7 @@ public class AnmodningUnntakTjeneste extends RestTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @PUT
+    @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("{behandlingID}/bestill")
