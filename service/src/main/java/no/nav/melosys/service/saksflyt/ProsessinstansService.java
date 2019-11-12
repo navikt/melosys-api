@@ -172,7 +172,9 @@ public class ProsessinstansService {
         prosessinstans.setSteg(ProsessSteg.IV_VALIDERING);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
+        if (StringUtils.isNotEmpty(mottakerInstitusjon)) {
+            prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
+        }
         prosessinstans.setBehandling(behandling);
 
         lagre(prosessinstans);

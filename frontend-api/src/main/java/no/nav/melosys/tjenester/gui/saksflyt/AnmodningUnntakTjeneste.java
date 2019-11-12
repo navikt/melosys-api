@@ -31,8 +31,6 @@ public class AnmodningUnntakTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
     @Path("{behandlingID}/bestill")
     @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
     public Response anmodningOmUnntak(@PathParam("behandlingID") long behandlingID, AnmodningUnntakDto anmodningUnntakDto) throws MelosysException {
