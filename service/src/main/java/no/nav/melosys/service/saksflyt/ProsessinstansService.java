@@ -132,10 +132,11 @@ public class ProsessinstansService {
         logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler, prosessinstans.getId(), prosessinstans.getType());
     }
 
-    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling) {
+    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, String mottakerInstitusjon) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.AOU_VALIDERING);
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
         prosessinstans.setBehandling(behandling);
 
         lagre(prosessinstans);

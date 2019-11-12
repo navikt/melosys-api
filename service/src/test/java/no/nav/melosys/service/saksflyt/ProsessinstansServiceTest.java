@@ -93,14 +93,16 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void opprettProsessinstansAnmodningOmUnntak() {
+        final String mottakerInstitusjon = "SE:123";
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansAnmodningOmUnntak(behandling);
+        service.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerInstitusjon);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.AOU_VALIDERING);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKER)).isEqualTo(mottakerInstitusjon);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
     }
 

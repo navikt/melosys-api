@@ -57,7 +57,7 @@ public class AnmodningUnntakService {
         behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling);
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerInstitusjon);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 

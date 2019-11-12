@@ -79,7 +79,7 @@ public class AnmodningUnntakServiceTest {
         anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon);
 
         verify(behandlingService).oppdaterStatus(eq(behandlingID), eq(Behandlingsstatus.ANMODNING_UNNTAK_SENDT));
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class));
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), eq(mottakerInstitusjon));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
 
