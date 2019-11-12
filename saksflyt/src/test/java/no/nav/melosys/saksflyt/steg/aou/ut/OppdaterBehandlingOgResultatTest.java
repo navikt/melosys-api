@@ -1,15 +1,16 @@
 package no.nav.melosys.saksflyt.steg.aou.ut;
 
-import java.util.Optional;
-
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,16 +23,17 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OppdaterBehandlingsresultatTest {
-
+public class OppdaterBehandlingOgResultatTest {
     @Mock
-    BehandlingsresultatRepository behandlingsresultatRepository;
+    BehandlingService behandlingService;
+    @Mock
+    BehandlingsresultatService behandlingsresultatService;
 
-    OppdaterBehandlingsresultat oppdaterBehandlingsresultat;
+    private OppdaterBehandlingOgResultat oppdaterBehandlingOgResultat;
 
     @Before
     public void setUp() {
-        oppdaterBehandlingsresultat = new OppdaterBehandlingsresultat(behandlingsresultatRepository);
+        oppdaterBehandlingOgResultat = new OppdaterBehandlingOgResultat(behandlingService, behandlingsresultatService);
     }
 
     @Test
@@ -46,10 +48,12 @@ public class OppdaterBehandlingsresultatTest {
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        oppdaterBehandlingsresultat.utfør(p);
+        oppdaterBehandlingOgResultat.utfør(p);
 
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         assertThat(behandlingsresultat.getEndretAv()).isEqualTo(testbruker);
         assertThat(p.getSteg()).isEqualTo(AOU_AVKLAR_MYNDIGHET);

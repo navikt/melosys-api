@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BehandlingsresultatService {
-
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatService.class);
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
@@ -43,6 +42,10 @@ public class BehandlingsresultatService {
     public Behandlingsresultat hentBehandlingsresultat(long behandlingsid) throws IkkeFunnetException {
         return behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
+    }
+
+    public void lagre(Behandlingsresultat resultat) {
+        behandlingsresultatRepository.save(resultat);
     }
 
     @Transactional(rollbackFor = Exception.class)
