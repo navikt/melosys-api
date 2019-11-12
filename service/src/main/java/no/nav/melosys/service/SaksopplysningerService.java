@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -55,6 +56,18 @@ public class SaksopplysningerService {
     public Optional<SedDokument> finnSedOpplysninger(long behandlingID) {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.SEDOPPL)
             .map(s -> (SedDokument) s.getDokument());
+    }
+
+    public PersonhistorikkDokument hentPersonhistorikk(long behandlingID) throws IkkeFunnetException {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSHIST)
+            .map(s -> (PersonhistorikkDokument) s.getDokument())
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke personhistorikkDokument"));
+    }
+
+    public PersonDokument hentPersonOpplysninger(long behandlingID) throws IkkeFunnetException {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSOPL)
+            .map(s -> (PersonDokument) s.getDokument())
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke persondokument"));
     }
 
     public SedDokument hentSedOpplysninger(long behandlingID) throws IkkeFunnetException {

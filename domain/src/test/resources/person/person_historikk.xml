@@ -84,14 +84,14 @@
             </periode>
             <personstatus>UTVA</personstatus>
         </personstatusListe>
-        <personstatusListe endringstidspunkt="2004-12-14T00:00:00.000+01:00" endretAv="SKD" endringstype="endret">
+        <personstatusListe endringstidspunkt="2004-12-14T00:00:00.000+01:00" endretAv="z123456, PP01" endringstype="endret">
             <periode>
                 <fom>2004-12-14T00:00:00.000+01:00</fom>
                 <tom>2005-07-14T00:00:00.000+02:00</tom>
             </periode>
             <personstatus>BOSA</personstatus>
         </personstatusListe>
-        <personstatusListe endringstidspunkt="2003-09-18T00:00:00.000+02:00" endretAv="SKD" endringstype="endret">
+        <personstatusListe endringstidspunkt="2003-09-18T00:00:00.000+02:00" endretAv="AJOURHD, SKD" endringstype="endret">
             <periode>
                 <fom>2003-09-18T00:00:00.000+02:00</fom>
                 <tom>2004-12-13T00:00:00.000+01:00</tom>

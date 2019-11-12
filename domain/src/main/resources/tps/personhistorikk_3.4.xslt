@@ -9,8 +9,6 @@
         <xsl:apply-templates/>
     </xsl:template>
 
-    <xsl:variable name="SKATTEDIREKTORATET">SKD</xsl:variable>
-
     <xsl:template match="response">
         <personhistorikkDokument>
             <xsl:apply-templates>
@@ -22,12 +20,9 @@
     <xsl:template match="aktoer|personstatusListe"/>
 
     <xsl:template match="statsborgerskapListe">
-        <!-- Attributtet er på formen "KODE_SYSTEM_KILDE" eller "ENDRET_AV, KODE_SYSTEM_KILDE" -->
-        <xsl:if test="@endretAv = $SKATTEDIREKTORATET or substring-after(@endretAv, ', ') = $SKATTEDIREKTORATET">
-            <xsl:element name="{local-name(.)}">
-                <xsl:apply-templates select="*|@endringstidspunkt"/>
-            </xsl:element>
-        </xsl:if>
+        <xsl:element name="{local-name(.)}">
+            <xsl:apply-templates select="*|@endretAv|@endringstidspunkt"/>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="bostedsadressePeriodeListe|postadressePeriodeListe">
@@ -96,6 +91,12 @@
         <statsborgerskap>
             <kode><xsl:value-of select="."/></kode>
         </statsborgerskap>
+    </xsl:template>
+
+    <xsl:template match="@endretAv">
+        <endretAv>
+            <xsl:value-of select="."/>
+        </endretAv>
     </xsl:template>
 
     <xsl:template match="@endringstidspunkt">
