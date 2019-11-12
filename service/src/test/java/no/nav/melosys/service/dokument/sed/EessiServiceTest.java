@@ -97,7 +97,7 @@ public class EessiServiceTest {
     @Test
     public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
         when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true))).thenReturn(new OpprettSedDto());
-        eessiService.opprettOgSendSed(behandling.getId(), BucType.LA_BUC_03);
+        eessiService.opprettOgSendSed(behandling.getId(), "SE:123", BucType.LA_BUC_03);
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_03), eq(true));
     }
 

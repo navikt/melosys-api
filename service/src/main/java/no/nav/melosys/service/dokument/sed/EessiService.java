@@ -55,11 +55,11 @@ public class EessiService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public void opprettOgSendSed(long behandlingID, BucType bucType) throws MelosysException {
-        opprettOgSendSed(behandlingID, bucType, null);
+    public void opprettOgSendSed(long behandlingID, String mottakerInstitusjon, BucType bucType) throws MelosysException {
+        opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, null);
     }
 
-    public void opprettOgSendSed(long behandlingID, BucType bucType, byte[] vedlegg) throws MelosysException {
+    public void opprettOgSendSed(long behandlingID, String mottakerInstitusjon, BucType bucType, byte[] vedlegg) throws MelosysException {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -68,6 +68,7 @@ public class EessiService {
 
             SedDataGrunnlag datagrunnlag = dataGrunnlagFactory.av(behandling);
             SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
+            sedData.setMottakerId(mottakerInstitusjon);
             sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
             log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
