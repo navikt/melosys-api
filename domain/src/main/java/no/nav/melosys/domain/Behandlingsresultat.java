@@ -227,7 +227,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         }
     }
 
-    public boolean erArt16EtterUtlandOgSvarRegistrert() {
+    public boolean erArt16EtterUtlandMedRegistrertSvar() {
         if (anmodningsperioder.isEmpty()) {
             return false;
         }

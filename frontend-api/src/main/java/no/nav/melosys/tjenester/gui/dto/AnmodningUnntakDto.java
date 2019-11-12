@@ -1,13 +1,13 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 public class AnmodningUnntakDto {
-    private String mottakerInstitusjon;
+    private String mottakerinstitusjon;
 
-    public String getMottakerInstitusjon() {
-        return mottakerInstitusjon;
+    public String getMottakerinstitusjon() {
+        return mottakerinstitusjon;
     }
 
-    public void setMottakerInstitusjon(String mottakerInstitusjon) {
-        this.mottakerInstitusjon = mottakerInstitusjon;
+    public void setMottakerinstitusjon(String mottakerinstitusjon) {
+        this.mottakerinstitusjon = mottakerinstitusjon;
     }
 }

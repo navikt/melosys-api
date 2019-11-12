@@ -94,7 +94,7 @@ public class VedtakServiceTest {
         vedtakService.fattVedtak(behandlingID, resultatType, mottakerInstitusjon);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
-        verify(behandlingService).oppdaterStatus(eq(behandlingID), eq(Behandlingsstatus.IVERKSETTER_VEDTAK));
+        verify(behandlingService).lagre(eq(behandling));
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq(mottakerInstitusjon));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
@@ -113,7 +113,7 @@ public class VedtakServiceTest {
         vedtakService.fattVedtak(behandlingID, resultatType, null);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
-        verify(behandlingService).oppdaterStatus(eq(behandlingID), eq(Behandlingsstatus.IVERKSETTER_VEDTAK));
+        verify(behandlingService).lagre(eq(behandling));
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }

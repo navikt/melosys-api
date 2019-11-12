@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
 
-    private static final String ANMODNING_UNNTAK_POST_SCHEMA = "saksflyt-anmodningsperioder-post-schema.json";
+    private static final String ANMODNING_UNNTAK_POST_SCHEMA = "saksflyt-anmodningsperioder-bestill-post-schema.json";
     @Mock
     private AnmodningUnntakService anmodningUnntakService;
     @Mock
@@ -35,7 +35,7 @@ public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
         final String mottakerInstitusjon = "SE:321";
 
         AnmodningUnntakDto dto = new AnmodningUnntakDto();
-        dto.setMottakerInstitusjon(mottakerInstitusjon);
+        dto.setMottakerinstitusjon(mottakerInstitusjon);
         anmodningUnntakTjeneste.anmodningOmUnntak(behandlingID, dto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);

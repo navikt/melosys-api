@@ -37,7 +37,9 @@ public class VedtakService {
     private final LandvelgerService landvelgerService;
 
     @Autowired
-    public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService, ProsessinstansService prosessinstansService, EessiService eessiService, LandvelgerService landvelgerService) {
+    public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+                         OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
+                         EessiService eessiService, LandvelgerService landvelgerService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -52,14 +54,15 @@ public class VedtakService {
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         validerMottakerInstitusjon(behandling, mottakerInstitusjon);
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.IVERKSETTER_VEDTAK);
+        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
+        behandlingService.lagre(behandling);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, mottakerInstitusjon);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     private void validerMottakerInstitusjon(Behandling behandling, String mottakerInstitusjon) throws MelosysException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (behandlingsresultat.erArt16EtterUtlandOgSvarRegistrert()) {
+        if (behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar()) {
             return; //Skal ikke sendes SED
         }
 
