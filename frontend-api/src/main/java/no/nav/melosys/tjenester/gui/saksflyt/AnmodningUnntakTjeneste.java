@@ -12,6 +12,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.RestTjeneste;
+import no.nav.melosys.tjenester.gui.dto.AnmodningUnntakDto;
+import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -36,9 +38,9 @@ public class AnmodningUnntakTjeneste extends RestTjeneste {
     @Produces(MediaType.TEXT_PLAIN)
     @Path("{behandlingID}/bestill")
     @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
-    public Response anmodningOmUnntak(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+    public Response anmodningOmUnntak(@PathParam("behandlingID") long behandlingID, AnmodningUnntakDto anmodningUnntakDto) throws MelosysException {
         tilgangService.sjekkTilgang(behandlingID);
-        anmodningUnntakService.anmodningOmUnntak(behandlingID);
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, anmodningUnntakDto.getMottakerInstitusjon());
         return Response.ok().build();
     }
 

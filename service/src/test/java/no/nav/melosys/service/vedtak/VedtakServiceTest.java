@@ -88,8 +88,8 @@ public class VedtakServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
-        when(eessiService.hentEessiMottakerinstitusjoner(eq("LA_BUC_04"), eq("SE")))
-            .thenReturn(Collections.singletonList(new Institusjon(mottakerInstitusjon, null, null)));
+        when(eessiService.erGyldigInstitusjonForLand(eq("LA_BUC_04"), eq("SE"), eq(mottakerInstitusjon)))
+            .thenReturn(Boolean.TRUE);
 
         vedtakService.fattVedtak(behandlingID, resultatType, mottakerInstitusjon);
 
@@ -146,8 +146,6 @@ public class VedtakServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
-        when(eessiService.hentEessiMottakerinstitusjoner(eq("LA_BUC_04"), eq("SE")))
-            .thenReturn(Collections.singletonList(new Institusjon("SE:99999", null, null)));
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage(String.format("MottakerID %s er ugyldig for land SE", mottakerInstitusjon));

@@ -107,6 +107,10 @@ public class EessiService {
         }
     }
 
+    public boolean erGyldigInstitusjonForLand(String bucType, String landkode, String mottakerInstitusjon) throws MelosysException {
+        return hentEessiMottakerinstitusjoner(bucType, landkode).stream().anyMatch(l -> l.getId().equals(mottakerInstitusjon));
+    }
+
     public boolean landErEessiReady(String bucType, String landkode) throws MelosysException {
         return !hentEessiMottakerinstitusjoner(bucType, landkode).isEmpty();
     }

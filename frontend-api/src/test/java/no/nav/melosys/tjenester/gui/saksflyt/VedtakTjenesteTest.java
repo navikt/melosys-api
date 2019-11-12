@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.VedtakService;
@@ -56,18 +57,19 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void fattVedtak_henleggelse_fungerer() throws FunksjonellException, TekniskException, IOException {
+    public void fattVedtak_henleggelse_fungerer() throws MelosysException, IOException {
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
+        fattVedtakDto.setMottakerinstitusjon("SE:4343");
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode());
+        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getMottakerinstitusjon());
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test(expected = BadRequestException.class)
-    public void fattVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
+    public void fattVedtak_dtoManglerBehandlingresultat_girException() throws MelosysException, IOException {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);

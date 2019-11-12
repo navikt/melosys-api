@@ -70,14 +70,10 @@ public class VedtakService {
         if (landErEessiReady) {
             if (StringUtils.isEmpty(mottakerInstitusjon)) {
                 throw new FunksjonellException(String.format("Kan ikke fatte vedtak: %s er EESSI-ready, men mottaker er ikke satt", landkode));
-            } else if (!erGyldigInstitusjonForLand(bucType, landkode, mottakerInstitusjon)) {
+            } else if (!eessiService.erGyldigInstitusjonForLand(bucType, landkode, mottakerInstitusjon)) {
                 throw new FunksjonellException(String.format("MottakerID %s er ugyldig for land %s", mottakerInstitusjon, landkode));
             }
         }
-    }
-
-    private boolean erGyldigInstitusjonForLand(String bucType, String landkode, String mottakerInstitusjon) throws MelosysException {
-        return eessiService.hentEessiMottakerinstitusjoner(bucType, landkode).stream().anyMatch(l -> l.getId().equals(mottakerInstitusjon));
     }
 
     private String avklarBucType(Behandlingsresultat behandlingsresultat) {
