@@ -106,6 +106,10 @@ public class EessiService {
         }
     }
 
+    public boolean landErEessiReady(String bucType, String landkode) throws MelosysException {
+        return !hentEessiMottakerinstitusjoner(bucType, landkode).isEmpty();
+    }
+
     public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException {
         return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, statuser);
     }

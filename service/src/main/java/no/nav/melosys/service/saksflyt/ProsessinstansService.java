@@ -166,11 +166,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType) {
+    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String mottakerInstitusjon) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setSteg(ProsessSteg.IV_VALIDERING);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
         prosessinstans.setBehandling(behandling);
 
         lagre(prosessinstans);
