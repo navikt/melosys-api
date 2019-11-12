@@ -136,7 +136,9 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.AOU_VALIDERING);
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
+        if (StringUtils.isNotEmpty(mottakerInstitusjon)) {
+            prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
+        }
         prosessinstans.setBehandling(behandling);
 
         lagre(prosessinstans);
