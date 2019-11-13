@@ -49,6 +49,10 @@ public class Land extends AbstraktKodeverkHjelper {
         this.kode = landkode;
     }
 
+    public static Land av(String landKodeIso3) {
+        return new Land(landKodeIso3);
+    }
+
     @Override
     public FellesKodeverk hentKodeverkNavn() {
         return FellesKodeverk.LANDKODER;

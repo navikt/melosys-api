@@ -42,8 +42,6 @@ public class AnmodningUnntakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void anmodningOmUnntak(long behandlingID) throws FunksjonellException, TekniskException {
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
@@ -71,7 +69,7 @@ public class AnmodningUnntakService {
     private void validerSvar(Behandling behandling) throws FunksjonellException {
         Optional<AnmodningsperiodeSvar> anmodningsperiodeSvar = anmodningsperiodeService
             .hentAnmodningsperiodeSvarForBehandling(behandling.getId()).stream().findFirst();
-        if (!anmodningsperiodeSvar.isPresent()) {
+        if (anmodningsperiodeSvar.isEmpty()) {
             throw new FunksjonellException("Finner ingen AnmodningsperiodeSvar for behandling " + behandling.getId());
         }
 

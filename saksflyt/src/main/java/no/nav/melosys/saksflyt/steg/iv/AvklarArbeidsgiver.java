@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -65,7 +66,8 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
 
     // Ved forkortet periode har allerede arbeidsgiver blitt avklart
     private static boolean arbeidsgiverAvklares(ProsessType prosessType, Behandlingsresultat resultat) {
-        return prosessType != IVERKSETT_VEDTAK_FORKORT_PERIODE &&
-            !resultat.hentValidertLovvalgsperiode().erArtikkel13();
+        return resultat.getType() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL ||
+            (prosessType != IVERKSETT_VEDTAK_FORKORT_PERIODE &&
+            !resultat.hentValidertLovvalgsperiode().erArtikkel13());
     }
 }

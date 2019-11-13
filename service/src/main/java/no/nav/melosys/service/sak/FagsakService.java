@@ -265,7 +265,7 @@ public class FagsakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void henleggOgVideresend(String saksnummer) throws FunksjonellException, TekniskException {
+    public void henleggOgVideresend(String saksnummer, String fritekst) throws FunksjonellException, TekniskException {
         Fagsak fagsak = hentFagsak(saksnummer);
 
         long behandlingId = fagsak.getAktivBehandling().getId();
@@ -275,7 +275,7 @@ public class FagsakService {
         fagsak.setStatus(Saksstatuser.VIDERESENDT);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
-        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling);
+        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

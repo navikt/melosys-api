@@ -40,6 +40,7 @@ public class Tps3PersonhistorikkKonverteringTest implements KonverteringTest {
         assertThat(dokument.midlertidigAdressePeriodeListe).isNotNull();
 
         for (StatsborgerskapPeriode statsborgerskapPeriode : dokument.statsborgerskapListe) {
+            assertThat(statsborgerskapPeriode.endretAv).isNotNull();
             assertThat(statsborgerskapPeriode.endringstidspunkt).isNotNull();
             assertThat(statsborgerskapPeriode.statsborgerskap).isNotNull();
         }

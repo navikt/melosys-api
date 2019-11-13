@@ -8,6 +8,7 @@ public class Adresse {
     private String land;
     private String gateadresse;
     private String region;
+    private Adressetype adressetype;
 
     public String getPoststed() {
         return poststed;
@@ -47,5 +48,13 @@ public class Adresse {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    public Adressetype getAdressetype() {
+        return adressetype;
+    }
+
+    public void setAdressetype(Adressetype adressetype) {
+        this.adressetype = adressetype;
     }
 }

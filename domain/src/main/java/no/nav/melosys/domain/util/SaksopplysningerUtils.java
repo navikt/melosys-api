@@ -10,7 +10,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
@@ -38,12 +37,6 @@ public final class SaksopplysningerUtils {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
-    }
-
-    public static PersonhistorikkDokument hentPersonhistorikkDokument(Behandling behandling) throws TekniskException {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.PERSHIST);
-        return (PersonhistorikkDokument) saksopplysning
-            .orElseThrow(() -> new TekniskException("Finner ikke personhistorikkDokument"));
     }
 
     public static SoeknadDokument hentSøknadDokument(Behandling behandling) throws TekniskException {

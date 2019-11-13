@@ -96,14 +96,14 @@ public class FagsakTjeneste extends RestTjeneste {
         return Response.ok().build();
     }
 
-    @PUT
+    @POST
     @Path("{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
-    public Response videresend(@PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+    public Response videresend(@PathParam("saksnr") String saksnummer, @ApiParam("henleggelseDto") HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
 
-        fagsakService.henleggOgVideresend(saksnummer);
+        fagsakService.henleggOgVideresend(saksnummer, henleggelseDto.getFritekst());
         return Response.ok().build();
     }
 
