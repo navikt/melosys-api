@@ -1,9 +1,9 @@
 package no.nav.melosys.domain.arkiv;
 
-import no.nav.melosys.domain.eessi.SedType;
-
 import java.util.Collections;
 import java.util.List;
+
+import no.nav.melosys.domain.eessi.SedType;
 
 public final class OpprettJournalpostUtils {
 
@@ -20,7 +20,7 @@ public final class OpprettJournalpostUtils {
 
     public static OpprettJournalpost lagJournalpostForSendingAvSedSomBrev(
         Long gsakSaksnummer, String brukerFnr, SedType sedType, byte[] sedPdf,
-        String institusjonID, String institusjonNavn, List<FysiskDokument> vedlegg) {
+        String institusjonID, String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg) {
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokument(sedType, sedPdf));
@@ -33,6 +33,7 @@ public final class OpprettJournalpostUtils {
 
         opprettJournalpost.setKorrespondansepartId(institusjonID);
         opprettJournalpost.setKorrespondansepartNavn(institusjonNavn);
+        opprettJournalpost.setKorrespondansepartLand(institusjonLand);
         opprettJournalpost.setKorrespondansepartIdType(UTENLANDSK_ORGANISASJON);
         opprettJournalpost.setBrukerId(brukerFnr);
 

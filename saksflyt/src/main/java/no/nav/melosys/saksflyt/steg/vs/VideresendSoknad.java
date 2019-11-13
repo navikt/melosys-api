@@ -1,5 +1,8 @@
 package no.nav.melosys.saksflyt.steg.vs;
 
+import java.util.Collections;
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -15,13 +18,12 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.apache.commons.lang3.StringUtils;
@@ -30,9 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-import java.util.List;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
@@ -50,7 +49,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
     private final TpsFasade tpsFasade;
-    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
 
     @Autowired
@@ -58,13 +57,13 @@ public class VideresendSoknad extends AbstraktSendUtland {
                                BehandlingsresultatService behandlingsresultatService,
                                LandvelgerService landvelgerService,
                                TpsFasade tpsFasade,
-                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
+                               UtenlandskMyndighetService utenlandskMyndighetService,
                                @Qualifier("system") JoarkFasade joarkFasade) {
         super(eessiService, behandlingsresultatService, landvelgerService);
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
         this.tpsFasade = tpsFasade;
-        this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
     }
 
@@ -110,13 +109,13 @@ public class VideresendSoknad extends AbstraktSendUtland {
         String fnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
         Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId()).stream().findFirst()
             .orElseThrow(() -> new FunksjonellException("Fant ikke trygdemyndighetsland for behandling " + behandling.getId()));
-        String institusjonID = fagsak.hentMyndigheter().stream().findFirst()
-            .orElseThrow(() -> new TekniskException("Finner ingen myndighet for fagsak " + fagsak.getSaksnummer())).getInstitusjonId();
-        String institusjonNavn = utenlandskMyndighetRepository.findByLandkode(landkode).map(u -> u.navn).orElse("");
+
+        String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(landkode);
+        String institusjonNavn = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode).navn;
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpostUtils.lagJournalpostForSendingAvSedSomBrev(
             fagsak.getGsakSaksnummer(), fnr, SedType.A008, eessiService.genererSedForhåndsvisning(behandling.getId(), SedType.A008),
-            institusjonID, institusjonNavn, lagSøknadVedlegg(behandling)
+            institusjonID, institusjonNavn, landkode.getKode(), lagSøknadVedlegg(behandling)
         );
 
         String journalpostID = joarkFasade.opprettJournalpost(opprettJournalpost, true);

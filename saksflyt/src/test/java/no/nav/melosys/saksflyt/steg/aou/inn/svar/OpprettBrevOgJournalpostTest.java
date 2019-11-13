@@ -1,9 +1,10 @@
 package no.nav.melosys.saksflyt.steg.aou.inn.svar;
 
-import java.util.Optional;
-
 import com.google.common.collect.Sets;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -14,7 +15,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +39,7 @@ public class OpprettBrevOgJournalpostTest {
     @Mock
     private TpsFasade tpsFasade;
     @Mock
-    private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private OpprettBrevOgJournalpost opprettBrevOgJournalpost;
 
@@ -47,11 +48,10 @@ public class OpprettBrevOgJournalpostTest {
         when(joarkFasade.opprettJournalpost(any(OpprettJournalpost.class), anyBoolean())).thenReturn("1234");
         when(eessiService.hentSedTypeForAnmodningUnntakSvar(anyLong())).thenReturn(SedType.A002);
         when(eessiService.genererSedForhåndsvisning(anyLong(), any(SedType.class))).thenReturn("pdf".getBytes());
-        when(utenlandskMyndighetRepository.findByLandkode(any(Landkoder.class)))
-            .thenReturn(Optional.of(lagUtenlandskMyndighet()));
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(any(Landkoder.class))).thenReturn(lagUtenlandskMyndighet());
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("123");
 
-        opprettBrevOgJournalpost = new OpprettBrevOgJournalpost(eessiService, joarkFasade, tpsFasade, utenlandskMyndighetRepository);
+        opprettBrevOgJournalpost = new OpprettBrevOgJournalpost(eessiService, joarkFasade, tpsFasade, utenlandskMyndighetService);
     }
 
     @Test

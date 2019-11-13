@@ -1,9 +1,9 @@
 package no.nav.melosys.saksflyt.steg.vs;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import java.util.Collections;
+import java.util.Set;
+
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.BucType;
@@ -16,8 +16,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
@@ -27,9 +27,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.Collections;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -48,7 +45,7 @@ public class VideresendSoknadTest {
     @Mock
     private TpsFasade tpsFasade;
     @Mock
-    private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private UtenlandskMyndighetService utenlandskMyndighetService;
     @Mock
     private JoarkFasade joarkFasade;
 
@@ -59,7 +56,7 @@ public class VideresendSoknadTest {
 
     @Before
     public void setup() {
-        videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, landvelgerService, tpsFasade, utenlandskMyndighetRepository, joarkFasade);
+        videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, landvelgerService, tpsFasade, utenlandskMyndighetService, joarkFasade);
     }
 
     @Test
@@ -145,6 +142,7 @@ public class VideresendSoknadTest {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singleton(Landkoder.SE));
         when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_03.name())))
             .thenReturn(Collections.singletonList(new Institusjon("2", "frankrike", "FR")));
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(any())).thenReturn(new UtenlandskMyndighet());
 
         videresendSoknad.utfør(prosessinstans);
 

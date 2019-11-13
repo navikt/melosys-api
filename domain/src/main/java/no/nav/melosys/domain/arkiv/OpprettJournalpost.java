@@ -6,6 +6,7 @@ public class OpprettJournalpost extends Journalpost {
 
     private String journalførendeEnhet;
     private String korrespondansepartIdType;
+    private String korrespondansepartLand;
     private FysiskDokument hoveddokument;
     private List<FysiskDokument> vedlegg;
 
@@ -27,6 +28,14 @@ public class OpprettJournalpost extends Journalpost {
 
     public void setKorrespondansepartIdType(String korrespondansepartIdType) {
         this.korrespondansepartIdType = korrespondansepartIdType;
+    }
+
+    public String getKorrespondansepartLand() {
+        return korrespondansepartLand;
+    }
+
+    public void setKorrespondansepartLand(String korrespondansepartLand) {
+        this.korrespondansepartLand = korrespondansepartLand;
     }
 
     @Override

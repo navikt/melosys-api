@@ -49,6 +49,11 @@ public class UtenlandskMyndighetService {
         fagsakService.oppdaterMyndigheter(saksnummer, institusjonsIder);
     }
 
+    public UtenlandskMyndighet hentUtenlandskMyndighet(Landkoder landkode) throws TekniskException {
+        return utenlandskMyndighetRepository.findByLandkode(landkode)
+            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
+    }
+
     private Collection<String> konverterLandkodeTilInstitusjonsId(Collection<Landkoder> landkoder) throws TekniskException {
         List<String> institusjonsider = new ArrayList<>();
         for (Landkoder landkode : landkoder) {
@@ -78,8 +83,7 @@ public class UtenlandskMyndighetService {
     }
 
     public String lagInstitusjonsId(Landkoder landkode) throws TekniskException {
-        UtenlandskMyndighet myndighet = utenlandskMyndighetRepository.findByLandkode(landkode)
-            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
+        UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode);
         return lagInstitusjonsId(myndighet);
     }
 
