@@ -95,7 +95,6 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         for (VilkaarBegrunnelse vilkaarBegrunnelse : art161Begrunnelser) {
             Art16_1_avslag artikkel161AvslagKode = Art16_1_avslag.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel161AvslagKode) {
-                case OVER_12_MD_UTL_ARBEIDSGIVER:
                 case OVER_5_AAR:
                     art161AvslagBegrunnelser.setOver5Aar(JA);
                     break;
