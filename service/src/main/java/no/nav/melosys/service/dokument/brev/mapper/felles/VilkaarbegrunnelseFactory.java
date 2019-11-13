@@ -116,6 +116,9 @@ public final class VilkaarbegrunnelseFactory {
                 case KUN_ADMIN_ANSATTE:
                     brevBegrunnelse.setKunAdminAnsatte(JA);
                     break;
+                case KONTRAKTER_IKKE_NORSK_LOV:
+                    brevBegrunnelse.setKontrakterIkkeNorskLov(JA);
+                    break;
                 default:
                     throw new TekniskException(vesentligVirksomhetBegrunnelse + IKKE_STØTTET);
             }
