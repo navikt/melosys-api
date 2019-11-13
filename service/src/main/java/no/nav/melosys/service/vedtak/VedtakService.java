@@ -48,6 +48,10 @@ public class VedtakService {
         this.landvelgerService = landvelgerService;
     }
 
+    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
+        fattVedtak(behandlingID, behandlingsresultattype, null);
+    }
+
     @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType, String mottakerInstitusjon) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);

@@ -81,7 +81,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
 
     private void fattVedtak(long behandlingID) throws MelosysException {
         behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
-        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, null);
+        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
     private void oppdaterBehandlingsstatusUnderBehandling(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
