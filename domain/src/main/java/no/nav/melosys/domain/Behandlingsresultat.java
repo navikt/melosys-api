@@ -225,7 +225,16 @@ public class Behandlingsresultat extends RegistreringsInfo {
         } else {
             return false;
         }
+    }
 
+    public boolean erArt16EtterUtlandMedRegistrertSvar() {
+        if (anmodningsperioder.isEmpty()) {
+            return false;
+        }
+
+        Anmodningsperiode anmodningsperiode = hentValidertAnmodningsperiode();
+        return anmodningsperiode.getAnmodningsperiodeSvar() != null
+            && anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() != null;
     }
 
     // Medl skal ikke oppdateres ved avslag.

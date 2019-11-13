@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
@@ -51,7 +52,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         final long behandlingID = prosessinstans.getBehandling().getId();
@@ -78,7 +79,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 
-    private void fattVedtak(long behandlingID) throws FunksjonellException, TekniskException {
+    private void fattVedtak(long behandlingID) throws MelosysException {
         behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
         vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }

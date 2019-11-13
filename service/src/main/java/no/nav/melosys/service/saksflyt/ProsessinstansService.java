@@ -132,10 +132,13 @@ public class ProsessinstansService {
         logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler, prosessinstans.getId(), prosessinstans.getType());
     }
 
-    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling) {
+    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, String mottakerInstitusjon) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.AOU_VALIDERING);
+        if (StringUtils.isNotEmpty(mottakerInstitusjon)) {
+            prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
+        }
         prosessinstans.setBehandling(behandling);
 
         lagre(prosessinstans);
@@ -166,11 +169,14 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType) {
+    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String mottakerInstitusjon) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setSteg(ProsessSteg.IV_VALIDERING);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
+        if (StringUtils.isNotEmpty(mottakerInstitusjon)) {
+            prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
+        }
         prosessinstans.setBehandling(behandling);
 
         lagre(prosessinstans);
