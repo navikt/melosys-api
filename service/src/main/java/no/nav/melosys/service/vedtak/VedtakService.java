@@ -50,7 +50,7 @@ public class VedtakService {
     }
 
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
-        fattVedtak(behandlingID, behandlingsresultattype, null);
+        fattVedtak(behandlingID, behandlingsresultattype, null, null);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -61,7 +61,7 @@ public class VedtakService {
         validerMottakerInstitusjon(behandling, mottakerInstitusjon);
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, mottakerInstitusjon);
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerInstitusjon);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -96,7 +96,7 @@ public class VedtakService {
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         behandling.setType(behandlingstype);
-        behandlingRepository.save(behandling);
+        behandlingService.lagre(behandling);
 
         prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());

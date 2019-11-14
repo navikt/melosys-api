@@ -92,11 +92,11 @@ public class VedtakServiceTest {
         when(eessiService.erGyldigInstitusjonForLand(eq("LA_BUC_04"), eq("SE"), eq(mottakerInstitusjon)))
             .thenReturn(Boolean.TRUE);
 
-        vedtakService.fattVedtak(behandlingID, resultatType, mottakerInstitusjon);
+        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", mottakerInstitusjon);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq(mottakerInstitusjon));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq(mottakerInstitusjon));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 
@@ -133,7 +133,7 @@ public class VedtakServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Kan ikke fatte vedtak: SE er EESSI-ready, men mottaker er ikke satt");
 
-        vedtakService.fattVedtak(behandlingID, resultatType, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, null, null);
     }
 
     @Test
