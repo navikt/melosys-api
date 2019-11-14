@@ -27,6 +27,8 @@ import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,7 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class FagsakTjeneste extends RestTjeneste {
+    private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
@@ -65,6 +68,7 @@ public class FagsakTjeneste extends RestTjeneste {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
         FagsakDto fagsakDto = tilFagsakDto(sak);
+        log.info("Henting av sak {} ({})", fagsakDto.getSaksnummer(), fagsakDto.getGsakSaksnummer());
         return Response.ok(fagsakDto).build();
     }
 
