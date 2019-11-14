@@ -16,7 +16,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
@@ -189,15 +189,15 @@ public class SedDataBygger {
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
             arbeidssted.setNavn(arb.getForetakNavn());
         } else {
-            IkkeFysiskArbeidssted ikkeFysiskArbeidssted = (IkkeFysiskArbeidssted)arb;
-            arbeidssted.setNavn(ikkeFysiskArbeidssted.getEnhetNavn());
+            MaritimtArbeidssted maritimtArbeidssted = (MaritimtArbeidssted) arb;
+            arbeidssted.setNavn(maritimtArbeidssted.getEnhetNavn());
 
             Adresse adresse = new Adresse();
-            adresse.setLand(ikkeFysiskArbeidssted.getLandkode());
+            adresse.setLand(maritimtArbeidssted.getLandkode());
             adresse.setPoststed("N/A");
 
             arbeidssted.setAdresse(adresse);
-            arbeidssted.setHjemmebase(ikkeFysiskArbeidssted.getLandkode());
+            arbeidssted.setHjemmebase(maritimtArbeidssted.getFlaggLandKode());
         }
         return arbeidssted;
     }

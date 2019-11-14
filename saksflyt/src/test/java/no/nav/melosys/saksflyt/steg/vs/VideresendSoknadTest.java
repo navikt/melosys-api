@@ -4,9 +4,9 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -46,6 +46,8 @@ public class VideresendSoknadTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @Before
     public void setup() {
@@ -95,17 +97,17 @@ public class VideresendSoknadTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, "SE:123");
 
         when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(behandling.getInitierendeDokumentId())))
             .thenReturn(vedlegg);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong()))
             .thenReturn(Collections.singleton(Landkoder.FR));
-        when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_03.name())))
-            .thenReturn(Collections.singletonList(new Institusjon("2", "frankrike", "FR")));
+        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_03.name()), eq("FR"))).thenReturn(Boolean.TRUE);
 
         videresendSoknad.utfør(prosessinstans);
 
-        verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(BucType.LA_BUC_03), eq(vedlegg));
+        verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(MOTTAKER_INSTITUSJON), eq(BucType.LA_BUC_03), eq(vedlegg));
     }
 }

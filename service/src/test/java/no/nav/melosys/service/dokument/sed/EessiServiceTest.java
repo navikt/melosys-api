@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
@@ -39,6 +36,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -97,7 +95,7 @@ public class EessiServiceTest {
     @Test
     public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
         when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true))).thenReturn(new OpprettSedDto());
-        eessiService.opprettOgSendSed(behandling.getId(), BucType.LA_BUC_03);
+        eessiService.opprettOgSendSed(behandling.getId(), "SE:123", BucType.LA_BUC_03);
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_03), eq(true));
     }
 
@@ -113,22 +111,32 @@ public class EessiServiceTest {
 
     @Test
     public void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
-        when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenReturn(Arrays.asList(
+        when(eessiConsumer.hentMottakerinstitusjoner(anyString(), anyString())).thenReturn(Arrays.asList(
             easyRandom.nextObject(Institusjon.class),
             easyRandom.nextObject(Institusjon.class)
         ));
 
-        List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01");
+        List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", "FR");
 
-        verify(eessiConsumer).hentMottakerinstitusjoner(anyString());
+        verify(eessiConsumer).hentMottakerinstitusjoner(anyString(), anyString());
         assertThat(mottakerinstitusjoner).hasSize(2);
         assertThat(mottakerinstitusjoner).hasOnlyElementsOfType(Institusjon.class);
     }
 
-    @Test(expected = MelosysException.class)
-    public void hentMottakerinstitusjoner_medFeilIConsumer_forventTomListe() throws MelosysException {
-        when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenThrow(new IntegrasjonException("Error!"));
-        eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01");
+    @Test
+    public void erGyldigInstitusjonForLand_mottakerInstitusjonFinnesIRespons_returnerTrue() throws MelosysException {
+        final String mottakerInstitusjon = "SE:1";
+        List<Institusjon> institusjoner = new ArrayList<>();
+        institusjoner.add(new Institusjon(mottakerInstitusjon, "Navn 1", "SE"));
+        institusjoner.add(new Institusjon("SE:2", "Navn 2", "SE"));
+        institusjoner.add(new Institusjon("SE:3", "Navn 1", "SE"));
+
+        when(eessiConsumer.hentMottakerinstitusjoner(eq(BucType.LA_BUC_01.name()), eq("SE")))
+            .thenReturn(institusjoner);
+
+        assertThat(eessiService.erGyldigInstitusjonForLand(BucType.LA_BUC_01.name(), "SE", mottakerInstitusjon))
+            .isTrue();
+
     }
 
     @Test
