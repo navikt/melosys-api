@@ -29,19 +29,13 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROT
 @Component
 @Scope(SCOPE_PROTOTYPE)
 public class ArbeiderTraad implements Runnable {
-
     private static final Logger logger = LoggerFactory.getLogger(ArbeiderTraad.class);
 
     private long oppholdMellomSteg;
-
     private Binge binge;
-
     private ProsessinstansRepository prosessinstansRepo;
-
     private List<StegBehandler> stegBehandlere;
-
     private StegBehandler aktivStegBehandler; // Brukes kun for logging
-
     private Prosessinstans aktivProsessinstans;
 
     @Autowired
@@ -91,6 +85,7 @@ public class ArbeiderTraad implements Runnable {
     private void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) {
         Prosessinstans pi = binge.hentOgSettProsessinstansTilAktiv(stegBehandler.inngangsvilkår());
         if (pi == null) {
+            aktivStegBehandler = null;
             return;
         }
 
@@ -108,6 +103,7 @@ public class ArbeiderTraad implements Runnable {
             prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
         } finally {
             binge.fjernFraAktiveProsessinstanser(pi);
+            aktivProsessinstans = null;
         }
 
         if (pi.getSteg() != ProsessSteg.FERDIG && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
