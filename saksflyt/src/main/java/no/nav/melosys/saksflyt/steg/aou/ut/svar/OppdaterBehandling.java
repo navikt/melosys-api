@@ -1,9 +1,12 @@
 package no.nav.melosys.saksflyt.steg.aou.ut.svar;
 
 import java.util.Collections;
+import java.util.stream.Stream;
 
+import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.SvarAnmodningUnntak;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -24,9 +27,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.metrics.MetrikkerNavn.*;
+
 @Component
 public class OppdaterBehandling extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandling.class);
+
+    private static final String INNVILGELSE = "godkjent";
+    private static final String INNVILGELSE_YTTERLIGEREINFO = "godkjentmedinfo";
+    private static final String DELVIS_INNVILGELSE = "delvisinnvilgelse";
+    private static final String AVSLAG = "avslag";
 
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;
@@ -44,6 +54,10 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
         this.behandlingsresultatService = behandlingsresultatService;
         this.vedtakService = vedtakService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+    }
+
+    static {
+        Stream.of(INNVILGELSE, INNVILGELSE_YTTERLIGEREINFO, DELVIS_INNVILGELSE, AVSLAG).forEach(s -> Metrics.counter(SVAR_AOU, TAG_RESULTAT, s));
     }
 
     @Override
@@ -76,6 +90,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
             oppdaterBehandlingsstatusUnderBehandling(prosessinstans);
         }
+        registrerMetrikk(melosysEessiMelding);
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 
@@ -90,5 +105,18 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
 
     private boolean inneholderYtterligereInformasjon(MelosysEessiMelding melosysEessiMelding) {
         return StringUtils.isNotEmpty(melosysEessiMelding.getYtterligereInformasjon());
+    }
+
+    private void registrerMetrikk(MelosysEessiMelding melosysEessiMelding) {
+        SvarAnmodningUnntak.Beslutning beslutning = melosysEessiMelding.getSvarAnmodningUnntak().getBeslutning();
+        if (beslutning == SvarAnmodningUnntak.Beslutning.AVSLAG) {
+            Metrics.counter(SVAR_AOU, TAG_RESULTAT, AVSLAG).increment();
+        } else if (beslutning == SvarAnmodningUnntak.Beslutning.DELVIS_INNVILGELSE) {
+            Metrics.counter(SVAR_AOU, TAG_RESULTAT, DELVIS_INNVILGELSE).increment();
+        } else if (beslutning == SvarAnmodningUnntak.Beslutning.INNVILGELSE) {
+            Metrics.counter(
+                SVAR_AOU, TAG_RESULTAT, inneholderYtterligereInformasjon(melosysEessiMelding) ? INNVILGELSE_YTTERLIGEREINFO : INNVILGELSE
+            ).increment();
+        }
     }
 }
