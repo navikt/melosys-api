@@ -10,11 +10,13 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
 
     private final AvklartMaritimtArbeid avklartMaritimtArbeid;
     private final String enhetNavn;
+    private final String flaggLandKode;
 
     public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid, AvklartMaritimtArbeid avklartMaritimtArbeid) {
         super(maritimtArbeid.foretakNavn, maritimtArbeid.foretakOrgnr, avklartMaritimtArbeid.getLand());
         this.avklartMaritimtArbeid = avklartMaritimtArbeid;
         this.enhetNavn = maritimtArbeid.enhetNavn;
+        this.flaggLandKode = maritimtArbeid.flaggLandkode;
     }
 
     @Override
@@ -34,5 +36,9 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     @Override
     public String getEnhetNavn() {
         return enhetNavn;
+    }
+
+    public String getFlaggLandKode() {
+        return flaggLandKode;
     }
 }

@@ -61,6 +61,7 @@ public class SendUtlandTest {
     private ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor;
 
     private static final long BEHANDLING_ID = 1L;
+    private static final String MOTTAKER_INSTITSJON = "SE:123";
 
     @Before
     public void setUp() throws MelosysException {
@@ -68,12 +69,9 @@ public class SendUtlandTest {
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setId(BEHANDLING_ID);
         prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, MOTTAKER_INSTITSJON);
 
-        Institusjon institusjon1 = new Institusjon("XY:XOPB", "Ikke eksisterende", "XY");
-        Institusjon institusjon2 = new Institusjon("SJ:123", "???", "SJ");
-        List<Institusjon> institusjoner = Arrays.asList(institusjon1, institusjon2);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SJ));
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(institusjoner);
 
         sendUtland = new SendUtland(eessiService, brevBestiller, behandlingService, behandlingsresultatService, landvelgerService, anmodningsperiodeService);
     }
@@ -82,19 +80,20 @@ public class SendUtlandTest {
     public void utfør_artikkel16_verifiserStegFerdig() throws Exception {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
+        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_01.name()), eq(Landkoder.SJ.getKode()))).thenReturn(Boolean.TRUE);
 
         sendUtland.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_01), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(MOTTAKER_INSTITSJON), eq(BucType.LA_BUC_01), eq(null));
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(BEHANDLING_ID));
     }
 
     @Test
     public void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(Collections.emptyList());
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
+        when(eessiService.landErEessiReady(any(), any())).thenReturn(Boolean.FALSE);
 
         sendUtland.utfør(prosessinstans);
 
@@ -117,7 +116,7 @@ public class SendUtlandTest {
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());
-        verify(eessiService, never()).opprettOgSendSed(anyLong(), any());
+        verify(eessiService, never()).opprettOgSendSed(anyLong(), any(), any());
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(prosessinstans.getBehandling().getId()));
     }
 

@@ -1,15 +1,12 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -55,6 +52,7 @@ public class SendVedtakUtlandTest {
     private ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor;
 
     private static final long BEHANDLING_ID = 1L;
+    private static final String MOTTAKER_INSTITUSJON = "SE:123";
     @Before
     public void setUp() throws Exception {
 
@@ -62,6 +60,7 @@ public class SendVedtakUtlandTest {
         behandling.setId(BEHANDLING_ID);
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, MOTTAKER_INSTITUSJON);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -75,33 +74,30 @@ public class SendVedtakUtlandTest {
         behandlingsresultat.setBehandling(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        Institusjon institusjon1 = new Institusjon("AX:XOPB", "Ikke eksisterende", "AX");
-        Institusjon institusjon2 = new Institusjon("YZ:123", "???", "YZ");
-        List<Institusjon> institusjoner = Arrays.asList(institusjon1, institusjon2);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.AX));
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(institusjoner);
 
         sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, landvelgerService);
     }
 
     @Test
     public void utførSteg_artikkel12Suksessfull_statusErAvgiftsoppgave() throws Exception{
+        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), eq(Landkoder.AX.name()))).thenReturn(Boolean.TRUE);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_04), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(MOTTAKER_INSTITUSJON), eq(BucType.LA_BUC_04), eq(null));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
     @Test
     public void utførSteg_artikkel13Suksessfull_statusErAvgiftsoppgave() throws Exception{
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_02.name()), eq(Landkoder.AX.name()))).thenReturn(Boolean.TRUE);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_02), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(MOTTAKER_INSTITUSJON), eq(BucType.LA_BUC_02), eq(null));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
     @Test
     public void utførSteg_ingenInstitusjonEessiKlar_senderBrev() throws Exception{
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString())).thenReturn(Collections.emptyList());
         sendVedtakUtland.utfør(prosessinstans);
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
@@ -112,8 +108,9 @@ public class SendVedtakUtlandTest {
     @Test
     public void utførStegForArtikkel11_suksessfull_statusErAvsluttBehandling() throws Exception {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
+        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_05.name()), eq(Landkoder.AX.name()))).thenReturn(Boolean.TRUE);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(BucType.LA_BUC_05), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(MOTTAKER_INSTITUSJON), eq(BucType.LA_BUC_05), eq(null));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 }

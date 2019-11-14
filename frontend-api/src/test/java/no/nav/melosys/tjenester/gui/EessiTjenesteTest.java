@@ -62,14 +62,14 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void hentMottakerInstitusjoner() throws IOException, MelosysException {
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString()))
+        when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyString()))
             .thenReturn(Arrays.asList(
                 defaultEasyRandom().nextObject(Institusjon.class),
                 defaultEasyRandom().nextObject(Institusjon.class),
                 defaultEasyRandom().nextObject(Institusjon.class)
             ));
 
-        Response response = eessiTjeneste.hentMottakerinstitusjoner("LA_BUC_01");
+        Response response = eessiTjeneste.hentMottakerinstitusjoner("LA_BUC_01", "SE");
         assertThat(response.getEntity()).isInstanceOf(List.class);
         assertThat((List) response.getEntity()).hasOnlyElementsOfType(Institusjon.class);
 

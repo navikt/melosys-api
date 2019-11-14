@@ -86,8 +86,12 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public List<Institusjon> hentMottakerinstitusjoner(String bucType) throws MelosysException {
-        List<InstitusjonDto> institusjonDtoList = exchange(String.format("/buc/%s/institusjoner", bucType), HttpMethod.GET,
+    public List<Institusjon> hentMottakerinstitusjoner(String bucType, String landkode) throws MelosysException {
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(String.format("/buc/%s/institusjoner", bucType))
+            .queryParam("land", landkode);
+
+        List<InstitusjonDto> institusjonDtoList = exchange(builder.toUriString(), HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<InstitusjonDto>>() {
             });
 
