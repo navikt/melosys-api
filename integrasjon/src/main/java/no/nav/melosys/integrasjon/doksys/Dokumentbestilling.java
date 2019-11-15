@@ -11,7 +11,7 @@ public final class Dokumentbestilling {
         this.brevData = brevXml;
     }
 
-    DokumentbestillingMetadata getMetadata() {
+    public DokumentbestillingMetadata getMetadata() {
         return metadata;
     }
 

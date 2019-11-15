@@ -9,7 +9,7 @@ import no.nav.melosys.exception.TekniskException;
 public enum DokumenttypeIdMapper {
     INSTANS;
 
-    static String hentID(Produserbaredokumenter produserbartDokument) throws TekniskException {
+    public static String hentID(Produserbaredokumenter produserbartDokument) throws TekniskException {
         switch (produserbartDokument) {
             case ATTEST_A1:
                 return "000116";
