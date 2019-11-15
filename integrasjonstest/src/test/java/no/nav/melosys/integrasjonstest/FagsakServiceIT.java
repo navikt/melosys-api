@@ -84,7 +84,7 @@ public class FagsakServiceIT {
     @BeforeEach
     public void setup() throws MelosysException {
         SpringSubjectHandler.set(new TestSubjectHandler());
-        when(eessiService.hentEessiMottakerinstitusjoner(any())).thenReturn(Collections.emptyList());
+        when(eessiService.hentEessiMottakerinstitusjoner(any(), any())).thenReturn(Collections.emptyList());
         when(gsakFasade.opprettOppgave(any())).thenReturn("");
     }
 
@@ -188,7 +188,7 @@ public class FagsakServiceIT {
         journalpost.setForsendelseMottatt(Instant.now());
         when(joarkService.hentJournalpost(any())).thenReturn(journalpost);
 
-        fagsakService.henleggOgVideresend("MELTEST-2", "");
+        fagsakService.henleggOgVideresend("MELTEST-2");
         prosessinstansTestService.ventPå(Testbehandlinger.TOM_BEHANDLING);
         prosessinstansTestService.sjekkProsessteg(Testbehandlinger.TOM_BEHANDLING, FERDIG);
 

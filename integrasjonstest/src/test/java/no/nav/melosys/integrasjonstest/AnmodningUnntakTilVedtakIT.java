@@ -8,9 +8,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakSystemService;
 import no.nav.melosys.integrasjon.joark.JoarkService;
@@ -93,7 +91,7 @@ public class AnmodningUnntakTilVedtakIT {
     @BeforeEach
     public void saksflytAnmodningTilVedtakTest() throws MelosysException {
         SpringSubjectHandler.set(new TestSubjectHandler());
-        when(eessiService.hentEessiMottakerinstitusjoner(any())).thenReturn(Collections.emptyList());
+        when(eessiService.hentEessiMottakerinstitusjoner(any(), any())).thenReturn(Collections.emptyList());
         when(gsakFasade.opprettOppgave(any())).thenReturn("");
 
         prosessinstansRepository.deleteAll();
@@ -111,10 +109,10 @@ public class AnmodningUnntakTilVedtakIT {
 
     @Test
     @Order(1)
-    void anmodningOmUnntak_anmodningOmUnntakMedAnmodningsperiode() throws FunksjonellException, TekniskException, InterruptedException {
+    void anmodningOmUnntak_anmodningOmUnntakMedAnmodningsperiode() throws MelosysException {
         Oppgave oppgave = new Oppgave.Builder().setFristFerdigstillelse(LocalDate.now()).build();
         when(gsakSystemService.hentOppgaveMedSaksnummer(any())).thenReturn(oppgave);
-        anmodningUnntakService.anmodningOmUnntak(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12);
+        anmodningUnntakService.anmodningOmUnntak(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12, "");
 
         prosessinstansTestService.ventPå(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12);
         prosessinstansTestService.sjekkProsessteg(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12, FERDIG);
@@ -130,10 +128,10 @@ public class AnmodningUnntakTilVedtakIT {
 
     @Test
     @Order(2)
-    void fattVedtak_anmodningOmUnntak() throws FunksjonellException, TekniskException, InterruptedException {
+    void fattVedtak_anmodningOmUnntak() throws MelosysException {
         behandlingsUtfyller.lagreAnmodningsperiodeSvar(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12, Anmodningsperiodesvartyper.INNVILGELSE);
 
-        vedtakService.fattVedtak(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        vedtakService.fattVedtak(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         prosessinstansTestService.ventPå(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12);
         prosessinstansTestService.sjekkProsessteg(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12, FERDIG);
 

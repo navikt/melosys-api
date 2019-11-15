@@ -5,9 +5,7 @@ import java.util.Collections;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakSystemService;
 import no.nav.melosys.integrasjon.joark.JoarkService;
@@ -34,11 +32,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
 import static no.nav.melosys.integrasjonstest.felles.verifisering.ForventetDokumentBestilling.forventDokument;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ContextConfiguration
@@ -82,20 +79,20 @@ public class VedtakServiceIT {
     @BeforeEach
     public void setup() throws MelosysException {
         SpringSubjectHandler.set(new TestSubjectHandler());
-        when(eessiService.hentEessiMottakerinstitusjoner(any())).thenReturn(Collections.emptyList());
+        when(eessiService.hentEessiMottakerinstitusjoner(any(), any())).thenReturn(Collections.emptyList());
         when(gsakFasade.opprettOppgave(any())).thenReturn("");
 
         prosessinstansTestService.nullstill();
     }
 
     @Test
-    public void fattVedtak_innvilgelse_art12() throws FunksjonellException, TekniskException {
+    public void fattVedtak_innvilgelse_art12() throws MelosysException {
         TestdataUtfyller utfyller = TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
         .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
         .utfyllVilkaarForArt12Innvilgelse()
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART12_1);
 
-        vedtakService.fattVedtak(utfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        vedtakService.fattVedtak(utfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "");
 
         prosessinstansTestService.ventPå(utfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(utfyller.getBehandlingsid(), FERDIG);
@@ -108,12 +105,12 @@ public class VedtakServiceIT {
     }
 
     @Test
-    public void fattVedtak_innvilgelse_art13() throws FunksjonellException, TekniskException {
+    public void fattVedtak_innvilgelse_art13() throws MelosysException {
         TestdataUtfyller testDataUtfyller = new TestdataUtfyller(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
         .utfyllAvklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A);
 
-        vedtakService.fattVedtak(testDataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        vedtakService.fattVedtak(testDataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "");
         prosessinstansTestService.ventPå(testDataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testDataUtfyller.getBehandlingsid(), FERDIG);
 
@@ -125,13 +122,13 @@ public class VedtakServiceIT {
     }
 
     @Test
-    public void fattVedtak_avslag_art12() throws FunksjonellException, TekniskException {
+    public void fattVedtak_avslag_art12() throws MelosysException {
         TestdataUtfyller testDataUtfyller = new TestdataUtfyller(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
         .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
         .utfyllVilkaarForArt12Avslag()
         .opprettAvslåttLovvalgsperiode(FO_883_2004_ART12_1);
 
-        vedtakService.fattVedtak(testDataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "");
+        vedtakService.fattVedtak(testDataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "");
         prosessinstansTestService.ventPå(testDataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testDataUtfyller.getBehandlingsid(), FERDIG);
 
@@ -143,10 +140,10 @@ public class VedtakServiceIT {
     }
 
     @Test
-    public void fattVedtak_avslagManglendeOpplysninger_ingenAvklartArbeidsgiver() throws FunksjonellException, TekniskException {
+    public void fattVedtak_avslagManglendeOpplysninger_ingenAvklartArbeidsgiver() throws MelosysException {
         new TestdataUtfyller(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt);
 
-        vedtakService.fattVedtak(Testbehandlinger.TOM_BEHANDLING, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
+        vedtakService.fattVedtak(Testbehandlinger.TOM_BEHANDLING, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         prosessinstansTestService.ventPå(Testbehandlinger.TOM_BEHANDLING);
         prosessinstansTestService.sjekkProsessteg(Testbehandlinger.TOM_BEHANDLING, FERDIG);
 
@@ -157,11 +154,11 @@ public class VedtakServiceIT {
     }
 
     @Test
-    public void fattVedtak_avslagManglendeOpplysningerMedArbeidsgiver_sendesOgsåTilArbGiver() throws FunksjonellException, TekniskException {
+    public void fattVedtak_avslagManglendeOpplysningerMedArbeidsgiver_sendesOgsåTilArbGiver() throws MelosysException {
         new TestdataUtfyller(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
             .utfyllAvklartefaktaForArt12(Landkoder.SE, AVKLART_ARBEIDSGIVER_ORGNR);
 
-        vedtakService.fattVedtak(Testbehandlinger.TOM_BEHANDLING, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "");
+        vedtakService.fattVedtak(Testbehandlinger.TOM_BEHANDLING, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,"", "");
         prosessinstansTestService.ventPå(Testbehandlinger.TOM_BEHANDLING);
         prosessinstansTestService.sjekkProsessteg(Testbehandlinger.TOM_BEHANDLING, FERDIG);
 
@@ -170,27 +167,5 @@ public class VedtakServiceIT {
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, HELFO_ORGNR),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(AVSLAG_MANGLENDE_OPPLYSNINGER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR));
-    }
-
-    @Test
-    public void fattVedtak_anmodningOmUnntak_skalFeile() throws FunksjonellException, TekniskException {
-        melosysGrensesnitt.setUnderBehandling(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
-
-        vedtakService.fattVedtak(Testbehandlinger.UTFYLT_BEHANDLING_ART12, Behandlingsresultattyper.ANMODNING_OM_UNNTAK, "");
-        prosessinstansTestService.ventPå(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
-        prosessinstansTestService.sjekkProsessteg(Testbehandlinger.UTFYLT_BEHANDLING_ART12, FEILET_MASKINELT);
-
-        verify(dokumentSjekker.getDoksysService(), never()).produserIkkeredigerbartDokument(any());
-    }
-
-    @Test
-    public void fattVedtak_henleggelse_skalFeile() throws FunksjonellException, TekniskException {
-        melosysGrensesnitt.setUnderBehandling(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
-        vedtakService.fattVedtak(Testbehandlinger.UTFYLT_BEHANDLING_ART12, Behandlingsresultattyper.HENLEGGELSE, "");
-
-        prosessinstansTestService.ventPå(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
-        prosessinstansTestService.sjekkProsessteg(Testbehandlinger.UTFYLT_BEHANDLING_ART12, FEILET_MASKINELT);
-
-        verify(dokumentSjekker.getDoksysService(), never()).produserIkkeredigerbartDokument(any());
     }
 }

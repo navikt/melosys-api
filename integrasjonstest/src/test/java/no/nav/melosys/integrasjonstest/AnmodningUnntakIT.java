@@ -2,9 +2,7 @@ package no.nav.melosys.integrasjonstest;
 
 import java.util.Collections;
 
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakSystemService;
 import no.nav.melosys.integrasjon.joark.JoarkService;
@@ -74,17 +72,17 @@ public class AnmodningUnntakIT {
     @BeforeEach
     public void saksflytAnmodningTilVedtakTest() throws MelosysException {
         SpringSubjectHandler.set(new TestSubjectHandler());
-        when(eessiService.hentEessiMottakerinstitusjoner(any())).thenReturn(Collections.emptyList());
+        when(eessiService.hentEessiMottakerinstitusjoner(any(), any())).thenReturn(Collections.emptyList());
         when(gsakFasade.opprettOppgave(any())).thenReturn("");
 
         prosessinstansRepository.deleteAll();
     }
 
     @Test
-    public void anmodningOmUnntak_anmodningOmUnntakUtenPeriode_skalFeile() throws FunksjonellException, TekniskException, InterruptedException {
+    public void anmodningOmUnntak_anmodningOmUnntakUtenPeriode_skalFeile() throws MelosysException {
         behandlingsUtfyller.setUnderBehandling(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
 
-        anmodningUnntakService.anmodningOmUnntak(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
+        anmodningUnntakService.anmodningOmUnntak(Testbehandlinger.UTFYLT_BEHANDLING_ART12, "");
         prosessinstansTestService.ventPå(Testbehandlinger.UTFYLT_BEHANDLING_ART12);
         prosessinstansTestService.sjekkProsessteg(Testbehandlinger.UTFYLT_BEHANDLING_ART12, FEILET_MASKINELT);
 
