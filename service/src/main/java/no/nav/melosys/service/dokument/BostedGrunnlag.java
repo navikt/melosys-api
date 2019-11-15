@@ -34,7 +34,7 @@ public class BostedGrunnlag {
             new TekniskException("Bostedsadressen finnes ikke eller mangler landkode"));
     }
 
-    public Optional<StrukturertAdresse> finnBostedsadresse() throws TekniskException {
+    public Optional<StrukturertAdresse> finnBostedsadresse() {
         StrukturertAdresse bostedsadresse = søknad != null ? SoeknadUtils.hentBostedsadresse(søknad) : null;
         if (bostedsadresse == null) {
             return finnBostedsadresseFraRegister();
@@ -42,7 +42,7 @@ public class BostedGrunnlag {
         return Optional.of(bostedsadresse);
     }
 
-    private Optional<StrukturertAdresse> finnBostedsadresseFraRegister() throws TekniskException {
+    private Optional<StrukturertAdresse> finnBostedsadresseFraRegister() {
         Bostedsadresse bostedsadresse = person.bostedsadresse;
         if (StringUtils.isEmpty(bostedsadresse.getLand().getKode())) {
             return Optional.empty();
@@ -51,7 +51,7 @@ public class BostedGrunnlag {
         return Optional.of(StrukturertAdresse.av(bostedsadresse));
     }
 
-    public Optional<StrukturertAdresse> finnPostadresse() throws TekniskException {
+    public Optional<StrukturertAdresse> finnPostadresse() {
         UstrukturertAdresse ustrukturertAdresse = person.postadresse;
 
         if (ustrukturertAdresse.erTom()) {

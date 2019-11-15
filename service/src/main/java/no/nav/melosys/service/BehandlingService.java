@@ -1,7 +1,6 @@
 package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
 import java.util.HashSet;

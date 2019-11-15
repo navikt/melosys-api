@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_9
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class FellesBrevtypeMappingTest {
@@ -56,7 +55,6 @@ public class FellesBrevtypeMappingTest {
             .forEach(YrkesgruppeKode::fromValue);
     }
 
-    @Ignore
     @Test
     public void testBehandlingstypeKode() throws Exception {
         List<String> uimplementerteEllerUgyldigeKoder = Arrays.asList(

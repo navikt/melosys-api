@@ -1,5 +1,8 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
@@ -25,9 +28,6 @@ import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelse
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
@@ -144,21 +144,17 @@ public class SedDataBygger {
             .collect(Collectors.toList());
     }
 
-    private static Optional<Adresse> finnAdresse(BostedGrunnlag bostedGrunnlag) throws TekniskException {
+    private static Optional<Adresse> finnAdresse(BostedGrunnlag bostedGrunnlag) {
         Optional<StrukturertAdresse> bostedsadresse = bostedGrunnlag.finnBostedsadresse();
         if (bostedsadresse.isPresent()) {
             return Optional.of(lagAdresse(bostedsadresse.get(), Adressetype.BOSTEDSADRESSE));
+        } else {
+            Optional<StrukturertAdresse> postadresse = bostedGrunnlag.finnPostadresse();
+            return postadresse.map(strukturertAdresse -> lagAdresse(strukturertAdresse, Adressetype.POSTADRESSE));
         }
-
-        Optional<StrukturertAdresse> postadresse = bostedGrunnlag.finnPostadresse();
-        if (postadresse.isPresent()) {
-            return Optional.of(lagAdresse(postadresse.get(), Adressetype.POSTADRESSE));
-        }
-
-        return Optional.empty();
     }
 
-    private static Adresse lagAdresse(StrukturertAdresse bostedsadresse, Adressetype adressetype) throws TekniskException {
+    private static Adresse lagAdresse(StrukturertAdresse bostedsadresse, Adressetype adressetype) {
         if (bostedsadresse == null) {
             return new Adresse();
         }

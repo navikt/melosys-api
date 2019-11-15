@@ -1,19 +1,17 @@
 package no.nav.melosys.domain.util;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-
 import java.util.Arrays;
 import java.util.Locale;
 
-public final class LandkoderUtils {
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
+public final class LandkoderUtils {
     private static final BiMap<String, String> map = HashBiMap.create();
 
     static {
-        Arrays.stream(Locale.getISOCountries()).forEach(c -> {
-            map.put(c, new Locale("", c).getISO3Country());
-        });
+        Arrays.stream(Locale.getISOCountries())
+            .forEach(c -> map.put(c, new Locale("", c).getISO3Country()));
     }
 
     private LandkoderUtils() {

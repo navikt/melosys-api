@@ -160,7 +160,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
     }
 
-    private static List<String> tilIso3Landkoder(List<String> land) throws TekniskException {
+    private static List<String> tilIso3Landkoder(List<String> land) {
         List<String> landkoder = new ArrayList<>();
 
         for (String l : land) {
