@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 public class FattVedtakDto {
     private Behandlingsresultattyper behandlingsresultatTypeKode;
     private String fritekst;
+    private String mottakerinstitusjon;
 
     public Behandlingsresultattyper getBehandlingsresultatTypeKode() {
         return behandlingsresultatTypeKode;
@@ -20,5 +21,13 @@ public class FattVedtakDto {
 
     public void setFritekst(final String fritekst) {
         this.fritekst = fritekst;
+    }
+
+    public String getMottakerinstitusjon() {
+        return mottakerinstitusjon;
+    }
+
+    public void setMottakerinstitusjon(String mottakerinstitusjon) {
+        this.mottakerinstitusjon = mottakerinstitusjon;
     }
 }

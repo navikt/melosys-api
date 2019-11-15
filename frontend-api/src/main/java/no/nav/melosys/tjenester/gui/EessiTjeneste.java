@@ -45,9 +45,9 @@ public class EessiTjeneste extends RestTjeneste {
         response = Institusjon.class,
         responseContainer = "List"
     )
-    public Response hentMottakerinstitusjoner(@PathParam("bucType") String bucType) throws MelosysException {
+    public Response hentMottakerinstitusjoner(@PathParam("bucType") String bucType, @QueryParam("landkode") String landkode) throws MelosysException {
         log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
-        return Response.ok(eessiService.hentEessiMottakerinstitusjoner(bucType)).build();
+        return Response.ok(eessiService.hentEessiMottakerinstitusjoner(bucType, landkode)).build();
     }
 
     @POST

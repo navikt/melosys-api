@@ -100,7 +100,7 @@ public class OppdaterBehandlingTest {
 
         oppdaterBehandling.utfør(prosessinstans);
 
-        verify(vedtakService).fattVedtak(eq(behandling.getId()), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND), any());
+        verify(vedtakService).fattVedtak(eq(behandling.getId()), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
         verify(behandlingsresultatService).oppdaterBehandlingsMaate(anyLong(), any());
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);

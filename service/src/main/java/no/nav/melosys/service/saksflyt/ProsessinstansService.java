@@ -133,13 +133,18 @@ public class ProsessinstansService {
         logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler, prosessinstans.getId(), prosessinstans.getType());
     }
 
-    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling) {
-        ProsessinstansBuilder prosessinstans = new ProsessinstansBuilder()
+    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, String mottakerInstitusjon) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medSteg(ProsessSteg.AOU_VALIDERING)
-            .medBehandling(behandling);
+            .medBehandling(behandling)
+            .build();
 
-        lagre(prosessinstans.build());
+        if (StringUtils.isNotEmpty(mottakerInstitusjon)) {
+            prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
+        }
+
+        lagre(prosessinstans);
     }
 
     public void opprettProsessinstansAnmodningOmUnntakMottakSvar(Behandling behandling) {
@@ -164,7 +169,8 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String fritekst) {
+    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
+                                                     String fritekst, String mottakerInstitusjon) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
             .medSteg(ProsessSteg.IV_VALIDERING)
@@ -172,6 +178,9 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(fritekst)
             .build();
 
+        if (StringUtils.isNotEmpty(mottakerInstitusjon)) {
+            prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
+        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
         lagre(prosessinstans);
     }
@@ -282,12 +291,11 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansVideresendSoknad(Behandling behandling, String fritekst) {
+    public void opprettProsessinstansVideresendSoknad(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
-            .medBegrunnelseFritekst(fritekst)
             .build();
 
         lagre(prosessinstans);

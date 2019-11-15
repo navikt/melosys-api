@@ -97,14 +97,16 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void opprettProsessinstansAnmodningOmUnntak() {
+        final String mottakerInstitusjon = "SE:123";
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansAnmodningOmUnntak(behandling);
+        service.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerInstitusjon);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.AOU_VALIDERING);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKER)).isEqualTo(mottakerInstitusjon);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
     }
 
@@ -112,13 +114,15 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansIverksettVedtak_medBehandlingOgBehandlingsresultat() {
         Behandling behandling = new Behandling();
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST");
+        String mottakerInstitusjon = "DE:2332";
+        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", mottakerInstitusjon);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKER)).isEqualTo(mottakerInstitusjon);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
         assertThat(Behandlingsresultattyper.valueOf(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
     }

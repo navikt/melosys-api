@@ -9,6 +9,8 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -38,7 +40,12 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (skalSendesUtland(behandlingsresultat)) {
             if (erEessiKlar(behandlingsresultat, bucType)) {
-                eessiService.opprettOgSendSed(behandlingID, bucType, vedlegg);
+                String mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
+                if (StringUtils.isEmpty(mottakerInstitusjon)) {
+                    throw new TekniskException("MottakerInstitusjon er ikke satt - kan ikke sende sed ved fatt vedtak");
+                }
+
+                eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, vedlegg);
             } else {
                 sendBrev(prosessinstans);
             }
@@ -48,7 +55,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
     private boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
         final String landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingsresultat.getId()).stream().findFirst().map(Landkoder::getKode)
             .orElseThrow(() -> new FunksjonellException("Fant ikke trygdemyndighetsland for behandling " + behandlingsresultat.getBehandling().getId()));
-        return eessiService.hentEessiMottakerinstitusjoner(bucType.toString()).stream().anyMatch(i -> i.getLandkode().equals(landkode));
+        return eessiService.landErEessiReady(bucType.name(), landkode);
     }
 
     protected abstract void sendBrev(Prosessinstans prosessinstans) throws MelosysException;
