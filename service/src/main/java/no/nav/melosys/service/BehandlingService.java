@@ -3,6 +3,7 @@ package no.nav.melosys.service;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.Period;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -29,8 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.melosys.metrics.MetrikkerNavn.BEHANDLINGER_AVSLUTTET;
-import static no.nav.melosys.metrics.MetrikkerNavn.BEHANDLINGER_OPPRETTET;
+import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
 public class BehandlingService {
@@ -40,9 +40,14 @@ public class BehandlingService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
 
-    private final Counter behandlingerOpprettet = Metrics.counter(BEHANDLINGER_OPPRETTET);
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
     private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
+
+    static {
+        Arrays.stream(Behandlingstyper.values()).forEach(
+            b -> Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, b.getKode())
+        );
+    }
 
     @Autowired
     public BehandlingService(BehandlingRepository behandlingRepository,
@@ -135,7 +140,7 @@ public class BehandlingService {
         behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         behandlingsresultatRepository.save(behandlingsresultat);
 
-        behandlingerOpprettet.increment();
+        Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, behandlingstype.getKode()).increment();
         return behandling;
     }
 
