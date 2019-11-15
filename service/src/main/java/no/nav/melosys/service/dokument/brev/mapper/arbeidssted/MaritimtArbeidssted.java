@@ -21,7 +21,7 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
 
     @Override
     public String getOmråde() {
-        if (avklartMaritimtArbeid.getMaritimtype() == Maritimtyper.SOKKEL) {
+        if (erSokkel()) {
             return OFFSHORE + ", " + landkode;
         } else {
             return landkode;
@@ -40,5 +40,9 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
 
     public String getFlaggLandKode() {
         return flaggLandKode;
+    }
+
+    public boolean erSokkel() {
+        return avklartMaritimtArbeid.getMaritimtype() == Maritimtyper.SOKKEL;
     }
 }
