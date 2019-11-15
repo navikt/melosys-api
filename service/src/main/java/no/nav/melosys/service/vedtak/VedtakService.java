@@ -1,5 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
+import java.util.Collection;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -22,8 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.Collection;
 
 @Service
 public class VedtakService {
@@ -48,6 +48,7 @@ public class VedtakService {
         this.landvelgerService = landvelgerService;
     }
 
+    @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
         fattVedtak(behandlingID, behandlingsresultattype, null);
     }
