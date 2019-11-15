@@ -28,12 +28,14 @@ import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -61,8 +63,20 @@ public class FagsakServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    @InjectMocks
     private FagsakService fagsakService;
+
+    private static EasyRandom random = new EasyRandom(getRandomConfig());
+
+    private static EasyRandomParameters getRandomConfig() {
+        return new EasyRandomParameters().collectionSizeRange(1, 4)
+            .stringLengthRange(2, 4);
+    }
+
+    @Before
+    public void setUp() {
+        fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService,
+            tps, prosessinstansService, behandlingsresultatService);
+    }
 
     @Test
     public void hentFagsak() throws IkkeFunnetException {
@@ -86,6 +100,61 @@ public class FagsakServiceTest {
         verify(fagsakRepo).save(fagsak);
         assertThat(fagsak).isNotNull();
         assertThat(fagsak.getSaksnummer()).isNotEmpty();
+    }
+
+    @Test
+    public void bestillNySakOgBehandling_oppretterProsess() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        fagsakService.bestillNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySak(eq(opprettSakDto));
+    }
+
+    @Test
+    public void validerOpprettSakDto_manglerSakstype_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.sakstype = null;
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("sakstype");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
+    }
+
+    @Test
+    public void validerOpprettSakDto_manglerBehandlingstype_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = null;
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("behandlingstype");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
+    }
+
+    @Test
+    public void validerOpprettSakDto_nullSøknad_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        opprettSakDto.soknadDto = null;
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("null");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
+    }
+
+    @Test
+    public void validerOpprettSakDto_søknadUtenFom_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        opprettSakDto.soknadDto.periode.setFom(null);
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("fra og med dato");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
+    }
+
+    @Test
+    public void validerOpprettSakDto_søknadUtenLand_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        opprettSakDto.soknadDto.land.clear();
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("land");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
     }
 
     @Test

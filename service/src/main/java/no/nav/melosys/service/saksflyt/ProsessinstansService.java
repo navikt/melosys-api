@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -25,6 +26,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
+import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -188,6 +190,23 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker);
         prosessinstans.setData(ProsessDataKey.BREVDATA, brevData);
 
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansNySak(OpprettSakDto opprettSakDto) throws FunksjonellException {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.OPPRETT_NY_SAK)
+            .build();
+        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD) {
+            prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
+            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.soknadDto.periode);
+            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.soknadDto.land);
+        } else {
+            throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
+                + " på bakgrunn av journalførte dokumenter er ikke støttet." );
+        }
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.behandlingstype);
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.skalTilordnes);
         lagre(prosessinstans);
     }
 

@@ -54,8 +54,7 @@ public class HentAktoerId extends AbstraktStegBehandler {
         Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
         if (behandlingstype.equals(Behandlingstyper.ENDRET_PERIODE)) {
             prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
-        }
-        else {
+        } else {
             prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
         }
         log.info("Hentet aktørId for prosessinstans {}", prosessinstans.getId());
