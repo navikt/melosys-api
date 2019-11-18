@@ -29,6 +29,7 @@ import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -52,6 +53,10 @@ public class VurderInngangsvilkaarTest {
     @Before
     public void setUp() {
         agent = new VurderInngangsvilkaar(regelmodulService, fagsakRepository, saksopplysningerService);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
     }
 
     @Test
@@ -67,11 +72,11 @@ public class VurderInngangsvilkaarTest {
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(lagPersoppl());
 
         agent.utførSteg(p);
-
-        verify(fagsakRepository).save(any(Fagsak.class));
+        ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
+        verify(fagsakRepository).save(fagsakArgumentCaptor.capture());
 
         assertNull(p.getHendelser());
-        assertEquals(Sakstyper.EU_EOS, p.getBehandling().getFagsak().getType());
+        assertEquals(Sakstyper.EU_EOS, fagsakArgumentCaptor.getValue().getType());
         assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
     }
 
@@ -141,10 +146,12 @@ public class VurderInngangsvilkaarTest {
 
         agent.utførSteg(p);
 
-        verify(fagsakRepository).save(any(Fagsak.class));
+        ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
+        verify(fagsakRepository).save(fagsakArgumentCaptor.capture());
+
 
         assertNull(p.getHendelser());
-        assertEquals(Sakstyper.EU_EOS, p.getBehandling().getFagsak().getType());
+        assertEquals(Sakstyper.EU_EOS, fagsakArgumentCaptor.getValue().getType());
         assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
     }
 
@@ -252,6 +259,7 @@ public class VurderInngangsvilkaarTest {
         p.getBehandling().setSaksopplysninger(Collections.singleton(sopp));
         p.setData(ProsessDataKey.SØKNADSLAND, Collections.singletonList(Landkoder.PL.getKode()));
         p.setData(ProsessDataKey.SØKNADSPERIODE, new PeriodeDto(LocalDate.now(), null));
+        p.setData(ProsessDataKey.SAKSNUMMER, "1234567");
         return p;
     }
 
