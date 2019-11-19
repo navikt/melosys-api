@@ -10,7 +10,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -52,7 +51,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         }
     }
 
-    private boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
+    protected boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
         final String landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingsresultat.getId()).stream().findFirst().map(Landkoder::getKode)
             .orElseThrow(() -> new FunksjonellException("Fant ikke trygdemyndighetsland for behandling " + behandlingsresultat.getBehandling().getId()));
         return eessiService.landErEessiReady(bucType.name(), landkode);

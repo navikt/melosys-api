@@ -12,10 +12,10 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
+import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import org.junit.Before;
@@ -35,6 +35,8 @@ public class DistribuerJournalpostTest {
     @Mock
     private DoksysFasade doksysFasade;
     @Mock
+    private SoeknadService soeknadService;
+    @Mock
     private LandvelgerService landvelgerService;
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
@@ -42,10 +44,10 @@ public class DistribuerJournalpostTest {
     private DistribuerJournalpost distribuerJournalpost;
 
     @Before
-    public void setup() throws TekniskException, IkkeFunnetException {
-        distribuerJournalpost = new DistribuerJournalpost(doksysFasade, landvelgerService, utenlandskMyndighetService);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SE));
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(any(Landkoder.class))).thenReturn(lagUtenlandskMyndighet());
+    public void setup() throws TekniskException {
+        distribuerJournalpost = new DistribuerJournalpost(doksysFasade, soeknadService, landvelgerService, utenlandskMyndighetService);
+        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(Landkoder.SE);
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(any())).thenReturn(lagUtenlandskMyndighet());
     }
 
     @Test

@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpostUtils;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -23,6 +24,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -51,6 +53,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     private final TpsFasade tpsFasade;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
+    private final SoeknadService soeknadService;
 
     @Autowired
     protected VideresendSoknad(EessiService eessiService,
@@ -58,13 +61,15 @@ public class VideresendSoknad extends AbstraktSendUtland {
                                LandvelgerService landvelgerService,
                                TpsFasade tpsFasade,
                                UtenlandskMyndighetService utenlandskMyndighetService,
-                               @Qualifier("system") JoarkFasade joarkFasade) {
+                               @Qualifier("system") JoarkFasade joarkFasade,
+                               SoeknadService soeknadService) {
         super(eessiService, behandlingsresultatService, landvelgerService);
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
         this.tpsFasade = tpsFasade;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
+        this.soeknadService = soeknadService;
     }
 
     @Override
@@ -97,6 +102,13 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     @Override
+    protected boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
+        SoeknadDokument søknad = soeknadService.hentSøknad(behandlingsresultat.getId());
+        final String landkode = landvelgerService.hentBostedsland(behandlingsresultat.getId(), søknad).getKode();
+        return eessiService.landErEessiReady(bucType.name(), landkode);
+    }
+
+    @Override
     protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
         return true;
     }
@@ -106,13 +118,13 @@ public class VideresendSoknad extends AbstraktSendUtland {
         Behandling behandling = prosessinstans.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
 
-        String fnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
-        Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId()).stream().findFirst()
-            .orElseThrow(() -> new FunksjonellException("Fant ikke trygdemyndighetsland for behandling " + behandling.getId()));
+        SoeknadDokument søknad = soeknadService.hentSøknad(behandling.getId());
+        Landkoder landkode = landvelgerService.hentBostedsland(behandling.getId(), søknad);
 
         String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(landkode);
         String institusjonNavn = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode).navn;
 
+        String fnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
         OpprettJournalpost opprettJournalpost = OpprettJournalpostUtils.lagJournalpostForSendingAvSedSomBrev(
             fagsak.getGsakSaksnummer(), fnr, SedType.A008, eessiService.genererSedForhåndsvisning(behandling.getId(), SedType.A008),
             institusjonID, institusjonNavn, landkode.getKode(), lagSøknadVedlegg(behandling)

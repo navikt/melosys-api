@@ -1,0 +1,1 @@
+INSERT INTO PROSESS_STEG (KODE, NAVN) VALUES ('VS_DISTRIBUER_JOURNALPOST', 'Distribuerer (sender) journalposten');

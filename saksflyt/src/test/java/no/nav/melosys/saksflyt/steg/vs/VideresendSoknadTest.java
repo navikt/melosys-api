@@ -1,16 +1,14 @@
 package no.nav.melosys.saksflyt.steg.vs;
 
-import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -18,6 +16,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -49,6 +48,8 @@ public class VideresendSoknadTest {
     private UtenlandskMyndighetService utenlandskMyndighetService;
     @Mock
     private JoarkFasade joarkFasade;
+    @Mock
+    private SoeknadService soeknadService;
 
     private VideresendSoknad videresendSoknad;
 
@@ -59,7 +60,7 @@ public class VideresendSoknadTest {
 
     @Before
     public void setup() {
-        videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, landvelgerService, tpsFasade, utenlandskMyndighetService, joarkFasade);
+        videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, landvelgerService, tpsFasade, utenlandskMyndighetService, joarkFasade, soeknadService);
     }
 
     @Test
@@ -111,8 +112,8 @@ public class VideresendSoknadTest {
         when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(behandling.getInitierendeDokumentId())))
             .thenReturn(vedlegg);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong()))
-            .thenReturn(Collections.singleton(Landkoder.FR));
+        when(landvelgerService.hentBostedsland(anyLong(), any()))
+            .thenReturn(Landkoder.FR);
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_03.name()), eq("FR"))).thenReturn(Boolean.TRUE);
 
         videresendSoknad.utfør(prosessinstans);
@@ -142,9 +143,7 @@ public class VideresendSoknadTest {
         behandlingsresultat.setId(1L);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singleton(Landkoder.SE));
-        when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_03.name())))
-            .thenReturn(Collections.singletonList(new Institusjon("2", "frankrike", "FR")));
+        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(Landkoder.SE);
         when(utenlandskMyndighetService.hentUtenlandskMyndighet(any())).thenReturn(new UtenlandskMyndighet());
 
         videresendSoknad.utfør(prosessinstans);
