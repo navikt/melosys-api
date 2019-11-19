@@ -104,7 +104,7 @@ public class AvklarteVirksomheterGrunnlag {
         return bivirksomheter;
     }
 
-    private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
+    StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
         StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
         if (StringUtils.isEmpty(adresse.postnummer)) {
             adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
