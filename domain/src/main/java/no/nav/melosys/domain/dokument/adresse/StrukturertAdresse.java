@@ -5,23 +5,17 @@ import java.util.Objects;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
-import no.nav.melosys.exception.TekniskException;
 import org.apache.commons.lang3.StringUtils;
 
 public class StrukturertAdresse extends Adresse {
-
     public String gatenavn;
-
     // Sammensatt av husnummer og husbokstav
     public String husnummer;
-
     public String region;
-
     public String postnummer;
-
     public String poststed;
 
-    public static StrukturertAdresse av(Bostedsadresse bostedsadresse) throws TekniskException {
+    public static StrukturertAdresse av(Bostedsadresse bostedsadresse) {
         Gateadresse gateadresse = bostedsadresse.getGateadresse();
         StrukturertAdresse adresse = new StrukturertAdresse();
         if (gateadresse != null) {

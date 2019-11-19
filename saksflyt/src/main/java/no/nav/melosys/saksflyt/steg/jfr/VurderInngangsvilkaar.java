@@ -120,7 +120,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
 
         // Sett sakstype...
-        Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(prosessinstans.getData(ProsessDataKey.SAKSNUMMER));
         Sakstyper nyFagsakstype;
         if (Boolean.TRUE.equals(res.kvalifisererForEf883_2004)) {
             nyFagsakstype = Sakstyper.EU_EOS;
@@ -160,7 +160,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
     }
 
-    private static List<String> tilIso3Landkoder(List<String> land) throws TekniskException {
+    private static List<String> tilIso3Landkoder(List<String> land) {
         List<String> landkoder = new ArrayList<>();
 
         for (String l : land) {

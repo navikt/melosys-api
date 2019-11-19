@@ -54,6 +54,7 @@ public class AktoerService {
         aktoer.setUtenlandskPersonId(aktoerDto.getUtenlandskPersonID());
         aktoer.setOrgnr(aktoerDto.getOrgnr());
         aktoer.setRolle(Aktoersroller.valueOf(aktoerDto.getRolleKode()));
+        aktoer.setAktørId(aktoerDto.getAktoerID());
 
         if (aktoerDto.getRepresentererKode() != null) {
             aktoer.setRepresenterer(Representerer.valueOf(aktoerDto.getRepresentererKode()));
