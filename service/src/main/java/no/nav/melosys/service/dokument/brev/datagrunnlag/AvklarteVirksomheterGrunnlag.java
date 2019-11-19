@@ -104,10 +104,13 @@ public class AvklarteVirksomheterGrunnlag {
         return bivirksomheter;
     }
 
-    private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
+    StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
         StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
-        if (StringUtils.isEmpty(adresse.gatenavn) || StringUtils.isEmpty(adresse.postnummer)) {
+        if (StringUtils.isEmpty(adresse.postnummer)) {
             adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
+        }
+        if (StringUtils.isEmpty(adresse.gatenavn)) {
+            adresse.gatenavn = " ";
         }
         adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
         return adresse;
