@@ -246,6 +246,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return lovvalgsperioder.stream().anyMatch(l -> l.getMedlPeriodeID() != null);
     }
 
+    public boolean harMedlemskapsperiode() {
+        return !lovvalgsperioder.isEmpty() || !anmodningsperioder.isEmpty();
+    }
+
     public Medlemskapsperiode hentValidertMedlemskapsperiode() {
         if (!lovvalgsperioder.isEmpty()) {
             return hentValidertLovvalgsperiode();

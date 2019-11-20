@@ -6,6 +6,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -265,6 +266,23 @@ public class LandvelgerServiceTest {
     public void hentTrygdemyndighetsland_medArt13BostedsadresseNorge() throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(Landkoder.NO));
+
+        søknad.soeknadsland.landkoder.add(søknadsland.getKode());
+        Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
+        assertThat(land).containsExactly(søknadsland);
+    }
+
+    @Test
+    public void hentTrygdemyndighetsland_medArt13Videresending() throws IkkeFunnetException {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setStatus(Saksstatuser.VIDERESENDT);
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(behandling);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(Landkoder.NO));
 
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
