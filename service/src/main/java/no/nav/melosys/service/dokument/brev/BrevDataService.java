@@ -89,8 +89,7 @@ public class BrevDataService {
         metadata.utenlandskMyndighet = mottaker.erUtenlandskMyndighet() ? hentMyndighetFraAktoer(mottaker) : null;
 
         if (mottaker.getRolle() == BRUKER) {
-            boolean brukerharIkkeAdresseIRegister = brukerHarIkkeTpsAdresse(behandling);
-            if (brukerharIkkeAdresseIRegister) {
+            if (brukerHarIkkeAdresseiTps(behandling)) {
                 StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
                 if (!oppgittAdresse.erTom()) {
                     metadata.postadresse = oppgittAdresse;
@@ -234,7 +233,7 @@ public class BrevDataService {
         mottakerBrev.setId(mottakerID);
 
         String navn = tpsFasade.hentSammensattNavn(mottakerID);
-        if (brukerHarIkkeTpsAdresse(behandling)) {
+        if (brukerHarIkkeAdresseiTps(behandling)) {
             StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
             if (oppgittAdresse.erTom()) {
                 throw new TekniskException("Bruker har verken adresse i TPS eller oppgitt adresse i søknad");
@@ -277,7 +276,7 @@ public class BrevDataService {
         return sakspart;
     }
 
-    private boolean brukerHarIkkeTpsAdresse(Behandling behandling) throws TekniskException {
+    private boolean brukerHarIkkeAdresseiTps(Behandling behandling) throws TekniskException {
         PersonDokument person = SaksopplysningerUtils.hentPersonDokument(behandling);
         return person.harIkkeRegistrertAdresse();
     }

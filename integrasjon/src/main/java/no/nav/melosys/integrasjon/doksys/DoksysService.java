@@ -205,10 +205,12 @@ public class DoksysService implements DoksysFasade {
 
         Aktoersroller mottakerRolle = metadata.mottaker.getRolle();
         String mottakerID = metadata.mottakerID;
+        String brukerNavn = metadata.brukerNavn;
+        boolean berik = metadata.postadresse == null;
 
         switch (mottakerRolle) {
             case BRUKER:
-                return lagPerson(mottakerID);
+                return lagPerson(mottakerID, brukerNavn, berik);
             case ARBEIDSGIVER:
             case REPRESENTANT:
                 Organisasjon organisasjon = objectFactory.createOrganisasjon();
@@ -218,7 +220,7 @@ public class DoksysService implements DoksysFasade {
                 if (metadata.mottaker.erUtenlandskMyndighet()) {
                     // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
                     // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
-                    return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn);
+                    return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn, false);
                 } else {
                     Organisasjon myndighet = objectFactory.createOrganisasjon();
                     myndighet.setOrgnummer(mottakerID);
@@ -226,18 +228,17 @@ public class DoksysService implements DoksysFasade {
                 }
             default:
                 log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakerRolle);
-                return lagPerson(mottakerID);
+                return lagPerson(mottakerID, brukerNavn, berik);
         }
     }
 
-    private Aktoer lagPerson(String personID) {
-        return lagPerson(personID, null);
-    }
-
-    private Aktoer lagPerson(String personID, String navn) {
+    private Aktoer lagPerson(String personID, String navn, boolean berik) {
         Person person = objectFactory.createPerson();
         person.setIdent(personID);
-        person.setNavn(navn);
+        if (!berik) {
+            person.setNavn(navn);
+        }
+        person.setBerik(berik);
         return person;
     }
 

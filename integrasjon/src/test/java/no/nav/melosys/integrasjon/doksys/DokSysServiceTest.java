@@ -13,6 +13,7 @@ import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournal
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Dokumentbestillingsinformasjon;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Person;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.UtenlandskPostadresse;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastRequest;
@@ -70,9 +71,11 @@ public class DokSysServiceTest {
 
         ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
-        ProduserIkkeredigerbartDokumentRequest dokumentRequest = captor.getValue();
-        assertThat(dokumentRequest.getDokumentbestillingsinformasjon().getDokumenttypeId()).isEqualTo(metadata.dokumenttypeID);
-        assertThat(dokumentRequest.getDokumentbestillingsinformasjon().getAdresse()).isNull();
+
+        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
+        assertThat(dokInfo.getDokumenttypeId()).isEqualTo(metadata.dokumenttypeID);
+        assertThat(dokInfo.getAdresse()).isNull();
+        assertThat(dokInfo.getMottaker().isBerik()).isTrue();
     }
 
     @Test
@@ -91,16 +94,20 @@ public class DokSysServiceTest {
 
         ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
-        UtenlandskPostadresse adresse = hentAdresseFraCaptor(captor);
+
+        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
+        assertThat(dokInfo.getMottaker().isBerik()).isFalse();
+
+        UtenlandskPostadresse adresse = (UtenlandskPostadresse) dokInfo.getAdresse();
         assertThat(adresse.getAdresselinje1()).isEqualTo(postadresse.gatenavn+" "+postadresse.husnummer);
         assertThat(adresse.getAdresselinje2()).isEqualTo(postadresse.postnummer+" "+postadresse.poststed);
         assertThat(adresse.getAdresselinje3()).isEqualTo(postadresse.region);
         assertThat(adresse.getLand().getValue()).isEqualTo(postadresse.landkode);
-        assertThat(((Person)captor.getValue().getDokumentbestillingsinformasjon().getBruker()).getNavn()).isEqualTo("Kim Se");
+        assertThat(((Person) dokInfo.getBruker()).getNavn()).isEqualTo("Kim Se");
     }
 
-    private UtenlandskPostadresse hentAdresseFraCaptor(ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor) {
-        return (UtenlandskPostadresse) captor.getValue().getDokumentbestillingsinformasjon().getAdresse();
+    private Dokumentbestillingsinformasjon hentDokumentBestillingInfoFraCaptor(ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor) {
+        return captor.getValue().getDokumentbestillingsinformasjon();
     }
 
     private DokumentbestillingMetadata lagMetadataForBruker(StrukturertAdresse postadresse) {
@@ -135,10 +142,11 @@ public class DokSysServiceTest {
         ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
 
-        ProduserIkkeredigerbartDokumentRequest dokumentRequest = captor.getValue();
-        assertThat(dokumentRequest.getDokumentbestillingsinformasjon().getMottaker()).isInstanceOf(Person.class);
+        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
+        assertThat(dokInfo.getMottaker().isBerik()).isFalse();
+        assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
 
-        UtenlandskPostadresse utenlandskPostadresse = hentAdresseFraCaptor(captor);
+        UtenlandskPostadresse utenlandskPostadresse = (UtenlandskPostadresse) dokInfo.getAdresse();
         assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse);
         assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.utenlandskMyndighet.landkode.getKode());
     }
