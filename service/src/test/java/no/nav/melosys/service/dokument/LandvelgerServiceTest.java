@@ -283,7 +283,7 @@ public class LandvelgerServiceTest {
         behandlingsresultat.setBehandling(behandling);
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(Landkoder.NO));
+        when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(Landkoder.DE));
 
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);

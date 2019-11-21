@@ -70,10 +70,10 @@ public class LandvelgerService {
         if (behandlingsresultat.harMedlemskapsperiode()) {
             Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsperiode();
             return medlemskapsperiode.erArtikkel13();
+        } else {
+            Fagsak fagsak = behandlingsresultat.getBehandling().getFagsak();
+            return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
         }
-
-        Fagsak fagsak = behandlingsresultat.getBehandling().getFagsak();
-        return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
