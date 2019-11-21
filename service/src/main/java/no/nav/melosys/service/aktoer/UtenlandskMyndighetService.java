@@ -87,7 +87,7 @@ public class UtenlandskMyndighetService {
         return lagInstitusjonsId(myndighet);
     }
 
-    private String lagInstitusjonsId(UtenlandskMyndighet utenlandskMyndighet) {
+    public String lagInstitusjonsId(UtenlandskMyndighet utenlandskMyndighet) {
         return utenlandskMyndighet.landkode
             + (utenlandskMyndighet.institusjonskode == null ? "" : ":" + utenlandskMyndighet.institusjonskode);
     }

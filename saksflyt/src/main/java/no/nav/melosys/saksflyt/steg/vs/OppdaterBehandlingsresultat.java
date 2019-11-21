@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_ORIENTERINGSBREV;
-
 /**
  * Oppdaterer behandlingsresultat
  *
@@ -46,6 +44,6 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
 
         log.info("Oppdatert behandlingsresultat for prosessinstans {}. Satt til henleggelse", prosessinstans.getId());
-        prosessinstans.setSteg(VS_SEND_ORIENTERINGSBREV);
+        prosessinstans.setSteg(ProsessSteg.VS_AVKLAR_MYNDIGHET);
     }
 }

@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -31,8 +32,9 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
 
         boolean innvilgelseEllerAnmodningUnntakSkalSendes = prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK
             || behandlingsresultat.erInnvilgelse();
+        boolean søknadSkalVideresendes = behandling.getFagsak().getStatus() == Saksstatuser.VIDERESENDT;
 
-        if (innvilgelseEllerAnmodningUnntakSkalSendes) {
+        if (innvilgelseEllerAnmodningUnntakSkalSendes || søknadSkalVideresendes) {
             utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
         }
     }

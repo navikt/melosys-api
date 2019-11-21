@@ -126,7 +126,8 @@ public class FagsakService {
     @Transactional
     public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId()));
+        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
+            && aktoer.getRolle() == Aktoersroller.MYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
             .map(id -> lagAktør(fagsak, Aktoersroller.MYNDIGHET, id))

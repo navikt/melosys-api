@@ -6,7 +6,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.domain.arkiv.OpprettJournalpostUtils;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -64,9 +63,9 @@ public class OpprettBrevOgJournalpost extends AbstraktStegBehandler {
 
         Landkoder landkode = fagsak.hentMyndighetLandkode();
         UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
-        String institusjonsId = utenlandskMyndighetService.lagInstitusjonsId(landkode);
+        String institusjonsId = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
 
-        return OpprettJournalpostUtils.lagJournalpostForSendingAvSedSomBrev(
+        return OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
             fagsak.getGsakSaksnummer(), brukerFnr, sedType, sedPdf, institusjonsId, utenlandskMyndighet.navn, landkode.getKode(), Collections.emptyList()
         );
     }

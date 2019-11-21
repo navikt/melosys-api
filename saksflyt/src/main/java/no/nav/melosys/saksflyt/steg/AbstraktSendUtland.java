@@ -30,11 +30,11 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         this.landvelgerService = landvelgerService;
     }
 
-    protected void sendUtland(BucType bucType, Prosessinstans prosessinstans) throws MelosysException {
-        sendUtland(bucType, prosessinstans, null);
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans) throws MelosysException {
+        return sendUtland(bucType, prosessinstans, null);
     }
 
-    protected void sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg) throws MelosysException {
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (skalSendesUtland(behandlingsresultat)) {
@@ -45,10 +45,14 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
                 }
 
                 eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, vedlegg);
+                return SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);
+                return SendUtlandStatus.BREV_SENDT;
             }
         }
+
+        return SendUtlandStatus.IKKE_SENDT;
     }
 
     protected boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
@@ -79,5 +83,11 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
             }
         }
         return saksbehandler;
+    }
+
+    public enum SendUtlandStatus {
+        IKKE_SENDT,
+        BREV_SENDT,
+        SED_SENDT
     }
 }

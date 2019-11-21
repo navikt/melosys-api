@@ -16,7 +16,7 @@ import no.nav.melosys.service.dokument.LandvelgerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("vsDistribuerJournalpost")
+@Component("VideresendSoknadDistribuerJournalpost")
 public class DistribuerJournalpost extends AbstraktDistribuerJournalpost {
     private final SoeknadService soeknadService;
     private final LandvelgerService landvelgerService;

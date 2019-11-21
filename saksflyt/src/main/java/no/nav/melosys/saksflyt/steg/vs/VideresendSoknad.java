@@ -6,10 +6,9 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.domain.arkiv.OpprettJournalpostUtils;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -19,15 +18,16 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +49,10 @@ public class VideresendSoknad extends AbstraktSendUtland {
     private static final Logger log = LoggerFactory.getLogger(VideresendSoknad.class);
 
     private final EessiService eessiService;
-    private final LandvelgerService landvelgerService;
     private final TpsFasade tpsFasade;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
-    private final SoeknadService soeknadService;
+    private final FagsakService fagsakService;
 
     @Autowired
     protected VideresendSoknad(EessiService eessiService,
@@ -62,14 +61,13 @@ public class VideresendSoknad extends AbstraktSendUtland {
                                TpsFasade tpsFasade,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                @Qualifier("system") JoarkFasade joarkFasade,
-                               SoeknadService soeknadService) {
+                               FagsakService fagsakService) {
         super(eessiService, behandlingsresultatService, landvelgerService);
         this.eessiService = eessiService;
-        this.landvelgerService = landvelgerService;
+        this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
-        this.soeknadService = soeknadService;
     }
 
     @Override
@@ -81,10 +79,14 @@ public class VideresendSoknad extends AbstraktSendUtland {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        sendUtland(BucType.LA_BUC_03, prosessinstans, hentSøknadDokument(prosessinstans.getBehandling()));
+        SendUtlandStatus sendtStatus = sendUtland(BucType.LA_BUC_03, prosessinstans, hentSøknadDokument(prosessinstans.getBehandling()));
 
-        if (prosessinstans.getSteg() != VS_DISTRIBUER_JOURNALPOST) {
+        if (sendtStatus == SendUtlandStatus.SED_SENDT) {
             prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
+        } else if (sendtStatus == SendUtlandStatus.BREV_SENDT) {
+            prosessinstans.setSteg(VS_DISTRIBUER_JOURNALPOST);
+        } else {
+            throw new TekniskException("Verken SED eller brev ble sendt for behandling " + prosessinstans.getBehandling().getId());
         }
     }
 
@@ -103,8 +105,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
     @Override
     protected boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
-        SoeknadDokument søknad = soeknadService.hentSøknad(behandlingsresultat.getId());
-        final String landkode = landvelgerService.hentBostedsland(behandlingsresultat.getId(), søknad).getKode();
+        final String landkode = behandlingsresultat.getBehandling().getFagsak().hentMyndighetLandkode().getKode();
         return eessiService.landErEessiReady(bucType.name(), landkode);
     }
 
@@ -116,23 +117,24 @@ public class VideresendSoknad extends AbstraktSendUtland {
     @Override
     protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
         Behandling behandling = prosessinstans.getBehandling();
-        Fagsak fagsak = behandling.getFagsak();
 
-        SoeknadDokument søknad = soeknadService.hentSøknad(behandling.getId());
-        Landkoder landkode = landvelgerService.hentBostedsland(behandling.getId(), søknad);
+        // Fagsak må hentes på nytt fra detabasen da den har blitt oppdatert i AvklarMyndighet
+        Fagsak fagsak = fagsakService.hentFagsak(behandling.getFagsak().getSaksnummer());
+        behandling.setFagsak(fagsak);
 
-        String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(landkode);
-        String institusjonNavn = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode).navn;
+        Landkoder landkode = fagsak.hentMyndighetLandkode();
+        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
+        String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
+        String institusjonNavn = utenlandskMyndighet.navn;
 
         String fnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
-        OpprettJournalpost opprettJournalpost = OpprettJournalpostUtils.lagJournalpostForSendingAvSedSomBrev(
+        OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
             fagsak.getGsakSaksnummer(), fnr, SedType.A008, eessiService.genererSedForhåndsvisning(behandling.getId(), SedType.A008),
             institusjonID, institusjonNavn, landkode.getKode(), lagSøknadVedlegg(behandling)
         );
 
         String journalpostID = joarkFasade.opprettJournalpost(opprettJournalpost, true);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
-        prosessinstans.setSteg(VS_DISTRIBUER_JOURNALPOST);
     }
 
     private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
@@ -141,7 +143,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setBrevkode(SedType.A008.name());
         fysiskDokument.setDokumentKategori(DokumentKategoriKode.SOK.getKode());
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(OpprettJournalpostUtils.lagArkivVariant(vedleggData)));
+        fysiskDokument.setDokumentVarianter(Collections.singletonList(OpprettJournalpost.lagArkivVariant(vedleggData)));
         fysiskDokument.setTittel(hentSøknadTittel(behandling));
         return Collections.singletonList(fysiskDokument);
     }
