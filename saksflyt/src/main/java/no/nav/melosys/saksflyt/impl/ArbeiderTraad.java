@@ -100,7 +100,7 @@ public class ArbeiderTraad implements Runnable {
                 pi.setSistForsøkt(LocalDateTime.now());
             }
             pi.setEndretDato(LocalDateTime.now());
-            prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
+            pi = prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
         } finally {
             binge.fjernFraAktiveProsessinstanser(pi);
             aktivProsessinstans = null;

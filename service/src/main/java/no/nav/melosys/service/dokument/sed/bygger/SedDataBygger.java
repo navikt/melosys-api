@@ -186,7 +186,7 @@ public class SedDataBygger {
             arbeidssted.setNavn(arb.getForetakNavn());
         } else {
             MaritimtArbeidssted maritimtArbeidssted = (MaritimtArbeidssted) arb;
-            arbeidssted.setNavn(maritimtArbeidssted.getEnhetNavn());
+            arbeidssted.setNavn(maritimtArbeidssted.getEnhetNavn() + (maritimtArbeidssted.erSokkel() ? " offshore" : ""));
 
             Adresse adresse = new Adresse();
             adresse.setLand(maritimtArbeidssted.getLandkode());

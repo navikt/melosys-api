@@ -82,6 +82,16 @@ public class BehandlingServiceTest {
         assertThat(behandling.getDokumentasjonSvarfristDato()).isNotNull();
     }
 
+    @Test
+    public void oppdaterStatus_statusAnmodningUnntakSendt_behandlingLagret() throws FunksjonellException, TekniskException {
+        long behandlingID = 11L;
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        verify(behandlingRepo).save(behandling);
+    }
+
     @Test(expected = IkkeFunnetException.class)
     public void oppdaterStatus_behIkkeFunnet() throws FunksjonellException, TekniskException {
         long behandlingID = 11L;
