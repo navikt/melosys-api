@@ -120,7 +120,7 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
-    // Sletter aktører som ikke ligger i oppgitt liste og legger til de som mangler.
+    // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.
     // Oppdaterer IKKE de som allerede finnes i database
 
     @Transactional

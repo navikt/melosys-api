@@ -248,7 +248,7 @@ public class FagsakServiceTest {
 
         assertThat(oppdaterFagsak.getAktører())
             .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonId)
-            .containsExactly(
+            .containsExactlyInAnyOrder(
                 tuple(Aktoersroller.BRUKER, "1234", null),
                 tuple(Aktoersroller.MYNDIGHET, null, "Ny institusjonsid")
             );

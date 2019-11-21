@@ -1,16 +1,15 @@
 package no.nav.melosys.domain.arkiv;
 
-import java.util.Collections;
+import no.nav.melosys.domain.eessi.SedType;
+
 import java.util.List;
 
-import no.nav.melosys.domain.eessi.SedType;
+import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentSed;
 
 public class OpprettJournalpost extends Journalpost {
 
-    private static final String ARKIV = "ARKIV";
     private static final String SENTRAL_UTSKRIFT = "S";
     private static final String MEDLEMSKAP_OG_AVGIFT = "4530";
-    private static final String DOKUMENT_KATEGORI_SED = "SED";
     private static final String UNNTAK_FRA_MEDLEMSKAP = "UFM";
     private static final String UTENLANDSK_ORGANISASJON = "UTL_ORG";
 
@@ -29,7 +28,7 @@ public class OpprettJournalpost extends Journalpost {
         String institusjonID, String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg) {
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        opprettJournalpost.setHoveddokument(lagFysiskDokument(sedType, sedPdf));
+        opprettJournalpost.setHoveddokument(lagFysiskDokumentSed(sedType, sedPdf));
         opprettJournalpost.setVedlegg(vedlegg);
         opprettJournalpost.setArkivSakId(gsakSaksnummer.toString());
         opprettJournalpost.setMottaksKanal(SENTRAL_UTSKRIFT);
@@ -46,36 +45,6 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
 
         return opprettJournalpost;
-    }
-
-    public static DokumentVariant lagArkivVariant(byte[] pdf) {
-        DokumentVariant dokumentVariant = new DokumentVariant();
-        dokumentVariant.setVariantFormat(ARKIV);
-        dokumentVariant.setFiltype(DokumentVariant.Filtype.PDFA);
-        dokumentVariant.setData(pdf);
-        return dokumentVariant;
-    }
-
-    private static FysiskDokument lagFysiskDokument(SedType sedType, byte[] sedPdf) {
-        FysiskDokument fysiskDokument = new FysiskDokument();
-        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SED);
-        fysiskDokument.setTittel(hentTittelForSedType(sedType));
-        fysiskDokument.setBrevkode(sedType.name());
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(sedPdf)));
-        return fysiskDokument;
-    }
-
-    private static String hentTittelForSedType(SedType sedType) {
-        switch (sedType) {
-            case A002:
-                return "Delvis eller fullt avslag på søknad om unntak";
-            case A008:
-                return "Melding om relevant informasjon";
-            case A011:
-                return "Innvilgelse av søknad om unntak";
-            default:
-                throw new IllegalArgumentException("Kan ikke opprette journalpost av sed-type " + sedType);
-        }
     }
 
     public String getJournalførendeEnhet() {
