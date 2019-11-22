@@ -222,7 +222,11 @@ public class SedDataBygger {
     }
 
     private static String lagGateadresse(String gatenavn, String husnummer) {
-        return Objects.toString(gatenavn, "N/A") + " " + Objects.toString(husnummer, "");
+        if (StringUtils.isEmpty(gatenavn)) {
+            return "N/A";
+        }
+
+        return gatenavn + (StringUtils.isEmpty(husnummer) ? "" : String.format(" %s", husnummer));
     }
 
     private static List<Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {

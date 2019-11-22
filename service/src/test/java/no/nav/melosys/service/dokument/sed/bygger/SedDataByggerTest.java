@@ -2,10 +2,17 @@ package no.nav.melosys.service.dokument.sed.bygger;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
+import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -13,9 +20,12 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.eessi.dto.Adresse;
+import no.nav.melosys.integrasjon.eessi.dto.Arbeidssted;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -137,6 +147,75 @@ public class SedDataByggerTest {
 
         assertThat(sedData).isNotNull();
         assertThat(sedData.getLovvalgsperioder()).isEmpty();
+    }
+
+    @Test
+    public void lag_bostedsadresseUtenGateadresse_gatenavnBlirNA() throws TekniskException, FunksjonellException {
+        Bostedsadresse bostedsadresse = new Bostedsadresse();
+        bostedsadresse.setGateadresse(null);
+        bostedsadresse.setLand(new Land(Land.SVERIGE));
+
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
+        sedDataGrunnlagMedSoknad.getPerson().bostedsadresse = bostedsadresse;
+
+        SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo("N/A");
+    }
+
+    @Test
+    public void lag_bostedsadresseUtenGatenavn_gatenavnBlirNA() throws TekniskException, FunksjonellException {
+        Gateadresse gateadresse = new Gateadresse();
+        gateadresse.setGatenavn("");
+        gateadresse.setHusnummer(123);
+
+        Bostedsadresse bostedsadresse = new Bostedsadresse();
+        bostedsadresse.setGateadresse(gateadresse);
+        bostedsadresse.setLand(new Land(Land.SVERIGE));
+
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
+        sedDataGrunnlagMedSoknad.getPerson().bostedsadresse = bostedsadresse;
+
+        SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo("N/A");
+    }
+
+    @Test
+    public void lag_bostedsadresseMedGatenavnOgHusnummer_rettFormatertGateadresse() throws TekniskException, FunksjonellException {
+        Gateadresse gateadresse = new Gateadresse();
+        gateadresse.setGatenavn("gate");
+        gateadresse.setHusnummer(123);
+
+        Bostedsadresse bostedsadresse = new Bostedsadresse();
+        bostedsadresse.setGateadresse(gateadresse);
+        bostedsadresse.setLand(new Land(Land.SVERIGE));
+
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
+        sedDataGrunnlagMedSoknad.getPerson().bostedsadresse = bostedsadresse;
+
+        SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo("gate 123");
+    }
+
+    @Test
+    public void lag_medMaritimtArbeid_gatenavnBlirNA() throws TekniskException, FunksjonellException {
+        Map<String, AvklartMaritimtArbeid> alleAvklarteMaritimeArbeid = new HashMap<>();
+        Avklartefakta maritimtFakta = new Avklartefakta();
+        maritimtFakta.setFakta("SE");
+        maritimtFakta.setType(Avklartefaktatyper.ARBEIDSLAND);
+        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("navn", Collections.singletonList(maritimtFakta));
+        alleAvklarteMaritimeArbeid.put("enhet", avklartMaritimtArbeid);
+
+        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(alleAvklarteMaritimeArbeid);
+
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidssteder())
+            .extracting(Arbeidssted::getAdresse)
+            .extracting(Adresse::getGateadresse)
+            .contains("N/A");
     }
 
     @Test

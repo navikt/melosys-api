@@ -69,6 +69,10 @@ public class DataByggerStubs {
         saksopplysning.setDokument(new ArbeidsforholdDokument());
         saksopplysninger.add(saksopplysning);
 
+        MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
+        maritimtArbeid.enhetNavn = "enhet";
+        søknadDokument.maritimtArbeid = Collections.singletonList(maritimtArbeid);
+
         PersonDokument personDokument = new PersonDokument();
         personDokument.erEgenAnsatt = true;
         personDokument.fødselsdato = LocalDate.now();
