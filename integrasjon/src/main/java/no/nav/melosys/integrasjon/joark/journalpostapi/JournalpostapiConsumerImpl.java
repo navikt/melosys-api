@@ -20,8 +20,10 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
     }
 
     public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request, boolean forsøkEndeligJfr) {
-        log.info("Oppretter journalpost av type {} for arkivsakid {}",
-            request.getJournalpostType().name(), request.getSak() != null ? request.getSak().getArkivsaksnummer() : "ukjent");
+        if (log.isInfoEnabled()) {
+            log.info("Oppretter journalpost av type {} for arkivsakid {}",
+                request.getJournalpostType().name(), request.getSak() != null ? request.getSak().getArkivsaksnummer() : "ukjent");
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
