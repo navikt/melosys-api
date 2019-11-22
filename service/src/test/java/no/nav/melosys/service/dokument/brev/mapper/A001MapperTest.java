@@ -56,9 +56,6 @@ public class A001MapperTest {
 
     private EasyRandom easyRandom;
 
-    private Behandlingsresultat behandlingsresultat;
-    private Behandling behandling;
-
     private BrevDataA001 brevData;
 
     @Before
@@ -70,7 +67,7 @@ public class A001MapperTest {
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
             Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
 
-        behandlingsresultat = mock(Behandlingsresultat.class);
+        Behandlingsresultat behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
@@ -94,7 +91,7 @@ public class A001MapperTest {
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setDokument(person);
 
-        behandling = mock(Behandling.class);
+        Behandling behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(saksopplysning)));
         when(behandling.getFagsak()).thenReturn(new Fagsak());

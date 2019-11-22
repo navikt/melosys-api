@@ -61,7 +61,7 @@ public class Inntekt3KonverteringTest {
     public void testKonverteringFrilans() throws Exception {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK_BOLK);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
             Saksopplysning saksopplysning = new Saksopplysning();
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -95,7 +95,7 @@ public class Inntekt3KonverteringTest {
     public void testKonverteringTilleggsinformasjon() throws Exception {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK_TILLEGGSINFO);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
             Saksopplysning saksopplysning = new Saksopplysning();
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));

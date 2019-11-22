@@ -16,15 +16,13 @@ public class AvklartefaktaDtoKonvertererTest {
 
     private AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
 
-    private Avklartefakta avklartefakta;
-
     private AvklartefaktaDto avklartefaktaDto;
 
     @Before
     public void setup() {
         avklartefaktaDtoKonverterer = new AvklartefaktaDtoKonverterer();
 
-        avklartefakta = new Avklartefakta();
+        Avklartefakta avklartefakta = new Avklartefakta();
 
         avklartefaktaDto = new AvklartefaktaDto(new ArrayList<>(Arrays.asList("Bosted")),"yrkestypevalgliste");
         avklartefaktaDto.setSubjektID("123456789");

@@ -22,7 +22,6 @@ public class OrganisasjonsDetaljerTest {
     private String linje3 = "LINJE3";
     private String postnr = "postnummer";
     private String poststed = "poststed";
-    private String kommunenr = "kommunenr";
     private String poststedUtland = "poststedUtland";
 
     @Before
@@ -38,6 +37,7 @@ public class OrganisasjonsDetaljerTest {
         adresse.setPostnr(postnr);
         adresse.setPoststed(poststed);
         adresse.setPoststedUtland(poststedUtland);
+        String kommunenr = "kommunenr";
         adresse.setKommunenr(kommunenr);
         adresse.setGyldighetsperiode(periode);
     }

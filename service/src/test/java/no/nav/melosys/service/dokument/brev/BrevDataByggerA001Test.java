@@ -74,7 +74,6 @@ public class BrevDataByggerA001Test {
     private Set<String> avklarteOrganisasjoner;
 
     private SoeknadDokument søknad;
-    private MedlemskapDokument medlDokument;
     private ArbeidsforholdDokument arbDokument;
 
     private BrevDataByggerA001 brevDataByggerA001;
@@ -116,7 +115,7 @@ public class BrevDataByggerA001Test {
         foretakUtland.orgnr = orgnr1;
         søknad.foretakUtland.add(foretakUtland);
 
-        medlDokument = new MedlemskapDokument();
+        MedlemskapDokument medlDokument = new MedlemskapDokument();
         Saksopplysning medl = new Saksopplysning();
         medl.setDokument(medlDokument);
         medl.setType(SaksopplysningType.MEDL);
@@ -146,7 +145,7 @@ public class BrevDataByggerA001Test {
     }
 
     private void lagVilkårResultat(Vilkaar vilkaarType, boolean oppfylt, Kodeverk begrunnelseKode) {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(vilkaarType, oppfylt, begrunnelseKode);;
+        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(vilkaarType, oppfylt, begrunnelseKode);
         when(vilkårRepo.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(vilkaarType))).thenReturn(Optional.of(vilkaarsresultat));
     }
 

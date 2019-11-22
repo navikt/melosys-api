@@ -3,7 +3,7 @@ package no.nav.melosys.domain.eessi.melding;
 public class SvarAnmodningUnntak {
 
     public enum Beslutning {
-        INNVILGELSE, DELVIS_INNVILGELSE, AVSLAG;
+        INNVILGELSE, DELVIS_INNVILGELSE, AVSLAG
     }
 
     private Beslutning beslutning;
