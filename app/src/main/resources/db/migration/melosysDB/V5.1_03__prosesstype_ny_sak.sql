@@ -1,0 +1,1 @@
+INSERT INTO prosess_type (kode, navn) VALUES ('OPPRETT_NY_SAK', 'Oppretter ny sak fra journalført dokument');

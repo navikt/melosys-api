@@ -32,6 +32,7 @@ import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
@@ -118,7 +119,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         if (forventning.getEntity() == null) {
             assertThat(resultat.getEntity()).isNull();
         } else {
-            assertThat(resultat.getEntity()).isEqualToComparingFieldByFieldRecursively(forventning.getEntity());
+            assertThat(resultat.getEntity()).usingRecursiveComparison().isEqualTo(forventning.getEntity());
         }
     }
 
@@ -133,15 +134,33 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         List<FagsakOppsummeringDto> forventet = Collections.singletonList(lagFagsakOppsummeringDto(behandling));
         assertThat(forventet.size()).isEqualTo(resultat.size());
         for (int i = 0; i < forventet.size(); i++) {
-            assertThat(resultat.get(i)).isEqualToComparingFieldByFieldRecursively(forventet.get(i));
+            assertThat(resultat.get(i)).usingRecursiveComparison().isEqualTo(forventet.get(i));
         }
     }
 
     @Test
-    public final void hentFagsakerUtenFnrGirBadRequestException() throws Exception {
+    public final void hentFagsaker_utenFnr_girBadRequest() throws Exception {
         FagsakTjeneste instans = lagFagsakTjeneste(lagFagsak());
         Throwable unntak = catchThrowable(() -> instans.hentFagsaker(null));
         assertThat(unntak).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    public final void opprettSak_utenFnr_badRequestException() throws Exception {
+        FagsakTjeneste instans = lagFagsakTjeneste(null);
+        OpprettSakDto dto = new OpprettSakDto();
+        Throwable unntak = catchThrowable(() -> instans.opprettFagsak(dto));
+        assertThat(unntak).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    public final void opprettSak_sjekkerTilgangOgKallerService() throws Exception {
+        FagsakTjeneste instans = lagFagsakTjeneste(null);
+        OpprettSakDto dto = new OpprettSakDto();
+        dto.brukerID = "brukerID";
+        instans.opprettFagsak(dto);
+        verify(tilgangService).sjekkFnr(eq(dto.brukerID));
+        verify(fagsakService).bestillNySakOgBehandling(eq(dto));
     }
 
     @Test

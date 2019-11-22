@@ -22,6 +22,7 @@ import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.slf4j.Logger;
@@ -67,6 +68,18 @@ public class FagsakTjeneste extends RestTjeneste {
         FagsakDto fagsakDto = tilFagsakDto(sak);
         log.info("Henting av sak {} ({})", fagsakDto.getSaksnummer(), fagsakDto.getGsakSaksnummer());
         return Response.ok(fagsakDto).build();
+    }
+
+    @POST
+    @Path("/opprett")
+    @ApiOperation(value = "Oppretter en sak med tilhørende behandling.")
+    public Response opprettFagsak(@ApiParam OpprettSakDto opprettSakDto) throws FunksjonellException {
+        if (opprettSakDto.brukerID == null) {
+            throw new BadRequestException("BrukerID trengs for å opprette en sak.");
+        }
+        tilgangService.sjekkFnr(opprettSakDto.brukerID);
+        fagsakService.bestillNySakOgBehandling(opprettSakDto);
+        return Response.ok().build();
     }
 
     @GET

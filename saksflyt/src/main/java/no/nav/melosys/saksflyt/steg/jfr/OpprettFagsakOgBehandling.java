@@ -78,7 +78,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
             prosessinstans.setSteg(STATUS_BEH_OPPR);
             log.info("Opprettet behandling {} for prosessinstans {}", behandling.getId(), prosessinstans.getId());
-        } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
+        } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK || prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
             OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID(aktørId).medArbeidsgiver(arbeidsgiver)
                 .medRepresentant(representant).medRepresentantKontaktperson(representantKontakperson)
                 .medBehandlingstype(Behandlingstyper.SOEKNAD).medInitierendeJournalpostId(initierendeJournalpostId)

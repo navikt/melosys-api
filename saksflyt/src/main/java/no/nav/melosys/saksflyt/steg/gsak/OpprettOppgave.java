@@ -2,7 +2,8 @@ package no.nav.melosys.saksflyt.steg.gsak;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -15,8 +16,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,17 +42,16 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDIN
 public class OpprettOppgave extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettOppgave.class);
 
-    private final BehandlingRepository behandlingRepository;
+    private final BehandlingService behandlingService;
     private final GsakFasade gsakFasade;
 
     private static final String PID_MELDING = "{}: {}";
     private static final String STØTTES_IKKE = " er ikke støttet";
 
     @Autowired
-    public OpprettOppgave(BehandlingRepository behandlingRepository, @Qualifier("system")GsakFasade gsakFasade) {
-        this.behandlingRepository = behandlingRepository;
+    public OpprettOppgave(BehandlingService behandlingService, @Qualifier("system")GsakFasade gsakFasade) {
+        this.behandlingService = behandlingService;
         this.gsakFasade = gsakFasade;
-        log.info("OpprettOppgave initialisert");
     }
 
     @Override
@@ -64,8 +64,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Long behandlingID = prosessinstans.getBehandling().getId();
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new FunksjonellException("Behandling " + behandlingID + " finnes ikke."));
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingstyper behandlingstype = behandling.getType();
 
         Fagsak fagsak = behandling.getFagsak();
@@ -94,7 +93,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
             } else {
                 prosessinstans.setSteg(ProsessSteg.FERDIG);
             }
-        } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
+        } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING || prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
         } else {
             String feilmelding = "ProsessType " + prosessinstans.getType() + STØTTES_IKKE;
