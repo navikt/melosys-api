@@ -86,18 +86,20 @@ public class BrevDataService {
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
-        metadata.utenlandskMyndighet = mottaker.erUtenlandskMyndighet() ? hentMyndighetFraAktoer(mottaker) : null;
+        metadata.berik = true;
 
         if (mottaker.getRolle() == BRUKER) {
-            boolean brukerharIkkeAdresseIRegister = brukerHarIkkeTpsAdresse(behandling);
-            if (brukerharIkkeAdresseIRegister) {
+            if (brukerHarIkkeAdresseiTps(behandling)) {
                 StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
                 if (!oppgittAdresse.erTom()) {
+                    metadata.berik = false;
                     metadata.postadresse = oppgittAdresse;
                     metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
                 }
             }
         } else if (mottaker.erUtenlandskMyndighet()) {
+            metadata.berik = false;
+            metadata.utenlandskMyndighet = hentMyndighetFraAktoer(mottaker);
             metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
         }
         return metadata;
@@ -234,7 +236,7 @@ public class BrevDataService {
         mottakerBrev.setId(mottakerID);
 
         String navn = tpsFasade.hentSammensattNavn(mottakerID);
-        if (brukerHarIkkeTpsAdresse(behandling)) {
+        if (brukerHarIkkeAdresseiTps(behandling)) {
             StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
             if (oppgittAdresse.erTom()) {
                 throw new TekniskException("Bruker har verken adresse i TPS eller oppgitt adresse i søknad");
@@ -277,7 +279,7 @@ public class BrevDataService {
         return sakspart;
     }
 
-    private boolean brukerHarIkkeTpsAdresse(Behandling behandling) throws TekniskException {
+    private boolean brukerHarIkkeAdresseiTps(Behandling behandling) throws TekniskException {
         PersonDokument person = SaksopplysningerUtils.hentPersonDokument(behandling);
         return person.harIkkeRegistrertAdresse();
     }

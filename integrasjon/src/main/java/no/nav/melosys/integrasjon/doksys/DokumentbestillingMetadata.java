@@ -31,4 +31,7 @@ public class DokumentbestillingMetadata {
     public UtenlandskMyndighet utenlandskMyndighet;
 
     public StrukturertAdresse postadresse;
+
+    // Avgjør om postadresse og mottakers navn utledes av tjenesten
+    public boolean berik;
 }
