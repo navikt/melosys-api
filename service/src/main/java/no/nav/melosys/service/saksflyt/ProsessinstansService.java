@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -138,11 +138,8 @@ public class ProsessinstansService {
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medSteg(ProsessSteg.AOU_VALIDERING)
             .medBehandling(behandling)
+            .medEessiMottaker(mottakerInstitusjon)
             .build();
-
-        if (StringUtils.isNotEmpty(mottakerInstitusjon)) {
-            prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
-        }
 
         lagre(prosessinstans);
     }
@@ -176,11 +173,9 @@ public class ProsessinstansService {
             .medSteg(ProsessSteg.IV_VALIDERING)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
+            .medEessiMottaker(mottakerInstitusjon)
             .build();
 
-        if (StringUtils.isNotEmpty(mottakerInstitusjon)) {
-            prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, mottakerInstitusjon);
-        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
         lagre(prosessinstans);
     }
@@ -291,11 +286,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansVideresendSoknad(Behandling behandling) {
+    public void opprettProsessinstansVideresendSoknad(Behandling behandling, String mottakerinstitusjon) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
+            .medEessiMottaker(mottakerinstitusjon)
             .build();
 
         lagre(prosessinstans);

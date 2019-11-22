@@ -188,7 +188,7 @@ public class FagsakServiceIT {
         journalpost.setForsendelseMottatt(Instant.now());
         when(joarkService.hentJournalpost(any())).thenReturn(journalpost);
 
-        fagsakService.henleggOgVideresend("MELTEST-2");
+        fagsakService.henleggOgVideresend("MELTEST-2", "SE:inst1234");
         prosessinstansTestService.ventPå(Testbehandlinger.TOM_BEHANDLING);
         prosessinstansTestService.sjekkProsessteg(Testbehandlinger.TOM_BEHANDLING, FERDIG);
 

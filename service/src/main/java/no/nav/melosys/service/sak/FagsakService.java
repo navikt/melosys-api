@@ -120,13 +120,14 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
-    // Sletter aktører som ikke ligger i oppgitt liste og legger til de som mangler.
+    // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.
     // Oppdaterer IKKE de som allerede finnes i database
 
     @Transactional
     public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId()));
+        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
+            && aktoer.getRolle() == Aktoersroller.MYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
             .map(id -> lagAktør(fagsak, Aktoersroller.MYNDIGHET, id))
@@ -265,7 +266,7 @@ public class FagsakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void henleggOgVideresend(String saksnummer) throws FunksjonellException, TekniskException {
+    public void henleggOgVideresend(String saksnummer, String mottakerinstitusjon) throws FunksjonellException, TekniskException {
         Fagsak fagsak = hentFagsak(saksnummer);
 
         long behandlingId = fagsak.getAktivBehandling().getId();
@@ -275,7 +276,7 @@ public class FagsakService {
         fagsak.setStatus(Saksstatuser.VIDERESENDT);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
-        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling);
+        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, mottakerinstitusjon);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

@@ -34,6 +34,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
  */
 @Component
 public class SendUtland extends AbstraktSendUtland {
+    private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final AnmodningsperiodeService anmodningsperiodeService;
 
@@ -46,7 +47,8 @@ public class SendUtland extends AbstraktSendUtland {
                       BehandlingService behandlingService,
                       BehandlingsresultatService behandlingsresultatService,
                       LandvelgerService landvelgerService, AnmodningsperiodeService anmodningsperiodeService) {
-        super(eessiService, brevBestiller, behandlingsresultatService, landvelgerService);
+        super(eessiService, behandlingsresultatService, landvelgerService);
+        this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
         this.anmodningsperiodeService = anmodningsperiodeService;
     }
@@ -69,13 +71,17 @@ public class SendUtland extends AbstraktSendUtland {
         prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
     }
 
-    @Override
-    protected Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    private Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         return new Brevbestilling.Builder().medDokumentType(Produserbaredokumenter.ANMODNING_UNNTAK)
             .medAvsender(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(MYNDIGHET))
             .medBehandling(behandling).build();
+    }
+
+    @Override
+    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+        brevBestiller.bestill(lagBrevBestilling(prosessinstans));
     }
 
     @Override

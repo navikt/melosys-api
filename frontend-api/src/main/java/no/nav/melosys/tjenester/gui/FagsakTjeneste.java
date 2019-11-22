@@ -22,10 +22,7 @@ import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
+import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,14 +97,14 @@ public class FagsakTjeneste extends RestTjeneste {
         return Response.ok().build();
     }
 
-    @PUT
+    @POST
     @Path("{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
-    public Response videresend(@PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+    public Response videresend(@PathParam("saksnr") String saksnummer, @ApiParam("videresendDto") VideresendDto videresendDto) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
 
-        fagsakService.henleggOgVideresend(saksnummer);
+        fagsakService.henleggOgVideresend(saksnummer, videresendDto.getMottakerinstitusjon());
         return Response.ok().build();
     }
 

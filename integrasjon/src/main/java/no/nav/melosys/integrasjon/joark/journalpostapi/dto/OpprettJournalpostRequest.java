@@ -63,7 +63,8 @@ public class OpprettJournalpostRequest {
             .avsenderMottaker(avsenderMottaker(
                 opprettJournalpost.getKorrespondansepartId(),
                 opprettJournalpost.getKorrespondansepartNavn(),
-                opprettJournalpost.getKorrespondansepartIdType()))
+                opprettJournalpost.getKorrespondansepartIdType(),
+                opprettJournalpost.getKorrespondansepartLand()))
             .bruker(bruker(opprettJournalpost.getBrukerId()))
             .tema(opprettJournalpost.getTema())
             .kanal(opprettJournalpost.getMottaksKanal())
@@ -76,11 +77,12 @@ public class OpprettJournalpostRequest {
             .build();
     }
 
-    private static AvsenderMottaker avsenderMottaker(String id, String navn, String idType) {
+    private static AvsenderMottaker avsenderMottaker(String id, String navn, String idType, String land) {
         return AvsenderMottaker.builder()
             .id(id)
             .idType(AvsenderMottaker.IdType.valueOf(idType))
             .navn(navn)
+            .land(land)
             .build();
     }
 

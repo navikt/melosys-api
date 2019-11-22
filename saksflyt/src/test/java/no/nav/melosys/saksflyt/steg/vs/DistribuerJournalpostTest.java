@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.aou.inn.svar;
+package no.nav.melosys.saksflyt.steg.vs;
 
 import java.util.Collections;
 
@@ -15,7 +15,9 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
+import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,16 +26,18 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DistribuerJournalpostTest {
-
     @Mock
     private DoksysFasade doksysFasade;
+    @Mock
+    private SoeknadService soeknadService;
+    @Mock
+    private LandvelgerService landvelgerService;
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
 
@@ -41,9 +45,9 @@ public class DistribuerJournalpostTest {
 
     @Before
     public void setup() throws TekniskException {
-        distribuerJournalpost = new DistribuerJournalpost(doksysFasade, utenlandskMyndighetService);
-
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(any(Landkoder.class))).thenReturn(lagUtenlandskMyndighet());
+        distribuerJournalpost = new DistribuerJournalpost(doksysFasade, soeknadService, landvelgerService, utenlandskMyndighetService);
+        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(Landkoder.SE);
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(any())).thenReturn(lagUtenlandskMyndighet());
     }
 
     @Test
@@ -56,6 +60,7 @@ public class DistribuerJournalpostTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(Collections.singleton(aktoer));
         Behandling behandling = new Behandling();
+        behandling.setId(1L);
         behandling.setFagsak(fagsak);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -67,7 +72,7 @@ public class DistribuerJournalpostTest {
         ArgumentCaptor<StrukturertAdresse> captor = ArgumentCaptor.forClass(StrukturertAdresse.class);
         verify(doksysFasade).distribuerJournalpost(eq("12345"), captor.capture());
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_STATUS_BEH_AVSL);
 
         StrukturertAdresse strukturertAdresse = captor.getValue();
         assertThat(strukturertAdresse).isNotNull();

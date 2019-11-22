@@ -38,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -224,6 +225,33 @@ public class FagsakServiceTest {
         assertThat(oppdaterFagsak.getAktører().stream()
             .map(Aktoer::getInstitusjonId)
             .collect(Collectors.toList())).containsOnlyElementsOf(nyeInstitusjonsIder);
+    }
+
+    @Test
+    public void oppdaterMyndigheter_harBruker_fjernerIkkeBruker() {
+        String saksnummer = "1234";
+        Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(eksisterendeFagsak);
+
+        Aktoer bruker = new Aktoer();
+        bruker.setFagsak(eksisterendeFagsak);
+        bruker.setRolle(Aktoersroller.BRUKER);
+        bruker.setAktørId("1234");
+        eksisterendeFagsak.getAktører().add(bruker);
+
+        List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
+        fagsakService.oppdaterMyndigheter(saksnummer, nyeInstitusjonsIder);
+
+        ArgumentCaptor<Fagsak> captor = ArgumentCaptor.forClass(Fagsak.class);
+        verify(fagsakRepo).save(captor.capture());
+        Fagsak oppdaterFagsak = captor.getValue();
+
+        assertThat(oppdaterFagsak.getAktører())
+            .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonId)
+            .containsExactlyInAnyOrder(
+                tuple(Aktoersroller.BRUKER, "1234", null),
+                tuple(Aktoersroller.MYNDIGHET, null, "Ny institusjonsid")
+            );
     }
 
     @Test
