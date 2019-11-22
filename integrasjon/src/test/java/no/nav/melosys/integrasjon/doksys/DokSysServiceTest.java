@@ -116,6 +116,9 @@ public class DokSysServiceTest {
         metadata.brukerNavn = "Kim Se";
         metadata.mottaker = lagAktør(Aktoersroller.BRUKER);
         metadata.postadresse = postadresse;
+        if (postadresse == null) {
+            metadata.berik = true;
+        }
         return metadata;
     }
 

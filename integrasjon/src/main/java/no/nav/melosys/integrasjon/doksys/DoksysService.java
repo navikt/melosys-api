@@ -206,7 +206,7 @@ public class DoksysService implements DoksysFasade {
         Aktoersroller mottakerRolle = metadata.mottaker.getRolle();
         String mottakerID = metadata.mottakerID;
         String brukerNavn = metadata.brukerNavn;
-        boolean berik = metadata.postadresse == null;
+        boolean berik = metadata.berik;
 
         switch (mottakerRolle) {
             case BRUKER:

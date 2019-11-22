@@ -86,17 +86,20 @@ public class BrevDataService {
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
-        metadata.utenlandskMyndighet = mottaker.erUtenlandskMyndighet() ? hentMyndighetFraAktoer(mottaker) : null;
+        metadata.berik = true;
 
         if (mottaker.getRolle() == BRUKER) {
             if (brukerHarIkkeAdresseiTps(behandling)) {
                 StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
                 if (!oppgittAdresse.erTom()) {
+                    metadata.berik = false;
                     metadata.postadresse = oppgittAdresse;
                     metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
                 }
             }
         } else if (mottaker.erUtenlandskMyndighet()) {
+            metadata.berik = false;
+            metadata.utenlandskMyndighet = hentMyndighetFraAktoer(mottaker);
             metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
         }
         return metadata;
