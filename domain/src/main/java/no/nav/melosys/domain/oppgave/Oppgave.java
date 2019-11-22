@@ -297,7 +297,7 @@ public final class Oppgave {
      *  Sorter oppgaver basert på prioritet (først), frist og aktiv dato
      */
     public static final Comparator<Oppgave> lavestTilHøyestPrioritet = (a, b) -> {
-        int res = 0;
+        int res;
 
         res = a.getPrioritet().compareTo(b.getPrioritet());
 

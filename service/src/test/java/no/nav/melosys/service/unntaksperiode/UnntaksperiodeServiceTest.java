@@ -85,7 +85,7 @@ public class UnntaksperiodeServiceTest {
     public void ikkeGodkjennPeriode_ingenBegrunnelser_forventException() throws Exception {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Ingen begrunnelser for avlag av periode");
-        unntaksperiodeService.ikkeGodkjennPeriode(1l, new HashSet<>(), null);
+        unntaksperiodeService.ikkeGodkjennPeriode(1L, new HashSet<>(), null);
     }
 
     @Test

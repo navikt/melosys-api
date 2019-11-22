@@ -123,7 +123,7 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
         assertThat(resultat.size()).isEqualTo(perioder.size());
         if (!perioder.isEmpty()) {
             assertThat(perioder.iterator().next())
-                    .isEqualToComparingFieldByFieldRecursively(resultat.iterator().next());
+                    .usingRecursiveComparison().isEqualTo(resultat.iterator().next());
         }
         validerArray(resultat, LOVVALGSPERIODER_SCHEMA);
     }

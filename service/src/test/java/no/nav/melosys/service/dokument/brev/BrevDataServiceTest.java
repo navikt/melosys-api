@@ -370,7 +370,7 @@ public class BrevDataServiceTest {
     private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Aktoersroller rolle) throws Exception {
         DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, mottaker, kontaktopplysning, lagBehandling(lagSaksopplysninger()), lagBrevData());
         DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype, rolle);
-        assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+        assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
     }
 
     private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) throws TekniskException {

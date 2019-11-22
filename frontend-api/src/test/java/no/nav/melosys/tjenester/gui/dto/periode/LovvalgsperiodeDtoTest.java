@@ -39,7 +39,7 @@ public class LovvalgsperiodeDtoTest {
         });
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
-        Assertions.assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+        Assertions.assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class LovvalgsperiodeDtoTest {
 
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
-        Assertions.assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+        Assertions.assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
     }
 
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {

@@ -34,7 +34,6 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeM
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InnvilgelsesbrevFlereLandMapperTest {
-
     private final InnvilgelsesbrevFlereLandMapper instans;
 
     public InnvilgelsesbrevFlereLandMapperTest() {
@@ -43,7 +42,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
 
     @Test
     public void testSakstypeKode() throws Exception {
-        List<String> koderSomIkkeErAktuelleForBrev = Arrays.asList(
+        List<String> koderSomIkkeErAktuelleForBrev = Collections.singletonList(
             "UKJENT" // Vet ikke om det er aktuelt med brev for denne
         );
 
@@ -93,8 +92,9 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.ORDINAER;
         brevdataA1.hovedvirksomhet = virksomheter.get(0);
-        brevdataA1.bivirksomheter = new ArrayList<>(virksomheter);
-        brevdataA1.bivirksomheter.remove(0);
+        ArrayList bivirksomheter = new ArrayList<>(virksomheter);
+        bivirksomheter.remove(0);
+        brevdataA1.bivirksomheter = bivirksomheter;
 
         brevdataA1.arbeidssteder = new ArrayList<>();
         return brevdataA1;

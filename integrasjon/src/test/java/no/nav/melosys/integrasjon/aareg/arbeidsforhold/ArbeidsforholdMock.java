@@ -29,7 +29,7 @@ public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
             throw new RuntimeException("ident " + ident + " er ikke støttet.");
         }
 
-        no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse response = null;
+        no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse response;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -50,7 +50,7 @@ public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
             throw new RuntimeException("arbeidsforholdsID " + arbeidsforholdId + " er ikke støttet.");
         }
 
-        no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse response = null;
+        no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse response;
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("mock/arbeidsforhold/" + arbeidsforholdId + ".xml")) {
             JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
