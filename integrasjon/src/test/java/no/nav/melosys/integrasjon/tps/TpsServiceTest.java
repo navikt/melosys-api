@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.tps;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,30 +23,26 @@ import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentRespon
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdResponse;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.IdentDetaljer;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkResponse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkResponse;
 import org.junit.Before;
 import org.junit.Test;
 
-import static java.lang.Thread.sleep;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class TpsServiceTest {
-
     private static final String FNR_1 = TpsTestData.STD_KVINNE_FNR;
     private static final String FNR_UKJENT = "88888888889";
     private static final Long AKTØRID_1 = TpsTestData.STD_KVINNE_AKTØR_ID;
 
     private AktorConsumer aktorConsumer;
-
     private PersonConsumer personConsumer;
-
     private AktoerIdCache aktørIdCache;
-
     private TpsService service;
 
     @Before
@@ -130,13 +127,14 @@ public class TpsServiceTest {
     }
 
     @Test
-    public void aktørIdTømtFraCache() throws IkkeFunnetException, InterruptedException, HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
+    public void aktørIdTømtFraCache()
+        throws IkkeFunnetException, HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
         aktørIdCache.onApplicationEvent(null);
 
         String aktørId = service.hentAktørIdForIdent(FNR_1);
         assertEquals(Long.toString(AKTØRID_1), aktørId);
 
-        sleep(1500);
+        await().atMost(Duration.ofMillis(1500)).until(() -> aktørIdCache.erTom());
 
         String fnr = service.hentIdentForAktørId(aktørId);
         assertThat(fnr).isEqualTo(FNR_1);
