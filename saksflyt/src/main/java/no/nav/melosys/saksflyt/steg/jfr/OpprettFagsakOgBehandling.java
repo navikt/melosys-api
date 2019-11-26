@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.audit.AuditorProvider;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -39,15 +39,11 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     private final BehandlingService behandlingService;
 
-    private final AuditorProvider auditorAware;
-
     @Autowired
     public OpprettFagsakOgBehandling(FagsakService fagsakService,
-                                     BehandlingService behandlingService,
-                                     AuditorProvider auditorAware) {
+                                     BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        this.auditorAware = auditorAware;
         log.info("OpprettSak initialisert");
     }
 
@@ -64,10 +60,8 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String representant = prosessinstans.getData(REPRESENTANT);
         String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
-        String endretAv = prosessinstans.getData(SAKSBEHANDLER);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
-        auditorAware.setSaksbehanlderID(endretAv);
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);

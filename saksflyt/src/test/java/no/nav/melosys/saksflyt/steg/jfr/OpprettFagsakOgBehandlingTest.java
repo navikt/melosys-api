@@ -43,7 +43,7 @@ public class OpprettFagsakOgBehandlingTest {
     @Before
     public void setUp() {
         AuditorProvider auditorAware = mock(AuditorProvider.class);
-        agent = new OpprettFagsakOgBehandling(fagsakService, behandlingService, auditorAware);
+        agent = new OpprettFagsakOgBehandling(fagsakService, behandlingService);
     }
 
     @Test
