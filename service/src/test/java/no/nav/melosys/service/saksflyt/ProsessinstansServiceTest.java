@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Periode;
@@ -153,7 +154,8 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void opprettProsessinstansOppfriskning() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = lagBehandling();
+
         String aktørID = "aktørID";
         String brukerID = "br";
         SoeknadDokument soeknadDokument = new SoeknadDokument();
@@ -166,11 +168,19 @@ public class ProsessinstansServiceTest {
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
     }
 
+    private Behandling lagBehandling() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("12354");
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        return behandling;
+    }
+
     @Test
     public void opprettProsessinstansForkortPeriode() {
         String saksbehandler = settInnloggetSaksbehandler();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = lagBehandling();
         service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE, null);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
