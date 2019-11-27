@@ -76,6 +76,7 @@ public class ArbeiderTraad implements Runnable {
             try {
                 aktivProsessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
                 prosessinstansRepo.save(aktivProsessinstans);
+                aktivProsessinstans = null;
             } catch (RuntimeException e) {
                 logger.error("Prosessinstans {} kunne ikke settes til feilet: ", aktivProsessinstans.getId(), e);
             }
@@ -101,9 +102,9 @@ public class ArbeiderTraad implements Runnable {
             }
             pi.setEndretDato(LocalDateTime.now());
             pi = prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
+            aktivProsessinstans = null;
         } finally {
             binge.fjernFraAktiveProsessinstanser(pi);
-            aktivProsessinstans = null;
         }
 
         if (pi.getSteg() != ProsessSteg.FERDIG && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {

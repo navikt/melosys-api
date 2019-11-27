@@ -164,9 +164,7 @@ public class SedDataBygger {
         adresse.setPoststed(bostedsadresse.poststed);
         adresse.setPostnr(bostedsadresse.postnummer);
         adresse.setLand(tilIso3(bostedsadresse.landkode));
-        adresse.setGateadresse(
-            bostedsadresse.gatenavn + " " + Objects.toString(bostedsadresse.husnummer, "")
-        );
+        adresse.setGateadresse(lagGateadresse(bostedsadresse.gatenavn, bostedsadresse.husnummer));
         return adresse;
     }
 
@@ -191,6 +189,7 @@ public class SedDataBygger {
             Adresse adresse = new Adresse();
             adresse.setLand(maritimtArbeidssted.getLandkode());
             adresse.setPoststed("N/A");
+            adresse.setGateadresse("N/A");
 
             arbeidssted.setAdresse(adresse);
             arbeidssted.setHjemmebase(maritimtArbeidssted.getFlaggLandKode());
@@ -222,12 +221,20 @@ public class SedDataBygger {
 
     private static Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
         Adresse adresse = new Adresse();
-        adresse.setGateadresse(strukturertAdresse.gatenavn + (strukturertAdresse.husnummer == null ? "" : (" " + strukturertAdresse.husnummer + " ")));
+        adresse.setGateadresse(lagGateadresse(strukturertAdresse.gatenavn, strukturertAdresse.husnummer));
         adresse.setLand(strukturertAdresse.landkode);
         adresse.setPostnr(strukturertAdresse.postnummer);
         adresse.setPoststed(strukturertAdresse.poststed);
         adresse.setRegion(strukturertAdresse.region);
         return adresse;
+    }
+
+    private static String lagGateadresse(String gatenavn, String husnummer) {
+        if (StringUtils.isEmpty(gatenavn)) {
+            return "N/A";
+        }
+
+        return gatenavn + (StringUtils.isEmpty(husnummer) ? "" : String.format(" %s", husnummer));
     }
 
     private static List<Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
