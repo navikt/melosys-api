@@ -215,6 +215,7 @@ public class ProsessinstansService {
         nyprosessinstans.setBehandling(behandling);
         nyprosessinstans.setType(ProsessType.OPPFRISKNING);
 
+        nyprosessinstans.setData(ProsessDataKey.SAKSNUMMER, behandling.getFagsak().getSaksnummer());
         nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
         nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
 
