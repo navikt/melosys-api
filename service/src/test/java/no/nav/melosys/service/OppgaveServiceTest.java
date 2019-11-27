@@ -116,10 +116,12 @@ public class OppgaveServiceTest {
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
-        assertThat(mineSaker.get(0).getOppgaveID()).isEqualTo("1");
-        assertThat(((BehandlingsoppgaveDto)mineSaker.get(0)).getBehandling().isErUnderOppdatering()).isEqualTo(true);
-        assertThat(mineSaker.get(0).getFnr()).isEqualTo("fnr");
-        assertThat(mineSaker.get(0).getSammensattNavn()).isEqualTo("sammensattNavn");
+        BehandlingsoppgaveDto oppgave = (BehandlingsoppgaveDto) mineSaker.get(0);
+        assertThat(oppgave.getOppgaveID()).isEqualTo("1");
+        assertThat(oppgave.getFnr()).isEqualTo("fnr");
+        assertThat(oppgave.getSammensattNavn()).isEqualTo("sammensattNavn");
+        assertThat(oppgave.getBehandling().isErUnderOppdatering()).isEqualTo(true);
+        assertThat(oppgave.getBehandling().getSvarFrist()).isEqualTo(Instant.ofEpochMilli(123456L));
 
         mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);
@@ -153,6 +155,7 @@ public class OppgaveServiceTest {
         behandling.setId(1L);
         behandling.setEndretDato(Instant.now());
         behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setDokumentasjonSvarfristDato(Instant.ofEpochMilli(123456L));
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         return behandling;
     }

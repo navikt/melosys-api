@@ -13,6 +13,7 @@ public class BehandlingDto {
     private Instant sisteOpplysningerHentetDato;
     private boolean erUnderOppdatering;
     private Instant registrertDato;
+    private Instant svarFrist;
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -60,5 +61,13 @@ public class BehandlingDto {
 
     public void setRegistrertDato(Instant registrertDato) {
         this.registrertDato = registrertDato;
+    }
+
+    public Instant getSvarFrist() {
+        return svarFrist;
+    }
+
+    public void setSvarFrist(Instant svarFrist) {
+        this.svarFrist = svarFrist;
     }
 }
