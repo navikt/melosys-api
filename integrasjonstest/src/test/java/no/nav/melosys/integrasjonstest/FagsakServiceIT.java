@@ -7,6 +7,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -36,7 +37,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner.SOEKNADEN_TRUKKET;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_HENLAGT_SAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
 import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testsubjekter.AVKLART_ARBEIDSGIVER_ORGNR;
 import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testsubjekter.DELOITTE_ORGNR;
@@ -105,7 +106,7 @@ public class FagsakServiceIT {
 
     @Test
     public void fagsak_henleggFagsak_medArbeidsgiver() throws FunksjonellException, TekniskException {
-        TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
+        TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
         .utfyllAvklartefaktaForArt12(Landkoder.SE, AVKLART_ARBEIDSGIVER_ORGNR);
 
         Journalpost journalpost = new Journalpost("123123");
@@ -181,19 +182,18 @@ public class FagsakServiceIT {
     @Test
     public void fagsak_henleggVideresend() throws FunksjonellException, TekniskException {
         TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
-            .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR)
             .utfyllAvklartefaktaForArt13(Landkoder.SE, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR, Landkoder.SE);
 
         Journalpost journalpost = new Journalpost("123123");
         journalpost.setForsendelseMottatt(Instant.now());
         when(joarkService.hentJournalpost(any())).thenReturn(journalpost);
+        when(joarkService.hentDokument(any(), any())).thenReturn(new byte[]{});
 
         fagsakService.henleggOgVideresend("MELTEST-2", "SE:inst1234");
-        prosessinstansTestService.ventPå(Testbehandlinger.TOM_BEHANDLING);
-        prosessinstansTestService.sjekkProsessteg(Testbehandlinger.TOM_BEHANDLING, FERDIG);
+        prosessinstansTestService.ventPå(Testbehandlinger.TOM_BEHANDLING, ProsessSteg.VS_SEND_SOKNAD);
+       // prosessinstansTestService.sjekkProsessteg(Testbehandlinger.TOM_BEHANDLING, FERDIG);
 
         dokumentSjekker.sjekkBrevBestilt(
-            forventDokument(MELDING_HENLAGT_SAK, Aktoersroller.BRUKER),
-            forventDokument(MELDING_HENLAGT_SAK, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR));
+            forventDokument(ORIENTERING_VIDERESENDT_SOEKNAD, Aktoersroller.BRUKER));
     }
 }
