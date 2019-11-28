@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "vedtak_metadata")
 @EntityListeners(AuditingEntityListener.class)
 public class VedtakMetadata extends RegistreringsInfo {
+    // Populeres av Hibernate med behandlingsresultat.id
     @Id
     private Long id;
 
