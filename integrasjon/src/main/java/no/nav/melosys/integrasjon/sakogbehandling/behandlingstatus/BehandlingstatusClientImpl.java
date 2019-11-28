@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 import java.io.StringWriter;
 import javax.jms.Message;
 import javax.jms.Queue;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -18,30 +17,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.integrasjon.felles.jms.JmsConfig.HENDELSESKØ;
 
 @Component
 public class BehandlingstatusClientImpl implements BehandlingstatusClient {
-    public static final long DEFAULT_TIMEOUT = 5000;
+    private static final long DEFAULT_TIMEOUT = 5000;
 
-    private final JAXBContext jaxbContext;
-    private final ObjectFactory objectFactory;
     private final JmsTemplate jmsTemplate;
     private final Queue hendelseshåndterer;
+    private final Jaxb2Marshaller jaxb2Marshaller;
+    private final ObjectFactory objectFactory;
 
     @Autowired
-    public BehandlingstatusClientImpl(JmsTemplate jmsTemplate, @Qualifier(HENDELSESKØ) Queue hendelseshåndterer) throws IntegrasjonException {
-        try {
-            jaxbContext = JAXBContext.newInstance(BehandlingStatus.class);
-        } catch (JAXBException e) {
-            throw new IntegrasjonException(e);
-        }
-        this.objectFactory = new ObjectFactory();
+    public BehandlingstatusClientImpl(JmsTemplate jmsTemplate,
+                                      @Qualifier(HENDELSESKØ) Queue hendelseshåndterer,
+                                      Jaxb2Marshaller jaxb2Marshaller) {
         this.jmsTemplate = jmsTemplate;
         this.hendelseshåndterer = hendelseshåndterer;
-
+        this.jaxb2Marshaller = jaxb2Marshaller;
+        this.objectFactory = new ObjectFactory();
         this.jmsTemplate.setReceiveTimeout(DEFAULT_TIMEOUT);
     }
 
@@ -57,7 +54,7 @@ public class BehandlingstatusClientImpl implements BehandlingstatusClient {
         jmsTemplate.convertAndSend(hendelseshåndterer, behandlingStatusTilXml(behandlingAvsluttet), behandleMelding);
     }
 
-    String behandlingStatusTilXml(BehandlingStatus behandlingStatus) throws IntegrasjonException {
+    private String behandlingStatusTilXml(BehandlingStatus behandlingStatus) throws IntegrasjonException {
         try {
             JAXBElement<?> xmlElement;
             if (behandlingStatus instanceof BehandlingOpprettet) {
@@ -67,7 +64,7 @@ public class BehandlingstatusClientImpl implements BehandlingstatusClient {
             } else {
                 throw new IntegrasjonException("Ukjent Behandlingsstatus i kø til Sak og Behandling");
             }
-            Marshaller marshaller = jaxbContext.createMarshaller();
+            Marshaller marshaller = jaxb2Marshaller.createMarshaller();
             StringWriter writer = new StringWriter();
             marshaller.marshal(xmlElement, writer);
             return writer.toString();
@@ -80,5 +77,4 @@ public class BehandlingstatusClientImpl implements BehandlingstatusClient {
         message.setStringProperty("callId", MDCOperations.getFromMDC(MDCOperations.MDC_CALL_ID));
         return message;
     };
-
 }

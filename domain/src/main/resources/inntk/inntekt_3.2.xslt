@@ -23,7 +23,7 @@
     </xsl:template>
 
     <xsl:template match="@xsi:*">
-        <xsl:value-of select="substring-after(., 'ns4:')"/>
+        <xsl:value-of select="substring-after(., ':')"/>
     </xsl:template>
 
     <xsl:template match="@*"/>

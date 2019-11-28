@@ -1,22 +1,18 @@
 package no.nav.melosys.integrasjon.aareg;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -25,13 +21,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class AaregServiceTest {
-
     private static final Long SIKKERHETSBEGRENSET_ID = 1L;
 
     private AaregService aaregService;
+    private Jaxb2Marshaller marshaller;
 
     @Before
     public void setUp() {
+        marshaller = new JaxbConfig().jaxb2Marshaller();
         aaregService = lagAaregService(new ArbeidsforholdMock());
     }
 
@@ -59,17 +56,6 @@ public class AaregServiceTest {
                 .hasMessageContaining("oppslag av arbeidsforhold");
     }
 
-    @Test
-    public void hentArbeidsforholdHistorikkMedDysfunksjonellJaxbContextKasterUnntak() throws Exception {
-        ArbeidsforholdConsumer arbeidsforholdConsumer = mockArbeidsforholdConsumer();
-        JAXBContext dysfunksjonelljaxbContext = JAXBContext.newInstance(Object.class);
-        AaregService instans = lagAaregService(arbeidsforholdConsumer, dysfunksjonelljaxbContext);
-        Throwable unntak = catchThrowable(() -> instans.hentArbeidsforholdHistorikk(2L));
-        assertThat(unntak).isInstanceOf(IntegrasjonException.class)
-                .hasCauseInstanceOf(JAXBException.class)
-                .hasMessageContaining("oppslag av arbeidsforhold");
-    }
-
     private static ArbeidsforholdConsumer mockArbeidsforholdConsumer() throws Exception {
         ArbeidsforholdConsumer arbeidsforholdConsumer = mock(ArbeidsforholdConsumer.class);
         HentArbeidsforholdHistorikkRequest request = new HentArbeidsforholdHistorikkRequest();
@@ -80,14 +66,8 @@ public class AaregServiceTest {
         return arbeidsforholdConsumer;
     }
 
-    private static AaregService lagAaregService(ArbeidsforholdConsumer arbeidsforholdConsumer) {
-        return lagAaregService(arbeidsforholdConsumer, null);
+    private AaregService lagAaregService(ArbeidsforholdConsumer arbeidsforholdConsumer) {
+        DokumentFactory dokumentFactory = new DokumentFactory(marshaller, new XsltTemplatesFactory());
+        return new AaregService(arbeidsforholdConsumer, dokumentFactory);
     }
-
-    private static AaregService lagAaregService(ArbeidsforholdConsumer arbeidsforholdConsumer, JAXBContext jaxbContext) {
-        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-        return jaxbContext != null ? new AaregService(arbeidsforholdConsumer, dokumentFactory, jaxbContext) :
-            new AaregService(arbeidsforholdConsumer, dokumentFactory);
-    }
-
 }
