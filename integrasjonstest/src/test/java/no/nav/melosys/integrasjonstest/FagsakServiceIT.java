@@ -191,7 +191,6 @@ public class FagsakServiceIT {
 
         fagsakService.henleggOgVideresend("MELTEST-2", "SE:inst1234");
         prosessinstansTestService.ventPå(Testbehandlinger.TOM_BEHANDLING, ProsessSteg.VS_SEND_SOKNAD);
-       // prosessinstansTestService.sjekkProsessteg(Testbehandlinger.TOM_BEHANDLING, FERDIG);
 
         dokumentSjekker.sjekkBrevBestilt(
             forventDokument(ORIENTERING_VIDERESENDT_SOEKNAD, Aktoersroller.BRUKER));
