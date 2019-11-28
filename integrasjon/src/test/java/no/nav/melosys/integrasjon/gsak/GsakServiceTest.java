@@ -62,6 +62,31 @@ public final class GsakServiceTest {
     }
 
     @Test
+    public void hentSisteOppgaveDtoForSak_flereOppgaver_sortererOgReturnererSisteGyldige() throws Exception {
+        OppgaveDto oppgaveDto = new OppgaveDto();
+        oppgaveDto.setAktivDato(LocalDate.now());
+        oppgaveDto.setId("2");
+        OppgaveDto oppgaveDto2 = new OppgaveDto();
+        oppgaveDto2.setAktivDato(LocalDate.now());
+        oppgaveDto2.setId("10");
+        OppgaveDto oppgaveDto3 = new OppgaveDto();
+        oppgaveDto3.setAktivDato(LocalDate.now().minusDays(1L));
+        oppgaveDto3.setId("300");
+        
+        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Arrays.asList(oppgaveDto, oppgaveDto2, oppgaveDto3));
+
+        Optional<OppgaveDto> respons = gsakService.hentSisteOppgaveDtoForSak("MELOSYSTEST-100");
+        assertThat(respons).isPresent();
+        assertThat(respons.get().getId()).isEqualTo("10");
+        
+        verify(oppgaveConsumer, times(1)).hentOppgaveListe(oppgaveSearchRequestCaptor.capture());
+
+        OppgaveSearchRequest request = oppgaveSearchRequestCaptor.getValue();
+        assertThat(request.getSaksreferanse().length).isEqualTo(1);
+        assertThat(request.getSaksreferanse()[0]).isEqualTo("MELOSYSTEST-100");
+    }
+
+    @Test
     public void opprettOppgave_vurderDokument_setterData() throws Exception {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.VUR)

@@ -106,6 +106,26 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public String opprettOppgave(OpprettOppgaveDto oppgaveDto) throws FunksjonellException, TekniskException {
+        return oppgaveConsumer.opprettOppgave(oppgaveDto);
+    }
+
+    @Override
+    public Optional<OppgaveDto> hentSisteOppgaveDtoForSak(String saksnummer) throws TekniskException, FunksjonellException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medSaksreferanse(new String[] { saksnummer })
+            .medTema(new String[] { Tema.MED.getKode(), Tema.UFM.getKode() })
+            .medOppgaveTyper(new String[]{ Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode() })
+            .build();
+
+        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
+        
+        return finnOppgaveListeResponse.stream()
+                .filter(Objects::nonNull)
+                .max(Comparator.comparing(OppgaveDto::getAktivDato).thenComparing(OppgaveDto::getId, Comparator.comparing(Integer::valueOf)));
+    }
+
+    @Override
     public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
         if (oppgave == null) {

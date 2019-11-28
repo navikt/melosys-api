@@ -113,7 +113,7 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getBehandling()).isEqualTo(behandlingsreplika);
         assertThat(behandlingsresultatreplika.getBehandlingsmåte()).isEqualTo(behandlingsresultat.getBehandlingsmåte());
         assertThat(behandlingsresultatreplika.getType()).isEqualTo(behandlingsresultat.getType());
-        assertThat(behandlingsresultatreplika.getVedtaksdato()).isEqualTo(behandlingsresultat.getVedtaksdato());
+        assertThat(behandlingsresultatreplika.getVedtakMetadata().getVedtaksdato()).isEqualTo(behandlingsresultat.getVedtakMetadata().getVedtaksdato());
 
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getId() == null);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika);
@@ -210,7 +210,9 @@ public class BehandlingsresultatServiceTest {
         behandlingsresultat.setBehandling(tidligsteInaktiveBehandling);
         behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        behandlingsresultat.setVedtaksdato(Instant.parse("2002-02-11T09:37:30Z"));
+        VedtakMetadata vedtakMetadata = new VedtakMetadata();
+        vedtakMetadata.setVedtaksdato(Instant.parse("2002-02-11T09:37:30Z"));
+        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
 
         behandlingsresultat.setAvklartefakta(new LinkedHashSet<>());
         behandlingsresultat.setLovvalgsperioder(new LinkedHashSet<>());

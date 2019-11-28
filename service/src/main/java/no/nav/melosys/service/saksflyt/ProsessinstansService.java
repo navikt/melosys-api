@@ -12,6 +12,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
@@ -168,8 +169,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                                                     String fritekst, String mottakerInstitusjon) {
+    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String fritekst, String mottakerInstitusjon, Vedtakstyper vedtakstype, String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
             .medSteg(ProsessSteg.IV_VALIDERING)
@@ -179,6 +179,11 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
+        prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, vedtakstype.getKode());
+        if (StringUtils.isNotEmpty(revurderBegrunnelse)) {
+            prosessinstans.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, revurderBegrunnelse);
+        }
+                    
         lagre(prosessinstans);
     }
 
