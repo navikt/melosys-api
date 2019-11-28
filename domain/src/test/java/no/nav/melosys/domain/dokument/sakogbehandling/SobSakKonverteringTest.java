@@ -26,7 +26,7 @@ public class SobSakKonverteringTest {
 
     @Before
     public void setUp() {
-        Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
+        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }

@@ -28,7 +28,7 @@ public class AaregServiceTest {
 
     @Before
     public void setUp() {
-        marshaller = new JaxbConfig().jaxb2Marshaller();
+        marshaller = JaxbConfig.jaxb2Marshaller();
         aaregService = lagAaregService(new ArbeidsforholdMock());
     }
 

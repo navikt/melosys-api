@@ -20,7 +20,7 @@ public class InntektServiceTest {
     @Before
     public void setUp() {
         InntektConsumer inntektMock  = new InntektMock();
-        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
         inntektService = new InntektService(inntektMock, dokumentFactory);
     }
     

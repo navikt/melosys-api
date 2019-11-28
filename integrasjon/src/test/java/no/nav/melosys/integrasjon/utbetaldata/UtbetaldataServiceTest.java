@@ -45,7 +45,7 @@ public class UtbetaldataServiceTest {
     @Before
     public void setup() throws TransformerConfigurationException {
         XsltTemplatesFactory xsltTemplatesFactory = mock(XsltTemplatesFactory.class);
-        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), xsltTemplatesFactory);
+        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), xsltTemplatesFactory);
 
         Templates xsltTemplates = TransformerFactory.newInstance().newTemplates(new StreamSource(
             ClassLoader.getSystemResourceAsStream("utbetaling/utbetaldata_1.0.xslt")));

@@ -30,7 +30,7 @@ public class BehandlingstatusClientImplTest {
 
     @Before
     public void setUp() throws IntegrasjonException {
-        behandlingstatusClient = new BehandlingstatusClientImpl(jmsTemplate, hendelseshåndterer, new JaxbConfig().jaxb2Marshaller());
+        behandlingstatusClient = new BehandlingstatusClientImpl(jmsTemplate, hendelseshåndterer, JaxbConfig.jaxb2Marshaller());
     }
 
     @Test

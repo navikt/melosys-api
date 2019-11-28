@@ -52,7 +52,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
-        assertThat("<ns3:navn>For Etter</ns3:navn>").isSubstringOf(resultat);
+        assertThat(":navn>For Etter</ns").isSubstringOf(resultat);
     }
 
 

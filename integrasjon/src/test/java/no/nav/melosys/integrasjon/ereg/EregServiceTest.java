@@ -18,7 +18,7 @@ public class EregServiceTest {
     @Before
     public void setUp() {
         OrganisasjonConsumer organisasjonMock = new OrganisasjonMock();
-        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
         eregService = new EregService(organisasjonMock, dokumentFactory);
     }
 

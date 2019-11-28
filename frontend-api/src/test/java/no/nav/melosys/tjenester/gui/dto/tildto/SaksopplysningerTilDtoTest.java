@@ -49,7 +49,7 @@ public class SaksopplysningerTilDtoTest {
     @Before
     public void setUp() {
         saksopplysningerTilDto = new SaksopplysningerTilDto(kodeverkService);
-        Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
+        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         dokumentFactory = new DokumentFactory(marshaller, xsltTemplatesFactory);
 
