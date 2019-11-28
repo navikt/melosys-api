@@ -36,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -252,10 +253,27 @@ public class VedtakServiceTest {
         assertThat(oppgaveArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.NY_VURDERING);
     }
 
-    @Test (expected = FunksjonellException.class)
+    @Test
     public void revurderVedtak_aktivBehandling_kasterException() throws Exception {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         
-        vedtakService.revurderVedtak(behandlingID);
+        try {
+            vedtakService.revurderVedtak(behandlingID);
+            fail();
+        } catch (FunksjonellException e) {
+            assertThat(e.getMessage()).contains("aktiv");
+        }
+    }
+
+    @Test
+    public void revurderVedtak_forkortetPeriodeVedtak_kasterException() throws Exception {
+        behandling.setType(Behandlingstyper.ENDRET_PERIODE);
+        
+        try {
+            vedtakService.revurderVedtak(behandlingID);
+            fail();
+        } catch (FunksjonellException e) {
+            assertThat(e.getMessage()).contains("forkortet");
+        }
     }
 }

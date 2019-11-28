@@ -9,7 +9,6 @@ import java.util.Set;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -137,37 +136,41 @@ public class VedtakService {
     @Transactional(rollbackFor = MelosysException.class)
     public long revurderVedtak(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling eksisterendeBehandling = behandlingService.hentBehandling(behandlingID);
-        Fagsak fagsak = eksisterendeBehandling.getFagsak();
 
-        if (eksisterendeBehandling.isAktiv()) {
-            throw new FunksjonellException(String.format("Kan ikke revurdere behandling %s for fagsak %s fordi den fortsatt er aktiv", behandlingID, fagsak.getSaksnummer()));
-        }
+        validerBehandlingForRevurdering(eksisterendeBehandling);
 
-        log.info("Revurderer vedtak for sak: {} behandling: {}", fagsak.getSaksnummer(), behandlingID);
+        log.info("Revurderer vedtak for sak: {} behandling: {}", eksisterendeBehandling.getFagsak().getSaksnummer(), behandlingID);
 
-        Behandling nyBehandling = opprettNyBehandling(behandlingID, eksisterendeBehandling, fagsak);
+        Behandling nyBehandling = opprettRevurderingsbehandlingFraEksisterende(eksisterendeBehandling);
 
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsakService.lagre(fagsak);
+        eksisterendeBehandling.getFagsak().setStatus(Saksstatuser.OPPRETTET);
+        fagsakService.lagre(eksisterendeBehandling.getFagsak());
 
-        opprettRevurderingsoppgave(eksisterendeBehandling, fagsak, SubjectHandler.getInstance().getUserID(), nyBehandling);
+        opprettRevurderingsoppgave(eksisterendeBehandling, SubjectHandler.getInstance().getUserID(), nyBehandling);
 
         return nyBehandling.getId();
     }
 
-    private Behandling opprettNyBehandling(long behandlingID, Behandling eksisterendeBehandling, Fagsak fagsak) throws IkkeFunnetException, TekniskException {
-        Behandling nyBehandling;
-
-        try {
-            nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(eksisterendeBehandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
-        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-            throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s", behandlingID, fagsak.getSaksnummer()), e);
+    private void validerBehandlingForRevurdering(Behandling eksisterendeBehandling) throws FunksjonellException {
+        if (eksisterendeBehandling.isAktiv()) {
+            throw new FunksjonellException(String.format("Kan ikke revurdere vedtak på behandling %s for fagsak %s fordi den fortsatt er aktiv", eksisterendeBehandling.getId(), eksisterendeBehandling.getFagsak().getSaksnummer()));
         }
-        return nyBehandling;
+
+        if (Behandlingstyper.ENDRET_PERIODE == eksisterendeBehandling.getType()) {
+            throw new FunksjonellException(String.format("Kan ikke revurdere vedtak på behandling %s for fagsak %s fordi vedtaket er gjort i forbindelse med forkortet periode", eksisterendeBehandling.getId(), eksisterendeBehandling.getFagsak().getSaksnummer()));
+        }
     }
 
-    private void opprettRevurderingsoppgave(Behandling eksisterendeBehandling, Fagsak fagsak, String saksbehandler, Behandling nyBehandling) throws TekniskException, FunksjonellException {
-        Optional<OppgaveDto> dtoOptional = gsakFasade.hentSisteOppgaveDtoForSak(fagsak.getSaksnummer());
+    private Behandling opprettRevurderingsbehandlingFraEksisterende(Behandling eksisterendeBehandling) throws IkkeFunnetException, TekniskException {
+        try {
+            return behandlingService.replikerBehandlingOgBehandlingsresultat(eksisterendeBehandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
+        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+            throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s", eksisterendeBehandling.getId(), eksisterendeBehandling.getFagsak().getSaksnummer()), e);
+        }
+    }
+
+    private void opprettRevurderingsoppgave(Behandling eksisterendeBehandling, String saksbehandler, Behandling nyBehandling) throws TekniskException, FunksjonellException {
+        Optional<OppgaveDto> dtoOptional = gsakFasade.hentSisteOppgaveDtoForSak(eksisterendeBehandling.getFagsak().getSaksnummer());
 
         if (dtoOptional.isPresent()) {
             OppgaveDto oppgaveDto = dtoOptional.get();
@@ -176,8 +179,8 @@ public class VedtakService {
         } else {
             Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(eksisterendeBehandling.getType())
                     .setJournalpostId(nyBehandling.getInitierendeJournalpostId())
-                    .setAktørId(finnAktoerBruker(fagsak.getAktører()).getAktørId())
-                    .setSaksnummer(fagsak.getSaksnummer())
+                    .setAktørId(finnAktoerBruker(eksisterendeBehandling.getFagsak().getAktører()).getAktørId())
+                    .setSaksnummer(eksisterendeBehandling.getFagsak().getSaksnummer())
                     .setBehandlingstype(nyBehandling.getType())
                     .setTilordnetRessurs(saksbehandler)
                     .build();
