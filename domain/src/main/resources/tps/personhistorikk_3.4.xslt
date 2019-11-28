@@ -119,4 +119,5 @@
         </postleveringsPeriode>
     </xsl:template>
 
+    <xsl:template match="text()"/>
 </xsl:stylesheet>

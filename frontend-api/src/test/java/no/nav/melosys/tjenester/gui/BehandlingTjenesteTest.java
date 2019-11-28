@@ -1,10 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
@@ -18,6 +18,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
+import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -43,11 +44,13 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private SaksopplysningerTilDto saksopplysningerTilDto;
     private EasyRandom random;
 
     @Before
     public void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, mock(TilgangService.class));
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class));
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)

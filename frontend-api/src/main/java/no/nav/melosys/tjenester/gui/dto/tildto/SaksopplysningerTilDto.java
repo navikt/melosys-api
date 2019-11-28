@@ -23,28 +23,36 @@ import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.PersonhistorikkDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
  */
-public final class SaksopplysningerTilDto {
+@Component
+public class SaksopplysningerTilDto {
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
 
-    private SaksopplysningerTilDto() {
-        throw new IllegalStateException("Utility");
+    //Medlemsperioder sorteres fra nyest til eldst.
+    static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
+        (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
+
+    private final KodeverkService kodeverkService;
+
+    @Autowired
+    public SaksopplysningerTilDto(KodeverkService kodeverkService) {
+        this.kodeverkService = kodeverkService;
     }
 
-    //Medlemsperioder sorteres fra nyest til eldst.
-     static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
-            (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
-
-    public static SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet, Behandling behandling) {
+    public SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet, Behandling behandling) {
         SaksopplysningerDto dto = new SaksopplysningerDto();
         Periode søknadsperiode = null;
         Land historiskStatsborgerskap = null;
@@ -55,7 +63,7 @@ public final class SaksopplysningerTilDto {
 
             switch (type) {
                 case PERSOPL:
-                    dto.setPerson((PersonDokument)dokument);
+                    dto.setPerson((PersonDokument) dokument);
                     break;
                 case ARBFORH:
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
@@ -65,7 +73,7 @@ public final class SaksopplysningerTilDto {
                     dto.setArbeidsforhold(arbeidsforholdDokument);
                     break;
                 case ORG:
-                    dto.getOrganisasjoner().add((OrganisasjonDokument)dokument);
+                    dto.getOrganisasjoner().add((OrganisasjonDokument) dokument);
                     break;
                 case MEDL:
                     MedlemskapDokument medlemskapDokument = (MedlemskapDokument) dokument;
@@ -83,6 +91,11 @@ public final class SaksopplysningerTilDto {
                 case PERSHIST:
                     PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) dokument;
                     dto.setPersonhistorikk(new PersonhistorikkDto(personhistorikk));
+
+                    dto.getPersonhistorikk().bostedsadressePerioder.forEach(bostedsadressePeriodeDto ->
+                        bostedsadressePeriodeDto.bostedsadresse.setPoststed(
+                            kodeverkService.dekod(POSTNUMMER, bostedsadressePeriodeDto.bostedsadresse.getPostnr(), LocalDate.now())));
+
                     if (!personhistorikk.statsborgerskapListe.isEmpty()) {
                         historiskStatsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
                     }
@@ -92,7 +105,7 @@ public final class SaksopplysningerTilDto {
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
                 case SEDOPPL:
-                    dto.setSed(SedDokumentDto.fra((SedDokument)dokument));
+                    dto.setSed(SedDokumentDto.fra((SedDokument) dokument));
                     break;
                 case UTBETAL:
                     break;
@@ -114,10 +127,10 @@ public final class SaksopplysningerTilDto {
     }
 
     /**
-    - Ved søknad tilbake i tid, brukes historisk statsborgerskap med fom-dato for søknad som dato
-    - Ved søknad framover i tid, brukes statsborgerskap fra TPS med gjeldende dato, avgrenset
-        av dato for henting av opplysninger (hvis tilstede) eller endring av behandling
-    */
+     * - Ved søknad tilbake i tid, brukes historisk statsborgerskap med fom-dato for søknad som dato
+     * - Ved søknad framover i tid, brukes statsborgerskap fra TPS med gjeldende dato, avgrenset
+     * av dato for henting av opplysninger (hvis tilstede) eller endring av behandling
+     */
     private static LocalDate hentGjeldendeDato(Behandling behandling) {
         if (behandling.getSistOpplysningerHentetDato() != null) {
             return LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), TIME_ZONE_ID).toLocalDate();
