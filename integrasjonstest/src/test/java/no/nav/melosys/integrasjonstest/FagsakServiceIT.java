@@ -7,6 +7,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -37,7 +38,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner.SOEKNADEN_TRUKKET;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_HENLAGT_SAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
 import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testsubjekter.AVKLART_ARBEIDSGIVER_ORGNR;
 import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testsubjekter.DELOITTE_ORGNR;
@@ -86,7 +88,7 @@ public class FagsakServiceIT {
     public void setup() throws MelosysException {
         SpringSubjectHandler.set(new TestSubjectHandler());
         when(eessiService.hentEessiMottakerinstitusjoner(any(), any())).thenReturn(Collections.emptyList());
-        when(gsakFasade.opprettOppgave(any())).thenReturn("");
+        when(gsakFasade.opprettOppgave(any(Oppgave.class))).thenReturn("");
     }
 
     @Test
