@@ -3,6 +3,7 @@ package no.nav.melosys.service.vedtak;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -30,9 +31,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -74,6 +77,7 @@ public class VedtakServiceTest {
         behandlingID = 1L;
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandlingsresultat.setId(behandlingID);
         
         replikertBehandling.setId(2L);
@@ -86,6 +90,10 @@ public class VedtakServiceTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
+        Aktoer aktoer = new Aktoer();
+        aktoer.setAktørId("1234567890123");
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Collections.singleton(aktoer));
         behandling.setFagsak(fagsak);
 
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
@@ -232,9 +240,22 @@ public class VedtakServiceTest {
     public void revurderVedtak_fungerer() throws Exception {
         vedtakService.revurderVedtak(behandlingID);
 
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), any());
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+        ArgumentCaptor<Oppgave> oppgaveArgumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
+        verify(behandlingService).hentBehandling(behandlingID);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
+        verify(gsakFasade).hentSisteOppgaveDtoForSak(behandling.getFagsak().getSaksnummer());
+        verify(gsakFasade).opprettOppgave(oppgaveArgumentCaptor.capture());
+        verifyNoMoreInteractions(gsakFasade, behandlingService);
+        
+        assertThat(oppgaveArgumentCaptor.getValue().getTilordnetRessurs()).isEqualTo("Z990007");
+        assertThat(oppgaveArgumentCaptor.getValue().getAktørId()).isEqualTo("1234567890123");
+        assertThat(oppgaveArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.NY_VURDERING);
+    }
+
+    @Test (expected = FunksjonellException.class)
+    public void revurderVedtak_aktivBehandling_kasterException() throws Exception {
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        
+        vedtakService.revurderVedtak(behandlingID);
     }
 }
