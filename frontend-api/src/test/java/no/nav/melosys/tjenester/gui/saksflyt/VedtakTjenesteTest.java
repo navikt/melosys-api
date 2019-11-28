@@ -68,7 +68,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         verify(tilgangService).sjekkTilgang(behandlingID);
         verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), null, fattVedtakDto.getMottakerinstitusjon(), fattVedtakDto.getVedtakstype(), null);
 
-        // valider(fattVedtakDto, FATT_VEDTAK_SCHEMA); // TODO: Feiler fordi schema har et nytt felt "vedtakstype"
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test(expected = BadRequestException.class)
