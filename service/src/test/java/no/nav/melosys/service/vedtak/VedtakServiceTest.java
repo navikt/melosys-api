@@ -54,6 +54,7 @@ public class VedtakServiceTest {
     private long behandlingID;
     private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private Behandling behandling = new Behandling();
+    private Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
 
     @Before
     public void setUp() throws IkkeFunnetException {
@@ -63,6 +64,10 @@ public class VedtakServiceTest {
         behandlingID = 1L;
         behandling.setId(behandlingID);
         behandlingsresultat.setId(behandlingID);
+
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
@@ -169,6 +174,18 @@ public class VedtakServiceTest {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
+
+        vedtakService.fattVedtak(behandlingID, resultatType, null);
+        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull());
+    }
+
+    @Test
+    public void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws MelosysException {
+        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
+        oppgaveBuilder.setOppgaveId("1");
+        Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());

@@ -69,7 +69,7 @@ public class VedtakService {
     }
 
     private boolean skalSendesSed(Behandlingsresultat behandlingsresultat, Behandlingsresultattyper behandlingsresultattype) {
-        if (behandlingsresultattype == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+        if (behandlingsresultattype == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL || behandlingsresultat.erAvslag()) {
             return false;
         }
         return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
