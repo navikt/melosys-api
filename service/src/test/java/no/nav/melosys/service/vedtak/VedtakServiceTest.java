@@ -88,6 +88,7 @@ public class VedtakServiceTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+        behandlingsresultat.setType(resultatType);
         when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
         when(eessiService.erGyldigInstitusjonForLand(eq("LA_BUC_04"), eq("SE"), eq(mottakerInstitusjon)))
             .thenReturn(Boolean.TRUE);
@@ -109,6 +110,7 @@ public class VedtakServiceTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+        behandlingsresultat.setType(resultatType);
         when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(false);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null);
@@ -128,6 +130,7 @@ public class VedtakServiceTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+        behandlingsresultat.setType(resultatType);
         when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
 
         expectedException.expect(FunksjonellException.class);
@@ -146,6 +149,7 @@ public class VedtakServiceTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+        behandlingsresultat.setType(resultatType);
         when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
 
         expectedException.expect(FunksjonellException.class);
@@ -164,6 +168,7 @@ public class VedtakServiceTest {
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
+        behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull());
@@ -174,6 +179,7 @@ public class VedtakServiceTest {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
+        behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
@@ -184,8 +190,9 @@ public class VedtakServiceTest {
     public void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws MelosysException {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
-        Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
+        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
