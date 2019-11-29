@@ -25,7 +25,7 @@ public class VideresendSoknadMapper implements BrevDataMapper {
         fag.setTrygdemyndighet(brevDataVideresend.trygdemyndighetsland);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {

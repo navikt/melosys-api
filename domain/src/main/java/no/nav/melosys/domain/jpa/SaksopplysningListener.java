@@ -14,7 +14,7 @@ public class SaksopplysningListener {
     private DokumentFactory dokumentFactory;
 
     public SaksopplysningListener() {
-        this.dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+        this.dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
     }
 
     @PostLoad

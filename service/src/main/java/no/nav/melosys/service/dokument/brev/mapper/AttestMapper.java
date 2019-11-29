@@ -31,7 +31,7 @@ public class AttestMapper implements BrevDataMapper {
 
         Fag fag = mapFag(brevDataVedlegg);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag, vedleggMapper.hent());
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     public Fag mapFag(BrevDataVedlegg vedlegg) {

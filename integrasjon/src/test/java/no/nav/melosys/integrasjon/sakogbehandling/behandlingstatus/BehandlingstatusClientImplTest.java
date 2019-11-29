@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.exception.IntegrasjonException;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class BehandlingstatusClientImplTest {
 
     @Before
     public void setUp() throws IntegrasjonException {
-        behandlingstatusClient = new BehandlingstatusClientImpl(jmsTemplate, hendelseshåndterer);
+        behandlingstatusClient = new BehandlingstatusClientImpl(jmsTemplate, hendelseshåndterer, JaxbConfig.jaxb2Marshaller());
     }
 
     @Test

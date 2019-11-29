@@ -43,7 +43,7 @@ public class MedlServiceTest {
         behandleMedlemskapV2 = mock(BehandleMedlemskapV2.class);
         BehandleMedlemskapConsumerImpl behandleMedlemskapConsumer1 = new BehandleMedlemskapConsumerImpl(behandleMedlemskapV2);
         BehandleMedlemskapConsumer behandleMedlemskapConsumer = behandleMedlemskapConsumer1;
-        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
         medlService = new MedlService(medlemskapMock, behandleMedlemskapConsumer, dokumentFactory);
 
         lovvalgsperiode = new Lovvalgsperiode();

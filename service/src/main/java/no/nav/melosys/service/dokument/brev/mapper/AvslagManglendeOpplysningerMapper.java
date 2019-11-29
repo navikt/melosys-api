@@ -18,12 +18,16 @@ public class AvslagManglendeOpplysningerMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000125.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
+    public String mapTilBrevXML(FellesType fellesType,
+                                MelosysNAVFelles navFelles,
+                                Behandling behandling,
+                                Behandlingsresultat resultat,
+                                BrevData brevData) throws JAXBException, SAXException {
         Fag fag = new Fag();
         fag.setFritekst(brevData.fritekst);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {

@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.inntk;
 
 import java.io.StringWriter;
 import java.time.YearMonth;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -32,7 +31,6 @@ public class InntektService implements InntektFasade {
     private final InntektConsumer inntektConsumer;
     private final DokumentFactory dokumentFactory;
     private final ObjectFactory objectFactory;
-    private final JAXBContext jaxbContext;
 
     public static final String FILTER = "MedlemskapA-inntekt";
     public static final String FILTER_URI = "http://nav.no/kodeverk/Kode/A-inntektsfilter/MedlemskapA-inntekt?v=6";
@@ -46,12 +44,6 @@ public class InntektService implements InntektFasade {
         this.dokumentFactory = dokumentFactory;
 
         this.objectFactory = new ObjectFactory();
-
-        try {
-            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse.class);
-        } catch (JAXBException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     // Henter inntekter for én ident fra hentInntektListeBolk for å få opplysninger om frilansforhold (se MELOSYS-1453).
@@ -99,7 +91,7 @@ public class InntektService implements InntektFasade {
         try {
             no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse xmlRoot = new no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse();
             xmlRoot.setResponse(response);
-            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
+            dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }

@@ -56,7 +56,7 @@ public class TpsServiceTest {
         identResponse.setIdent(FNR_1);
         when(aktorConsumer.hentIdentForAktoerId(any())).thenReturn(identResponse);
 
-        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+        DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
 
         aktørIdCache = new AktoerIdCache(1000, 1000, 16);
         service = new TpsService(aktorConsumer, personConsumer, dokumentFactory, aktørIdCache);

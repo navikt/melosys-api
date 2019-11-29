@@ -32,7 +32,7 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
         Fag fag = mapFag(brevDataAvslagArbeidsgiver);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     Fag mapFag(BrevDataAvslagArbeidsgiver brevData) throws TekniskException {

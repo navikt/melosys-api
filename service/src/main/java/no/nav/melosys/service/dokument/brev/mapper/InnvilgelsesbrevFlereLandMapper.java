@@ -40,7 +40,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         Fag fag = mapFag(behandling, brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag, vedleggMapper.hent());
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     private Fag mapFag(Behandling behandling, BrevDataInnvilgelseFlereLand brevdata) {

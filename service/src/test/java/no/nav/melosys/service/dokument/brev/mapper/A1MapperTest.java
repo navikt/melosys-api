@@ -192,7 +192,7 @@ public class A1MapperTest {
         vedlegg.setA1(mapper.mapA1(behandling, resultat, (BrevDataA1) brevData));
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag, vedlegg);
 
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     private Fag mapFag() {

@@ -41,7 +41,7 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         BrevDataAnmodningUnntak brevdata = (BrevDataAnmodningUnntak) brevDataFelles;
         Fag fag = mapFag(behandling, resultat, brevdata);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntak brevData) throws TekniskException {

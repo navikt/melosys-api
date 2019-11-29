@@ -3,6 +3,7 @@ package no.nav.melosys.domain.dokument;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import javax.xml.bind.Marshaller;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
@@ -35,6 +36,10 @@ public class DokumentFactory {
     public DokumentFactory(Jaxb2Marshaller marshaller, XsltTemplatesFactory xsltTemplatesFactory) {
         this.marshaller = marshaller;
         this.xsltTemplatesFactory = xsltTemplatesFactory;
+    }
+
+    public Marshaller createMarshaller() {
+        return marshaller.createMarshaller();
     }
 
     /**
