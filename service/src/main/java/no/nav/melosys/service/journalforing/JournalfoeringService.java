@@ -56,7 +56,7 @@ public class JournalfoeringService {
             throw new FunksjonellException("Journalpost med id " + journalpost.getJournalpostId() + " skal ikke journalføres manuelt");
         }
 
-        if (behandlingstypeErSøknad(journalfoeringDto.getBehandlingstypeKode())){
+        if (journalfoeringDto.behandlingstypeErSøknad()){
             opprettSakOgJournalfør(journalfoeringDto);
         } else if (Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(journalfoeringDto.getBehandlingstypeKode())) {
             opprettProsessinstansBrevAouMottak(journalfoeringDto);
@@ -69,11 +69,6 @@ public class JournalfoeringService {
         }
 
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
-    }
-
-    private boolean behandlingstypeErSøknad(String behandlingstypeKode) {
-        return Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(behandlingstypeKode)
-            || Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstypeKode);
     }
 
     private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {

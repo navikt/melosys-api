@@ -108,13 +108,9 @@ public class GsakService implements GsakFasade {
 
     @Override
     public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
-        if (oppgave == null) {
-            throw new IkkeFunnetException("Oppgave med ID " + oppgaveID + " er ikke funnet.");
-        } else {
-            oppgave.setStatus(OPPGAVE_STATUS_FERDIGSTILT);
-            oppgaveConsumer.oppdaterOppgave(oppgave);
-        }
+        OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
+        oppgave.setStatus(OPPGAVE_STATUS_FERDIGSTILT);
+        oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
     @Override
@@ -140,12 +136,7 @@ public class GsakService implements GsakFasade {
 
     @Override
     public Oppgave hentOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
-        OppgaveDto gsakOppgave = oppgaveConsumer.hentOppgave(oppgaveId);
-
-        if (gsakOppgave == null) {
-            throw new IkkeFunnetException("Oppgave med oppgaveID " + oppgaveId + " finnes ikke.");
-        }
-        return oppgaveMappingDtoTilDomain(gsakOppgave);
+        return oppgaveMappingDtoTilDomain(hentOppgaveDto(oppgaveId));
     }
 
     @Override
@@ -185,22 +176,49 @@ public class GsakService implements GsakFasade {
 
     @Override
     public void leggTilbakeOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
-        if (oppgave == null) {
-            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
-        }
+        OppgaveDto oppgave = hentOppgaveDto(oppgaveId);
         oppgave.setTilordnetRessurs(null);
         oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
     @Override
-    public void oppdaterOppgavePrioritet(String oppgaveId, PrioritetType prioritet) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
-        if (oppgave == null) {
-            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
+    public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
+        OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
+
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getBeskrivelse())) {
+            if (StringUtils.isEmpty(oppgave.getBeskrivelse())) {
+                oppgave.setBeskrivelse(oppgaveOppdatering.getBeskrivelse());
+            } else {
+                oppgave.setBeskrivelse(StringUtils.joinWith("\n", oppgave.getBeskrivelse(), oppgaveOppdatering.getBeskrivelse()));
+            }
         }
-        oppgave.setPrioritet(prioritet.name());
+
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getPrioritet())) {
+            oppgave.setPrioritet(oppgaveOppdatering.getPrioritet());
+        }
+
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getStatus())) {
+            oppgave.setStatus(oppgaveOppdatering.getStatus());
+        }
+
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getTilordnetRessurs())) {
+            oppgave.setTilordnetRessurs(oppgaveOppdatering.getTilordnetRessurs());
+        }
+
+        if (oppgaveOppdatering.getFristFerdigstillelse() != null) {
+            oppgave.setFristFerdigstillelse(oppgaveOppdatering.getFristFerdigstillelse());
+        }
+
         oppgaveConsumer.oppdaterOppgave(oppgave);
+    }
+
+    private OppgaveDto hentOppgaveDto(String oppgaveID) throws FunksjonellException, TekniskException {
+        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
+        if (oppgave == null) {
+            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveID);
+        }
+
+        return oppgave;
     }
 
     @Override
@@ -259,24 +277,6 @@ public class GsakService implements GsakFasade {
             .filter(Objects::nonNull)
             .map(GsakService::oppgaveMappingDtoTilDomain)
             .collect(Collectors.toList());
-    }
-
-    @Override
-    public void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
-        if (oppgave == null) {
-            throw new IkkeFunnetException(String.format("Feil ved henting av "
-                + "oppgave %s for saksbehandler %s:", oppgaveId, saksbehandlerID));
-        }
-        oppgave.setTilordnetRessurs(saksbehandlerID);
-        oppgaveConsumer.oppdaterOppgave(oppgave);
-    }
-
-    @Override
-    public void oppdaterOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgaveDto = oppgaveMappingDomainTilDto(oppgave);
-
-        oppgaveConsumer.oppdaterOppgave(oppgaveDto);
     }
 
     static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgaveDto) {
