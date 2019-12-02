@@ -181,7 +181,7 @@ public class OppgaveService {
         behandlingDto.setBehandlingsstatus(behandling.getStatus());
         behandlingDto.setBehandlingstype(behandling.getType());
         behandlingDto.setRegistrertDato(behandling.getRegistrertDato());
-        behandlingDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
+        behandlingDto.setEndretDato(behandling.getEndretDato());
         behandlingDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
         behandlingDto.setErUnderOppdatering(saksopplysningerService.harAktivOppfrisking(behandling.getId()));
         return behandlingDto;

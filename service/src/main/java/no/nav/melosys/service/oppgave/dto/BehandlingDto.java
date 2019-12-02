@@ -10,9 +10,9 @@ public class BehandlingDto {
     private Long behandlingID;
     private Behandlingstyper behandlingstype;
     private Behandlingsstatus behandlingsstatus;
-    private Instant sisteOpplysningerHentetDato;
     private boolean erUnderOppdatering;
     private Instant registrertDato;
+    private Instant endretDato;
     private Instant svarFrist;
 
     public Long getBehandlingID() {
@@ -39,14 +39,6 @@ public class BehandlingDto {
         this.behandlingsstatus = behandlingsstatus;
     }
 
-    public Instant getSisteOpplysningerHentetDato() {
-        return sisteOpplysningerHentetDato;
-    }
-
-    public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
-        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
-    }
-
     public boolean isErUnderOppdatering() {
         return erUnderOppdatering;
     }
@@ -61,6 +53,14 @@ public class BehandlingDto {
 
     public void setRegistrertDato(Instant registrertDato) {
         this.registrertDato = registrertDato;
+    }
+
+    public Instant getEndretDato() {
+        return endretDato;
+    }
+
+    public void setEndretDato(Instant endretDato) {
+        this.endretDato = endretDato;
     }
 
     public Instant getSvarFrist() {

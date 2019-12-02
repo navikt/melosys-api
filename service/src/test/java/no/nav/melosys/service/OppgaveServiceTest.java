@@ -26,6 +26,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.service.sak.FagsakService;
@@ -120,8 +121,12 @@ public class OppgaveServiceTest {
         assertThat(oppgave.getOppgaveID()).isEqualTo("1");
         assertThat(oppgave.getFnr()).isEqualTo("fnr");
         assertThat(oppgave.getSammensattNavn()).isEqualTo("sammensattNavn");
-        assertThat(oppgave.getBehandling().isErUnderOppdatering()).isEqualTo(true);
-        assertThat(oppgave.getBehandling().getSvarFrist()).isEqualTo(Instant.ofEpochMilli(123456L));
+
+        BehandlingDto behandlingDto = oppgave.getBehandling();
+        assertThat(behandlingDto.isErUnderOppdatering()).isEqualTo(true);
+        assertThat(behandlingDto.getRegistrertDato()).isEqualTo(Instant.ofEpochMilli(111L));
+        assertThat(behandlingDto.getEndretDato()).isEqualTo(Instant.ofEpochMilli(222L));
+        assertThat(behandlingDto.getSvarFrist()).isEqualTo(Instant.ofEpochMilli(333L));
 
         mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);
@@ -153,9 +158,10 @@ public class OppgaveServiceTest {
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setEndretDato(Instant.now());
+        behandling.setRegistrertDato(Instant.ofEpochMilli(111L));
+        behandling.setEndretDato(Instant.ofEpochMilli(222L));
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setDokumentasjonSvarfristDato(Instant.ofEpochMilli(123456L));
+        behandling.setDokumentasjonSvarfristDato(Instant.ofEpochMilli(333L));
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         return behandling;
     }
