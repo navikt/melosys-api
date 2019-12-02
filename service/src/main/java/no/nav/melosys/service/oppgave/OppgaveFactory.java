@@ -32,6 +32,7 @@ public final class OppgaveFactory {
     private static OppgaveParametere hentOppgaveParametere(Behandlingstyper behandlingstype) {
         switch (behandlingstype) {
             case SOEKNAD:
+            case SOEKNAD_IKKE_YRKESAKTIV:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristUker(12), Behandlingstema.EU_EOS);
             case ENDRET_PERIODE:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.VUR, fristDager(1), Behandlingstema.EU_EOS);

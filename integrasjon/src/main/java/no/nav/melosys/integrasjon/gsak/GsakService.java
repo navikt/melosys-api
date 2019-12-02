@@ -47,6 +47,7 @@ public class GsakService implements GsakFasade {
     private static final ImmutableBiMap<Behandlingstyper, String> BEHANDLINGSTYPE_FELLESKODE_MAP =
         ImmutableBiMap.<Behandlingstyper, String>builder()
             .put(SOEKNAD, "ae0034")
+            .put(SOEKNAD_IKKE_YRKESAKTIV, "ae0238")
             .put(ENDRET_PERIODE, "ae0052")
             .put(ANKE, "ae0046")
             .put(KLAGE, "ae0058")
@@ -79,7 +80,7 @@ public class GsakService implements GsakFasade {
     public Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
         SakDto sakDto = new SakDto();
 
-        if (SOEKNAD == behandlingstype || VURDER_TRYGDETID == behandlingstype) {
+        if (SOEKNAD == behandlingstype || SOEKNAD_IKKE_YRKESAKTIV == behandlingstype || VURDER_TRYGDETID == behandlingstype) {
             sakDto.setTema(Tema.MED.getKode());
         } else if (GYLDIGE_BEHANDLINGSTYPER_UFM.contains(behandlingstype)) {
             sakDto.setTema(Tema.UFM.getKode());
