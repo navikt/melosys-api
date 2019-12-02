@@ -2,7 +2,6 @@ package no.nav.melosys.service.eessi;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -77,7 +76,7 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        Optional<Oppgave> oppgave = finnOppgave(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> oppgave = gsakFasade.finnFørsteOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         if (oppgave.isEmpty()) {
             opprettOppgave(behandling, sedType);
         } else {
@@ -86,8 +85,7 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
     }
 
     private void opprettOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
-        String aktørID = behandling.getFagsak().getAktører().stream().findFirst().map(Aktoer::getAktørId)
-            .orElseThrow(() -> new FunksjonellException("Finner ikke aktør for fagsak " + behandling.getFagsak().getSaksnummer()));
+        String aktørID = behandling.getFagsak().hentBruker().getAktørId();
 
         Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
             .setAktørId(aktørID)
@@ -102,10 +100,6 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
 
     private String lagMottattSedBeskrivelse(String sedType) {
         return String.format(MOTTATT_SED_BESKRIVELSE, sedType);
-    }
-
-    private Optional<Oppgave> finnOppgave(String saksnummer) throws FunksjonellException, TekniskException {
-        return gsakFasade.finnOppgaverMedSaksnummer(saksnummer).stream().findFirst();
     }
 
     @Override

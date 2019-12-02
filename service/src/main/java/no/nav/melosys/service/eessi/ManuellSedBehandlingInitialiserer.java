@@ -72,7 +72,7 @@ public class ManuellSedBehandlingInitialiserer {
     }
 
     private void oppdaterOppgavePrioritet(String saksnummer) throws FunksjonellException, TekniskException {
-        Optional<Oppgave> oppgave = gsakFasade.finnOppgaverMedSaksnummer(saksnummer).stream().findFirst();
+        Optional<Oppgave> oppgave = gsakFasade.finnFørsteOppgaveMedSaksnummer(saksnummer);
         if (oppgave.isPresent()) {
             log.info("Setter prioritet til HØY for oppgave {}", oppgave.get().getOppgaveId());
             gsakFasade.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().prioritet(PrioritetType.HOY.name()).build());

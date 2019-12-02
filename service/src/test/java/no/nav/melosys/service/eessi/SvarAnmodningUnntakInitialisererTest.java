@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -81,8 +82,8 @@ public class SvarAnmodningUnntakInitialisererTest {
         Fagsak fagsak = hentFagsak(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
         Prosessinstans prosessinstans = hentProsessinstans();
-        when(gsakFasade.finnOppgaverMedSaksnummer(eq(fagsak.getSaksnummer())))
-            .thenReturn(Collections.singletonList(new Oppgave.Builder().build()));
+        when(gsakFasade.finnFørsteOppgaveMedSaksnummer(eq(fagsak.getSaksnummer())))
+            .thenReturn(Optional.of(new Oppgave.Builder().build()));
         RutingResultat resultat = svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
         verify(gsakFasade).oppdaterOppgave(any(), any(OppgaveOppdatering.class));
@@ -122,6 +123,7 @@ public class SvarAnmodningUnntakInitialisererTest {
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
         Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId(AKTØR_ID);
         fagsak.setAktører(Sets.newSet(aktoer));
         return fagsak;

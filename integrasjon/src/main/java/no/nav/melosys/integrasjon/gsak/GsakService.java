@@ -182,6 +182,11 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public void tildelOppgave(String oppgaveId, String saksbehandler) throws FunksjonellException, TekniskException {
+        oppdaterOppgave(oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
+    }
+
+    @Override
     public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
         OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
 
@@ -277,6 +282,11 @@ public class GsakService implements GsakFasade {
             .filter(Objects::nonNull)
             .map(GsakService::oppgaveMappingDtoTilDomain)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Oppgave> finnFørsteOppgaveMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+        return finnOppgaverMedSaksnummer(saksnummer).stream().findFirst();
     }
 
     static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgaveDto) {

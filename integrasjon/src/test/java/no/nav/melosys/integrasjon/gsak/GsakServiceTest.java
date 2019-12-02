@@ -126,6 +126,30 @@ public final class GsakServiceTest {
     }
 
     @Test
+    public void tildelOppgave_verifiserFelterSatt() throws FunksjonellException, TekniskException {
+        final String oppgaveID = "2222";
+        final String sakbehandler = "Z111111";
+        OppgaveDto oppgave = GsakService.oppgaveMappingDomainTilDto(lagOppgave());
+        oppgave.setBeskrivelse("test");
+        when(oppgaveConsumer.hentOppgave(eq(oppgaveID))).thenReturn(oppgave);
+
+        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+            .tilordnetRessurs(sakbehandler)
+            .build();
+
+        gsakService.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
+        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoCaptor.capture());
+
+        OppgaveDto dto = oppgaveDtoCaptor.getValue();
+        assertThat(dto.getPrioritet()).isEqualTo(oppgave.getPrioritet());
+        assertThat(dto.getBeskrivelse()).isEqualTo(oppgave.getBeskrivelse());
+        assertThat(dto.getStatus()).isEqualTo(oppgave.getStatus());
+        assertThat(dto.getTilordnetRessurs()).isEqualTo(oppgaveOppdatering.getTilordnetRessurs());
+        assertThat(dto.getFristFerdigstillelse()).isEqualTo(oppgave.getFristFerdigstillelse());
+    }
+
+
+    @Test
     public void oppdaterOppgave_alleFelterSattEksisterendeBeskrivelse_verifiserFelterSatt() throws FunksjonellException, TekniskException {
         final String oppgaveID = "2222";
         OppgaveDto oppgave = GsakService.oppgaveMappingDomainTilDto(lagOppgave());

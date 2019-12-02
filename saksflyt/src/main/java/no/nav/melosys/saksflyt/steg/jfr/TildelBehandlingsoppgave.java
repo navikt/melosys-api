@@ -7,7 +7,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,7 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
         String behandlingsoppgaveId = oppgave.getOppgaveId();
 
         log.info("Tildeler behandlingsoppgave {} til saksbehandler {}", behandlingsoppgaveId, saksbehandler);
-        gsakFasade.oppdaterOppgave(behandlingsoppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
+        gsakFasade.tildelOppgave(behandlingsoppgaveId, saksbehandler);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Prosessinstans {} har tildelt behandlingsoppgave for fagsak {} til saksbehandler {}",

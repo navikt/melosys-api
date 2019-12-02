@@ -7,14 +7,11 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -40,9 +37,6 @@ public class TildelBehandlingsoppgaveTest {
 
     private TildelBehandlingsoppgave tildelBehandlingsoppgave;
 
-    @Captor
-    private ArgumentCaptor<OppgaveOppdatering> oppgaveOppdateringCaptor;
-
     private Prosessinstans prosessinstans;
 
     @Before
@@ -66,12 +60,6 @@ public class TildelBehandlingsoppgaveTest {
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(gsakFasade).hentOppgaveMedSaksnummer(eq(SAKSNUMMER));
-        verify(gsakFasade).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
-
-        OppgaveOppdatering oppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
-        assertThat(oppgaveOppdatering.getBeskrivelse()).isNull();
-        assertThat(oppgaveOppdatering.getStatus()).isNull();
-        assertThat(oppgaveOppdatering.getPrioritet()).isNull();
-        assertThat(oppgaveOppdatering.getTilordnetRessurs()).isEqualTo(SAKSBEHANDLER);
+        verify(gsakFasade).tildelOppgave(eq(OPPGAVE_ID), eq(SAKSBEHANDLER));
     }
 }

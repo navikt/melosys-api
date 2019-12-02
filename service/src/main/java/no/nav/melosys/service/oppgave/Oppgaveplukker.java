@@ -19,7 +19,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
@@ -74,7 +73,7 @@ public class Oppgaveplukker {
         if (valg.isPresent()) {
             // Tildeler oppgaven
             oppdaterBehandlingsstatus(valg.get().getSaksnummer());
-            gsakFasade.oppdaterOppgave(valg.get().getOppgaveId(), OppgaveOppdatering.builder().tilordnetRessurs(saksbehandlerID).build());
+            gsakFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
         }
         return valg;
     }
