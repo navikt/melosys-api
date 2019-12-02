@@ -1,7 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
 import java.util.Collections;
-import javax.ws.rs.HEAD;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
@@ -183,9 +182,9 @@ public class VedtakServiceTest {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
         behandlingsresultat.setType(resultatType);
 
-        vedtakService.fattVedtak(behandlingID, resultatType, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, null, null);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull());
     }
 
     @Test
