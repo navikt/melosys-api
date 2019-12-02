@@ -612,6 +612,58 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>itest</id>
+            <activation>
+                <property>
+                    <name>itest</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>integrasjonstest*/IT.java</include>
+                                <include>integrasjonstest*/*IT.java</include>
+                            </includes>
+                            <skipITs>false</skipITs>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>true</skipTests>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.4.2</version>
+                        <executions>
+                            <execution>
+                                <id>download-tls-certificate-from-fasit</id>
+                                <inherited>false</inherited>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>https://fasit.adeo.no/api/v2/resources/8599733/file/keystore</url>
+                                    <outputFileName>nav_truststore_nonproduction_ny2.jts</outputFileName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <repositories>
         <repository>
             <id>m2internal</id>
