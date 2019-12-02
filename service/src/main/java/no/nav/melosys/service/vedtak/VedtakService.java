@@ -57,10 +57,11 @@ public class VedtakService {
     @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType, String fritekst, String mottakerInstitusjon) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        if (skalSendesSed(behandlingsresultat, behandlingsresultatType)) {
+        if (skalSendesSed(behandlingsresultat)) {
             validerMottakerInstitusjon(behandling, behandlingsresultat, mottakerInstitusjon);
         }
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
@@ -69,8 +70,8 @@ public class VedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private boolean skalSendesSed(Behandlingsresultat behandlingsresultat, Behandlingsresultattyper behandlingsresultattype) {
-        if (behandlingsresultattype == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+    private boolean skalSendesSed(Behandlingsresultat behandlingsresultat) {
+        if (behandlingsresultat.erAvslag()) {
             return false;
         }
         return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
