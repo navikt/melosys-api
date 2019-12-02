@@ -2,49 +2,68 @@ package no.nav.melosys.service.eessi;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 //A002,A011
 @Service
 public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandlingInitialiserer {
 
+    private static final Logger log = LoggerFactory.getLogger(SvarAnmodningUnntakInitialiserer.class);
+
     private final FagsakService fagsakService;
     private final AnmodningsperiodeService anmodningsperiodeService;
+    private final GsakFasade gsakFasade;
+
+    private static final String MOTTATT_SED_BESKRIVELSE = "Mottatt svar på A001: SED %s";
 
     @Autowired
-    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService, AnmodningsperiodeService anmodningsperiodeService) {
+    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService, AnmodningsperiodeService anmodningsperiodeService, GsakFasade gsakFasade) {
         this.fagsakService = fagsakService;
         this.anmodningsperiodeService = anmodningsperiodeService;
+        this.gsakFasade = gsakFasade;
     }
 
     @Override
-    @Transactional
     public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         Behandling behandling = hentBehandling(gsakSaksnummer);
+        prosessinstans.setBehandling(behandling);
         Optional<Anmodningsperiode> anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId())
             .stream().findFirst();
 
-        if (!anmodningsperiode.isPresent()) {
+        if (behandling.getType() == Behandlingstyper.SOEKNAD && anmodningsperiode.isEmpty()) {
             throw new FunksjonellException(String.format(
                 "Mottatt SED %s på buctype %s - finner behandling %s for rinasak %s, men behandlingen har ingen anmodningsperiode",
                 melosysEessiMelding.getSedType(), melosysEessiMelding.getBucType(), behandling.getId(), melosysEessiMelding.getRinaSaksnummer()));
+        } else if (behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+            oppdaterBehandlingOgOppgave(behandling, melosysEessiMelding.getSedType());
+            return RutingResultat.INGEN_BEHANDLING;
         }
 
-        prosessinstans.setBehandling(behandling);
         return anmodningsperiode.map(Anmodningsperiode::getAnmodningsperiodeSvar).isPresent() ?
             RutingResultat.INGEN_BEHANDLING : RutingResultat.OPPDATER_BEHANDLING;
     }
@@ -54,6 +73,39 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
             .orElseThrow(() -> new TekniskException("Finner ikke fagsak fra gsakSaksnummer " + gsakSaksnummer));
 
         return fagsak.getAktivBehandling();
+    }
+
+    private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
+        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        Optional<Oppgave> oppgave = finnOppgave(behandling.getFagsak().getSaksnummer());
+        if (oppgave.isEmpty()) {
+            opprettOppgave(behandling, sedType);
+        } else {
+            gsakFasade.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().beskrivelse(lagMottattSedBeskrivelse(sedType)).build());
+        }
+    }
+
+    private void opprettOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
+        String aktørID = behandling.getFagsak().getAktører().stream().findFirst().map(Aktoer::getAktørId)
+            .orElseThrow(() -> new FunksjonellException("Finner ikke aktør for fagsak " + behandling.getFagsak().getSaksnummer()));
+
+        Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
+            .setAktørId(aktørID)
+            .setJournalpostId(behandling.getInitierendeJournalpostId())
+            .setPrioritet(PrioritetType.NORM)
+            .setSaksnummer(behandling.getFagsak().getSaksnummer())
+            .setBeskrivelse(lagMottattSedBeskrivelse(sedType));
+
+        String oppgaveID = gsakFasade.opprettOppgave(oppgaveBuilder.build());
+        log.info("Opprettet behandlingsoppgave med id {} for behandling {}", oppgaveID, behandling.getId());
+    }
+
+    private String lagMottattSedBeskrivelse(String sedType) {
+        return String.format(MOTTATT_SED_BESKRIVELSE, sedType);
+    }
+
+    private Optional<Oppgave> finnOppgave(String saksnummer) throws FunksjonellException, TekniskException {
+        return gsakFasade.finnOppgaverMedSaksnummer(saksnummer).stream().findFirst();
     }
 
     @Override
