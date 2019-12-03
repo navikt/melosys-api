@@ -99,7 +99,8 @@ public class VedtakServiceTest {
 
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(Behandling.class), any(Behandlingsstatus.class), any(Behandlingstyper.class))).thenReturn(replikertBehandling);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(Behandling.class), any(Behandlingsstatus.class), any(Behandlingstyper.class)))
+            .thenReturn(replikertBehandling);
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
     }
@@ -244,7 +245,6 @@ public class VedtakServiceTest {
         ArgumentCaptor<Oppgave> oppgaveArgumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
         verify(behandlingService).hentBehandling(behandlingID);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
-        verify(gsakFasade).hentSisteOppgaveDtoForSak(behandling.getFagsak().getSaksnummer());
         verify(gsakFasade).opprettOppgave(oppgaveArgumentCaptor.capture());
         verifyNoMoreInteractions(gsakFasade, behandlingService);
         

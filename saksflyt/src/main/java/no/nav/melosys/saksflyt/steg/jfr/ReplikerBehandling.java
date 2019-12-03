@@ -1,11 +1,10 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.lang.reflect.InvocationTargetException;
-
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -58,13 +57,7 @@ public class ReplikerBehandling extends AbstraktStegBehandler {
 
         Behandling behandling;
         if (fagsak.getTidligsteInaktiveBehandling() != null) {
-            try {
-                behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(fagsak.getTidligsteInaktiveBehandling(), Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
-
-            } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-                throw new TekniskException("Klarte ikke replikere tidligste inaktive behandling for fagsak: " + fagsak.getSaksnummer(), e);
-            }
-
+            behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(fagsak.getTidligsteInaktiveBehandling(), Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
         } else {
             throw new FunksjonellException("Finner ingen avsluttet behandling på fagsak " + fagsak.getSaksnummer());
         }

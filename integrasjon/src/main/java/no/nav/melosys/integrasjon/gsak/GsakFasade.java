@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Tema;
@@ -12,8 +11,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
 
 public interface GsakFasade {
 
@@ -38,11 +35,6 @@ public interface GsakFasade {
      * Oppgave sorterer oppgavene stigende etter frist.
      */
     Set<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
-
-    /**
-     * Finner Oppgave med gitt saksnummer.
-     */
-    Optional<OppgaveDto> hentSisteOppgaveDtoForSak(String saksnummer) throws TekniskException, FunksjonellException;
 
     /**
      * Finner Oppgave med gitt saksnummer.
@@ -88,10 +80,4 @@ public interface GsakFasade {
      * Oppdaterer en eksisterende oppgave.
      */
     void oppdaterOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException;
-
-    /**
-     * 
-     * Oppretter en oppgave for Melosys i Oppgave og returnerer en unik oppgaveId
-     */
-    String opprettOppgave(OpprettOppgaveDto oppgave) throws FunksjonellException, TekniskException;   
 }
