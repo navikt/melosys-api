@@ -230,7 +230,7 @@ public class SedDataBygger {
     }
 
     private static String lagGateadresse(String gatenavn, String husnummer) {
-        if (StringUtils.isEmpty(gatenavn) || StringUtils.isBlank(gatenavn)) {
+        if (StringUtils.isBlank(gatenavn)) {
             return "N/A";
         }
 
