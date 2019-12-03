@@ -22,7 +22,7 @@ public class VedtakMetadata extends RegistreringsInfo {
     @Column(name = "vedtak_klagefrist")
     private LocalDate vedtakKlagefrist;
 
-    @Column(name = "vedtak_type")
+    @Column(name = "vedtak_type", nullable = false)
     private Vedtakstyper vedtakstype;
     
     @Column(name = "revurder_begrunnelse")

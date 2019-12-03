@@ -2,7 +2,7 @@ CREATE TABLE vedtak_metadata (
     behandlingsresultat_id NUMBER(19)      NOT NULL,
     vedtak_dato            TIMESTAMP       NULL,
     vedtak_klagefrist      DATE            NULL,
-    vedtak_type            VARCHAR2(99)    NULL,
+    vedtak_type            VARCHAR2(99)    NOT NULL,
     revurder_begrunnelse   VARCHAR2(4000)  NULL, 
     registrert_dato        TIMESTAMP       NOT NULL,
     endret_dato            TIMESTAMP       NOT NULL,
