@@ -25,8 +25,8 @@ INSERT INTO vedtak_type (kode, navn) VALUES ('OMGJØRINGSVEDTAK', 'Omgjøring av
 ALTER TABLE vedtak_metadata ADD CONSTRAINT fk_vedtak_metadata_type FOREIGN KEY (vedtak_type) REFERENCES vedtak_type;
 ALTER TABLE vedtak_metadata ADD CONSTRAINT fk_vedtak_behandlingsresultat_id FOREIGN KEY (behandlingsresultat_id) REFERENCES behandlingsresultat;
 
-INSERT INTO vedtak_metadata (behandlingsresultat_id, vedtak_dato, vedtak_klagefrist, vedtak_type) 
-    SELECT br.behandling_id, br.vedtak_dato, br.vedtak_klagefrist, 'FØRSTEGANGSVEDTAK' 
+INSERT INTO vedtak_metadata (behandlingsresultat_id, vedtak_dato, vedtak_klagefrist, vedtak_type, registrert_dato, endret_dato, registrert_av, endret_av)
+    SELECT br.behandling_id, br.vedtak_dato, br.vedtak_klagefrist, 'FØRSTEGANGSVEDTAK', br.endret_dato, SYSTIMESTAMP, 'MELOSYS', 'MELOSYS'
     FROM behandlingsresultat br
     WHERE br.vedtak_dato IS NOT NULL OR br.vedtak_klagefrist IS NOT NULL;
 
