@@ -38,22 +38,24 @@ public class VedtakTjeneste extends RestTjeneste {
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public Response fattVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("fattVedtakDto") FattVedtakDto fattVedtakDto) throws MelosysException {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null || fattVedtakDto.getVedtakstype() == null) {
-            throw new BadRequestException();
+            throw new BadRequestException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(), fattVedtakDto.getMottakerinstitusjon(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
+        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(),
+            fattVedtakDto.getMottakerinstitusjon(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
         return Response.ok().build();
     }
 
     @POST
     @Path("{behandlingID}/endre")
     @ApiOperation(value = "Endrer et vedtak for en gitt behandling")
-    public Response endreVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("endreVedtakDto") EndreVedtakDto endreVedtakDto) throws FunksjonellException, TekniskException {
+    public Response endreVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("endreVedtakDto") EndreVedtakDto endreVedtakDto)
+        throws FunksjonellException, TekniskException {
         if (endreVedtakDto.getBegrunnelseKode() == null) {
-            throw new BadRequestException("Mangler BegrunnelseKode");
+            throw new BadRequestException("BegrunnelseKode mangler.");
         }
         if (endreVedtakDto.getBehandlingstype() == null) {
-            throw new BadRequestException("Mangler Behandlingstype");
+            throw new BadRequestException("Behandlingstype mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
         vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getBehandlingstype(), endreVedtakDto.getFritekst());
@@ -64,7 +66,7 @@ public class VedtakTjeneste extends RestTjeneste {
     @PUT
     @Path("{behandlingID}/revurder")
     @ApiOperation(value = "Korrigerer eller omgjør vedtak for en sak ved å opprette en ny behandling basert på en eksisterende")
-    public Response revurderVedtak(@PathParam("saksnr") long behandlingID) throws FunksjonellException, TekniskException {
+    public Response revurderVedtak(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
 
         long nyBehandlingId = vedtakService.revurderVedtak(behandlingID);
