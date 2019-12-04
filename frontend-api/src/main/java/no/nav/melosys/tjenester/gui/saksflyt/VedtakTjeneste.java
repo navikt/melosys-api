@@ -63,15 +63,13 @@ public class VedtakTjeneste extends RestTjeneste {
     }
 
 
-    @PUT
+    @POST
     @Path("{behandlingID}/revurder")
     @ApiOperation(value = "Korrigerer eller omgjør vedtak for en sak ved å opprette en ny behandling basert på en eksisterende")
     public Response revurderVedtak(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
 
-        long nyBehandlingId = vedtakService.revurderVedtak(behandlingID);
-        return Response.ok(nyBehandlingId).build();
+        long nyBehandlingID = vedtakService.revurderVedtak(behandlingID);
+        return Response.ok(nyBehandlingID).build();
     }
-
-
 }
