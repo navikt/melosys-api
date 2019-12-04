@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.MelosysException;
@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.HENT_SOB_SAKER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_SOB_SAKER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

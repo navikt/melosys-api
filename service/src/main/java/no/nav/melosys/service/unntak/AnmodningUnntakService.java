@@ -53,7 +53,6 @@ public class AnmodningUnntakService {
         validerMottakerInstitusjon(behandlingID, mottakerInstitusjon);
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerInstitusjon);
@@ -93,7 +92,7 @@ public class AnmodningUnntakService {
     private void validerSvar(Behandling behandling) throws FunksjonellException {
         Optional<AnmodningsperiodeSvar> anmodningsperiodeSvar = anmodningsperiodeService
             .hentAnmodningsperiodeSvarForBehandling(behandling.getId()).stream().findFirst();
-        if (!anmodningsperiodeSvar.isPresent()) {
+        if (anmodningsperiodeSvar.isEmpty()) {
             throw new FunksjonellException("Finner ingen AnmodningsperiodeSvar for behandling " + behandling.getId());
         }
 

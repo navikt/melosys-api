@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.vs;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -17,8 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.VS_SEND_ORIENTERINGSBREV;
-import static no.nav.melosys.domain.ProsessSteg.VS_SEND_SOKNAD;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_ORIENTERINGSBREV;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_SOKNAD;
 
 /**
  * Sender orienteringsbrev til bruker
@@ -48,8 +49,10 @@ public class SendOrienteringsbrev extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder()
+            .medAvsender(saksbehandler)
             .medDokumentType(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)

@@ -11,8 +11,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.*;
-import static no.nav.melosys.domain.ProsessType.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessType.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 

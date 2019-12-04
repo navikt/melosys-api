@@ -16,6 +16,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
@@ -51,9 +52,9 @@ public class SedDataBygger {
     }
 
     private SedDataDto lag(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
-        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnAdresse()
-            .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId()));
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
+            .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
@@ -62,9 +63,9 @@ public class SedDataBygger {
     }
 
     private SedDataDto lag(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
-        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnAdresse()
-            .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId()));
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
+            .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setMottakerLand(dataGrunnlag.getBehandling().getFagsak().hentMyndighetLandkode().getKode());
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
@@ -81,22 +82,22 @@ public class SedDataBygger {
     }
 
     private SedDataDto lagUtkast(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
-        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnAdresse().orElse(null);
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
     private SedDataDto lagUtkast(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException {
-        StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnAdresse().orElse(null);
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag, bostedsadresse);
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
-    private static SedDataDto lagPersonopplysninger(SedDataGrunnlagUtenSoknad dataGrunnlag, StrukturertAdresse bostedsadresse) throws TekniskException {
+    private static SedDataDto lagPersonopplysninger(SedDataGrunnlagUtenSoknad dataGrunnlag) {
         SedDataDto sedDataDto = new SedDataDto();
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
@@ -105,20 +106,16 @@ public class SedDataBygger {
             .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(SedDataBygger::hentFamilieMedlem).collect(Collectors.toList()));
 
-        sedDataDto.setBostedsadresse(fraBostedsadresse(bostedsadresse));
-
         return sedDataDto;
     }
 
-    private SedDataDto lagPersonopplysninger(SedDataGrunnlagMedSoknad dataGrunnlag, StrukturertAdresse strukturertAdresse) throws TekniskException, FunksjonellException {
+    private SedDataDto lagPersonopplysninger(SedDataGrunnlagMedSoknad dataGrunnlag) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = new SedDataDto();
 
         sedDataDto.setArbeidsgivendeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere()));
 
         sedDataDto.setArbeidssteder(dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()));
-
-        sedDataDto.setBostedsadresse(fraBostedsadresse(strukturertAdresse));
 
         sedDataDto.setAvklartBostedsland(
             landvelgerService.hentBostedsland(dataGrunnlag.getBehandling().getId(), dataGrunnlag.getSøknad()).getKode()
@@ -147,12 +144,23 @@ public class SedDataBygger {
             .collect(Collectors.toList());
     }
 
-    private static Adresse fraBostedsadresse(StrukturertAdresse bostedsadresse) {
+    private static Optional<Adresse> finnAdresse(BostedGrunnlag bostedGrunnlag) {
+        Optional<StrukturertAdresse> bostedsadresse = bostedGrunnlag.finnBostedsadresse();
+        if (bostedsadresse.isPresent()) {
+            return Optional.of(lagAdresse(bostedsadresse.get(), Adressetype.BOSTEDSADRESSE));
+        } else {
+            Optional<StrukturertAdresse> postadresse = bostedGrunnlag.finnPostadresse();
+            return postadresse.map(strukturertAdresse -> lagAdresse(strukturertAdresse, Adressetype.POSTADRESSE));
+        }
+    }
+
+    private static Adresse lagAdresse(StrukturertAdresse bostedsadresse, Adressetype adressetype) {
         if (bostedsadresse == null) {
             return new Adresse();
         }
 
         Adresse adresse = new Adresse();
+        adresse.setAdressetype(adressetype);
         adresse.setPoststed(bostedsadresse.poststed);
         adresse.setPostnr(bostedsadresse.postnummer);
         adresse.setLand(tilIso3(bostedsadresse.landkode));
@@ -222,7 +230,7 @@ public class SedDataBygger {
     }
 
     private static String lagGateadresse(String gatenavn, String husnummer) {
-        if (StringUtils.isEmpty(gatenavn)) {
+        if (StringUtils.isBlank(gatenavn)) {
             return "N/A";
         }
 

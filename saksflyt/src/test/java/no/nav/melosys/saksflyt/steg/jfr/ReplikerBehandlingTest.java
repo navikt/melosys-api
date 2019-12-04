@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -20,8 +20,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
-import static no.nav.melosys.domain.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.OPPRETTET;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;

@@ -79,7 +79,6 @@
     <xsl:template match="midlertidigPostadresse[@xsi:type='ns3:MidlertidigPostadresseNorge']">
         <midlertidigPostadresse>
             <xsl:attribute name="xsi:type"><xsl:value-of select="substring-after(@xsi:type, ':')" /></xsl:attribute>
-            <!-- FIXME: MidlertidigPostadresseNorge kan også være en matrikkeladresse - trenger testdata -->
             <tilleggsadresse><xsl:value-of select="strukturertAdresse/tilleggsadresse" /></tilleggsadresse>
             <tilleggsadresseType><xsl:value-of select="strukturertAdresse/tilleggsadresseType" /></tilleggsadresseType>
             <gateadresse>

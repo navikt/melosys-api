@@ -3,13 +3,13 @@ package no.nav.melosys.saksflyt.impl;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static no.nav.melosys.domain.ProsessSteg.JFR_AKTØR_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_AKTØR_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_PERS_OPPL;
 import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.assertThat;
 

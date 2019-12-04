@@ -1,10 +1,10 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.*;
-import static no.nav.melosys.domain.ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE;
 
 /**
  * Oppdaterer aktør med avklart arbeidsgiver i saken.

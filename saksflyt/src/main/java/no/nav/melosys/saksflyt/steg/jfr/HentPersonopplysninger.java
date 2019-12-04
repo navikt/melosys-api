@@ -4,6 +4,9 @@ import java.time.Instant;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -16,14 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
-import static no.nav.melosys.domain.ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
 
 /**
  * Steget sørger for å hente personinfo fra TPS
- * 
- * Transisjoner: 
+ *
+ * Transisjoner:
  * JFR_HENT_PERS_OPPL → JFR_VURDER_INNGANGSVILKÅR hvis alt ok
  * JFR_HENT_PERS_OPPL → FEILET_MASKINELT hvis personen ikke finnes i TPS
  */

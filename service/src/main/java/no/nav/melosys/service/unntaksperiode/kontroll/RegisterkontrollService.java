@@ -54,7 +54,7 @@ public class RegisterkontrollService {
         return kontroller.stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
-            .peek(this::registrerMetrikk)
+            .peek(this::registrerMetrikk) //NOSONAR
             .collect(Collectors.toList());
     }
 

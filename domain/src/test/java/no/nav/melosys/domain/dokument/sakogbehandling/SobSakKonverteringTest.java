@@ -3,7 +3,7 @@ package no.nav.melosys.domain.dokument.sakogbehandling;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -35,7 +35,7 @@ public class SobSakKonverteringTest {
     public void testKonverteringBarnetrygd() throws Exception {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(EØS_BARNETRYGD);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
             Saksopplysning saksopplysning = new Saksopplysning();
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -65,7 +65,7 @@ public class SobSakKonverteringTest {
     public void testKonverteringIngenSaker() throws Exception {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INGEN_SAKER);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
             Saksopplysning saksopplysning = new Saksopplysning();
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));

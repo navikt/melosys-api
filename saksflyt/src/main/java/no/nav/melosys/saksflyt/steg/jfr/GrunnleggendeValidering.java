@@ -3,6 +3,10 @@ package no.nav.melosys.saksflyt.steg.jfr;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -14,8 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE;
 import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
@@ -26,7 +30,7 @@ import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
  */
 @Component
 public class GrunnleggendeValidering extends AbstraktStegBehandler {
-    
+
     private static final Logger log = LoggerFactory.getLogger(GrunnleggendeValidering.class);
     private static final String PID_MELDING = "{}: {}";
 

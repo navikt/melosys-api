@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import org.junit.Before;

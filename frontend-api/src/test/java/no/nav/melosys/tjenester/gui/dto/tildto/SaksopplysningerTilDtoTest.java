@@ -3,13 +3,14 @@ package no.nav.melosys.tjenester.gui.dto.tildto;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
@@ -19,25 +20,40 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static no.nav.melosys.domain.SaksopplysningType.PERSHIST;
 import static no.nav.melosys.domain.SaksopplysningType.PERSOPL;
 import static no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto.medlemsperiodeKomparator;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class SaksopplysningerTilDtoTest {
 
     private DokumentFactory dokumentFactory;
 
+    @Mock
+    private KodeverkService kodeverkService;
+
+    private SaksopplysningerTilDto saksopplysningerTilDto;
+
     @Before
     public void setUp() {
+        saksopplysningerTilDto = new SaksopplysningerTilDto(kodeverkService);
         Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         dokumentFactory = new DokumentFactory(marshaller, xsltTemplatesFactory);
+
+        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString(), any(LocalDate.class))).thenReturn("sted");
     }
 
     @Test
@@ -111,19 +127,23 @@ public class SaksopplysningerTilDtoTest {
         behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC));
         behandling.setSaksopplysninger(saksopplysninger);
 
-        SaksopplysningerDto saksopplysningerDto = SaksopplysningerTilDto.getSaksopplysningerDto(saksopplysninger, behandling);
+        SaksopplysningerDto saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(saksopplysninger, behandling);
 
         PersonDokument person = saksopplysningerDto.getPerson();
 
         assertThat(person).isNotNull();
         assertThat(person.statsborgerskap).isNotNull();
         assertThat(person.statsborgerskapDato).isNotNull();
+        assertThat(saksopplysningerDto.getPersonhistorikk().bostedsadressePerioder)
+            .extracting("bostedsadresse")
+            .extracting("poststed")
+            .contains("sted");
     }
 
     private Saksopplysning lagDokument(String ressurs, SaksopplysningType type, String versjon) {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
             Saksopplysning saksopplysning = new Saksopplysning();
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));

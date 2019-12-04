@@ -17,15 +17,13 @@ import static org.mockito.Mockito.when;
 
 public class OppgaveMappingMellomDTOogDomainTest {
 
-    private SakConsumer sakConsumerMock;
-
     private OppgaveConsumer oppgaveConsumerMock;
 
     private GsakFasade gsakFasade;
 
     @Before
     public void setUp() {
-        sakConsumerMock = mock(SakConsumer.class);
+        SakConsumer sakConsumerMock = mock(SakConsumer.class);
         oppgaveConsumerMock = mock(OppgaveConsumer.class);
         gsakFasade = new GsakService(sakConsumerMock,oppgaveConsumerMock);
     }

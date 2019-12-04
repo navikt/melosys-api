@@ -35,15 +35,14 @@ public class MedlServiceTest {
     private Lovvalgsperiode lovvalgsperiode;
 
     private MedlService medlServiceSpy;
-    private BehandleMedlemskapConsumerImpl behandleMedlemskapConsumer;
     private BehandleMedlemskapV2 behandleMedlemskapV2;
 
     @Before
     public void setUp() throws PersonIkkeFunnet, UgyldigInput, Sikkerhetsbegrensning {
         MedlemskapMock medlemskapMock = new MedlemskapMock();
         behandleMedlemskapV2 = mock(BehandleMedlemskapV2.class);
-        behandleMedlemskapConsumer = new BehandleMedlemskapConsumerImpl(behandleMedlemskapV2);
-        BehandleMedlemskapConsumer behandleMedlemskapConsumer = this.behandleMedlemskapConsumer;
+        BehandleMedlemskapConsumerImpl behandleMedlemskapConsumer1 = new BehandleMedlemskapConsumerImpl(behandleMedlemskapV2);
+        BehandleMedlemskapConsumer behandleMedlemskapConsumer = behandleMedlemskapConsumer1;
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
         medlService = new MedlService(medlemskapMock, behandleMedlemskapConsumer, dokumentFactory);
 

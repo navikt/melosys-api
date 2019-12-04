@@ -155,6 +155,6 @@ public class BrevDataByggerAnmodningUnntakTest {
 
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
-        assertThat(brevData.fritekst).isEqualTo("FRITEKST");
+        assertThat(brevData.anmodningFritekst).isEqualTo("FRITEKST");
     }
 }

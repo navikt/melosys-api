@@ -3,6 +3,9 @@ package no.nav.melosys.saksflyt.steg.hs;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
@@ -11,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.HS_HENLEGG_SAK;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.HS_HENLEGG_SAK;
 
 /**
  * Oppdaterer behandlingsresultat
@@ -45,7 +48,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke oppdatere behandlingsresultatet for henleggelsen fordi behandling " + behandlingID + " ikke finnes."));
         behandlingsresultat.setType(Behandlingsresultattyper.HENLEGGELSE);
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
-        behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.FRITEKST));
+        behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST));
 
         BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
         begrunnelse.setBehandlingsresultat(behandlingsresultat);

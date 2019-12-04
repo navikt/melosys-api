@@ -52,7 +52,7 @@ public class LovvalgsperiodeService {
             throw new FunksjonellException("Forventer minst én og kun én lovvalgsperiode!");
         }
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
-        if (!lovvalgsperiode.harGyldigTilstand()) {
+        if (lovvalgsperiode.harUgyldigTilstand()) {
             throw new FunksjonellException("Lovvalgsperioden har en ugyldig kombinasjon av resultat og lovvalgsland");
         }
         return lovvalgsperiode;

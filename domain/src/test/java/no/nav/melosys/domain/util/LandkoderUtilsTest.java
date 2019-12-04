@@ -4,11 +4,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,8 +30,8 @@ public class LandkoderUtilsTest {
 
         // Sjekker at alle iso3-koder er inkludert i mappere (Bortsett fra Statsløs og Ukjent)
         for (String landkodeIso3 : hentLandIso3()) {
-            if (landkodeIso3 == Land.STATSLØS) continue;
-            if (landkodeIso3 == Land.UKJENT) continue;
+            if (Objects.equals(landkodeIso3, Land.STATSLØS)) continue;
+            if (Objects.equals(landkodeIso3, Land.UKJENT)) continue;
 
             String landkodeIso2 = LandkoderUtils.tilIso2(landkodeIso3);
             String resultatSomIso3 = LandkoderUtils.tilIso3(landkodeIso2);

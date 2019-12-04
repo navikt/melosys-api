@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.aou.ut;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -42,14 +42,14 @@ public class OppdaterOppgave extends AbstraktStegBehandler {
 
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
-        
+
         Oppgave.Builder builder = new Oppgave.Builder(oppgave);
 
         if (oppgave.getFristFerdigstillelse().isBefore(frist)) {
             builder.setFristFerdigstillelse(frist);
         }
         builder.setBeskrivelse(StringUtils.isEmpty(oppgave.getBeskrivelse()) ? ANMODNING_OM_UNNTAK_SENDT : oppgave.getBeskrivelse() + System.lineSeparator() + ANMODNING_OM_UNNTAK_SENDT);
-        
+
         gsakFasade.oppdaterOppgave(builder.build());
 
         LOGGER.info("Oppdatert oppgave {} med beskrivelse, og frist som samsvarer med behandlingsfristen", oppgave.getOppgaveId());

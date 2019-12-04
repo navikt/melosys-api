@@ -47,13 +47,13 @@ public class BostedGrunnlagTest {
     }
 
     @Test
-    public void finnAdresse_harBostedsadresse_forventBostedsadresse() throws TekniskException {
+    public void finnBostedsadresse_harBostedsadresse_forventBostedsadresse() throws TekniskException {
         soeknadDokument.bosted = new Bosted();
         soeknadDokument.bosted.oppgittAdresse = new StrukturertAdresse();
         soeknadDokument.bosted.oppgittAdresse.landkode = "SE";
         soeknadDokument.bosted.oppgittAdresse.gatenavn = "gate";
 
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnAdresse();
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
         assertThat(strukturertAdresse.isPresent()).isTrue();
         assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
@@ -61,13 +61,13 @@ public class BostedGrunnlagTest {
     }
 
     @Test
-    public void finnAdresse_harBostedsadresseIRegister_forventBostedsadresse() throws TekniskException {
+    public void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() throws TekniskException {
         personDokument.bostedsadresse = new no.nav.melosys.domain.dokument.person.Bostedsadresse();
         personDokument.bostedsadresse.setLand(new Land("SWE"));
         personDokument.bostedsadresse.setGateadresse(new Gateadresse());
         personDokument.bostedsadresse.getGateadresse().setGatenavn("gate");
 
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnAdresse();
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
         assertThat(strukturertAdresse.isPresent()).isTrue();
         assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
@@ -75,12 +75,18 @@ public class BostedGrunnlagTest {
     }
 
     @Test
-    public void finnAdresse_harPostadresse_forventPostadresse() throws TekniskException {
+    public void finnBostedsadresse_ingenAdresse_forventTomOptional() throws TekniskException {
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
+        assertThat(strukturertAdresse.isPresent()).isFalse();
+    }
+
+    @Test
+    public void finnPostadresse_harPostadresse_forventPostadresse() throws TekniskException {
         personDokument.postadresse = new UstrukturertAdresse();
         personDokument.postadresse.land = new Land("SWE");
         personDokument.postadresse.adresselinje1 = "gate";
 
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnAdresse();
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnPostadresse();
 
         assertThat(strukturertAdresse.isPresent()).isTrue();
         assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
@@ -88,9 +94,8 @@ public class BostedGrunnlagTest {
     }
 
     @Test
-    public void finnAdresse_ingenAdresse_forventTomOptional() throws TekniskException {
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnAdresse();
+    public void finnPostadresse_ingenAdresse_forventTomOptional() throws TekniskException {
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnPostadresse();
         assertThat(strukturertAdresse.isPresent()).isFalse();
     }
-
 }

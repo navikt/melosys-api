@@ -11,11 +11,16 @@ import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateTimeXmlAdapter;
+import org.apache.commons.lang3.StringUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class StatsborgerskapPeriode implements HarPeriode {
+    private static final String SKATTEDIREKTORATET = "SKD";
 
     public Periode periode;
+
+    // Attributtet endretAv er på formen "KODE_SYSTEM_KILDE" eller "ENDRET_AV, KODE_SYSTEM_KILDE"
+    public String endretAv;
 
     @XmlJavaTypeAdapter(LocalDateTimeXmlAdapter.class)
     public LocalDateTime endringstidspunkt;
@@ -26,5 +31,9 @@ public class StatsborgerskapPeriode implements HarPeriode {
     @JsonIgnore
     public ErPeriode getPeriode() {
         return periode;
+    }
+
+    public boolean erFraSkattedirektoratet() {
+        return StringUtils.contains(endretAv, SKATTEDIREKTORATET);
     }
 }

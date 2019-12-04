@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.sob;
 import java.time.Instant;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessSteg.HENT_SOB_SAKER;
-import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.AKTØR_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_SOB_SAKER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 
 /**
  * Steget sørger for å hente saker fra SOB

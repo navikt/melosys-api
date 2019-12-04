@@ -57,7 +57,6 @@ public class BrevDataByggerA1Test {
 
     private String saksbehandler = "";
 
-    private String orgnr1 = "12345678910";
     private String orgnr2 = "10987654321";
 
     @Before
@@ -83,6 +82,7 @@ public class BrevDataByggerA1Test {
         soeknad.setType(SaksopplysningType.SØKNAD);
 
         ForetakUtland foretakUtland = new ForetakUtland();
+        String orgnr1 = "12345678910";
         foretakUtland.orgnr = orgnr1;
         foretakUtland.navn = "Utenlandsk arbeidsgiver AS";
         søknad.foretakUtland.add(foretakUtland);

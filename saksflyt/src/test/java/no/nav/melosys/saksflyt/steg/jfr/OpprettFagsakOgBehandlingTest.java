@@ -6,6 +6,10 @@ import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.BehandlingService;
@@ -19,17 +23,15 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessDataKey.DOKUMENT_ID;
-import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DOKUMENT_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.JOURNALPOST_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettFagsakOgBehandlingTest {
-
     @Mock
     private FagsakService fagsakService;
-
     @Mock
     private BehandlingService behandlingService;
 
@@ -38,11 +40,10 @@ public class OpprettFagsakOgBehandlingTest {
     @Captor
     private ArgumentCaptor<OpprettSakRequest> opprettSakRequestArgumentCaptor;
 
-
     @Before
     public void setUp() {
         AuditorProvider auditorAware = mock(AuditorProvider.class);
-        agent = new OpprettFagsakOgBehandling(fagsakService, behandlingService, auditorAware);
+        agent = new OpprettFagsakOgBehandling(fagsakService, behandlingService);
     }
 
     @Test
@@ -76,6 +77,27 @@ public class OpprettFagsakOgBehandlingTest {
         assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeDokumentId()).isEqualTo(dokumentId);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getRepresentant()).isEqualTo(representant);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getRepresentantKontaktperson()).isEqualTo(representantKontaktperson);
+
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
+    }
+
+    @Test
+    public void utførSteg_typeNySakFraDok_tilStegJfrOpprettSøknad() throws FunksjonellException {
+        Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.OPPRETT_NY_SAK);
+        String aktørId = "FJERNET93";
+        p.setData(ProsessDataKey.AKTØR_ID, aktørId);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MELTEST-333");
+        fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
+        when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
+
+        agent.utførSteg(p);
+
+        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getAktørID()).isEqualTo(aktørId);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeJournalpostId()).isNull();
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
     }

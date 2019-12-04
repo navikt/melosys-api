@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.function.Predicate;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 
 public final class Utils {
 
@@ -19,12 +19,12 @@ public final class Utils {
     public static Predicate<Prosessinstans> medSteg(ProsessSteg steg) {
         return pi -> pi.getSteg() == steg;
     }
-    
+
     /**
      * Kvalifiserer prosessinstanser som ikke sover
      */
     public static final Predicate<Prosessinstans> somIkkeSover = pi -> pi.getSoverTil() == null || pi.getSoverTil().isBefore(Instant.now());
-    
+
     /**
      * Sorterer prosessinstanser etter alder, eldste først
      */

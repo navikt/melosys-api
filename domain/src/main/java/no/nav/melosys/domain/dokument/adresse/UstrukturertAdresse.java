@@ -52,9 +52,13 @@ public class UstrukturertAdresse extends Adresse {
     }
 
     public static UstrukturertAdresse av(no.nav.melosys.domain.dokument.person.UstrukturertAdresse adresse) {
-        return new UstrukturertAdresse(adresse.adresselinje1, adresse.adresselinje2,
-                                       adresse.adresselinje3, adresse.adresselinje4,
-                                       adresse.land.getKode());
+        UstrukturertAdresse ustrukturertAdresse =
+            new UstrukturertAdresse(adresse.adresselinje1, adresse.adresselinje2,
+                                    adresse.adresselinje3, adresse.adresselinje4,
+                                    adresse.land.getKode());
+
+        ustrukturertAdresse.adresselinjer.add(sammenslå(adresse.postnr, adresse.poststed));
+        return ustrukturertAdresse;
     }
 
     public static UstrukturertAdresse av(StrukturertAdresse sAdresse) {

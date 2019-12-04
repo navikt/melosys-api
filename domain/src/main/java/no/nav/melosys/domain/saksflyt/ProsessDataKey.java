@@ -1,4 +1,4 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.saksflyt;
 
 /**
  * Property keys brukt i saksflyt
@@ -24,7 +24,6 @@ public enum ProsessDataKey {
     EESSI_MELDING("eessiMelding"),
     EESSI_MOTTAKER("eessiMottaker"),
     ER_OPPDATERT_SED("erOppdatertSed"),
-    FRITEKST("fritekst"),
     FYSISKE_VEDLEGG("fysiskeVedlegg"),
     GSAK_SAK_ID("gsakSakID"),
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),

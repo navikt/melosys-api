@@ -313,6 +313,7 @@ public class BrevDataServiceTest {
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
         assertThat(metadata.postadresse.gatenavn).isEqualTo("Strukturert Gate");
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
+        assertThat(metadata.berik).isFalse();
     }
 
     @Test
@@ -325,6 +326,7 @@ public class BrevDataServiceTest {
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
         assertThat(metadata.postadresse).isNull();
         assertThat(metadata.brukerNavn).isNull();
+        assertThat(metadata.berik).isTrue();
     }
 
     @Test
@@ -338,6 +340,7 @@ public class BrevDataServiceTest {
         assertThat(metadata.postadresse).isNull();
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
         assertThat(metadata.utenlandskMyndighet).isNotNull();
+        assertThat(metadata.berik).isFalse();
     }
 
     @Test
@@ -357,6 +360,7 @@ public class BrevDataServiceTest {
 
         metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
         assertThat(metadata.mottakerID).isEqualTo(ORGNR);
+        assertThat(metadata.berik).isTrue();
     }
 
     private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) throws Exception {
@@ -366,7 +370,7 @@ public class BrevDataServiceTest {
     private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Aktoersroller rolle) throws Exception {
         DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, mottaker, kontaktopplysning, lagBehandling(lagSaksopplysninger()), lagBrevData());
         DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype, rolle);
-        assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+        assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
     }
 
     private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) throws TekniskException {
@@ -383,6 +387,7 @@ public class BrevDataServiceTest {
         forventet.fagområde = "MED";
         forventet.journalsakID = "123";
         forventet.saksbehandler = "TEST";
+        forventet.berik = true;
 
         return forventet;
     }

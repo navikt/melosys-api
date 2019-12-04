@@ -17,6 +17,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -64,7 +65,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
 
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, vilkaarsresultatRepository);
+        brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, vilkaarsresultatRepository, new BrevbestillingDto());
     }
 
     @Test

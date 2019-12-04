@@ -57,7 +57,7 @@ public class NAVSTSClient extends STSClient {
     }
 
     private String getUserKey() {
-        String jwt = null;
+        String jwt;
 
         switch (type) {
             case SECURITYCONTEXT_TIL_SAML:

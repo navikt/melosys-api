@@ -28,16 +28,19 @@ import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,8 +63,20 @@ public class FagsakServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    @InjectMocks
     private FagsakService fagsakService;
+
+    private static EasyRandom random = new EasyRandom(getRandomConfig());
+
+    private static EasyRandomParameters getRandomConfig() {
+        return new EasyRandomParameters().collectionSizeRange(1, 4)
+            .stringLengthRange(2, 4);
+    }
+
+    @Before
+    public void setUp() {
+        fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService,
+            tps, prosessinstansService, behandlingsresultatService);
+    }
 
     @Test
     public void hentFagsak() throws IkkeFunnetException {
@@ -85,6 +100,61 @@ public class FagsakServiceTest {
         verify(fagsakRepo).save(fagsak);
         assertThat(fagsak).isNotNull();
         assertThat(fagsak.getSaksnummer()).isNotEmpty();
+    }
+
+    @Test
+    public void bestillNySakOgBehandling_oppretterProsess() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        fagsakService.bestillNySakOgBehandling(opprettSakDto);
+        verify(prosessinstansService).opprettProsessinstansNySak(eq(opprettSakDto));
+    }
+
+    @Test
+    public void validerOpprettSakDto_manglerSakstype_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.sakstype = null;
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("sakstype");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
+    }
+
+    @Test
+    public void validerOpprettSakDto_manglerBehandlingstype_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = null;
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("behandlingstype");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
+    }
+
+    @Test
+    public void validerOpprettSakDto_nullSøknad_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        opprettSakDto.soknadDto = null;
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("null");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
+    }
+
+    @Test
+    public void validerOpprettSakDto_søknadUtenFom_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        opprettSakDto.soknadDto.periode.setFom(null);
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("fra og med dato");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
+    }
+
+    @Test
+    public void validerOpprettSakDto_søknadUtenLand_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        opprettSakDto.soknadDto.land.clear();
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("land");
+        fagsakService.validerOpprettSakDto(opprettSakDto);
     }
 
     @Test
@@ -224,6 +294,33 @@ public class FagsakServiceTest {
         assertThat(oppdaterFagsak.getAktører().stream()
             .map(Aktoer::getInstitusjonId)
             .collect(Collectors.toList())).containsOnlyElementsOf(nyeInstitusjonsIder);
+    }
+
+    @Test
+    public void oppdaterMyndigheter_harBruker_fjernerIkkeBruker() {
+        String saksnummer = "1234";
+        Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(eksisterendeFagsak);
+
+        Aktoer bruker = new Aktoer();
+        bruker.setFagsak(eksisterendeFagsak);
+        bruker.setRolle(Aktoersroller.BRUKER);
+        bruker.setAktørId("1234");
+        eksisterendeFagsak.getAktører().add(bruker);
+
+        List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
+        fagsakService.oppdaterMyndigheter(saksnummer, nyeInstitusjonsIder);
+
+        ArgumentCaptor<Fagsak> captor = ArgumentCaptor.forClass(Fagsak.class);
+        verify(fagsakRepo).save(captor.capture());
+        Fagsak oppdaterFagsak = captor.getValue();
+
+        assertThat(oppdaterFagsak.getAktører())
+            .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonId)
+            .containsExactlyInAnyOrder(
+                tuple(Aktoersroller.BRUKER, "1234", null),
+                tuple(Aktoersroller.MYNDIGHET, null, "Ny institusjonsid")
+            );
     }
 
     @Test

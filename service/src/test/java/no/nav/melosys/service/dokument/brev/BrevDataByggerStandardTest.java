@@ -8,14 +8,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class BrevDataByggerStandardTest {
 
-    private BrevDataByggerStandard brevDataByggerStandard;
-
     @Test
     public void lagBrevData() {
         BrevbestillingDto bestilling = new BrevbestillingDto();
         bestilling.mottaker = Aktoersroller.BRUKER;
         bestilling.fritekst = "FRITEKST";
-        brevDataByggerStandard = new BrevDataByggerStandard(bestilling);
+        BrevDataByggerStandard brevDataByggerStandard = new BrevDataByggerStandard(bestilling);
 
         String saksbehandler = "Z123456";
         BrevData brevData = brevDataByggerStandard.lag(null, saksbehandler);

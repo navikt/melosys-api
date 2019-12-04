@@ -3,7 +3,7 @@ package no.nav.melosys.service.eessi;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;

@@ -1,6 +1,6 @@
 package no.nav.melosys.service.saksflyt;
 
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import org.springframework.context.ApplicationEvent;
 
 public class ProsessinstansOpprettetEvent extends ApplicationEvent {

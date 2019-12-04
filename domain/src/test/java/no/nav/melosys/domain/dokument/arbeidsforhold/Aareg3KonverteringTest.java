@@ -1,20 +1,13 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.*;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.helpers.DefaultValidationEventHandler;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
@@ -26,6 +19,8 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Aareg3KonverteringTest {
 
@@ -77,7 +72,7 @@ public class Aareg3KonverteringTest {
         final String ressurs = "arbeidsforhold/99999999999_med_mock.xml";
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
             Saksopplysning saksopplysning = new Saksopplysning();
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));

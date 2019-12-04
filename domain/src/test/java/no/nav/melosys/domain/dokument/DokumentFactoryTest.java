@@ -48,7 +48,7 @@ public class DokumentFactoryTest {
         StringBuilder stringBuilder = new StringBuilder();
         try (Reader reader = new BufferedReader(new InputStreamReader
                 (kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c = 0;
+            int c;
             while ((c = reader.read()) != -1) {
                 stringBuilder.append((char) c);
             }
@@ -74,7 +74,7 @@ public class DokumentFactoryTest {
         StringBuilder stringBuilder = new StringBuilder();
         try (Reader reader = new BufferedReader(new InputStreamReader
                 (kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c = 0;
+            int c;
             while ((c = reader.read()) != -1) {
                 stringBuilder.append((char) c);
             }

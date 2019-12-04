@@ -6,6 +6,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -50,11 +51,11 @@ public class VedtakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
-        fattVedtak(behandlingID, behandlingsresultattype, null);
+        fattVedtak(behandlingID, behandlingsresultattype, null, null);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType, String mottakerInstitusjon) throws MelosysException {
+    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType, String fritekst, String mottakerInstitusjon) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -65,7 +66,7 @@ public class VedtakService {
         }
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, mottakerInstitusjon);
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerInstitusjon);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -98,12 +99,14 @@ public class VedtakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void endreVedtak(Long behandlingID, Endretperiode endretperiode) throws FunksjonellException, TekniskException {
+    public void endreVedtak(Long behandlingID, Endretperiode endretperiode, Behandlingstyper behandlingstype, String fritekst) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode);
+        behandling.setType(behandlingstype);
+        behandlingService.lagre(behandling);
+
+        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
-
 }

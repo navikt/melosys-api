@@ -5,7 +5,6 @@ import javax.transaction.Transactional;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +40,6 @@ public class FagsakAuditingIT {
 
     @Autowired
     private AuditorProvider auditorAware;
-
-    @Before
-    public void setUp() {
-        auditorAware.setSaksbehanlderID("Z990123");
-    }
 
     @Test
     @Rollback(false)

@@ -15,6 +15,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
@@ -37,7 +41,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.IKKE_NORSK_AG_REGNING;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -78,7 +82,7 @@ public class SendVedtaksbrevInnlandTest {
         BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
         when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(brevdataVedlegg);
         BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv = mock(BrevDataByggerAvslagYrkesaktiv.class);
-        BrevDataAvslagYrkesaktiv brevdataAvslag = new BrevDataAvslagYrkesaktiv(saksbehandler);
+        BrevDataAvslagYrkesaktiv brevdataAvslag = new BrevDataAvslagYrkesaktiv(new BrevbestillingDto(), saksbehandler);
         when(brevDataByggerAvslagYrkesaktiv.lag(any(), any())).thenReturn(brevdataAvslag);
 
         BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver(saksbehandler);

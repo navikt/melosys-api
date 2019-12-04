@@ -44,19 +44,22 @@ public class VedtakTjeneste extends RestTjeneste {
             throw new BadRequestException();
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getMottakerinstitusjon());
+        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(), fattVedtakDto.getMottakerinstitusjon());
         return Response.ok().build();
     }
 
     @POST
-    @Path("{behandlingID}/endreperiode")
+    @Path("{behandlingID}/endre")
     @ApiOperation(value = "Endrer et vedtak for en gitt behandling")
     public Response endreVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("endreVedtakDto") EndreVedtakDto endreVedtakDto) throws FunksjonellException, TekniskException {
         if (endreVedtakDto.getBegrunnelseKode() == null) {
             throw new BadRequestException("Mangler BegrunnelseKode");
         }
+        if (endreVedtakDto.getBehandlingstype() == null) {
+            throw new BadRequestException("Mangler Behandlingstype");
+        }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode());
+        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getBehandlingstype(), endreVedtakDto.getFritekst());
         return Response.ok().build();
     }
 }

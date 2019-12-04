@@ -5,6 +5,9 @@ import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
@@ -17,8 +20,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
@@ -45,7 +48,7 @@ public class SendHenleggelsesbrevTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.HENLEGG_SAK);
         prosessinstans.setData(BEGRUNNELSEKODE, Henleggelsesgrunner.ANNET);
-        prosessinstans.setData(FRITEKST, "fritekst");
+        prosessinstans.setData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, "fritekst");
         Behandling behandling = new Behandling();
         behandling.setId(behandlingId);
         behandling.setFagsak(fagsak);

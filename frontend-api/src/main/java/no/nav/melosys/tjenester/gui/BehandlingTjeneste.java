@@ -33,12 +33,13 @@ public class BehandlingTjeneste extends RestTjeneste {
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjeneste.class);
 
     private final BehandlingService behandlingService;
-
+    private final SaksopplysningerTilDto saksopplysningerTilDto;
     private final TilgangService tilgangService;
 
     @Autowired
-    public BehandlingTjeneste(BehandlingService behandlingService, TilgangService tilgangService) {
+    public BehandlingTjeneste(BehandlingService behandlingService, SaksopplysningerTilDto saksopplysningerTilDto, TilgangService tilgangService) {
         this.behandlingService = behandlingService;
+        this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.tilgangService = tilgangService;
     }
 
@@ -99,7 +100,7 @@ public class BehandlingTjeneste extends RestTjeneste {
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setRedigerbart(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler));
         behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
-        SaksopplysningerDto saksopplysningerDto = SaksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
+        SaksopplysningerDto saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
         behandlingDto.setSaksopplysninger(saksopplysningerDto);
         return behandlingDto;
     }

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AktoerIdCache {
-
     private static final Logger log = LoggerFactory.getLogger(AktoerIdCache.class);
 
     private final Map<String, String> identTilAktørIdCache;
@@ -31,6 +30,10 @@ public class AktoerIdCache {
 
         identTilAktørIdCache = new ConcurrentHashMap<>(initiellKapasitet);
         aktørIdTilIdentCache = new ConcurrentHashMap<>(initiellKapasitet);
+    }
+
+    public boolean erTom() {
+        return utløpskø.isEmpty();
     }
 
     public void leggTilCache(String ident, String aktørId) {

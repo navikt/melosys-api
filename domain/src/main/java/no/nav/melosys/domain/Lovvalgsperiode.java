@@ -188,8 +188,8 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
             && harGyldigBestemmelse();
     }
 
-    public boolean harGyldigTilstand() {
-        return erInnvilget() || erAvslått();
+    public boolean harUgyldigTilstand() {
+        return !erInnvilget() && !erAvslått();
     }
 
     public static Lovvalgsperiode av(AnmodningsperiodeSvar anmodningsperiodeSvar,

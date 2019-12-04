@@ -4,8 +4,9 @@ import java.io.IOException;
 import javax.ws.rs.BadRequestException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -63,9 +64,9 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getMottakerinstitusjon());
+        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), null, fattVedtakDto.getMottakerinstitusjon());
 
-        //valider(fattVedtakDto, FATT_VEDTAK_SCHEMA); TODO: må kommenteres ut igjen. Mismatch med schema-versjon
+        // valider(fattVedtakDto, FATT_VEDTAK_SCHEMA); // TODO: Feiler fordi schema har et nytt felt "vedtakstype"
     }
 
     @Test(expected = BadRequestException.class)
@@ -79,12 +80,13 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
         endreVedtakDto.setBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
+        endreVedtakDto.setBehandlingstype(Behandlingstyper.ENDRET_PERIODE);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakService).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
+        verify(vedtakService).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, Behandlingstyper.ENDRET_PERIODE, null);
 
-        //valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA); TODO: må kommenteres ut igjen. Mismatch med schema-versjon
+        valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }
 
     @Test

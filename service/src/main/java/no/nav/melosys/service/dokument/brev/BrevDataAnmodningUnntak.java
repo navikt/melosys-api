@@ -12,6 +12,7 @@ public class BrevDataAnmodningUnntak extends BrevData {
     public Yrkesaktivitetstyper yrkesaktivitet;
     public Set<VilkaarBegrunnelse> anmodningBegrunnelser;
     public Set<VilkaarBegrunnelse> anmodningUtenArt12Begrunnelser;
+    public String anmodningFritekst;    // Tilhørende vilkåret
 
     public BrevDataAnmodningUnntak(String saksbehandler) {
         super(saksbehandler);

@@ -3,11 +3,13 @@ package no.nav.melosys.saksflyt.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.saksflyt.api.StegBehandler;
+import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +91,8 @@ public class ArbeiderTraad implements Runnable {
             aktivStegBehandler = null;
             return;
         }
+
+        SaksflytSubjektHolder.set(pi.getData(ProsessDataKey.SAKSBEHANDLER));
 
         aktivStegBehandler = stegBehandler;
         aktivProsessinstans = pi;

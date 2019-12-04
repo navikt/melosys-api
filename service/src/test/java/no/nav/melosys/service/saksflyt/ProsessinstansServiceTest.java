@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Periode;
@@ -16,15 +17,25 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
+import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -37,6 +48,9 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProsessinstansServiceTest {
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     @Mock
@@ -111,7 +125,7 @@ public class ProsessinstansServiceTest {
         Behandling behandling = new Behandling();
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         String mottakerInstitusjon = "DE:2332";
-        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, mottakerInstitusjon);
+        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", mottakerInstitusjon);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -140,7 +154,8 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void opprettProsessinstansOppfriskning() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = lagBehandling();
+
         String aktørID = "aktørID";
         String brukerID = "br";
         SoeknadDokument soeknadDokument = new SoeknadDokument();
@@ -153,12 +168,20 @@ public class ProsessinstansServiceTest {
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
     }
 
+    private Behandling lagBehandling() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("12354");
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        return behandling;
+    }
+
     @Test
     public void opprettProsessinstansForkortPeriode() {
         String saksbehandler = settInnloggetSaksbehandler();
 
-        Behandling behandling = new Behandling();
-        service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE);
+        Behandling behandling = lagBehandling();
+        service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE, null);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -289,6 +312,37 @@ public class ProsessinstansServiceTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.SED_GENERELL_SAK);
         assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getDokumentID());
+    }
+
+    @Test
+    public void opprettProsessinstansNySak() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        service.opprettProsessinstansNySak(opprettSakDto);
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
+    }
+
+    @Test
+    public void opprettProsessinstansNySak_behandlingstypeIkkeStøttet_feiler() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = Behandlingstyper.ANKE;
+        expectedException.expect(FunksjonellException.class);
+        service.opprettProsessinstansNySak(opprettSakDto);
+    }
+
+    @Test
+    public void opprettProsessinstansNySak_behandlingstypeSøknad() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        service.opprettProsessinstansNySak(opprettSakDto);
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
+        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.soknadDto.periode);
+        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class)).isEqualTo(opprettSakDto.soknadDto.land);
     }
 
     @Test

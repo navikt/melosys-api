@@ -1,17 +1,17 @@
 package no.nav.melosys.saksflyt.steg.aou.ut;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_RESULTAT;
-import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_OPPDATER_RESULTAT;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)

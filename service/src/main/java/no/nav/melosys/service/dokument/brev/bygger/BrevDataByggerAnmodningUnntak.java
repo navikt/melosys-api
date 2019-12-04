@@ -48,7 +48,7 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
             brevData.anmodningUtenArt12Begrunnelser = art16Begrunnelser;
         }
 
-        brevData.fritekst = art16Vilkaar.getBegrunnelseFritekst();
+        brevData.anmodningFritekst = art16Vilkaar.getBegrunnelseFritekst();
 
         return brevData;
     }

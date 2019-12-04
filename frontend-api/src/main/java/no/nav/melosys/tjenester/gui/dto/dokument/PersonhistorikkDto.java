@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.*;
 
 public class PersonhistorikkDto {
@@ -36,7 +36,7 @@ public class PersonhistorikkDto {
             .collect(Collectors.toList());
     }
 
-    class BostedsadressePeriodeDto {
+    public class BostedsadressePeriodeDto {
         public final Bostedsadresse bostedsadresse;
         public final Periode periode;
 
@@ -46,7 +46,7 @@ public class PersonhistorikkDto {
         }
     }
 
-    class PostadressePeriodeDto {
+    public class PostadressePeriodeDto {
         public final UstrukturertAdresse postadresse;
         public final Periode periode;
 
@@ -56,7 +56,7 @@ public class PersonhistorikkDto {
         }
     }
 
-    class MidlertidigPostadressePeriodeDto {
+    public class MidlertidigPostadressePeriodeDto {
         public final MidlertidigPostadresse midlertidigAdresse;
         public final Periode periode;
 

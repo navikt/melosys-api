@@ -41,7 +41,6 @@ public class BrevDataGrunnlagTest {
 
     private PersonDokument person;
     private SoeknadDokument søknad;
-    private Behandling behandling;
     private BrevDataGrunnlag dataGrunnlag;
 
     @Before
@@ -59,7 +58,7 @@ public class BrevDataGrunnlagTest {
         person.bostedsadresse = boAdresseFraRegister;
 
         søknad = new SoeknadDokument();
-        behandling = lagBehandling(søknad, person);
+        Behandling behandling = lagBehandling(søknad, person);
 
         dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
     }

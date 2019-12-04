@@ -5,6 +5,8 @@ import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -25,6 +27,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_
 @Component
 public class SendVedtakUtland extends AbstraktSendUtland {
     private BehandlingService behandlingService;
+    private BrevBestiller brevBestiller;
 
     @Autowired
     public SendVedtakUtland(EessiService eessiService,
@@ -32,8 +35,9 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
                             LandvelgerService landvelgerService) {
-        super(eessiService, brevBestiller, behandlingsresultatService, landvelgerService);
+        super(eessiService, behandlingsresultatService, landvelgerService);
         this.behandlingService = behandlingService;
+        this.brevBestiller = brevBestiller;
     }
 
     @Override
@@ -53,14 +57,19 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     }
 
-    @Override
-    protected Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    private Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         return new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
             .medAvsender(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(MYNDIGHET))
             .medBehandling(behandling)
-            .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans)).build();
+            .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans))
+            .build();
+    }
+
+    @Override
+    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+        brevBestiller.bestill(lagBrevBestilling(prosessinstans));
     }
 
     @Override

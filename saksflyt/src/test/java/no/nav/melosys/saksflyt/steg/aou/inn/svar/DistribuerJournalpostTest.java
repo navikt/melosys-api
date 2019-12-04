@@ -1,15 +1,21 @@
 package no.nav.melosys.saksflyt.steg.aou.inn.svar;
 
 import java.util.Collections;
-import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,16 +35,15 @@ public class DistribuerJournalpostTest {
     @Mock
     private DoksysFasade doksysFasade;
     @Mock
-    private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private DistribuerJournalpost distribuerJournalpost;
 
     @Before
-    public void setup() {
-        distribuerJournalpost = new DistribuerJournalpost(doksysFasade, utenlandskMyndighetRepository);
+    public void setup() throws TekniskException {
+        distribuerJournalpost = new DistribuerJournalpost(doksysFasade, utenlandskMyndighetService);
 
-        when(utenlandskMyndighetRepository.findByLandkode(any(Landkoder.class)))
-            .thenReturn(Optional.of(lagUtenlandskMyndighet()));
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(any(Landkoder.class))).thenReturn(lagUtenlandskMyndighet());
     }
 
     @Test

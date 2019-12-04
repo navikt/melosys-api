@@ -1,6 +1,7 @@
 package no.nav.melosys.service.journalforing.dto;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -41,5 +42,19 @@ public class PeriodeDto implements ErPeriode {
 
     public void setTom(LocalDate tom) {
         this.tom = tom;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PeriodeDto)) return false;
+        PeriodeDto that = (PeriodeDto) o;
+        return getFom().equals(that.getFom()) &&
+            Objects.equals(getTom(), that.getTom());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFom(), getTom());
     }
 }

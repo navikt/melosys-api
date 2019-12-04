@@ -1,9 +1,12 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.audit.AuditorProvider;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
@@ -15,8 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 /**
  * Oppretter en sak og en behandling i Melosys.
@@ -36,15 +39,11 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     private final BehandlingService behandlingService;
 
-    private final AuditorProvider auditorAware;
-
     @Autowired
     public OpprettFagsakOgBehandling(FagsakService fagsakService,
-                                     BehandlingService behandlingService,
-                                     AuditorProvider auditorAware) {
+                                     BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        this.auditorAware = auditorAware;
         log.info("OpprettSak initialisert");
     }
 
@@ -61,10 +60,8 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String representant = prosessinstans.getData(REPRESENTANT);
         String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
-        String endretAv = prosessinstans.getData(SAKSBEHANDLER);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
-        auditorAware.setSaksbehanlderID(endretAv);
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
@@ -75,7 +72,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
             prosessinstans.setSteg(STATUS_BEH_OPPR);
             log.info("Opprettet behandling {} for prosessinstans {}", behandling.getId(), prosessinstans.getId());
-        } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
+        } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK || prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
             OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID(aktørId).medArbeidsgiver(arbeidsgiver)
                 .medRepresentant(representant).medRepresentantKontaktperson(representantKontakperson)
                 .medBehandlingstype(Behandlingstyper.SOEKNAD).medInitierendeJournalpostId(initierendeJournalpostId)

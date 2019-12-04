@@ -177,8 +177,7 @@ public class TpsService implements TpsFasade {
             XMLGregorianCalendar xmlDato = KonverteringsUtils.localDateToXMLGregorianCalendar(dato);
             /*
             Når fom == tom leverer TPS all foregående historikk, mens fom < tom gir historikk med gyldighetsdato
-            innenfor perioden det søkes på. Vi filtrerer på opplysninger registrert av SKD og sorterer på endringsdato
-            for å finne prefererte opplysninger, og ønsker derfor all historikk fram til start av søknadsperioden.
+            innenfor perioden det søkes på.
             */
             periode.setFom(xmlDato);
             periode.setTom(xmlDato);
@@ -216,26 +215,6 @@ public class TpsService implements TpsFasade {
         dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
-    }
-
-    @Override
-    public int hentAntallPersonerSomBorPåBostedsadresse(String argAktørId) throws IntegrasjonException, IkkeFunnetException, SikkerhetsbegrensningException {
-        //Hvis adressedato ikke gitt som request paramerter da tjensten antar at adresseDato er dagensdato.
-        HentPersonerMedSammeAdresseRequest request = new HentPersonerMedSammeAdresseRequest();
-        AktoerId aktørId = new AktoerId();
-        aktørId.setAktoerId(argAktørId);
-        try {
-            HentPersonerMedSammeAdresseResponse response = personConsumer.hentPersonerMedSammeAdresse(request);
-            if (response != null) {
-                return response.getPersonBorHerListe().size();
-            } else {
-                throw new IntegrasjonException("Feil ved henting av antall personer bor på bostedsadresse");
-            }
-        } catch (HentPersonerMedSammeAdresseSikkerhetsbegrensning e) {
-            throw new SikkerhetsbegrensningException(e);
-        } catch (HentPersonerMedSammeAdresseIkkeFunnet e) {
-            throw new IkkeFunnetException(e);
-        }
     }
 
     @Override

@@ -38,7 +38,7 @@ public final class LovvalgBestemmelsekonvertererTest {
         testConvertToDatabseColumn(null, null);
     }
 
-    private final void testConvertToDatabseColumn(LovvalgBestemmelse input, String forventet) {
+    private void testConvertToDatabseColumn(LovvalgBestemmelse input, String forventet) {
         String resultat = instans.convertToDatabaseColumn(input);
         if (input == null) {
             assertThat(resultat).isNull();
@@ -67,7 +67,7 @@ public final class LovvalgBestemmelsekonvertererTest {
         testKonverterTIlEntitetsAttributt(null);
     }
 
-    private final void testKonverterTIlEntitetsAttributt(LovvalgBestemmelse input) {
+    private void testKonverterTIlEntitetsAttributt(LovvalgBestemmelse input) {
         LovvalgBestemmelse resultat = instans.convertToEntityAttribute(input != null ? input.name() : null);
         assertThat(resultat).isEqualTo(input);
     }

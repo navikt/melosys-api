@@ -28,6 +28,7 @@
     <foretakUtland>
         <uuid>ca24c782-c7f0-11e9-a32f-2a2ae2dbcce4</uuid>
         <navn>Jarlsberg International</navn>
+        <orgnr>0192385347</orgnr>
         <adresse>
             <gatenavn>NEDRE VARÅSEN</gatenavn>
             <husnummer>1</husnummer>

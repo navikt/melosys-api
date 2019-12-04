@@ -27,6 +27,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -120,13 +121,56 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
-    // Sletter aktører som ikke ligger i oppgitt liste og legger til de som mangler.
-    // Oppdaterer IKKE de som allerede finnes i database
+    @Transactional(rollbackFor = MelosysException.class)
+    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException {
+        validerOpprettSakDto(opprettSakDto);
+        prosessinstansService.opprettProsessinstansNySak(opprettSakDto);
+    }
 
+    void validerOpprettSakDto(OpprettSakDto opprettSakDto) throws FunksjonellException {
+        boolean feilet = false;
+        StringBuilder feilmeldingBuilder = new StringBuilder();
+        if (opprettSakDto.sakstype == null) {
+            feilet = true;
+            feilmeldingBuilder.append("sakstype, ");
+        }
+        if (opprettSakDto.behandlingstype == null) {
+            feilet = true;
+            feilmeldingBuilder.append("behandlingstype, ");
+        }
+        if (feilet) {
+            throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en ny sak.").toString());
+        }
+        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD) {
+            final SøknadDto soknadDto = opprettSakDto.soknadDto;
+            if (soknadDto == null) {
+                throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
+            }
+            PeriodeDto periodeDto = soknadDto.periode;
+            if (periodeDto.getFom() == null) {
+                feilet = true;
+                feilmeldingBuilder.append("søknadsperiodes fra og med dato, ");
+            }
+            if (soknadDto.land == null || soknadDto.land.isEmpty()) {
+                feilet = true;
+                feilmeldingBuilder.append("land, ");
+            }
+            if (feilet) {
+                throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en søknadbehandling.").toString());
+            }
+            if (periodeDto.getTom() != null && periodeDto.getFom().isAfter(periodeDto.getTom())) {
+                throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
+            }
+        }
+    }
+
+    // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.
+    // Oppdaterer IKKE de som allerede finnes i database
     @Transactional
     public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId()));
+        fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
+            && aktoer.getRolle() == Aktoersroller.MYNDIGHET);
 
         Collection<Aktoer> nyeMyndigheter = ider.stream()
             .map(id -> lagAktør(fagsak, Aktoersroller.MYNDIGHET, id))
@@ -265,7 +309,7 @@ public class FagsakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void henleggOgVideresend(String saksnummer) throws FunksjonellException, TekniskException {
+    public void henleggOgVideresend(String saksnummer, String mottakerinstitusjon) throws FunksjonellException, TekniskException {
         Fagsak fagsak = hentFagsak(saksnummer);
 
         long behandlingId = fagsak.getAktivBehandling().getId();
@@ -275,7 +319,7 @@ public class FagsakService {
         fagsak.setStatus(Saksstatuser.VIDERESENDT);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
-        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling);
+        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, mottakerinstitusjon);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }
