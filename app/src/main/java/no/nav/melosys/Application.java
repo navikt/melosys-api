@@ -1,5 +1,6 @@
 package no.nav.melosys;
 
+import no.nav.security.token.support.spring.api.EnableJwtTokenValidation;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @PropertySource(value = "classpath:service.properties", encoding = "utf-8")
 @SpringBootApplication
 @Controller
+@EnableJwtTokenValidation
 public class Application {
 
     public static void main(String[] args) {

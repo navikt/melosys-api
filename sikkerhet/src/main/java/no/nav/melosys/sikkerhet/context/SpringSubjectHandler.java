@@ -1,35 +1,40 @@
 package no.nav.melosys.sikkerhet.context;
 
-
-import java.util.Optional;
-
-import org.pac4j.oidc.profile.OidcProfile;
-import org.pac4j.springframework.security.authentication.Pac4jAuthentication;
-import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import no.nav.security.token.support.core.context.TokenValidationContext;
+import no.nav.security.token.support.core.jwt.JwtToken;
+import no.nav.security.token.support.spring.SpringTokenValidationContextHolder;
+import org.springframework.web.context.request.RequestContextHolder;
 
 public class SpringSubjectHandler extends SubjectHandler {
 
+    private static final String ISSO = "isso";
+
+    private final SpringTokenValidationContextHolder contextHolder;
+
+    public SpringSubjectHandler(SpringTokenValidationContextHolder contextHolder) {
+        this.contextHolder = contextHolder;
+    }
+
     @Override
     public String getOidcTokenString() {
-        return oidcProfile().map(OidcProfile::getIdTokenString).orElse(null);
+        return hasValidToken() ? issoToken().getTokenAsString() : null;
     }
 
     @Override
     public String getUserID() {
-        return oidcProfile()
-            .map(OidcProfile::getSubject)
-            .map(String::toUpperCase)
-            .orElse(null);
+        return hasValidToken() ? issoToken().getSubject() : null;
     }
 
-    private static Optional<OidcProfile> oidcProfile() {
-        return authentication()
-            .map(Pac4jAuthentication::getProfile)
-            .map(OidcProfile.class::cast);
+    private boolean hasValidToken() {
+        //contextHolder.getTokenValidationContext() kaster exception om det ikke finnes en request-context
+        return RequestContextHolder.getRequestAttributes() != null && context().hasTokenFor(ISSO);
     }
 
-    private static Optional<Pac4jAuthenticationToken> authentication() {
-        return Optional.ofNullable((Pac4jAuthenticationToken) SecurityContextHolder.getContext().getAuthentication());
+    private JwtToken issoToken() {
+        return context().getJwtToken(ISSO);
+    }
+
+    private TokenValidationContext context() {
+        return contextHolder.getTokenValidationContext();
     }
 }
