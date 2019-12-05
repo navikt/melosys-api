@@ -1,0 +1,41 @@
+#!groovy
+
+node {
+    def mvnSettings = "navMavenSettingsUtenProxy"
+    def branchName, commit, commitId, imageVersion
+    def application = "melosys", springProfiles = "nais"
+    def javaHome = tool "jdk-11"
+    def mvnHome = tool "maven-3.6.0"
+    env.PATH = "${javaHome}/bin:${mvnHome}/bin:${env.PATH}"
+
+    stage("Checkout") {
+        scmInfo = checkout scm
+
+        commit = sh(script: "git log -1 --oneline", returnStdout: true)
+    }
+
+    stage("Testing application") {
+        withCredentials([usernamePassword(credentialsId: 'MELOSYS_Q3', passwordVariable: 'dbpassword', usernameVariable: 'dbusername')]) {
+            env.testUsername = dbusername
+            env.testPassword = dbpassword
+        }
+
+        withCredentials([string(credentialsId: 'truststore', variable: 'truststorepassword'), string(credentialsId: '690b28ff-2ecd-4b67-8a2b-99493b736c12', variable: 'stsTestPassword')]) {
+            env.stsTestPassword = stsTestPassword
+
+            configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
+                sh 'mvn package failsafe:integration-test -DfailIfNoTests=false -Pitest -Dspring.profiles.active="local,mock,itest" -e -U -Djavax.net.ssl.trustStore=../target/nav_truststore_nonproduction_ny2.jts -Djavax.net.ssl.trustStorePassword=$truststorepassword -s $MAVEN_SETTINGS'
+            }
+        }
+    }
+
+    stage("Report") {
+        allure([
+            includeProperties: false,
+            jdk: '',
+            properties: [],
+            reportBuildPolicy: 'ALWAYS',
+            results: [[path: 'integrasjonstest/target/allure-results']]
+        ])
+    }
+}
