@@ -515,6 +515,11 @@
                 <version>${awaitility.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-junit5</artifactId>
+                <version>2.11.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -575,6 +580,11 @@
                         <skipITs>true</skipITs>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>io.qameta.allure</groupId>
+                    <artifactId>allure-maven</artifactId>
+                    <version>2.10.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -609,6 +619,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+            </plugin>
         </plugins>
     </build>
 
@@ -640,24 +654,6 @@
                         <configuration>
                             <skipTests>true</skipTests>
                         </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.googlecode.maven-download-plugin</groupId>
-                        <artifactId>download-maven-plugin</artifactId>
-                        <version>1.4.2</version>
-                        <executions>
-                            <execution>
-                                <id>download-tls-certificate-from-fasit</id>
-                                <inherited>false</inherited>
-                                <goals>
-                                    <goal>wget</goal>
-                                </goals>
-                                <configuration>
-                                    <url>https://fasit.adeo.no/api/v2/resources/8599733/file/keystore</url>
-                                    <outputFileName>nav_truststore_nonproduction_ny2.jts</outputFileName>
-                                </configuration>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
