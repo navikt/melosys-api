@@ -1,10 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Set;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,14 +13,18 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
+@Protected
 @Api(tags = { "avklartefakta" })
-@Path("/avklartefakta")
-@Service
+@RestController("/avklartefakta")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AvklartefaktaTjeneste extends RestTjeneste {
 
@@ -38,20 +38,18 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @GET
-    @Path("{behandlingID}")
+    @GetMapping("{behandlingID}")
     @ApiOperation(value = "Henter avklartefakta for en gitt behandling",
                   response = Avklartefakta.class,
                   responseContainer = "Set")
-    public Set<AvklartefaktaDto> hentAvklarteFakta(@ApiParam("BehandlingsID") @PathParam("behandlingID") long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public Set<AvklartefaktaDto> hentAvklarteFakta(@ApiParam("BehandlingsID") @PathVariable("behandlingID") long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         tilgangService.sjekkTilgang(behandlingID);
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
     }
 
-    @POST
-    @Path("{behandlingID}")
+    @PostMapping("{behandlingID}")
     @ApiOperation(value = "Lagre avklartefakta")
-    public Set<AvklartefaktaDto> lagreAvklarteFakta(@PathParam("behandlingID") long behandlingID,
+    public Set<AvklartefaktaDto> lagreAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                     @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 

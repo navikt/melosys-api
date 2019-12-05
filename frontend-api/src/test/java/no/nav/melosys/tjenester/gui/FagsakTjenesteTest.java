@@ -8,9 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -26,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -50,6 +48,8 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory.fagsakMedBehandlinger;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,18 +108,18 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public final void hentFagsakGir200OkOgDto() throws Exception {
         Fagsak fagsak = lagFagsak();
-        testHentFagsak("123", Response.status(Status.OK).entity(lagFagsakDto(fagsak)).build());
+        testHentFagsak("123", ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak)));
     }
 
-    private void testHentFagsak(String saksnr, Response forventning) throws Exception {
+    private void testHentFagsak(String saksnr, ResponseEntity forventning) throws Exception {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
-        Response resultat = instans.hentFagsak(saksnr);
-        assertThat(resultat.getStatusInfo()).isEqualTo(forventning.getStatusInfo());
-        if (forventning.getEntity() == null) {
-            assertThat(resultat.getEntity()).isNull();
+        ResponseEntity resultat = instans.hentFagsak(saksnr);
+        assertThat(resultat.getStatusCode()).isEqualTo(forventning.getStatusCode());
+        if (forventning.getBody() == null) {
+            assertThat(resultat.getBody()).isNull();
         } else {
-            assertThat(resultat.getEntity()).usingRecursiveComparison().isEqualTo(forventning.getEntity());
+            assertThat(resultat.getBody()).usingRecursiveComparison().isEqualTo(forventning.getBody());
         }
     }
 
@@ -142,7 +142,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     public final void hentFagsaker_utenFnr_girBadRequest() throws Exception {
         FagsakTjeneste instans = lagFagsakTjeneste(lagFagsak());
         Throwable unntak = catchThrowable(() -> instans.hentFagsaker(null));
-        assertThat(unntak).isInstanceOf(BadRequestException.class);
+        assertThat(unntak).isInstanceOf(FunksjonellException.class);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(null);
         OpprettSakDto dto = new OpprettSakDto();
         Throwable unntak = catchThrowable(() -> instans.opprettFagsak(dto));
-        assertThat(unntak).isInstanceOf(BadRequestException.class);
+        assertThat(unntak).isInstanceOf(FunksjonellException.class);
     }
 
     @Test
@@ -175,9 +175,9 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
         String saksnummer = "123";
-        Response resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
+        ResponseEntity resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
 
-        assertThat(resultat.getStatusInfo()).isEqualTo(Status.OK);
+        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(fagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
     }
     @Test
@@ -244,9 +244,9 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         String saksnummer = "123";
-        Response resultat = instans.avsluttSakSomBortfalt(saksnummer);
+        ResponseEntity resultat = instans.avsluttSakSomBortfalt(saksnummer);
 
-        assertThat(resultat.getStatusInfo()).isEqualTo(Status.NO_CONTENT);
+        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         verify(fagsakService).avsluttSakSomBortfalt(fagsak);
     }
 

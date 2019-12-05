@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.MelosysException;
@@ -20,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -55,8 +55,8 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
         journalpost.setAvsenderId(SAMPLE_ORGNR);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        Response response = tjeneste.hentJournalpostOpplysninger(anyString());
-        JournalpostDto journalpostDto = (JournalpostDto) response.getEntity();
+        ResponseEntity response = tjeneste.hentJournalpostOpplysninger(anyString());
+        JournalpostDto journalpostDto = (JournalpostDto) response.getBody();
 
         valider(journalpostDto, JOURNALFOERING_SCHEMA, log);
     }

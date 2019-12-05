@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -29,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
@@ -99,11 +99,11 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
         List<Long> periodeIder = Arrays.asList(2L, 3L, 5L);
         when(behandlingService.hentMedlemsperioder(behandlingID)).thenReturn(periodeIder);
 
-        Response response = behandlingTjeneste.hentMedlemsperioder(behandlingID);
-        assertThat(response.getEntity()).isNotNull();
-        assertThat(response.getEntity()).isInstanceOf(TidligereMedlemsperioderDto.class);
+        ResponseEntity response = behandlingTjeneste.hentMedlemsperioder(behandlingID);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isInstanceOf(TidligereMedlemsperioderDto.class);
 
-        TidligereMedlemsperioderDto tidligereMedlemsperioderDto = (TidligereMedlemsperioderDto) response.getEntity();
+        TidligereMedlemsperioderDto tidligereMedlemsperioderDto = (TidligereMedlemsperioderDto) response.getBody();
         assertThat(tidligereMedlemsperioderDto.periodeIder).containsAll(periodeIder);
 
         verify(behandlingService, times(1)).hentMedlemsperioder(behandlingID);

@@ -1,10 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -13,14 +8,19 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
+@Protected
 @Api(tags = {"organisasjoner"})
-@Path("/organisasjoner")
-@Service
+@RestController("/organisasjoner")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class OrganisasjonTjeneste extends RestTjeneste {
     private final RegisterOppslagService registerOppslag;
@@ -30,22 +30,21 @@ public class OrganisasjonTjeneste extends RestTjeneste {
         this.registerOppslag = registerOppslag;
     }
 
-    @GET
-    @Path("{orgnr}")
+    @GetMapping("{orgnr}")
     @ApiOperation(value = "Henter en organisasjon fra Enhetsregisteret.", response = OrganisasjonDokument.class)
-    public Response hentOrganisasjon(@PathParam("orgnr") @ApiParam("Organisasjonsnummer.") String orgnummer)
+    public ResponseEntity hentOrganisasjon(@PathVariable("orgnr") @ApiParam("Organisasjonsnummer.") String orgnummer)
         throws SikkerhetsbegrensningException, IntegrasjonException {
         if (orgnummer == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
         OrganisasjonDokument organisasjonDokument;
         try {
             organisasjonDokument = registerOppslag.hentOrganisasjon(orgnummer);
         } catch (IkkeFunnetException e) {
-            return Response.ok(tomJson()).build();
+            return ResponseEntity.ok(tomJson());
         }
 
-        return Response.ok(organisasjonDokument).build();
+        return ResponseEntity.ok(organisasjonDokument);
     }
 }

@@ -3,10 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,16 +17,20 @@ import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
+@Protected
 @Api(tags = "oppgaver")
-@Path("/oppgaver")
-@Service
+@RestController("/oppgaver")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class OppgaveTjeneste extends RestTjeneste {
 
@@ -45,10 +45,9 @@ public class OppgaveTjeneste extends RestTjeneste {
         this.oppgaveService = oppgaveService;
     }
 
-    @POST
-    @Path("/plukk")
+    @PostMapping("/plukk")
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
-    public Response plukkOppgave(@ApiParam PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity plukkOppgave(@ApiParam PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
 
         Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
@@ -67,27 +66,25 @@ public class OppgaveTjeneste extends RestTjeneste {
             dto.setBehandlingstype(behandling.getType().getKode());
             dto.setJournalpostID(oppgave.getJournalpostId());
 
-            return Response.ok(dto).build();
+            return ResponseEntity.ok(dto);
         } else {
-            return Response.ok().build();
+            return ResponseEntity.ok().build();
         }
     }
 
-    @POST
-    @Path("/tilbakelegg")
+    @PostMapping("/tilbakelegg")
     @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
-    public Response leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
+    public ResponseEntity leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
         oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging);
-        return Response.ok().build();
+        return ResponseEntity.ok().build();
     }
 
-    @GET
-    @Path("/oversikt")
+    @GetMapping("/oversikt")
     @ApiOperation(
         value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.",
         response = OppgaveOversiktDto.class)
-    public Response mineOppgaver() throws TekniskException, FunksjonellException {
+    public ResponseEntity mineOppgaver() throws TekniskException, FunksjonellException {
         String ident = SubjectHandler.getInstance().getUserID();
         List<OppgaveDto> oppgaveDtoListe;
         oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
@@ -106,6 +103,6 @@ public class OppgaveTjeneste extends RestTjeneste {
         }
         oversiktDto.setJournalforing(journalføring);
         oversiktDto.setSaksbehandling(saksbehandling);
-        return Response.ok(oversiktDto).build();
+        return ResponseEntity.ok(oversiktDto);
     }
 }

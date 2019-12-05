@@ -2,25 +2,24 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-
+@Protected
 @Api(tags = {"adresser"})
-@Path("/adresser")
-@Service
+@RestController("/adresser")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AdresseTjeneste extends RestTjeneste {
 
@@ -30,24 +29,22 @@ public class AdresseTjeneste extends RestTjeneste {
         this.utenlandskMyndighetRepo = utenlandskMyndighetRepo;
     }
 
-    @GET
-    @Path("/myndigheter/{landkode}")
+    @GetMapping("/myndigheter/{landkode}")
     @ApiOperation(
         value = "Henter adressen til en gitt utenlandsk myndighet",
         response = UtenlandskMyndighet.class)
-    public Response hentMyndighet(@PathParam("landkode") Landkoder landkode) {
+    public ResponseEntity hentMyndighet(@PathVariable("landkode") Landkoder landkode) {
         Optional<UtenlandskMyndighet> utenlandskMyndighet = utenlandskMyndighetRepo.findByLandkode(landkode);
-        return utenlandskMyndighet.map(Response::ok).orElse(Response.status(NOT_FOUND)).build();
+        return utenlandskMyndighet.map(ResponseEntity::ok).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @GET
-    @Path("/myndigheter")
+    @GetMapping("/myndigheter")
     @ApiOperation(
         value = "Henter adresser til alle utenlandske myndigheter",
         response = UtenlandskMyndighet.class,
         responseContainer = "List")
-    public Response hentMyndigheter() {
+    public ResponseEntity hentMyndigheter() {
         List<UtenlandskMyndighet> utenlandskeMyndigheter = utenlandskMyndighetRepo.findAll();
-        return Response.ok(utenlandskeMyndigheter).build();
+        return ResponseEntity.ok(utenlandskeMyndigheter);
     }
 }

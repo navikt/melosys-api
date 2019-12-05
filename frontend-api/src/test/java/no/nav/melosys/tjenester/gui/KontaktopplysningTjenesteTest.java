@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Optional;
-import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.exception.FunksjonellException;
@@ -12,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -38,33 +38,33 @@ public class KontaktopplysningTjenesteTest {
     public void hentKontaktopplysning_kallerPåService_objektFinnes() {
         doReturn(Optional.of(new Kontaktopplysning())).when(kontaktopplysningService).hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
-        Response response = kontaktopplysningTjeneste.hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+        ResponseEntity response = kontaktopplysningTjeneste.hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
-        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
     @Test
     public void hentKontaktopplysning_kallerPåService_objektFinnesIkke() {
-        Response response = kontaktopplysningTjeneste.hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+        ResponseEntity response = kontaktopplysningTjeneste.hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
         verify(kontaktopplysningService).hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
-        assertThat(response.getStatus()).isEqualTo(404);
+        assertThat(response.getStatusCode().value()).isEqualTo(404);
     }
 
     @Test
     public void lagKontaktopplysning_kallerPåService() {
-        Response response = kontaktopplysningTjeneste.lagKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO);
+        ResponseEntity response = kontaktopplysningTjeneste.lagKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO);
 
         verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.getKontaktorgnr(), KONTAKT_INFO.getKontaktnavn());
-        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
     @Test
     public void slettKontaktopplysning_kallerPåService() throws FunksjonellException {
-        Response response = kontaktopplysningTjeneste.slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+        ResponseEntity response = kontaktopplysningTjeneste.slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
         verify(kontaktopplysningService).slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
-        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 }
