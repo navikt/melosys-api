@@ -92,6 +92,7 @@
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
         <failsafe.version>2.22.0</failsafe.version>
+        <allure.version>2.11.0</allure.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -518,7 +519,7 @@
             <dependency>
                 <groupId>io.qameta.allure</groupId>
                 <artifactId>allure-junit5</artifactId>
-                <version>2.11.0</version>
+                <version>${allure.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -583,7 +584,7 @@
                 <plugin>
                     <groupId>io.qameta.allure</groupId>
                     <artifactId>allure-maven</artifactId>
-                    <version>2.10.0</version>
+                    <version>${allure.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -618,10 +619,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>io.qameta.allure</groupId>
-                <artifactId>allure-maven</artifactId>
             </plugin>
         </plugins>
     </build>

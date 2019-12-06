@@ -8,6 +8,8 @@ node {
     def mvnHome = tool "maven-3.6.0"
     env.PATH = "${javaHome}/bin:${mvnHome}/bin:${env.PATH}"
 
+    env.testDb = "jdbc:oracle:thin:@a01dbfl042.adeo.no:1521/MELOSYS_Q3"
+
     stage("Checkout") {
         scmInfo = checkout scm
 
