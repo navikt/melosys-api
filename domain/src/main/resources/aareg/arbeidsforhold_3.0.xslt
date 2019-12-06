@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xmlns:ns2="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3">
+                xmlns:aareg="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3">
 
     <xsl:output method="xml" indent="no"/>
 
     <xsl:template match="/">
         <arbeidsforholdDokument>
             <arbeidsforhold>
-                <xsl:for-each select="(ns2:finnArbeidsforholdPrArbeidstakerResponse|ns2:hentArbeidsforholdHistorikkResponse)/parameters/arbeidsforhold">
+                <xsl:for-each select="(aareg:finnArbeidsforholdPrArbeidstakerResponse|aareg:hentArbeidsforholdHistorikkResponse)/parameters/arbeidsforhold">
                     <arbeidsforhold>
                         <arbeidsforholdID><xsl:value-of select="arbeidsforholdID" /></arbeidsforholdID>
                         <arbeidsforholdIDnav><xsl:value-of select="arbeidsforholdIDnav" /></arbeidsforholdIDnav>
@@ -38,7 +38,7 @@
                                 <beregnetAntallTimerPrUke><xsl:value-of select="beregnetAntallTimerPrUke" /></beregnetAntallTimerPrUke>
                                 <endringsdatoStillingsprosent><xsl:value-of select="endringsdatoStillingsprosent" /></endringsdatoStillingsprosent>
                                 <xsl:choose>
-                                    <xsl:when test="@xsi:type='ns4:MaritimArbeidsavtale'">
+                                    <xsl:when test="contains(@xsi:type,'MaritimArbeidsavtale')">
                                         <maritimArbeidsavtale>true</maritimArbeidsavtale>
                                         <fartsområde>
                                             <xsl:value-of select="fartsomraade/@kodeRef" />
@@ -85,17 +85,17 @@
 
     <xsl:template match="arbeidsgiver|opplysningspliktig">
         <xsl:element name="{concat(name(), 'type')}">
-            <xsl:value-of select="substring-after(@xsi:type, 'ns4:')" />
+            <xsl:value-of select="substring-after(@xsi:type, ':')" />
         </xsl:element>
         <xsl:element name="{concat(name(), 'ID')}">
             <xsl:choose>
-                <xsl:when test="@xsi:type='ns4:Organisasjon'">
+                <xsl:when test="contains(@xsi:type,'Organisasjon')">
                     <xsl:value-of select="orgnummer" />
                 </xsl:when>
-                <xsl:when test="@xsi:type='ns4:Person'">
+                <xsl:when test="contains(@xsi:type,'Person')">
                     <xsl:value-of select="ident/ident" />
                 </xsl:when>
-                <xsl:when test="@xsi:type='ns4:HistoriskArbeidsgiverMedArbeidsgivernummer'">
+                <xsl:when test="contains(@xsi:type,'HistoriskArbeidsgiverMedArbeidsgivernummer')">
                     <xsl:value-of select="arbeidsgivernummer" />
                 </xsl:when>
             </xsl:choose>

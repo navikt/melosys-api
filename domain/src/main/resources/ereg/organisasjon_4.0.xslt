@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:nsx="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
 
     <xsl:output method="xml" indent="no"/>
 
-    <xsl:template match="/ns2:hentOrganisasjonResponse/response/organisasjon">
+    <xsl:template match="/|nsx:hentOrganisasjonResponse|response">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="organisasjon">
         <organisasjonDokument>
             <orgnummer><xsl:value-of select="orgnummer"/></orgnummer>
             <navn>
@@ -64,14 +68,14 @@
 
     <xsl:template match="forretningsadresse|postadresse">
         <xsl:choose>
-            <xsl:when test="@xsi:type='ns4:SemistrukturertAdresse'">
+            <xsl:when test="contains(@xsi:type,'SemistrukturertAdresse')">
                 <xsl:element name="{name()}">
                     <xsl:attribute name="xsi:type">SemistrukturertAdresse</xsl:attribute>
                     <xsl:call-template name="Perioder"/>
                     <xsl:apply-templates/>
                 </xsl:element>
             </xsl:when>
-            <xsl:when test="@xsi:type='ns4:Gateadresse'">
+            <xsl:when test="contains(@xsi:type,'Gateadresse')">
                 <xsl:element name="{name()}">
                     <xsl:attribute name="xsi:type">Gateadresse</xsl:attribute>
                         <xsl:call-template name="Perioder"/>
@@ -81,6 +85,9 @@
                     </xsl:for-each>
                 </xsl:element>
             </xsl:when>
+            <xsl:otherwise>
+                <failed/>
+            </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
 
