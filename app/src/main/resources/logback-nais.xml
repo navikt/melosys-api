@@ -13,7 +13,6 @@
 
     <logger name="org.apache.cxf.services" level="WARN"/>
     <logger name="org.apache.kafka" level="WARN"/>
-    <logger name="org.mitre.openid.connect.client.OIDCAuthenticationFilter" level="INFO"/>
     <logger name="org.springframework.kafka" level="WARN"/>
     <logger name="org.springframework.oxm.jaxb.Jaxb2Marshaller" level="WARN"/>
     <logger name="no.nav.melosys.frontendlogg" level="WARN"/>
