@@ -26,7 +26,7 @@ node {
             env.stsTestPassword = stsTestPassword
 
             configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
-                sh 'mvn package failsafe:integration-test -DfailIfNoTests=false -Pitest -Dspring.profiles.active="local,mock,itest" -e -U -Djavax.net.ssl.trustStore=../target/nav_truststore_nonproduction_ny2.jts -Djavax.net.ssl.trustStorePassword=$truststorepassword -s $MAVEN_SETTINGS'
+                sh 'mvn package failsafe:integration-test -DfailIfNoTests=false -Pitest -Dspring.profiles.active="local,itest" -e -U -Djavax.net.ssl.trustStore=../target/nav_truststore_nonproduction_ny2.jts -Djavax.net.ssl.trustStorePassword=$truststorepassword -s $MAVEN_SETTINGS'
             }
         }
     }

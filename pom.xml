@@ -626,12 +626,6 @@
     <profiles>
         <profile>
             <id>itest</id>
-            <activation>
-                <property>
-                    <name>itest</name>
-                    <value>true</value>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -639,7 +633,6 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <includes>
-                                <include>integrasjonstest*/IT.java</include>
                                 <include>integrasjonstest*/*IT.java</include>
                             </includes>
                             <skipITs>false</skipITs>
