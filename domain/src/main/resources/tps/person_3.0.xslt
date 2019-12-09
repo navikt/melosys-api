@@ -63,7 +63,7 @@
         </postadresse>
     </xsl:template>
 
-    <xsl:template match="midlertidigPostadresse[@xsi:type='ns3:MidlertidigPostadresseUtland']">
+    <xsl:template match="midlertidigPostadresse[contains(@xsi:type,'MidlertidigPostadresseUtland')]">
         <midlertidigPostadresse>
             <xsl:attribute name="xsi:type"><xsl:value-of select="substring-after(@xsi:type, ':')" /></xsl:attribute>
             <adresselinje1><xsl:value-of select="ustrukturertAdresse/adresselinje1" /></adresselinje1>
@@ -76,7 +76,7 @@
         </midlertidigPostadresse>
     </xsl:template>
 
-    <xsl:template match="midlertidigPostadresse[@xsi:type='ns3:MidlertidigPostadresseNorge']">
+    <xsl:template match="midlertidigPostadresse[contains(@xsi:type,'MidlertidigPostadresseNorge')]">
         <midlertidigPostadresse>
             <xsl:attribute name="xsi:type"><xsl:value-of select="substring-after(@xsi:type, ':')" /></xsl:attribute>
             <tilleggsadresse><xsl:value-of select="strukturertAdresse/tilleggsadresse" /></tilleggsadresse>
