@@ -39,7 +39,6 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>2.0.4-PR-39-SNAPSHOT</melosys.frontend.version>
         <melosys.jsonschema.version>1.33.4-58</melosys.jsonschema.version>
         <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
         <melosys.internt.kodeverk.version>5.14.14</melosys.internt.kodeverk.version>
@@ -89,7 +88,6 @@
         <restFixture.version>4.4</restFixture.version>
         <slf4j.version>1.7.25</slf4j.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
-        <spring-security-pac4j.version>4.1.0</spring-security-pac4j.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
         <failsafe.version>2.22.0</failsafe.version>
@@ -166,12 +164,6 @@
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>melosys-frontendlogger</artifactId>
                 <version>${melosys.frontendlogger.version}</version>
-                <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.melosys</groupId>
-                <artifactId>melosys-web</artifactId>
-                <version>${melosys.frontend.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>

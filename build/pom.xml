@@ -17,12 +17,6 @@
             <artifactId>app</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-web</artifactId>
-            <type>zip</type>
-            <scope>runtime</scope>
-        </dependency>
 
         <dependency>
             <groupId>no.nav.melosys</groupId>
