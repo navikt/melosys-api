@@ -23,8 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
+@RestController
+@RequestMapping("/eessi")
 @Api(tags = {"eessi"})
-@RestController("/eessi")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class EessiTjeneste extends RestTjeneste {
     private static final Logger log = LoggerFactory.getLogger(EessiTjeneste.class);

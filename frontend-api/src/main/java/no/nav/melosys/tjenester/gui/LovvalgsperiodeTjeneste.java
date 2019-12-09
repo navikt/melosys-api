@@ -19,15 +19,13 @@ import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
+@RestController
+@RequestMapping("/lovvalgsperioder")
 @Api(tags = { "lovvalgsperioder" })
-@RestController("/lovvalgsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class LovvalgsperiodeTjeneste extends RestTjeneste {
 

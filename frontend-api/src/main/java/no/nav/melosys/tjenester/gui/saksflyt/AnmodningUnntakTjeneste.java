@@ -12,15 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
+@RestController
+@RequestMapping("/saksflyt/anmodningsperioder")
 @Api(tags = {"saksflyt", "anmodningsperioder"})
-@RestController(value = "/saksflyt/anmodningsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningUnntakTjeneste extends RestTjeneste {
     private final AnmodningUnntakService anmodningUnntakService;

@@ -16,15 +16,13 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
+@RestController
+@RequestMapping("/avklartefakta")
 @Api(tags = { "avklartefakta" })
-@RestController("/avklartefakta")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AvklartefaktaTjeneste extends RestTjeneste {
 

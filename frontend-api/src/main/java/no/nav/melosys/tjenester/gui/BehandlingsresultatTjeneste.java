@@ -14,12 +14,14 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
+@RestController
+@RequestMapping("/behandlinger")
 @Api(tags = { "behandlingsresultat" })
-@RestController("/behandlinger")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsresultatTjeneste extends RestTjeneste {
 

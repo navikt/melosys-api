@@ -17,12 +17,14 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
+@RestController
+@RequestMapping("/saksflyt/vedtak")
 @Api(tags = {"saksflyt", "vedtak"})
-@RestController("/saksflyt/vedtak")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VedtakTjeneste extends RestTjeneste {
     private final VedtakService vedtakService;

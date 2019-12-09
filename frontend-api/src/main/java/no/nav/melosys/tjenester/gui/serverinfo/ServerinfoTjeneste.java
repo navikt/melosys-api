@@ -7,12 +7,14 @@ import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 @Unprotected
+@RestController
+@RequestMapping("/serverinfo")
 @Api(tags = {"serverinfo"})
-@RestController("/serverinfo")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class ServerinfoTjeneste {
     @GetMapping

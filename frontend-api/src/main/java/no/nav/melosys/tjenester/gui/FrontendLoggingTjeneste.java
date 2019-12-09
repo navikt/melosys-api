@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 @Unprotected
+@RestController
+@RequestMapping("/logger")
 @Api(tags = {"frontend-logger"})
-@RestController("/logger")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class FrontendLoggingTjeneste extends RestTjeneste {
 

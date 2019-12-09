@@ -17,8 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
+@RestController
+@RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
-@RestController("/fagsaker")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class KontaktopplysningTjeneste extends RestTjeneste {
     private final KontaktopplysningService kontaktopplysningService;
@@ -51,7 +52,7 @@ public class KontaktopplysningTjeneste extends RestTjeneste {
         return ResponseEntity.ok(kontaktopplysning);
     }
 
-    @DeleteMapping("{saksnummer}/kontaktopplysninger/{orgnr}")
+    @DeleteMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
     @ApiOperation(value = "Sletter kontaktopplysning på en fagsak med gitt orgnummer")
     public ResponseEntity slettKontaktopplysning(@PathVariable("saksnummer") String saksnummer, @PathVariable("orgnr") String orgnr) throws FunksjonellException {
         kontaktopplysningService.slettKontaktopplysning(saksnummer, orgnr);

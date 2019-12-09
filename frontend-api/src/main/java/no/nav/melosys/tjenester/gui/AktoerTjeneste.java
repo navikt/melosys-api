@@ -28,8 +28,9 @@ import org.springframework.web.context.WebApplicationContext;
 import static java.util.stream.Collectors.toList;
 
 @Protected
+@RestController
+@RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
-@RestController("/fagsaker")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AktoerTjeneste extends RestTjeneste {
 
@@ -46,7 +47,7 @@ public class AktoerTjeneste extends RestTjeneste {
         this.fagsakService = fagsakService;
     }
 
-    @GetMapping("{saksnummer}/aktoerer/")
+    @GetMapping("/{saksnummer}/aktoerer/")
     @ApiOperation(
         value = "Henter aktører knyttet til et gitt saksnummer.",
         response = AktoerDto.class,
@@ -72,7 +73,7 @@ public class AktoerTjeneste extends RestTjeneste {
         return aktører.stream().map(this::tilDto).collect(toList());
     }
 
-    @PostMapping("{saksnummer}/aktoerer/")
+    @PostMapping("/{saksnummer}/aktoerer/")
     @ApiOperation(
         value = "Lagrer/oppdaterer aktør informasjon for et gitt saksnummer.",
         response = AktoerDto.class)

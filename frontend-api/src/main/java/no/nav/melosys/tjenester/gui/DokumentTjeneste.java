@@ -23,15 +23,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
+@RestController
+@RequestMapping("/dokumenter")
 @Api(tags = {"dokumenter"})
-@RestController("/dokumenter")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DokumentTjeneste extends RestTjeneste {
     private static final String APPLICATION_PDF = "application/pdf";
@@ -53,7 +51,7 @@ public class DokumentTjeneste extends RestTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @GetMapping(value = "pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
+    @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
     public ResponseEntity hentDokument(@ApiParam @PathVariable("journalpostID") String journalpostID, @ApiParam @PathVariable("dokumentID") String dokumentID)
         throws SikkerhetsbegrensningException, IkkeFunnetException {

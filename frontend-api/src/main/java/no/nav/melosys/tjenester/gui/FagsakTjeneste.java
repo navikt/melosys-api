@@ -36,8 +36,9 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
 @Protected
+@RestController
+@RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
-@RestController("/fagsaker")
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class FagsakTjeneste extends RestTjeneste {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);

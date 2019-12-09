@@ -18,15 +18,13 @@ import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
+@RestController
+@RequestMapping("/soknader")
 @Api(tags = {"søknad"})
-@RestController("/soknader")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class SoeknadTjeneste extends RestTjeneste {
 
