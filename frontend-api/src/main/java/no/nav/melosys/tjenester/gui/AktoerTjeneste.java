@@ -52,8 +52,8 @@ public class AktoerTjeneste {
         response = AktoerDto.class,
         responseContainer = "List")
     public List<AktoerDto> hentAktoerer(@PathVariable("saksnummer") String saksnummer,
-                                        @RequestParam("rolleKode") String rolleKode,
-                                        @RequestParam("representerer") String representerer)
+                                        @RequestParam(value = "rolleKode", required = false) String rolleKode,
+                                        @RequestParam(value = "representerer", required = false) String representerer)
         throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);

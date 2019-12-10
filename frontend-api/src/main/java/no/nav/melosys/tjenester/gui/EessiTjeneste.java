@@ -44,7 +44,8 @@ public class EessiTjeneste {
         response = Institusjon.class,
         responseContainer = "List"
     )
-    public ResponseEntity hentMottakerinstitusjoner(@PathVariable("bucType") String bucType, @RequestParam("landkode") String landkode) throws MelosysException {
+    public ResponseEntity hentMottakerinstitusjoner(@PathVariable("bucType") String bucType,
+                                                    @RequestParam(value = "landkode", required = false) String landkode) throws MelosysException {
         log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
         return ResponseEntity.ok(eessiService.hentEessiMottakerinstitusjoner(bucType, landkode));
     }
@@ -69,7 +70,7 @@ public class EessiTjeneste {
         response = BucerTilknyttetBehandlingDto.class
     )
     public ResponseEntity hentBucer(@PathVariable("behandlingID") long behandlingID,
-                              @RequestParam("statuser") List<String> statuser) throws MelosysException {
+                              @RequestParam(value = "statuser", required = false) List<String> statuser) throws MelosysException {
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
