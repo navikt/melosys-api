@@ -18,7 +18,6 @@
 
     <modules>
         <module>app</module>
-        <module>build</module>
         <module>config</module>
         <module>domain</module>
         <module>feil</module>
