@@ -1,11 +1,11 @@
 <ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
     <response>
-        <organisasjon xsi:type="ns4:JuridiskEnhet"
-                      xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon"
+        <organisasjon xsi:type="ns99:JuridiskEnhet"
+                      xmlns:ns99="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon"
                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                       xsi:schemaLocation="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon wsdl/no/nav/tjeneste/virksomhet/organisasjon/v4/informasjon/informasjon.xsd">
             <orgnummer>920643043</orgnummer>
-            <navn xsi:type="ns4:UstrukturertNavn">
+            <navn xsi:type="ns99:UstrukturertNavn">
                 <navnelinje>METODE RENHOLD AS</navnelinje>
                 <navnelinje/>
                 <navnelinje/>
@@ -29,7 +29,7 @@
                         fomGyldighetsperiode="2015-08-20T00:00:00.000+02:00">
                     <statuskode kodeRef="OPFU"/>
                 </status>
-                <forretningsadresse xsi:type="ns4:Gateadresse">
+                <forretningsadresse xsi:type="ns99:Gateadresse">
                     <landkode kodeRef="NO"/>
                     <poststed>1234</poststed>
                     <gatenummer>1</gatenummer>
@@ -38,7 +38,7 @@
                     <husbokstav>A</husbokstav>
                 </forretningsadresse>
                 <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00"
-                             fomGyldighetsperiode="2011-09-14T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                             fomGyldighetsperiode="2011-09-14T00:00:00.000+02:00" xsi:type="ns99:SemistrukturertAdresse">
                     <landkode kodeRef="NO"/>
                     <adresseledd>
                         <noekkel kodeRef="adresselinje1"/>
@@ -68,7 +68,7 @@
                 </naering>
                 <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00"
                       fomGyldighetsperiode="2005-10-09T00:00:00.000+02:00">
-                    <navn xsi:type="ns4:UstrukturertNavn">
+                    <navn xsi:type="ns99:UstrukturertNavn">
                         <navnelinje>METODE RENHOLD AS</navnelinje>
                         <navnelinje/>
                         <navnelinje/>
@@ -92,7 +92,7 @@
                 <virkningsdato>2015-10-24+02:00</virkningsdato>
                 <juridiskEnhet>
                     <orgnummer>834327082</orgnummer>
-                    <navn xsi:type="ns4:UstrukturertNavn">
+                    <navn xsi:type="ns99:UstrukturertNavn">
                         <navnelinje>ELITE SERVICE PARTNER AS</navnelinje>
                         <navnelinje/>
                         <navnelinje/>
@@ -102,7 +102,7 @@
                     <organisasjonDetaljer>
                         <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00"
                               fomGyldighetsperiode="1999-01-20T00:00:00.000+01:00">
-                            <navn xsi:type="ns4:UstrukturertNavn">
+                            <navn xsi:type="ns99:UstrukturertNavn">
                                 <navnelinje>ELITE SERVICE PARTNER AS</navnelinje>
                                 <navnelinje/>
                                 <navnelinje/>
@@ -120,7 +120,7 @@
                 <virkningsdato>2015-10-17+02:00</virkningsdato>
                 <juridiskEnhet>
                     <orgnummer>992442107</orgnummer>
-                    <navn xsi:type="ns4:UstrukturertNavn">
+                    <navn xsi:type="ns99:UstrukturertNavn">
                         <navnelinje>MAX RENT SERVICE AS</navnelinje>
                         <navnelinje/>
                         <navnelinje/>
@@ -130,7 +130,7 @@
                     <organisasjonDetaljer>
                         <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00"
                               fomGyldighetsperiode="2008-03-29T00:00:00.000+01:00">
-                            <navn xsi:type="ns4:UstrukturertNavn">
+                            <navn xsi:type="ns99:UstrukturertNavn">
                                 <navnelinje>MAX RENT SERVICE AS</navnelinje>
                                 <navnelinje/>
                                 <navnelinje/>

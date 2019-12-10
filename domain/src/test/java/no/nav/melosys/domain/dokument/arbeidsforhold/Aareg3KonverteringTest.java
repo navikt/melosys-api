@@ -91,14 +91,15 @@ public class Aareg3KonverteringTest {
             for (Arbeidsforhold arbeidsforhold : dokument.getArbeidsforhold()) {
 
                 assertThat(arbeidsforhold.getArbeidsgivertype()).isNotNull();
-                assertThat(arbeidsforhold.getArbeidsgiverID()).isNotNull();
+                assertThat(arbeidsforhold.getArbeidsgiverID()).isNotBlank();
                 assertThat(arbeidsforhold.getOpplysningspliktigtype()).isNotNull();
-                assertThat(arbeidsforhold.getOpplysningspliktigID()).isNotNull();
+                assertThat(arbeidsforhold.getOpplysningspliktigID()).isNotBlank();
                 assertThat(arbeidsforhold.getArbeidsavtaler()).isNotEmpty();
 
                 for (Arbeidsavtale arbeidsavtale : arbeidsforhold.getArbeidsavtaler()) {
 
                     assertThat(arbeidsavtale).isNotNull();
+                    assertThat(arbeidsavtale.maritimArbeidsavtale).isNotNull();
                 }
             }
         }

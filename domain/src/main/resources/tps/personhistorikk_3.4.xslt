@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:ns2="http://nav.no/tjeneste/virksomhet/person/v3"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:tps="http://nav.no/tjeneste/virksomhet/person/v3">
 
     <xsl:output method="xml" indent="no"/>
 
-    <xsl:template match="/ns2:hentPersonhistorikkResponse">
+    <xsl:template match="/tps:hentPersonhistorikkResponse">
         <xsl:apply-templates/>
     </xsl:template>
 
@@ -31,14 +31,14 @@
         </xsl:element>
     </xsl:template>
 
-    <xsl:template match="midlertidigAdressePeriodeListe[@xsi:type='ns3:MidlertidigPostadresseUtland']">
+    <xsl:template match="midlertidigAdressePeriodeListe[contains(@xsi:type,'MidlertidigPostadresseUtland')]">
         <midlertidigAdressePeriodeListe>
             <xsl:attribute name="xsi:type">MidlertidigPostadresseUtland</xsl:attribute>
             <xsl:apply-templates select="*|@endringstidspunkt"/>
         </midlertidigAdressePeriodeListe>
     </xsl:template>
 
-    <xsl:template match="midlertidigAdressePeriodeListe[@xsi:type='ns3:MidlertidigPostadresseNorge']">
+    <xsl:template match="midlertidigAdressePeriodeListe[contains(@xsi:type,'MidlertidigPostadresseNorge')]">
         <midlertidigAdressePeriodeListe>
             <xsl:attribute name="xsi:type">MidlertidigPostadresseNorge</xsl:attribute>
             <xsl:apply-templates select="strukturertAdresse/*"/>
@@ -54,7 +54,7 @@
         </bostedsadresse>
     </xsl:template>
 
-    <xsl:template match="strukturertAdresse[@xsi:type='ns3:Gateadresse']">
+    <xsl:template match="strukturertAdresse[contains(@xsi:type,'Gateadresse')]">
         <gateadresse>
             <gatenavn><xsl:value-of select="gatenavn"/></gatenavn>
             <gatenummer><xsl:value-of select="gatenummer"/></gatenummer>

@@ -619,6 +619,4 @@
             <url>http://maven.adeo.no/nexus/content/repositories/m2snapshot</url>
         </snapshotRepository>
     </distributionManagement>
-
-
 </project>
