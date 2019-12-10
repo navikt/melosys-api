@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     private static boolean erFrontendApiTjeneste(Class clazz) {
-        return clazz.getPackageName().equals(FRONTEND_API_TJENESTER)
+        return clazz.getPackageName().startsWith(FRONTEND_API_TJENESTER)
             && clazz.isAnnotationPresent(RestController.class);
     }
 
