@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
-import no.nav.melosys.tjenester.gui.RestTjeneste;
 import no.nav.melosys.tjenester.gui.dto.AnmodningUnntakDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/saksflyt/anmodningsperioder")
 @Api(tags = {"saksflyt", "anmodningsperioder"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class AnmodningUnntakTjeneste extends RestTjeneste {
+public class AnmodningUnntakTjeneste {
     private final AnmodningUnntakService anmodningUnntakService;
     private final TilgangService tilgangService;
 
@@ -32,7 +31,7 @@ public class AnmodningUnntakTjeneste extends RestTjeneste {
 
     @PostMapping("{behandlingID}/bestill")
     @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
-    public ResponseEntity anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID, AnmodningUnntakDto anmodningUnntakDto) throws MelosysException {
+    public ResponseEntity anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID, @RequestBody AnmodningUnntakDto anmodningUnntakDto) throws MelosysException {
         tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID, anmodningUnntakDto.getMottakerinstitusjon());
         return ResponseEntity.ok().build();

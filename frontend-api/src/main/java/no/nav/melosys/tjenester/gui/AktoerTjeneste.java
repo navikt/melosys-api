@@ -4,7 +4,6 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -32,7 +31,7 @@ import static java.util.stream.Collectors.toList;
 @RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class AktoerTjeneste extends RestTjeneste {
+public class AktoerTjeneste {
 
     private final TilgangService tilgangService;
 
@@ -77,7 +76,7 @@ public class AktoerTjeneste extends RestTjeneste {
     @ApiOperation(
         value = "Lagrer/oppdaterer aktør informasjon for et gitt saksnummer.",
         response = AktoerDto.class)
-    public ResponseEntity lagAktoerer(@PathVariable("saksnummer") String saksnummer, @ApiParam AktoerDto aktoerDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity lagAktoerer(@PathVariable("saksnummer") String saksnummer, @RequestBody AktoerDto aktoerDto) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
         Long databaseId = aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);

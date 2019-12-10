@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -25,7 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/behandlinger")
 @Api(tags = { "behandlinger" })
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class BehandlingTjeneste extends RestTjeneste {
+public class BehandlingTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjeneste.class);
 
@@ -44,7 +43,7 @@ public class BehandlingTjeneste extends RestTjeneste {
     @ApiOperation("Oppdaterer status for en behandling. " +
         "Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.")
     public void oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
-                               @ApiParam("statusKode") BehandlingsstatusDto status) throws FunksjonellException, TekniskException {
+                               @RequestBody BehandlingsstatusDto status) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, status.getBehandlingsstatus().getKode());
         tilgangService.sjekkTilgang(behandlingID);
         behandlingService.oppdaterStatus(behandlingID, status.getBehandlingsstatus());
@@ -54,7 +53,7 @@ public class BehandlingTjeneste extends RestTjeneste {
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public ResponseEntity knyttMedlemsperioder(@PathVariable("behandlingID") long behandlingID,
-                                               TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException, TekniskException {
+                                               @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 

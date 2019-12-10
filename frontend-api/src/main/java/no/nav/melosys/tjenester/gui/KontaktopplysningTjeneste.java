@@ -21,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class KontaktopplysningTjeneste extends RestTjeneste {
+public class KontaktopplysningTjeneste {
     private final KontaktopplysningService kontaktopplysningService;
 
     @Autowired
@@ -46,7 +46,7 @@ public class KontaktopplysningTjeneste extends RestTjeneste {
         response = Kontaktopplysning.class)
     public ResponseEntity lagKontaktopplysning(@PathVariable("saksnummer") String saksnummer,
                                          @PathVariable("orgnr") String orgnr,
-                                         KontaktInfoDto kontaktInfoDto) {
+                                         @RequestBody KontaktInfoDto kontaktInfoDto) {
         Kontaktopplysning kontaktopplysning = kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, orgnr,
             kontaktInfoDto.getKontaktorgnr(), kontaktInfoDto.getKontaktnavn());
         return ResponseEntity.ok(kontaktopplysning);

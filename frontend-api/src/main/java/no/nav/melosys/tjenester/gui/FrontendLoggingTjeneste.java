@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,41 +17,41 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/logger")
 @Api(tags = {"frontend-logger"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class FrontendLoggingTjeneste extends RestTjeneste {
+public class FrontendLoggingTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger("no.nav.melosys.frontendlogg");
 
     @PostMapping("/trace")
     @ApiOperation(value = "Logger trace-melding.", notes = ("Logger trace-melding."))
-    public ResponseEntity frontendTraceLogging(@ApiParam String loggMelding) {
+    public ResponseEntity frontendTraceLogging(String loggMelding) {
         log.trace(loggMelding);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/debug")
     @ApiOperation(value = "Logger debug-melding.", notes = ("Logger debug-melding."))
-    public ResponseEntity frontendDebugLogging(@ApiParam String loggMelding) {
+    public ResponseEntity frontendDebugLogging(String loggMelding) {
         log.debug(loggMelding);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/info")
     @ApiOperation(value = "Logger info-melding.", notes = ("Logger info-melding."))
-    public ResponseEntity frontendInfoLogging(@ApiParam String loggMelding) {
+    public ResponseEntity frontendInfoLogging(String loggMelding) {
         log.info(loggMelding);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/warn")
     @ApiOperation(value = "Logger warn-melding.", notes = ("Logger warn-melding."))
-    public ResponseEntity frontendWarnLogging(@ApiParam String loggMelding) {
+    public ResponseEntity frontendWarnLogging(String loggMelding) {
         log.warn(loggMelding);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/error")
     @ApiOperation(value = "Logger error-melding.", notes = ("Logger error-melding."))
-    public ResponseEntity frontendErrorLogging(@ApiParam String loggMelding) {
+    public ResponseEntity frontendErrorLogging(String loggMelding) {
         log.error(loggMelding);
         return ResponseEntity.ok().build();
     }

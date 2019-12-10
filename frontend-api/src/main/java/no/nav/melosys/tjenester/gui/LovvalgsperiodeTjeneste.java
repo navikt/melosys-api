@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -27,7 +30,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/lovvalgsperioder")
 @Api(tags = { "lovvalgsperioder" })
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class LovvalgsperiodeTjeneste extends RestTjeneste {
+public class LovvalgsperiodeTjeneste {
 
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final TilgangService tilgangService;
@@ -55,7 +58,7 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @ApiOperation("Lagrer en lovvalgsperiode for en gitt behandling.")
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
     public Collection<LovvalgsperiodeDto> lagreLovvalgsperioder(@PathVariable("behandlingID") long behandlingsid,
-            @ApiParam(value = "En liste av lovvalgsperioder å lagre.") Collection<LovvalgsperiodeDto> lovvalgsperiodeDtoer) throws FunksjonellException, TekniskException {
+            @RequestBody Collection<LovvalgsperiodeDto> lovvalgsperiodeDtoer) throws FunksjonellException, TekniskException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingsid);
         List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeDtoer.stream()
                 .map(LovvalgsperiodeDto::til)

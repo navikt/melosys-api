@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -28,7 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"personer"})
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class PersonTjeneste extends RestTjeneste {
+public class PersonTjeneste {
     private final RegisterOppslagService registerOppslag;
     private final TilgangService tilgangService;
 
@@ -40,7 +39,7 @@ public class PersonTjeneste extends RestTjeneste {
 
     @GetMapping("{fnr}")
     @ApiOperation(value = "Henter en person fra TPS.", response = PersonDokument.class)
-    public ResponseEntity getPerson(@PathVariable("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String personnummer)
+    public ResponseEntity getPerson(@PathVariable("fnr") String personnummer)
         throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         if (personnummer == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

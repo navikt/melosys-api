@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
@@ -31,7 +30,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/dokumenter")
 @Api(tags = {"dokumenter"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class DokumentTjeneste extends RestTjeneste {
+public class DokumentTjeneste {
     private static final String APPLICATION_PDF = "application/pdf";
     private static final String APPLICATION_JSON_UTF8 = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8";
 
@@ -53,7 +52,7 @@ public class DokumentTjeneste extends RestTjeneste {
 
     @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
-    public ResponseEntity hentDokument(@ApiParam @PathVariable("journalpostID") String journalpostID, @ApiParam @PathVariable("dokumentID") String dokumentID)
+    public ResponseEntity hentDokument(@PathVariable("journalpostID") String journalpostID, @PathVariable("dokumentID") String dokumentID)
         throws SikkerhetsbegrensningException, IkkeFunnetException {
         byte[] dokument;
         dokument = dokumentVisningService.hentDokument(journalpostID, dokumentID);
@@ -74,7 +73,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     public ResponseEntity produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
                                        @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                       BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
+                                       @RequestBody BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
         dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
@@ -93,7 +92,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
     public ResponseEntity produserDokument(@PathVariable("behandlingID") long behandlingID,
                                                    @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                                   BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
+                                                   @RequestBody BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
         if (brevBestillingDto.mottaker == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }

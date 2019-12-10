@@ -2,11 +2,9 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
-import no.nav.melosys.tjenester.gui.RestTjeneste;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/saksflyt/unntaksperioder")
 @Api(tags = {"saksflyt", "unntaksperioder"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class UnntakTjeneste extends RestTjeneste {
+public class UnntakTjeneste {
 
     private final UnntaksperiodeService unntaksperiodeService;
 
@@ -31,7 +29,7 @@ public class UnntakTjeneste extends RestTjeneste {
     }
 
     @PostMapping("{behandlingID}/ikkegodkjenn")
-    public ResponseEntity ikkeGodkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity ikkeGodkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @RequestBody VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException, TekniskException {
         unntaksperiodeService.ikkeGodkjennPeriode(behandlingId, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
         return ResponseEntity.noContent().build();
     }

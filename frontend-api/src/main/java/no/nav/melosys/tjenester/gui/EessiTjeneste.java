@@ -4,7 +4,6 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.exception.MelosysException;
@@ -27,7 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/eessi")
 @Api(tags = {"eessi"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class EessiTjeneste extends RestTjeneste {
+public class EessiTjeneste {
     private static final Logger log = LoggerFactory.getLogger(EessiTjeneste.class);
 
     private final EessiService eessiService;
@@ -55,7 +54,7 @@ public class EessiTjeneste extends RestTjeneste {
         value = "Oppretter en sak i RINA og sakens første tilgjengelige SED. Returnerer en URL til saken i RINA.",
         response = String.class
     )
-    public ResponseEntity opprettBuc(@ApiParam BucBestillingDto nyBucDto, @PathVariable("behandlingID") long behandlingID) throws MelosysException {
+    public ResponseEntity opprettBuc(@RequestBody BucBestillingDto nyBucDto, @PathVariable("behandlingID") long behandlingID) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
             eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), nyBucDto.getMottakerLand(), nyBucDto.getMottakerId())

@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @PropertySource(value = "classpath:service.properties", encoding = "utf-8")
 @SpringBootApplication
 @Controller
-@EnableJwtTokenValidation
+@EnableJwtTokenValidation(ignore={"org.springframework", "springfox.documentation"})
 public class Application {
 
     public static void main(String[] args) {

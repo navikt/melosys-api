@@ -4,7 +4,6 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -25,7 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"vilkår"})
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class VilkaarTjeneste extends RestTjeneste {
+public class VilkaarTjeneste {
 
     private final VilkaarsresultatService vilkaarsresultatService;
 
@@ -50,7 +49,7 @@ public class VilkaarTjeneste extends RestTjeneste {
     @PostMapping("{behandlingID}")
     @ApiOperation(value = "Lagre vilkår")
     public List<VilkaarDto> registrerVilkår(@PathVariable("behandlingID") long behandlingID,
-            @ApiParam("VilkaarData") List<VilkaarDto> vilkaarDtoer) throws FunksjonellException, TekniskException {
+            @RequestBody List<VilkaarDto> vilkaarDtoer) throws FunksjonellException, TekniskException {
         List<VilkaarDto> vilkaarDtoListe;
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);

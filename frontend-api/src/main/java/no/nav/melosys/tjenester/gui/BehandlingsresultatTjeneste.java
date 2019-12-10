@@ -23,7 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/behandlinger")
 @Api(tags = { "behandlingsresultat" })
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class BehandlingsresultatTjeneste extends RestTjeneste {
+public class BehandlingsresultatTjeneste {
 
     private final TilgangService tilgangService;
     private BehandlingsresultatService behandlingsresultatService;

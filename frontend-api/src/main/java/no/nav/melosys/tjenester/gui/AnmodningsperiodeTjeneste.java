@@ -5,7 +5,10 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -32,7 +35,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"anmodningsperioder"})
 @RequestMapping("/anmodningsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class AnmodningsperiodeTjeneste extends RestTjeneste {
+public class AnmodningsperiodeTjeneste {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final TilgangService tilgangService;
@@ -58,8 +61,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     @ApiOperation("Lagrer anmodningsperioder for en gitt behandling.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
     public AnmodningsperiodeGetDto lagreAnmodningsperioder(@PathVariable("behandlingID") long behandlingID,
-                                                           @ApiParam(value = "En liste av anmodningsperioder å lagre.")
-                                                                 AnmodningsperiodePostDto anmodningsperiodePostDto)
+                                                           @RequestBody AnmodningsperiodePostDto anmodningsperiodePostDto)
         throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
@@ -91,7 +93,7 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
     @ApiOperation("Lagrer svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
     public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathVariable("anmodningsperiodeID") long anmodningsperiodeID,
-                                                               @ApiParam(value = "Svar på anmodningsperiode som skal lagres.") AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
+                                                               @RequestBody AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
         throws FunksjonellException, TekniskException {
 
         long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningsperiodeID)

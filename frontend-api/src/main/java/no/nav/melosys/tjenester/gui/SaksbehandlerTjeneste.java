@@ -26,7 +26,7 @@ import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
 @RequestMapping("/saksbehandler")
 @Api(tags = {"saksbehandler"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class SaksbehandlerTjeneste extends RestTjeneste {
+public class SaksbehandlerTjeneste {
 
     @Value("${melosys.security.melosys_ad_group}")
     private String MELOSYS_AD_GRUPPE;

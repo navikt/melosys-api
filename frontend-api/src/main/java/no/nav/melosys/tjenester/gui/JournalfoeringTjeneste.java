@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -28,7 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/journalforing")
 @Api(tags = {"journalforing"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class JournalfoeringTjeneste extends RestTjeneste {
+public class JournalfoeringTjeneste {
     private static Logger log = LoggerFactory.getLogger(JournalfoeringTjeneste.class);
 
     private JournalfoeringService journalføringService;
@@ -54,19 +53,19 @@ public class JournalfoeringTjeneste extends RestTjeneste {
 
     @PostMapping("opprett")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public void opprettSakOgJournalfør(@ApiParam JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+    public void opprettSakOgJournalfør(@RequestBody JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         journalføringService.opprettOgJournalfør(journalfoeringDto);
     }
 
     @PostMapping("sed")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public void journalførSed(@ApiParam JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
+    public void journalførSed(@RequestBody JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
         journalføringService.journalførSed(journalfoeringSedDto);
     }
 
     @PostMapping("tilordne")
     @ApiOperation(value = "Tilordne sak og journalfør.")
-    public void tilordneSakOgJournalfør(@ApiParam JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
+    public void tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
         journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
     }
 }

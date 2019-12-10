@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
@@ -40,7 +39,7 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 @RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
-public class FagsakTjeneste extends RestTjeneste {
+public class FagsakTjeneste {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
@@ -62,7 +61,7 @@ public class FagsakTjeneste extends RestTjeneste {
 
     @GetMapping("{saksnr}")
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."), response = Fagsak.class)
-    public ResponseEntity<FagsakDto> hentFagsak(@ApiParam @PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+    public ResponseEntity<FagsakDto> hentFagsak(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
         FagsakDto fagsakDto = tilFagsakDto(sak);
@@ -72,7 +71,7 @@ public class FagsakTjeneste extends RestTjeneste {
 
     @PostMapping("/opprett")
     @ApiOperation(value = "Oppretter en sak med tilhørende behandling.")
-    public ResponseEntity opprettFagsak(@ApiParam OpprettSakDto opprettSakDto) throws FunksjonellException {
+    public ResponseEntity opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) throws FunksjonellException {
         if (opprettSakDto.brukerID == null) {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }
@@ -87,7 +86,7 @@ public class FagsakTjeneste extends RestTjeneste {
         notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
-    public List<FagsakOppsummeringDto> hentFagsaker(@RequestParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) throws FunksjonellException {
+    public List<FagsakOppsummeringDto> hentFagsaker(@RequestParam("fnr") String fnr) throws FunksjonellException {
         Iterable<Fagsak> saker;
         if (fnr == null) {
             throw new FunksjonellException("fnr er null");
@@ -99,7 +98,7 @@ public class FagsakTjeneste extends RestTjeneste {
 
     @PostMapping("{saksnr}/henlegg")
     @ApiOperation(value = "Henlegger en fagsak")
-    public ResponseEntity henleggFagsak(@ApiParam @PathVariable("saksnr") String saksnummer, @ApiParam("henleggelseDto") HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
 
@@ -109,7 +108,7 @@ public class FagsakTjeneste extends RestTjeneste {
 
     @PostMapping("{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
-    public ResponseEntity videresend(@PathVariable("saksnr") String saksnummer, @ApiParam("videresendDto") VideresendDto videresendDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity videresend(@PathVariable("saksnr") String saksnummer, @RequestBody VideresendDto videresendDto) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
 

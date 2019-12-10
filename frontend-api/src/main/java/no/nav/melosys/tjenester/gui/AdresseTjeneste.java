@@ -23,7 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/adresser")
 @Api(tags = {"adresser"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class AdresseTjeneste extends RestTjeneste {
+public class AdresseTjeneste {
 
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepo;
 

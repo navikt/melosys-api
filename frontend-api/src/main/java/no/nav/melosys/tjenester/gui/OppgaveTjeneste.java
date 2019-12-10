@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -23,10 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 @Protected
@@ -34,7 +30,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RequestMapping("/oppgaver")
 @Api(tags = "oppgaver")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class OppgaveTjeneste extends RestTjeneste {
+public class OppgaveTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveTjeneste.class);
 
@@ -49,7 +45,7 @@ public class OppgaveTjeneste extends RestTjeneste {
 
     @PostMapping("/plukk")
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
-    public ResponseEntity plukkOppgave(@ApiParam PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity plukkOppgave(@RequestBody PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
 
         Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
@@ -76,7 +72,7 @@ public class OppgaveTjeneste extends RestTjeneste {
 
     @PostMapping("/tilbakelegg")
     @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
-    public ResponseEntity leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
+    public ResponseEntity leggTilbakeOppgave(@RequestBody TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
         oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging);
         return ResponseEntity.ok().build();
