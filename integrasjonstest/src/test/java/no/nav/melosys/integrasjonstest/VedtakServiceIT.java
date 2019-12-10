@@ -30,8 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
 import static no.nav.melosys.integrasjonstest.felles.verifisering.ForventetDokumentBestilling.forventDokument;
 import static org.mockito.ArgumentMatchers.any;
@@ -105,9 +104,46 @@ public class VedtakServiceIT {
     }
 
     @Test
-    public void fattVedtak_innvilgelse_art13() throws MelosysException {
+    public void fattVedtak_innvilgelseBostedNorgeArbeidPåNorskflaggetSkip_Art113A() throws MelosysException {
+        TestdataUtfyller utfyller = TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING_MARITIMT_ARBEID_OG_OPPGITT_ADRESSE, melosysGrensesnitt)
+            .utfyllAvklartefaktaArbeidPåSkip(Landkoder.NO, Landkoder.NO, "Seven Kestrel", AVKLART_ARBEIDSGIVER_ORGNR)
+            .utfyllVilkaarForArt113A()
+            .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A);
+
+        vedtakService.fattVedtak(utfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "");
+
+        prosessinstansTestService.ventPå(utfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(utfyller.getBehandlingsid(), FERDIG);
+
+        dokumentSjekker.sjekkBrevBestilt(
+            forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER),
+            forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
+            forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR));
+    }
+
+    @Test
+    public void fattVedtak_innvilgelseBostedØsterriketArbeidPåNorskflaggetSkip_Art113A() throws MelosysException {
+        TestdataUtfyller utfyller = TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING_MARITIMT_ARBEID_OG_OPPGITT_ADRESSE, melosysGrensesnitt)
+            .utfyllAvklartefaktaArbeidPåSkip(Landkoder.AT, Landkoder.NO, "Seven Kestrel", AVKLART_ARBEIDSGIVER_ORGNR)
+            .utfyllVilkaarForArt113A()
+            .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A);
+
+        vedtakService.fattVedtak(utfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "");
+
+        prosessinstansTestService.ventPå(utfyller.getBehandlingsid());
+        prosessinstansTestService.sjekkProsessteg(utfyller.getBehandlingsid(), FERDIG);
+
+        dokumentSjekker.sjekkBrevBestilt(
+            forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET),
+            forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER),
+            forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
+            forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR));
+    }
+
+    @Test
+    public void fattVedtak_innvilgelseNorgeBostedsland_art13() throws MelosysException {
         TestdataUtfyller testDataUtfyller = new TestdataUtfyller(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
-        .utfyllAvklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllAvklartefaktaForArt13BostedNorge(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A);
 
         vedtakService.fattVedtak(testDataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "");
@@ -116,9 +152,9 @@ public class VedtakServiceIT {
 
         dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.BRUKER),
-            forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
+            forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR)
             // HELFO skal ikke ha kopi ved Art13 (MELOSYS-3039)
-            forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
+        );
     }
 
     @Test

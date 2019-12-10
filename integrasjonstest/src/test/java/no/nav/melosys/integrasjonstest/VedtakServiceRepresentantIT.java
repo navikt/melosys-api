@@ -148,7 +148,7 @@ public class VedtakServiceRepresentantIT {
     @Test
     public void fattVedtak_innvilgelseArt13_representantArbeidsgiver() throws MelosysException {
         TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
-        .utfyllAvklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllAvklartefaktaForArt13BostedNorge(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)
         .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
 
@@ -166,7 +166,7 @@ public class VedtakServiceRepresentantIT {
     @Test
     public void fattVedtak_innvilgelseArt13_representantBruker() throws MelosysException {
         TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
-        .utfyllAvklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllAvklartefaktaForArt13BostedNorge(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)
         .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
 
@@ -185,7 +185,7 @@ public class VedtakServiceRepresentantIT {
     @Test
     public void fattVedtak_innvilgelseArt13_representantBegge() throws MelosysException {
         TestdataUtfyller testdataUtfyller = TestdataUtfyller.til(TOM_BEHANDLING_REPRESENTANT, melosysGrensesnitt)
-        .utfyllAvklartefaktaForArt13(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
+        .utfyllAvklartefaktaForArt13BostedNorge(Landkoder.AT, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR)
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)
         .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
 
