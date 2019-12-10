@@ -20,6 +20,8 @@ public class ExceptionMapper {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionMapper.class);
 
+    private static final String FEIL_OPPSTÅTT = "Feil oppstått: ";
+
     @ExceptionHandler(value = IkkeFunnetException.class)
     public ResponseEntity håndter(IkkeFunnetException e) {
         return håndter(e, HttpStatus.NOT_FOUND, Level.WARN);
@@ -42,9 +44,9 @@ public class ExceptionMapper {
 
     private ResponseEntity håndter(Exception e, HttpStatus httpStatus, Level loggnivå) {
         if (loggnivå.equals(Level.ERROR)) {
-            log.error("{}", e.getMessage());
+            log.error(FEIL_OPPSTÅTT, e);
         } else if (loggnivå.equals(Level.WARN)) {
-            log.warn("{}", e.getMessage());
+            log.warn(FEIL_OPPSTÅTT, e);
         }
 
         Map<String, Object> entity = new HashMap<>();
