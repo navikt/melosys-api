@@ -1,7 +1,9 @@
 package no.nav.melosys.tjenester.gui.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -19,5 +21,10 @@ public class WebConfig implements WebMvcConfigurer {
     private static boolean erFrontendApiTjeneste(Class clazz) {
         return clazz.getPackageName().equals(FRONTEND_API_TJENESTER)
             && clazz.isAnnotationPresent(RestController.class);
+    }
+
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        configurer.defaultContentType(MediaType.APPLICATION_JSON);
     }
 }
