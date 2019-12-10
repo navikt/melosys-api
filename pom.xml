@@ -40,7 +40,6 @@
 
         <!-- Melosys -->
         <melosys.jsonschema.version>1.33.4-58</melosys.jsonschema.version>
-        <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
         <melosys.internt.kodeverk.version>5.14.14</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
@@ -157,19 +156,13 @@
                 <artifactId>sikkerhet</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
-            <!-- Melosys javascript frontend -->
-            <dependency>
-                <groupId>no.nav.melosys</groupId>
-                <artifactId>melosys-frontendlogger</artifactId>
-                <version>${melosys.frontendlogger.version}</version>
-                <type>zip</type>
-            </dependency>
             <dependency>
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>melosys-internt-kodeverk</artifactId>
                 <version>${melosys.internt.kodeverk.version}</version>
             </dependency>
+
+            <!-- Eksterne biblioteker -->
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>

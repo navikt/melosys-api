@@ -16,50 +16,18 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>app</artifactId>
         </dependency>
-
-
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-frontendlogger</artifactId>
-            <type>zip</type>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-logger</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeGroupIds>no.nav.melosys</includeGroupIds>
-                            <includeArtifactIds>melosys-frontendlogger</includeArtifactIds>
-                            <outputDirectory>${project.basedir}/src/main/resources/frontendlogger</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>no.nav.melosys.Application</mainClass>
-                    <excludes>
-                        <exclude>
-                            <groupId>no.nav.melosys</groupId>
-                            <artifactId>melosys-frontendlogger</artifactId>
-                        </exclude>
-                    </excludes>
                     <finalName>melosys</finalName>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>
