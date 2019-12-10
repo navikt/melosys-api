@@ -30,19 +30,14 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingServiceTest {
-
     @Mock
     private BehandlingRepository behandlingRepo;
-
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
-
     @Mock
     private TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepo;
-
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-
     @Mock
     private OppgaveService oppgaveService;
 
@@ -260,7 +255,7 @@ public class BehandlingServiceTest {
 
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder().setTilordnetRessurs(SAKSBEHANDLER);
 
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(oppgaveBuilder.build());
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgaveBuilder.build()));
 
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
@@ -280,17 +275,17 @@ public class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         oppgaveBuilder.setTilordnetRessurs("noen andre");
         Oppgave oppgave2 = oppgaveBuilder.build();
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(oppgave2);
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave2));
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
 
         oppgaveBuilder.setTilordnetRessurs(null);
         Oppgave oppgave3 = oppgaveBuilder.build();
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(oppgave3);
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave3));
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
     }
 
     @Test
-    public final void testtestErBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() throws FunksjonellException, TekniskException {
+    public final void testErBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("12345678901");
         Behandling behandling = new Behandling();
@@ -298,7 +293,7 @@ public class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer()))
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer()))
             .thenThrow(new TekniskException("Finner ingen oppgave for fagsak"));
 
         expectedException.expect(TekniskException.class);
