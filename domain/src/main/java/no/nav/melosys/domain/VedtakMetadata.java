@@ -22,6 +22,7 @@ public class VedtakMetadata extends RegistreringsInfo {
     @Column(name = "vedtak_klagefrist")
     private LocalDate vedtakKlagefrist;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "vedtak_type", nullable = false)
     private Vedtakstyper vedtakstype;
     
@@ -29,7 +30,7 @@ public class VedtakMetadata extends RegistreringsInfo {
     private String revurderBegrunnelse;
 
     @MapsId
-    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @OneToOne(optional = false)
     @JoinColumn(name = "behandlingsresultat_id")
     private Behandlingsresultat behandlingsresultat;
     
