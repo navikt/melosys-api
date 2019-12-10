@@ -42,11 +42,12 @@ public class BehandlingTjeneste {
     @PostMapping("{behandlingID}/status")
     @ApiOperation("Oppdaterer status for en behandling. " +
         "Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.")
-    public void oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
+    public ResponseEntity oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
                                @RequestBody BehandlingsstatusDto status) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, status.getBehandlingsstatus().getKode());
         tilgangService.sjekkTilgang(behandlingID);
         behandlingService.oppdaterStatus(behandlingID, status.getBehandlingsstatus());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/tidligeremedlemsperioder")

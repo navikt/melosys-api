@@ -53,19 +53,22 @@ public class JournalfoeringTjeneste {
 
     @PostMapping("opprett")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public void opprettSakOgJournalfør(@RequestBody JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+    public ResponseEntity opprettSakOgJournalfør(@RequestBody JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         journalføringService.opprettOgJournalfør(journalfoeringDto);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("sed")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public void journalførSed(@RequestBody JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
+    public ResponseEntity journalførSed(@RequestBody JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
         journalføringService.journalførSed(journalfoeringSedDto);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("tilordne")
     @ApiOperation(value = "Tilordne sak og journalfør.")
-    public void tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
         journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
+        return ResponseEntity.noContent().build();
     }
 }
