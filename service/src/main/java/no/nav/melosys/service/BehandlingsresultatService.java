@@ -56,6 +56,7 @@ public class BehandlingsresultatService {
         Behandlingsresultat behandlingsresultatsreplika = (Behandlingsresultat) BeanUtils.cloneBean(behandlingsresultat);
         behandlingsresultatsreplika.setBehandling(behandlingsreplika);
         behandlingsresultatsreplika.setId(null);
+        behandlingsresultatsreplika.setVedtakMetadata(null);
 
         replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
         replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);

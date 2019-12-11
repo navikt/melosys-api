@@ -10,17 +10,17 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,14 +28,13 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingsresultatServiceTest {
-
+    @Mock
     private BehandlingsresultatRepository behandlingsresultatRepo;
 
     private BehandlingsresultatService behandlingsresultatService;
 
     @Before
     public void setUp() {
-        behandlingsresultatRepo = mock(BehandlingsresultatRepository.class);
         behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo));
     }
 
@@ -81,7 +80,8 @@ public class BehandlingsresultatServiceTest {
     }
 
     @Test
-    public void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections() throws NoSuchMethodException, TekniskException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
+    public void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections()
+        throws NoSuchMethodException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = new Behandling();
         tidligsteInaktiveBehandling.setId(1L);
         Behandling behandlingsreplika = new Behandling();
@@ -113,7 +113,7 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getBehandling()).isEqualTo(behandlingsreplika);
         assertThat(behandlingsresultatreplika.getBehandlingsmåte()).isEqualTo(behandlingsresultat.getBehandlingsmåte());
         assertThat(behandlingsresultatreplika.getType()).isEqualTo(behandlingsresultat.getType());
-        assertThat(behandlingsresultatreplika.getVedtakMetadata().getVedtaksdato()).isEqualTo(behandlingsresultat.getVedtakMetadata().getVedtaksdato());
+        assertThat(behandlingsresultatreplika.getVedtakMetadata()).isNull();
 
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getId() == null);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika);
