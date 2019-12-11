@@ -6,8 +6,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataVideresend;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class VideresendSoknadMapperTest {
     }
 
     @Test
-    public void mapTilBrevXML() throws JAXBException, SAXException, TekniskException {
+    public void mapTilBrevXML() throws JAXBException, SAXException {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = lagNAVFelles();
 
@@ -38,7 +38,15 @@ public class VideresendSoknadMapperTest {
     private BrevDataVideresend lagBrevDataVideresend() {
         BrevDataVideresend brevDataVideresend = new BrevDataVideresend(new BrevbestillingDto(), "Saksbehandler");
         brevDataVideresend.bostedsland = Landkoder.NO.getBeskrivelse();
-        brevDataVideresend.trygdemyndighetsland = "Sverige";
+
+        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.navn = "Försäkringskassan";
+        utenlandskMyndighet.gateadresse = "Box 1164";
+        utenlandskMyndighet.postnummer = "SE-621 22";
+        utenlandskMyndighet.poststed = "Visby";
+        utenlandskMyndighet.land = "Sverige";
+        utenlandskMyndighet.landkode = Landkoder.SE;
+        brevDataVideresend.trygdemyndighet = utenlandskMyndighet;
         return brevDataVideresend;
     }
 }
