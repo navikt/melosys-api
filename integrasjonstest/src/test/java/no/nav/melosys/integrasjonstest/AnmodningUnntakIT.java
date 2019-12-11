@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjonstest;
 
 import java.util.Collections;
 
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakSystemService;
@@ -73,7 +74,7 @@ public class AnmodningUnntakIT {
     public void saksflytAnmodningTilVedtakTest() throws MelosysException {
         SpringSubjectHandler.set(new TestSubjectHandler());
         when(eessiService.hentEessiMottakerinstitusjoner(any(), any())).thenReturn(Collections.emptyList());
-        when(gsakFasade.opprettOppgave(any())).thenReturn("");
+        when(gsakFasade.opprettOppgave(any(Oppgave.class))).thenReturn("");
 
         prosessinstansRepository.deleteAll();
     }

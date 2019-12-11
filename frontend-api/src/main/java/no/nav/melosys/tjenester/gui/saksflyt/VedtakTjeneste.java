@@ -34,25 +34,36 @@ public class VedtakTjeneste {
     @PostMapping("{behandlingID}/fatt")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public ResponseEntity fattVedtak(@PathVariable("behandlingID") long behandlingID, @RequestBody FattVedtakDto fattVedtakDto) throws MelosysException {
-        if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null) {
-            throw new FunksjonellException("");
+        if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null || fattVedtakDto.getVedtakstype() == null) {
+            throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(), fattVedtakDto.getMottakerinstitusjon());
+        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(),
+            fattVedtakDto.getMottakerinstitusjon(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("{behandlingID}/endre")
     @ApiOperation(value = "Endrer et vedtak for en gitt behandling")
-    public ResponseEntity endreVedtak(@PathVariable("behandlingID") long behandlingID, @RequestBody EndreVedtakDto endreVedtakDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity endreVedtak(@PathVariable("behandlingID") long behandlingID, @RequestBody EndreVedtakDto endreVedtakDto)
+        throws FunksjonellException, TekniskException {
         if (endreVedtakDto.getBegrunnelseKode() == null) {
-            throw new FunksjonellException("Mangler BegrunnelseKode");
+            throw new FunksjonellException("BegrunnelseKode mangler.");
         }
         if (endreVedtakDto.getBehandlingstype() == null) {
-            throw new FunksjonellException("Mangler Behandlingstype");
+            throw new FunksjonellException("Behandlingstype mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
         vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getBehandlingstype(), endreVedtakDto.getFritekst());
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("{behandlingID}/revurder")
+    @ApiOperation(value = "Korrigerer eller omgjør vedtak for en sak ved å opprette en ny behandling basert på en eksisterende")
+    public ResponseEntity revurderVedtak(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+        tilgangService.sjekkTilgang(behandlingID);
+
+        long nyBehandlingID = vedtakService.revurderVedtak(behandlingID);
+        return ResponseEntity.ok(nyBehandlingID);
     }
 }

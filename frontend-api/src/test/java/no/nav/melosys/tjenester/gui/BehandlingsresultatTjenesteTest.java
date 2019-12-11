@@ -5,8 +5,10 @@ import java.io.IOException;
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.VedtakMetadata;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -47,7 +49,8 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void validerBehandlingsresultat() throws IOException {
         EasyRandomParameters easyRandomParameters = defaultEasyRandomParameters()
-            .randomize(named("behandlingsresultatTypeKode").and(ofType(String.class)), () -> new EnumRandomizer<>(Behandlingsresultattyper.class).getRandomValue().getKode());
+            .randomize(named("behandlingsresultatTypeKode").and(ofType(String.class)), () -> new EnumRandomizer<>(Behandlingsresultattyper.class).getRandomValue().getKode())
+            .randomize(named("vedtakstype").and(ofType(String.class)), () -> new EnumRandomizer<>(Vedtakstyper.class).getRandomValue().getKode());
         BehandlingsresultatDto behandlingsresultat = new EasyRandom(easyRandomParameters).nextObject(BehandlingsresultatDto.class);
         String jsonString = objectMapper().writeValueAsString(behandlingsresultat);
         assertThat(jsonString).isNotEmpty();
@@ -62,6 +65,10 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
         begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
         behandlingsresultat.setBehandlingsresultatBegrunnelser(Sets.newHashSet(begrunnelse));
+        VedtakMetadata vedtakMetadata = new VedtakMetadata();
+        vedtakMetadata.setVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK);
+        vedtakMetadata.setRevurderBegrunnelse("BEGRUNNELSE");
+        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         ResponseEntity response = behandlingsresultatTjeneste.hentBehandlingsresultat(4L);

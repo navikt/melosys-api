@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -59,17 +60,29 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void fattVedtak_henleggelse_fungerer() throws MelosysException, IOException {
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
+        fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
         fattVedtakDto.setMottakerinstitusjon("SE:4343");
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), null, fattVedtakDto.getMottakerinstitusjon());
+        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), null,
+            fattVedtakDto.getMottakerinstitusjon(), fattVedtakDto.getVedtakstype(), null);
 
-        // valider(fattVedtakDto, FATT_VEDTAK_SCHEMA); // TODO: Feiler fordi schema har et nytt felt "vedtakstype"
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test(expected = FunksjonellException.class)
     public void fattVedtak_dtoManglerBehandlingresultat_girException() throws MelosysException, IOException {
+        fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
+
+        verify(tilgangService).sjekkTilgang(behandlingID);
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void fattVedtak_dtoManglerVedtakstype_girException() throws MelosysException, IOException {
+        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);

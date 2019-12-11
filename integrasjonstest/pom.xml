@@ -37,7 +37,6 @@
             <artifactId>melosys-service</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>com.oracle.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
@@ -67,6 +66,10 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
         </dependency>
     </dependencies>
 
