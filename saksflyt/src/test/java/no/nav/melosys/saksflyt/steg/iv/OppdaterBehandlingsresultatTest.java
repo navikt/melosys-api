@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -50,6 +51,8 @@ public class OppdaterBehandlingsresultatTest {
         String testbruker = "Z097";
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.getKode());
+        p.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.KORRIGERT_VEDTAK.getKode());
+        p.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, "BEGRUNNELSE");
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
@@ -60,8 +63,10 @@ public class OppdaterBehandlingsresultatTest {
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
-        assertThat(capture.getVedtaksdato()).isNotNull();
-        assertThat(capture.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
+        assertThat(capture.getVedtakMetadata().getVedtaksdato()).isNotNull();
+        assertThat(capture.getVedtakMetadata().getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
+        assertThat(capture.getVedtakMetadata().getVedtakstype()).isEqualTo(Vedtakstyper.KORRIGERT_VEDTAK);
+        assertThat(capture.getVedtakMetadata().getRevurderBegrunnelse()).isEqualTo("BEGRUNNELSE");
         assertThat(p.getSteg()).isEqualTo(IV_AVKLAR_MYNDIGHET);
     }
 
@@ -75,6 +80,8 @@ public class OppdaterBehandlingsresultatTest {
         p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
         String testbruker = "Z097";
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
+        p.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.KORRIGERT_VEDTAK.getKode());
+        p.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, "BEGRUNNELSE");
 
         Behandlingsresultat behandlingsresultat = spy(new Behandlingsresultat());
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
@@ -87,8 +94,10 @@ public class OppdaterBehandlingsresultatTest {
         verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
-        assertThat(capture.getVedtaksdato()).isNotNull();
-        assertThat(capture.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
+        assertThat(capture.getVedtakMetadata().getVedtaksdato()).isNotNull();
+        assertThat(capture.getVedtakMetadata().getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
+        assertThat(capture.getVedtakMetadata().getVedtakstype()).isEqualTo(Vedtakstyper.KORRIGERT_VEDTAK);
+        assertThat(capture.getVedtakMetadata().getRevurderBegrunnelse()).isEqualTo("BEGRUNNELSE");
         assertThat(p.getSteg()).isEqualTo(IV_AVKLAR_MYNDIGHET);
     }
 }

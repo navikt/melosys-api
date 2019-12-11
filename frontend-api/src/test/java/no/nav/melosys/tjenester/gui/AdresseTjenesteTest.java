@@ -3,13 +3,13 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
@@ -39,31 +39,31 @@ public class AdresseTjenesteTest {
 
     @Test
     public void hentMyndighet_gyldigLandkode() {
-        Response response = adresseTjeneste.hentMyndighet(Landkoder.DK);
+        ResponseEntity response = adresseTjeneste.hentMyndighet(Landkoder.DK);
         assertThat(response).isNotNull();
-        assertThat(response.getEntity()).isNotNull();
-        assertThat(response.getEntity()).isInstanceOf(UtenlandskMyndighet.class);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isInstanceOf(UtenlandskMyndighet.class);
 
-        UtenlandskMyndighet myndighet = (UtenlandskMyndighet) response.getEntity();
+        UtenlandskMyndighet myndighet = (UtenlandskMyndighet) response.getBody();
         assertThat(myndighet.landkode).isEqualTo(Landkoder.DK);
         assertThat(myndighet.land).isEqualTo("Denmark");
     }
 
     @Test
     public void hentMyndighet_ikkeGyldigLandkode() {
-        Response response = adresseTjeneste.hentMyndighet(Landkoder.NO);
+        ResponseEntity response = adresseTjeneste.hentMyndighet(Landkoder.NO);
         assertThat(response).isNotNull();
-        assertThat(response.getEntity()).isNull();
+        assertThat(response.getBody()).isNull();
     }
 
     @Test
     public void hentMyndigheter() {
-        Response response = adresseTjeneste.hentMyndigheter();
+        ResponseEntity response = adresseTjeneste.hentMyndigheter();
         assertThat(response).isNotNull();
-        assertThat(response.getEntity()).isNotNull();
-        assertThat(response.getEntity()).isInstanceOf(List.class);
-        
-        List myndigheter = (List) response.getEntity();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isInstanceOf(List.class);
+
+        List myndigheter = (List) response.getBody();
         assertThat(myndigheter.size()).isEqualTo(2);
         assertThat(myndigheter.get(0)).isInstanceOf(UtenlandskMyndighet.class);
     }

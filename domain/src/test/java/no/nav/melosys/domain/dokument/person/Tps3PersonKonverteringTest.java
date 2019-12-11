@@ -63,6 +63,7 @@ public class Tps3PersonKonverteringTest implements KonverteringTest {
         assertThat(dokument).isNotNull();
         assertThat(dokument.postadresse).isNotNull();
         assertThat(dokument.midlertidigPostadresse).isNotNull();
+        assertThat(dokument.midlertidigPostadresse.land.getKode()).isEqualTo("GBR");
     }
 
     @Test

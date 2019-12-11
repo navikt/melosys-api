@@ -154,13 +154,23 @@ public class BehandlingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Behandling replikerBehandlingOgBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IkkeFunnetException {
-        Behandling behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingsstatus, behandlingstype);
-        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
+    public Behandling replikerBehandlingOgBehandlingsresultat(Behandling tidligsteInaktiveBehandling,
+                                                              Behandlingsstatus behandlingsstatus,
+                                                              Behandlingstyper behandlingstype) throws TekniskException, IkkeFunnetException {
+        Behandling behandlingsreplika;
+        try {
+            behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingsstatus, behandlingstype);
+            behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
+        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+            throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
+                tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
+        }
+
         return behandlingsreplika;
     }
 
-    Behandling replikerBehandling(Behandling tidligsteInaktiveBehandling, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    Behandling replikerBehandling(Behandling tidligsteInaktiveBehandling, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype)
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
         behandlingsreplika.setId(null);
         behandlingsreplika.setType(behandlingstype);
@@ -208,9 +218,13 @@ public class BehandlingService {
             return false;
         }
 
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> oppgaveOptional = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
-        String tilordnetRessurs = oppgave.getTilordnetRessurs();
-        return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);
+        if (oppgaveOptional.isEmpty()) {
+            return false;
+        } else {
+            String tilordnetRessurs = oppgaveOptional.get().getTilordnetRessurs();
+            return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);
+        }
     }
 }

@@ -1,8 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.freg.abac.core.annotation.Abac;
@@ -14,23 +11,27 @@ import no.nav.melosys.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.InnloggetBrukerDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
 
+@Protected
+@RestController
+@RequestMapping("/saksbehandler")
 @Api(tags = {"saksbehandler"})
-@Path("/saksbehandler")
-@Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class SaksbehandlerTjeneste extends RestTjeneste {
+public class SaksbehandlerTjeneste {
 
     @Value("${melosys.security.melosys_ad_group}")
     private String MELOSYS_AD_GRUPPE;
 
-    @GET
+    @GetMapping
     @Abac(bias = Decision.DENY, actions = @Abac.Attr(key = ACTION_ID, value = PepImpl.READ))
     @ApiOperation(
         value = "Returnerer fullt navn for ident",

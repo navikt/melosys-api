@@ -1,14 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -17,18 +10,21 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+@Protected
+@RestController
+@RequestMapping("/behandlinger")
 @Api(tags = { "behandlinger" })
-@Path("/behandlinger")
-@Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class BehandlingTjeneste extends RestTjeneste {
+public class BehandlingTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjeneste.class);
 
@@ -43,48 +39,45 @@ public class BehandlingTjeneste extends RestTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @POST
-    @Path("{behandlingID}/status")
+    @PostMapping("{behandlingID}/status")
     @ApiOperation("Oppdaterer status for en behandling. " +
         "Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.")
-    public void oppdaterStatus(@PathParam("behandlingID") long behandlingID,
-                               @ApiParam("statusKode") BehandlingsstatusDto status) throws FunksjonellException, TekniskException {
+    public ResponseEntity oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
+                               @RequestBody BehandlingsstatusDto status) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, status.getBehandlingsstatus().getKode());
         tilgangService.sjekkTilgang(behandlingID);
         behandlingService.oppdaterStatus(behandlingID, status.getBehandlingsstatus());
+        return ResponseEntity.noContent().build();
     }
 
-    @POST
-    @Path("{behandlingID}/tidligeremedlemsperioder")
+    @PostMapping("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
-    public Response knyttMedlemsperioder(@PathParam("behandlingID") long behandlingID,
-                                         TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException, TekniskException {
+    public ResponseEntity knyttMedlemsperioder(@PathVariable("behandlingID") long behandlingID,
+                                               @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException, TekniskException {
         log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 
         behandlingService.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioder.periodeIder);
-        return Response.ok(tidligereMedlemsperioder).build();
+        return ResponseEntity.ok(tidligereMedlemsperioder);
     }
 
-    @GET
-    @Path("{behandlingID}/tidligeremedlemsperioder")
+    @GetMapping("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
-    public Response hentMedlemsperioder(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+    public ResponseEntity hentMedlemsperioder(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         log.debug("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
-        return Response.ok(tidligereMedlemsperioderDto).build();
+        return ResponseEntity.ok(tidligereMedlemsperioderDto);
     }
 
-    @GET
-    @Path("{behandlingID}")
+    @GetMapping("{behandlingID}")
     @ApiOperation(value = "Hent en spesifikk behandling",
         response = TidligereMedlemsperioderDto.class)
-    public Response hentBehandling(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+    public ResponseEntity hentBehandling(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
@@ -92,7 +85,7 @@ public class BehandlingTjeneste extends RestTjeneste {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
         BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandler);
-        return Response.ok(behandlingDto).build();
+        return ResponseEntity.ok(behandlingDto);
     }
 
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {

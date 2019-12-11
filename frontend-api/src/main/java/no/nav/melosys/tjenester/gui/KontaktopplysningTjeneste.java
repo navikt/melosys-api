@@ -1,8 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Optional;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,18 +8,20 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.tjenester.gui.dto.KontaktInfoDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-
+@Protected
+@RestController
+@RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
-@Path("/fagsaker")
-@Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class KontaktopplysningTjeneste extends RestTjeneste {
+public class KontaktopplysningTjeneste {
     private final KontaktopplysningService kontaktopplysningService;
 
     @Autowired
@@ -29,36 +29,33 @@ public class KontaktopplysningTjeneste extends RestTjeneste {
         this.kontaktopplysningService = kontaktopplysningService;
     }
 
-    @GET
-    @Path("/{saksnummer}/kontaktopplysninger/{orgnr}")
+    @GetMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
     @ApiOperation(
         value = "Henter kontakt orgnummer og person navn for gitt fagsak og orgnummer",
         response = Kontaktopplysning.class)
-    public Response hentKontaktopplysning(@PathParam("saksnummer") String saksnummer,
-                                          @PathParam("orgnr") String orgnr) {
+    public ResponseEntity hentKontaktopplysning(@PathVariable("saksnummer") String saksnummer,
+                                                @PathVariable("orgnr") String orgnr) {
         Optional<Kontaktopplysning> kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(saksnummer, orgnr);
-        return kontaktopplysning.map(opp -> Response.ok(KontaktInfoDto.av(opp)))
-            .orElse(Response.status(NOT_FOUND)).build();
+        return kontaktopplysning.map(opp -> ResponseEntity.ok(KontaktInfoDto.av(opp)))
+            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @POST
-    @Path("/{saksnummer}/kontaktopplysninger/{orgnr}")
+    @PostMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
     @ApiOperation(
         value = "Lagrer/oppdaterer kontakt orgnummer og navn for gitt fagsak og orgnummer",
         response = Kontaktopplysning.class)
-    public Response lagKontaktopplysning(@PathParam("saksnummer") String saksnummer,
-                                         @PathParam("orgnr") String orgnr,
-                                         KontaktInfoDto kontaktInfoDto) {
+    public ResponseEntity lagKontaktopplysning(@PathVariable("saksnummer") String saksnummer,
+                                         @PathVariable("orgnr") String orgnr,
+                                         @RequestBody KontaktInfoDto kontaktInfoDto) {
         Kontaktopplysning kontaktopplysning = kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, orgnr,
             kontaktInfoDto.getKontaktorgnr(), kontaktInfoDto.getKontaktnavn());
-        return Response.ok(kontaktopplysning).build();
+        return ResponseEntity.ok(kontaktopplysning);
     }
 
-    @DELETE
-    @Path("{saksnummer}/kontaktopplysninger/{orgnr}")
+    @DeleteMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
     @ApiOperation(value = "Sletter kontaktopplysning på en fagsak med gitt orgnummer")
-    public Response slettKontaktopplysning(@PathParam("saksnummer") String saksnummer, @PathParam("orgnr") String orgnr) throws FunksjonellException {
+    public ResponseEntity slettKontaktopplysning(@PathVariable("saksnummer") String saksnummer, @PathVariable("orgnr") String orgnr) throws FunksjonellException {
         kontaktopplysningService.slettKontaktopplysning(saksnummer, orgnr);
-        return Response.ok().build();
+        return ResponseEntity.ok().build();
     }
 }

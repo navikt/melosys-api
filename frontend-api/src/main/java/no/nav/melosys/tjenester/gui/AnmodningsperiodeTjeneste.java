@@ -4,12 +4,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -25,16 +24,18 @@ import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeGetDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSkrivDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+@Protected
+@RestController
 @Api(tags = {"anmodningsperioder"})
-@Service
-@Path("/anmodningsperioder")
+@RequestMapping("/anmodningsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class AnmodningsperiodeTjeneste extends RestTjeneste {
+public class AnmodningsperiodeTjeneste {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final TilgangService tilgangService;
@@ -47,23 +48,20 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @GET
-    @Path("{behandlingID}")
+    @GetMapping("{behandlingID}")
     @ApiOperation(value = "Henter anmodningsperioder for en gitt behandling", response = AnmodningsperiodeSkrivDto.class)
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
-    public AnmodningsperiodeGetDto hentAnmodningsperioder(@PathParam("behandlingID") long behandlingID)
+    public AnmodningsperiodeGetDto hentAnmodningsperioder(@PathVariable("behandlingID") long behandlingID)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
         return AnmodningsperiodeGetDto.av(anmodningsperiodeService.hentAnmodningsperioder(behandlingID));
     }
 
-    @POST
-    @Path("{behandlingID}")
+    @PostMapping("{behandlingID}")
     @ApiOperation("Lagrer anmodningsperioder for en gitt behandling.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
-    public AnmodningsperiodeGetDto lagreAnmodningsperioder(@PathParam("behandlingID") long behandlingID,
-                                                           @ApiParam(value = "En liste av anmodningsperioder å lagre.")
-                                                                 AnmodningsperiodePostDto anmodningsperiodePostDto)
+    public AnmodningsperiodeGetDto lagreAnmodningsperioder(@PathVariable("behandlingID") long behandlingID,
+                                                           @RequestBody AnmodningsperiodePostDto anmodningsperiodePostDto)
         throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
@@ -73,11 +71,10 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         return AnmodningsperiodeGetDto.av(anmodningsperioder);
     }
 
-    @GET
-    @Path("{anmodningsperiodeID}/svar")
+    @GetMapping("{anmodningsperiodeID}/svar")
     @ApiOperation("Henter svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
-    public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathParam("anmodningsperiodeID") long anmodningsperiodeID)
+    public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathVariable("anmodningsperiodeID") long anmodningsperiodeID)
         throws FunksjonellException, TekniskException {
 
         Optional<Anmodningsperiode> anmodningsperiodeOptional = anmodningsperiodeService.hentAnmodningsperiode(anmodningsperiodeID);
@@ -92,12 +89,11 @@ public class AnmodningsperiodeTjeneste extends RestTjeneste {
         return svar.map(AnmodningsperiodeSvarDto::av).orElseGet(AnmodningsperiodeSvarDto::new);
     }
 
-    @POST
-    @Path("{anmodningsperiodeID}/svar")
+    @PostMapping("{anmodningsperiodeID}/svar")
     @ApiOperation("Lagrer svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
-    public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathParam("anmodningsperiodeID") long anmodningsperiodeID,
-                                                               @ApiParam(value = "Svar på anmodningsperiode som skal lagres.") AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
+    public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathVariable("anmodningsperiodeID") long anmodningsperiodeID,
+                                                               @RequestBody AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
         throws FunksjonellException, TekniskException {
 
         long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningsperiodeID)

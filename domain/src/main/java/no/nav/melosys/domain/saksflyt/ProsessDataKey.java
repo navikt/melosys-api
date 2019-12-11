@@ -37,6 +37,7 @@ public enum ProsessDataKey {
     OPPGAVE_ID("oppgaveID"),
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
+    REVURDER_BEGRUNNELSE("revurderBegrunnelse"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
     SED_DOKUMENT("sedDokument"),
@@ -47,7 +48,8 @@ public enum ProsessDataKey {
     SØKNADSPERIODE("søknadsperiode"),
     TEMA("tema"),
     UNNTAK_FRA_LOVVALGSBESTEMMELSE("unntakFraLovvalgsbestemmelse"),
-    UNNTAK_FRA_LOVVALGSLAND("unntakFraLovvalgsland");
+    UNNTAK_FRA_LOVVALGSLAND("unntakFraLovvalgsland"),
+    VEDTAKSTYPE("vedtakstype");
 
     private String kode;
 

@@ -101,7 +101,6 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .queryParam("tildeltRessurs", oppgaveSearchRequest.getTildeltRessurs())
             .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
             .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs())
-            .queryParam("saksreferanse", (Object[]) oppgaveSearchRequest.getSaksreferanse())
             .queryParam("statuskategori", oppgaveSearchRequest.getStatusKategori())
             .queryParam("behandlesAvApplikasjon", oppgaveSearchRequest.getBehandlesAvApplikasjon())
             .queryParam("limit", OPPGAVE_ANTALL_LIMIT)
@@ -109,8 +108,10 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .queryParam("behandlingstype", oppgaveSearchRequest.getBehandlingstype())
             .queryParam("behandlingstema", oppgaveSearchRequest.getBehandlingstema());
 
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "oppgavetype", oppgaveSearchRequest.getOppgavetype());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "saksreferanse", oppgaveSearchRequest.getSaksreferanse());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());
+
 
         try {
             return lokalTarget.request()

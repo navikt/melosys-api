@@ -7,8 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
@@ -166,6 +166,24 @@ public class SedDataByggerTest {
     public void lag_bostedsadresseUtenGatenavn_gatenavnBlirNA() throws TekniskException, FunksjonellException {
         Gateadresse gateadresse = new Gateadresse();
         gateadresse.setGatenavn("");
+        gateadresse.setHusnummer(123);
+
+        Bostedsadresse bostedsadresse = new Bostedsadresse();
+        bostedsadresse.setGateadresse(gateadresse);
+        bostedsadresse.setLand(new Land(Land.SVERIGE));
+
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
+        sedDataGrunnlagMedSoknad.getPerson().bostedsadresse = bostedsadresse;
+
+        SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo("N/A");
+    }
+
+    @Test
+    public void lag_bostedsadresseMedBlanktGatenavn_gatenavnBlirNA() throws TekniskException, FunksjonellException {
+        Gateadresse gateadresse = new Gateadresse();
+        gateadresse.setGatenavn(" ");
         gateadresse.setHusnummer(123);
 
         Bostedsadresse bostedsadresse = new Bostedsadresse();

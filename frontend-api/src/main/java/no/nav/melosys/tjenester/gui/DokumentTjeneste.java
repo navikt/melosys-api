@@ -3,12 +3,9 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
@@ -19,18 +16,23 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+@Protected
+@RestController
+@RequestMapping("/dokumenter")
 @Api(tags = {"dokumenter"})
-@Path("/dokumenter")
-@Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class DokumentTjeneste extends RestTjeneste {
+public class DokumentTjeneste {
     private static final String APPLICATION_PDF = "application/pdf";
-    private static final String APPLICATION_JSON_UTF8 = MediaType.APPLICATION_JSON + "; charset=UTF-8";
+    private static final String APPLICATION_JSON_UTF8 = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8";
 
     private final DokumentService dokumentService;
     private final DokumentVisningService dokumentVisningService;
@@ -48,70 +50,61 @@ public class DokumentTjeneste extends RestTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @GET
-    @Path("pdf/{journalpostID}/{dokumentID}")
+    @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
-    @Produces({APPLICATION_PDF, APPLICATION_JSON_UTF8})
-    public Response hentDokument(@ApiParam @PathParam("journalpostID") String journalpostID, @ApiParam @PathParam("dokumentID") String dokumentID)
+    public ResponseEntity hentDokument(@PathVariable("journalpostID") String journalpostID, @PathVariable("dokumentID") String dokumentID)
         throws SikkerhetsbegrensningException, IkkeFunnetException {
         byte[] dokument;
         dokument = dokumentVisningService.hentDokument(journalpostID, dokumentID);
         return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
-    @GET
-    @Path("/oversikt/{saksnummer}")
+    @GetMapping("/oversikt/{saksnummer}")
     @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
-    public Response hentDokumenter(@PathParam("saksnummer") String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+    public ResponseEntity hentDokumenter(@PathVariable("saksnummer") String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
         List<JournalpostInfoDto> dokumentListe = dokumentVisningService.hentDokumenter(saksnummer)
             .stream()
             .map(JournalpostInfoDto::av)
             .sorted(Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())))
             .collect(Collectors.toList());
-        return Response.ok(dokumentListe).build();
+        return ResponseEntity.ok(dokumentListe);
     }
 
-    @POST
-    @Path("pdf/brev/utkast/{behandlingID}/{produserbartDokument}")
-    @Produces({APPLICATION_PDF, APPLICATION_JSON_UTF8})
-    public Response produserUtkastBrev(@PathParam("behandlingID") long behandlingID,
-                                       @PathParam("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                       BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
+    @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
+    public ResponseEntity produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
+                                       @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
+                                       @RequestBody BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
         dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
-    @GET
-    @Path("pdf/sed/utkast/{behandlingID}/{sedType}")
-    @Produces({APPLICATION_PDF, APPLICATION_JSON_UTF8})
-    public Response produserUtkastSed(@PathParam("behandlingID") long behandlingID,
-                                      @PathParam("sedType") SedType sedType) throws MelosysException {
+    @GetMapping(value = "pdf/sed/utkast/{behandlingID}/{sedType}", produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
+                                      @PathVariable("sedType") SedType sedType) throws MelosysException {
 
         tilgangService.sjekkTilgang(behandlingID);
         byte[] dokument = eessiService.genererSedForhåndsvisning(behandlingID, sedType);
         return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
     }
 
-    @POST
-    @Path("opprett/{behandlingID}/{produserbartDokument}")
-    public Response produserDokument(@Context UriInfo uriInfo,
-                                     @PathParam("behandlingID") long behandlingID,
-                                     @PathParam("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                     BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
+    @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
+    public ResponseEntity produserDokument(@PathVariable("behandlingID") long behandlingID,
+                                                   @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
+                                                   @RequestBody BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
         if (brevBestillingDto.mottaker == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
         tilgangService.sjekkTilgang(behandlingID);
         dokumentService.produserDokumentISaksflyt(produserbartDokument, brevBestillingDto.mottaker, behandlingID, new BrevData(brevBestillingDto));
-        return Response.noContent().build();
+        return ResponseEntity.noContent().build();
     }
 
-    private static Response lagResponseAvDokument(byte[] dokument, String filnavn) {
-        Response.ResponseBuilder ok = Response.ok(dokument);
-        ok.header(HttpHeaders.CONTENT_LENGTH, dokument.length);
-        ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + filnavn);
-        return ok.build();
+    private static ResponseEntity lagResponseAvDokument(byte[] dokument, String filnavn) {
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(dokument.length))
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + filnavn)
+            .body(dokument);
     }
 }

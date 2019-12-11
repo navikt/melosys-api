@@ -119,9 +119,9 @@ def prepareNaisYaml(naiseratorFile, imageVersion, namespace, cluster) {
     }
 
     if (namespace == "default") {
-        replaceInFile('@@URL@@', 'melosys' + domain, naiseratorFile)
+        replaceInFile('@@URL@@', 'melosys-api' + domain, naiseratorFile)
     } else {
-        replaceInFile('@@URL@@', "melosys-" + namespace.toString() + domain, naiseratorFile)
+        replaceInFile('@@URL@@', "melosys-api-" + namespace.toString() + domain, naiseratorFile)
     }
 
     replaceInFile('@@NAMESPACE@@', namespace, naiseratorFile)

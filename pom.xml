@@ -18,7 +18,6 @@
 
     <modules>
         <module>app</module>
-        <module>build</module>
         <module>config</module>
         <module>domain</module>
         <module>feil</module>
@@ -39,10 +38,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>2.0.2-PR-39-SNAPSHOT</melosys.frontend.version>
-        <melosys.jsonschema.version>1.33.4-58</melosys.jsonschema.version>
-        <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
-        <melosys.internt.kodeverk.version>5.14.16</melosys.internt.kodeverk.version>
+        <melosys.jsonschema.version>1.34.0-65</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.14.14</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -59,6 +56,7 @@
         <joark.journal.version>3.1.2</joark.journal.version>
         <medl2-v2.version>2.0.6</medl2-v2.version>
         <sakogbehandling.version>1.0.0-alpha011</sakogbehandling.version>
+        <token-support.version>1.1.3</token-support.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>3.4.1</tps.person.version>
         <utbetaling.version>1.1.3</utbetaling.version>
@@ -83,15 +81,14 @@
         <oracle.version>18</oracle.version>
         <org.json.version>20180813</org.json.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
-        <pac4j.version>3.7.0</pac4j.version>
         <easy-random.version>4.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <slf4j.version>1.7.25</slf4j.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
-        <spring-security-pac4j.version>4.1.0</spring-security-pac4j.version>
         <springfox.version>2.9.2</springfox.version>
-        <swagger.version>1.5.13</swagger.version>
+        <swagger.version>1.5.21</swagger.version>
         <failsafe.version>2.22.0</failsafe.version>
+        <allure.version>2.11.0</allure.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -159,25 +156,13 @@
                 <artifactId>sikkerhet</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
-            <!-- Melosys javascript frontend -->
-            <dependency>
-                <groupId>no.nav.melosys</groupId>
-                <artifactId>melosys-frontendlogger</artifactId>
-                <version>${melosys.frontendlogger.version}</version>
-                <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.melosys</groupId>
-                <artifactId>melosys-web</artifactId>
-                <version>${melosys.frontend.version}</version>
-                <type>zip</type>
-            </dependency>
             <dependency>
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>melosys-internt-kodeverk</artifactId>
                 <version>${melosys.internt.kodeverk.version}</version>
             </dependency>
+
+            <!-- Eksterne biblioteker -->
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
@@ -315,11 +300,6 @@
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${springfox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-jersey2-jaxrs</artifactId>
-                <version>${swagger.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
@@ -495,25 +475,26 @@
                 <version>${spring-kafka.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.pac4j</groupId>
-                <artifactId>spring-security-pac4j</artifactId>
-                <version>${spring-security-pac4j.version}</version>
+                <groupId>no.nav.security</groupId>
+                <artifactId>token-validation-spring</artifactId>
+                <version>${token-support.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.pac4j</groupId>
-                <artifactId>pac4j-oidc</artifactId>
-                <version>${pac4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.pac4j</groupId>
-                <artifactId>pac4j-core</artifactId>
-                <version>${pac4j.version}</version>
+                <groupId>no.nav.security</groupId>
+                <artifactId>token-validation-test-support</artifactId>
+                <version>${token-support.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
                 <version>${awaitility.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-junit5</artifactId>
+                <version>${allure.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -553,6 +534,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <argLine>-Xms256m -Dfile.encoding=UTF-8</argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -574,6 +558,11 @@
                     <configuration>
                         <skipITs>true</skipITs>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>io.qameta.allure</groupId>
+                    <artifactId>allure-maven</artifactId>
+                    <version>${allure.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -611,6 +600,33 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>itest</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>integrasjonstest*/*IT.java</include>
+                            </includes>
+                            <skipITs>false</skipITs>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>true</skipTests>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <repositories>
         <repository>

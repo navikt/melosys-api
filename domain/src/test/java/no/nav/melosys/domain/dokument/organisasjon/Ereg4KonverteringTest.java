@@ -17,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 
 // Denne konverteringen testes også i DokumentFactoryTest, uten strukturert adresse
@@ -65,10 +66,10 @@ public class Ereg4KonverteringTest implements KonverteringTest {
         Saksopplysning saksopplysning = getSaksopplysning(EREG_4_0_MOCK);
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
-        assertNotEquals("", dokument.getSektorkode());
+        assertThat(dokument.getSektorkode()).isNotBlank();
         assertFalse(dokument.getOrganisasjonDetaljer().getNaering().isEmpty());
         assertNull(dokument.getOppstartsdato());
-        assertNotEquals("", dokument.getEnhetstype());
+        assertThat(dokument.getEnhetstype()).isNotBlank();
     }
 
     @Test
@@ -77,7 +78,7 @@ public class Ereg4KonverteringTest implements KonverteringTest {
         Saksopplysning saksopplysning = getSaksopplysning(ressurs);
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
-        assertNotEquals("", dokument.getSektorkode());
+        assertThat(dokument.getSektorkode()).isNotBlank();
         assertFalse(dokument.getOrganisasjonDetaljer().getNaering().isEmpty());
         assertNull(dokument.getOppstartsdato());
         assertEquals("", dokument.getEnhetstype());

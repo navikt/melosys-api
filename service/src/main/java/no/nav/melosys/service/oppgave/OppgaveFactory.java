@@ -48,9 +48,10 @@ public final class OppgaveFactory {
                 return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8), Behandlingstema.EU_EOS);
             case VURDER_TRYGDETID:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(8), Behandlingstema.EU_EOS);
+            case NY_VURDERING:
+                return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30), Behandlingstema.EU_EOS);
             case KLAGE:
             case ANKE:
-            case NY_VURDERING:
             default:
                 throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstype  " + behandlingstype);
         }

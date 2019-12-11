@@ -1,7 +1,5 @@
 package no.nav.melosys.domain;
 
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
@@ -41,12 +39,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "begrunnelse_fritekst")
     private String begrunnelseFritekst;
 
-    @Column(name = "vedtak_dato")
-    private Instant vedtaksdato;
-
-    @Column(name = "vedtak_klagefrist")
-    private LocalDate vedtakKlagefrist;
-
+    @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private VedtakMetadata vedtakMetadata;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "utfall_registrering_unntak")
     private Utfallregistreringunntak utfallRegistreringUnntak;
@@ -114,20 +109,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
-    public Instant getVedtaksdato() {
-        return vedtaksdato;
+    public VedtakMetadata getVedtakMetadata() {
+        return vedtakMetadata;
     }
 
-    public void setVedtaksdato(Instant vedtaksdato) {
-        this.vedtaksdato = vedtaksdato;
-    }
-
-    public LocalDate getVedtakKlagefrist() {
-        return vedtakKlagefrist;
-    }
-
-    public void setVedtakKlagefrist(LocalDate vedtakKlagefrist) {
-        this.vedtakKlagefrist = vedtakKlagefrist;
+    public void setVedtakMetadata(final VedtakMetadata vedtakMetadata) {
+        this.vedtakMetadata = vedtakMetadata;
     }
 
     public Utfallregistreringunntak getUtfallRegistreringUnntak() {

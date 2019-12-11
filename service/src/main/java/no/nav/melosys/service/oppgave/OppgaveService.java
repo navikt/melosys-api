@@ -83,6 +83,15 @@ public class OppgaveService {
         gsakFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
+    public Optional<Oppgave> finnOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+        try {
+            return Optional.of(gsakFasade.hentOppgaveMedSaksnummer(saksnummer));
+        } catch (IkkeFunnetException e) {
+            log.warn(e.getMessage());
+            return Optional.empty();
+        }
+    }
+
     public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         return gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
     }

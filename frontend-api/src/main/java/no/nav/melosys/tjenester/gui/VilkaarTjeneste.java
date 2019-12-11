@@ -2,15 +2,8 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -18,17 +11,20 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+@Protected
+@RestController
+@RequestMapping("/vilkaar")
 @Api(tags = {"vilkår"})
-@Path("/vilkaar")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class VilkaarTjeneste extends RestTjeneste {
+public class VilkaarTjeneste {
 
     private final VilkaarsresultatService vilkaarsresultatService;
 
@@ -40,9 +36,8 @@ public class VilkaarTjeneste extends RestTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @GET
-    @Path("{behandlingID}")
-    public List<VilkaarDto> hentVilkår(@PathParam("behandlingID") long behandlingID) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    @GetMapping("{behandlingID}")
+    public List<VilkaarDto> hentVilkår(@PathVariable("behandlingID") long behandlingID) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         List<VilkaarDto> vilkaarDtoListe;
 
         tilgangService.sjekkTilgang(behandlingID);
@@ -51,11 +46,10 @@ public class VilkaarTjeneste extends RestTjeneste {
         return vilkaarDtoListe;
     }
 
-    @POST
-    @Path("{behandlingID}")
+    @PostMapping("{behandlingID}")
     @ApiOperation(value = "Lagre vilkår")
-    public List<VilkaarDto> registrerVilkår(@PathParam("behandlingID") long behandlingID,
-            @ApiParam("VilkaarData") List<VilkaarDto> vilkaarDtoer) throws FunksjonellException, TekniskException {
+    public List<VilkaarDto> registrerVilkår(@PathVariable("behandlingID") long behandlingID,
+            @RequestBody List<VilkaarDto> vilkaarDtoer) throws FunksjonellException, TekniskException {
         List<VilkaarDto> vilkaarDtoListe;
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);
