@@ -38,19 +38,21 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
     protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        Optional<String> landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst().map(Landkoder::getKode);
-        if (landkode.isPresent() && skalSendesUtland(behandlingsresultat)) {
-            if (eessiService.landErEessiReady(bucType.name(), landkode.get())) {
-                String mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
-                if (StringUtils.isEmpty(mottakerInstitusjon)) {
-                    throw new TekniskException("MottakerInstitusjon er ikke satt - kan ikke sende sed ved fatt vedtak");
-                }
+        if (skalSendesUtland(behandlingsresultat)) {
+            Optional<String> landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst().map(Landkoder::getKode);
+            if (landkode.isPresent()) {
+                if (eessiService.landErEessiReady(bucType.name(), landkode.get())) {
+                    String mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
+                    if (StringUtils.isEmpty(mottakerInstitusjon)) {
+                        throw new TekniskException("MottakerInstitusjon er ikke satt - kan ikke sende sed ved fatt vedtak");
+                    }
 
-                eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, vedlegg);
-                return SendUtlandStatus.SED_SENDT;
-            } else {
-                sendBrev(prosessinstans);
-                return SendUtlandStatus.BREV_SENDT;
+                    eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, vedlegg);
+                    return SendUtlandStatus.SED_SENDT;
+                } else {
+                    sendBrev(prosessinstans);
+                    return SendUtlandStatus.BREV_SENDT;
+                }
             }
         }
 
