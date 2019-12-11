@@ -80,7 +80,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test(expected = FunksjonellException.class)
     public void fattVedtak_dtoManglerVedtakstype_girException() throws MelosysException, IOException {
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
@@ -104,7 +104,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void endreVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Mangler BegrunnelseKode");
+        expectedException.expectMessage("BegrunnelseKode mangler.");
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgangService, never()).sjekkTilgang(behandlingID);

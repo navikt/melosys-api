@@ -38,12 +38,6 @@
             <artifactId>cxf-services-sts-core</artifactId>
         </dependency>
 
-        <!-- Distributed JDBC sessions -->
-        <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-jdbc</artifactId>
-        </dependency>
-
         <!-- OIDC login -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
