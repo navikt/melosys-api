@@ -218,9 +218,13 @@ public class BehandlingService {
             return false;
         }
 
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> oppgaveOptional = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
-        String tilordnetRessurs = oppgave.getTilordnetRessurs();
-        return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);
+        if (oppgaveOptional.isEmpty()) {
+            return false;
+        } else {
+            String tilordnetRessurs = oppgaveOptional.get().getTilordnetRessurs();
+            return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);
+        }
     }
 }
