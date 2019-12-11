@@ -47,6 +47,6 @@ public class AnmodningUnntakTjeneste extends RestTjeneste {
     public Response svar(@PathParam("behandlingID") long behandlingID) throws MelosysException {
         tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntakSvar(behandlingID);
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 }
