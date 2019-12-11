@@ -18,6 +18,4 @@ app/src/main/resources/db/flyway_q1.properties
 app/src/main/resources/db/flyway_p.properties
 app/src/main/resources/frontendlogger/
 app/src/main/resources/public/
-build/src/main/resources/frontendlogger/
-build/src/main/resources/public/
 *.secrets.properties

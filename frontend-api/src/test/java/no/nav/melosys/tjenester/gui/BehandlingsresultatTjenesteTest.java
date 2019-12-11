@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -25,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.named;
@@ -71,8 +71,8 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        Response response = behandlingsresultatTjeneste.hentBehandlingsresultat(4L);
-        String jsonString = objectMapper().writeValueAsString(response.getEntity());
+        ResponseEntity response = behandlingsresultatTjeneste.hentBehandlingsresultat(4L);
+        String jsonString = objectMapper().writeValueAsString(response.getBody());
         assertThat(jsonString).isNotEmpty();
         valider(jsonString, BEHANDLINGSRESULTAT_SCHEMA, log);
     }

@@ -1,13 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -15,16 +9,25 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
+@Protected
+@RestController
+@RequestMapping("/personer")
 @Api(tags = {"personer"})
-@Path("/personer")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class PersonTjeneste extends RestTjeneste {
+public class PersonTjeneste {
     private final RegisterOppslagService registerOppslag;
     private final TilgangService tilgangService;
 
@@ -34,16 +37,15 @@ public class PersonTjeneste extends RestTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @GET
-    @Path("{fnr}")
+    @GetMapping("{fnr}")
     @ApiOperation(value = "Henter en person fra TPS.", response = PersonDokument.class)
-    public Response getPerson(@PathParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String personnummer)
+    public ResponseEntity getPerson(@PathVariable("fnr") String personnummer)
         throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         if (personnummer == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         PersonDokument personDokument = registerOppslag.hentPerson(personnummer);
         tilgangService.sjekkFnr(personnummer);
-        return Response.ok(new PersonDto(personDokument)).build();
+        return ResponseEntity.ok(new PersonDto(personDokument));
     }
 }

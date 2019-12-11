@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Collections;
 import java.util.HashSet;
-import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -23,6 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.named;
@@ -75,9 +76,9 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void testHentSøknad() throws Exception {
-        Response resultat = soeknadTjeneste.hentSøknad(1L);
-        assertThat(resultat.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
-        SoeknadDto dto = (SoeknadDto) resultat.getEntity();
+        ResponseEntity resultat = soeknadTjeneste.hentSøknad(1L);
+        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
+        SoeknadDto dto = (SoeknadDto) resultat.getBody();
 
         assertThat(dto.getSoeknadDokument()).isNotNull();
         SoeknadTilleggsDataDto tilleggsDto = dto.getTilleggsData();
@@ -88,8 +89,8 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void soeknadDokumentSchemaValidering() throws Exception {
-        Response response = soeknadTjeneste.hentSøknad(1222L);
-        SoeknadDto søknadDto = (SoeknadDto) response.getEntity();
+        ResponseEntity response = soeknadTjeneste.hentSøknad(1222L);
+        SoeknadDto søknadDto = (SoeknadDto) response.getBody();
 
         assertThat(søknadDto).isNotNull();
 

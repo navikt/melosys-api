@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.core.Response;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import org.junit.Before;
@@ -11,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -25,14 +24,14 @@ public class PersonTjenesteTest extends JsonSchemaTestParent {
     @Before
     public void setUp() throws Exception {
         PersonDto person = defaultEasyRandom().nextObject(PersonDto.class);
-        when(personTjeneste.getPerson(anyString())).thenReturn(Response.ok(person).build());
+        when(personTjeneste.getPerson(anyString())).thenReturn(ResponseEntity.ok(person));
     }
 
     @Test
     public void personSchemaValidering() throws Exception {
-        Response person = personTjeneste.getPerson("12345678910");
+        ResponseEntity person = personTjeneste.getPerson("12345678910");
         ObjectMapper mapper = objectMapperMedKodeverkServiceStub();
-        String jsonInString = mapper.writeValueAsString(person.getEntity());
+        String jsonInString = mapper.writeValueAsString(person.getBody());
         valider(jsonInString, "personer-schema.json", log);
     }
 }

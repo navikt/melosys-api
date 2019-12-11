@@ -57,9 +57,6 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Test;
-import org.pac4j.oidc.profile.OidcProfile;
-import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
@@ -110,10 +107,6 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserUtkast_innvilgelsesBrev_funker() throws Exception {
-        OidcProfile oidcProfile = mock(OidcProfile.class);
-        when(oidcProfile.getSubject()).thenReturn("testbruker");
-        Pac4jAuthenticationToken auth = new Pac4jAuthenticationToken(Collections.singletonList(oidcProfile));
-        SecurityContextHolder.getContext().setAuthentication(auth);
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(BRUKER);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
@@ -124,10 +117,6 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserUtkast_avslagArbeidsgiver_funker() throws Exception {
-        OidcProfile oidcProfile = mock(OidcProfile.class);
-        when(oidcProfile.getSubject()).thenReturn("testbruker");
-        Pac4jAuthenticationToken auth = new Pac4jAuthenticationToken(Collections.singletonList(oidcProfile));
-        SecurityContextHolder.getContext().setAuthentication(auth);
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(ARBEIDSGIVER);
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
