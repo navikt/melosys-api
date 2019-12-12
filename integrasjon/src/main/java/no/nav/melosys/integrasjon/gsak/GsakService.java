@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -269,6 +270,20 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public List<Oppgave> finnOppgaverMedBrukerID(String aktørId) throws FunksjonellException, TekniskException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medAktørId(aktørId)
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .map(GsakService::oppgaveMappingDtoTilDomain)
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
@@ -277,9 +292,7 @@ public class GsakService implements GsakFasade {
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
-        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
-        return finnOppgaveListeResponse.stream()
-            .filter(Objects::nonNull)
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(GsakService::oppgaveMappingDtoTilDomain)
             .collect(Collectors.toList());
     }
@@ -291,6 +304,7 @@ public class GsakService implements GsakFasade {
             .setAktivDato(oppgaveDto.getAktivDato())
             .setAktørId(oppgaveDto.getAktørId())
             .setBeskrivelse(oppgaveDto.getBeskrivelse())
+            .setOpprettetTidspunkt(oppgaveDto.getOpprettetTidspunkt() != null ? oppgaveDto.getOpprettetTidspunkt().toLocalDateTime() : null)
             .setFristFerdigstillelse(oppgaveDto.getFristFerdigstillelse())
             .setJournalpostId(oppgaveDto.getJournalpostId())
             .setOppgaveId(oppgaveId)
@@ -310,7 +324,7 @@ public class GsakService implements GsakFasade {
             try {
                 domainOppgaveBuilder.setBehandlingstype(hentBehandlingstyper(oppgaveDto.getBehandlingstype()));
             } catch (IllegalArgumentException e) {
-                log.error("Fikk uventet behandlingstype: {} for OppgaveID: {}", oppgaveDto.getBehandlingstype(), oppgaveDto.getId());
+                log.warn("Fikk uventet behandlingstype: {} for OppgaveID: {}", oppgaveDto.getBehandlingstype(), oppgaveDto.getId());
             }
         }
 
@@ -331,6 +345,9 @@ public class GsakService implements GsakFasade {
             oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstype()));
         }
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
+        if (oppgave.getOpprettetTidspunkt() != null) {
+            oppgaveDto.setOpprettetTidspunkt(oppgave.getOpprettetTidspunkt().atZone(ZoneId.systemDefault()));
+        }
         oppgaveDto.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         oppgaveDto.setId(oppgave.getOppgaveId());
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());

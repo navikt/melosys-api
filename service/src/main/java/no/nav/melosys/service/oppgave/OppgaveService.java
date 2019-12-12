@@ -57,6 +57,14 @@ public class OppgaveService {
         this.søknadService = søknadService;
     }
 
+    public List<Oppgave> finnOppgaverMedBrukerID(String brukerIdent) throws FunksjonellException, TekniskException {
+        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
+        if (aktørId == null) {
+            throw new IkkeFunnetException("Finner ikke aktørId for ident " + brukerIdent);
+        }
+        return gsakFasade.finnOppgaverMedBrukerID(aktørId);
+    }
+
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
         Collection<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -108,6 +109,15 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         valider(entity, OPPGAVER_PLUKK_SCHEMA, logger);
 
         assertThat(entity.getOppgaveID()).isEqualTo("1");
+    }
+
+    @Test
+    public void søkOppgaverMedBrukerID() throws FunksjonellException, TekniskException, IOException {
+        List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
+        when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
+
+        assertThat((List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>) tjeneste.søkOppgaverMedBrukerID("").getBody()).isNotEmpty();
+        //TODO validerArray(oppgave, OPPGAVER_SOK_SCHEMA, logger);
     }
 
     @Test

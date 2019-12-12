@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import no.nav.melosys.domain.Fagsystem;
@@ -221,6 +222,7 @@ public final class GsakServiceTest {
         oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
         oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
         oppgaveBuilder.setBeskrivelse("bla bla");
+        oppgaveBuilder.setOpprettetTidspunkt(LocalDateTime.now());
         oppgaveBuilder.setFristFerdigstillelse(LocalDate.now().plusMonths(1L));
         oppgaveBuilder.setOppgaveId("123");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
