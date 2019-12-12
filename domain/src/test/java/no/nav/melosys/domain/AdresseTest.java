@@ -1,12 +1,11 @@
-package no.nav.melosys.domain.util;
+package no.nav.melosys.domain;
 
 import org.junit.Test;
 
-import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
+import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AdresseUtilsTest {
-
+public class AdresseTest {
     @Test
     public void concatTest() {
         assertThat(sammenslå(null, "145")).isEqualTo("145");

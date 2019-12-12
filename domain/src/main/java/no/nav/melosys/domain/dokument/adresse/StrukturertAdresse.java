@@ -10,8 +10,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
-
 public class StrukturertAdresse extends Adresse {
     public String gatenavn;
     // Sammensatt av husnummer og husbokstav

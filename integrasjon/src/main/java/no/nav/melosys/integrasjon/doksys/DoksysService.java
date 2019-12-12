@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.doksys;
 
-import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
@@ -30,7 +29,7 @@ import org.w3c.dom.ls.LSSerializer;
 
 import static no.nav.melosys.domain.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.domain.Fagsystem.MELOSYS;
-import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
+import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
@@ -117,7 +116,7 @@ public class DoksysService implements DoksysFasade {
         info.setSaksbehandlernavn(metadata.saksbehandler);
 
         if (metadata.mottaker.erUtenlandskMyndighet()) {
-            info.setAdresse(lagUtenlandskAdresse(metadata.utenlandskMyndighet));
+            info.setAdresse(lagUtenlandskAdresse(metadata.utenlandskMyndighet.getAdresse()));
         } else if (metadata.postadresse != null) {
             info.setAdresse(lagUtenlandskAdresse(metadata.postadresse));
         }
@@ -179,14 +178,6 @@ public class DoksysService implements DoksysFasade {
             .adresselinje3(strukturertAdresse.region)
             .land(strukturertAdresse.landkode)
             .build();
-    }
-
-    private UtenlandskPostadresse lagUtenlandskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
-        UtenlandskPostadresse utenlandskPostadresse = new UtenlandskPostadresse();
-        utenlandskPostadresse.setAdresselinje1(utenlandskMyndighet.gateadresse);
-        utenlandskPostadresse.setAdresselinje2(sammenslå(utenlandskMyndighet.postnummer, utenlandskMyndighet.poststed));
-        utenlandskPostadresse.setLand(new Landkoder().withValue(utenlandskMyndighet.landkode.getKode()));
-        return utenlandskPostadresse;
     }
 
     private UtenlandskPostadresse lagUtenlandskAdresse(StrukturertAdresse postadresse) {
