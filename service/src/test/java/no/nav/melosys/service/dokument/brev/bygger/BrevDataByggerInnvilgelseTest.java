@@ -77,7 +77,10 @@ public class BrevDataByggerInnvilgelseTest {
         behandling = new Behandling();
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(new SoeknadDokument()));
-        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
+
+        PersonDokument person = new PersonDokument();
+        person.sammensattNavn = "Tom Mestokk";
+        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(person));
 
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
 

@@ -41,6 +41,8 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
         Fag fag = new Fag();
 
         fag.setArbeidsland(brevDataInnvilgelse.arbeidsland);
+        fag.setNavn(brevDataInnvilgelse.personNavn);
+        fag.setArbeidsgiver(brevDataInnvilgelse.hovedvirksomhet.navn);
 
         Lovvalgsperiode periode = brevDataInnvilgelse.lovvalgsperiode;
         fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
