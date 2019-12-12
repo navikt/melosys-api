@@ -183,7 +183,7 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null);
-        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull());
     }
 
@@ -196,7 +196,7 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null);
-        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull());
     }
 

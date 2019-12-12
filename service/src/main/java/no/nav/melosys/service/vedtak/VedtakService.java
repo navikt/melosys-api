@@ -1,5 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
+import java.util.Collection;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -23,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.Collection;
 
 @Service
 public class VedtakService {
@@ -61,26 +61,29 @@ public class VedtakService {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        if (skalSendesSed(behandlingsresultat)) {
-            validerMottakerInstitusjon(behandling, behandlingsresultat, mottakerInstitusjon);
+        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
+        if (skalSendesSed(behandlingsresultat, landkoder)) {
+            String landkode = landkoder.iterator().next().getKode();
+            validerMottakerInstitusjon(landkode, behandlingsresultat, mottakerInstitusjon);
         }
+
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerInstitusjon);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private boolean skalSendesSed(Behandlingsresultat behandlingsresultat) {
+    private boolean skalSendesSed(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {
         if (behandlingsresultat.erAvslag()) {
+            return false;
+        }
+        if (landkoder.isEmpty()) {
             return false;
         }
         return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
     }
 
-    private void validerMottakerInstitusjon(Behandling behandling, Behandlingsresultat behandlingsresultat, String mottakerInstitusjon) throws MelosysException {
-
-        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
-        String landkode = landkoder.iterator().next().getKode();
+    private void validerMottakerInstitusjon(String landkode, Behandlingsresultat behandlingsresultat, String mottakerInstitusjon) throws MelosysException {
         String bucType = avklarBucType(behandlingsresultat);
         boolean landErEessiReady = eessiService.landErEessiReady(bucType, landkode);
         if (landErEessiReady) {

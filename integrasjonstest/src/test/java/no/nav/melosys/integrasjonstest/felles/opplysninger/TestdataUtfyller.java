@@ -1,10 +1,7 @@
 package no.nav.melosys.integrasjonstest.felles.opplysninger;
 
 import no.nav.melosys.domain.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -68,6 +65,17 @@ public class TestdataUtfyller {
         return this;
     }
 
+    public TestdataUtfyller utfyllAvklartefaktaArbeidPåSkip(Landkoder soeknadsland, Landkoder arbeidsland, String skipsnavn, String arbeidsgiversOrgnr) throws FunksjonellException, TekniskException {
+        behandlingsUtfyller.opprettAvklartefakta(behandlingsid,
+            lagAvklartSoeknadsland(soeknadsland),
+            lagAvklartBostedsland(soeknadsland),
+            lagAvklartYrkesgruppe(Yrkesgrupper.SOKKEL_ELLER_SKIP),
+            lagAvklartMaritimtArbeid(Maritimtyper.SKIP, skipsnavn),
+            lagAvklartArbeidsland(arbeidsland, skipsnavn),
+            lagAvklartVirksomhet(arbeidsgiversOrgnr));
+        return this;
+    }
+
     public TestdataUtfyller utfyllVilkaarForArt12Innvilgelse() throws FunksjonellException, TekniskException {
         behandlingsUtfyller.opprettVilkaar(behandlingsid,
             lagVilkaarDto(Vilkaar.FO_883_2004_ART12_1, true),
@@ -85,6 +93,14 @@ public class TestdataUtfyller {
         return this;
     }
 
+    public TestdataUtfyller utfyllVilkaarForArt113A() throws FunksjonellException, TekniskException {
+        behandlingsUtfyller.opprettVilkaar(behandlingsid,
+            lagVilkaarDto(Vilkaar.FO_883_2004_ART11_3A, true),
+            lagVilkaarDto(Vilkaar.FO_883_2004_ART11_4_1, true),
+            lagVilkaarDto(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP, false));
+        return this;
+    }
+
     public TestdataUtfyller utfyllAvklartefaktaForArt13(Landkoder land1, Landkoder land2, String arbeidsgiverId, Landkoder bostedsland) throws FunksjonellException, TekniskException {
         behandlingsUtfyller.opprettAvklartefakta(behandlingsid,
             lagAvklartSoeknadsland(land1),
@@ -95,14 +111,8 @@ public class TestdataUtfyller {
         return this;
     }
 
-    public TestdataUtfyller utfyllAvklartefaktaForArt13(Landkoder land1, Landkoder land2, String arbeidsgiverId) throws FunksjonellException, TekniskException {
-        behandlingsUtfyller.opprettAvklartefakta(behandlingsid,
-            lagAvklartSoeknadsland(land1),
-            lagAvklartSoeknadsland(land2),
-            lagAvklartYrkesgruppe(Yrkesgrupper.ORDINAER),
-            lagAvklartBostedsland(Landkoder.NO),
-            lagAvklartVirksomhet(arbeidsgiverId));
-        return this;
+    public TestdataUtfyller utfyllAvklartefaktaForArt13BostedNorge(Landkoder land1, Landkoder land2, String arbeidsgiverId) throws FunksjonellException, TekniskException {
+        return utfyllAvklartefaktaForArt13(land1, land2, arbeidsgiverId, Landkoder.NO);
     }
 
     public TestdataUtfyller opprettInnvilgetLovvalgsperiode(LovvalgBestemmelse bestemmelse) throws FunksjonellException, TekniskException {

@@ -1,11 +1,9 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -77,21 +75,23 @@ public class LandvelgerService {
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
+        Collection<Landkoder> trygdemyndighetsland = hentTrygdemyndighetsland(behandlingID);
+        trygdemyndighetsland.remove(Landkoder.NO);
+        return trygdemyndighetsland;
+    }
+
+    private Collection<Landkoder> hentTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
         Collection<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandlingID);
         SoeknadDokument søknad = søknadService.hentSøknad(behandlingID);
         if (oppfylteVilkår.contains(FO_883_2004_ART11_3A)) {
-            return Collections.singletonList(hentBostedsland(behandlingID, søknad));
+            return Lists.newArrayList(hentBostedsland(behandlingID, søknad));
         }
 
         if (erArtikkel13(behandlingID)) {
-            Landkoder bostedsland = hentBostedsland(behandlingID, søknad);
-            if (bostedsland != Landkoder.NO) {
-                return Collections.singletonList(bostedsland);
-            }
+            return Lists.newArrayList(hentBostedsland(behandlingID, søknad));
         }
 
         Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
-        alleArbeidsland.remove(Landkoder.NO);
         return new ArrayList<>(alleArbeidsland);
     }
 

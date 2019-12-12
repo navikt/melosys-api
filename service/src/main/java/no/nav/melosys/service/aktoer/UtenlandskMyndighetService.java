@@ -41,12 +41,10 @@ public class UtenlandskMyndighetService {
     public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) throws IkkeFunnetException, TekniskException {
         String saksnummer = behandling.getFagsak().getSaksnummer();
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
-        if (landkoder.isEmpty()) {
-            throw new TekniskException("Mangler myndighetsland for sak " + saksnummer);
+        if (!landkoder.isEmpty()) {
+            Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
+            fagsakService.oppdaterMyndigheter(saksnummer, institusjonsIder);
         }
-
-        Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
-        fagsakService.oppdaterMyndigheter(saksnummer, institusjonsIder);
     }
 
     public UtenlandskMyndighet hentUtenlandskMyndighet(Landkoder landkode) throws TekniskException {

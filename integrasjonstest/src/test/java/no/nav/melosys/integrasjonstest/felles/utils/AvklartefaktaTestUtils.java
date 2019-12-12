@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjonstest.felles.utils;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 
@@ -32,6 +33,26 @@ public final class AvklartefaktaTestUtils {
         avklartefakta.setType(Avklartefaktatyper.YRKESGRUPPE);
         avklartefakta.setReferanse(Avklartefaktatyper.YRKESGRUPPE.getKode());
         avklartefakta.setSubjekt(null);
+        return new AvklartefaktaDto(avklartefakta);
+    }
+
+    public static AvklartefaktaDto lagAvklartMaritimtArbeid(Maritimtyper maritimtyper, String navn) {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta(maritimtyper.getKode());
+        avklartefakta.setReferanse(maritimtyper.getKode());
+        avklartefakta.setType(Avklartefaktatyper.SOKKEL_ELLER_SKIP);
+        avklartefakta.setSubjekt(navn);
+        return new AvklartefaktaDto(avklartefakta);
+    }
+
+    public static AvklartefaktaDto lagAvklartArbeidsland(Landkoder arbeidsland, String subjekt) {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta(arbeidsland.getKode());
+        avklartefakta.setReferanse(arbeidsland.getKode());
+        avklartefakta.setType(Avklartefaktatyper.ARBEIDSLAND);
+        if (subjekt != null) {
+            avklartefakta.setSubjekt(subjekt);
+        }
         return new AvklartefaktaDto(avklartefakta);
     }
 
