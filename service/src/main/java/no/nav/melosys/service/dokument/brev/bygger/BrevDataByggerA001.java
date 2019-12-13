@@ -3,7 +3,10 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.*;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -11,9 +14,9 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
@@ -27,7 +30,7 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_2;
 public class BrevDataByggerA001 implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
     private BrevDataGrunnlag dataGrunnlag;
@@ -35,11 +38,11 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
     public BrevDataByggerA001(LovvalgsperiodeService lovvalgsperiodeService,
                               AnmodningsperiodeService anmodningsperiodeService,
-                              UtenlandskMyndighetRepository utenlandskMyndighetRepository,
+                              UtenlandskMyndighetService utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
+        this.utenlandskMyndighetService = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
@@ -53,7 +56,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = dataGrunnlag.getPerson();
-        brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
+        brevData.utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
 
         brevData.arbeidsgivendeVirksomheter =
             ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
@@ -98,11 +101,6 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         Optional<Vilkaarsresultat> art121Vilkaar = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART12_1);
         Optional<Vilkaarsresultat> art122Vilkaar = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART12_2);
         return art121Vilkaar.isPresent() || art122Vilkaar.isPresent();
-    }
-
-    private UtenlandskMyndighet hentUtenlandsMyndighet(Landkoder landkode) throws TekniskException {
-        return  utenlandskMyndighetRepository.findByLandkode(landkode)
-            .orElseThrow(() -> new TekniskException("Fant ingen utenlandsk myndighet for landkode: " + landkode.getKode()));
     }
 
     private Vilkaarsresultat hentVilkårsresultat() throws TekniskException {
