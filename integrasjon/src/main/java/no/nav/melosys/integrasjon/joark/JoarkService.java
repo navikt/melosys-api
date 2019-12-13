@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsu
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.binding.*;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
@@ -233,21 +234,21 @@ public class JoarkService implements JoarkFasade {
         final String hovedDokumentID = journalpostOppdatering.getHovedDokumentID();
         if (hovedDokumentID != null) {
             oppdaterDokument(journalpostID, hovedDokumentID, journalpostOppdatering.getTittel(), journalpostOppdatering.isMedDokumentkategori());
-        }
 
-        Map<String, String> fysiskeVedlegg = journalpostOppdatering.getFysiskeVedlegg();
-        if (!CollectionUtils.isEmpty(fysiskeVedlegg)) {
-            for (Map.Entry<String, String> vedleggIdMedTittel : fysiskeVedlegg.entrySet()) {
-                oppdaterDokument(journalpostID, vedleggIdMedTittel.getKey(), vedleggIdMedTittel.getValue(), false);
+            if (journalpostOppdatering.harLogiskeVedlegg()) {
+                oppdaterLogiskeVedlegg(journalpostID, journalpostOppdatering);
+            }
+
+            if (journalpostOppdatering.getMottatDato() != null) {
+                OppdaterJournalpostRequest request = new OppdaterJournalpostRequest(journalpostOppdatering.getMottatDato());
+                journalpostapiConsumer.oppdaterJournalpost(request, journalpostID);
             }
         }
 
-        List<String> logiskeVedleggTitler = journalpostOppdatering.getLogiskeVedleggTitler();
-        if (hovedDokumentID != null && !CollectionUtils.isEmpty(logiskeVedleggTitler)) {
-            for (String vedleggTittel : logiskeVedleggTitler) {
-                PostLogiskVedleggRequest logiskVedleggRequest = new PostLogiskVedleggRequest();
-                logiskVedleggRequest.setTittel(vedleggTittel);
-                journalfoerInngaaendeConsumer.leggTilLogiskVedlegg(logiskVedleggRequest, journalpostID, hovedDokumentID);
+        if (journalpostOppdatering.harFysiskeVedlegg()) {
+            Map<String, String> fysiskeVedlegg = journalpostOppdatering.getFysiskeVedlegg();
+            for (Map.Entry<String, String> vedleggIdMedTittel : fysiskeVedlegg.entrySet()) {
+                oppdaterDokument(journalpostID, vedleggIdMedTittel.getKey(), vedleggIdMedTittel.getValue(), false);
             }
         }
 
@@ -288,6 +289,15 @@ public class JoarkService implements JoarkFasade {
         journalpostRequest.setJournalfEnhet(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
         journalpostRequest.setForsoekEndeligJF(forsøkFerdigstill);
         journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpostRequest, journalpostID);
+    }
+
+    private void oppdaterLogiskeVedlegg(String journalpostID, JournalpostOppdatering journalpostOppdatering) throws SikkerhetsbegrensningException, IntegrasjonException {
+        List<String> logiskeVedleggTitler = journalpostOppdatering.getLogiskeVedleggTitler();
+        for (String vedleggTittel : logiskeVedleggTitler) {
+            PostLogiskVedleggRequest logiskVedleggRequest = new PostLogiskVedleggRequest();
+            logiskVedleggRequest.setTittel(vedleggTittel);
+            journalfoerInngaaendeConsumer.leggTilLogiskVedlegg(logiskVedleggRequest, journalpostID, journalpostOppdatering.getHovedDokumentID());
+        }
     }
 
     private void oppdaterDokument(String journalpostId, String dokumentID, String tittel, boolean medDokumentkategori) throws SikkerhetsbegrensningException, IntegrasjonException {

@@ -1,15 +1,16 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.feil.Feilkategori;
@@ -93,6 +94,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         }
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
         String hovedDokumentID = prosessinstans.getData(DOKUMENT_ID);
+        LocalDate mottattDato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
 
         List<String> logiskeVedleggTitler = prosessinstans.getData(LOGISKE_VEDLEGG_TITLER, List.class);
         Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
@@ -100,7 +102,9 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(arkivSakID)
             .medBrukerID(brukerID).medHovedDokumentID(hovedDokumentID)
             .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType)
-            .medTittel(tittel).medFysiskeVedlegg(fysiskeVedleggMedTitler)
+            .medTittel(tittel)
+            .medMottatDato(mottattDato)
+            .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler).medDokumentkategori(medDokumentkategori).build();
         joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, false);
 
@@ -108,4 +112,3 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         log.info("Prosessinstans {} har oppdatert journalpost {}. SakId: {}", prosessinstans.getId(), journalpostID, arkivSakID);
     }
 }
-

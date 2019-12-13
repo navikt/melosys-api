@@ -1,7 +1,9 @@
 package no.nav.melosys.service.journalforing.dto;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 
 public class JournalfoeringDto {
@@ -17,6 +19,7 @@ public class JournalfoeringDto {
     private List<DokumentDto> vedlegg;
     private boolean skalTilordnes;
     private Boolean ikkeSendForvaltingsmelding;
+    private LocalDate mottatDato;
 
     public String getBehandlingstypeKode() {
         return behandlingstypeKode;
@@ -113,5 +116,14 @@ public class JournalfoeringDto {
     public void setIkkeSendForvaltingsmelding(Boolean ikkeSendForvaltingsmelding) {
         this.ikkeSendForvaltingsmelding = ikkeSendForvaltingsmelding;
     }
-    
+
+    @JsonIgnore
+    public LocalDate getMottatDato() {
+        return mottatDato;
+    }
+
+    @JsonIgnore
+    public void setMottatDato(LocalDate mottatDato) {
+        this.mottatDato = mottatDato;
+    }
 }

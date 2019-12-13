@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi;
 
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse;
 import org.slf4j.Logger;
@@ -25,13 +26,24 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
                 request.getJournalpostType().name(), request.getSak() != null ? request.getSak().getArkivsaksnummer() : "ukjent");
         }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath("")
             .queryParam("forsoekFerdigstill", forsøkEndeligJfr);
 
-        return restTemplate.postForObject(uriBuilder.toUriString(), new HttpEntity<>(request, headers), OpprettJournalpostResponse.class);
+        return restTemplate.postForObject(uriBuilder.toUriString(), new HttpEntity<>(request, lagHeaders()), OpprettJournalpostResponse.class);
+    }
+
+    private static HttpHeaders lagHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        return headers;
+    }
+
+    public void oppdaterJournalpost(OppdaterJournalpostRequest request, String journalpostId) {
+        if (log.isInfoEnabled()) {
+            log.info("Oppdaterer journalpost med id {}", journalpostId);
+        }
+        // UriComponentsBuilder uribuilder = UriComponentsBuilder.fromPath("").query(journalpostId);
+        restTemplate.put(journalpostId, new HttpEntity<>(request, lagHeaders()));
     }
 }

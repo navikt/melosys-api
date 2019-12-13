@@ -84,6 +84,10 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
         prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, skalSendesForvaltningsmelding(journalfoeringDto));
 
+        if (journalfoeringDto.getMottatDato() != null) {
+            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringDto.getMottatDato());
+        }
+
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
             final String hovedDokumentID = journalfoeringDto.getDokumentID();
             prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER,
@@ -185,7 +189,7 @@ public class ProsessinstansService {
         if (StringUtils.isNotEmpty(revurderBegrunnelse)) {
             prosessinstans.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, revurderBegrunnelse);
         }
-                    
+
         lagre(prosessinstans);
     }
 
