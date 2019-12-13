@@ -12,7 +12,6 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.doksys.DoksysSystemService;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakSystemService;
 import no.nav.melosys.integrasjon.joark.JoarkService;
@@ -68,9 +67,6 @@ public class FagsakServiceIT {
 
     @MockBean
     EessiService eessiService;
-
-    @MockBean
-    DoksysSystemService doksysService;
 
     @Autowired
     private FagsakService fagsakService;
