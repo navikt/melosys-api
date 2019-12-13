@@ -108,8 +108,9 @@ public class VedtakService {
 
         behandling.setType(behandlingstype);
         behandlingService.lagre(behandling);
+        String mottakerinstitusjon = behandling.getFagsak().hentMyndighet().getInstitusjonId();
 
-        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode, fritekst);
+        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode, fritekst, mottakerinstitusjon);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }
