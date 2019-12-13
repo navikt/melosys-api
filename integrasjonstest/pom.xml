@@ -16,7 +16,7 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>app</artifactId>
             <classifier>test</classifier>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
