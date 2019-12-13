@@ -65,6 +65,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         VedtakMetadata vedtakMetadata;
         if (behandlingsresultat.getVedtakMetadata() == null) {
             vedtakMetadata = new VedtakMetadata();
+            vedtakMetadata.setBehandlingsresultat(behandlingsresultat);
             behandlingsresultat.setVedtakMetadata(vedtakMetadata);
         } else {
             vedtakMetadata = behandlingsresultat.getVedtakMetadata();
