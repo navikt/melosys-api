@@ -68,6 +68,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
         }
 
+        brevdata.personNavn = dataGrunnlag.getPerson().sammensattNavn;
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
         brevdata.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
 
