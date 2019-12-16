@@ -30,7 +30,6 @@ spec:
   vault:
     enabled: true
   prometheus:
-    port: 8080
     enabled: true
     path: /internal/prometheus
   ingresses:
