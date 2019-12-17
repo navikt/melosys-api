@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -304,7 +303,7 @@ public class GsakService implements GsakFasade {
             .setAktivDato(oppgaveDto.getAktivDato())
             .setAktørId(oppgaveDto.getAktørId())
             .setBeskrivelse(oppgaveDto.getBeskrivelse())
-            .setOpprettetTidspunkt(oppgaveDto.getOpprettetTidspunkt() != null ? oppgaveDto.getOpprettetTidspunkt().toLocalDateTime() : null)
+            .setOpprettetTidspunkt(oppgaveDto.getOpprettetTidspunkt())
             .setFristFerdigstillelse(oppgaveDto.getFristFerdigstillelse())
             .setJournalpostId(oppgaveDto.getJournalpostId())
             .setOppgaveId(oppgaveId)
@@ -346,7 +345,7 @@ public class GsakService implements GsakFasade {
         }
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
         if (oppgave.getOpprettetTidspunkt() != null) {
-            oppgaveDto.setOpprettetTidspunkt(oppgave.getOpprettetTidspunkt().atZone(ZoneId.systemDefault()));
+            oppgaveDto.setOpprettetTidspunkt(oppgave.getOpprettetTidspunkt());
         }
         oppgaveDto.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         oppgaveDto.setId(oppgave.getOppgaveId());

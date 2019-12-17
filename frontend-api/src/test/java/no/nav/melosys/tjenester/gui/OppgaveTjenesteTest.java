@@ -116,8 +116,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
         when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
 
-        assertThat((List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>) tjeneste.søkOppgaverMedBrukerID("").getBody()).isNotEmpty();
-        //TODO validerArray(oppgave, OPPGAVER_SOK_SCHEMA, logger);
+        validerArray((List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>)tjeneste.søkOppgaverMedBrukerID("").getBody(), OPPGAVER_SOK_SCHEMA, logger);
     }
 
     @Test

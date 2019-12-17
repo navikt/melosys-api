@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.dto.oppgave;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -10,7 +11,7 @@ public class OppgaveDto {
     public String oppgaveID;
     public Tema tema;
     public String oppgavetype;
-    public LocalDateTime registrertDato;
+    public ZonedDateTime registrertDato;
     public LocalDate frist;
     public String sakID;
 
