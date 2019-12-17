@@ -1,0 +1,1 @@
+INSERT INTO PROSESS_STEG (KODE, NAVN) VALUES ('GJENBRUK_OPPGAVE', 'Gjenbruker eksisterende oppgave');
