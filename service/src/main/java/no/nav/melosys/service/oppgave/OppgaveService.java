@@ -104,6 +104,10 @@ public class OppgaveService {
         return gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
     }
 
+    public Oppgave hentOppgaveMedOppgaveID(String oppgaveID) throws FunksjonellException, TekniskException {
+        return gsakFasade.hentOppgave(oppgaveID);
+    }
+
     public Behandling hentAktivBehandling(String saksnummer) throws IkkeFunnetException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         return Optional.ofNullable(fagsak.getAktivBehandling())
