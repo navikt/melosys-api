@@ -320,13 +320,13 @@ public final class DokumentServiceTest {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
-        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
+        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         JoarkService joarkService = mock(JoarkService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         SoeknadService soeknadService = mock(SoeknadService.class);
         LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, soeknadService, vilkaarsresultatRepository);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
-            utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService, landvelgerService);
+            utenlandskMyndighetService, vilkaarsresultatRepository, joarkService, landvelgerService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() throws FunksjonellException, TekniskException {

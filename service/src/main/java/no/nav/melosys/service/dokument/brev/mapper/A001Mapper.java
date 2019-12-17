@@ -25,7 +25,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 
-import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
+import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapAnmodningBegrunnelser;

@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 
 @Entity
@@ -50,5 +51,14 @@ public class UtenlandskMyndighet {
     @Override
     public int hashCode() {
         return Objects.hash(institusjonskode, land);
+    }
+
+    public StrukturertAdresse getAdresse() {
+        StrukturertAdresse adresse = new StrukturertAdresse();
+        adresse.gatenavn = gateadresse;
+        adresse.postnummer = postnummer;
+        adresse.poststed = poststed;
+        adresse.landkode = landkode.getKode();
+        return adresse;
     }
 }

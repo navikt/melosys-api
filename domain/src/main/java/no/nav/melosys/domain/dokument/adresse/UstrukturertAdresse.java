@@ -8,8 +8,6 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.dokument.adresse.AdresseUtils.sammenslå;
-
 public class UstrukturertAdresse extends Adresse {
     private final List<String> adresselinjer = new ArrayList<>();
 

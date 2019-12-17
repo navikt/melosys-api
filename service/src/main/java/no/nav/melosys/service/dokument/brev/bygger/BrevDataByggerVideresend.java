@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataVideresend;
@@ -11,11 +12,14 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 
 public class BrevDataByggerVideresend implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BrevbestillingDto brevbestillingDto;
 
     public BrevDataByggerVideresend(LandvelgerService landvelgerService,
+                                    UtenlandskMyndighetService utenlandskMyndighetService,
                                     BrevbestillingDto brevbestillingDto) {
         this.landvelgerService = landvelgerService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.brevbestillingDto = brevbestillingDto;
     }
 
@@ -30,10 +34,7 @@ public class BrevDataByggerVideresend implements BrevDataBygger {
 
         BrevDataVideresend brevdata = new BrevDataVideresend(brevbestillingDto, saksbehandler);
         brevdata.bostedsland = bostedsland.getBeskrivelse();
-        brevdata.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
-            .findFirst()
-            .map(Landkoder::getBeskrivelse)
-            .orElseThrow(() -> new FunksjonellException("Kan ikke avgjøre trygdemyndighetsland i videresending av søknad"));
+        brevdata.trygdemyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(bostedsland);
 
         return brevdata;
     }

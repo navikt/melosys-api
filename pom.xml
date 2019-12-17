@@ -28,7 +28,6 @@
         <module>saksflyt-api</module>
         <module>service</module>
         <module>sikkerhet</module>
-        <module>integrasjonstest</module>
     </modules>
 
     <properties>
@@ -38,7 +37,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.34.0-65</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.7-72</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.14.18</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
@@ -47,7 +46,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.1.28</dokprod.melosysbrev.version>
+        <dokprod.melosysbrev.version>1.2.7</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
@@ -604,6 +603,9 @@
     <profiles>
         <profile>
             <id>itest</id>
+            <modules>
+                <module>integrasjonstest</module>
+            </modules>
             <build>
                 <plugins>
                     <plugin>
