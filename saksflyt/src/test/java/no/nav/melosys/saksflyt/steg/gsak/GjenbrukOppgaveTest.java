@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.gsak;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -44,7 +45,8 @@ public class GjenbrukOppgaveTest {
         verify(gsakFasade).oppdaterOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue()).hasFieldOrPropertyWithValue("saksnummer", saksnummer)
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
-            .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK);
+            .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
+            .hasFieldOrPropertyWithValue("behandlingstype", Behandlingstyper.SOEKNAD);
     }
 
     private static Oppgave lagOppgave(String oppgaveID) {
