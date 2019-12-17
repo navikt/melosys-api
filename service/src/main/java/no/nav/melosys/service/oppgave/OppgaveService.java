@@ -140,7 +140,9 @@ public class OppgaveService {
             behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
-            if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.ENDRET_PERIODE) {
+            if (behandling.getType() == Behandlingstyper.SOEKNAD
+                || behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
+                || behandling.getType() == Behandlingstyper.ENDRET_PERIODE) {
                 SoeknadDokument søknadDokument = søknadService.hentSøknad(behandling.getId());
                 behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
                 behOppgaveDto.setPeriode(mapPeriode(søknadDokument));

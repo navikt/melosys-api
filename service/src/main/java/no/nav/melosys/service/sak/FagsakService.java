@@ -141,7 +141,7 @@ public class FagsakService {
         if (feilet) {
             throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en ny sak.").toString());
         }
-        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD) {
+        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD || opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
             final SøknadDto soknadDto = opprettSakDto.soknadDto;
             if (soknadDto == null) {
                 throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
@@ -302,7 +302,20 @@ public class FagsakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus,  Behandling behandling) throws IkkeFunnetException {
+    //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException {
+        Behandlingstyper behandlingstype = behandling.getType();
+        if (behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
+            && behandlingstype != Behandlingstyper.ØVRIGE_SED
+            && behandlingstype != Behandlingstyper.VURDER_TRYGDETID) {
+            throw new FunksjonellException("Behandlingstype " + behandlingstype + " kan ikke avsluttes manuelt");
+        }
+
+        Saksstatuser saksstatus = behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
+        avsluttFagsakOgBehandling(fagsak, saksstatus, behandling);
+    }
+
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus, Behandling behandling) throws IkkeFunnetException {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
         behandlingService.avsluttBehandling(behandling.getId());

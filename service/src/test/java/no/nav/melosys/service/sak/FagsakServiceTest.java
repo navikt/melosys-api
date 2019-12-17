@@ -280,6 +280,43 @@ public class FagsakServiceTest {
     }
 
     @Test
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeSoeknadIkkeYrkesaktiv_blirAvsluttet() throws FunksjonellException {
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        behandling.setType(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV);
+        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
+
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
+        verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
+    }
+
+    @Test
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeVurderTrygdetid_blirAvsluttet() throws FunksjonellException {
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        behandling.setType(Behandlingstyper.VURDER_TRYGDETID);
+        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
+
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.AVSLUTTET);
+        verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
+    }
+
+    @Test
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeSoeknad_kasterException() throws FunksjonellException {
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("kan ikke avsluttes manuelt");
+
+        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
+    }
+
+    @Test
     public void leggTilFjernAktørerForMyndighet() {
         String saksnummer = "1234";
         Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");

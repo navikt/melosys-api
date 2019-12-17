@@ -25,6 +25,7 @@ import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 //A002,A011
@@ -40,7 +41,7 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
     private static final String MOTTATT_SED_BESKRIVELSE = "Mottatt svar på A001: SED %s";
 
     @Autowired
-    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService, AnmodningsperiodeService anmodningsperiodeService, GsakFasade gsakFasade) {
+    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService, AnmodningsperiodeService anmodningsperiodeService, @Qualifier("system") GsakFasade gsakFasade) {
         this.fagsakService = fagsakService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.gsakFasade = gsakFasade;

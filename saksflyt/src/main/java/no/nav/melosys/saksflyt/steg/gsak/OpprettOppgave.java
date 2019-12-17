@@ -105,7 +105,9 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     }
 
     private void validerBehandlingstype(Behandlingstyper behandlingstype) throws FunksjonellException {
-        if (behandlingstype != Behandlingstyper.SOEKNAD && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
+        if (behandlingstype != Behandlingstyper.SOEKNAD
+            && behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
+            && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
             throw new FunksjonellException("Behandlingstype " + behandlingstype + STØTTES_IKKE);
         }
     }
