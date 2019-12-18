@@ -188,33 +188,52 @@ public class GsakService implements GsakFasade {
 
     @Override
     public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
+        OppgaveDto oppgaveDto = hentOppgaveDto(oppgaveID);
+
+        if (oppgaveOppdatering.getOppgavetype() != null) {
+            oppgaveDto.setOppgavetype(oppgaveOppdatering.getOppgavetype().getKode());
+        }
+        if (oppgaveOppdatering.getTema() != null) {
+            oppgaveDto.setTema(oppgaveOppdatering.getTema().getKode());
+        }
+        if (oppgaveOppdatering.getBehandlingstema() != null) {
+            oppgaveDto.setBehandlingstema(oppgaveOppdatering.getBehandlingstema().getKode());
+        }
+        if (oppgaveOppdatering.getBehandlingstype() != null) {
+            oppgaveDto.setBehandlingstype(hentFellesKode(oppgaveOppdatering.getBehandlingstype()));
+        }
+        if (oppgaveOppdatering.getBehandlesAvApplikasjon() != null && oppgaveOppdatering.getBehandlesAvApplikasjon() != Fagsystem.INTET) {
+            oppgaveDto.setBehandlesAvApplikasjon(oppgaveOppdatering.getBehandlesAvApplikasjon().getKode());
+        }
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getSaksnummer())) {
+            oppgaveDto.setSaksreferanse(oppgaveOppdatering.getSaksnummer());
+        }
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getBeskrivelse())) {
-            if (StringUtils.isEmpty(oppgave.getBeskrivelse())) {
-                oppgave.setBeskrivelse(oppgaveOppdatering.getBeskrivelse());
+            if (StringUtils.isEmpty(oppgaveDto.getBeskrivelse())) {
+                oppgaveDto.setBeskrivelse(oppgaveOppdatering.getBeskrivelse());
             } else {
-                oppgave.setBeskrivelse(StringUtils.joinWith("\n", oppgave.getBeskrivelse(), oppgaveOppdatering.getBeskrivelse()));
+                oppgaveDto.setBeskrivelse(StringUtils.joinWith("\n", oppgaveDto.getBeskrivelse(), oppgaveOppdatering.getBeskrivelse()));
             }
         }
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getPrioritet())) {
-            oppgave.setPrioritet(oppgaveOppdatering.getPrioritet());
+            oppgaveDto.setPrioritet(oppgaveOppdatering.getPrioritet());
         }
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getStatus())) {
-            oppgave.setStatus(oppgaveOppdatering.getStatus());
+            oppgaveDto.setStatus(oppgaveOppdatering.getStatus());
         }
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getTilordnetRessurs())) {
-            oppgave.setTilordnetRessurs(oppgaveOppdatering.getTilordnetRessurs());
+            oppgaveDto.setTilordnetRessurs(oppgaveOppdatering.getTilordnetRessurs());
         }
 
         if (oppgaveOppdatering.getFristFerdigstillelse() != null) {
-            oppgave.setFristFerdigstillelse(oppgaveOppdatering.getFristFerdigstillelse());
+            oppgaveDto.setFristFerdigstillelse(oppgaveOppdatering.getFristFerdigstillelse());
         }
 
-        oppgaveConsumer.oppdaterOppgave(oppgave);
+        oppgaveConsumer.oppdaterOppgave(oppgaveDto);
     }
 
     private OppgaveDto hentOppgaveDto(String oppgaveID) throws FunksjonellException, TekniskException {

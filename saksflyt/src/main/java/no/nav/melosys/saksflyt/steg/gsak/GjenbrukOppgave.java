@@ -2,13 +2,13 @@ package no.nav.melosys.saksflyt.steg.gsak;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.slf4j.Logger;
@@ -39,17 +39,18 @@ public class GjenbrukOppgave extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         final String oppgaveID = prosessinstans.getData(ProsessDataKey.OPPGAVE_ID);
         final String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
+        final Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
 
-        Oppgave oppgave = gsakFasade.hentOppgave(oppgaveID);
-        Oppgave.Builder builder = new Oppgave.Builder(oppgave);
-        builder.setBehandlingstype(Behandlingstyper.SOEKNAD);
-        final OppgaveFactory.OppgaveParametere oppgaveParametere = OppgaveFactory.hentOppgaveParametere(Behandlingstyper.SOEKNAD);
-        builder.setTema(oppgaveParametere.tema);
-        builder.setBehandlingstema(oppgaveParametere.behandlingstema);
-        builder.setOppgavetype(oppgaveParametere.oppgavetype);
-        builder.setSaksnummer(saksnummer);
-        builder.setBehandlesAvApplikasjon(Fagsystem.MELOSYS);
-        gsakFasade.oppdaterOppgave(builder.build());
+        final OppgaveFactory.OppgaveParametere oppgaveParametere = OppgaveFactory.hentOppgaveParametere(behandlingstype);
+        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+            .oppgavetype(oppgaveParametere.oppgavetype)
+            .behandlingstype(behandlingstype)
+            .tema(oppgaveParametere.tema)
+            .behandlingstema(oppgaveParametere.behandlingstema)
+            .saksnummer(saksnummer)
+            .behandlesAvApplikasjon(Fagsystem.MELOSYS)
+            .build();
+        gsakFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("PID {} har knyttet oppgave {} til sak {}", prosessinstans.getId(), oppgaveID, saksnummer);
