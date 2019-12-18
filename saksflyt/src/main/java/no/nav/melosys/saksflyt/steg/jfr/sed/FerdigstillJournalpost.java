@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("RegistreringUnntakFerdigstillJournalpost")
+@Component("SedMottakFerdigstillJournalpost")
 public class FerdigstillJournalpost extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(FerdigstillJournalpost.class);
@@ -40,10 +40,11 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
+        ProsessSteg nesteSteg;
         if (prosessinstans.getType() != ProsessType.MOTTAK_SED_JOURNALFØRING) {
-            prosessinstans.setSteg(ProsessSteg.hentFørsteProsessStegForType(prosessinstans.getType()));
+            nesteSteg = ProsessSteg.hentFørsteProsessStegForType(prosessinstans.getType());
         } else {
-            prosessinstans.setSteg(ProsessSteg.FERDIG);
+            nesteSteg = ProsessSteg.FERDIG;
         }
 
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
@@ -55,6 +56,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
             .medBrukerID(brukerID).medArkivSakID(arkivSakID).medHovedDokumentID(dokumentID).medTittel(tittel).build();
         joarkFasade.oppdaterJournalpost(journalpostId, journalpostOppdatering, true);
         log.info("Journalpost {} ferdigstilt for gsak-sak {}", journalpostId, prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID));
+        prosessinstans.setSteg(nesteSteg);
     }
 
     private String hentBrukerID(Prosessinstans prosessinstans) throws IkkeFunnetException {
