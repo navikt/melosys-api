@@ -2,12 +2,12 @@ package no.nav.melosys.service.eessi;
 
 import java.util.Collections;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -15,6 +15,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
@@ -88,7 +89,7 @@ public class ManuellSedBehandlingInitialisererTest {
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
         verify(gsakFasade).finnOppgaverMedSaksnummer(eq(SAKSNUMMER));
-        verify(gsakFasade).oppdaterOppgavePrioritet(eq(oppgaveId), eq(PrioritetType.HOY));
+        verify(gsakFasade).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
 
     }
 

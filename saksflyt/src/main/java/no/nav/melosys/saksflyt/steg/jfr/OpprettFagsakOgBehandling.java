@@ -62,11 +62,11 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
+        Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
             Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-            Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
             Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setBehandling(behandling);
 
@@ -75,7 +75,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK || prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
             OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID(aktørId).medArbeidsgiver(arbeidsgiver)
                 .medRepresentant(representant).medRepresentantKontaktperson(representantKontakperson)
-                .medBehandlingstype(Behandlingstyper.SOEKNAD).medInitierendeJournalpostId(initierendeJournalpostId)
+                .medBehandlingstype(behandlingstype).medInitierendeJournalpostId(initierendeJournalpostId)
                 .medInitierendeDokumentId(initierendeDokumentId).build();
             Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
             prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());

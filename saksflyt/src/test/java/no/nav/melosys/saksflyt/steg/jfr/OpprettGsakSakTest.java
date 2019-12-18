@@ -1,12 +1,10 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.Properties;
-
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -40,22 +38,23 @@ public class OpprettGsakSakTest {
 
     @Test
     public void utfoerSteg() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        Properties properties = new Properties();
+        Behandlingstyper behandlingstyper = Behandlingstyper.SOEKNAD;
         String saksnummer = "MEL-009";
-        properties.setProperty(ProsessDataKey.SAKSNUMMER.getKode(), saksnummer);
         String aktørID = "FJERNET93";
-        properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), aktørID);
-        p.setData(properties);
-        when(gsakFasade.opprettSak(anyString(), eq(Behandlingstyper.SOEKNAD), anyString())).thenReturn(123L);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstyper);
+        when(gsakFasade.opprettSak(anyString(), eq(behandlingstyper), anyString())).thenReturn(123L);
 
         Fagsak fagsak = new Fagsak();
         when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
 
-        agent.utførSteg(p);
+        agent.utførSteg(prosessinstans);
 
-        verify(gsakFasade, times(1)).opprettSak(saksnummer, Behandlingstyper.SOEKNAD, aktørID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
+        verify(gsakFasade, times(1)).opprettSak(saksnummer, behandlingstyper, aktørID);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
         Assert.notNull(fagsak.getGsakSaksnummer(), "Fagsak skal ha fått Gsak saksnummert");
     }
 }

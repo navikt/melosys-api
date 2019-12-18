@@ -126,6 +126,17 @@ public class FagsakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping(value = "{saksnr}/avslutt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = {MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ApiOperation(value = "Brukes for å avslutte manuelle behandlinger. " +
+        "Gyldige behandlingstyper er VURDER_TRYGDETID, ØVRIGE_SED og SOEKNAD_IKKE_YRKESAKTIVE", produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity avsluttSakManuelt(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        tilgangService.sjekkSak(fagsak);
+        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.getAktivBehandling());
+
+        return ResponseEntity.noContent().build();
+    }
+
     private FagsakDto tilFagsakDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
         fagsakDto.setSaksnummer(fagsak.getSaksnummer());
@@ -175,7 +186,7 @@ public class FagsakTjeneste {
     }
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
-        if (behandling.getType() == Behandlingstyper.SOEKNAD) {
+        if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
             søknadService.finnSøknad(behandling.getId()).ifPresent(soeknadDokument -> {
                     behandlingOversiktDto.setLand(hentSøknadsland(soeknadDokument));
                     Periode periode = hentPeriode(soeknadDokument);

@@ -65,7 +65,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
-
     private static TilgangService tilgangService;
 
     private EasyRandom random;
@@ -260,6 +259,14 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         instans.avsluttSakSomBortfalt("123");
 
         verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public final void avsluttSakManuelt_sakEksisterer_avsluttes() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        instans.avsluttSakManuelt("123");
+        verify(fagsakService).avsluttFagsakOgBehandlingValiderBehandlingstype(eq(fagsak), eq(fagsak.getAktivBehandling()));
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {

@@ -58,6 +58,7 @@ public class FellesBrevtypeMappingTest {
     @Test
     public void testBehandlingstypeKode() throws Exception {
         List<String> uimplementerteEllerUgyldigeKoder = Arrays.asList(
+            "SOEKNAD_IKKE_YRKESAKTIV",
             "ANKE", // Ikke i bruk enda
             "REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING",
             "REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE",
