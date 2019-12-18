@@ -169,7 +169,7 @@ public class FagsakService {
             throw new FunksjonellException("OppgaveID mangler.");
         }
         final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
-        if (oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK_MK) {
+        if (oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK_MK && oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK) {
             throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype());
         }
     }
