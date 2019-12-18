@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.*;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
+import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
-import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
-import no.nav.dok.tjenester.journalfoerinngaaende.response.Status;
+import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -19,8 +19,7 @@ import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsu
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.DokumentInformasjonMangler;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
@@ -31,8 +30,6 @@ import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostli
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.KorrespendansePart;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
-import org.hamcrest.core.AllOf;
-import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -64,11 +61,11 @@ public class JoarkServiceTest {
     @Mock
     private JournalpostapiConsumer journalpostapiConsumer;
     @Captor
-    private ArgumentCaptor<PutJournalpostRequest> oppdaterJournalpostCaptor;
+    private ArgumentCaptor<FerdigstillJournalpostRequest> ferdigstillJournalpostCaptor;
     @Captor
-    private ArgumentCaptor<PutDokumentRequest> oppdaterDokumentCaptor;
+    private ArgumentCaptor<OppdaterJournalpostRequest> oppdaterJournalpostRequestCaptor;
     @Captor
-    private ArgumentCaptor<PostLogiskVedleggRequest> logiskVedleggCaptor;
+    private ArgumentCaptor<String> logiskVedleggTittelCaptor;
 
     @Before
     public void setUp() {
@@ -151,78 +148,81 @@ public class JoarkServiceTest {
     @Test
     public void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
         String tittel = "tittel";
+        String hovedDokumentID = "1234";
         Map<String, String> vedleggMedTitler = new HashMap<>();
         String fysiskVedleggTittel = "Fysisk vedlegg";
-        vedleggMedTitler.put("vedleggDokID", fysiskVedleggTittel);
+        String fysiskVedleggID = "vedleggDokID";
+        vedleggMedTitler.put(fysiskVedleggID, fysiskVedleggTittel);
+
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
-            .medHovedDokumentID("1234").medBrukerID("12345")
+            .medHovedDokumentID(hovedDokumentID).medBrukerID("12345")
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.ORGANISASJON)
             .medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
             .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).medDokumentkategori(true).build();
         joarkService.oppdaterJournalpost("123",journalpostOppdatering, false);
 
-        verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
-        PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
+        verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
+        OppdaterJournalpostRequest request = oppdaterJournalpostRequestCaptor.getValue();
 
         assertThat(request).isNotNull();
-        assertThat(request.getTittel()).isEqualTo(tittel);
-        assertThat(request.getAvsender()).isNotNull();
-        assertThat(request.getAvsender().getNavn()).isNotNull();
-        assertThat(request.getAvsender().getAvsenderType()).isEqualTo(Avsender.AvsenderType.ORGANISASJON);
+        assertThat(request.tittel).isEqualTo(tittel);
+        assertThat(request.avsenderMottaker).isNotNull();
+        assertThat(request.avsenderMottaker.getNavn()).isNotNull();
+        assertThat(request.avsenderMottaker.getIdType()).isEqualTo(AvsenderMottaker.IdType.ORGNR);
 
-        assertThat(request.getBruker()).isNotNull();
-        assertThat(request.getBruker().getIdentifikator()).isNotNull();
-        assertThat(request.getBruker().getBrukerType()).isNotNull();
+        assertThat(request.bruker).isNotNull();
+        assertThat(request.bruker.getId()).isNotNull();
+        assertThat(request.bruker.getIdType()).isEqualTo(no.nav.melosys.integrasjon.joark.journalpostapi.dto.Bruker.BrukerIdType.FNR);
 
-        assertThat(request.getArkivSak()).isNotNull();
-        assertThat(request.getArkivSak().getArkivSakId()).isNotNull();
-        assertThat(request.getArkivSak().getArkivSakSystem()).isNotNull();
+        assertThat(request.sak).isNotNull();
+        assertThat(request.sak.getArkivsaksnummer()).isNotNull();
+        assertThat(request.sak.getArkivsaksystem()).isNotNull();
 
-        verify(journalfoerInngaaendeConsumer, times(2)).oppdaterDokument(oppdaterDokumentCaptor.capture(), anyString(), anyString());
-        List<PutDokumentRequest> dokumentRequest = oppdaterDokumentCaptor.getAllValues();
-        assertThat(dokumentRequest.size()).isEqualTo(2);
-        assertThat(dokumentRequest.get(0).getDokumentKategori()).isEqualTo(DokumentKategoriKode.IS.getKode());
-        assertThat(dokumentRequest.get(0).getTittel()).isEqualTo(tittel);
-        assertThat(dokumentRequest.get(1).getTittel()).isEqualTo(fysiskVedleggTittel);
+        assertThat(request.dokumenter.size()).isEqualTo(2);
+        assertThat(request.dokumenter.get(0).tittel).isEqualTo(tittel);
+        assertThat(request.dokumenter.get(0).dokumentInfoId).isEqualTo(hovedDokumentID);
+        assertThat(request.dokumenter.get(1).tittel).isEqualTo(fysiskVedleggTittel);
+        assertThat(request.dokumenter.get(1).dokumentInfoId).isEqualTo(fysiskVedleggID);
 
-        verify(journalfoerInngaaendeConsumer, times(2)).leggTilLogiskVedlegg(logiskVedleggCaptor.capture(), anyString(), anyString());
-        List<PostLogiskVedleggRequest> logiskVedleggRequest = logiskVedleggCaptor.getAllValues();
+        verify(journalpostapiConsumer, times(2)).leggTilLogiskVedlegg(anyString(), logiskVedleggTittelCaptor.capture());
+        List<String> logiskVedleggRequest = logiskVedleggTittelCaptor.getAllValues();
         assertThat(logiskVedleggRequest.size()).isEqualTo(2);
-        assertThat(logiskVedleggRequest.get(0).getTittel()).isEqualTo("dok1");
-        assertThat(logiskVedleggRequest.get(1).getTittel()).isEqualTo("dok2");
+        assertThat(logiskVedleggRequest.get(0)).isEqualTo("dok1");
+        assertThat(logiskVedleggRequest.get(1)).isEqualTo("dok2");
     }
 
     @Test
     public void oppdaterJournalpost_utenVedlegg_fungerer() throws Exception {
         String tittel = "tittel";
+        String hovedDokumentID = "1234";
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
-            .medBrukerID("12345").medHovedDokumentID("1234")
+            .medBrukerID("12345").medHovedDokumentID(hovedDokumentID)
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
             .medLogiskeVedleggTitler(null).medDokumentkategori(true).build();
         joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);
 
-        verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
-        PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
+        verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
+        OppdaterJournalpostRequest request = oppdaterJournalpostRequestCaptor.getValue();
 
         assertThat(request).isNotNull();
-        assertThat(request.getTittel()).isEqualTo(tittel);
-        assertThat(request.getAvsender()).isNotNull();
-        assertThat(request.getAvsender().getNavn()).isNotNull();
+        assertThat(request.tittel).isEqualTo(tittel);
+        assertThat(request.avsenderMottaker).isNotNull();
+        assertThat(request.avsenderMottaker.getNavn()).isNotNull();
 
-        assertThat(request.getBruker()).isNotNull();
-        assertThat(request.getBruker().getIdentifikator()).isNotNull();
-        assertThat(request.getBruker().getBrukerType()).isNotNull();
+        assertThat(request.bruker).isNotNull();
+        assertThat(request.bruker.getId()).isNotNull();
+        assertThat(request.bruker.getIdType()).isNotNull();
 
-        assertThat(request.getArkivSak()).isNotNull();
-        assertThat(request.getArkivSak().getArkivSakId()).isNotNull();
-        assertThat(request.getArkivSak().getArkivSakSystem()).isNotNull();
+        assertThat(request.sak).isNotNull();
+        assertThat(request.sak.getArkivsaksnummer()).isNotNull();
+        assertThat(request.sak.getArkivsaksystem()).isNotNull();
 
-        verify(journalfoerInngaaendeConsumer).oppdaterDokument(oppdaterDokumentCaptor.capture(), anyString(), anyString());
-        PutDokumentRequest dokumentRequest = oppdaterDokumentCaptor.getValue();
-        assertThat(dokumentRequest.getDokumentKategori()).isEqualTo(DokumentKategoriKode.IS.getKode());
-        assertThat(dokumentRequest.getTittel()).isEqualTo(tittel);
+        assertThat(request.dokumenter).hasSize(1);
+        Dokumentoppdatering hovedDokument = request.dokumenter.iterator().next();
+        assertThat(hovedDokument.tittel).isEqualTo(tittel);
+        assertThat(hovedDokument.dokumentInfoId).isEqualTo(hovedDokumentID);
 
-        verify(journalfoerInngaaendeConsumer, never()).leggTilLogiskVedlegg(logiskVedleggCaptor.capture(), anyString(), anyString());
+        verify(journalpostapiConsumer, never()).leggTilLogiskVedlegg(anyString(), anyString());
     }
 
     @Test
@@ -289,48 +289,15 @@ public class JoarkServiceTest {
         String journalpostId = "123";
         PutJournalpostResponse putJournalpostResponse = new PutJournalpostResponse();
         putJournalpostResponse.setHarEndeligJF(true);
-        doReturn(putJournalpostResponse).when(journalfoerInngaaendeConsumer).oppdaterJournalpost(any(), eq(journalpostId));
 
         joarkService.ferdigstillJournalføring(journalpostId);
 
-        verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), eq(journalpostId));
+        verify(journalpostapiConsumer).ferdigstillJournalpost(ferdigstillJournalpostCaptor.capture(), eq(journalpostId));
 
-        PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
+        FerdigstillJournalpostRequest request = ferdigstillJournalpostCaptor.getValue();
 
         assertThat(request).isNotNull();
-        assertThat(request.isForsoekEndeligJF()).isTrue();
-        assertThat(request.getJournalfEnhet()).isEqualTo(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
-    }
-
-    @Test
-    public void ferdigstillJournalpost_journalpostBlirIkkeJournalført_funksjonellExepctionMedManglerKastes() throws Exception {
-        String journalpostId = "123";
-        PutJournalpostResponse putJournalpostResponse = new PutJournalpostResponse();
-        putJournalpostResponse.setHarEndeligJF(false);
-        putJournalpostResponse.setJournalpostId(journalpostId);
-        Mangler mangler = lagMangler();
-        putJournalpostResponse.setMangler(mangler);
-        doReturn(putJournalpostResponse).when(journalfoerInngaaendeConsumer).oppdaterJournalpost(any(PutJournalpostRequest.class), eq(journalpostId));
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage(AllOf.allOf(
-            StringContains.containsString("Journalpost 123 har ikke blitt endelig journalført"),
-            StringContains.containsString("Tittel: MANGLER"),
-            StringContains.containsString("Tema: MANGLER_IKKE")
-        ));
-
-        joarkService.ferdigstillJournalføring(journalpostId);
-
-    }
-
-    private Mangler lagMangler() {
-        Mangler mangler = new Mangler();
-        mangler.setArkivSak(Status.MANGLER_IKKE);
-        mangler.setAvsenderNavn(Status.MANGLER_IKKE);
-        mangler.setBruker(Status.MANGLER);
-        mangler.setTema(Status.MANGLER_IKKE);
-        mangler.setTittel(Status.MANGLER);
-        return mangler;
+        assertThat(request.journalfoerendeEnhet).isEqualTo(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
     }
 
     @Test

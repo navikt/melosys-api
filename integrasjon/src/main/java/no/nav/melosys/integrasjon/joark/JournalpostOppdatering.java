@@ -13,6 +13,7 @@ public final class JournalpostOppdatering {
     private final String avsenderID;
     private final String avsenderNavn;
     private final Avsendertyper avsenderType;
+    private final String avsenderLand;
     private final String tittel;
     private final Map<String, String> fysiskeVedlegg;
     private final List<String> logiskeVedleggTitler;
@@ -26,6 +27,7 @@ public final class JournalpostOppdatering {
         private String brukerID;
         private String avsenderID;
         private String avsenderNavn;
+        private String avsenderLand;
         private Avsendertyper avsenderType;
         private String tittel;
         private LocalDate mottatDato;
@@ -55,6 +57,11 @@ public final class JournalpostOppdatering {
 
         public Builder medAvsenderNavn(String avsenderNavn) {
             this.avsenderNavn = avsenderNavn;
+            return this;
+        }
+
+        public Builder medAvsenderLand(String avsenderLand) {
+            this.avsenderLand = avsenderLand;
             return this;
         }
 
@@ -109,6 +116,7 @@ public final class JournalpostOppdatering {
         this.logiskeVedleggTitler = builder.logiskeVedleggTitler;
         this.medDokumentkategori = builder.medDokumentkategori;
         this.mottatDato = builder.mottatDato;
+        this.avsenderLand = builder.avsenderLand;
     }
 
     public Long getArkivSakID() {
@@ -134,6 +142,12 @@ public final class JournalpostOppdatering {
     Avsendertyper getAvsenderType() {
         return avsenderType;
     }
+
+
+    public String getAvsenderLand() {
+        return avsenderLand;
+    }
+
 
     public String getTittel() {
         return tittel;

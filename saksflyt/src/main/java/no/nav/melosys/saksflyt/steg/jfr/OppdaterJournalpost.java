@@ -85,6 +85,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         String brukerID = prosessinstans.getData(BRUKER_ID);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
+        String avsenderLand = prosessinstans.getData(AVSENDER_LAND);
         Avsendertyper avsenderType = prosessinstans.getData(AVSENDER_TYPE, Avsendertyper.class);
         if (avsenderNavn == null) {
             if (avsenderID == null) {
@@ -101,7 +102,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
 
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(arkivSakID)
             .medBrukerID(brukerID).medHovedDokumentID(hovedDokumentID)
-            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType)
+            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType).medAvsenderLand(avsenderLand)
             .medTittel(tittel)
             .medMottatDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)

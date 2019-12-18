@@ -10,6 +10,7 @@ public enum ProsessDataKey {
     ARKIV_ID("arkivId"),
     ARKIVSYSTEM("arkivsystem"),
     AVSENDER_ID("avsenderID"),
+    AVSENDER_LAND("avsenderLand"),
     AVSENDER_NAVN("avsenderNavn"),
     AVSENDER_TYPE("avsenderType"),
     BEGRUNNELSEKODE("begrunnelsekode"),
