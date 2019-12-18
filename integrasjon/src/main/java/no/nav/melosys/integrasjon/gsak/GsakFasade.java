@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Tema;
@@ -52,8 +51,6 @@ public interface GsakFasade {
      * Finner alle oppgaver med gitt saksnummer.
      */
     List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException;
-
-    Optional<Oppgave> finnFørsteOppgaveMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException;
 
     /**
      * Hent oppgave fra Oppgave på en gitt oppgaveId

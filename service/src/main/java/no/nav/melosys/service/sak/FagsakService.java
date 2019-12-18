@@ -303,7 +303,7 @@ public class FagsakService {
     }
 
     //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException {
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException, TekniskException {
         Behandlingstyper behandlingstype = behandling.getType();
         if (behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
             && behandlingstype != Behandlingstyper.ØVRIGE_SED
@@ -313,6 +313,7 @@ public class FagsakService {
 
         Saksstatuser saksstatus = behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
         avsluttFagsakOgBehandling(fagsak, saksstatus, behandling);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus, Behandling behandling) throws IkkeFunnetException {

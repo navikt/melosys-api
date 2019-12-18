@@ -284,11 +284,6 @@ public class GsakService implements GsakFasade {
             .collect(Collectors.toList());
     }
 
-    @Override
-    public Optional<Oppgave> finnFørsteOppgaveMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-        return finnOppgaverMedSaksnummer(saksnummer).stream().findFirst();
-    }
-
     static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgaveDto) {
         Oppgave.Builder domainOppgaveBuilder = new Oppgave.Builder();
         String oppgaveId = oppgaveDto.getId();

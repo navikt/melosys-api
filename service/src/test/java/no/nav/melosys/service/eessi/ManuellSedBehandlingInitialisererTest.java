@@ -1,6 +1,6 @@
 package no.nav.melosys.service.eessi;
 
-import java.util.Optional;
+import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -69,7 +69,7 @@ public class ManuellSedBehandlingInitialisererTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
-        verify(gsakFasade, never()).finnFørsteOppgaveMedSaksnummer(any());
+        verify(gsakFasade, never()).finnOppgaverMedSaksnummer(any());
     }
 
     @Test
@@ -82,13 +82,13 @@ public class ManuellSedBehandlingInitialisererTest {
         Oppgave oppgave = new Oppgave.Builder().setOppgaveId(oppgaveId).build();
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(hentFagsak());
-        when(gsakFasade.finnFørsteOppgaveMedSaksnummer(eq(SAKSNUMMER))).thenReturn(Optional.of(oppgave));
+        when(gsakFasade.finnOppgaverMedSaksnummer(eq(SAKSNUMMER))).thenReturn(Collections.singletonList(oppgave));
         manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SED_JOURNALFØRING);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
-        verify(gsakFasade).finnFørsteOppgaveMedSaksnummer(eq(SAKSNUMMER));
+        verify(gsakFasade).finnOppgaverMedSaksnummer(eq(SAKSNUMMER));
         verify(gsakFasade).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
 
     }

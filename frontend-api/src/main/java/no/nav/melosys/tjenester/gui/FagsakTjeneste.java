@@ -17,7 +17,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -45,18 +44,16 @@ public class FagsakTjeneste {
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
-    private final OppgaveService oppgaveService;
     private final SaksopplysningerService saksopplysningerService;
     private final SoeknadService søknadService;
     private final TilgangService tilgangService;
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService,
-                          OppgaveService oppgaveService, SaksopplysningerService saksopplysningerService,
+                          SaksopplysningerService saksopplysningerService,
                           SoeknadService soeknadService,
                           TilgangService tilgangService) {
         this.fagsakService = fagsakService;
-        this.oppgaveService = oppgaveService;
         this.saksopplysningerService = saksopplysningerService;
         this.søknadService = soeknadService;
         this.tilgangService = tilgangService;
@@ -136,7 +133,6 @@ public class FagsakTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.getAktivBehandling());
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
 
         return ResponseEntity.noContent().build();
     }

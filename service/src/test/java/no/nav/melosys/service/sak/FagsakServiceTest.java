@@ -280,7 +280,7 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeSoeknadIkkeYrkesaktiv_blirAvsluttet() throws FunksjonellException {
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeSoeknadIkkeYrkesaktiv_blirAvsluttet() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
@@ -292,7 +292,7 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeVurderTrygdetid_blirAvsluttet() throws FunksjonellException {
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeVurderTrygdetid_blirAvsluttet() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
@@ -304,7 +304,7 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeSoeknad_kasterException() throws FunksjonellException {
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeSoeknad_kasterException() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(123L);

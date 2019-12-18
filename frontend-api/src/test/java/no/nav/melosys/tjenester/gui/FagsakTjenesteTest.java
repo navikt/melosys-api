@@ -29,7 +29,6 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
@@ -66,7 +65,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
-    private static OppgaveService oppgaveService;
     private static TilgangService tilgangService;
 
     private EasyRandom random;
@@ -273,7 +271,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
         tilgangService = mock(TilgangService.class);
-        oppgaveService = mock(OppgaveService.class);
         fagsakService = mock(FagsakService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         SoeknadService søknadService = mock(SoeknadService.class);
@@ -286,7 +283,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, oppgaveService, saksopplysningerService, søknadService, tilgangService);
+        return new FagsakTjeneste(fagsakService, saksopplysningerService, søknadService, tilgangService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {

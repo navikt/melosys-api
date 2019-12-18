@@ -77,7 +77,7 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        Optional<Oppgave> oppgave = gsakFasade.finnFørsteOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> oppgave = gsakFasade.finnOppgaverMedSaksnummer(behandling.getFagsak().getSaksnummer()).stream().findFirst();
         if (oppgave.isEmpty()) {
             opprettOppgave(behandling, sedType);
         } else {
