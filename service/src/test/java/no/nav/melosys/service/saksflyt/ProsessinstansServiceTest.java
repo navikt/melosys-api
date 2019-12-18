@@ -329,12 +329,13 @@ public class ProsessinstansServiceTest {
     @Test
     public void opprettProsessinstansNySak_behandlingstypeSøknad() throws FunksjonellException {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
-        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV;
         service.opprettProsessinstansNySak(opprettSakDto);
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(opprettSakDto.behandlingstype);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.brukerID);
         assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.oppgaveID);
         assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.soknadDto.periode);

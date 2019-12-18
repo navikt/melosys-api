@@ -201,9 +201,10 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansNySak(OpprettSakDto opprettSakDto) throws FunksjonellException {
-        if (opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD) {
+        if (opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD
+            && opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
             throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
-                + " på bakgrunn av journalførte dokumenter er ikke støttet." );
+                + " på bakgrunn av journalførte dokumenter er ikke støttet.");
         }
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.OPPRETT_NY_SAK)
