@@ -18,6 +18,10 @@ import org.xml.sax.SAXException;
 public final class JaxbHelper {
     private static final Map<String, Schema> SCHEMAS = new ConcurrentHashMap<>();
 
+    private JaxbHelper() {
+        // Utility class
+    }
+
     public static String marshalAndValidate(Object jaxbObject, String xsdLocation) throws JAXBException, SAXException {
         Marshaller marshaller = JaxbConfig.jaxb2Marshaller().createMarshaller();
 

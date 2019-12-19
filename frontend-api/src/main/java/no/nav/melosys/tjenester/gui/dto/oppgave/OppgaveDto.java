@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.oppgave;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 import no.nav.melosys.domain.Tema;
