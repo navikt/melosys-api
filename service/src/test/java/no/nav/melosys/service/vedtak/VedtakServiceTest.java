@@ -212,7 +212,7 @@ public class VedtakServiceTest {
         vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, Behandlingstyper.ENDRET_PERIODE, "FRITEKST");
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), any(), eq("SE:SE001"));
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), any());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }

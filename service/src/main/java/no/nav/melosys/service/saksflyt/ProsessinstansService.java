@@ -227,13 +227,12 @@ public class ProsessinstansService {
         lagre(nyprosessinstans);
     }
 
-    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode, String fritekst, String mottakerinstitusjon) {
+    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode, String fritekst) {
         Prosessinstans nyprosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE)
             .medSteg(ProsessSteg.IV_FORKORT_PERIODE)
             .medBegrunnelseFritekst(fritekst)
-            .medEessiMottaker(mottakerinstitusjon)
             .build();
 
         nyprosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiode);

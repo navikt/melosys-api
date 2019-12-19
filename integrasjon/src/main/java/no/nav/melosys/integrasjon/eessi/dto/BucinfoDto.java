@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.eessi.dto;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ public class BucinfoDto {
     private String id;
     private String bucType;
     private Long opprettetDato;
+    private List<String> mottakerinstitusjoner = new ArrayList<>();
     private List<SedinfoDto> seder;
 
     public BucinfoDto() {
@@ -29,6 +31,7 @@ public class BucinfoDto {
             id,
             bucType,
             Instant.ofEpochMilli(opprettetDato).atZone(ZoneId.systemDefault()).toLocalDate(),
+            mottakerinstitusjoner,
             seder.stream()
                 .map(SedinfoDto::tilDomene)
                 .collect(Collectors.toList())
@@ -68,6 +71,14 @@ public class BucinfoDto {
 
     public void setOpprettetDato(Long opprettetDato) {
         this.opprettetDato = opprettetDato;
+    }
+
+    public List<String> getMottakerinstitusjoner() {
+        return mottakerinstitusjoner;
+    }
+
+    public void setMottakerinstitusjoner(List<String> mottakerinstitusjoner) {
+        this.mottakerinstitusjoner = mottakerinstitusjoner;
     }
 
     public List<SedinfoDto> getSeder() {

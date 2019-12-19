@@ -181,7 +181,7 @@ public class ProsessinstansServiceTest {
         String saksbehandler = settInnloggetSaksbehandler();
 
         Behandling behandling = lagBehandling();
-        service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE, null, "SE:SE001");
+        service.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE, null);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -190,7 +190,6 @@ public class ProsessinstansServiceTest {
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_FORKORT_PERIODE);
         assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
         assertThat(lagretInstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class)).isEqualTo(Endretperiode.RETURNERT_NORGE);
-        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKER)).isEqualTo("SE:SE001");
     }
 
     @Test
