@@ -10,14 +10,12 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -30,6 +28,7 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,8 +121,9 @@ public class FagsakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException {
+    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
         validerOpprettSakDto(opprettSakDto);
+        validerOppgave(opprettSakDto.oppgaveID);
         prosessinstansService.opprettProsessinstansNySak(opprettSakDto);
     }
 
@@ -161,6 +161,16 @@ public class FagsakService {
             if (periodeDto.getTom() != null && periodeDto.getFom().isAfter(periodeDto.getTom())) {
                 throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
             }
+        }
+    }
+
+    private void validerOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
+        if (StringUtils.isEmpty(oppgaveID)) {
+            throw new FunksjonellException("OppgaveID mangler.");
+        }
+        final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
+        if (oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK_MK && oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK) {
+            throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype());
         }
     }
 

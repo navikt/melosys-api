@@ -160,33 +160,6 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg_nySakFraDok_tilFerdig() throws FunksjonellException, TekniskException {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = "MEL-TESTx";
-        fagsak.setSaksnummer(saksnummer);
-        fagsak.setType(Sakstyper.EU_EOS);
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setFagsak(fagsak);
-
-        Prosessinstans p = new Prosessinstans();
-        p.setBehandling(behandling);
-        p.setType(ProsessType.OPPRETT_NY_SAK);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
-        agent.utførSteg(p);
-
-        verify(gsakFasade).opprettOppgave(oppgave.capture());
-
-        assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
-        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(EU_EOS);
-        assertThat(oppgave.getValue().getJournalpostId()).isNull();
-        assertThat(p.getSteg()).isEqualTo(FERDIG);
-    }
-
-    @Test
     public void utfoerSteg_nyBehandling_tilFerdig() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";

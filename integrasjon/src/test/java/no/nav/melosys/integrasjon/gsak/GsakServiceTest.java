@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import no.nav.melosys.domain.Fagsystem;
@@ -28,6 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ØVRIGE_SED;
+import static no.nav.melosys.integrasjon.gsak.GsakService.hentFellesKode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -158,6 +160,12 @@ public final class GsakServiceTest {
         LocalDate nå = LocalDate.now();
 
         OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+            .oppgavetype(Oppgavetyper.BEH_SAK_MK)
+            .tema(Tema.MED)
+            .behandlingstema(Behandlingstema.EU_EOS)
+            .behandlingstype(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV)
+            .behandlesAvApplikasjon(Fagsystem.MELOSYS)
+            .saksnummer("MEL-123")
             .prioritet(PrioritetType.HOY.name())
             .beskrivelse("test")
             .status("AAPEN")
@@ -169,6 +177,12 @@ public final class GsakServiceTest {
         verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoCaptor.capture());
 
         OppgaveDto dto = oppgaveDtoCaptor.getValue();
+        assertThat(dto.getOppgavetype()).isEqualTo(oppgaveOppdatering.getOppgavetype().getKode());
+        assertThat(dto.getTema()).isEqualTo(oppgaveOppdatering.getTema().getKode());
+        assertThat(dto.getBehandlingstema()).isEqualTo(oppgaveOppdatering.getBehandlingstema().getKode());
+        assertThat(dto.getBehandlingstype()).isEqualTo(hentFellesKode(oppgaveOppdatering.getBehandlingstype()));
+        assertThat(dto.getBehandlesAvApplikasjon()).isEqualTo(oppgaveOppdatering.getBehandlesAvApplikasjon().getKode());
+        assertThat(dto.getSaksreferanse()).isEqualTo(oppgaveOppdatering.getSaksnummer());
         assertThat(dto.getPrioritet()).isEqualTo(oppgaveOppdatering.getPrioritet());
         assertThat(dto.getBeskrivelse()).isEqualTo(oppgaveOppdatering.getBeskrivelse() + "\n" + oppgaveOppdatering.getBeskrivelse());
         assertThat(dto.getStatus()).isEqualTo(oppgaveOppdatering.getStatus());
@@ -209,7 +223,7 @@ public final class GsakServiceTest {
         EnumSet<Behandlingstyper> behandlingstyper = EnumSet.complementOf(EnumSet.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED));
 
         for (Behandlingstyper behandlingstype : behandlingstyper) {
-            Behandlingstyper mappetType = GsakService.hentBehandlingstyper(GsakService.hentFellesKode(behandlingstype));
+            Behandlingstyper mappetType = GsakService.hentBehandlingstyper(hentFellesKode(behandlingstype));
             assertThat(mappetType).isEqualTo(behandlingstype);
         }
     }
@@ -221,6 +235,7 @@ public final class GsakServiceTest {
         oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
         oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
         oppgaveBuilder.setBeskrivelse("bla bla");
+        oppgaveBuilder.setOpprettetTidspunkt(ZonedDateTime.now());
         oppgaveBuilder.setFristFerdigstillelse(LocalDate.now().plusMonths(1L));
         oppgaveBuilder.setOppgaveId("123");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);

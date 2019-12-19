@@ -201,18 +201,20 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansNySak(OpprettSakDto opprettSakDto) throws FunksjonellException {
+        if (opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD
+            && opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+            throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
+                + " på bakgrunn av journalførte dokumenter er ikke støttet.");
+        }
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.OPPRETT_NY_SAK)
+            .medSteg(ProsessSteg.JFR_AKTØR_ID)
             .build();
-        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD) {
-            prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
-            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.soknadDto.periode);
-            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.soknadDto.land);
-        } else {
-            throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
-                + " på bakgrunn av journalførte dokumenter er ikke støttet." );
-        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.behandlingstype);
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.brukerID);
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.oppgaveID);
+        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.soknadDto.periode);
+        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.soknadDto.land);
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.skalTilordnes);
         lagre(prosessinstans);
     }

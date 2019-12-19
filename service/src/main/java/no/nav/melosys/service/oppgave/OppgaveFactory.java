@@ -29,7 +29,7 @@ public final class OppgaveFactory {
             .setPrioritet(PrioritetType.NORM);
     }
 
-    private static OppgaveParametere hentOppgaveParametere(Behandlingstyper behandlingstype) {
+    public static OppgaveParametere hentOppgaveParametere(Behandlingstyper behandlingstype) {
         switch (behandlingstype) {
             case SOEKNAD:
             case SOEKNAD_IKKE_YRKESAKTIV:
@@ -65,11 +65,11 @@ public final class OppgaveFactory {
         return LocalDate.now().plusDays(dager);
     }
 
-    private static class OppgaveParametere {
-        private Tema tema;
-        private Oppgavetyper oppgavetype;
-        private LocalDate fristFerdigstillelse;
-        private Behandlingstema behandlingstema;
+    public static class OppgaveParametere {
+        public Tema tema;
+        public Oppgavetyper oppgavetype;
+        public LocalDate fristFerdigstillelse;
+        public Behandlingstema behandlingstema;
 
         OppgaveParametere(Tema tema, Oppgavetyper oppgavetype, LocalDate fristFerdigstillelse, Behandlingstema behandlingstema) {
             this.tema = tema;

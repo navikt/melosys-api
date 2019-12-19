@@ -188,33 +188,52 @@ public class GsakService implements GsakFasade {
 
     @Override
     public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
+        OppgaveDto oppgaveDto = hentOppgaveDto(oppgaveID);
+
+        if (oppgaveOppdatering.getOppgavetype() != null) {
+            oppgaveDto.setOppgavetype(oppgaveOppdatering.getOppgavetype().getKode());
+        }
+        if (oppgaveOppdatering.getTema() != null) {
+            oppgaveDto.setTema(oppgaveOppdatering.getTema().getKode());
+        }
+        if (oppgaveOppdatering.getBehandlingstema() != null) {
+            oppgaveDto.setBehandlingstema(oppgaveOppdatering.getBehandlingstema().getKode());
+        }
+        if (oppgaveOppdatering.getBehandlingstype() != null) {
+            oppgaveDto.setBehandlingstype(hentFellesKode(oppgaveOppdatering.getBehandlingstype()));
+        }
+        if (oppgaveOppdatering.getBehandlesAvApplikasjon() != null && oppgaveOppdatering.getBehandlesAvApplikasjon() != Fagsystem.INTET) {
+            oppgaveDto.setBehandlesAvApplikasjon(oppgaveOppdatering.getBehandlesAvApplikasjon().getKode());
+        }
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getSaksnummer())) {
+            oppgaveDto.setSaksreferanse(oppgaveOppdatering.getSaksnummer());
+        }
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getBeskrivelse())) {
-            if (StringUtils.isEmpty(oppgave.getBeskrivelse())) {
-                oppgave.setBeskrivelse(oppgaveOppdatering.getBeskrivelse());
+            if (StringUtils.isEmpty(oppgaveDto.getBeskrivelse())) {
+                oppgaveDto.setBeskrivelse(oppgaveOppdatering.getBeskrivelse());
             } else {
-                oppgave.setBeskrivelse(StringUtils.joinWith("\n", oppgave.getBeskrivelse(), oppgaveOppdatering.getBeskrivelse()));
+                oppgaveDto.setBeskrivelse(StringUtils.joinWith("\n", oppgaveDto.getBeskrivelse(), oppgaveOppdatering.getBeskrivelse()));
             }
         }
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getPrioritet())) {
-            oppgave.setPrioritet(oppgaveOppdatering.getPrioritet());
+            oppgaveDto.setPrioritet(oppgaveOppdatering.getPrioritet());
         }
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getStatus())) {
-            oppgave.setStatus(oppgaveOppdatering.getStatus());
+            oppgaveDto.setStatus(oppgaveOppdatering.getStatus());
         }
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getTilordnetRessurs())) {
-            oppgave.setTilordnetRessurs(oppgaveOppdatering.getTilordnetRessurs());
+            oppgaveDto.setTilordnetRessurs(oppgaveOppdatering.getTilordnetRessurs());
         }
 
         if (oppgaveOppdatering.getFristFerdigstillelse() != null) {
-            oppgave.setFristFerdigstillelse(oppgaveOppdatering.getFristFerdigstillelse());
+            oppgaveDto.setFristFerdigstillelse(oppgaveOppdatering.getFristFerdigstillelse());
         }
 
-        oppgaveConsumer.oppdaterOppgave(oppgave);
+        oppgaveConsumer.oppdaterOppgave(oppgaveDto);
     }
 
     private OppgaveDto hentOppgaveDto(String oppgaveID) throws FunksjonellException, TekniskException {
@@ -269,6 +288,20 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public List<Oppgave> finnOppgaverMedBrukerID(String aktørId) throws FunksjonellException, TekniskException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medAktørId(aktørId)
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .map(GsakService::oppgaveMappingDtoTilDomain)
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
@@ -277,9 +310,7 @@ public class GsakService implements GsakFasade {
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
-        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
-        return finnOppgaveListeResponse.stream()
-            .filter(Objects::nonNull)
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(GsakService::oppgaveMappingDtoTilDomain)
             .collect(Collectors.toList());
     }
@@ -291,6 +322,7 @@ public class GsakService implements GsakFasade {
             .setAktivDato(oppgaveDto.getAktivDato())
             .setAktørId(oppgaveDto.getAktørId())
             .setBeskrivelse(oppgaveDto.getBeskrivelse())
+            .setOpprettetTidspunkt(oppgaveDto.getOpprettetTidspunkt())
             .setFristFerdigstillelse(oppgaveDto.getFristFerdigstillelse())
             .setJournalpostId(oppgaveDto.getJournalpostId())
             .setOppgaveId(oppgaveId)
@@ -310,7 +342,7 @@ public class GsakService implements GsakFasade {
             try {
                 domainOppgaveBuilder.setBehandlingstype(hentBehandlingstyper(oppgaveDto.getBehandlingstype()));
             } catch (IllegalArgumentException e) {
-                log.error("Fikk uventet behandlingstype: {} for OppgaveID: {}", oppgaveDto.getBehandlingstype(), oppgaveDto.getId());
+                log.warn("Fikk uventet behandlingstype: {} for OppgaveID: {}", oppgaveDto.getBehandlingstype(), oppgaveDto.getId());
             }
         }
 
@@ -331,6 +363,9 @@ public class GsakService implements GsakFasade {
             oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstype()));
         }
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
+        if (oppgave.getOpprettetTidspunkt() != null) {
+            oppgaveDto.setOpprettetTidspunkt(oppgave.getOpprettetTidspunkt());
+        }
         oppgaveDto.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         oppgaveDto.setId(oppgave.getOppgaveId());
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());

@@ -48,6 +48,12 @@ public interface GsakFasade {
     Tema hentTemaFraSak(Long gsakSaksnummer) throws TekniskException, FunksjonellException;
 
     /**
+     * Finner oppgaver relatert til en bruker.
+     * Oppgaver sorteres stigende etter frist.
+     */
+    List<Oppgave> finnOppgaverMedBrukerID(String aktørID) throws FunksjonellException, TekniskException;
+
+    /**
      * Finner alle oppgaver med gitt saksnummer.
      */
     List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException;

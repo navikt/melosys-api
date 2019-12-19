@@ -3,12 +3,14 @@ package no.nav.melosys.tjenester.gui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
@@ -31,7 +33,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = "oppgaver")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class OppgaveTjeneste {
-
     private static final Logger log = LoggerFactory.getLogger(OppgaveTjeneste.class);
 
     private final Oppgaveplukker oppgaveplukker;
@@ -102,5 +103,23 @@ public class OppgaveTjeneste {
         oversiktDto.setJournalforing(journalføring);
         oversiktDto.setSaksbehandling(saksbehandling);
         return ResponseEntity.ok(oversiktDto);
+    }
+
+    @GetMapping("/sok")
+    @ApiOperation(
+        value = "Søk etter oppgaver knyttet til et fødselsnummer eller d-nummer",
+        response = no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto.class,
+        responseContainer = "List")
+    public ResponseEntity søkOppgaverMedBrukerID(@RequestParam("fnr") String fnr)
+        throws FunksjonellException, TekniskException {
+        if (fnr == null) {
+            throw new FunksjonellException("Fødselsnummer eller D-nummer mangler.");
+        }
+        try {
+            return ResponseEntity.ok(oppgaveService.finnOppgaverMedBrukerID(fnr).stream()
+                .map(no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto::av).collect(Collectors.toList()));
+        } catch (IkkeFunnetException e) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
     }
 }

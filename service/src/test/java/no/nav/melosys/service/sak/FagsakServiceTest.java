@@ -9,15 +9,16 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -103,10 +104,29 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void bestillNySakOgBehandling_oppretterProsess() throws FunksjonellException {
+    public void bestillNySakOgBehandling_oppretterProsess() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.oppgaveID))).thenReturn(oppgave);
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
         verify(prosessinstansService).opprettProsessinstansNySak(eq(opprettSakDto));
+    }
+
+    @Test
+    public void bestillNySakOgBehandling_oppgaveIdMangler_feiler() throws FunksjonellException, TekniskException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.oppgaveID = "";
+        expectedException.expect(FunksjonellException.class);
+        fagsakService.bestillNySakOgBehandling(opprettSakDto);
+    }
+
+    @Test
+    public void bestillNySakOgBehandling_oppgaveTypeUgyldig_feiler() throws FunksjonellException, TekniskException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SED).build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.oppgaveID))).thenReturn(oppgave);
+        expectedException.expect(FunksjonellException.class);
+        fagsakService.bestillNySakOgBehandling(opprettSakDto);
     }
 
     @Test
@@ -219,7 +239,6 @@ public class FagsakServiceTest {
         andreBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
         long førsteBehandlingId = 999L;
         long andreBehandlingId = 234L;
-        Behandlingsresultat behandlingsresultat = mock(Behandlingsresultat.class);
 
         initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId);
 

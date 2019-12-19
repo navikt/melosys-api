@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
@@ -61,6 +64,7 @@ import static org.mockito.Mockito.*;
 public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjenesteTest.class);
     private static final String FAGSAKER_SCHEMA = "fagsaker-schema.json";
+    private static final String FAGSAKER_OPPRETT_SCHEMA = "fagsaker-opprett-post-schema.json";
     private static final String SOK_FAGSAKER_SCHEMA = "fagsaker-sok-schema.json";
 
     private static final String FNR = "12345678901";
@@ -92,6 +96,14 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
         valider(jsonString, FAGSAKER_SCHEMA, log);
+    }
+
+    @Test
+    public void fagsakOpprettSchemaValidering() throws IOException, JSONException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+
+        String jsonString = new ObjectMapper().registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).writeValueAsString(opprettSakDto);
+        valider(jsonString, FAGSAKER_OPPRETT_SCHEMA, log);
     }
 
     @Test

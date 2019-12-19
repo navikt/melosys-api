@@ -14,7 +14,6 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
@@ -31,12 +30,6 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDIN
 
 /**
  * Oppretter en oppgave i GSAK.
- *
- * Transisjoner:
- * 1) ProsessType.JFR_NY_SAK eller Behandlingstyper.ENDRET_PERIODE:
- *      GSAK_OPPRETT_OPPGAVE -> SEND_FORVALTNINGSMELDING eller FEILET_MASKINELT hvis feil
- * 2) ProsessType.JFR_NY_BEHANDLING:
- *      GSAK_OPPRETT_OPPGAVE -> null eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettOppgave extends AbstraktStegBehandler {
@@ -45,7 +38,6 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     private final BehandlingService behandlingService;
     private final GsakFasade gsakFasade;
 
-    private static final String PID_MELDING = "{}: {}";
     private static final String STØTTES_IKKE = " er ikke støttet";
 
     @Autowired
@@ -87,19 +79,19 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         String oppgaveId = gsakFasade.opprettOppgave(oppgaveBuilder.build());
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
-            boolean skalSendesForvaltningsmelding = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).orElse(true);
+            boolean skalSendesForvaltningsmelding =
+                Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).orElse(true);
             if (skalSendesForvaltningsmelding) {
                 prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
             } else {
                 prosessinstans.setSteg(ProsessSteg.FERDIG);
             }
-        } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING || prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
+        } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
         } else {
-            String feilmelding = "ProsessType " + prosessinstans.getType() + STØTTES_IKKE;
-            log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-            return;
+            String feilmelding = prosessinstans.getId() + ":" + System.lineSeparator()
+                + "prosessType " + prosessinstans.getType() + STØTTES_IKKE;
+            throw new TekniskException(feilmelding);
         }
         log.info("Opprettet oppgave {} for prosessinstans {}", oppgaveId, prosessinstans.getId());
     }

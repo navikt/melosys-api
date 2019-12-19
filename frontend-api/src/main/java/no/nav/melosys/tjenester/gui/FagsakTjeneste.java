@@ -71,7 +71,7 @@ public class FagsakTjeneste {
 
     @PostMapping("/opprett")
     @ApiOperation(value = "Oppretter en sak med tilhørende behandling.")
-    public ResponseEntity opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) throws FunksjonellException {
+    public ResponseEntity opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
         if (opprettSakDto.brukerID == null) {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }

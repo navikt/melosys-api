@@ -13,19 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 /**
- * Oppdatere behandling med siste opplysninger hentet dato
- *
- * Transisjoner:
- * 1) ProsessType.OPPFRISKNING :
- * OPPFRISK_SAKSOPPLYSNINGER -> null siden oppfrisking av saksopplysning er ferdig og trenger ikke å opprette oppgaven
- * 2) Andre prosess typer
- * OPPFRISK_SAKSOPPLYSNINGER -> GSAK_OPPRETT_OPPGAVE
- * 3) Ved exception ellers teknisk feil
- * OPPFRISK_SAKSOPPLYSNINGER -> FEILET_MASKINELT
+ * Oppdaterer behandling med siste opplysninger hentet dato.
  */
 @Component
 public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
@@ -36,7 +27,6 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
 
     @Autowired
     public OppfriskSaksopplysninger(BehandlingRepository behandlingRepository) {
-        log.info("OppfriskSaksopplysninger initialisert");
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -57,6 +47,8 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
             log.info("Oppfrisking av saksopplysninger er ferdig for prosessinstans {} og behandlingID {}.", prosessinstans.getId(), behandling.getId());
             return;
+        } else if (prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
+            prosessinstans.setSteg(GJENBRUK_OPPGAVE);
         } else {
             prosessinstans.setSteg(GSAK_OPPRETT_OPPGAVE);
         }
