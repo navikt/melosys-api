@@ -1,14 +1,15 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +18,7 @@ public class HentEessiMelding extends AbstraktStegBehandler {
     private final EessiService eessiService;
     private final TpsService tpsService;
 
-    public HentEessiMelding(EessiService eessiService, TpsService tpsService) {
+    public HentEessiMelding(@Qualifier("system") EessiService eessiService, TpsService tpsService) {
         this.eessiService = eessiService;
         this.tpsService = tpsService;
     }

@@ -3,7 +3,9 @@ package no.nav.melosys.saksflyt.steg.aou.ut;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
@@ -21,6 +23,7 @@ import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
@@ -42,7 +45,7 @@ public class SendUtland extends AbstraktSendUtland {
     private static final int SVARFRIST_MÅNEDER = 2;
 
     @Autowired
-    public SendUtland(EessiService eessiService,
+    public SendUtland(@Qualifier("system") EessiService eessiService,
                       BrevBestiller brevBestiller,
                       BehandlingService behandlingService,
                       BehandlingsresultatService behandlingsresultatService,

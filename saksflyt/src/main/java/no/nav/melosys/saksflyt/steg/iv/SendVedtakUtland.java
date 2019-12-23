@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
@@ -18,6 +20,7 @@ import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
@@ -30,7 +33,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private BrevBestiller brevBestiller;
 
     @Autowired
-    public SendVedtakUtland(EessiService eessiService,
+    public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,

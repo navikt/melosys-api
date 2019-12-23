@@ -14,18 +14,17 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OidcTokenClientRequestInterceptor implements ClientHttpRequestInterceptor {
-    private static final Logger logger = LoggerFactory.getLogger(OidcTokenClientRequestInterceptor.class);
+public class SystemContextClientRequestInterceptor implements ClientHttpRequestInterceptor {
+    private static final Logger logger = LoggerFactory.getLogger(SystemContextClientRequestInterceptor.class);
 
     private final RestStsClient restStsClient;
 
-    public OidcTokenClientRequestInterceptor(RestStsClient restStsClient) {
+    public SystemContextClientRequestInterceptor(RestStsClient restStsClient) {
         this.restStsClient = restStsClient;
     }
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-            ClientHttpRequestExecution execution) throws IOException {
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
         try {
             request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + restStsClient.collectToken());
         } catch (MelosysException e) {

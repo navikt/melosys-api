@@ -3,13 +3,13 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.util.Collection;
 import java.util.Optional;
 
+import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,7 +47,7 @@ public class SedMottakRuting extends AbstraktStegBehandler {
     @Autowired
     public SedMottakRuting(Collection<AutomatiskSedBehandlingInitialiserer> automatiskSedBehandlingInitialiserere,
                            ManuellSedBehandlingInitialiserer manuellSedBehandlingInitialiserer,
-                           EessiService eessiService) {
+                           @Qualifier("system") EessiService eessiService) {
         this.automatiskSedBehandlingInitialiserere = automatiskSedBehandlingInitialiserere;
         this.manuellSedBehandlingInitialiserer = manuellSedBehandlingInitialiserer;
         this.eessiService = eessiService;
