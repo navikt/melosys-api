@@ -105,12 +105,6 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     @Override
-    protected boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
-        final String landkode = behandlingsresultat.getBehandling().getFagsak().hentMyndighetLandkode().getKode();
-        return eessiService.landErEessiReady(bucType.name(), landkode);
-    }
-
-    @Override
     protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
         return true;
     }

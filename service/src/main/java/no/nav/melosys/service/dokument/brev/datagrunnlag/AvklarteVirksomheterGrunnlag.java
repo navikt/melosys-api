@@ -106,7 +106,7 @@ public class AvklarteVirksomheterGrunnlag {
 
     StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
         StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
-        if (StringUtils.isEmpty(adresse.postnummer)) {
+        if (adresse == null || StringUtils.isEmpty(adresse.postnummer)) {
             adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
         }
         if (StringUtils.isEmpty(adresse.gatenavn)) {

@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.vs;
 
+import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -7,10 +8,12 @@ import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -58,8 +61,10 @@ public class VideresendSoknadTest {
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @Before
-    public void setup() {
+    public void setup() throws IkkeFunnetException {
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, landvelgerService, tpsFasade, utenlandskMyndighetService, joarkFasade, fagsakService);
+
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SE));
     }
 
     @Test
@@ -107,8 +112,6 @@ public class VideresendSoknadTest {
             .thenReturn(vedlegg);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_03.name()), eq("SE"))).thenReturn(Boolean.TRUE);
-        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.navn = "SE";
 
         videresendSoknad.utfør(prosessinstans);
 

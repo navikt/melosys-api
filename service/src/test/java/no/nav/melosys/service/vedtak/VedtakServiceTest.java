@@ -58,7 +58,7 @@ public class VedtakServiceTest {
     private FagsakService fagsakService;
     @Mock
     private GsakFasade gsakFasade;
-    
+
     private VedtakService vedtakService;
 
     @Rule
@@ -80,7 +80,7 @@ public class VedtakServiceTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandlingsresultat.setId(behandlingID);
-        
+
         replikertBehandling.setId(2L);
         replikertBehandling.setStatus(Behandlingsstatus.OPPRETTET);
         replikertBehandling.setType(Behandlingstyper.NY_VURDERING);
@@ -211,7 +211,7 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService)
             .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
@@ -225,7 +225,7 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
@@ -247,7 +247,7 @@ public class VedtakServiceTest {
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
         verify(gsakFasade).opprettOppgave(oppgaveArgumentCaptor.capture());
         verifyNoMoreInteractions(gsakFasade, behandlingService);
-        
+
         assertThat(oppgaveArgumentCaptor.getValue().getTilordnetRessurs()).isEqualTo("Z990007");
         assertThat(oppgaveArgumentCaptor.getValue().getAktørId()).isEqualTo("1234567890123");
         assertThat(oppgaveArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.NY_VURDERING);
@@ -256,7 +256,7 @@ public class VedtakServiceTest {
     @Test
     public void revurderVedtak_aktivBehandling_kasterException() throws Exception {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        
+
         try {
             vedtakService.revurderVedtak(behandlingID);
             fail();
@@ -268,7 +268,7 @@ public class VedtakServiceTest {
     @Test
     public void revurderVedtak_forkortetPeriodeVedtak_kasterException() throws Exception {
         behandling.setType(Behandlingstyper.ENDRET_PERIODE);
-        
+
         try {
             vedtakService.revurderVedtak(behandlingID);
             fail();

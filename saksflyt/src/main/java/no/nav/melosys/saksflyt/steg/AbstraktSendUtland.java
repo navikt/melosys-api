@@ -1,12 +1,13 @@
 package no.nav.melosys.saksflyt.steg;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -38,27 +39,24 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (skalSendesUtland(behandlingsresultat)) {
-            if (erEessiKlar(behandlingsresultat, bucType)) {
-                String mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
-                if (StringUtils.isEmpty(mottakerInstitusjon)) {
-                    throw new TekniskException("MottakerInstitusjon er ikke satt - kan ikke sende sed ved fatt vedtak");
-                }
+            Optional<String> landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst().map(Landkoder::getKode);
+            if (landkode.isPresent()) {
+                if (eessiService.landErEessiReady(bucType.name(), landkode.get())) {
+                    String mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
+                    if (StringUtils.isEmpty(mottakerInstitusjon)) {
+                        throw new TekniskException("MottakerInstitusjon er ikke satt - kan ikke sende sed ved fatt vedtak");
+                    }
 
-                eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, vedlegg);
-                return SendUtlandStatus.SED_SENDT;
-            } else {
-                sendBrev(prosessinstans);
-                return SendUtlandStatus.BREV_SENDT;
+                    eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, vedlegg);
+                    return SendUtlandStatus.SED_SENDT;
+                } else {
+                    sendBrev(prosessinstans);
+                    return SendUtlandStatus.BREV_SENDT;
+                }
             }
         }
 
         return SendUtlandStatus.IKKE_SENDT;
-    }
-
-    protected boolean erEessiKlar(Behandlingsresultat behandlingsresultat, BucType bucType) throws MelosysException {
-        final String landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingsresultat.getId()).stream().findFirst().map(Landkoder::getKode)
-            .orElseThrow(() -> new FunksjonellException("Fant ikke trygdemyndighetsland for behandling " + behandlingsresultat.getBehandling().getId()));
-        return eessiService.landErEessiReady(bucType.name(), landkode);
     }
 
     protected abstract void sendBrev(Prosessinstans prosessinstans) throws MelosysException;
