@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.sed;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -18,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -185,5 +187,25 @@ public class EessiService {
             return SedType.A011;
         }
         return SedType.A002;
+    }
+
+    public String hentMottakerinstitusjonFraBuc(Fagsak fagsak, BucType bucType) throws MelosysException {
+        Long gsakSaksnummer = fagsak.getGsakSaksnummer();
+        String landkode = fagsak.hentMyndighetLandkode().getKode();
+
+        List<BucInformasjon> bucer = hentTilknyttedeBucer(gsakSaksnummer, List.of("sendt")).stream()
+            .filter(buc -> bucType.name().equalsIgnoreCase(buc.getBucType())).collect(Collectors.toList());
+
+        List<String> mottakerinstitusjoner = bucer.stream()
+            .flatMap(buc -> buc.getMottakerinstitusjoner().stream())
+            .filter(inst -> inst.toLowerCase().startsWith(landkode.toLowerCase())) // Mottakerinstitusjoner har format LANDKODE:ID
+            .distinct().collect(Collectors.toList());
+
+        if (mottakerinstitusjoner.size() > 1) {
+            throw new TekniskException("Flere mottakerinstitusjoner er satt");
+        }
+
+        return mottakerinstitusjoner.stream().findFirst()
+            .orElseThrow(() -> new TekniskException("MottakerInstitusjon er ikke satt"));
     }
 }

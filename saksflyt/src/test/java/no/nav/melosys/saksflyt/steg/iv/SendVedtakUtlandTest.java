@@ -1,15 +1,12 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import java.time.LocalDate;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -20,7 +17,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -137,15 +133,7 @@ public class SendVedtakUtlandTest {
         fagsak.setGsakSaksnummer(1L);
         behandling.setFagsak(fagsak);
 
-        when(eessiService.hentTilknyttedeBucer(anyLong(), anyList()))
-            .thenReturn(List.of(
-                new BucInformasjon(
-                    "id",
-                    BucType.LA_BUC_04.name(),
-                    LocalDate.now(),
-                    List.of(MOTTAKER_INSTITUSJON, "DE:111", "FR:222"),
-                    List.of()
-                )));
+        when(eessiService.hentMottakerinstitusjonFraBuc(any(Fagsak.class), any(BucType.class))).thenReturn(MOTTAKER_INSTITUSJON);
 
         sendVedtakUtland.utfør(prosessinstans);
 
@@ -153,24 +141,5 @@ public class SendVedtakUtlandTest {
         verify(eessiService).opprettOgSendSed(anyLong(), captor.capture(), any(), any());
 
         assertThat(captor.getValue()).isEqualTo(MOTTAKER_INSTITUSJON);
-    }
-
-    @Test(expected = TekniskException.class)
-    public void utførSteg_utenOppgittMottakerinstitusjonITidligereBuc_forventException() throws MelosysException {
-        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), eq(Landkoder.AX.name()))).thenReturn(Boolean.TRUE);
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, "");
-
-        Aktoer myndighet = new Aktoer();
-        myndighet.setInstitusjonId(MOTTAKER_INSTITUSJON);
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
-
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(Set.of(myndighet));
-        fagsak.setGsakSaksnummer(1L);
-        behandling.setFagsak(fagsak);
-
-        when(eessiService.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(List.of());
-
-        sendVedtakUtland.utfør(prosessinstans);
     }
 }

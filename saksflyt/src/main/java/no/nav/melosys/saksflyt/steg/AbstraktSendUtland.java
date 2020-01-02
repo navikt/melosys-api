@@ -1,12 +1,8 @@
 package no.nav.melosys.saksflyt.steg;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -14,7 +10,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -48,7 +43,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
                 if (eessiService.landErEessiReady(bucType.name(), landkode.get())) {
                     String mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
                     if (StringUtils.isEmpty(mottakerInstitusjon)) {
-                        mottakerInstitusjon = hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), bucType);
+                        mottakerInstitusjon = eessiService.hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), bucType);
                     }
 
                     eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, vedlegg);
@@ -85,26 +80,6 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
             }
         }
         return saksbehandler;
-    }
-
-    private String hentMottakerinstitusjonFraBuc(Fagsak fagsak, BucType bucType) throws MelosysException {
-        Long gsakSaksnummer = fagsak.getGsakSaksnummer();
-        String landkode = fagsak.hentMyndighetLandkode().getKode();
-
-        List<BucInformasjon> bucer = eessiService.hentTilknyttedeBucer(gsakSaksnummer, List.of("sendt")).stream()
-            .filter(buc -> bucType.name().equalsIgnoreCase(buc.getBucType())).collect(Collectors.toList());
-
-        List<String> mottakerinstitusjoner = bucer.stream()
-            .flatMap(buc -> buc.getMottakerinstitusjoner().stream())
-            .filter(inst -> inst.toLowerCase().startsWith(landkode.toLowerCase())) // Mottakerinstitusjoner har format LANDKODE:ID
-            .distinct().collect(Collectors.toList());
-
-        if (mottakerinstitusjoner.size() > 1) {
-            throw new TekniskException("Flere mottakerinstitusjoner er satt - kan ikke sende sed ved fatt vedtak");
-        }
-
-        return mottakerinstitusjoner.stream().findFirst()
-            .orElseThrow(() -> new TekniskException("MottakerInstitusjon er ikke satt - kan ikke sende sed ved fatt vedtak"));
     }
 
     public enum SendUtlandStatus {
