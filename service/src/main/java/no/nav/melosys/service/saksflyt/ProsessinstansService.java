@@ -76,6 +76,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringDto.getAvsenderType());
         if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, lagInstitusjonsId(journalfoeringDto.getAvsenderID()));
+            prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, journalfoeringDto.getAvsenderID());
         } else {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
         }
@@ -83,6 +84,10 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
         prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, skalSendesForvaltningsmelding(journalfoeringDto));
+
+        if (journalfoeringDto.getMottatDato() != null) {
+            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringDto.getMottatDato());
+        }
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
             final String hovedDokumentID = journalfoeringDto.getDokumentID();
@@ -185,7 +190,7 @@ public class ProsessinstansService {
         if (StringUtils.isNotEmpty(revurderBegrunnelse)) {
             prosessinstans.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, revurderBegrunnelse);
         }
-                    
+
         lagre(prosessinstans);
     }
 

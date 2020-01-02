@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.joark.journalfoerinngaaende;
 
 import java.util.Collections;
 
-import no.nav.dok.tjenester.journalfoerinngaaende.*;
+import no.nav.dok.tjenester.journalfoerinngaaende.GetJournalpostResponse;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import org.springframework.http.HttpEntity;
@@ -24,21 +24,6 @@ public class JournalfoerInngaaendeConsumer {
     public GetJournalpostResponse hentJournalpost(String journalpostId) throws SikkerhetsbegrensningException, IntegrasjonException {
         return exchange(String.format("/journalposter/%s", journalpostId), HttpMethod.GET,
             new HttpEntity<>(getHttpHeaders()), GetJournalpostResponse.class);
-    }
-
-    public PutJournalpostResponse oppdaterJournalpost(PutJournalpostRequest journalpostRequest, String journalpostId) throws SikkerhetsbegrensningException, IntegrasjonException {
-        return exchange(String.format("/journalposter/%s", journalpostId), HttpMethod.PUT,
-            new HttpEntity<>(journalpostRequest, getHttpHeaders()), PutJournalpostResponse.class);
-    }
-
-    public void oppdaterDokument(PutDokumentRequest dokumentRequest, String journalpostId, String dokumentId) throws SikkerhetsbegrensningException, IntegrasjonException {
-        exchange(String.format("/journalposter/%s/dokumenter/%s", journalpostId, dokumentId),
-            HttpMethod.PUT, new HttpEntity<>(dokumentRequest, getHttpHeaders()), PutDokumentResponse.class);
-    }
-
-    public void leggTilLogiskVedlegg(PostLogiskVedleggRequest logiskVedleggRequest, String journalpostId, String dokumentId) throws SikkerhetsbegrensningException, IntegrasjonException {
-        exchange(String.format("/journalposter/%s/dokumenter/%s/logiskeVedlegg", journalpostId, dokumentId),
-            HttpMethod.POST, new HttpEntity<>(logiskVedleggRequest, getHttpHeaders()), Void.class);
     }
 
     private HttpHeaders getHttpHeaders() {

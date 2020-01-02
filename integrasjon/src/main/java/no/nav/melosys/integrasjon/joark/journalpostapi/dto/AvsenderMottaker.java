@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.exception.TekniskException;
+
 public class AvsenderMottaker {
 
     private String id;
@@ -72,6 +75,19 @@ public class AvsenderMottaker {
 
         public AvsenderMottaker build() {
             return new AvsenderMottaker(id, navn, land, idType);
+        }
+    }
+
+    public static AvsenderMottaker.IdType tilAvsenderMottakerIdType(Avsendertyper avsendertype) throws TekniskException {
+        switch (avsendertype) {
+            case PERSON:
+                return AvsenderMottaker.IdType.FNR;
+            case ORGANISASJON:
+                return AvsenderMottaker.IdType.ORGNR;
+            case UTENLANDSK_TRYGDEMYNDIGHET:
+                return AvsenderMottaker.IdType.UTL_ORG;
+            default:
+                throw new TekniskException("AvsenderType " + avsendertype + " støttes ikke.");
         }
     }
 }
