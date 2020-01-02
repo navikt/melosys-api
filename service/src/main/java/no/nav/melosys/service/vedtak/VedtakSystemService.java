@@ -19,7 +19,7 @@ public class VedtakSystemService extends VedtakService {
                                BehandlingsresultatService behandlingsresultatService,
                                @Qualifier("system") OppgaveService oppgaveService,
                                ProsessinstansService prosessinstansService,
-                               EessiService eessiService,
+                               @Qualifier("system") EessiService eessiService,
                                LandvelgerService landvelgerService,
                                FagsakService fagsakService,
                                GsakFasade gsakFasade) {

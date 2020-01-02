@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi;
 
-import no.nav.melosys.integrasjon.felles.OidcTokenClientRequestInterceptor;
+import no.nav.melosys.integrasjon.felles.SystemContextClientRequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -19,10 +19,10 @@ public class JournalpostapiConsumerProducer {
 
     @Bean
     public JournalpostapiConsumer journalpostapiConsumer(
-        OidcTokenClientRequestInterceptor oidcTokenClientRequestInterceptor) {
+        SystemContextClientRequestInterceptor systemContextClientRequestInterceptor) {
         RestTemplate restTemplate = new RestTemplateBuilder()
             .uriTemplateHandler(new DefaultUriBuilderFactory(url))
-            .interceptors(oidcTokenClientRequestInterceptor)
+            .interceptors(systemContextClientRequestInterceptor)
             .build();
 
         return new JournalpostapiConsumerImpl(restTemplate);
