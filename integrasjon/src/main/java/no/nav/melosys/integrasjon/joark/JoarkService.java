@@ -212,17 +212,16 @@ public class JoarkService implements JoarkFasade {
     public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
         throws SikkerhetsbegrensningException, TekniskException {
 
-        OppdaterJournalpostRequest.Builder request = new OppdaterJournalpostRequest.Builder();
-        request.medDatoMottatt(journalpostOppdatering.getMottatDato());
-        request.medTittel(journalpostOppdatering.getTittel());
-        request.medBruker(journalpostOppdatering.getBrukerID());
-        request.medArkivsaksnummer(Long.toString(journalpostOppdatering.getArkivSakID()));
+        OppdaterJournalpostRequest.Builder request = new OppdaterJournalpostRequest.Builder()
+            .medDatoMottatt(journalpostOppdatering.getMottatDato())
+            .medTittel(journalpostOppdatering.getTittel())
+            .medBruker(journalpostOppdatering.getBrukerID())
+            .medArkivsaksnummer(Long.toString(journalpostOppdatering.getArkivSakID()));
 
         final String hovedDokumentID = journalpostOppdatering.getHovedDokumentID();
         if (hovedDokumentID != null) {
             if (journalpostOppdatering.harLogiskeVedlegg()) {
-                List<String> logiskeVedleggTitler = journalpostOppdatering.getLogiskeVedleggTitler();
-                for (String vedleggTittel : logiskeVedleggTitler) {
+                for (String vedleggTittel : journalpostOppdatering.getLogiskeVedleggTitler()) {
                     journalpostapiConsumer.leggTilLogiskVedlegg(hovedDokumentID, vedleggTittel);
                 }
             }
@@ -230,32 +229,20 @@ public class JoarkService implements JoarkFasade {
         }
 
         if (journalpostOppdatering.harFysiskeVedlegg()) {
-            Map<String, String> fysiskeVedlegg = journalpostOppdatering.getFysiskeVedlegg();
-            for (Map.Entry<String, String> vedleggIdMedTittel : fysiskeVedlegg.entrySet()) {
+            for (Map.Entry<String, String> vedleggIdMedTittel : journalpostOppdatering.getFysiskeVedlegg().entrySet()) {
                 request.leggTilDokumentoppdatering(vedleggIdMedTittel.getKey(), vedleggIdMedTittel.getValue());
             }
         }
 
         if (journalpostOppdatering.getAvsenderType() != null) {
-            AvsenderMottaker.AvsenderMottakerBuilder avsender = AvsenderMottaker.builder()
+            AvsenderMottaker avsender = AvsenderMottaker.builder()
                 .id(journalpostOppdatering.getAvsenderID())
                 .land(journalpostOppdatering.getAvsenderLand())
-                .navn(journalpostOppdatering.getAvsenderNavn());
+                .navn(journalpostOppdatering.getAvsenderNavn())
+                .idType(AvsenderMottaker.tilAvsenderMottakerIdType(journalpostOppdatering.getAvsenderType()))
+                .build();
 
-            switch (journalpostOppdatering.getAvsenderType()) {
-                case PERSON:
-                    avsender.idType(AvsenderMottaker.IdType.FNR);
-                    break;
-                case ORGANISASJON:
-                    avsender.idType(AvsenderMottaker.IdType.ORGNR);
-                    break;
-                case UTENLANDSK_TRYGDEMYNDIGHET:
-                    avsender.idType(AvsenderMottaker.IdType.UTL_ORG);
-                    break;
-                default:
-                    throw new TekniskException("AvsenderType " + journalpostOppdatering.getAvsenderType() + " støttes ikke.");
-            }
-            request.medAvsender(avsender.build());
+            request.medAvsender(avsender);
         }
         journalpostapiConsumer.oppdaterJournalpost(request.build(), journalpostID);
     }
