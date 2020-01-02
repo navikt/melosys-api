@@ -1,7 +1,10 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi;
 
+import java.io.IOException;
 import java.util.Collections;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
@@ -11,6 +14,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -20,9 +24,11 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
     private static final Logger log = LoggerFactory.getLogger(JournalpostapiConsumerImpl.class);
 
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     public JournalpostapiConsumerImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -75,15 +81,28 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
         try {
             return restTemplate.exchange(uri, method, entity, clazz).getBody();
         } catch (HttpStatusCodeException ex) {
+            String feilmelding = hentFeilmelding(ex);
             switch (ex.getStatusCode()) {
                 case UNAUTHORIZED:
                 case FORBIDDEN:
-                    throw new SikkerhetsbegrensningException(ex);
+                    throw new SikkerhetsbegrensningException(feilmelding, ex);
                 default:
-                    throw new IntegrasjonException(ex);
+                    throw new IntegrasjonException(feilmelding, ex);
             }
         } catch (RestClientException ex) {
-            throw new IntegrasjonException(ex);
+            throw new IntegrasjonException("Ukjent feil mot journalpostapi", ex);
+        }
+    }
+
+    private String hentFeilmelding(HttpStatusCodeException e) {
+        String feilmelding = e.getResponseBodyAsString();
+        if (StringUtils.isEmpty(feilmelding)) return e.getMessage();
+        try {
+            JsonNode json = objectMapper.readTree(feilmelding).path("message");
+            return json.isMissingNode() ? e.getMessage() : json.toString();
+        } catch (IOException ex) {
+            log.warn("Kunne ikke lese feilmelding fra response", ex);
+            return feilmelding;
         }
     }
 }
