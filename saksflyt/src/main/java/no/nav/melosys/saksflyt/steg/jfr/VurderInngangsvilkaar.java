@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
+import static no.nav.melosys.saksflyt.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 
 /**
