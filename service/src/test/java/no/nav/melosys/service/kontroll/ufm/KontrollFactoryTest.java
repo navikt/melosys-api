@@ -1,4 +1,4 @@
-package no.nav.melosys.service.unntaksperiode.kontroll;
+package no.nav.melosys.service.kontroll.ufm;
 
 import java.util.List;
 import java.util.function.Function;
@@ -15,31 +15,31 @@ public class KontrollFactoryTest {
 
     @Test
     public void hentKontrollerA001_verifiserKontroller() {
-        List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A001);
+        List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A001);
         assertThat(kontroller).hasSize(10);
     }
 
     @Test
     public void hentKontrollerA003_verifiserKontroller() {
-        List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A003);
+        List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A003);
         assertThat(kontroller).hasSize(10);
     }
 
     @Test
     public void hentKontrollerA009_verifiserKontroller() {
-        List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A009);
+        List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A009);
         assertThat(kontroller).hasSize(10);
     }
 
     @Test
     public void hentKontrollerA010_verifiserKontroller() {
-        List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A010);
+        List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A010);
         assertThat(kontroller).hasSize(9);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void hentKontrollerA008_verifiserIngenKontroller() {
-        List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A008);
+        List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A008);
         assertThat(kontroller).isEmpty();
     }
 }

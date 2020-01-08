@@ -1,12 +1,11 @@
 package no.nav.melosys.tjenester.gui.unntakshandtering;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -42,7 +41,16 @@ public class ExceptionMapper {
         return håndter(e, HttpStatus.FORBIDDEN, Level.WARN);
     }
 
-    private ResponseEntity håndter(Exception e, HttpStatus httpStatus, Level loggnivå) {
+    @ExceptionHandler(value = ValideringException.class)
+    public ResponseEntity håndter(ValideringException e) {
+        return håndter(e, HttpStatus.BAD_REQUEST, Level.INFO, e.getFeilkoder());
+    }
+
+    private ResponseEntity håndter(Exception e, HttpStatus httpStatus, Level loggnivå){
+        return håndter(e, httpStatus, loggnivå, Collections.emptyList());
+    }
+
+    private ResponseEntity håndter(Exception e, HttpStatus httpStatus, Level loggnivå, Collection<String> begrunnelser) {
         if (loggnivå.equals(Level.ERROR)) {
             log.error(FEIL_OPPSTÅTT, e);
         } else if (loggnivå.equals(Level.WARN)) {
@@ -53,6 +61,9 @@ public class ExceptionMapper {
         entity.put("status", httpStatus.value());
         entity.put("error", httpStatus.getReasonPhrase());
         entity.put("message", e.getMessage());
+        if (begrunnelser != null && !begrunnelser.isEmpty()){
+            entity.put("feilkoder", begrunnelser);
+        }
         return new ResponseEntity<>(entity, httpStatus);
     }
 }

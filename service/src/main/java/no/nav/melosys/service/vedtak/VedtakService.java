@@ -1,14 +1,17 @@
 package no.nav.melosys.service.vedtak;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsystem;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -17,11 +20,13 @@ import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -46,12 +51,13 @@ public class VedtakService {
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
     private final GsakFasade gsakFasade;
+    private final VedtakKontrollService vedtakKontrollService;
 
     @Autowired
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
-                        FagsakService fagsakService, GsakFasade gsakFasade) {
+                         FagsakService fagsakService, GsakFasade gsakFasade, VedtakKontrollService vedtakKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -60,6 +66,7 @@ public class VedtakService {
         this.landvelgerService = landvelgerService;
         this.gsakFasade = gsakFasade;
         this.fagsakService = fagsakService;
+        this.vedtakKontrollService = vedtakKontrollService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -76,6 +83,10 @@ public class VedtakService {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
+        if (behandlingsresultatType == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
+            validerFattVedtak(behandling, behandlingsresultat);
+        }
+
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         if (skalSendesSed(behandlingsresultat, landkoder)) {
             String landkode = landkoder.iterator().next().getKode();
@@ -86,6 +97,14 @@ public class VedtakService {
         behandlingService.lagre(behandling);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerInstitusjon, vedtakstype, revurderBegrunnelse );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    private void validerFattVedtak(Behandling behandling, Behandlingsresultat behandlingsresultat) throws MelosysException {
+        Collection<Unntak_periode_begrunnelser> feilValideringer = vedtakKontrollService.utførKontroller(behandling, behandlingsresultat);
+        if (!feilValideringer.isEmpty()) {
+            throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
+                feilValideringer.stream().map(Kodeverk::getKode).collect(Collectors.toList()));
+        }
     }
 
     private boolean skalSendesSed(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {

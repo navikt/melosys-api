@@ -5,6 +5,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -22,7 +23,8 @@ public class VedtakSystemService extends VedtakService {
                                @Qualifier("system") EessiService eessiService,
                                LandvelgerService landvelgerService,
                                FagsakService fagsakService,
-                               GsakFasade gsakFasade) {
-        super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade);
+                               GsakFasade gsakFasade,
+                               VedtakKontrollService vedtakKontrollService) {
+        super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, vedtakKontrollService);
     }
 }

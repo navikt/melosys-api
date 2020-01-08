@@ -1,4 +1,4 @@
-package no.nav.melosys.service.unntaksperiode.kontroll;
+package no.nav.melosys.service.kontroll.ufm;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -24,79 +24,79 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UnntaksperiodeKontrollerTest {
+public class UfmKontrollerTest {
 
 
     @Test
     public void feilIPeriode_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.feilIPeriode(kontrollData(null, null))).isEqualTo(Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
+        assertThat(UfmKontroller.feilIPeriode(kontrollData(null, null))).isEqualTo(Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
     }
 
     @Test
     public void periodeErÅpen_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.periodeErÅpen(kontrollData(LocalDate.now(), null))).isEqualTo(Unntak_periode_begrunnelser.INGEN_SLUTTDATO);
+        assertThat(UfmKontroller.periodeErÅpen(kontrollData(LocalDate.now(), null))).isEqualTo(Unntak_periode_begrunnelser.INGEN_SLUTTDATO);
     }
 
     @Test
     public void periodeOver24Mnd_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.periodeOver24Mnd(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD);
+        assertThat(UfmKontroller.periodeOver24Mnd(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD);
     }
 
     @Test
     public void periodeOver5År_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.periodeOver5År(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.PERIODEN_OVER_5_AR);
+        assertThat(UfmKontroller.periodeOver5År(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.PERIODEN_OVER_5_AR);
     }
 
     @Test
     public void periodeEldreEnn5År_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.periodeEldreEnn3År(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL);
+        assertThat(UfmKontroller.periodeEldreEnn3År(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL);
     }
 
     @Test
     public void periodeOver1ÅrFremITid_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.periodeOver1ÅrFremITid(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.PERIODE_LANGT_FREM_I_TID);
+        assertThat(UfmKontroller.periodeOver1ÅrFremITid(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.PERIODE_LANGT_FREM_I_TID);
     }
 
     @Test
     public void utbetaltYtelserFraOffentligIPeriode_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.utbetaltYtelserFraOffentligIPeriode(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
+        assertThat(UfmKontroller.utbetaltYtelserFraOffentligIPeriode(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
     }
 
     @Test
     public void utbetaltBarnetrygdytelser_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.utbetaltBarnetrygdytelser(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
+        assertThat(UfmKontroller.utbetaltBarnetrygdytelser(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
     }
 
     @Test
     public void lovvalgslandErNorge_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.lovvalgslandErNorge(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.LOVVALGSLAND_NORGE);
+        assertThat(UfmKontroller.lovvalgslandErNorge(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.LOVVALGSLAND_NORGE);
     }
 
     @Test
     public void overlappendeMedlemsperiode_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.overlappendeMedlemsperiode(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.OVERLAPPENDE_MEDL_PERIODER);
+        assertThat(UfmKontroller.overlappendeMedlemsperiode(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.OVERLAPPENDE_MEDL_PERIODER);
     }
 
     @Test
     public void statsborgerskapIkkeMedlemsland_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.statsborgerskapIkkeMedlemsland(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
+        assertThat(UfmKontroller.statsborgerskapIkkeMedlemsland(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
     }
 
     @Test
     public void personDød_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.personDød(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.PERSON_DOD);
+        assertThat(UfmKontroller.personDød(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.PERSON_DOD);
     }
 
     @Test
     public void personBosattINorge_erFeil_verifiserBegrunnelse() {
-        assertThat(UnntaksperiodeKontroller.personBosattINorge(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.BOSATT_I_NORGE);
+        assertThat(UfmKontroller.personBosattINorge(kontrollData())).isEqualTo(Unntak_periode_begrunnelser.BOSATT_I_NORGE);
     }
 
-    private KontrollData kontrollData() {
+    private UfmKontrollData kontrollData() {
         return kontrollData(LocalDate.now().plusMonths(15), LocalDate.now().plusYears(10));
     }
 
-    private KontrollData kontrollData(LocalDate fom, LocalDate tom) {
+    private UfmKontrollData kontrollData(LocalDate fom, LocalDate tom) {
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgsperiode(new Periode(fom, tom));
         sedDokument.setLovvalgslandKode(Landkoder.NO);
@@ -124,7 +124,7 @@ public class UnntaksperiodeKontrollerTest {
         UtbetalingDokument utbetalingDokument = new UtbetalingDokument();
         utbetalingDokument.utbetalinger = Collections.singletonList(new Utbetaling());
 
-        return new KontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
+        return new UfmKontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
     }
 
 }
