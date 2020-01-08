@@ -177,4 +177,14 @@ public class Behandling extends RegistreringsInfo {
     public boolean isAktiv() {
         return status != Behandlingsstatus.AVSLUTTET;
     }
+
+    @Override
+    public String toString() {
+        return "Behandling{" +
+            "id=" + id +
+            ", fagsak=" + fagsak.getSaksnummer() +
+            ", type=" + type +
+            ", status=" + status +
+            "} ";
+    }
 }

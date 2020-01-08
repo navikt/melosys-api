@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
@@ -76,13 +77,21 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
 
         final Instant nå = Instant.now();
         Behandling behandling = prosessinstans.getBehandling();
+        log.info("Henter inntektopplysninger for behandling {} og periode {} til {}", behandling, fom, tom);
         Saksopplysning saksopplysning = inntektFasade.hentInntektListe(brukerId, fom, tom);
         saksopplysning.setBehandling(behandling);
         saksopplysning.setRegistrertDato(nå);
         saksopplysning.setEndretDato(nå);
-        saksopplysningRepo.save(saksopplysning);
+        try {
+            saksopplysningRepo.save(saksopplysning);
+        } catch (DataIntegrityViolationException e) {
+            Throwable rootCause = e.getRootCause();
+            if (rootCause != null) {
+                log.error(rootCause.getMessage(), rootCause);
+            }
+            throw e;
+        }
 
         prosessinstans.setSteg(ProsessSteg.HENT_ORG_OPPL);
-        log.info("Hentet inntektopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 }
