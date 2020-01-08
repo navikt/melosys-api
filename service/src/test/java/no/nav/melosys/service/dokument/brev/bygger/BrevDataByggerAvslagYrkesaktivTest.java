@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -21,6 +20,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,13 +42,13 @@ public class BrevDataByggerAvslagYrkesaktivTest {
     @Mock
     RegisterOppslagService registerOppslagService;
     @Mock
-    VilkaarsresultatRepository vilkaarsresultatRepository;
-    @Mock
     LandvelgerService landvelgerService;
     @Mock
     AnmodningsperiodeService anmodningsperiodeService;
     @Mock
     KodeverkService kodeverkService;
+    @Mock
+    VilkaarsresultatService vilkaarsresultatService;
 
     private BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv;
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
@@ -61,11 +61,11 @@ public class BrevDataByggerAvslagYrkesaktivTest {
         anmodningsperiode.setSendtUtland(true);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
 
-        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
 
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, vilkaarsresultatRepository, new BrevbestillingDto());
+        brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, new BrevbestillingDto(), vilkaarsresultatService);
     }
 
     @Test
@@ -95,6 +95,8 @@ public class BrevDataByggerAvslagYrkesaktivTest {
         organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
 
         when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
+        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
+        when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
         String saksbehandler = "saksbehandler";
         BrevDataAvslagYrkesaktiv brevData = (BrevDataAvslagYrkesaktiv) brevDataByggerAvslagYrkesaktiv.lag(lagBrevressurser(behandling), saksbehandler);
@@ -103,6 +105,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
         assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isEqualTo(true);
         assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
         assertThat(brevData.anmodningsperiodeSvar.get()).isEqualToComparingFieldByField(anmodningsperiodeSvar);
+        assertThat(brevData.erArt16UtenArt12).isTrue();
     }
 
     private AnmodningsperiodeSvar lagAnmodningsperiodeSvarAvslag() {

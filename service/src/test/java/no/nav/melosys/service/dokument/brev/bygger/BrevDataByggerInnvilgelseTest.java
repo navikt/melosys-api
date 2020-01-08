@@ -28,6 +28,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,6 +65,9 @@ public class BrevDataByggerInnvilgelseTest {
     @Mock
     AnmodningsperiodeService anmodningsperiodeService;
 
+    @Mock
+    VilkaarsresultatService vilkaarsresultatService;
+
     private Behandling behandling;
 
     @Mock
@@ -98,7 +102,8 @@ public class BrevDataByggerInnvilgelseTest {
             lovvalgsperiodeService,
             anmodningsperiodeService,
             brevbestillingDto,
-            brevDataByggerA1);
+            brevDataByggerA1,
+            vilkaarsresultatService);
     }
 
     public BrevDataGrunnlag lagBrevdataGrunnlag() throws TekniskException {
@@ -131,7 +136,7 @@ public class BrevDataByggerInnvilgelseTest {
         brevbestillingDto.fritekst = "FRITEKST";
 
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService, anmodningsperiodeService, brevbestillingDto, brevDataByggerA1);
+            new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService, anmodningsperiodeService, brevbestillingDto, brevDataByggerA1, vilkaarsresultatService);
 
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
@@ -141,7 +146,7 @@ public class BrevDataByggerInnvilgelseTest {
     @Test
     public void lag_medAnmodningsperiode_girAnmodningsperiodeSvar() throws FunksjonellException, TekniskException {
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService, anmodningsperiodeService, brevbestillingDto, brevDataByggerA1);
+            new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService, anmodningsperiodeService, brevbestillingDto, brevDataByggerA1, vilkaarsresultatService);
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         AnmodningsperiodeSvar anmodningsperiodeSvar = lagAnmodningsperiodeSvarInnvilgelse();
@@ -156,10 +161,28 @@ public class BrevDataByggerInnvilgelseTest {
     @Test
     public void lag_utenAnmodningsperiode_erMulig() throws FunksjonellException, TekniskException {
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService, anmodningsperiodeService, brevbestillingDto, brevDataByggerA1);
+            new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService, anmodningsperiodeService, brevbestillingDto, brevDataByggerA1, vilkaarsresultatService);
 
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.anmodningsperiodesvar.isPresent()).isFalse();
+    }
+
+    @Test
+    public void lag_erArt12_art16UtenArt12False() throws FunksjonellException, TekniskException {
+        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(true);
+        when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
+
+        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
+        assertThat(brevData.erArt16UtenArt12).isFalse();
+    }
+
+    @Test
+    public void lag_erArt16UtenArt12_art16UtenArt12True() throws FunksjonellException, TekniskException {
+        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
+        when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
+
+        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
+        assertThat(brevData.erArt16UtenArt12).isTrue();
     }
 }

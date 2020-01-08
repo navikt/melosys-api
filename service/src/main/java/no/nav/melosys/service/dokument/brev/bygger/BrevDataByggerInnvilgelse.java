@@ -16,6 +16,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 
 public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
@@ -24,6 +25,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final BrevDataByggerA1 brevbyggerA1;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     private BrevDataGrunnlag dataGrunnlag;
 
@@ -31,12 +33,14 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      LandvelgerService landvelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      AnmodningsperiodeService anmodningsperiodeService,
-                                     BrevbestillingDto brevbestillingDto) {
+                                     BrevbestillingDto brevbestillingDto,
+                                     VilkaarsresultatService vilkaarsresultatService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.brevbestillingDto = brevbestillingDto;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.vilkaarsresultatService = vilkaarsresultatService;
         this.brevbyggerA1 = null;
     }
 
@@ -45,13 +49,15 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
-                                     BrevDataByggerA1 brevbyggerA1) {
+                                     BrevDataByggerA1 brevbyggerA1,
+                                     VilkaarsresultatService vilkaarsresultatService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.brevbestillingDto = brevbestillingDto;
         this.brevbyggerA1 = brevbyggerA1;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     @Override
@@ -63,8 +69,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         BrevDataInnvilgelse brevdata;
         if (brevbyggerA1 != null) {
             brevdata = lagInnvilgelseBrevdataMedA1(saksbehandler);
-        }
-        else {
+        } else {
             brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
         }
 
@@ -91,6 +96,8 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             .filter(Anmodningsperiode::erSendtUtland)
             .findFirst()
             .map(Anmodningsperiode::getAnmodningsperiodeSvar);
+
+        brevdata.erArt16UtenArt12 = vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID);
 
         return brevdata;
     }

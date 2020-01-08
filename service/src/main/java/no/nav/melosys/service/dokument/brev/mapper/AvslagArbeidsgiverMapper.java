@@ -42,7 +42,7 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
 
         fag.setArbeidsland(brevData.arbeidsland);
 
-        fag.setArbeidsgiver(brevData.hovedvirksomhet.navn);
+        // fag.setArbeidsgiver(brevData.hovedvirksomhet.navn); TODO: Nytt felt i 1.2.9
         fag.setJuridiskEnhet(brevData.hovedvirksomhet.navn);    // Skal fjernes når xsd er oppdatert
 
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(brevData.lovvalgsperiode));

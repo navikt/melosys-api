@@ -8,30 +8,30 @@ import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 
 public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final BrevbestillingDto brevbestilling;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     public BrevDataByggerAvslagYrkesaktiv(LandvelgerService landvelgerService,
                                           AnmodningsperiodeService anmodningsperiodeService,
-                                          VilkaarsresultatRepository vilkaarsresultatRepository,
-                                          BrevbestillingDto brebestilling) {
+                                          BrevbestillingDto brebestilling,
+                                          VilkaarsresultatService vilkaarsresultatService) {
         this.landvelgerService = landvelgerService;
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.brevbestilling = brebestilling;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     @Override
@@ -53,6 +53,8 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
             brevData.anmodningsperiodeSvar = hentAnmodningsperiodeSvar(behandlingID);
         }
 
+        brevData.erArt16UtenArt12 = vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID);
+
         return brevData;
     }
 
@@ -65,7 +67,7 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     }
 
     private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatForArt16(long behandlingID) throws FunksjonellException {
-        return vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART16_1)
+        return vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_ART16_1)
             .filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16"));
     }
 }
