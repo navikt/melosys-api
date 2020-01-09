@@ -19,7 +19,7 @@ node {
     def DEFAULT_BUILD_USER = "eessi2-jenkins"
 
     def cluster = "dev-fss"
-    def dockerRepo = "docker.adeo.no:5000/melosys"
+    def dockerRepo = "repo.adeo.no:5443/melosys"
     def environment = "${params.ENV}".toString()
     def namespace
     def mvnSettings = "navMavenSettingsUtenProxy"
