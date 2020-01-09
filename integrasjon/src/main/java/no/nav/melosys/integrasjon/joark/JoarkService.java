@@ -245,6 +245,10 @@ public class JoarkService implements JoarkFasade {
             request.medAvsender(avsender);
         }
         journalpostapiConsumer.oppdaterJournalpost(request.build(), journalpostID);
+
+        if (forsokFerdigstill) {
+            journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
+        }
     }
 
     @Override
