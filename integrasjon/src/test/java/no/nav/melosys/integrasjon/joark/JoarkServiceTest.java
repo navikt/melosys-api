@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
-import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
@@ -185,6 +183,7 @@ public class JoarkServiceTest {
         assertThat(request.dokumenter.get(1).dokumentInfoId).isEqualTo(fysiskVedleggID);
 
         verify(journalpostapiConsumer, times(2)).leggTilLogiskVedlegg(anyString(), logiskVedleggTittelCaptor.capture());
+        verify(journalpostapiConsumer, never()).ferdigstillJournalpost(any(), any());
         List<String> logiskVedleggRequest = logiskVedleggTittelCaptor.getAllValues();
         assertThat(logiskVedleggRequest.size()).isEqualTo(2);
         assertThat(logiskVedleggRequest.get(0)).isEqualTo("dok1");
@@ -223,6 +222,16 @@ public class JoarkServiceTest {
         assertThat(hovedDokument.dokumentInfoId).isEqualTo(hovedDokumentID);
 
         verify(journalpostapiConsumer, never()).leggTilLogiskVedlegg(anyString(), anyString());
+    }
+
+    @Test
+    public void oppdaterJournalpost_skalFerdigstilles_ferdigstillJournalpostBlirKalt() throws Exception {
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
+            .medBrukerID("12345").build();
+        joarkService.oppdaterJournalpost("123", journalpostOppdatering, true);
+
+        verify(journalpostapiConsumer).oppdaterJournalpost(any(OppdaterJournalpostRequest.class), anyString());
+        verify(journalpostapiConsumer).ferdigstillJournalpost(any(FerdigstillJournalpostRequest.class), eq("123"));
     }
 
     @Test
