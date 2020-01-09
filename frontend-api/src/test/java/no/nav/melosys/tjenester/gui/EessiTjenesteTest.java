@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
@@ -104,7 +105,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         assertThat(response.getBody()).isInstanceOf(BucerTilknyttetBehandlingDto.class);
 
         BucerTilknyttetBehandlingDto dto = (BucerTilknyttetBehandlingDto) response.getBody();
-        assertThat(dto.getBucer()).hasOnlyElementsOfType(BucInformasjon.class);
+        assertThat(dto).extracting(BucerTilknyttetBehandlingDto::getBucer).hasNoNullFieldsOrProperties();
 
         valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);
     }
@@ -114,6 +115,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
             defaultEasyRandom().nextObject(String.class),
             defaultEasyRandom().nextObject(String.class),
             defaultEasyRandom().nextObject(LocalDate.class),
+            Collections.singletonList(defaultEasyRandom().toString()),
             Arrays.asList(
                 sedInformasjonMedGyldigUrl(),
                 sedInformasjonMedGyldigUrl()

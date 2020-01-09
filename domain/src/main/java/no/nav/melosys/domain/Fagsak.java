@@ -1,9 +1,9 @@
 package no.nav.melosys.domain;
 
 
+import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
@@ -146,6 +146,10 @@ public class Fagsak extends RegistreringsInfo {
      * Henter myndighetens landkode fra institusjonsID som har format landkode:institusjonskode.
      */
     public Landkoder hentMyndighetLandkode() throws TekniskException {
+        return hentMyndighet().hentMyndighetLandkode();
+    }
+
+    public Aktoer hentMyndighet() throws TekniskException {
         List<Aktoer> myndigheter = hentMyndigheter();
         if (myndigheter.isEmpty()) {
             throw new TekniskException("Finner ingen aktør med rolle " + MYNDIGHET + " for fagsak " + saksnummer);
@@ -153,7 +157,7 @@ public class Fagsak extends RegistreringsInfo {
         if (myndigheter.size() > 1) {
             throw new TekniskException("Kan ikke hente landkode for en bestemt myndighet fordi finnes flere myndigheter");
         }
-        return myndigheter.get(0).hentMyndighetLandkode();
+        return myndigheter.get(0);
     }
 
     /**

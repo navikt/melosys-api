@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,6 +11,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.BucInformasjonDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -76,7 +78,10 @@ public class EessiTjeneste {
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
 
         log.info("Henter tilknyttede bucer for gsak {}", gsakSaksnummer);
-        BucerTilknyttetBehandlingDto bucerDto = new BucerTilknyttetBehandlingDto(eessiService.hentTilknyttedeBucer(gsakSaksnummer, statuser));
+        BucerTilknyttetBehandlingDto bucerDto = new BucerTilknyttetBehandlingDto(
+            eessiService.hentTilknyttedeBucer(gsakSaksnummer, statuser).stream()
+                .map(BucInformasjonDto::av).collect(Collectors.toList())
+        );
         return ResponseEntity.ok(bucerDto);
     }
 }

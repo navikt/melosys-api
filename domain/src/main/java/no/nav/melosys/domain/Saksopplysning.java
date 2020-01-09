@@ -44,7 +44,7 @@ public class Saksopplysning {
     private Instant endretDato;
 
     @Type(type = XMLTYPE)
-    @Column(name = "dokument_xml")
+    @Column(name = "dokument_xml", nullable = false)
     private String dokumentXml;
 
     @Type(type = XMLTYPE)

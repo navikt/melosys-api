@@ -10,7 +10,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -44,7 +43,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
                 if (eessiService.landErEessiReady(bucType.name(), landkode.get())) {
                     String mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
                     if (StringUtils.isEmpty(mottakerInstitusjon)) {
-                        throw new TekniskException("MottakerInstitusjon er ikke satt - kan ikke sende sed ved fatt vedtak");
+                        mottakerInstitusjon = eessiService.hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), bucType);
                     }
 
                     eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, vedlegg);

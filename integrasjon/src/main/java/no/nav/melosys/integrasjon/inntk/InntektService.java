@@ -97,7 +97,12 @@ public class InntektService implements InntektFasade {
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
+        final String dokumentXml = xmlWriter.toString();
+        if (dokumentXml != null) {
+            saksopplysning.setDokumentXml(dokumentXml);
+        } else {
+            throw new IntegrasjonException("DokumentXML er null!");
+        }
         saksopplysning.setKilde(SaksopplysningKilde.INNTK);
         saksopplysning.setType(SaksopplysningType.INNTK);
         saksopplysning.setVersjon(INNTEKT_VERSJON);

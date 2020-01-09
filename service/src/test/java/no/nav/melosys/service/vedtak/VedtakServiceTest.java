@@ -1,6 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
 import java.util.Collections;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -231,6 +232,11 @@ public class VedtakServiceTest {
 
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
+        Aktoer myndighet = new Aktoer();
+        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setInstitusjonId("SE:SE001");
+        behandling.getFagsak().setAktører(Set.of(myndighet));
+
         vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, Behandlingstyper.ENDRET_PERIODE, "FRITEKST");
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);

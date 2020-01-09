@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import com.google.common.collect.Sets;
@@ -10,12 +11,14 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -36,7 +39,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,6 +64,7 @@ public class EessiServiceTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     private EasyRandom easyRandom = new EasyRandom();
+    private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @Before
     public void setup() throws Exception {
@@ -316,5 +319,63 @@ public class EessiServiceTest {
         SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(1L);
 
         assertThat(sedType).isEqualTo(SedType.A011);
+    }
+
+    @Test
+    public void hentMottakerinstitusjonerFraBuc_medFlereMottakerinstitusjoner_forventRettInstitusjon() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
+            .thenReturn(List.of(
+                new BucInformasjon(
+                    "id",
+                    BucType.LA_BUC_04.name(),
+                    LocalDate.now(),
+                    List.of("DE:111", "FR:222", MOTTAKER_INSTITUSJON),
+                    List.of()
+                )));
+
+        String mottakerinstitusjon = eessiService.hentMottakerinstitusjonFraBuc(lagFagsak(), BucType.LA_BUC_04);
+        assertThat(mottakerinstitusjon).isEqualTo(MOTTAKER_INSTITUSJON);
+    }
+
+    @Test(expected = TekniskException.class)
+    public void hentMottakerinstitusjonerFraBuc_medFlereMottakerinstitusjonerFraSammeLand_forventException() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
+            .thenReturn(List.of(
+                new BucInformasjon(
+                    "id",
+                    BucType.LA_BUC_04.name(),
+                    LocalDate.now(),
+                    List.of("DE:111", "FR:222", MOTTAKER_INSTITUSJON, "SE:333"),
+                    List.of()
+                )));
+
+        eessiService.hentMottakerinstitusjonFraBuc(lagFagsak(), BucType.LA_BUC_04);
+    }
+
+    @Test(expected = TekniskException.class)
+    public void hentMottakerinstitusjonerFraBuc_ingenMottakerinstitusjoner_forventException() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
+            .thenReturn(List.of(
+                new BucInformasjon(
+                    "id",
+                    BucType.LA_BUC_04.name(),
+                    LocalDate.now(),
+                    List.of("DE:111", "FR:222"),
+                    List.of()
+                )));
+
+        eessiService.hentMottakerinstitusjonFraBuc(lagFagsak(), BucType.LA_BUC_04);
+    }
+
+    private static Fagsak lagFagsak() {
+        Aktoer myndighet = new Aktoer();
+        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setInstitusjonId(MOTTAKER_INSTITUSJON);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(1L);
+        fagsak.setAktører(Set.of(myndighet));
+
+        return fagsak;
     }
 }
