@@ -46,7 +46,7 @@ public class AktoerTjeneste {
         this.fagsakService = fagsakService;
     }
 
-    @GetMapping("/{saksnummer}/aktoerer/")
+    @GetMapping("/{saksnummer}/aktoerer")
     @ApiOperation(
         value = "Henter aktører knyttet til et gitt saksnummer.",
         response = AktoerDto.class,
@@ -72,7 +72,7 @@ public class AktoerTjeneste {
         return aktører.stream().map(this::tilDto).collect(toList());
     }
 
-    @PostMapping("/{saksnummer}/aktoerer/")
+    @PostMapping("/{saksnummer}/aktoerer")
     @ApiOperation(
         value = "Lagrer/oppdaterer aktør informasjon for et gitt saksnummer.",
         response = AktoerDto.class)
