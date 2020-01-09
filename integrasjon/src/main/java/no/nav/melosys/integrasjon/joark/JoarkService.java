@@ -246,7 +246,7 @@ public class JoarkService implements JoarkFasade {
         }
         journalpostapiConsumer.oppdaterJournalpost(request.build(), journalpostID);
 
-        if (forsokFerdigstill) {
+        if (forsøkFerdigstill) {
             journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
         }
     }

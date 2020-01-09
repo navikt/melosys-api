@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.*;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
+import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
