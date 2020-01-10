@@ -1,0 +1,123 @@
+<ns2:hentPeriodeListeResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/medlemskap/v2">
+    <response>
+        <periodeListe opprinneligOpprettetAv="BMEDL001" sistEndretAv="BMEDL001" tidspunktOpprinneligOpprettet="2012-05-26T20:17:08.914+02:00" tidspunktSistEndret="2012-05-26T20:17:08.924+02:00">
+            <fraOgMed>2009-04-22</fraOgMed>
+            <tilOgMed>2009-12-31</tilOgMed>
+            <id>3151398</id>
+            <versjon>1</versjon>
+            <datoRegistrert>2012-05-26</datoRegistrert>
+            <datoBesluttet>2012-05-26</datoBesluttet>
+            <status term="Gyldig">GYLD</status>
+            <trygdedekning term="Full">Full</trygdedekning>
+            <helsedel>true</helsedel>
+            <type term="Periode med medlemskap">PMMEDSKP</type>
+            <land term="NORGE">NOR</land>
+            <lovvalg term="Endelig">ENDL</lovvalg>
+            <kilde term="Avgiftsystemet">AVGSYS</kilde>
+            <kildedokumenttype term="Dokument">Dokument</kildedokumenttype>
+            <grunnlagstype term="Medlem, ukjent">MEDUKJ</grunnlagstype>
+        </periodeListe>
+        <periodeListe opprinneligOpprettetAv="BMEDL001" sistEndretAv="BMEDL001" tidspunktOpprinneligOpprettet="2012-05-26T20:17:08.929+02:00" tidspunktSistEndret="2012-05-26T20:17:08.932+02:00">
+            <fraOgMed>2010-01-01</fraOgMed>
+            <tilOgMed>2010-06-30</tilOgMed>
+            <id>3151399</id>
+            <versjon>1</versjon>
+            <datoRegistrert>2012-05-26</datoRegistrert>
+            <datoBesluttet>2012-05-26</datoBesluttet>
+            <status term="Gyldig">GYLD</status>
+            <trygdedekning term="Full">Full</trygdedekning>
+            <helsedel>true</helsedel>
+            <type term="Periode med medlemskap">PMMEDSKP</type>
+            <land term="NORGE">NOR</land>
+            <lovvalg term="Endelig">ENDL</lovvalg>
+            <kilde term="Avgiftsystemet">AVGSYS</kilde>
+            <kildedokumenttype term="Dokument">Dokument</kildedokumenttype>
+            <grunnlagstype term="Medlem, ukjent">MEDUKJ</grunnlagstype>
+        </periodeListe>
+        <periodeListe opprinneligOpprettetAv="BMEDL001" sistEndretAv="BMEDL001" tidspunktOpprinneligOpprettet="2012-05-26T20:17:08.938+02:00" tidspunktSistEndret="2012-05-26T20:17:08.940+02:00">
+            <fraOgMed>2010-07-01</fraOgMed>
+            <tilOgMed>2010-12-31</tilOgMed>
+            <id>3151400</id>
+            <versjon>1</versjon>
+            <datoRegistrert>2012-05-26</datoRegistrert>
+            <datoBesluttet>2012-05-26</datoBesluttet>
+            <status term="Gyldig">GYLD</status>
+            <trygdedekning term="Full">Full</trygdedekning>
+            <helsedel>true</helsedel>
+            <type term="Periode med medlemskap">PMMEDSKP</type>
+            <land term="NORGE">NOR</land>
+            <lovvalg term="Endelig">ENDL</lovvalg>
+            <kilde term="Avgiftsystemet">AVGSYS</kilde>
+            <kildedokumenttype term="Dokument">Dokument</kildedokumenttype>
+            <grunnlagstype term="Medlem, ukjent">MEDUKJ</grunnlagstype>
+        </periodeListe>
+        <periodeListe opprinneligOpprettetAv="BMEDL001" sistEndretAv="BMEDL001" tidspunktOpprinneligOpprettet="2012-05-26T20:17:08.948+02:00" tidspunktSistEndret="2012-05-26T20:17:08.962+02:00">
+            <fraOgMed>2011-01-01</fraOgMed>
+            <tilOgMed>2011-12-31</tilOgMed>
+            <id>3151401</id>
+            <versjon>1</versjon>
+            <datoRegistrert>2012-05-26</datoRegistrert>
+            <datoBesluttet>2012-05-26</datoBesluttet>
+            <status term="Gyldig">GYLD</status>
+            <trygdedekning term="Full">Full</trygdedekning>
+            <helsedel>true</helsedel>
+            <type term="Periode med medlemskap">PMMEDSKP</type>
+            <land term="NORGE">NOR</land>
+            <lovvalg term="Endelig">ENDL</lovvalg>
+            <kilde term="Avgiftsystemet">AVGSYS</kilde>
+            <kildedokumenttype term="Dokument">Dokument</kildedokumenttype>
+            <grunnlagstype term="Medlem, ukjent">MEDUKJ</grunnlagstype>
+        </periodeListe>
+        <periodeListe opprinneligOpprettetAv="B137659" sistEndretAv="B137659" tidspunktOpprinneligOpprettet="2013-04-19T11:09:42.117+02:00" tidspunktSistEndret="2013-04-19T11:09:42.170+02:00">
+            <fraOgMed>2012-01-01</fraOgMed>
+            <tilOgMed>2012-12-31</tilOgMed>
+            <id>3235038</id>
+            <versjon>1</versjon>
+            <datoRegistrert>2013-04-19</datoRegistrert>
+            <datoBesluttet>2013-04-19</datoBesluttet>
+            <status term="Gyldig">GYLD</status>
+            <trygdedekning term="Full">Full</trygdedekning>
+            <helsedel>true</helsedel>
+            <type term="Periode med medlemskap">PMMEDSKP</type>
+            <land term="NORGE">NOR</land>
+            <lovvalg term="Endelig">ENDL</lovvalg>
+            <kilde term="Gosys">FS22</kilde>
+            <kildedokumenttype term="Henvendelse/søknad">Henv_Soknad</kildedokumenttype>
+            <grunnlagstype term="EØS 1408/71 - 17">FO_1408_17</grunnlagstype>
+        </periodeListe>
+        <periodeListe opprinneligOpprettetAv="M140899" sistEndretAv="M140899" tidspunktOpprinneligOpprettet="2014-11-24T12:24:23.164+01:00" tidspunktSistEndret="2014-11-24T12:24:23.164+01:00">
+            <fraOgMed>2013-01-01</fraOgMed>
+            <tilOgMed>2013-12-31</tilOgMed>
+            <id>3235510</id>
+            <versjon>2</versjon>
+            <datoRegistrert>2013-04-24</datoRegistrert>
+            <datoBesluttet>2014-11-24</datoBesluttet>
+            <status term="Gyldig">GYLD</status>
+            <trygdedekning term="Full">Full</trygdedekning>
+            <helsedel>true</helsedel>
+            <type term="Periode med medlemskap">PMMEDSKP</type>
+            <land term="NORGE">NOR</land>
+            <lovvalg term="Endelig">ENDL</lovvalg>
+            <kilde term="Gosys">FS22</kilde>
+            <kildedokumenttype term="Henvendelse/søknad">Henv_Soknad</kildedokumenttype>
+            <grunnlagstype term="EØS 883/04 - 16">FO_16</grunnlagstype>
+        </periodeListe>
+        <periodeListe opprinneligOpprettetAv="M140899" sistEndretAv="M140899" tidspunktOpprinneligOpprettet="2015-09-09T15:51:42.174+02:00" tidspunktSistEndret="2015-09-09T15:51:42.188+02:00">
+            <fraOgMed>2015-02-01</fraOgMed>
+            <tilOgMed>2016-12-31</tilOgMed>
+            <id>3424128</id>
+            <versjon>1</versjon>
+            <datoRegistrert>2015-09-09</datoRegistrert>
+            <datoBesluttet>2015-09-09</datoBesluttet>
+            <status term="Gyldig">GYLD</status>
+            <trygdedekning term="Full">Full</trygdedekning>
+            <helsedel>true</helsedel>
+            <type term="Periode med medlemskap">PMMEDSKP</type>
+            <land term="NORGE">NOR</land>
+            <lovvalg term="Endelig">ENDL</lovvalg>
+            <kilde term="Gosys">FS22</kilde>
+            <kildedokumenttype term="Henvendelse/søknad">Henv_Soknad</kildedokumenttype>
+            <grunnlagstype term="EØS 883/04 - 12.1">FO_12_1</grunnlagstype>
+        </periodeListe>
+    </response>
+</ns2:hentPeriodeListeResponse>

@@ -1,0 +1,448 @@
+<ns2:hentInntektListeResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/inntekt/v3">
+    <response>
+        <arbeidsInntektIdent>
+            <arbeidsInntektMaaned>
+                <aarMaaned>2017-06+02:00</aarMaaned>
+                <arbeidsInntektInformasjon>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>45000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.993+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-06</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>Periode</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:Etterbetalingsperiode">
+                                <etterbetalingsperiode>
+                                    <startDato>2017-03-01+01:00</startDato>
+                                    <sluttDato>2017-03-31+02:00</sluttDato>
+                                </etterbetalingsperiode>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>13000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-09</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>43000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-09</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>43000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-08</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>43000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-08</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>33000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-07</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>43000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-07</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>33000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-06</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>43000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-06</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>23300</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-05</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>33000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-05</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>60000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-04</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>50000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-07</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>910253158</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>75000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-06</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>982683955</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                    </inntektListe>
+                </arbeidsInntektInformasjon>
+            </arbeidsInntektMaaned>
+            <ident xsi:type="ns4:PersonIdent" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <personIdent>99999999992</personIdent>
+            </ident>
+        </arbeidsInntektIdent>
+    </response>
+</ns2:hentInntektListeResponse>

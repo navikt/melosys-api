@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:hentUtbetalingsinformasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/utbetaling/v1">
+    <hentUtbetalingsinformasjonResponse>
+        <utbetalingListe>
+            <posteringsdato>2018-03-12Z</posteringsdato>
+            <utbetaltTil xmlns:ns4="http://nav.no/tjeneste/virksomhet/utbetaling/v1/informasjon"
+                         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns4:Person">
+                <aktoerId>77777777776</aktoerId>
+                <navn>TESTPERSON 0005522847</navn>
+            </utbetaltTil>
+            <utbetalingNettobeloep>19400.0</utbetalingNettobeloep>
+            <ytelseListe>
+                <ytelsestype kodeRef="?" kodeverksRef="?">Barnetrygd</ytelsestype>
+                <ytelsesperiode>
+                    <fom>2016-09-01Z</fom>
+                    <tom>2016-09-30Z</tom>
+                </ytelsesperiode>
+                <ytelseskomponentListe>
+                    <ytelseskomponenttype>Ordinær og utvidet</ytelseskomponenttype>
+                    <satsbeloep>0.0</satsbeloep>
+                    <ytelseskomponentbeloep>970.0</ytelseskomponentbeloep>
+                </ytelseskomponentListe>
+                <ytelseskomponentersum>970.0</ytelseskomponentersum>
+                <trekksum>-0.0</trekksum>
+                <skattsum>-0.0</skattsum>
+                <ytelseNettobeloep>970.0</ytelseNettobeloep>
+                <bilagsnummer>570682100</bilagsnummer>
+                <rettighetshaver xmlns:ns4="http://nav.no/tjeneste/virksomhet/utbetaling/v1/informasjon"
+                                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns4:Person">
+                    <aktoerId>77777777776</aktoerId>
+                    <navn>TESTPERSON 0005522847</navn>
+                </rettighetshaver>
+                <refundertForOrg xmlns:ns4="http://nav.no/tjeneste/virksomhet/utbetaling/v1/informasjon"
+                                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns4:Organisasjon">
+                    <aktoerId>000000000</aktoerId>
+                </refundertForOrg>
+            </ytelseListe>
+            <utbetalingsdato>2018-04-04Z</utbetalingsdato>
+            <forfallsdato>2018-03-12Z</forfallsdato>
+            <utbetaltTilKonto/>
+            <utbetalingsmetode>Norsk utbetalingskort</utbetalingsmetode>
+            <utbetalingsstatus>Utbetalt</utbetalingsstatus>
+        </utbetalingListe>
+        <utbetalingListe>
+            <posteringsdato>2018-03-12Z</posteringsdato>
+            <utbetaltTil xmlns:ns4="http://nav.no/tjeneste/virksomhet/utbetaling/v1/informasjon"
+                         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns4:Person">
+                <aktoerId>77777777776</aktoerId>
+                <navn>TESTPERSON 0005522847</navn>
+            </utbetaltTil>
+            <utbetalingNettobeloep>19400.0</utbetalingNettobeloep>
+            <ytelseListe>
+                <ytelsestype kodeRef="?" kodeverksRef="?">Dagpenger</ytelsestype>
+                <ytelsesperiode>
+                    <fom>2016-09-01Z</fom>
+                    <tom>2016-09-30Z</tom>
+                </ytelsesperiode>
+                <ytelseskomponentListe>
+                    <ytelseskomponenttype>Ordinær og utvidet</ytelseskomponenttype>
+                    <satsbeloep>0.0</satsbeloep>
+                    <ytelseskomponentbeloep>970.0</ytelseskomponentbeloep>
+                </ytelseskomponentListe>
+                <ytelseskomponentersum>970.0</ytelseskomponentersum>
+                <trekksum>-0.0</trekksum>
+                <skattsum>-0.0</skattsum>
+                <ytelseNettobeloep>970.0</ytelseNettobeloep>
+                <bilagsnummer>570682100</bilagsnummer>
+                <rettighetshaver xmlns:ns4="http://nav.no/tjeneste/virksomhet/utbetaling/v1/informasjon"
+                                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns4:Person">
+                    <aktoerId>77777777776</aktoerId>
+                    <navn>TESTPERSON 0005522847</navn>
+                </rettighetshaver>
+                <refundertForOrg xmlns:ns4="http://nav.no/tjeneste/virksomhet/utbetaling/v1/informasjon"
+                                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns4:Organisasjon">
+                    <aktoerId>000000000</aktoerId>
+                </refundertForOrg>
+            </ytelseListe>
+            <utbetalingsdato>2018-04-04Z</utbetalingsdato>
+            <forfallsdato>2018-03-12Z</forfallsdato>
+            <utbetaltTilKonto/>
+            <utbetalingsmetode>Norsk utbetalingskort</utbetalingsmetode>
+            <utbetalingsstatus>Utbetalt</utbetalingsstatus>
+        </utbetalingListe>
+    </hentUtbetalingsinformasjonResponse>
+</ns2:hentUtbetalingsinformasjonResponse>
