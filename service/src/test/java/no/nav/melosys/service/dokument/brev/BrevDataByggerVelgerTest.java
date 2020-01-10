@@ -9,6 +9,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,11 +30,12 @@ public class BrevDataByggerVelgerTest {
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
+        VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
         JoarkService joarkService = mock(JoarkService.class);
         LandvelgerService landvelgerService = mock(LandvelgerService.class);
 
         brevDataByggerVelger = new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService,
-            lovvalgsperiodeService, utenlandskMyndighetService, vilkaarsresultatRepository, joarkService, landvelgerService);
+            lovvalgsperiodeService, utenlandskMyndighetService, vilkaarsresultatRepository, vilkaarsresultatService, joarkService, landvelgerService);
     }
 
     @Test

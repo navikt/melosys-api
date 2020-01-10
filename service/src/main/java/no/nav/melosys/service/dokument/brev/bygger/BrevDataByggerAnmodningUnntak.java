@@ -1,29 +1,28 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 
-import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 
 public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
-    private final VilkaarsresultatRepository vilkaarsresultatRepository;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     public BrevDataByggerAnmodningUnntak(LandvelgerService landvelgerService,
-                                         VilkaarsresultatRepository vilkaarsresultatRepository) {
+                                         VilkaarsresultatService vilkaarsresultatService) {
         this.landvelgerService = landvelgerService;
-        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     @Override
@@ -40,7 +39,7 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
 
         Vilkaarsresultat art16Vilkaar = hentFørsteGyldigeVilkaarsresultatArt16(behandlingID);
         Set<VilkaarBegrunnelse> art16Begrunnelser = art16Vilkaar.getBegrunnelser();
-        if (harVilkaarForArtikkel12(behandlingID)) {
+        if (vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID)) {
             brevData.anmodningBegrunnelser = art16Begrunnelser;
             brevData.anmodningUtenArt12Begrunnelser = Collections.emptySet();
         } else {
@@ -53,15 +52,9 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
         return brevData;
     }
 
-    private boolean harVilkaarForArtikkel12(long behandlingID) {
-        Optional<Vilkaarsresultat> art121Vilkaar = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART12_1);
-        Optional<Vilkaarsresultat> art122Vilkaar = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART12_2);
-        return art121Vilkaar.isPresent() || art122Vilkaar.isPresent();
-    }
-
     // Vilkåret for art16 er både oppfylt og har begrunnelser ved anmodning om unntak
     private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatArt16(long behandlingID) throws TekniskException {
-        return vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART16_1)
+        return vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_ART16_1)
             .filter(v -> v.isOppfylt() && !v.getBegrunnelser().isEmpty())
             .orElseThrow(() -> new TekniskException("Ingen oppfylte art16-vilkår med vilkårbegrunnelser funnet for brev om orientering anmodning om unntak"));
     }

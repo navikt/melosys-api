@@ -14,24 +14,21 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_2;
 
 public class BrevDataByggerA001 implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final VilkaarsresultatRepository vilkaarsresultatRepository;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     private BrevDataGrunnlag dataGrunnlag;
     private Behandling behandling;
@@ -39,11 +36,11 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     public BrevDataByggerA001(LovvalgsperiodeService lovvalgsperiodeService,
                               AnmodningsperiodeService anmodningsperiodeService,
                               UtenlandskMyndighetService utenlandskMyndighetRepository,
-                              VilkaarsresultatRepository vilkaarsresultatRepository) {
+                              VilkaarsresultatService vilkaarsresultatService) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.utenlandskMyndighetService = utenlandskMyndighetRepository;
-        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     @Override
@@ -76,7 +73,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
         Vilkaarsresultat art16Vilkaar = hentVilkårsresultat();
         Set<VilkaarBegrunnelse> art16VilkaarBegrunnelser = art16Vilkaar.getBegrunnelser();
-        if (harVilkaarForArtikkel12(behandling.getId())) {
+        if (vilkaarsresultatService.harVilkaarForArtikkel12(behandling.getId())) {
             brevData.anmodningBegrunnelser = art16VilkaarBegrunnelser;
             brevData.anmodningUtenArt12Begrunnelser = Collections.emptySet();
         } else {
@@ -97,14 +94,8 @@ public class BrevDataByggerA001 implements BrevDataBygger {
             .anyMatch("SAERLIG_GRUNN"::equals);
     }
 
-    private boolean harVilkaarForArtikkel12(long behandlingID) {
-        Optional<Vilkaarsresultat> art121Vilkaar = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART12_1);
-        Optional<Vilkaarsresultat> art122Vilkaar = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandlingID, FO_883_2004_ART12_2);
-        return art121Vilkaar.isPresent() || art122Vilkaar.isPresent();
-    }
-
     private Vilkaarsresultat hentVilkårsresultat() throws TekniskException {
-        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandling.getId(), Vilkaar.FO_883_2004_ART16_1);
+        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatService.finnVilkaarsresultat(behandling.getId(), Vilkaar.FO_883_2004_ART16_1);
         Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
             new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1"));
 

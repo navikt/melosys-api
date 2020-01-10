@@ -1,9 +1,6 @@
 package no.nav.melosys.service.vilkaar;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -17,6 +14,8 @@ import no.nav.melosys.repository.VilkaarsresultatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 
 @Service
 public class VilkaarsresultatService {
@@ -46,6 +45,24 @@ public class VilkaarsresultatService {
         }
 
         return vilkaarDtoListe;
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Vilkaarsresultat> finnVilkaarsresultat(long behandlingID, Vilkaar vilkaar) {
+        return vilkaarsresultatRepo.findByBehandlingsresultatIdAndVilkaar(behandlingID, vilkaar);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean harVilkaarForArtikkel12(long behandlingID) {
+        Optional<Vilkaarsresultat> art121Vilkaar = finnVilkaarsresultat(behandlingID, FO_883_2004_ART12_1);
+        Optional<Vilkaarsresultat> art122Vilkaar = finnVilkaarsresultat(behandlingID, FO_883_2004_ART12_2);
+        return art121Vilkaar.isPresent() || art122Vilkaar.isPresent();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean harVilkaarForArtikkel16(long behandlingID) {
+        Optional<Vilkaarsresultat> art161Vilkaar = finnVilkaarsresultat(behandlingID, FO_883_2004_ART16_1);
+        return art161Vilkaar.isPresent();
     }
 
     @Transactional(rollbackFor = MelosysException.class)
