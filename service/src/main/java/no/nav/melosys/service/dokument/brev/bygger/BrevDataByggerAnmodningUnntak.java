@@ -17,7 +17,6 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 
 public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
-    //private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
 
     public BrevDataByggerAnmodningUnntak(LandvelgerService landvelgerService,
