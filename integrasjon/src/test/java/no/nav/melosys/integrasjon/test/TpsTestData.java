@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.test;
 public class TpsTestData {
 
     // Konstanter for standardbrukere (kan refereres eksternt)
-    public static final long STD_KVINNE_AKTØR_ID = FJERNET67L;
+    public static final long STD_KVINNE_AKTØR_ID = 1000021552067L;
     public static final String STD_KVINNE_FNR = "88888888888";
     public static final String STD_KVINNE_ETTERNAVN = "KVINNE_ETTERNAVNSEN";
 

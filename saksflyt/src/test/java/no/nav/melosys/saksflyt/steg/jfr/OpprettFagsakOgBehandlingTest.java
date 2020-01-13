@@ -50,7 +50,7 @@ public class OpprettFagsakOgBehandlingTest {
     public void utførSteg_typeJfrNySak_tilStegJfrOpprettSøknad() throws FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
-        String aktørId = "FJERNET93";
+        String aktørId = "1000104568393";
         String journalpostId = "44553";
         String dokumentId = "222221";
         String arbeidsgiver = "104568393";
@@ -85,7 +85,7 @@ public class OpprettFagsakOgBehandlingTest {
     public void utførSteg_typeNySakFraDok_tilStegJfrOpprettSøknad() throws FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.OPPRETT_NY_SAK);
-        String aktørId = "FJERNET93";
+        String aktørId = "1000104568393";
         p.setData(ProsessDataKey.AKTØR_ID, aktørId);
 
         Fagsak fagsak = new Fagsak();
