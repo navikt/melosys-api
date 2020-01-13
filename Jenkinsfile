@@ -19,7 +19,7 @@ node {
     def DEFAULT_BUILD_USER = "eessi2-jenkins"
 
     def cluster = "dev-fss"
-    def dockerRepo = "docker.adeo.no:5000/melosys"
+    def dockerRepo = "repo.adeo.no:5443"
     def environment = "${params.ENV}".toString()
     def namespace
     def mvnSettings = "navMavenSettingsUtenProxy"
@@ -42,6 +42,12 @@ node {
 
     try {
 
+        stage("Docker login") {
+            withCredentials([[$class: "UsernamePasswordMultiBinding", credentialsId: "nexus-uploader", usernameVariable: "NEXUS_USERNAME", passwordVariable: "NEXUS_PASSWORD"]]) {
+                sh "echo ${NEXUS_PASSWORD} | docker login -u ${NEXUS_USERNAME} --password-stdin ${dockerRepo}"
+            }
+        }
+
         stage("Checkout") {
             scmInfo = checkout scm
 
@@ -59,9 +65,8 @@ node {
         }
 
         stage("Build & publish Docker image") {
-            sh "docker build --build-arg JAR_FILE=${application}-${imageVersion}.jar --build-arg SPRING_PROFILES=${springProfiles} -t ${dockerRepo}/${application}:${imageVersion} ."
-            sh "docker push ${dockerRepo}/${application}:${imageVersion}"
-
+            sh "docker build --build-arg JAR_FILE=${application}-${imageVersion}.jar --build-arg SPRING_PROFILES=${springProfiles} -t ${dockerRepo}/melosys/${application}:${imageVersion} ."
+            sh "docker push ${dockerRepo}/melosys/${application}:${imageVersion}"
         }
 
         stage("Deploy to NAIS") {
