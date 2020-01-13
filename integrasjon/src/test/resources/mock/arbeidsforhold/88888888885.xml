@@ -1,0 +1,49 @@
+<ns2:finnArbeidsforholdPrArbeidstakerResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3">
+    <parameters>
+        <arbeidsforhold applikasjonsID="EDAG" endretAv="srvappserver"
+                        endringstidspunkt="2017-06-28T14:30:29.517+02:00"
+                        opphavREF="eda00000-0000-0000-0000-000641358209"
+                        opprettelsestidspunkt="2016-04-13T10:32:47.299+02:00" opprettetAv="srvappserver"
+                        sistBekreftet="2017-06-28T14:01:30.000+02:00">
+            <arbeidsforholdID>V974600951R131438S1001L0001</arbeidsforholdID>
+            <arbeidsforholdIDnav>39525427</arbeidsforholdIDnav>
+            <ansettelsesPeriode applikasjonsID="EDAG" endretAv="srvappserver"
+                                endringstidspunkt="2017-06-15T13:05:17.166+02:00" fomBruksperiode="2017-06-15+02:00"
+                                opphavREF="eda00000-0000-0000-0000-000623607809">
+                <periode>
+                    <fom>2016-04-01T00:00:00.000+02:00</fom>
+                </periode>
+            </ansettelsesPeriode>
+            <arbeidsforholdstype kodeRef="ordinaertArbeidsforhold">Ordinært arbeidsforhold</arbeidsforholdstype>
+            <arbeidsavtale applikasjonsID="EDAG" endretAv="srvappserver"
+                           endringstidspunkt="2016-04-13T10:32:47.299+02:00" fomBruksperiode="2016-04-13+02:00"
+                           fomGyldighetsperiode="2016-04-01T00:00:00.000+02:00"
+                           opphavREF="04e908b6-32f7-4eb3-8acb-6115447030e4">
+                <arbeidstidsordning kodeRef="ikkeSkift">Ikke skift</arbeidstidsordning>
+                <avloenningstype kodeRef="fast">Fastlønn</avloenningstype>
+                <yrke kodeRef="3119136">INGENIØR (ØVRIG TEKNISK VIRKSOMHET)</yrke>
+                <avtaltArbeidstimerPerUke>37.5</avtaltArbeidstimerPerUke>
+                <stillingsprosent>100.0</stillingsprosent>
+                <sisteLoennsendringsdato>2016-04-01+02:00</sisteLoennsendringsdato>
+                <beregnetAntallTimerPrUke>37.5</beregnetAntallTimerPrUke>
+                <endringsdatoStillingsprosent>2016-04-01+02:00</endringsdatoStillingsprosent>
+            </arbeidsavtale>
+            <arbeidsgiver xsi:type="ns4:Organisasjon"
+                          xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>974600951</orgnummer>
+            </arbeidsgiver>
+            <arbeidstaker>
+                <ident>
+                    <ident>88888888885</ident>
+                </ident>
+            </arbeidstaker>
+            <opplysningspliktig xsi:type="ns4:Organisasjon"
+                                xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>964338531</orgnummer>
+            </opplysningspliktig>
+            <arbeidsforholdInnrapportertEtterAOrdningen>true</arbeidsforholdInnrapportertEtterAOrdningen>
+        </arbeidsforhold>
+    </parameters>
+</ns2:finnArbeidsforholdPrArbeidstakerResponse>

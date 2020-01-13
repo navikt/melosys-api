@@ -5,10 +5,10 @@
                 <strukturertAdresse c:type="a:Gateadresse">
                     <landkode>NOR</landkode>
                     <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>
-                    <poststed>3333</poststed>
-                    <bolignummer>H0809</bolignummer>
-                    <kommunenummer>1203</kommunenummer>
-                    <gatenavn>A00VEIEN</gatenavn>
+                    <poststed>1111</poststed>
+                    <bolignummer>H0009</bolignummer>
+                    <kommunenummer>3201</kommunenummer>
+                    <gatenavn>YYYYYYYYYYYY</gatenavn>
                     <husnummer>12</husnummer>
                 </strukturertAdresse>
             </bostedsadresse>

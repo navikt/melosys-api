@@ -1,14 +1,15 @@
 package no.nav.melosys.integrasjon.medl.medlemskap;
 
+import java.util.Arrays;
+import java.util.List;
+
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 public class MedlemskapMockTest {
 

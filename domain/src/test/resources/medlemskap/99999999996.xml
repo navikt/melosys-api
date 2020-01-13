@@ -34,54 +34,6 @@
             <kildedokumenttype term="Henvendelse/søknad">Henv_Soknad</kildedokumenttype>
             <grunnlagstype term="EØS 883/04 - 12.1">FO_12_1</grunnlagstype>
         </periodeListe>
-        <!--<periodeListe opprinneligOpprettetAv="Z991500" sistEndretAv="Z991500" tidspunktOpprinneligOpprettet="2018-08-16T11:53:13.478+02:00" tidspunktSistEndret="2018-08-16T11:53:13.478+02:00">
-            <fraOgMed>2017-01-01</fraOgMed>
-            <tilOgMed>2017-12-31</tilOgMed>
-            <id>100110669</id>
-            <versjon>0</versjon>
-            <datoRegistrert>2018-08-16</datoRegistrert>
-            <status term="Uavklart">UAVK</status>
-            <trygdedekning term="Full">Full</trygdedekning>
-            <helsedel>true</helsedel>
-            <type term="Periode med medlemskap">PMMEDSKP</type>
-            <land term="NORGE">NOR</land>
-            <lovvalg term="Under avklaring">UAVK</lovvalg>
-            <kilde term="Gosys">FS22</kilde>
-            <kildedokumenttype term="Henvendelse/søknad">Henv_Soknad</kildedokumenttype>
-            <grunnlagstype term="EØS 883/04 - 16">FO_16</grunnlagstype>
-        </periodeListe>
-        <periodeListe opprinneligOpprettetAv="Z991500" sistEndretAv="Z991500" tidspunktOpprinneligOpprettet="2018-08-16T11:54:07.789+02:00" tidspunktSistEndret="2018-08-16T11:54:07.789+02:00">
-            <fraOgMed>2011-01-01</fraOgMed>
-            <tilOgMed>2011-12-31</tilOgMed>
-            <id>100110670</id>
-            <versjon>0</versjon>
-            <datoRegistrert>2018-08-16</datoRegistrert>
-            <status term="Uavklart">UAVK</status>
-            <trygdedekning term="Full">Full</trygdedekning>
-            <helsedel>true</helsedel>
-            <type term="Periode med medlemskap">PMMEDSKP</type>
-            <land term="NORGE">NOR</land>
-            <lovvalg term="Under avklaring">UAVK</lovvalg>
-            <kilde term="Gosys">FS22</kilde>
-            <kildedokumenttype term="Henvendelse/søknad">Henv_Soknad</kildedokumenttype>
-            <grunnlagstype term="EØS 1408/71 - 14.1.a">FO_1408_14_1_a</grunnlagstype>
-        </periodeListe>
-        <periodeListe opprinneligOpprettetAv="Z991500" sistEndretAv="Z991500" tidspunktOpprinneligOpprettet="2018-08-16T11:55:00.940+02:00" tidspunktSistEndret="2018-08-16T11:55:00.940+02:00">
-            <fraOgMed>2010-01-01</fraOgMed>
-            <tilOgMed>2010-12-31</tilOgMed>
-            <id>100110671</id>
-            <versjon>0</versjon>
-            <datoRegistrert>2018-08-16</datoRegistrert>
-            <status term="Uavklart">UAVK</status>
-            <trygdedekning term="Full">Full</trygdedekning>
-            <helsedel>true</helsedel>
-            <type term="Periode med medlemskap">PMMEDSKP</type>
-            <land term="NORGE">NOR</land>
-            <lovvalg term="Under avklaring">UAVK</lovvalg>
-            <kilde term="Gosys">FS22</kilde>
-            <kildedokumenttype term="Henvendelse/søknad">Henv_Soknad</kildedokumenttype>
-            <grunnlagstype term="EØS 1408/71 - 14.1.a">FO_1408_14_1_a</grunnlagstype>
-        </periodeListe>-->
         <periodeListe opprinneligOpprettetAv="Z991500" sistEndretAv="Z991500" tidspunktOpprinneligOpprettet="2018-08-16T11:46:46.442+02:00" tidspunktSistEndret="2018-08-16T11:46:46.442+02:00">
             <fraOgMed>2013-01-01</fraOgMed>
             <tilOgMed>2014-12-31</tilOgMed>
