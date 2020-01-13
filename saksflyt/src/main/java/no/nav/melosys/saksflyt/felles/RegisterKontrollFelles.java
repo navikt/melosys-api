@@ -10,7 +10,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.unntaksperiode.kontroll.RegisterkontrollService;
+import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +21,19 @@ public class RegisterKontrollFelles {
     private static final Logger log = LoggerFactory.getLogger(RegisterKontrollFelles.class);
 
     private final BehandlingService behandlingService;
-    private final RegisterkontrollService registerkontrollService;
+    private final UfmKontrollService ufmKontrollService;
     private final AvklartefaktaService avklartefaktaService;
 
     @Autowired
-    public RegisterKontrollFelles(BehandlingService behandlingService, RegisterkontrollService registerkontrollService, AvklartefaktaService avklartefaktaService) {
+    public RegisterKontrollFelles(BehandlingService behandlingService, UfmKontrollService ufmKontrollService, AvklartefaktaService avklartefaktaService) {
         this.behandlingService = behandlingService;
-        this.registerkontrollService = registerkontrollService;
+        this.ufmKontrollService = ufmKontrollService;
         this.avklartefaktaService = avklartefaktaService;
     }
 
     public void utførKontrollerOgRegistrerFeil(long behandlingId) throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        List<Unntak_periode_begrunnelser> registrerteTreff = registerkontrollService.utførKontroller(behandling);
+        List<Unntak_periode_begrunnelser> registrerteTreff = ufmKontrollService.utførKontroller(behandling);
         registrerFeil(behandlingId, registrerteTreff);
     }
 

@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -17,11 +18,13 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -59,6 +62,8 @@ public class VedtakServiceTest {
     private FagsakService fagsakService;
     @Mock
     private GsakFasade gsakFasade;
+    @Mock
+    private VedtakKontrollService vedtakKontrollService;
 
     private VedtakService vedtakService;
 
@@ -73,7 +78,7 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, vedtakKontrollService);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -228,6 +233,24 @@ public class VedtakServiceTest {
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+    }
+
+    @Test
+    public void fattVedtak_feilIValidering_kasterExceptionMedFeilkode() throws MelosysException {
+        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
+        behandlingsresultat.setType(resultatType);
+        when(vedtakKontrollService.utførKontroller(any(), any()))
+            .thenReturn(Collections.singletonList(Unntak_periode_begrunnelser.OVERLAPPENDE_MEDL_PERIODER));
+
+        ValideringException forventetException = null;
+        try {
+            vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        } catch (ValideringException ex) {
+            forventetException = ex;
+        }
+
+        assertThat(forventetException).isNotNull();
+        assertThat(forventetException.getFeilkoder()).containsExactly(Unntak_periode_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
     }
 
     @Test

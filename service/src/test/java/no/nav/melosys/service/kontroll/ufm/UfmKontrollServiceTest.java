@@ -1,4 +1,4 @@
-package no.nav.melosys.service.unntaksperiode.kontroll;
+package no.nav.melosys.service.kontroll.ufm;
 
 import java.time.LocalDate;
 import java.util.function.Function;
@@ -28,22 +28,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RegisterkontrollServiceTest {
+public class UfmKontrollServiceTest {
 
     @Mock
     private KontrollFactory kontrollFactory;
 
-    private RegisterkontrollService registerkontrollService;
+    private UfmKontrollService ufmKontrollService;
 
     private final Behandling behandling = new Behandling();
 
-    private Function<KontrollData, Unntak_periode_begrunnelser> f1 = (o) -> Unntak_periode_begrunnelser.BOSATT_I_NORGE;
-    private Function<KontrollData, Unntak_periode_begrunnelser> f2 = (o) -> Unntak_periode_begrunnelser.INGEN_SLUTTDATO;
-    private Function<KontrollData, Unntak_periode_begrunnelser> f3 = (o) -> Unntak_periode_begrunnelser.MOTTAR_YTELSER;
+    private Function<UfmKontrollData, Unntak_periode_begrunnelser> f1 = (o) -> Unntak_periode_begrunnelser.BOSATT_I_NORGE;
+    private Function<UfmKontrollData, Unntak_periode_begrunnelser> f2 = (o) -> Unntak_periode_begrunnelser.INGEN_SLUTTDATO;
+    private Function<UfmKontrollData, Unntak_periode_begrunnelser> f3 = (o) -> Unntak_periode_begrunnelser.MOTTAR_YTELSER;
 
     @Before
     public void setup() {
-        registerkontrollService = new RegisterkontrollService(kontrollFactory);
+        ufmKontrollService = new UfmKontrollService(kontrollFactory);
         SedDokument sedDokument = new SedDokument();
         sedDokument.setSedType(SedType.A009);
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().plusMonths(1)));
@@ -60,13 +60,13 @@ public class RegisterkontrollServiceTest {
     public void utførKontroller_periodeIkkeGyldig_forventEttTreff() throws Exception {
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().minusYears(1)));
-        assertThat(registerkontrollService.utførKontroller(behandling))
+        assertThat(ufmKontrollService.utførKontroller(behandling))
             .containsExactly(Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
     }
 
     @Test
     public void utførKontroller_periodeGyldig_forventTreTreff() throws Exception {
-        assertThat(registerkontrollService.utførKontroller(behandling))
+        assertThat(ufmKontrollService.utførKontroller(behandling))
             .containsExactly(
                 Unntak_periode_begrunnelser.BOSATT_I_NORGE,
                 Unntak_periode_begrunnelser.INGEN_SLUTTDATO,

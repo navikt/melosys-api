@@ -1,4 +1,4 @@
-package no.nav.melosys.service.unntaksperiode.kontroll;
+package no.nav.melosys.service.kontroll.ufm;
 
 import java.util.*;
 import java.util.function.Function;
@@ -21,11 +21,11 @@ import static no.nav.melosys.metrics.MetrikkerNavn.TAG_BEGRUNNELSE;
 import static no.nav.melosys.metrics.MetrikkerNavn.UNNTAKSPERIODE_KONTROLL_TREFF;
 
 @Service
-public class RegisterkontrollService {
+public class UfmKontrollService {
 
     private final KontrollFactory kontrollFactory;
 
-    public RegisterkontrollService(KontrollFactory kontrollFactory) {
+    public UfmKontrollService(KontrollFactory kontrollFactory) {
         this.kontrollFactory = kontrollFactory;
     }
 
@@ -44,13 +44,13 @@ public class RegisterkontrollService {
         MedlemskapDokument medlemskapDokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
         InntektDokument inntektDokument = SaksopplysningerUtils.hentInntektDokument(behandling);
         UtbetalingDokument utbetalingDokument = SaksopplysningerUtils.finnUtbetalingDokument(behandling).orElse(null);
-        KontrollData kontrollData = new KontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
+        UfmKontrollData kontrollData = new UfmKontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
 
         return utførKontroller(kontrollData, kontrollFactory.hentKontrollerForSedType(sedDokument.getSedType()));
     }
 
-    private List<Unntak_periode_begrunnelser> utførKontroller(KontrollData kontrollData,
-                                                                     Collection<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller) {
+    private List<Unntak_periode_begrunnelser> utførKontroller(UfmKontrollData kontrollData,
+                                                              Collection<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller) {
         return kontroller.stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
