@@ -95,6 +95,10 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
         }
 
+        if (StringUtils.isNotEmpty(journalfoeringDto.getFullmektigRepresenterer())) {
+            prosessinstans.setData(ProsessDataKey.FULLMEKTIG_REPRESENTERER, journalfoeringDto.getFullmektigRepresenterer());
+        }
+
         prosessinstansService.lagre(prosessinstans);
     }
 

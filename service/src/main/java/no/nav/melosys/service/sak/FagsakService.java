@@ -80,8 +80,7 @@ public class FagsakService {
         Henleggelsesgrunner begrunnelseKode;
         try {
             begrunnelseKode = Henleggelsesgrunner.valueOf(begrunnelseKodeString.toUpperCase());
-        }
-        catch (java.lang.IllegalArgumentException iae) {
+        } catch (java.lang.IllegalArgumentException iae) {
             throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
         }
 
@@ -189,6 +188,7 @@ public class FagsakService {
         fagsak.getAktører().addAll(nyeMyndigheter);
         fagsakRepository.save(fagsak);
     }
+
     @Transactional
     public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
@@ -248,12 +248,13 @@ public class FagsakService {
         }
 
         String representant = opprettSakRequest.getRepresentant();
+        Representerer fullmektigRepresenterer = opprettSakRequest.getFullmektigRepresenterer();
         if (representant != null) {
             Aktoer aktørRepresentant = new Aktoer();
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
             aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
-            aktørRepresentant.setRepresenterer(Representerer.BRUKER);
+            aktørRepresentant.setRepresenterer(fullmektigRepresenterer == null ? Representerer.BRUKER : fullmektigRepresenterer);
             aktører.add(aktørRepresentant);
         }
 
@@ -298,7 +299,7 @@ public class FagsakService {
             .orElseThrow(() -> new IllegalStateException("Sak " + fagsak.getSaksnummer() + " har ingen behandlinger eller bare avsluttede behandlinger."));
     }
 
-    @Transactional(rollbackFor=MelosysException.class)
+    @Transactional(rollbackFor = MelosysException.class)
     public void avsluttSakSomBortfalt(Fagsak fagsak) throws FunksjonellException, TekniskException {
         fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
 

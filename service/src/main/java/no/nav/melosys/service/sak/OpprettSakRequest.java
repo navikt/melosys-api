@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak;
 
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
@@ -8,6 +9,7 @@ public class OpprettSakRequest {
     private String arbeidsgiver;
     private String representant;
     private String representantKontaktperson;
+    private Representerer fullmektigRepresenterer;
     private Behandlingstyper behandlingstype;
     private String initierendeJournalpostId;
     private String initierendeDokumentId;
@@ -18,6 +20,7 @@ public class OpprettSakRequest {
         this.arbeidsgiver = builder.arbeidsgiver;
         this.representant = builder.representant;
         this.representantKontaktperson = builder.representantKontaktperson;
+        this.fullmektigRepresenterer = builder.fullmektigRepresenterer;
         this.behandlingstype = builder.behandlingstype;
         this.initierendeJournalpostId = builder.initierendeJournalpostId;
         this.initierendeDokumentId = builder.initierendeDokumentId;
@@ -38,6 +41,10 @@ public class OpprettSakRequest {
 
     public String getRepresentantKontaktperson() {
         return representantKontaktperson;
+    }
+
+    public Representerer getFullmektigRepresenterer() {
+        return fullmektigRepresenterer;
     }
 
     public Behandlingstyper getBehandlingstype() {
@@ -61,6 +68,7 @@ public class OpprettSakRequest {
         private String arbeidsgiver;
         private String representant;
         private String representantKontaktperson;
+        private Representerer fullmektigRepresenterer;
         private Behandlingstyper behandlingstype;
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
@@ -83,6 +91,11 @@ public class OpprettSakRequest {
 
         public Builder medRepresentantKontaktperson(String representantKontaktperson) {
             this.representantKontaktperson = representantKontaktperson;
+            return this;
+        }
+
+        public Builder medFullmektigRepresenterer(Representerer fullmektigRepresenterer) {
+            this.fullmektigRepresenterer = fullmektigRepresenterer;
             return this;
         }
 
