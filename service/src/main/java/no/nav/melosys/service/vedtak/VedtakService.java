@@ -83,7 +83,7 @@ public class VedtakService {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        if (behandlingsresultatType == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
+        if (behandlingsresultat.erInnvilgelse()) {
             validerFattVedtak(behandling, behandlingsresultat);
         }
 
