@@ -21,21 +21,14 @@ public final class MedlemskapKontroller {
 
     public static boolean overlappendeMedlemsperiode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
 
-        if (tom == null) {
-            for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {
-                Periode periode = medlemsperiode.getPeriode();
-                if (periodeIkkeAvvist(medlemsperiode) && fom.isBefore(periode.getTom())) {
-                    return true;
-                }
-            }
-        } else {
-            for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {
-                Periode periode = medlemsperiode.getPeriode();
-                if (periodeIkkeAvvist(medlemsperiode) && fom.isBefore(periode.getTom()) && periode.getFom().isBefore(tom)) {
-                    return true;
-                }
+
+        for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {
+            Periode periode = medlemsperiode.getPeriode();
+            if (periodeIkkeAvvist(medlemsperiode) && PeriodeKontroller.periodeOverlapper(fom, tom, periode.getFom(), periode.getTom())) {
+                return true;
             }
         }
+
         return false;
     }
 
