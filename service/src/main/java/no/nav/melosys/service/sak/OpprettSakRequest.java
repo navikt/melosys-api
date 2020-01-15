@@ -9,7 +9,7 @@ public class OpprettSakRequest {
     private String arbeidsgiver;
     private String representant;
     private String representantKontaktperson;
-    private Representerer fullmektigRepresenterer;
+    private Representerer representantRepresenterer;
     private Behandlingstyper behandlingstype;
     private String initierendeJournalpostId;
     private String initierendeDokumentId;
@@ -20,7 +20,7 @@ public class OpprettSakRequest {
         this.arbeidsgiver = builder.arbeidsgiver;
         this.representant = builder.representant;
         this.representantKontaktperson = builder.representantKontaktperson;
-        this.fullmektigRepresenterer = builder.fullmektigRepresenterer;
+        this.representantRepresenterer = builder.representantRepresenterer;
         this.behandlingstype = builder.behandlingstype;
         this.initierendeJournalpostId = builder.initierendeJournalpostId;
         this.initierendeDokumentId = builder.initierendeDokumentId;
@@ -43,8 +43,8 @@ public class OpprettSakRequest {
         return representantKontaktperson;
     }
 
-    public Representerer getFullmektigRepresenterer() {
-        return fullmektigRepresenterer;
+    public Representerer getRepresentantRepresenterer() {
+        return representantRepresenterer;
     }
 
     public Behandlingstyper getBehandlingstype() {
@@ -68,7 +68,7 @@ public class OpprettSakRequest {
         private String arbeidsgiver;
         private String representant;
         private String representantKontaktperson;
-        private Representerer fullmektigRepresenterer;
+        private Representerer representantRepresenterer;
         private Behandlingstyper behandlingstype;
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
@@ -94,8 +94,8 @@ public class OpprettSakRequest {
             return this;
         }
 
-        public Builder medFullmektigRepresenterer(Representerer fullmektigRepresenterer) {
-            this.fullmektigRepresenterer = fullmektigRepresenterer;
+        public Builder medRepresentantRepresenterer(Representerer representantRepresenterer) {
+            this.representantRepresenterer = representantRepresenterer;
             return this;
         }
 

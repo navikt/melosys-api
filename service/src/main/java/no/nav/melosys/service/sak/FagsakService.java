@@ -248,13 +248,13 @@ public class FagsakService {
         }
 
         String representant = opprettSakRequest.getRepresentant();
-        Representerer fullmektigRepresenterer = opprettSakRequest.getFullmektigRepresenterer();
+        Representerer representantRepresenterer = opprettSakRequest.getRepresentantRepresenterer();
         if (representant != null) {
             Aktoer aktørRepresentant = new Aktoer();
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
             aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
-            aktørRepresentant.setRepresenterer(fullmektigRepresenterer == null ? Representerer.BRUKER : fullmektigRepresenterer);
+            aktørRepresentant.setRepresenterer(representantRepresenterer);
             aktører.add(aktørRepresentant);
         }
 
