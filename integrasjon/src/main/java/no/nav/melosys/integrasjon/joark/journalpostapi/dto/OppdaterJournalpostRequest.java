@@ -4,10 +4,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import no.nav.melosys.integrasjon.Konstanter;
 import org.apache.commons.lang3.StringUtils;
 
 public class OppdaterJournalpostRequest {
+    @JsonFormat(pattern = "yyyy-MM-dd")
     public final LocalDate datoMottatt;
     public final String tittel;
     public final String journalfoerendeEnhet;
