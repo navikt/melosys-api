@@ -7,13 +7,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
