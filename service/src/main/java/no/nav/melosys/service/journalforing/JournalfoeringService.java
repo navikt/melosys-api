@@ -3,6 +3,7 @@ package no.nav.melosys.service.journalforing;
 import java.util.Optional;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -93,6 +94,11 @@ public class JournalfoeringService {
 
         if (StringUtils.isNotEmpty(journalfoeringDto.getRepresentantKontaktPerson())) {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
+        }
+
+        if (StringUtils.isNotEmpty(journalfoeringDto.getRepresentererKode())) {
+            Representerer representantRepresenterer = Representerer.valueOf(journalfoeringDto.getRepresentererKode());
+            prosessinstans.setData(ProsessDataKey.REPRESENTANT_REPRESENTERER, representantRepresenterer);
         }
 
         prosessinstansService.lagre(prosessinstans);

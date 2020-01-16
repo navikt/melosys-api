@@ -39,6 +39,7 @@ public enum ProsessDataKey {
     OPPGAVE_ID("oppgaveID"),
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
+    REPRESENTANT_REPRESENTERER("representantRepresenterer"),
     REVURDER_BEGRUNNELSE("revurderBegrunnelse"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),

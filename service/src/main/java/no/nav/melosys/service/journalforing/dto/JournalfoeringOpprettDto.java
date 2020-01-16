@@ -8,6 +8,7 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private String arbeidsgiverID;
     private String representantID;
     private String representantKontaktPerson;
+    private String representererKode;
 
     public FagsakDto getFagsak() {
         return fagsak;
@@ -47,6 +48,14 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
 
     public void setRepresentantKontaktPerson(String representantKontaktPerson) {
         this.representantKontaktPerson = representantKontaktPerson;
+    }
+
+    public String getRepresentererKode() {
+        return representererKode;
+    }
+
+    public void setRepresentererKode(String representererKode) {
+        this.representererKode = representererKode;
     }
 
     public boolean behandlingstypeErSøknad() {

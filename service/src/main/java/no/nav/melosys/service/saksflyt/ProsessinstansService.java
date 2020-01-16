@@ -85,8 +85,8 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
         prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, skalSendesForvaltningsmelding(journalfoeringDto));
 
-        if (journalfoeringDto.getMottatDato() != null) {
-            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringDto.getMottatDato());
+        if (journalfoeringDto.getMottattDato() != null) {
+            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringDto.getMottattDato());
         }
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {

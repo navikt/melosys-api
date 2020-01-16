@@ -213,7 +213,7 @@ public class JoarkService implements JoarkFasade {
         throws SikkerhetsbegrensningException, TekniskException {
 
         OppdaterJournalpostRequest.Builder request = new OppdaterJournalpostRequest.Builder()
-            .medDatoMottatt(journalpostOppdatering.getMottatDato())
+            .medDatoMottatt(journalpostOppdatering.getMottattDato())
             .medTittel(journalpostOppdatering.getTittel())
             .medBruker(journalpostOppdatering.getBrukerID())
             .medArkivsaksnummer(Long.toString(journalpostOppdatering.getArkivSakID()));
