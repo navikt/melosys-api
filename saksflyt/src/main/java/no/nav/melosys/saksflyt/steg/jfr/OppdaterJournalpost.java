@@ -104,7 +104,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
             .medBrukerID(brukerID).medHovedDokumentID(hovedDokumentID)
             .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType).medAvsenderLand(avsenderLand)
             .medTittel(tittel)
-            .medMottatDato(mottattDato)
+            .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler).medDokumentkategori(medDokumentkategori).build();
         joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, false);

@@ -19,7 +19,7 @@ public class JournalfoeringDto {
     private List<DokumentDto> vedlegg;
     private boolean skalTilordnes;
     private Boolean ikkeSendForvaltingsmelding;
-    private LocalDate mottatDato;
+    private LocalDate mottattDato;
 
     public String getBehandlingstypeKode() {
         return behandlingstypeKode;
@@ -117,13 +117,11 @@ public class JournalfoeringDto {
         this.ikkeSendForvaltingsmelding = ikkeSendForvaltingsmelding;
     }
 
-    @JsonIgnore
-    public LocalDate getMottatDato() {
-        return mottatDato;
+    public LocalDate getMottattDato() {
+        return mottattDato;
     }
 
-    @JsonIgnore
-    public void setMottatDato(LocalDate mottatDato) {
-        this.mottatDato = mottatDato;
+    public void setMottattDato(LocalDate mottattDato) {
+        this.mottattDato = mottattDato;
     }
 }

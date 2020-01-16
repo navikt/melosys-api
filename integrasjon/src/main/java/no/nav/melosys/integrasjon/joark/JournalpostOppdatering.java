@@ -19,7 +19,7 @@ public final class JournalpostOppdatering {
     private final List<String> logiskeVedleggTitler;
     // Om dokumentkategori skal oppdatteres med standardverdi "IS", Ikke tolkbart skjema
     private final boolean medDokumentkategori;
-    private final LocalDate mottatDato;
+    private final LocalDate mottattDato;
 
     public static class Builder {
         private Long arkivSakID;
@@ -30,7 +30,7 @@ public final class JournalpostOppdatering {
         private String avsenderLand;
         private Avsendertyper avsenderType;
         private String tittel;
-        private LocalDate mottatDato;
+        private LocalDate mottattDato;
         private Map<String, String> fysiskeVedlegg = new HashMap<>();
         private List<String> logiskeVedleggTitler = new ArrayList<>();
         private boolean medDokumentkategori;
@@ -75,8 +75,8 @@ public final class JournalpostOppdatering {
             return this;
         }
 
-        public Builder medMottatDato(LocalDate mottatDato) {
-            this.mottatDato = mottatDato;
+        public Builder medMottattDato(LocalDate mottattDato) {
+            this.mottattDato = mottattDato;
             return this;
         }
 
@@ -115,7 +115,7 @@ public final class JournalpostOppdatering {
         this.fysiskeVedlegg = builder.fysiskeVedlegg;
         this.logiskeVedleggTitler = builder.logiskeVedleggTitler;
         this.medDokumentkategori = builder.medDokumentkategori;
-        this.mottatDato = builder.mottatDato;
+        this.mottattDato = builder.mottattDato;
         this.avsenderLand = builder.avsenderLand;
     }
 
@@ -153,8 +153,8 @@ public final class JournalpostOppdatering {
         return tittel;
     }
 
-    public LocalDate getMottatDato() {
-        return mottatDato;
+    public LocalDate getMottattDato() {
+        return mottattDato;
     }
 
     Map<String, String> getFysiskeVedlegg() {

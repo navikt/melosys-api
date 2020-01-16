@@ -32,13 +32,13 @@ public final class JournalpostDto {
     }
 
     public static JournalpostDto av(Journalpost journalpost) {
-        Instant mottatDato = journalpost.getForsendelseMottatt();
+        Instant mottattDato = journalpost.getForsendelseMottatt();
         String brukerID = journalpost.getBrukerId();
         String avsenderID = journalpost.getAvsenderId();
         String avsenderNavn = journalpost.getAvsenderNavn();
         Avsendertyper avsenderType = journalpost.getAvsenderType();
         boolean erBrukerAvsender = brukerID != null && brukerID.equalsIgnoreCase(avsenderID);
-        JournalpostDto dto = new JournalpostDto(mottatDato, brukerID, avsenderID, avsenderNavn, avsenderType, erBrukerAvsender);
+        JournalpostDto dto = new JournalpostDto(mottattDato, brukerID, avsenderID, avsenderNavn, avsenderType, erBrukerAvsender);
         DokumentDto dokumentDto = new DokumentDto(journalpost.getHoveddokument().getDokumentId(), journalpost.getHoveddokument().getTittel());
         dto.setHoveddokument(dokumentDto);
         dto.setVedlegg(journalpost.getVedleggListe().stream().map(v -> new DokumentDto(v.getDokumentId(), v.getTittel())).collect(Collectors.toList()));
