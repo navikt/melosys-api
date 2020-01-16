@@ -42,7 +42,7 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
 
         fag.setArbeidsland(brevDataInnvilgelse.arbeidsland);
         fag.setNavn(brevDataInnvilgelse.personNavn);
-        // fag.setArbeidsgiver(brevDataInnvilgelse.hovedvirksomhet.navn); TODO: Nytt felt i 1.2.9
+        fag.setArbeidsgiver(brevDataInnvilgelse.hovedvirksomhet.navn);
 
         Lovvalgsperiode periode = brevDataInnvilgelse.lovvalgsperiode;
         fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
