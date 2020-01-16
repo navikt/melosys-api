@@ -14,7 +14,7 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MedlemskapKontrollerTest {
-    
+
     @Test
     public void lovvalgslandErNorge_erNorge_registrerTreff() {
         assertThat(MedlemskapKontroller.lovvalgslandErNorge(Landkoder.NO)).isTrue();
@@ -64,6 +64,27 @@ public class MedlemskapKontrollerTest {
     public void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_4() {
         assertThat(MedlemskapKontroller.overlappendeMedlemsperiode(
             LocalDate.now().minusYears(1), LocalDate.now().plusYears(1), hentMedlemskapsDokument())).isTrue();
+    }
+
+    @Test
+    public void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_5() {
+        assertThat(MedlemskapKontroller.overlappendeMedlemsperiode(
+            LocalDate.now(), LocalDate.now().plusYears(2), hentMedlemskapsDokument())
+        ).isTrue();
+    }
+
+    @Test
+    public void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_6() {
+        assertThat(MedlemskapKontroller.overlappendeMedlemsperiode(
+            LocalDate.now().plusYears(2), LocalDate.now().plusYears(3), hentMedlemskapsDokument())
+        ).isTrue();
+    }
+
+    @Test
+    public void overlappendeMedlemsperiode_overlappendePeriode_registrerTreff_7() {
+        assertThat(MedlemskapKontroller.overlappendeMedlemsperiode(
+            LocalDate.now().plusYears(2), LocalDate.now().plusYears(2), hentMedlemskapsDokument())
+        ).isTrue();
     }
 
     @Test

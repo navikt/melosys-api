@@ -11,13 +11,12 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.SaksopplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
@@ -36,18 +35,11 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentMedlemskapsopplysninger.class);
 
-    private final MedlFasade medlFasade;
-
-    private final SaksopplysningRepository saksopplysningRepo;
-
-    private final Integer medlemskaphistorikkAntallÅr;
+    private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
-    public HentMedlemskapsopplysninger(MedlFasade medlFasade, SaksopplysningRepository saksopplysningRepo,
-                                       @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr) {
-        this.medlFasade = medlFasade;
-        this.saksopplysningRepo = saksopplysningRepo;
-        this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
+    public HentMedlemskapsopplysninger(SaksopplysningerService saksopplysningerService) {
+        this.saksopplysningerService = saksopplysningerService;
         log.info("HentMedlemskapsopplysninger initialisert");
     }
 
@@ -57,22 +49,11 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        String brukerId = prosessinstans.getData(BRUKER_ID);
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
-        LocalDate fom = periode.getFom().minusYears(medlemskaphistorikkAntallÅr);
-        LocalDate tom = LocalDate.now();
-
-        Instant nå = Instant.now();
-        Behandling behandling = prosessinstans.getBehandling();
-        Saksopplysning saksopplysning = medlFasade.hentPeriodeListe(brukerId, fom, tom);
-        saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(nå);
-        saksopplysning.setEndretDato(nå);
-        saksopplysningRepo.save(saksopplysning);
-
+        saksopplysningerService.hentSaksopplysningMedl(prosessinstans.getBehandling().getId(), periode.getFom(), periode.getTom());
         prosessinstans.setSteg(HENT_SOB_SAKER);
         log.info("Hentet medlemskapsopplysninger for prosessinstans {}", prosessinstans.getId());
     }

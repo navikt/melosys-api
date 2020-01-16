@@ -22,6 +22,7 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
@@ -64,6 +65,8 @@ public class VedtakServiceTest {
     private GsakFasade gsakFasade;
     @Mock
     private VedtakKontrollService vedtakKontrollService;
+    @Mock
+    private SaksopplysningerService saksopplysningerService;
 
     private VedtakService vedtakService;
 
@@ -78,7 +81,7 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, vedtakKontrollService);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, vedtakKontrollService, saksopplysningerService);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -240,7 +243,7 @@ public class VedtakServiceTest {
     public void fattVedtak_feilIValidering_kasterExceptionMedFeilkode() throws MelosysException {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         behandlingsresultat.setType(resultatType);
-        when(vedtakKontrollService.utførKontroller(any(), any()))
+        when(vedtakKontrollService.utførKontroller(anyLong()))
             .thenReturn(Collections.singletonList(Unntak_periode_begrunnelser.OVERLAPPENDE_MEDL_PERIODER));
 
         ValideringException forventetException = null;

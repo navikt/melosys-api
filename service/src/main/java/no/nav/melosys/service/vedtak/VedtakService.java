@@ -24,6 +24,7 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
@@ -52,12 +53,13 @@ public class VedtakService {
     private final FagsakService fagsakService;
     private final GsakFasade gsakFasade;
     private final VedtakKontrollService vedtakKontrollService;
+    private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
-                         FagsakService fagsakService, GsakFasade gsakFasade, VedtakKontrollService vedtakKontrollService) {
+                         FagsakService fagsakService, GsakFasade gsakFasade, VedtakKontrollService vedtakKontrollService, SaksopplysningerService saksopplysningerService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -67,6 +69,7 @@ public class VedtakService {
         this.gsakFasade = gsakFasade;
         this.fagsakService = fagsakService;
         this.vedtakKontrollService = vedtakKontrollService;
+        this.saksopplysningerService = saksopplysningerService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -78,13 +81,14 @@ public class VedtakService {
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType,
                            String fritekst, String mottakerInstitusjon,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         if (behandlingsresultat.erInnvilgelse()) {
-            validerFattVedtak(behandling, behandlingsresultat);
+            saksopplysningerService.hentSaksopplysningMedl(behandlingID, behandlingsresultat.hentValidertLovvalgsperiode());
+            validerFattVedtak(behandlingID);
         }
 
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
@@ -99,8 +103,8 @@ public class VedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerFattVedtak(Behandling behandling, Behandlingsresultat behandlingsresultat) throws MelosysException {
-        Collection<Unntak_periode_begrunnelser> feilValideringer = vedtakKontrollService.utførKontroller(behandling, behandlingsresultat);
+    private void validerFattVedtak(long behandlingID) throws MelosysException {
+        Collection<Unntak_periode_begrunnelser> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
                 feilValideringer.stream().map(Kodeverk::getKode).collect(Collectors.toList()));
