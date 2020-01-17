@@ -8,10 +8,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
@@ -26,6 +26,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -50,6 +51,8 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory.fagsakMedBehandlinger;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,11 +64,11 @@ import static org.mockito.Mockito.*;
 public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjenesteTest.class);
     private static final String FAGSAKER_SCHEMA = "fagsaker-schema.json";
+    private static final String FAGSAKER_OPPRETT_SCHEMA = "fagsaker-opprett-post-schema.json";
     private static final String SOK_FAGSAKER_SCHEMA = "fagsaker-sok-schema.json";
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
-
     private static TilgangService tilgangService;
 
     private EasyRandom random;
@@ -96,6 +99,14 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    public void fagsakOpprettSchemaValidering() throws IOException, JSONException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+
+        String jsonString = new ObjectMapper().registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).writeValueAsString(opprettSakDto);
+        valider(jsonString, FAGSAKER_OPPRETT_SCHEMA, log);
+    }
+
+    @Test
     public void fagsakSøkSchemaValidering() throws IOException, JSONException {
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());
         List<BehandlingOversiktDto> behandlingOversiktDtoer = random.objects(BehandlingOversiktDto.class, 1).collect(Collectors.toList());
@@ -108,18 +119,18 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public final void hentFagsakGir200OkOgDto() throws Exception {
         Fagsak fagsak = lagFagsak();
-        testHentFagsak("123", Response.status(Status.OK).entity(lagFagsakDto(fagsak)).build());
+        testHentFagsak("123", ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak)));
     }
 
-    private void testHentFagsak(String saksnr, Response forventning) throws Exception {
+    private void testHentFagsak(String saksnr, ResponseEntity forventning) throws Exception {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
-        Response resultat = instans.hentFagsak(saksnr);
-        assertThat(resultat.getStatusInfo()).isEqualTo(forventning.getStatusInfo());
-        if (forventning.getEntity() == null) {
-            assertThat(resultat.getEntity()).isNull();
+        ResponseEntity resultat = instans.hentFagsak(saksnr);
+        assertThat(resultat.getStatusCode()).isEqualTo(forventning.getStatusCode());
+        if (forventning.getBody() == null) {
+            assertThat(resultat.getBody()).isNull();
         } else {
-            assertThat(resultat.getEntity()).usingRecursiveComparison().isEqualTo(forventning.getEntity());
+            assertThat(resultat.getBody()).usingRecursiveComparison().isEqualTo(forventning.getBody());
         }
     }
 
@@ -142,7 +153,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     public final void hentFagsaker_utenFnr_girBadRequest() throws Exception {
         FagsakTjeneste instans = lagFagsakTjeneste(lagFagsak());
         Throwable unntak = catchThrowable(() -> instans.hentFagsaker(null));
-        assertThat(unntak).isInstanceOf(BadRequestException.class);
+        assertThat(unntak).isInstanceOf(FunksjonellException.class);
     }
 
     @Test
@@ -150,7 +161,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(null);
         OpprettSakDto dto = new OpprettSakDto();
         Throwable unntak = catchThrowable(() -> instans.opprettFagsak(dto));
-        assertThat(unntak).isInstanceOf(BadRequestException.class);
+        assertThat(unntak).isInstanceOf(FunksjonellException.class);
     }
 
     @Test
@@ -175,9 +186,9 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
         String saksnummer = "123";
-        Response resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
+        ResponseEntity resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
 
-        assertThat(resultat.getStatusInfo()).isEqualTo(Status.OK);
+        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(fagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
     }
     @Test
@@ -244,9 +255,9 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         String saksnummer = "123";
-        Response resultat = instans.avsluttSakSomBortfalt(saksnummer);
+        ResponseEntity resultat = instans.avsluttSakSomBortfalt(saksnummer);
 
-        assertThat(resultat.getStatusInfo()).isEqualTo(Status.NO_CONTENT);
+        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         verify(fagsakService).avsluttSakSomBortfalt(fagsak);
     }
 
@@ -260,6 +271,14 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         instans.avsluttSakSomBortfalt("123");
 
         verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public final void avsluttSakManuelt_sakEksisterer_avsluttes() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        instans.avsluttSakManuelt("123");
+        verify(fagsakService).avsluttFagsakOgBehandlingValiderBehandlingstype(eq(fagsak), eq(fagsak.getAktivBehandling()));
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {

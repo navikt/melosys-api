@@ -2,12 +2,13 @@ package no.nav.melosys.service.journalforing;
 
 import java.util.Optional;
 
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
@@ -56,7 +57,7 @@ public class JournalfoeringService {
             throw new FunksjonellException("Journalpost med id " + journalpost.getJournalpostId() + " skal ikke journalføres manuelt");
         }
 
-        if (Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(journalfoeringDto.getBehandlingstypeKode())){
+        if (journalfoeringDto.behandlingstypeErSøknad()){
             opprettSakOgJournalfør(journalfoeringDto);
         } else if (Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(journalfoeringDto.getBehandlingstypeKode())) {
             opprettProsessinstansBrevAouMottak(journalfoeringDto);
@@ -93,6 +94,11 @@ public class JournalfoeringService {
 
         if (StringUtils.isNotEmpty(journalfoeringDto.getRepresentantKontaktPerson())) {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
+        }
+
+        if (StringUtils.isNotEmpty(journalfoeringDto.getRepresentererKode())) {
+            Representerer representantRepresenterer = Representerer.valueOf(journalfoeringDto.getRepresentererKode());
+            prosessinstans.setData(ProsessDataKey.REPRESENTANT_REPRESENTERER, representantRepresenterer);
         }
 
         prosessinstansService.lagre(prosessinstans);

@@ -1,4 +1,4 @@
-<ns2:finnArbeidsforholdPrArbeidstakerResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3">
+<ns33:finnArbeidsforholdPrArbeidstakerResponse xmlns:ns33="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3">
     <parameters>
         <arbeidsforhold applikasjonsID="KONVERTERING" endretAv="EDAG-1456" endringstidspunkt="2015-06-01T05:41:12.914+02:00" opprettelsestidspunkt="2014-12-13T16:33:52.361+01:00" opprettetAv="BAAREG002" sistBekreftet="2010-08-15T00:00:00.000+02:00">
             <arbeidsforholdID>konvertert_e184423b-060e-4600-a635-e79f34acc2a8</arbeidsforholdID>
@@ -10,7 +10,7 @@
                 </periode>
             </ansettelsesPeriode>
             <arbeidsforholdstype kodeRef="ordinaertArbeidsforhold">Ordinært arbeidsforhold</arbeidsforholdstype>
-            <arbeidsavtale xsi:type="ns4:MaritimArbeidsavtale" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" applikasjonsID="KONVERTERING" endretAv="BAAREG002" endringstidspunkt="2014-12-13T16:33:52.361+01:00" fomBruksperiode="2014-12-13+01:00" fomGyldighetsperiode="2010-06-01T00:00:00.000+02:00">
+            <arbeidsavtale xsi:type="ns99:MaritimArbeidsavtale" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" applikasjonsID="KONVERTERING" endretAv="BAAREG002" endringstidspunkt="2014-12-13T16:33:52.361+01:00" fomBruksperiode="2014-12-13+01:00" fomGyldighetsperiode="2010-06-01T00:00:00.000+02:00">
                 <yrke kodeRef="9133105">SERVERINGSHJELP</yrke>
                 <beregnetAntallTimerPrUke>30.0</beregnetAntallTimerPrUke>
                 <endringsdatoStillingsprosent>2010-06-21+02:00</endringsdatoStillingsprosent>
@@ -18,7 +18,7 @@
                 <skipsregister kodeRef="nor">NOR</skipsregister>
                 <skipstype kodeRef="turist">Turistskip</skipstype>
             </arbeidsavtale>
-            <arbeidsgiver xsi:type="ns4:Person" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <arbeidsgiver xsi:type="ns99:Person" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <ident>
                     <ident>99999999998</ident>
                 </ident>
@@ -28,7 +28,7 @@
                     <ident>99999999999</ident>
                 </ident>
             </arbeidstaker>
-            <opplysningspliktig xsi:type="ns4:Person" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <opplysningspliktig xsi:type="ns99:Person" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <ident>
                     <ident>99999999998</ident>
                 </ident>
@@ -52,7 +52,7 @@
                 <beregnetStillingsprosent>66.6</beregnetStillingsprosent>
                 <antallTimerGammeltAa>1000</antallTimerGammeltAa>
             </arbeidsavtale>
-            <arbeidsgiver xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <arbeidsgiver xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>975270211</orgnummer>
             </arbeidsgiver>
             <arbeidstaker>
@@ -60,7 +60,7 @@
                     <ident>99999999999</ident>
                 </ident>
             </arbeidstaker>
-            <opplysningspliktig xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <opplysningspliktig xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>940493021</orgnummer>
             </opplysningspliktig>
             <arbeidsforholdInnrapportertEtterAOrdningen>false</arbeidsforholdInnrapportertEtterAOrdningen>
@@ -80,7 +80,7 @@
                 <beregnetAntallTimerPrUke>23.65</beregnetAntallTimerPrUke>
                 <endringsdatoStillingsprosent>2011-09-01+02:00</endringsdatoStillingsprosent>
             </arbeidsavtale>
-            <arbeidsgiver xsi:type="ns4:HistoriskArbeidsgiverMedArbeidsgivernummer" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <arbeidsgiver xsi:type="ns99:HistoriskArbeidsgiverMedArbeidsgivernummer" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <arbeidsgivernummer>12345</arbeidsgivernummer>
             </arbeidsgiver>
             <arbeidstaker>
@@ -88,7 +88,7 @@
                     <ident>99999999999</ident>
                 </ident>
             </arbeidstaker>
-            <opplysningspliktig xsi:type="ns4:HistoriskArbeidsgiverMedArbeidsgivernummer" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <opplysningspliktig xsi:type="ns99:HistoriskArbeidsgiverMedArbeidsgivernummer" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <arbeidsgivernummer>12345</arbeidsgivernummer>
             </opplysningspliktig>
             <arbeidsforholdInnrapportertEtterAOrdningen>false</arbeidsforholdInnrapportertEtterAOrdningen>
@@ -108,7 +108,7 @@
                 <beregnetAntallTimerPrUke>25.73</beregnetAntallTimerPrUke>
                 <endringsdatoStillingsprosent>2011-08-01+02:00</endringsdatoStillingsprosent>
             </arbeidsavtale>
-            <arbeidsgiver xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <arbeidsgiver xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>988991708</orgnummer>
             </arbeidsgiver>
             <arbeidstaker>
@@ -116,7 +116,7 @@
                     <ident>99999999999</ident>
                 </ident>
             </arbeidstaker>
-            <opplysningspliktig xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <opplysningspliktig xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>940493021</orgnummer>
             </opplysningspliktig>
             <arbeidsforholdInnrapportertEtterAOrdningen>false</arbeidsforholdInnrapportertEtterAOrdningen>
@@ -140,7 +140,7 @@
                 <sisteLoennsendringsdato>2014-05-01+02:00</sisteLoennsendringsdato>
                 <beregnetAntallTimerPrUke>10.834599999999998</beregnetAntallTimerPrUke>
             </arbeidsavtale>
-            <arbeidsgiver xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <arbeidsgiver xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>995816598</orgnummer>
             </arbeidsgiver>
             <arbeidstaker>
@@ -148,7 +148,7 @@
                     <ident>99999999999</ident>
                 </ident>
             </arbeidstaker>
-            <opplysningspliktig xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <opplysningspliktig xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>964338531</orgnummer>
             </opplysningspliktig>
             <arbeidsforholdInnrapportertEtterAOrdningen>true</arbeidsforholdInnrapportertEtterAOrdningen>
@@ -168,7 +168,7 @@
                 <beregnetAntallTimerPrUke>35.5</beregnetAntallTimerPrUke>
                 <endringsdatoStillingsprosent>2014-07-01+02:00</endringsdatoStillingsprosent>
             </arbeidsavtale>
-            <arbeidsgiver xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <arbeidsgiver xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>995816598</orgnummer>
             </arbeidsgiver>
             <arbeidstaker>
@@ -176,7 +176,7 @@
                     <ident>99999999999</ident>
                 </ident>
             </arbeidstaker>
-            <opplysningspliktig xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <opplysningspliktig xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>974773880</orgnummer>
             </opplysningspliktig>
             <arbeidsforholdInnrapportertEtterAOrdningen>false</arbeidsforholdInnrapportertEtterAOrdningen>
@@ -449,7 +449,7 @@
                 <permisjonsprosent>100.0</permisjonsprosent>
                 <permisjonOgPermittering kodeRef="permisjon">Permisjon</permisjonOgPermittering>
             </permisjonOgPermittering>
-            <arbeidsgiver xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <arbeidsgiver xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>995816598</orgnummer>
             </arbeidsgiver>
             <arbeidstaker>
@@ -457,7 +457,7 @@
                     <ident>99999999999</ident>
                 </ident>
             </arbeidstaker>
-            <opplysningspliktig xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <opplysningspliktig xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>964338531</orgnummer>
             </opplysningspliktig>
             <arbeidsforholdInnrapportertEtterAOrdningen>true</arbeidsforholdInnrapportertEtterAOrdningen>
@@ -481,7 +481,7 @@
                 <sisteLoennsendringsdato>2014-05-28+02:00</sisteLoennsendringsdato>
                 <beregnetAntallTimerPrUke>35.5</beregnetAntallTimerPrUke>
             </arbeidsavtale>
-            <arbeidsgiver xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <arbeidsgiver xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>995816598</orgnummer>
             </arbeidsgiver>
             <arbeidstaker>
@@ -489,10 +489,10 @@
                     <ident>99999999999</ident>
                 </ident>
             </arbeidstaker>
-            <opplysningspliktig xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <opplysningspliktig xsi:type="ns99:Organisasjon" xmlns:ns99="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <orgnummer>964338531</orgnummer>
             </opplysningspliktig>
             <arbeidsforholdInnrapportertEtterAOrdningen>true</arbeidsforholdInnrapportertEtterAOrdningen>
         </arbeidsforhold>
     </parameters>
-</ns2:finnArbeidsforholdPrArbeidstakerResponse>
+</ns33:finnArbeidsforholdPrArbeidstakerResponse>

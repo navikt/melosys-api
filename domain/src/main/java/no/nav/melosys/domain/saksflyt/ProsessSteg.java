@@ -33,8 +33,9 @@ public enum ProsessSteg implements Kodeverk {
     HENT_SOB_SAKER("HENT_SOB_SAKER", "Hent saker fra Sak og behandling"),
     OPPFRISK_SAKSOPPLYSNINGER("OPPFRISK_SAKSOPPLYSNINGER", "Oppfrisking av saksopplysninger"),
 
-    //Gsak
-    GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
+    // Oppgave
+    GJENBRUK_OPPGAVE("GJENBRUK_OPPGAVE", "Gjenbruker eksisterende oppgave"),
+    GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i Oppgave"),
 
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
 

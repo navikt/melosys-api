@@ -16,6 +16,8 @@ public class BrevDataInnvilgelse extends BrevData {
     public String trygdemyndighetsland;
     public BrevDataA1 vedleggA1;
     public Optional<AnmodningsperiodeSvar> anmodningsperiodesvar;
+    public String personNavn;
+    public boolean erArt16UtenArt12;
 
     public BrevDataInnvilgelse(BrevbestillingDto brevbestillingDto, String saksbehandler) {
         super(brevbestillingDto, saksbehandler);

@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -60,13 +61,14 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String representant = prosessinstans.getData(REPRESENTANT);
         String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
+        Representerer representantRepresenterer = prosessinstans.getData(REPRESENTANT_REPRESENTERER, Representerer.class);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
+        Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
             Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-            Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
             Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setBehandling(behandling);
 
@@ -75,7 +77,8 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK || prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
             OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID(aktørId).medArbeidsgiver(arbeidsgiver)
                 .medRepresentant(representant).medRepresentantKontaktperson(representantKontakperson)
-                .medBehandlingstype(Behandlingstyper.SOEKNAD).medInitierendeJournalpostId(initierendeJournalpostId)
+                .medRepresentantRepresenterer(representantRepresenterer)
+                .medBehandlingstype(behandlingstype).medInitierendeJournalpostId(initierendeJournalpostId)
                 .medInitierendeDokumentId(initierendeDokumentId).build();
             Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
             prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());

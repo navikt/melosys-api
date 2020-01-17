@@ -13,6 +13,7 @@ public class BrevDataAvslagYrkesaktiv extends BrevData {
     public Yrkesaktivitetstyper yrkesaktivitet;
     public Optional<AnmodningsperiodeSvar> anmodningsperiodeSvar;
     public Vilkaarsresultat art16Vilkaar;
+    public boolean erArt16UtenArt12;
 
     public BrevDataAvslagYrkesaktiv(BrevbestillingDto brevbestillingDto, String saksbehandler) {
         super(brevbestillingDto, saksbehandler);

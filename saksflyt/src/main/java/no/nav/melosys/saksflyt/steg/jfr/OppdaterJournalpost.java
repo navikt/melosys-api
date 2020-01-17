@@ -1,21 +1,22 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         String brukerID = prosessinstans.getData(BRUKER_ID);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
+        String avsenderLand = prosessinstans.getData(AVSENDER_LAND);
         Avsendertyper avsenderType = prosessinstans.getData(AVSENDER_TYPE, Avsendertyper.class);
         if (avsenderNavn == null) {
             if (avsenderID == null) {
@@ -93,14 +95,17 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         }
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
         String hovedDokumentID = prosessinstans.getData(DOKUMENT_ID);
+        LocalDate mottattDato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
 
         List<String> logiskeVedleggTitler = prosessinstans.getData(LOGISKE_VEDLEGG_TITLER, List.class);
         Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
 
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(arkivSakID)
             .medBrukerID(brukerID).medHovedDokumentID(hovedDokumentID)
-            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType)
-            .medTittel(tittel).medFysiskeVedlegg(fysiskeVedleggMedTitler)
+            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType).medAvsenderLand(avsenderLand)
+            .medTittel(tittel)
+            .medMottattDato(mottattDato)
+            .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler).medDokumentkategori(medDokumentkategori).build();
         joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, false);
 
@@ -108,4 +113,3 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         log.info("Prosessinstans {} har oppdatert journalpost {}. SakId: {}", prosessinstans.getId(), journalpostID, arkivSakID);
     }
 }
-

@@ -32,7 +32,7 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
         Fag fag = mapFag(brevDataAvslagArbeidsgiver);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     Fag mapFag(BrevDataAvslagArbeidsgiver brevData) throws TekniskException {
@@ -42,7 +42,8 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
 
         fag.setArbeidsland(brevData.arbeidsland);
 
-        fag.setJuridiskEnhet(brevData.hovedvirksomhet.navn);
+        fag.setArbeidsgiver(brevData.hovedvirksomhet.navn);
+        fag.setJuridiskEnhet(brevData.hovedvirksomhet.navn);    // Skal fjernes når xsd er oppdatert
 
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(brevData.lovvalgsperiode));
 

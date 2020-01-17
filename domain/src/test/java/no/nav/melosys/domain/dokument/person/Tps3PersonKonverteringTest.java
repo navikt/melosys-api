@@ -27,7 +27,7 @@ public class Tps3PersonKonverteringTest implements KonverteringTest {
 
     @BeforeClass
     public static void setUp() {
-        Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
+        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
@@ -63,6 +63,7 @@ public class Tps3PersonKonverteringTest implements KonverteringTest {
         assertThat(dokument).isNotNull();
         assertThat(dokument.postadresse).isNotNull();
         assertThat(dokument.midlertidigPostadresse).isNotNull();
+        assertThat(dokument.midlertidigPostadresse.land.getKode()).isEqualTo("GBR");
     }
 
     @Test

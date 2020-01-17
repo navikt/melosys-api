@@ -1,12 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -19,19 +16,22 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.security.token.support.core.api.Protected;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 import static java.util.stream.Collectors.toList;
 
+@Protected
+@RestController
+@RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
-@Path("/fagsaker")
-@Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class AktoerTjeneste extends RestTjeneste {
+public class AktoerTjeneste {
 
     private final TilgangService tilgangService;
 
@@ -46,15 +46,14 @@ public class AktoerTjeneste extends RestTjeneste {
         this.fagsakService = fagsakService;
     }
 
-    @GET
-    @Path("{saksnummer}/aktoerer/")
+    @GetMapping("/{saksnummer}/aktoerer")
     @ApiOperation(
         value = "Henter aktører knyttet til et gitt saksnummer.",
         response = AktoerDto.class,
         responseContainer = "List")
-    public List<AktoerDto> hentAktoerer(@PathParam("saksnummer") String saksnummer,
-                                        @QueryParam("rolleKode") String rolleKode,
-                                        @QueryParam("representerer") String representerer)
+    public List<AktoerDto> hentAktoerer(@PathVariable("saksnummer") String saksnummer,
+                                        @RequestParam(value = "rolleKode", required = false) String rolleKode,
+                                        @RequestParam(value = "representerer", required = false) String representerer)
         throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
@@ -73,27 +72,25 @@ public class AktoerTjeneste extends RestTjeneste {
         return aktører.stream().map(this::tilDto).collect(toList());
     }
 
-    @POST
-    @Path("{saksnummer}/aktoerer/")
+    @PostMapping("/{saksnummer}/aktoerer")
     @ApiOperation(
         value = "Lagrer/oppdaterer aktør informasjon for et gitt saksnummer.",
         response = AktoerDto.class)
-    public Response lagAktoerer(@PathParam("saksnummer") String saksnummer, @ApiParam AktoerDto aktoerDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity lagAktoerer(@PathVariable("saksnummer") String saksnummer, @RequestBody AktoerDto aktoerDto) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
         Long databaseId = aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
         aktoerDto.setDatabaseID(databaseId);
-        return Response.ok(aktoerDto).build();
+        return ResponseEntity.ok(aktoerDto);
     }
 
-    @DELETE
-    @Path("/aktoerer/{databaseID}")
+    @DeleteMapping("/aktoerer/{databaseID}")
     @ApiOperation(
         value = "Sletter aktøren med en gitt database-id.",
         response = AktoerDto.class)
-    public Response slettAktoer(@PathParam("databaseID") long databaseID) throws TekniskException, FunksjonellException {
+    public ResponseEntity slettAktoer(@PathVariable("databaseID") long databaseID) throws TekniskException, FunksjonellException {
         aktoerService.slettAktoer(databaseID);
-        return Response.ok().build();
+        return ResponseEntity.ok().build();
     }
 
     private AktoerDto tilDto(Aktoer aktoer) {

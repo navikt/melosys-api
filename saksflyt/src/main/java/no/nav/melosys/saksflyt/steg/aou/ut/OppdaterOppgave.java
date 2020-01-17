@@ -3,19 +3,19 @@ package no.nav.melosys.saksflyt.steg.aou.ut;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component("AnmodningOmUnntakOppdaterOppgave")
 public class OppdaterOppgave extends AbstraktStegBehandler {
@@ -43,14 +43,12 @@ public class OppdaterOppgave extends AbstraktStegBehandler {
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
 
-        Oppgave.Builder builder = new Oppgave.Builder(oppgave);
+        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+            .beskrivelse(ANMODNING_OM_UNNTAK_SENDT)
+            .fristFerdigstillelse(oppgave.getFristFerdigstillelse().isBefore(frist) ? frist : null)
+            .build();
 
-        if (oppgave.getFristFerdigstillelse().isBefore(frist)) {
-            builder.setFristFerdigstillelse(frist);
-        }
-        builder.setBeskrivelse(StringUtils.isEmpty(oppgave.getBeskrivelse()) ? ANMODNING_OM_UNNTAK_SENDT : oppgave.getBeskrivelse() + System.lineSeparator() + ANMODNING_OM_UNNTAK_SENDT);
-
-        gsakFasade.oppdaterOppgave(builder.build());
+        gsakFasade.oppdaterOppgave(oppgave.getOppgaveId(), oppgaveOppdatering);
 
         LOGGER.info("Oppdatert oppgave {} med beskrivelse, og frist som samsvarer med behandlingsfristen", oppgave.getOppgaveId());
         prosessinstans.setSteg(ProsessSteg.FERDIG);

@@ -56,10 +56,8 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Test;
-import org.pac4j.oidc.profile.OidcProfile;
-import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
@@ -110,10 +108,6 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserUtkast_innvilgelsesBrev_funker() throws Exception {
-        OidcProfile oidcProfile = mock(OidcProfile.class);
-        when(oidcProfile.getSubject()).thenReturn("testbruker");
-        Pac4jAuthenticationToken auth = new Pac4jAuthenticationToken(Collections.singletonList(oidcProfile));
-        SecurityContextHolder.getContext().setAuthentication(auth);
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(BRUKER);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
@@ -124,10 +118,6 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserUtkast_avslagArbeidsgiver_funker() throws Exception {
-        OidcProfile oidcProfile = mock(OidcProfile.class);
-        when(oidcProfile.getSubject()).thenReturn("testbruker");
-        Pac4jAuthenticationToken auth = new Pac4jAuthenticationToken(Collections.singletonList(oidcProfile));
-        SecurityContextHolder.getContext().setAuthentication(auth);
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(ARBEIDSGIVER);
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
@@ -331,13 +321,14 @@ public final class DokumentServiceTest {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
-        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
+        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
+        VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
         JoarkService joarkService = mock(JoarkService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         SoeknadService soeknadService = mock(SoeknadService.class);
         LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, soeknadService, vilkaarsresultatRepository);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
-            utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService, landvelgerService);
+            utenlandskMyndighetService, vilkaarsresultatRepository, vilkaarsresultatService, joarkService, landvelgerService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() throws FunksjonellException, TekniskException {

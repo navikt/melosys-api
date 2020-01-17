@@ -56,7 +56,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     private final FagsakService fagsakService;
 
     @Autowired
-    protected VideresendSoknad(EessiService eessiService,
+    protected VideresendSoknad(@Qualifier("system") EessiService eessiService,
                                BehandlingsresultatService behandlingsresultatService,
                                LandvelgerService landvelgerService,
                                TpsFasade tpsFasade,

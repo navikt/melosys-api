@@ -28,7 +28,7 @@ public class Aareg3KonverteringTest {
 
     @Before
     public void setUp() {
-        Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
+        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
@@ -91,14 +91,15 @@ public class Aareg3KonverteringTest {
             for (Arbeidsforhold arbeidsforhold : dokument.getArbeidsforhold()) {
 
                 assertThat(arbeidsforhold.getArbeidsgivertype()).isNotNull();
-                assertThat(arbeidsforhold.getArbeidsgiverID()).isNotNull();
+                assertThat(arbeidsforhold.getArbeidsgiverID()).isNotBlank();
                 assertThat(arbeidsforhold.getOpplysningspliktigtype()).isNotNull();
-                assertThat(arbeidsforhold.getOpplysningspliktigID()).isNotNull();
+                assertThat(arbeidsforhold.getOpplysningspliktigID()).isNotBlank();
                 assertThat(arbeidsforhold.getArbeidsavtaler()).isNotEmpty();
 
                 for (Arbeidsavtale arbeidsavtale : arbeidsforhold.getArbeidsavtaler()) {
 
                     assertThat(arbeidsavtale).isNotNull();
+                    assertThat(arbeidsavtale.maritimArbeidsavtale).isNotNull();
                 }
             }
         }

@@ -84,7 +84,7 @@ public class Behandling extends RegistreringsInfo {
     public void setType(Behandlingstyper type) {
         this.type = type;
     }
-    
+
     public Set<Saksopplysning> getSaksopplysninger() {
         return saksopplysninger;
     }
@@ -164,7 +164,7 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean erRedigerbar() {
         return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK
-                    || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT
+                    || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && type != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV)
                     || status == Behandlingsstatus.AVSLUTTET);
     }
 
@@ -173,7 +173,7 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.AVVENT_DOK_UTL
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
-    
+
     public boolean isAktiv() {
         return status != Behandlingsstatus.AVSLUTTET;
     }

@@ -10,6 +10,7 @@ public enum ProsessDataKey {
     ARKIV_ID("arkivId"),
     ARKIVSYSTEM("arkivsystem"),
     AVSENDER_ID("avsenderID"),
+    AVSENDER_LAND("avsenderLand"),
     AVSENDER_NAVN("avsenderNavn"),
     AVSENDER_TYPE("avsenderType"),
     BEGRUNNELSEKODE("begrunnelsekode"),
@@ -33,10 +34,13 @@ public enum ProsessDataKey {
     LOVVALGSBESTEMMELSE("lovvalgsbestemmelse"),
     LOVVALGSLAND("lovvalgsland"),
     MOTTAKER("mottaker"),
+    MOTTATT_DATO("mottattDato"),
     OPPHOLDSLAND("oppholdsland"),
     OPPGAVE_ID("oppgaveID"),
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
+    REPRESENTANT_REPRESENTERER("representantRepresenterer"),
+    REVURDER_BEGRUNNELSE("revurderBegrunnelse"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
     SED_DOKUMENT("sedDokument"),
@@ -47,7 +51,8 @@ public enum ProsessDataKey {
     SØKNADSPERIODE("søknadsperiode"),
     TEMA("tema"),
     UNNTAK_FRA_LOVVALGSBESTEMMELSE("unntakFraLovvalgsbestemmelse"),
-    UNNTAK_FRA_LOVVALGSLAND("unntakFraLovvalgsland");
+    UNNTAK_FRA_LOVVALGSLAND("unntakFraLovvalgsland"),
+    VEDTAKSTYPE("vedtakstype");
 
     private String kode;
 

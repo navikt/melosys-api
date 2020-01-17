@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.core.Response;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -67,9 +68,9 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         }
 
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
-        Response response = tjeneste.mineOppgaver();
+        ResponseEntity response = tjeneste.mineOppgaver();
 
-        OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getEntity();
+        OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getBody();
         valider(oppgaveOversikt, OPPGAVER_OVERSIKT_SCHEMA, logger);
     }
 
@@ -100,14 +101,22 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
         valider(innData, OPPGAVER_PLUKK_POST_SCHEMA, logger);
 
-        Response response = tjeneste.plukkOppgave(innData);
+        ResponseEntity response = tjeneste.plukkOppgave(innData);
 
-        assertThat(response.getEntity()).isExactlyInstanceOf(PlukketOppgaveDto.class);
+        assertThat(response.getBody()).isExactlyInstanceOf(PlukketOppgaveDto.class);
 
-        PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getEntity();
+        PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getBody();
         valider(entity, OPPGAVER_PLUKK_SCHEMA, logger);
 
         assertThat(entity.getOppgaveID()).isEqualTo("1");
+    }
+
+    @Test
+    public void søkOppgaverMedBrukerID() throws FunksjonellException, TekniskException, IOException {
+        List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
+        when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
+
+        validerArray((List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>)tjeneste.søkOppgaverMedBrukerID("").getBody(), OPPGAVER_SOK_SCHEMA, logger);
     }
 
     @Test

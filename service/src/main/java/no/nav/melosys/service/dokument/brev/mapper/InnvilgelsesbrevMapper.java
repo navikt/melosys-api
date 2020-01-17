@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -25,7 +26,8 @@ import org.xml.sax.SAXException;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_2;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
-import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt121BegrunnelseType;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt122BegrunnelseType;
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
@@ -43,7 +45,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag, vedleggMapper.hent());
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevdata) throws TekniskException {
@@ -109,7 +111,32 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
         fag.setFritekst(brevdata.fritekst);
 
+        if (resultat.getVedtakMetadata() != null) {
+            fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
+        }
+
+        if (brevdata.erArt16UtenArt12) {
+            fag.setArt16UtenArt12(JA);
+        }
+
         return fag;
+    }
+
+    private VedtaksTypeKode tilVedtaksTypeKode(Vedtakstyper vedtakstype) throws TekniskException {
+        if (vedtakstype == null) {
+            return null;
+        }
+
+        switch (vedtakstype) {
+            case FØRSTEGANGSVEDTAK:
+                return VedtaksTypeKode.FOERSTEGANGSVEDTAK;
+            case KORRIGERT_VEDTAK:
+                return VedtaksTypeKode.KORRIGERT_VEDTAK;
+            case OMGJØRINGSVEDTAK:
+                return VedtaksTypeKode.OMGJOERINGSVEDTAK;
+            default:
+                throw new TekniskException("Ukjent vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
+        }
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {

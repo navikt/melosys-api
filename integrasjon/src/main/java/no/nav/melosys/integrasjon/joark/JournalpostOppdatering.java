@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -12,11 +13,13 @@ public final class JournalpostOppdatering {
     private final String avsenderID;
     private final String avsenderNavn;
     private final Avsendertyper avsenderType;
+    private final String avsenderLand;
     private final String tittel;
     private final Map<String, String> fysiskeVedlegg;
     private final List<String> logiskeVedleggTitler;
     // Om dokumentkategori skal oppdatteres med standardverdi "IS", Ikke tolkbart skjema
     private final boolean medDokumentkategori;
+    private final LocalDate mottattDato;
 
     public static class Builder {
         private Long arkivSakID;
@@ -24,8 +27,10 @@ public final class JournalpostOppdatering {
         private String brukerID;
         private String avsenderID;
         private String avsenderNavn;
+        private String avsenderLand;
         private Avsendertyper avsenderType;
         private String tittel;
+        private LocalDate mottattDato;
         private Map<String, String> fysiskeVedlegg = new HashMap<>();
         private List<String> logiskeVedleggTitler = new ArrayList<>();
         private boolean medDokumentkategori;
@@ -55,6 +60,11 @@ public final class JournalpostOppdatering {
             return this;
         }
 
+        public Builder medAvsenderLand(String avsenderLand) {
+            this.avsenderLand = avsenderLand;
+            return this;
+        }
+
         public Builder medAvsenderType(Avsendertyper avsenderType) {
             this.avsenderType = avsenderType;
             return this;
@@ -62,6 +72,11 @@ public final class JournalpostOppdatering {
 
         public Builder medTittel(String tittel) {
             this.tittel = tittel;
+            return this;
+        }
+
+        public Builder medMottattDato(LocalDate mottattDato) {
+            this.mottattDato = mottattDato;
             return this;
         }
 
@@ -100,6 +115,8 @@ public final class JournalpostOppdatering {
         this.fysiskeVedlegg = builder.fysiskeVedlegg;
         this.logiskeVedleggTitler = builder.logiskeVedleggTitler;
         this.medDokumentkategori = builder.medDokumentkategori;
+        this.mottattDato = builder.mottattDato;
+        this.avsenderLand = builder.avsenderLand;
     }
 
     public Long getArkivSakID() {
@@ -126,16 +143,35 @@ public final class JournalpostOppdatering {
         return avsenderType;
     }
 
+
+    public String getAvsenderLand() {
+        return avsenderLand;
+    }
+
+
     public String getTittel() {
         return tittel;
+    }
+
+    public LocalDate getMottattDato() {
+        return mottattDato;
     }
 
     Map<String, String> getFysiskeVedlegg() {
         return fysiskeVedlegg;
     }
 
+    boolean harFysiskeVedlegg() {
+        return !CollectionUtils.isEmpty(fysiskeVedlegg);
+    }
+
+
     List<String> getLogiskeVedleggTitler() {
         return logiskeVedleggTitler;
+    }
+
+    boolean harLogiskeVedlegg() {
+        return !CollectionUtils.isEmpty(logiskeVedleggTitler);
     }
 
     public boolean isMedDokumentkategori() {

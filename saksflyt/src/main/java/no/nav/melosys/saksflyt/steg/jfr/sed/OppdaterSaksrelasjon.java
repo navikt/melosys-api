@@ -1,14 +1,15 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("oppdaterSaksrelasjonSedMottak")
@@ -18,7 +19,7 @@ public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
 
     private final EessiService eessiService;
 
-    public OppdaterSaksrelasjon(EessiService eessiService) {
+    public OppdaterSaksrelasjon(@Qualifier("system") EessiService eessiService) {
         this.eessiService = eessiService;
     }
 

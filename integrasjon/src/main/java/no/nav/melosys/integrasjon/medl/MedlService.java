@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.medl;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.util.Optional;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -39,7 +38,6 @@ public class MedlService implements MedlFasade {
     private final MedlemskapConsumer medlemskapConsumer;
     private final BehandleMedlemskapConsumer behandleMedlemskapConsumer;
     private final DokumentFactory dokumentFactory;
-    private final JAXBContext jaxbContext;
 
     @Autowired
     public MedlService(MedlemskapConsumer medlemskapConsumer,
@@ -48,12 +46,6 @@ public class MedlService implements MedlFasade {
         this.medlemskapConsumer = medlemskapConsumer;
         this.behandleMedlemskapConsumer = behandleMedlemskapConsumer;
         this.dokumentFactory = dokumentFactory;
-
-        try {
-            jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponseWrapper.class);
-        } catch (JAXBException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     @Override
@@ -68,7 +60,7 @@ public class MedlService implements MedlFasade {
             JAXBElement<HentPeriodeListeResponseWrapper> xmlRoot
                 = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponseWrapper.class, wrapper);
 
-            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
+            dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }

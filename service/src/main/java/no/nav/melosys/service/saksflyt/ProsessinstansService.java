@@ -12,6 +12,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
@@ -75,6 +76,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringDto.getAvsenderType());
         if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, lagInstitusjonsId(journalfoeringDto.getAvsenderID()));
+            prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, journalfoeringDto.getAvsenderID());
         } else {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
         }
@@ -82,6 +84,10 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
         prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, skalSendesForvaltningsmelding(journalfoeringDto));
+
+        if (journalfoeringDto.getMottattDato() != null) {
+            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringDto.getMottattDato());
+        }
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
             final String hovedDokumentID = journalfoeringDto.getDokumentID();
@@ -169,7 +175,8 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                                                     String fritekst, String mottakerInstitusjon) {
+                                                     String fritekst, String mottakerInstitusjon,
+                                                     Vedtakstyper vedtakstype, String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
             .medSteg(ProsessSteg.IV_VALIDERING)
@@ -179,6 +186,11 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
+        prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, vedtakstype.getKode());
+        if (StringUtils.isNotEmpty(revurderBegrunnelse)) {
+            prosessinstans.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, revurderBegrunnelse);
+        }
+
         lagre(prosessinstans);
     }
 
@@ -194,18 +206,20 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansNySak(OpprettSakDto opprettSakDto) throws FunksjonellException {
+        if (opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD
+            && opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+            throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
+                + " på bakgrunn av journalførte dokumenter er ikke støttet.");
+        }
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.OPPRETT_NY_SAK)
+            .medSteg(ProsessSteg.JFR_AKTØR_ID)
             .build();
-        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD) {
-            prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
-            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.soknadDto.periode);
-            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.soknadDto.land);
-        } else {
-            throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
-                + " på bakgrunn av journalførte dokumenter er ikke støttet." );
-        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.behandlingstype);
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.brukerID);
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.oppgaveID);
+        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.soknadDto.periode);
+        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.soknadDto.land);
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.skalTilordnes);
         lagre(prosessinstans);
     }

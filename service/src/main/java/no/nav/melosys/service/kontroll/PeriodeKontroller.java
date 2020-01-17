@@ -39,9 +39,35 @@ public final class PeriodeKontroller {
     private static boolean datoErLik(LocalDate date1, LocalDate date2) {
 
         if (date1 == null || date2 == null) {
-            return date1 == null && date2 == null;
+            return date1 == date2;
         }
 
         return date1.equals(date2);
+    }
+
+    public static boolean periodeOverlapper(LocalDate fom1, LocalDate tom1, LocalDate fom2, LocalDate tom2) {
+
+        if (fom1 == null || fom2 == null) {
+            throw new IllegalArgumentException("Fom-dato kan ikke være null!");
+        } else if (tom1 == null && tom2 == null) {
+            throw new IllegalArgumentException("Kan ikke avgjøre om to åpne periode overlapper");
+        }
+
+        if (datoErLik(fom1, fom2) || datoErLik(tom1, tom2) || datoErLik(fom1, tom2) || datoErLik(tom1, fom2)) {
+            return true;
+        }
+
+        if (tom1 == null) {
+            return åpenPeriodeOverlapper(fom2, tom2, fom1);
+        } else if (tom2 == null) {
+            return åpenPeriodeOverlapper(fom1, tom1, fom2);
+        }
+
+        return fom1.isBefore(fom2) && tom1.isAfter(fom2) || fom1.isAfter(fom2) && fom1.isBefore(tom2);
+
+    }
+
+    private static boolean åpenPeriodeOverlapper(LocalDate fom, LocalDate tom, LocalDate åpenPeriode) {
+        return fom.isAfter(åpenPeriode) && tom.isAfter(åpenPeriode);
     }
 }

@@ -1,16 +1,13 @@
 package no.nav.melosys.saksflyt.steg.reg;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.service.SaksopplysningerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,38 +23,30 @@ import static org.mockito.Mockito.*;
 public class HentMedlemskapsopplysningerTest {
 
     @Mock
-    private MedlFasade medlFasade;
+    private SaksopplysningerService saksopplysningerService;
 
-    private HentMedlemskapsopplysninger agent;
-
-    // Antall måneder tilbake i tid vi henter medlemskaphistorikk for
-    private final int MEDLEMSKAPHISTORIKK_ANTALL_ÅR = 5;
-
+    private HentMedlemskapsopplysninger hentMedlemskapsopplysninger;
 
     @Before
     public void setUp() {
-        agent = new HentMedlemskapsopplysninger(medlFasade, mock(SaksopplysningRepository.class), MEDLEMSKAPHISTORIKK_ANTALL_ÅR);
+        hentMedlemskapsopplysninger = new HentMedlemskapsopplysninger(saksopplysningerService);
     }
 
     @Test
     public void utfoerSteg() throws MelosysException {
+        final long behandlingID = 222L;
+        Behandling behandling = new Behandling();
+        behandling.setId(behandlingID);
+
         Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
-        p.getBehandling().setSaksopplysninger(new HashSet<>());
-
-        String brukerID = "99999999991";
-        Periode periode = new Periode(LocalDate.now(), null);
-
-        p.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        p.setBehandling(behandling);
+        Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1));
         p.setData(ProsessDataKey.SØKNADSPERIODE, periode);
-        when(medlFasade.hentPeriodeListe(any(), any(), any())).thenReturn(new Saksopplysning());
 
-        agent.utførSteg(p);
+        hentMedlemskapsopplysninger.utførSteg(p);
 
-        LocalDate fom = periode.getFom().minusYears(MEDLEMSKAPHISTORIKK_ANTALL_ÅR);
-        LocalDate tom = LocalDate.now();
-
-        verify(medlFasade, times(1)).hentPeriodeListe(brukerID, fom, tom);
+        verify(saksopplysningerService, times(1))
+            .hentSaksopplysningMedl(eq(behandlingID), eq(periode.getFom()), eq(periode.getTom()));
         assertThat(p.getSteg()).isEqualTo(HENT_SOB_SAKER);
     }
 

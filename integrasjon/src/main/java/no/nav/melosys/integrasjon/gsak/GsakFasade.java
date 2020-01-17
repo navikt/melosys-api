@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 
@@ -28,7 +27,9 @@ public interface GsakFasade {
                                                   Behandlingstema behandlingstema
     ) throws TekniskException, FunksjonellException;
 
-    void oppdaterOppgavePrioritet(String oppgaveId, PrioritetType prioritet) throws FunksjonellException, TekniskException;
+    void tildelOppgave(String oppgaveId, String saksbehandler) throws FunksjonellException, TekniskException;
+
+    void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException;
 
     /**
      * Finner Oppgaver basert på ansvarlig saksbehandler
@@ -45,6 +46,12 @@ public interface GsakFasade {
      * Henter tema for aktuell saksnummer
      */
     Tema hentTemaFraSak(Long gsakSaksnummer) throws TekniskException, FunksjonellException;
+
+    /**
+     * Finner oppgaver relatert til en bruker.
+     * Oppgaver sorteres stigende etter frist.
+     */
+    List<Oppgave> finnOppgaverMedBrukerID(String aktørID) throws FunksjonellException, TekniskException;
 
     /**
      * Finner alle oppgaver med gitt saksnummer.
@@ -70,14 +77,4 @@ public interface GsakFasade {
      * Oppretter en sak i Oppgave
      */
     Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws TekniskException, FunksjonellException;
-
-    /**
-     * Tildeler en oppgaver til en saksbehandler
-     */
-    void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException;
-
-    /**
-     * Oppdaterer en eksisterende oppgave.
-     */
-    void oppdaterOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException;
 }

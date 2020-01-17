@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -80,9 +81,24 @@ public class GrunnleggendeValideringTest {
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now().plusYears(1)));
+        prosessinstans.setData(BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         prosessinstans.setData(lagProsessData_nySak());
         agent.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE);
+    }
+
+    @Test
+    public void utførSteg_nySak_feilBehandlingstype() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.JFR_NY_SAK);
+        prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
+        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now().plusYears(1)));
+        prosessinstans.setData(BEHANDLINGSTYPE, Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        prosessinstans.setData(lagProsessData_nySak());
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Behandlingstype er ikke av type søknad!");
+        agent.utfør(prosessinstans);
     }
 
     @Test

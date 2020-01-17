@@ -3,10 +3,10 @@ package no.nav.melosys.saksflyt.steg.unntak;
 import java.util.EnumMap;
 import java.util.Map;
 
-import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 
-import static no.nav.melosys.feil.Feilkategori.*;
+import static no.nav.melosys.saksflyt.feil.Feilkategori.*;
 import static no.nav.melosys.saksflyt.steg.unntak.KjedetUnntakBehandler.først;
 import static no.nav.melosys.saksflyt.steg.unntak.OpprettHendelse.opprettHendelse;
 import static no.nav.melosys.saksflyt.steg.unntak.SettTilFeilet.settTilFeilet;

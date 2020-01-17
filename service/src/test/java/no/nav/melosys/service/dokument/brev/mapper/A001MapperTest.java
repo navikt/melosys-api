@@ -188,7 +188,7 @@ public class A001MapperTest {
         vedlegg.setSEDA001(mapper.mapSEDA001((BrevDataA001) brevData));
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag, vedlegg);
 
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     public Fag mapFag() {

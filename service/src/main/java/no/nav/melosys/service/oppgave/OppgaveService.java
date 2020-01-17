@@ -57,6 +57,14 @@ public class OppgaveService {
         this.søknadService = søknadService;
     }
 
+    public List<Oppgave> finnOppgaverMedBrukerID(String brukerIdent) throws FunksjonellException, TekniskException {
+        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
+        if (aktørId == null) {
+            throw new IkkeFunnetException("Finner ikke aktørId for ident " + brukerIdent);
+        }
+        return gsakFasade.finnOppgaverMedBrukerID(aktørId);
+    }
+
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
         Collection<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
@@ -94,6 +102,10 @@ public class OppgaveService {
 
     public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         return gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
+    }
+
+    public Oppgave hentOppgaveMedOppgaveID(String oppgaveID) throws FunksjonellException, TekniskException {
+        return gsakFasade.hentOppgave(oppgaveID);
     }
 
     public Behandling hentAktivBehandling(String saksnummer) throws IkkeFunnetException, TekniskException {
@@ -140,7 +152,9 @@ public class OppgaveService {
             behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
-            if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.ENDRET_PERIODE) {
+            if (behandling.getType() == Behandlingstyper.SOEKNAD
+                || behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
+                || behandling.getType() == Behandlingstyper.ENDRET_PERIODE) {
                 SoeknadDokument søknadDokument = søknadService.hentSøknad(behandling.getId());
                 behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
                 behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
@@ -181,7 +195,8 @@ public class OppgaveService {
         behandlingDto.setBehandlingsstatus(behandling.getStatus());
         behandlingDto.setBehandlingstype(behandling.getType());
         behandlingDto.setRegistrertDato(behandling.getRegistrertDato());
-        behandlingDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
+        behandlingDto.setEndretDato(behandling.getEndretDato());
+        behandlingDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
         behandlingDto.setErUnderOppdatering(saksopplysningerService.harAktivOppfrisking(behandling.getId()));
         return behandlingDto;
     }

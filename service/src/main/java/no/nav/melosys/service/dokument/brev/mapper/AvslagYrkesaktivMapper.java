@@ -11,6 +11,7 @@ import no.nav.dok.melosysbrev._000081.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000081.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
 import no.nav.melosys.exception.TekniskException;
@@ -42,13 +43,12 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         }
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     private void mapArt161AvslagFraAnmodningsperiode(Fag fag, AnmodningsperiodeSvar svar) {
         fag.setBegrunnelseFritekst(svar.getBegrunnelseFritekst());
         Art161AvslagBegrunnelse avslagBegrunnelse = lagTomArt161AvslagBegrunnelse();
-        avslagBegrunnelse.setUtlAvslaarAvtale(JA);
         fag.setArt161AvslagBegrunnelse(avslagBegrunnelse);
     }
 
@@ -83,7 +83,15 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
 
         fag.setFritekst(brevData.fritekst);
 
-        fag.setAvslag(JA);
+        brevData.anmodningsperiodeSvar
+            .map(AnmodningsperiodeSvar::getAnmodningsperiodeSvarType)
+            .map(Anmodningsperiodesvartyper::getKode)
+            .map(AnmodningsPeriodeSvarTypeKode::valueOf)
+            .ifPresent(fag::setAnmodningsPeriodeSvarType);
+
+        if (brevData.erArt16UtenArt12) {
+            fag.setArt16UtenArt12(JA);
+        }
 
         return fag;
     }
@@ -120,7 +128,6 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         return Art161AvslagBegrunnelse.builder().withIngenSpesielleForhold("")
             .withOver5Aar("")
             .withSaerligAvslagsgrunn("")
-            .withUtlAvslaarAvtale("")
             .withSoektForSent("").build();
     }
 

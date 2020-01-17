@@ -1,9 +1,7 @@
 package no.nav.melosys.integrasjon.inntk;
 
-import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.time.YearMonth;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -23,8 +21,6 @@ import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkUgyldig
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.*;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,11 +28,9 @@ import org.springframework.stereotype.Service;
 public class InntektService implements InntektFasade {
     private static final String INNTEKT_VERSJON = "3.2";
 
-    private static final Logger log = LoggerFactory.getLogger(InntektService.class);
     private final InntektConsumer inntektConsumer;
     private final DokumentFactory dokumentFactory;
     private final ObjectFactory objectFactory;
-    private final JAXBContext jaxbContext;
 
     public static final String FILTER = "MedlemskapA-inntekt";
     public static final String FILTER_URI = "http://nav.no/kodeverk/Kode/A-inntektsfilter/MedlemskapA-inntekt?v=6";
@@ -50,12 +44,6 @@ public class InntektService implements InntektFasade {
         this.dokumentFactory = dokumentFactory;
 
         this.objectFactory = new ObjectFactory();
-
-        try {
-            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse.class);
-        } catch (JAXBException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     // Henter inntekter for én ident fra hentInntektListeBolk for å få opplysninger om frilansforhold (se MELOSYS-1453).
@@ -103,13 +91,7 @@ public class InntektService implements InntektFasade {
         try {
             no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse xmlRoot = new no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse();
             xmlRoot.setResponse(response);
-            if (response != null) {
-                log.info("Debug inntekt: response.getArbeidsInntektIdentListe().size() {}", response.getArbeidsInntektIdentListe().size());
-            } else {
-                log.info("Debug inntekt: response er null");
-            }
-
-            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
+            dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }
@@ -118,7 +100,6 @@ public class InntektService implements InntektFasade {
         final String dokumentXml = xmlWriter.toString();
         if (dokumentXml != null) {
             saksopplysning.setDokumentXml(dokumentXml);
-            skrivDokumentXml(personID, dokumentXml);
         } else {
             throw new IntegrasjonException("DokumentXML er null!");
         }
@@ -130,15 +111,6 @@ public class InntektService implements InntektFasade {
         dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
-    }
-
-    private void skrivDokumentXml(String personID, String dokumentXml) {
-        try (FileOutputStream outputStream = new FileOutputStream("/app/debug-inntekt/" + personID + "-inntekt-debug.txt")) {
-            outputStream.write(dokumentXml.getBytes());
-        } catch (Exception e) {
-            String localizedMessage = e.getLocalizedMessage();
-            log.info("Kunne ikke skrive til fil {}", localizedMessage != null ? localizedMessage.replace(personID, "personID") : "");
-        }
     }
 
     private static XMLGregorianCalendar convertToXMLGregorianCalendar(YearMonth yearMonth) throws DatatypeConfigurationException {

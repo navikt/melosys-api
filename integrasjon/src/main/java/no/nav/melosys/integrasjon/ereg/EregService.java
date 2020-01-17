@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.ereg;
 
 import java.io.StringWriter;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -26,19 +25,11 @@ public class EregService implements EregFasade {
 
     private final OrganisasjonConsumer organisasjonConsumer;
     private final DokumentFactory dokumentFactory;
-    private final JAXBContext jaxbContext;
 
     @Autowired
     public EregService(OrganisasjonConsumer organisasjonConsumer, DokumentFactory dokumentFactory) {
         this.organisasjonConsumer = organisasjonConsumer;
         this.dokumentFactory = dokumentFactory;
-
-        try {
-            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse.class);
-        } catch (JAXBException e) {
-            throw new IllegalStateException(e);
-        }
-
     }
     
     @Override
@@ -61,7 +52,7 @@ public class EregService implements EregFasade {
         try {
             no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse xmlRoot = new no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse();
             xmlRoot.setResponse(response);
-            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
+            dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }

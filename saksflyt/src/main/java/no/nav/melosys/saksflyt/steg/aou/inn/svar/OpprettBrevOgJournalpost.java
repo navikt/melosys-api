@@ -20,6 +20,7 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,7 +33,7 @@ public class OpprettBrevOgJournalpost extends AbstraktStegBehandler {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     @Autowired
-    public OpprettBrevOgJournalpost(EessiService eessiService, JoarkFasade joarkFasade, TpsFasade tpsFasade, UtenlandskMyndighetService utenlandskMyndighetService) {
+    public OpprettBrevOgJournalpost(@Qualifier("system") EessiService eessiService, JoarkFasade joarkFasade, TpsFasade tpsFasade, UtenlandskMyndighetService utenlandskMyndighetService) {
         this.eessiService = eessiService;
         this.joarkFasade = joarkFasade;
         this.tpsFasade = tpsFasade;

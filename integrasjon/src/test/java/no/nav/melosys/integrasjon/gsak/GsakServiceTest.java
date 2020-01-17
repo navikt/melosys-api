@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import no.nav.melosys.domain.Fagsystem;
@@ -10,7 +11,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -27,8 +29,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ØVRIGE_SED;
+import static no.nav.melosys.integrasjon.gsak.GsakService.hentFellesKode;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,15 +52,6 @@ public final class GsakServiceTest {
     @Before
     public void setup() {
         gsakService = new GsakService(sakConsumer, oppgaveConsumer);
-    }
-
-    @Test
-    public final void tildelIkkeEksisterendeOppgaveGirIkkeFunnetException() {
-        Throwable unntak = catchThrowable(() -> gsakService.tildelOppgave("1", "2"));
-        assertThat(unntak)
-                .isInstanceOf(IkkeFunnetException.class)
-                .hasMessageContaining("Feil")
-                .hasMessageContaining("oppgave 1 for saksbehandler 2");
     }
 
     @Test
@@ -133,18 +126,89 @@ public final class GsakServiceTest {
         assertThat(oppgaver.size()).isEqualTo(1);
         assertThat(oppgaver.iterator().next().getOppgaveId()).isEqualTo(oppgaveID);
     }
-    
-    @Test
-    public void oppdaterOppgave() throws Exception {
-        Oppgave oppgave = lagOppgave();
-        
-        gsakService.oppdaterOppgave(oppgave);
 
+    @Test
+    public void tildelOppgave_verifiserFelterSatt() throws FunksjonellException, TekniskException {
+        final String oppgaveID = "2222";
+        final String sakbehandler = "Z111111";
+        OppgaveDto oppgave = GsakService.oppgaveMappingDomainTilDto(lagOppgave());
+        oppgave.setBeskrivelse("test");
+        when(oppgaveConsumer.hentOppgave(eq(oppgaveID))).thenReturn(oppgave);
+
+        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+            .tilordnetRessurs(sakbehandler)
+            .build();
+
+        gsakService.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
         verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoCaptor.capture());
-        assertThat(oppgaveDtoCaptor.getValue().getAktørId())
-                .isEqualTo("aktoer123");
+
+        OppgaveDto dto = oppgaveDtoCaptor.getValue();
+        assertThat(dto.getPrioritet()).isEqualTo(oppgave.getPrioritet());
+        assertThat(dto.getBeskrivelse()).isEqualTo(oppgave.getBeskrivelse());
+        assertThat(dto.getStatus()).isEqualTo(oppgave.getStatus());
+        assertThat(dto.getTilordnetRessurs()).isEqualTo(oppgaveOppdatering.getTilordnetRessurs());
+        assertThat(dto.getFristFerdigstillelse()).isEqualTo(oppgave.getFristFerdigstillelse());
     }
-    
+
+
+    @Test
+    public void oppdaterOppgave_alleFelterSattEksisterendeBeskrivelse_verifiserFelterSatt() throws FunksjonellException, TekniskException {
+        final String oppgaveID = "2222";
+        OppgaveDto oppgave = GsakService.oppgaveMappingDomainTilDto(lagOppgave());
+        oppgave.setBeskrivelse("test");
+        when(oppgaveConsumer.hentOppgave(eq(oppgaveID))).thenReturn(oppgave);
+        LocalDate nå = LocalDate.now();
+
+        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+            .oppgavetype(Oppgavetyper.BEH_SAK_MK)
+            .tema(Tema.MED)
+            .behandlingstema(Behandlingstema.EU_EOS)
+            .behandlingstype(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV)
+            .behandlesAvApplikasjon(Fagsystem.MELOSYS)
+            .saksnummer("MEL-123")
+            .prioritet(PrioritetType.HOY.name())
+            .beskrivelse("test")
+            .status("AAPEN")
+            .tilordnetRessurs("Meg123")
+            .fristFerdigstillelse(nå)
+            .build();
+
+        gsakService.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
+        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoCaptor.capture());
+
+        OppgaveDto dto = oppgaveDtoCaptor.getValue();
+        assertThat(dto.getOppgavetype()).isEqualTo(oppgaveOppdatering.getOppgavetype().getKode());
+        assertThat(dto.getTema()).isEqualTo(oppgaveOppdatering.getTema().getKode());
+        assertThat(dto.getBehandlingstema()).isEqualTo(oppgaveOppdatering.getBehandlingstema().getKode());
+        assertThat(dto.getBehandlingstype()).isEqualTo(hentFellesKode(oppgaveOppdatering.getBehandlingstype()));
+        assertThat(dto.getBehandlesAvApplikasjon()).isEqualTo(oppgaveOppdatering.getBehandlesAvApplikasjon().getKode());
+        assertThat(dto.getSaksreferanse()).isEqualTo(oppgaveOppdatering.getSaksnummer());
+        assertThat(dto.getPrioritet()).isEqualTo(oppgaveOppdatering.getPrioritet());
+        assertThat(dto.getBeskrivelse()).isEqualTo(oppgaveOppdatering.getBeskrivelse() + "\n" + oppgaveOppdatering.getBeskrivelse());
+        assertThat(dto.getStatus()).isEqualTo(oppgaveOppdatering.getStatus());
+        assertThat(dto.getTilordnetRessurs()).isEqualTo(oppgaveOppdatering.getTilordnetRessurs());
+        assertThat(dto.getFristFerdigstillelse()).isEqualTo(nå);
+    }
+
+    @Test
+    public void oppdaterOppgave_ingenFelterSattEksisterendeBeskrivelse_verifiserFelterSatt() throws FunksjonellException, TekniskException {
+        final String oppgaveID = "2222";
+        OppgaveDto oppgave = GsakService.oppgaveMappingDomainTilDto(lagOppgave());
+        oppgave.setBeskrivelse("test");
+        when(oppgaveConsumer.hentOppgave(eq(oppgaveID))).thenReturn(oppgave);
+
+        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder().build();
+        gsakService.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
+        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoCaptor.capture());
+
+        OppgaveDto dto = oppgaveDtoCaptor.getValue();
+        assertThat(dto.getPrioritet()).isEqualTo(oppgave.getPrioritet());
+        assertThat(dto.getBeskrivelse()).isEqualTo(oppgave.getBeskrivelse());
+        assertThat(dto.getStatus()).isEqualTo(oppgave.getStatus());
+        assertThat(dto.getTilordnetRessurs()).isEqualTo(oppgave.getTilordnetRessurs());
+        assertThat(dto.getFristFerdigstillelse()).isEqualTo(oppgave.getFristFerdigstillelse());
+    }
+
     @Test
     public void mapDtoTilDomainTilDto() {
         Oppgave oppgave = lagOppgave();
@@ -153,13 +217,13 @@ public final class GsakServiceTest {
         Oppgave oppgaveMappetTilbake = GsakService.oppgaveMappingDtoTilDomain(oppgaveDto);
         assertThat(oppgaveMappetTilbake).isEqualToComparingFieldByField(oppgave);
     }
-    
+
     @Test
     public void mapBehandlingstypeTilFelleskodeTilBehandlingstype() {
         EnumSet<Behandlingstyper> behandlingstyper = EnumSet.complementOf(EnumSet.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED));
-        
+
         for (Behandlingstyper behandlingstype : behandlingstyper) {
-            Behandlingstyper mappetType = GsakService.hentBehandlingstyper(GsakService.hentFellesKode(behandlingstype));
+            Behandlingstyper mappetType = GsakService.hentBehandlingstyper(hentFellesKode(behandlingstype));
             assertThat(mappetType).isEqualTo(behandlingstype);
         }
     }
@@ -171,10 +235,12 @@ public final class GsakServiceTest {
         oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
         oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
         oppgaveBuilder.setBeskrivelse("bla bla");
+        oppgaveBuilder.setOpprettetTidspunkt(ZonedDateTime.now());
         oppgaveBuilder.setFristFerdigstillelse(LocalDate.now().plusMonths(1L));
         oppgaveBuilder.setOppgaveId("123");
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgaveBuilder.setJournalpostId("journalpost123");
+        oppgaveBuilder.setPrioritet(PrioritetType.NORM);
         oppgaveBuilder.setSaksnummer("sak123");
         oppgaveBuilder.setStatus("tildet");
         oppgaveBuilder.setTema(Tema.MED);

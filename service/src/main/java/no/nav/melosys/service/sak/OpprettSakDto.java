@@ -7,6 +7,7 @@ public class OpprettSakDto {
     public String brukerID;
     public Sakstyper sakstype;
     public Behandlingstyper behandlingstype;
+    public String oppgaveID;
     public SøknadDto soknadDto;
     public boolean skalTilordnes;
 }

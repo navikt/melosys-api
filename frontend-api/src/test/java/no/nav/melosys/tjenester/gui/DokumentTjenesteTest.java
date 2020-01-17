@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Comparators;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -25,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -56,8 +56,9 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         List<Journalpost> journalposter = defaultEasyRandom().objects(Journalpost.class, 3).collect(Collectors.toList());
         given(dokumentVisningService.hentDokumenter(anyString())).willReturn(journalposter);
 
-        Response response = dokumentTjeneste.hentDokumenter("MEL-1873");
-        List<JournalpostInfoDto> dtos = (List<JournalpostInfoDto>) response.getEntity();
+        ResponseEntity response = dokumentTjeneste.hentDokumenter("MEL-1873");
+        @SuppressWarnings("unchecked")
+        List<JournalpostInfoDto> dtos = (List<JournalpostInfoDto>) response.getBody();
         boolean inOrder = Comparators.isInOrder(dtos, Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
         assertThat(inOrder).isTrue();
 
@@ -69,7 +70,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         final byte[] MOCK_PDF = "bytes fra en pdf".getBytes();
         when(eessiService.genererSedForhåndsvisning(anyLong(), any())).thenReturn(MOCK_PDF);
 
-        Response response = dokumentTjeneste.produserUtkastSed(1L, SedType.A001);
-        assertThat(response.getEntity()).isEqualTo(MOCK_PDF);
+        ResponseEntity response = dokumentTjeneste.produserUtkastSed(1L, SedType.A001);
+        assertThat(response.getBody()).isEqualTo(MOCK_PDF);
     }
 }

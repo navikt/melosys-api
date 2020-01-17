@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -61,9 +62,20 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         }
 
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
-        behandlingsresultat.setVedtaksdato(Instant.now());
+        VedtakMetadata vedtakMetadata;
+        if (behandlingsresultat.getVedtakMetadata() == null) {
+            vedtakMetadata = new VedtakMetadata();
+            vedtakMetadata.setBehandlingsresultat(behandlingsresultat);
+            behandlingsresultat.setVedtakMetadata(vedtakMetadata);
+        } else {
+            vedtakMetadata = behandlingsresultat.getVedtakMetadata();
+        }
+        vedtakMetadata.setVedtaksdato(Instant.now());
         LocalDate klagefrist = LocalDate.now().plusWeeks(FRIST_KLAGE_UKER);
-        behandlingsresultat.setVedtakKlagefrist(klagefrist);
+        vedtakMetadata.setVedtakKlagefrist(klagefrist);
+        vedtakMetadata.setRevurderBegrunnelse(prosessinstans.getData(ProsessDataKey.REVURDER_BEGRUNNELSE));
+        vedtakMetadata.setVedtakstype(prosessinstans.getData(ProsessDataKey.VEDTAKSTYPE) == null ? null : Vedtakstyper.valueOf(prosessinstans.getData(ProsessDataKey.VEDTAKSTYPE)));
+
         behandlingsresultatRepository.save(behandlingsresultat);
 
         prosessinstans.setSteg(IV_AVKLAR_MYNDIGHET);

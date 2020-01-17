@@ -10,14 +10,12 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -30,6 +28,7 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,8 +80,7 @@ public class FagsakService {
         Henleggelsesgrunner begrunnelseKode;
         try {
             begrunnelseKode = Henleggelsesgrunner.valueOf(begrunnelseKodeString.toUpperCase());
-        }
-        catch (java.lang.IllegalArgumentException iae) {
+        } catch (java.lang.IllegalArgumentException iae) {
             throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
         }
 
@@ -122,8 +120,9 @@ public class FagsakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException {
+    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
         validerOpprettSakDto(opprettSakDto);
+        validerOppgave(opprettSakDto.oppgaveID);
         prosessinstansService.opprettProsessinstansNySak(opprettSakDto);
     }
 
@@ -141,7 +140,7 @@ public class FagsakService {
         if (feilet) {
             throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en ny sak.").toString());
         }
-        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD) {
+        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD || opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
             final SøknadDto soknadDto = opprettSakDto.soknadDto;
             if (soknadDto == null) {
                 throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
@@ -164,6 +163,16 @@ public class FagsakService {
         }
     }
 
+    private void validerOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
+        if (StringUtils.isEmpty(oppgaveID)) {
+            throw new FunksjonellException("OppgaveID mangler.");
+        }
+        final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
+        if (oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK_MK && oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK) {
+            throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype());
+        }
+    }
+
     // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.
     // Oppdaterer IKKE de som allerede finnes i database
     @Transactional
@@ -179,6 +188,7 @@ public class FagsakService {
         fagsak.getAktører().addAll(nyeMyndigheter);
         fagsakRepository.save(fagsak);
     }
+
     @Transactional
     public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
@@ -238,12 +248,13 @@ public class FagsakService {
         }
 
         String representant = opprettSakRequest.getRepresentant();
+        Representerer representantRepresenterer = opprettSakRequest.getRepresentantRepresenterer();
         if (representant != null) {
             Aktoer aktørRepresentant = new Aktoer();
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
             aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
-            aktørRepresentant.setRepresenterer(Representerer.BRUKER);
+            aktørRepresentant.setRepresenterer(representantRepresenterer);
             aktører.add(aktørRepresentant);
         }
 
@@ -288,7 +299,7 @@ public class FagsakService {
             .orElseThrow(() -> new IllegalStateException("Sak " + fagsak.getSaksnummer() + " har ingen behandlinger eller bare avsluttede behandlinger."));
     }
 
-    @Transactional(rollbackFor=MelosysException.class)
+    @Transactional(rollbackFor = MelosysException.class)
     public void avsluttSakSomBortfalt(Fagsak fagsak) throws FunksjonellException, TekniskException {
         fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
 
@@ -302,7 +313,21 @@ public class FagsakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus,  Behandling behandling) throws IkkeFunnetException {
+    //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException, TekniskException {
+        Behandlingstyper behandlingstype = behandling.getType();
+        if (behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
+            && behandlingstype != Behandlingstyper.ØVRIGE_SED
+            && behandlingstype != Behandlingstyper.VURDER_TRYGDETID) {
+            throw new FunksjonellException("Behandlingstype " + behandlingstype + " kan ikke avsluttes manuelt");
+        }
+
+        Saksstatuser saksstatus = behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
+        avsluttFagsakOgBehandling(fagsak, saksstatus, behandling);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+    }
+
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus, Behandling behandling) throws IkkeFunnetException {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
         behandlingService.avsluttBehandling(behandling.getId());

@@ -2,7 +2,8 @@ package no.nav.melosys.service.eessi;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -15,6 +16,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
@@ -48,7 +50,7 @@ public class ManuellSedBehandlingInitialiserer {
         Optional<Long> gsakSaksnummer = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class));
 
         SedType sedType = SedType.valueOf(melosysEessiMelding.getSedType());
-        if (!gsakSaksnummer.isPresent()) {
+        if (gsakSaksnummer.isEmpty()) {
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_JFR_OPPG);
 
         } else {
@@ -73,7 +75,7 @@ public class ManuellSedBehandlingInitialiserer {
         Optional<Oppgave> oppgave = gsakFasade.finnOppgaverMedSaksnummer(saksnummer).stream().findFirst();
         if (oppgave.isPresent()) {
             log.info("Setter prioritet til HØY for oppgave {}", oppgave.get().getOppgaveId());
-            gsakFasade.oppdaterOppgavePrioritet(oppgave.get().getOppgaveId(), PrioritetType.HOY);
+            gsakFasade.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().prioritet(PrioritetType.HOY.name()).build());
         }
     }
 }

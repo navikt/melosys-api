@@ -8,5 +8,5 @@ public class TpsTestData {
     public static final String STD_KVINNE_ETTERNAVN = "KVINNE_ETTERNAVNSEN";
 
     public static final String STD_FNR = "88888888884";
-    public static final long STD_AKTØR_ID = 1000009490071L;
+    public static final long STD_AKTØR_ID = 8888888888888L;
 }

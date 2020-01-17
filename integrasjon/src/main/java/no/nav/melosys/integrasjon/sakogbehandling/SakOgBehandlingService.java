@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.sakogbehandling;
 
 import java.io.StringWriter;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -24,19 +23,12 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
     private final BehandlingskjedeConsumer behandlingskjedeConsumer;
     private final BehandlingstatusClient behandlingstatusClient;
     private final DokumentFactory dokumentFactory;
-    private final JAXBContext jaxbContext;
 
     @Autowired
     public SakOgBehandlingService(BehandlingskjedeConsumer behandlingskjedeConsumer, BehandlingstatusClient behandlingstatusClient, DokumentFactory dokumentFactory) {
         this.behandlingskjedeConsumer = behandlingskjedeConsumer;
         this.behandlingstatusClient = behandlingstatusClient;
         this.dokumentFactory = dokumentFactory;
-
-        try {
-            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.sakogbehandling.v1.FinnSakOgBehandlingskjedeListeResponse.class);
-        } catch (JAXBException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     @Override
@@ -63,7 +55,7 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
         try {
             no.nav.tjeneste.virksomhet.sakogbehandling.v1.FinnSakOgBehandlingskjedeListeResponse xmlRoot = new no.nav.tjeneste.virksomhet.sakogbehandling.v1.FinnSakOgBehandlingskjedeListeResponse();
             xmlRoot.setResponse(response);
-            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
+            dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }

@@ -269,6 +269,11 @@ public class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
 
+        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        behandling.setType(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
+        behandling.setType(null);
+
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
 

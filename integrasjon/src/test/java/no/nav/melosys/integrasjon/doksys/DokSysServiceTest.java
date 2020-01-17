@@ -165,7 +165,8 @@ public class DokSysServiceTest {
     private UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.gateadresse = "Stubenstrasse 77";
-        utenlandskMyndighet.poststed = "0101";
+        utenlandskMyndighet.postnummer = "0101";
+        utenlandskMyndighet.poststed = "Berlin";
         utenlandskMyndighet.landkode = Landkoder.GL;
         utenlandskMyndighet.institusjonskode = "INST-023%zdf";
         return utenlandskMyndighet;

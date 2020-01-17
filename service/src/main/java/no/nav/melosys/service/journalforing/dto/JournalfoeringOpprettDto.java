@@ -1,11 +1,14 @@
 package no.nav.melosys.service.journalforing.dto;
 
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+
 public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private FagsakDto fagsak;
     private AnmodningOmUnntakDto anmodningOmUnntak;
     private String arbeidsgiverID;
     private String representantID;
     private String representantKontaktPerson;
+    private String representererKode;
 
     public FagsakDto getFagsak() {
         return fagsak;
@@ -45,5 +48,18 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
 
     public void setRepresentantKontaktPerson(String representantKontaktPerson) {
         this.representantKontaktPerson = representantKontaktPerson;
+    }
+
+    public String getRepresentererKode() {
+        return representererKode;
+    }
+
+    public void setRepresentererKode(String representererKode) {
+        this.representererKode = representererKode;
+    }
+
+    public boolean behandlingstypeErSøknad() {
+        return Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(getBehandlingstypeKode())
+            || Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(getBehandlingstypeKode());
     }
 }

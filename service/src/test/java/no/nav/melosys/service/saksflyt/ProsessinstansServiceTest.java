@@ -12,6 +12,7 @@ import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
@@ -125,7 +126,8 @@ public class ProsessinstansServiceTest {
         Behandling behandling = new Behandling();
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         String mottakerInstitusjon = "DE:2332";
-        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", mottakerInstitusjon);
+        Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
+        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", mottakerInstitusjon, vedtakstype, "BEGRUNNELSE");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -135,6 +137,8 @@ public class ProsessinstansServiceTest {
         assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKER)).isEqualTo(mottakerInstitusjon);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
         assertThat(Behandlingsresultattyper.valueOf(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
+        assertThat(lagretInstans.getData(ProsessDataKey.REVURDER_BEGRUNNELSE)).isEqualTo("BEGRUNNELSE");
+        assertThat(Vedtakstyper.valueOf(lagretInstans.getData(ProsessDataKey.VEDTAKSTYPE))).isEqualTo(vedtakstype);
     }
 
     @Test
@@ -315,16 +319,6 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansNySak() throws FunksjonellException {
-        OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
-        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
-        service.opprettProsessinstansNySak(opprettSakDto);
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
-    }
-
-    @Test
     public void opprettProsessinstansNySak_behandlingstypeIkkeStøttet_feiler() throws FunksjonellException {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.behandlingstype = Behandlingstyper.ANKE;
@@ -335,14 +329,18 @@ public class ProsessinstansServiceTest {
     @Test
     public void opprettProsessinstansNySak_behandlingstypeSøknad() throws FunksjonellException {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
-        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
+        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV;
         service.opprettProsessinstansNySak(opprettSakDto);
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(opprettSakDto.behandlingstype);
+        assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.brukerID);
+        assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.oppgaveID);
         assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.soknadDto.periode);
         assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class)).isEqualTo(opprettSakDto.soknadDto.land);
+        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakDto.skalTilordnes);
     }
 
     @Test

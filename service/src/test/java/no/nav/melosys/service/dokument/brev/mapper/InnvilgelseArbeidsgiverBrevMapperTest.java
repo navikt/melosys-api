@@ -8,6 +8,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
@@ -47,12 +49,13 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
         MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataInnvilgelse brevDataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "Z123456");
         brevDataInnvilgelse.arbeidsland = "Sverige";
+        brevDataInnvilgelse.hovedvirksomhet = new AvklartVirksomhet("Equinor", "987654321", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevDataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
-        assertThat("<ns3:navn>For Etter</ns3:navn>").isSubstringOf(resultat);
+        assertThat(":navn>For Etter</ns").isSubstringOf(resultat);
     }
 
 

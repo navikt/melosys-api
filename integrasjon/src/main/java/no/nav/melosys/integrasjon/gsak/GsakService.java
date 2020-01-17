@@ -47,11 +47,12 @@ public class GsakService implements GsakFasade {
     private static final ImmutableBiMap<Behandlingstyper, String> BEHANDLINGSTYPE_FELLESKODE_MAP =
         ImmutableBiMap.<Behandlingstyper, String>builder()
             .put(SOEKNAD, "ae0034")
+            .put(SOEKNAD_IKKE_YRKESAKTIV, "ae0238")
             .put(ENDRET_PERIODE, "ae0052")
             .put(ANKE, "ae0046")
             .put(KLAGE, "ae0058")
             .put(UTL_MYND_UTPEKT_NORGE, "ae0112")
-            .put(NY_VURDERING, "ae0028")
+            .put(NY_VURDERING, "ae0240")
             .put(UTL_MYND_UTPEKT_SEG_SELV, "ae0113")
             .put(ANMODNING_OM_UNNTAK_HOVEDREGEL, "ae0110")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
@@ -79,7 +80,7 @@ public class GsakService implements GsakFasade {
     public Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
         SakDto sakDto = new SakDto();
 
-        if (SOEKNAD == behandlingstype || VURDER_TRYGDETID == behandlingstype) {
+        if (SOEKNAD == behandlingstype || SOEKNAD_IKKE_YRKESAKTIV == behandlingstype || VURDER_TRYGDETID == behandlingstype) {
             sakDto.setTema(Tema.MED.getKode());
         } else if (GYLDIGE_BEHANDLINGSTYPER_UFM.contains(behandlingstype)) {
             sakDto.setTema(Tema.UFM.getKode());
@@ -107,13 +108,9 @@ public class GsakService implements GsakFasade {
 
     @Override
     public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
-        if (oppgave == null) {
-            throw new IkkeFunnetException("Oppgave med ID " + oppgaveID + " er ikke funnet.");
-        } else {
-            oppgave.setStatus(OPPGAVE_STATUS_FERDIGSTILT);
-            oppgaveConsumer.oppdaterOppgave(oppgave);
-        }
+        OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
+        oppgave.setStatus(OPPGAVE_STATUS_FERDIGSTILT);
+        oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
     @Override
@@ -139,12 +136,7 @@ public class GsakService implements GsakFasade {
 
     @Override
     public Oppgave hentOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
-        OppgaveDto gsakOppgave = oppgaveConsumer.hentOppgave(oppgaveId);
-
-        if (gsakOppgave == null) {
-            throw new IkkeFunnetException("Oppgave med oppgaveID " + oppgaveId + " finnes ikke.");
-        }
-        return oppgaveMappingDtoTilDomain(gsakOppgave);
+        return oppgaveMappingDtoTilDomain(hentOppgaveDto(oppgaveId));
     }
 
     @Override
@@ -184,22 +176,73 @@ public class GsakService implements GsakFasade {
 
     @Override
     public void leggTilbakeOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
-        if (oppgave == null) {
-            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
-        }
+        OppgaveDto oppgave = hentOppgaveDto(oppgaveId);
         oppgave.setTilordnetRessurs(null);
         oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
     @Override
-    public void oppdaterOppgavePrioritet(String oppgaveId, PrioritetType prioritet) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
-        if (oppgave == null) {
-            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
+    public void tildelOppgave(String oppgaveId, String saksbehandler) throws FunksjonellException, TekniskException {
+        oppdaterOppgave(oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
+    }
+
+    @Override
+    public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
+        OppgaveDto oppgaveDto = hentOppgaveDto(oppgaveID);
+
+        if (oppgaveOppdatering.getOppgavetype() != null) {
+            oppgaveDto.setOppgavetype(oppgaveOppdatering.getOppgavetype().getKode());
         }
-        oppgave.setPrioritet(prioritet.name());
-        oppgaveConsumer.oppdaterOppgave(oppgave);
+        if (oppgaveOppdatering.getTema() != null) {
+            oppgaveDto.setTema(oppgaveOppdatering.getTema().getKode());
+        }
+        if (oppgaveOppdatering.getBehandlingstema() != null) {
+            oppgaveDto.setBehandlingstema(oppgaveOppdatering.getBehandlingstema().getKode());
+        }
+        if (oppgaveOppdatering.getBehandlingstype() != null) {
+            oppgaveDto.setBehandlingstype(hentFellesKode(oppgaveOppdatering.getBehandlingstype()));
+        }
+        if (oppgaveOppdatering.getBehandlesAvApplikasjon() != null && oppgaveOppdatering.getBehandlesAvApplikasjon() != Fagsystem.INTET) {
+            oppgaveDto.setBehandlesAvApplikasjon(oppgaveOppdatering.getBehandlesAvApplikasjon().getKode());
+        }
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getSaksnummer())) {
+            oppgaveDto.setSaksreferanse(oppgaveOppdatering.getSaksnummer());
+        }
+
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getBeskrivelse())) {
+            if (StringUtils.isEmpty(oppgaveDto.getBeskrivelse())) {
+                oppgaveDto.setBeskrivelse(oppgaveOppdatering.getBeskrivelse());
+            } else {
+                oppgaveDto.setBeskrivelse(StringUtils.joinWith("\n", oppgaveDto.getBeskrivelse(), oppgaveOppdatering.getBeskrivelse()));
+            }
+        }
+
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getPrioritet())) {
+            oppgaveDto.setPrioritet(oppgaveOppdatering.getPrioritet());
+        }
+
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getStatus())) {
+            oppgaveDto.setStatus(oppgaveOppdatering.getStatus());
+        }
+
+        if (StringUtils.isNotEmpty(oppgaveOppdatering.getTilordnetRessurs())) {
+            oppgaveDto.setTilordnetRessurs(oppgaveOppdatering.getTilordnetRessurs());
+        }
+
+        if (oppgaveOppdatering.getFristFerdigstillelse() != null) {
+            oppgaveDto.setFristFerdigstillelse(oppgaveOppdatering.getFristFerdigstillelse());
+        }
+
+        oppgaveConsumer.oppdaterOppgave(oppgaveDto);
+    }
+
+    private OppgaveDto hentOppgaveDto(String oppgaveID) throws FunksjonellException, TekniskException {
+        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
+        if (oppgave == null) {
+            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveID);
+        }
+
+        return oppgave;
     }
 
     @Override
@@ -245,6 +288,20 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public List<Oppgave> finnOppgaverMedBrukerID(String aktørId) throws FunksjonellException, TekniskException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medAktørId(aktørId)
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .map(GsakService::oppgaveMappingDtoTilDomain)
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
@@ -253,29 +310,9 @@ public class GsakService implements GsakFasade {
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
-        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
-        return finnOppgaveListeResponse.stream()
-            .filter(Objects::nonNull)
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
             .map(GsakService::oppgaveMappingDtoTilDomain)
             .collect(Collectors.toList());
-    }
-
-    @Override
-    public void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
-        if (oppgave == null) {
-            throw new IkkeFunnetException(String.format("Feil ved henting av "
-                + "oppgave %s for saksbehandler %s:", oppgaveId, saksbehandlerID));
-        }
-        oppgave.setTilordnetRessurs(saksbehandlerID);
-        oppgaveConsumer.oppdaterOppgave(oppgave);
-    }
-
-    @Override
-    public void oppdaterOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
-        OppgaveDto oppgaveDto = oppgaveMappingDomainTilDto(oppgave);
-
-        oppgaveConsumer.oppdaterOppgave(oppgaveDto);
     }
 
     static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgaveDto) {
@@ -285,6 +322,7 @@ public class GsakService implements GsakFasade {
             .setAktivDato(oppgaveDto.getAktivDato())
             .setAktørId(oppgaveDto.getAktørId())
             .setBeskrivelse(oppgaveDto.getBeskrivelse())
+            .setOpprettetTidspunkt(oppgaveDto.getOpprettetTidspunkt())
             .setFristFerdigstillelse(oppgaveDto.getFristFerdigstillelse())
             .setJournalpostId(oppgaveDto.getJournalpostId())
             .setOppgaveId(oppgaveId)
@@ -304,7 +342,7 @@ public class GsakService implements GsakFasade {
             try {
                 domainOppgaveBuilder.setBehandlingstype(hentBehandlingstyper(oppgaveDto.getBehandlingstype()));
             } catch (IllegalArgumentException e) {
-                log.error("Fikk uventet behandlingstype: {} for OppgaveID: {}", oppgaveDto.getBehandlingstype(), oppgaveDto.getId());
+                log.warn("Fikk uventet behandlingstype: {} for OppgaveID: {}", oppgaveDto.getBehandlingstype(), oppgaveDto.getId());
             }
         }
 
@@ -325,6 +363,9 @@ public class GsakService implements GsakFasade {
             oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstype()));
         }
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
+        if (oppgave.getOpprettetTidspunkt() != null) {
+            oppgaveDto.setOpprettetTidspunkt(oppgave.getOpprettetTidspunkt());
+        }
         oppgaveDto.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         oppgaveDto.setId(oppgave.getOppgaveId());
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());

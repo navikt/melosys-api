@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -9,8 +10,8 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE;
-import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
+import static no.nav.melosys.saksflyt.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
  * Utfører grunnleggende validering
@@ -56,6 +57,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType prosessType = prosessinstans.getType();
+        Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         if (prosessType != ProsessType.JFR_NY_SAK && prosessType != ProsessType.JFR_KNYTT) {
             String feilmelding = "ProsessType " + prosessType + " er ikke støttet";
             log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
@@ -66,6 +68,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
         if (prosessType == ProsessType.JFR_NY_SAK) {
             Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
             validerSøknadsperiode(periode);
+            validerBehandlingstype(behandlingstype);
         }
 
         if (prosessType == ProsessType.JFR_KNYTT) {
@@ -78,7 +81,6 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
                 return;
             }
 
-            Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
             if (behandlingstype != null && behandlingstype.equals(Behandlingstyper.ENDRET_PERIODE)) {
                 Behandling aktivBehandling = fagsak.getAktivBehandling();
                 Behandling tidligsteInaktiveBehandling = fagsak.getTidligsteInaktiveBehandling();
@@ -133,6 +135,12 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
         prosessinstans.setSteg(JFR_VURDER_JOURNALFOERINGSTYPE);
 
         log.info("Ferdig med grunnleggende validering av prosessinstans {}", prosessinstans.getId());
+    }
+
+    private void validerBehandlingstype(Behandlingstyper behandlingstype) throws FunksjonellException {
+        if (behandlingstype != Behandlingstyper.SOEKNAD && behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+            throw new FunksjonellException("Behandlingstype er ikke av type søknad!");
+        }
     }
 
     private void validerSøknadsperiode(Periode periode) throws FunksjonellException {

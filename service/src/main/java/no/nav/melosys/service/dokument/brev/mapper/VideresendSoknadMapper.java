@@ -10,6 +10,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataVideresend;
 import org.xml.sax.SAXException;
@@ -22,10 +23,13 @@ public class VideresendSoknadMapper implements BrevDataMapper {
         BrevDataVideresend brevDataVideresend = (BrevDataVideresend) brevData;
         Fag fag = new Fag();
         fag.setBostedsland(brevDataVideresend.bostedsland);
-        fag.setTrygdemyndighet(brevDataVideresend.trygdemyndighetsland);
+
+        StrukturertAdresse myndighetensAdresse = brevDataVideresend.trygdemyndighet.getAdresse();
+        String utenlandskMyndighetsNavnOgAdresse = brevDataVideresend.trygdemyndighet.navn + ", " + myndighetensAdresse.toString();
+        fag.setTrygdemyndighet(utenlandskMyndighetsNavnOgAdresse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {

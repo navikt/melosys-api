@@ -1,14 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -20,20 +13,23 @@ import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.BehandlingsInformasjon;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+@Protected
+@RestController
+@RequestMapping("/journalforing")
 @Api(tags = {"journalforing"})
-@Path("/journalforing")
-@Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class JournalfoeringTjeneste extends RestTjeneste {
+public class JournalfoeringTjeneste {
     private static Logger log = LoggerFactory.getLogger(JournalfoeringTjeneste.class);
-    
+
     private JournalfoeringService journalføringService;
 
     @Autowired
@@ -41,10 +37,9 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         this.journalføringService = journalføringService;
     }
 
-    @GET
-    @Path("{journalpostID}")
+    @GetMapping("{journalpostID}")
     @ApiOperation(value = "Hent journalpost opplysninger.", response = JournalpostDto.class)
-    public Response hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) throws MelosysException {
+    public ResponseEntity hentJournalpostOpplysninger(@PathVariable("journalpostID") String journalpostID) throws MelosysException {
         log.debug("Journalpost med ID {} hentes.", journalpostID);
         Journalpost journalpost = journalføringService.hentJournalpost(journalpostID);
         JournalpostDto journalpostDto = JournalpostDto.av(journalpost);
@@ -53,27 +48,27 @@ public class JournalfoeringTjeneste extends RestTjeneste {
             journalføringService.finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID)
                 .ifPresent(b -> journalpostDto.setBehandlingsInformasjon(new BehandlingsInformasjon(Sakstyper.EU_EOS, b)));
         }
-        return Response.ok(journalpostDto).build();
+        return ResponseEntity.ok(journalpostDto);
     }
 
-    @POST
-    @Path("opprett")
+    @PostMapping("opprett")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public void opprettSakOgJournalfør(@ApiParam JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+    public ResponseEntity opprettSakOgJournalfør(@RequestBody JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         journalføringService.opprettOgJournalfør(journalfoeringDto);
+        return ResponseEntity.noContent().build();
     }
 
-    @POST
-    @Path("sed")
+    @PostMapping("sed")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public void journalførSed(@ApiParam JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
+    public ResponseEntity journalførSed(@RequestBody JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
         journalføringService.journalførSed(journalfoeringSedDto);
+        return ResponseEntity.noContent().build();
     }
 
-    @POST
-    @Path("tilordne")
+    @PostMapping("tilordne")
     @ApiOperation(value = "Tilordne sak og journalfør.")
-    public void tilordneSakOgJournalfør(@ApiParam JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
         journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
+        return ResponseEntity.noContent().build();
     }
 }

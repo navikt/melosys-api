@@ -1,14 +1,14 @@
 package no.nav.melosys.saksflyt.steg.gsak;
 
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +52,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
         String saksnummer = prosessinstans.getData(SAKSNUMMER);
+        Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         if (fagsak.getGsakSaksnummer() != null) {
             String feilmelding = "Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny GSAK sak: allerede knyttet til " + fagsak.getGsakSaksnummer();
@@ -60,7 +61,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
             return;
         }
 
-        Long gsakSakId = gsakFasade.opprettSak(saksnummer, Behandlingstyper.SOEKNAD, aktørId);
+        Long gsakSakId = gsakFasade.opprettSak(saksnummer, behandlingstype, aktørId);
         fagsak.setGsakSaksnummer(gsakSakId);
         fagsakRepository.save(fagsak);
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);

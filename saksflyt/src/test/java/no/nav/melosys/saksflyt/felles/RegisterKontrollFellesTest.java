@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.unntaksperiode.kontroll.RegisterkontrollService;
+import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +25,7 @@ public class RegisterKontrollFellesTest {
     @Mock
     private AvklartefaktaService avklartefaktaService;
     @Mock
-    private RegisterkontrollService registerkontrollService;
+    private UfmKontrollService ufmKontrollService;
     @Mock
     private BehandlingService behandlingService;
 
@@ -36,8 +36,8 @@ public class RegisterKontrollFellesTest {
 
     @Before
     public void setup() throws Exception {
-        registerKontrollFelles = new RegisterKontrollFelles(behandlingService, registerkontrollService, avklartefaktaService);
-        when(registerkontrollService.utførKontroller(any(Behandling.class)))
+        registerKontrollFelles = new RegisterKontrollFelles(behandlingService, ufmKontrollService, avklartefaktaService);
+        when(ufmKontrollService.utførKontroller(any(Behandling.class)))
             .thenReturn(Lists.newArrayList(
                 Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND,
                 Unntak_periode_begrunnelser.MOTTAR_YTELSER)
@@ -50,7 +50,7 @@ public class RegisterKontrollFellesTest {
         registerKontrollFelles.utførKontrollerOgRegistrerFeil(1L);
 
         verify(behandlingService).hentBehandling(anyLong());
-        verify(registerkontrollService).utførKontroller(any(Behandling.class));
+        verify(ufmKontrollService).utførKontroller(any(Behandling.class));
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE), anyString(), any(), eq("TRUE"));
         verify(avklartefaktaService, times(2)).leggTilRegistrering(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE), captor.capture());
 

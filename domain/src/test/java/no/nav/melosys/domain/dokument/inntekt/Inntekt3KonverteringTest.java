@@ -1,16 +1,13 @@
 package no.nav.melosys.domain.dokument.inntekt;
 
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.KonverteringTest;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
@@ -20,9 +17,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Inntekt3KonverteringTest {
-
-    private static final String INNTEKT_3_2_MOCK = "inntekt/99999999992.xml";
+public class Inntekt3KonverteringTest implements KonverteringTest {
     private static final String INNTEKT_3_2_MOCK_BOLK = "inntekt/99999999992_mock_bolk.xml";
     private static final String INNTEKT_3_2_MOCK_TILLEGGSINFO = "inntekt/99999999992_mock_tilleggsinformasjon.xml";
 
@@ -30,93 +25,53 @@ public class Inntekt3KonverteringTest {
 
     @Before
     public void setUp() {
-        Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
+        Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
 
     @Test
     public void testKonvertering() throws Exception {
-        Saksopplysning test = new Saksopplysning();
+        Saksopplysning saksopplysning = getSaksopplysning(INNTEKT_3_2_MOCK_BOLK);
 
-        InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK);
-        StringBuilder stringBuilder = new StringBuilder();
-        try (Reader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c;
-            while ((c = reader.read()) != -1) {
-                stringBuilder.append((char) c);
-            }
-        }
-        test.setDokumentXml(stringBuilder.toString());
-        test.setType(SaksopplysningType.INNTK);
-        test.setVersjon("3.2");
+        assertThat(saksopplysning.getDokument()).isInstanceOf(InntektDokument.class);
 
-        factory.lagDokument(test);
+        InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
 
-        InntektDokument dokument = (InntektDokument) test.getDokument();
-        assertThat(dokument).isNotNull();
-    }
+        assertThat(dokument.getArbeidsInntektMaanedListe()).isNotEmpty();
 
-    @Test
-    public void testKonverteringFrilans() throws Exception {
-        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK_BOLK);
+        for (ArbeidsInntektMaaned arbeidsInntektMaaned : dokument.getArbeidsInntektMaanedListe()) {
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
-            Saksopplysning saksopplysning = new Saksopplysning();
+            assertThat(arbeidsInntektMaaned.getArbeidsInntektInformasjon()).isNotNull();
+            assertThat(arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe()).isNotEmpty();
 
-            String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-
-            saksopplysning.setDokumentXml(xmlStr);
-            saksopplysning.setType(SaksopplysningType.INNTK);
-            saksopplysning.setVersjon("3.2");
-
-            factory.lagDokument(saksopplysning);
-
-            assertThat(saksopplysning.getDokument()).isInstanceOf(InntektDokument.class);
-
-            InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
-
-            assertThat(dokument.getArbeidsInntektMaanedListe()).isNotEmpty();
-
-            for (ArbeidsInntektMaaned arbeidsInntektMaaned : dokument.getArbeidsInntektMaanedListe()) {
-
-                assertThat(arbeidsInntektMaaned.getArbeidsInntektInformasjon()).isNotNull();
-                assertThat(arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe()).isNotEmpty();
-
-                for (ArbeidsforholdFrilanser arbeidsforhold : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe()) {
-                    assertThat(arbeidsforhold.yrke).isNotBlank();
-                    assertThat(arbeidsforhold.frilansPeriode).isNotNull();
-                }
+            for (ArbeidsforholdFrilanser arbeidsforhold : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe()) {
+                assertThat(arbeidsforhold.yrke).isNotBlank();
+                assertThat(arbeidsforhold.frilansPeriode).isNotNull();
             }
         }
     }
 
     @Test
     public void testKonverteringTilleggsinformasjon() throws Exception {
-        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK_TILLEGGSINFO);
+        Saksopplysning saksopplysning = getSaksopplysning(INNTEKT_3_2_MOCK_TILLEGGSINFO);
+        InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {
-            Saksopplysning saksopplysning = new Saksopplysning();
+        assertThat(dokument.getArbeidsInntektMaanedListe()).isNotEmpty();
 
-            String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-
-            saksopplysning.setDokumentXml(xmlStr);
-            saksopplysning.setType(SaksopplysningType.INNTK);
-            saksopplysning.setVersjon("3.2");
-
-            factory.lagDokument(saksopplysning);
-
-            InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
-
-            assertThat(dokument.getArbeidsInntektMaanedListe()).isNotEmpty();
-
-            for (ArbeidsInntektMaaned arbeidsInntektMaaned : dokument.getArbeidsInntektMaanedListe()) {
-                for (Inntekt inntekt : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe()) {
-                    assertThat(inntekt.getTilleggsinformasjon()).isNotNull();
-                    Tilleggsinformasjon tilleggsinformasjon = inntekt.getTilleggsinformasjon();
-                    assertThat(tilleggsinformasjon.kategori).isNotEmpty();
-                }
+        for (ArbeidsInntektMaaned arbeidsInntektMaaned : dokument.getArbeidsInntektMaanedListe()) {
+            for (Inntekt inntekt : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe()) {
+                assertThat(inntekt.getTilleggsinformasjon()).isNotNull();
+                Tilleggsinformasjon tilleggsinformasjon = inntekt.getTilleggsinformasjon();
+                assertThat(tilleggsinformasjon.kategori).isNotEmpty();
             }
         }
+    }
+
+    @Override
+    public Saksopplysning getSaksopplysning(String ressurs) throws IOException {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
+        Objects.requireNonNull(kilde);
+        return konverter(kilde, factory, SaksopplysningType.INNTK, "3.2");
     }
 }

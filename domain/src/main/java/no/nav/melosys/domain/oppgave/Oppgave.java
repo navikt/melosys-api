@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.oppgave;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -18,6 +19,7 @@ public final class Oppgave {
     private final Behandlingstyper behandlingstype;
     private final String beskrivelse;
     private final Fagsystem behandlesAvApplikasjon;
+    private final ZonedDateTime opprettetTidspunkt;
     private final LocalDate fristFerdigstillelse;
     private final String journalpostId;
     private final String oppgaveId;
@@ -38,6 +40,7 @@ public final class Oppgave {
         private Behandlingstema behandlingstema;
         private Behandlingstyper behandlingstype;
         private String beskrivelse;
+        private ZonedDateTime opprettetTidspunkt;
         private LocalDate fristFerdigstillelse;
         private String journalpostId;
         private String oppgaveId;
@@ -61,6 +64,7 @@ public final class Oppgave {
             this.behandlingstype = copy.getBehandlingstype();
             this.beskrivelse = copy.getBeskrivelse();
             this.behandlesAvApplikasjon = copy.getBehandlesAvApplikasjon();
+            this.opprettetTidspunkt = copy.getOpprettetTidspunkt();
             this.fristFerdigstillelse = copy.getFristFerdigstillelse();
             this.journalpostId = copy.getJournalpostId();
             this.oppgaveId = copy.getOppgaveId();
@@ -93,6 +97,11 @@ public final class Oppgave {
 
         public Builder setBeskrivelse(String beskrivelse) {
             this.beskrivelse = beskrivelse;
+            return this;
+        }
+
+        public Builder setOpprettetTidspunkt(ZonedDateTime opprettetTidspunkt) {
+            this.opprettetTidspunkt = opprettetTidspunkt;
             return this;
         }
 
@@ -175,6 +184,7 @@ public final class Oppgave {
         this.oppgaveId = builder.oppgaveId;
         this.behandlesAvApplikasjon = builder.behandlesAvApplikasjon != null ? builder.behandlesAvApplikasjon : Fagsystem.MELOSYS;
         this.saksnummer = builder.saksnummer;
+        this.opprettetTidspunkt = builder.opprettetTidspunkt;
         this.fristFerdigstillelse = builder.fristFerdigstillelse;
         this.tema = builder.tema;
         this.oppgavetype = builder.oppgavetype;
@@ -210,6 +220,10 @@ public final class Oppgave {
 
     public String getBeskrivelse() {
         return beskrivelse;
+    }
+
+    public ZonedDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
     }
 
     public LocalDate getFristFerdigstillelse() {

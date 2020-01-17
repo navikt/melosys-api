@@ -4,10 +4,11 @@ import java.time.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +32,7 @@ public class OppdaterOppgaveTest {
     private GsakFasade gsakFasade;
 
     @Captor
-    private ArgumentCaptor<Oppgave> oppgaveCaptor;
+    private ArgumentCaptor<OppgaveOppdatering> oppgaveCaptor;
 
     private OppdaterOppgave agent;
 
@@ -62,11 +63,9 @@ public class OppdaterOppgaveTest {
 
         agent.utførSteg(prosessinstans);
         verify(gsakFasade).hentOppgaveMedSaksnummer(SAKSNUMMER);
-        verify(gsakFasade).oppdaterOppgave(oppgaveCaptor.capture());
-        assertThat(oppgaveCaptor.getValue())
-                .hasFieldOrPropertyWithValue("oppgaveId", OPPGAVE_ID)
-                .hasFieldOrPropertyWithValue("fristFerdigstillelse", toMånederFremITid)
-                .hasFieldOrPropertyWithValue("beskrivelse", ANMODNING_UNNTAK_BESKRIVELSE);
+        verify(gsakFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(toMånederFremITid);
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);
         assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);
 
     }
@@ -81,13 +80,9 @@ public class OppdaterOppgaveTest {
 
         agent.utførSteg(prosessinstans);
         verify(gsakFasade).hentOppgaveMedSaksnummer(SAKSNUMMER);
-        verify(gsakFasade).oppdaterOppgave(oppgaveCaptor.capture());
-        assertThat(oppgaveCaptor.getValue())
-                .hasFieldOrPropertyWithValue("oppgaveId", OPPGAVE_ID)
-                .hasFieldOrPropertyWithValue("fristFerdigstillelse", treMånederFremITid);
-        assertThat(oppgaveCaptor.getValue().getBeskrivelse())
-                .contains(ANMODNING_UNNTAK_BESKRIVELSE)
-                .contains(eksisterendeBeskrivelse);
+        verify(gsakFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isNull();
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);
         assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);
     }
 

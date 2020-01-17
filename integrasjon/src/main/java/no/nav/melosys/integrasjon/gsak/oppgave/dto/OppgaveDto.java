@@ -1,10 +1,13 @@
 package no.nav.melosys.integrasjon.gsak.oppgave.dto;
 
+import java.time.ZonedDateTime;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OppgaveDto extends OpprettOppgaveDto {
     private String id;
+    private ZonedDateTime opprettetTidspunkt;
     private String status;
     private int versjon;
 
@@ -14,6 +17,14 @@ public class OppgaveDto extends OpprettOppgaveDto {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public ZonedDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
+    }
+
+    public void setOpprettetTidspunkt(ZonedDateTime opprettetTidspunkt) {
+        this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
     public String getStatus() {

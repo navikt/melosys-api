@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.utbetaldata;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -25,29 +24,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class UtbetaldataService implements UtbetaldataFasade {
     private static final String UTBETAL_VERSJON = "1.0";
-
     private static final String BARNETRYGD = "BARNETRYGD";
-
     private static final String RETTIGHETSHAVER = "Rettighetshaver";
-
     private static final String YTELSESPERIODE = "Ytelsesperiode";
 
-    private UtbetalingConsumer utbetalingConsumer;
-
-    private DokumentFactory dokumentFactory;
-
-    private final JAXBContext jaxbContext;
+    private final UtbetalingConsumer utbetalingConsumer;
+    private final DokumentFactory dokumentFactory;
 
     @Autowired
     public UtbetaldataService(UtbetalingConsumer utbetalingConsumer, DokumentFactory dokumentFactory) {
         this.utbetalingConsumer = utbetalingConsumer;
         this.dokumentFactory = dokumentFactory;
-
-        try {
-            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse.class);
-        } catch (JAXBException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     @Override
@@ -84,7 +71,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
             no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse xmlRoot =
                 new no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse();
             xmlRoot.setHentUtbetalingsinformasjonResponse(response);
-            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
+            dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }

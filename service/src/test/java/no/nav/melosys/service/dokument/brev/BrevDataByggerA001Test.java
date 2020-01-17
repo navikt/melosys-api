@@ -25,16 +25,16 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,9 +61,9 @@ public class BrevDataByggerA001Test {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    private UtenlandskMyndighetRepository myndighetsRepo;
+    private UtenlandskMyndighetService myndighetsService;
     @Mock
-    private VilkaarsresultatRepository vilkårRepo;
+    private VilkaarsresultatService vilkaarsresultatService;
 
     @Mock
     private EregFasade ereg;
@@ -93,7 +93,7 @@ public class BrevDataByggerA001Test {
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Arrays.asList(periode));
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        when(myndighetsRepo.findByLandkode(any())).thenReturn(Optional.of(utenlandskMyndighet));
+        when(myndighetsService.hentUtenlandskMyndighet(any())).thenReturn(utenlandskMyndighet);
 
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
@@ -141,12 +141,13 @@ public class BrevDataByggerA001Test {
         leggTilTestorganisasjon("navn1", orgnr1, detaljer);
         leggTilTestorganisasjon("navn2", orgnr2, detaljer);
 
-        brevDataByggerA001 = new BrevDataByggerA001(lovvalgsperiodeService, anmodningsperiodeService, myndighetsRepo, vilkårRepo);
+        when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenCallRealMethod();
+        brevDataByggerA001 = new BrevDataByggerA001(lovvalgsperiodeService, anmodningsperiodeService, myndighetsService, vilkaarsresultatService);
     }
 
     private void lagVilkårResultat(Vilkaar vilkaarType, boolean oppfylt, Kodeverk begrunnelseKode) {
         Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(vilkaarType, oppfylt, begrunnelseKode);
-        when(vilkårRepo.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(vilkaarType))).thenReturn(Optional.of(vilkaarsresultat));
+        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(vilkaarType))).thenReturn(Optional.of(vilkaarsresultat));
     }
 
     private BrevDataGrunnlag lagDokumentressurs() throws TekniskException {

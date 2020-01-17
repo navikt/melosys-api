@@ -29,9 +29,10 @@ public final class OppgaveFactory {
             .setPrioritet(PrioritetType.NORM);
     }
 
-    private static OppgaveParametere hentOppgaveParametere(Behandlingstyper behandlingstype) {
+    public static OppgaveParametere hentOppgaveParametere(Behandlingstyper behandlingstype) {
         switch (behandlingstype) {
             case SOEKNAD:
+            case SOEKNAD_IKKE_YRKESAKTIV:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristUker(12), Behandlingstema.EU_EOS);
             case ENDRET_PERIODE:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.VUR, fristDager(1), Behandlingstema.EU_EOS);
@@ -47,9 +48,10 @@ public final class OppgaveFactory {
                 return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8), Behandlingstema.EU_EOS);
             case VURDER_TRYGDETID:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(8), Behandlingstema.EU_EOS);
+            case NY_VURDERING:
+                return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30), Behandlingstema.EU_EOS);
             case KLAGE:
             case ANKE:
-            case NY_VURDERING:
             default:
                 throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstype  " + behandlingstype);
         }
@@ -63,11 +65,11 @@ public final class OppgaveFactory {
         return LocalDate.now().plusDays(dager);
     }
 
-    private static class OppgaveParametere {
-        private Tema tema;
-        private Oppgavetyper oppgavetype;
-        private LocalDate fristFerdigstillelse;
-        private Behandlingstema behandlingstema;
+    public static class OppgaveParametere {
+        public Tema tema;
+        public Oppgavetyper oppgavetype;
+        public LocalDate fristFerdigstillelse;
+        public Behandlingstema behandlingstema;
 
         OppgaveParametere(Tema tema, Oppgavetyper oppgavetype, LocalDate fristFerdigstillelse, Behandlingstema behandlingstema) {
             this.tema = tema;

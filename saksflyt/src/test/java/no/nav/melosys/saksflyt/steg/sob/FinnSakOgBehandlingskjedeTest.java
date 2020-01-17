@@ -38,7 +38,7 @@ public class FinnSakOgBehandlingskjedeTest {
     @Before
     public void setup() throws Exception {
         DokumentFactory dokumentFactory = new DokumentFactory(
-            new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+            JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
 
         sakOgBehandlingService = new SakOgBehandlingService(
             behandlingskjedeConsumer, behandlingstatusClient, dokumentFactory);

@@ -2,13 +2,9 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
@@ -25,21 +21,25 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
+@Protected
+@RestController
+@RequestMapping("/fagsaker")
 @Api(tags = {"fagsaker"})
-@Path("/fagsaker")
-@Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
-public class FagsakTjeneste extends RestTjeneste {
+public class FagsakTjeneste {
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
@@ -59,79 +59,82 @@ public class FagsakTjeneste extends RestTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @GET
-    @Path("{saksnr}")
+    @GetMapping("{saksnr}")
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."), response = Fagsak.class)
-    public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+    public ResponseEntity<FagsakDto> hentFagsak(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
         FagsakDto fagsakDto = tilFagsakDto(sak);
         log.info("Henting av sak {} ({})", fagsakDto.getSaksnummer(), fagsakDto.getGsakSaksnummer());
-        return Response.ok(fagsakDto).build();
+        return ResponseEntity.ok(fagsakDto);
     }
 
-    @POST
-    @Path("/opprett")
+    @PostMapping("/opprett")
     @ApiOperation(value = "Oppretter en sak med tilhørende behandling.")
-    public Response opprettFagsak(@ApiParam OpprettSakDto opprettSakDto) throws FunksjonellException {
+    public ResponseEntity opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
         if (opprettSakDto.brukerID == null) {
-            throw new BadRequestException("BrukerID trengs for å opprette en sak.");
+            throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }
         tilgangService.sjekkFnr(opprettSakDto.brukerID);
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
-        return Response.ok().build();
+        return ResponseEntity.ok().build();
     }
 
-    @GET
-    @Path("/sok")
+    @GetMapping("/sok")
     @ApiOperation(
         value = "Søk etter saker på fødselsnummer eller d-nummer",
         notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
-    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) throws FunksjonellException {
+    public List<FagsakOppsummeringDto> hentFagsaker(@RequestParam("fnr") String fnr) throws FunksjonellException {
         Iterable<Fagsak> saker;
         if (fnr == null) {
-            throw new BadRequestException();
+            throw new FunksjonellException("fnr er null");
         }
         tilgangService.sjekkFnr(fnr);
         saker = fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fnr);
         return tilFagsakOppsummeringDtoer(saker);
     }
 
-    @POST
-    @Path("{saksnr}/henlegg")
+    @PostMapping("{saksnr}/henlegg")
     @ApiOperation(value = "Henlegger en fagsak")
-    public Response henleggFagsak(@ApiParam @PathParam("saksnr") String saksnummer, @ApiParam("henleggelseDto") HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
 
         fagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
-        return Response.ok().build();
+        return ResponseEntity.ok().build();
     }
 
-    @POST
-    @Path("{saksnr}/henlegg-videresend")
+    @PostMapping("{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
-    public Response videresend(@PathParam("saksnr") String saksnummer, @ApiParam("videresendDto") VideresendDto videresendDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity videresend(@PathVariable("saksnr") String saksnummer, @RequestBody VideresendDto videresendDto) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
 
         fagsakService.henleggOgVideresend(saksnummer, videresendDto.getMottakerinstitusjon());
-        return Response.ok().build();
+        return ResponseEntity.ok().build();
     }
 
-    @PUT
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_PLAIN)
-    @Path("{saksnr}/avsluttsaksombortfalt")
+    @PutMapping(value = "{saksnr}/avsluttsaksombortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Avslutter en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys")
-    public Response avsluttSakSomBortfalt(@PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+    public ResponseEntity avsluttSakSomBortfalt(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
 
         fagsakService.avsluttSakSomBortfalt(fagsak);
-        return Response.noContent().build();
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping(value = "{saksnr}/avslutt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = {MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ApiOperation(value = "Brukes for å avslutte manuelle behandlinger. " +
+        "Gyldige behandlingstyper er VURDER_TRYGDETID, ØVRIGE_SED og SOEKNAD_IKKE_YRKESAKTIVE", produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity avsluttSakManuelt(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        tilgangService.sjekkSak(fagsak);
+        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.getAktivBehandling());
+
+        return ResponseEntity.noContent().build();
     }
 
     private FagsakDto tilFagsakDto(Fagsak fagsak) {
@@ -183,7 +186,7 @@ public class FagsakTjeneste extends RestTjeneste {
     }
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
-        if (behandling.getType() == Behandlingstyper.SOEKNAD) {
+        if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
             søknadService.finnSøknad(behandling.getId()).ifPresent(soeknadDokument -> {
                     behandlingOversiktDto.setLand(hentSøknadsland(soeknadDokument));
                     Periode periode = hentPeriode(soeknadDokument);

@@ -1,9 +1,12 @@
 package no.nav.melosys.domain.dokument.adresse;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -36,5 +39,15 @@ public class StrukturertAdresse extends Adresse {
     @Override
     public boolean erTom() {
         return StringUtils.isAllEmpty(gatenavn, husnummer, postnummer, poststed, region, landkode);
+    }
+
+    @Override
+    public String toString() {
+        return Stream.of(sammenslå(gatenavn, husnummer),
+                region,
+                postnummer, poststed,
+                Landkoder.valueOf(landkode).getBeskrivelse())
+            .filter(StringUtils::isNotEmpty)
+            .collect(Collectors.joining(", "));
     }
 }

@@ -5,14 +5,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -26,6 +25,8 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.junit.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -100,10 +101,10 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
         doThrow(new TekniskException("Det har oppstått en..."))
                 .when(tilgangService).sjekkTilgang(eq(BEHANDLING_MED_TEKNISK_FEIL));
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
-        Response resultat = instans.hentLovvalgsperioder(behandlingsid);
-        assertEquals(Response.Status.OK.getStatusCode(), resultat.getStatus());
+        ResponseEntity resultat = instans.hentLovvalgsperioder(behandlingsid);
+        assertEquals(HttpStatus.OK, resultat.getStatusCode());
         @SuppressWarnings("unchecked")
-        Collection<LovvalgsperiodeDto> resultatliste = (Collection<LovvalgsperiodeDto>) resultat.getEntity();
+        Collection<LovvalgsperiodeDto> resultatliste = (Collection<LovvalgsperiodeDto>) resultat.getBody();
         assertThat(resultatliste.size()).isEqualTo(forventet.size());
         validerArray(resultatliste, LOVVALGSPERIODER_SCHEMA);
     }
@@ -143,7 +144,7 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
         lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET.medlemskapsperiodeID));
         when(behandlingsresultatRepo.findById(eq(42L))).thenReturn(Optional.of(lagBehandlingsresultat()));
-        List<Lovvalgsperiode> ingenPerioder = Collections.<Lovvalgsperiode> emptyList();
+        List<Lovvalgsperiode> ingenPerioder = Collections.emptyList();
         List<Lovvalgsperiode> enPeriode = Collections.singletonList(lovvalgsperiode);
         when(lovvalgsperiodeRepo.findByBehandlingsresultatId(eq(13L))).thenReturn(enPeriode);
         mockWithGenericVarargsArray(lovvalgsperiodeRepo, ingenPerioder, enPeriode);
@@ -157,8 +158,7 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     private static Behandlingsresultat lagBehandlingsresultat() {
-        Behandlingsresultat resultat = new Behandlingsresultat();
-        return resultat;
+        return new Behandlingsresultat();
     }
 
     @Test(expected = FunksjonellException.class)
