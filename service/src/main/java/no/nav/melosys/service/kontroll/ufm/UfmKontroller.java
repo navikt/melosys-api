@@ -3,13 +3,9 @@ package no.nav.melosys.service.kontroll.ufm;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
-import no.nav.melosys.service.kontroll.MedlemskapKontroller;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
-import no.nav.melosys.service.kontroll.PersonKontroller;
-import no.nav.melosys.service.kontroll.YtelseKontroller;
+import no.nav.melosys.service.kontroll.*;
 
 final class UfmKontroller {
-
     private UfmKontroller() {
     }
 
@@ -89,5 +85,10 @@ final class UfmKontroller {
     static Unntak_periode_begrunnelser personBosattINorge(UfmKontrollData kontrollData) {
         return PersonKontroller.personBosattINorge(kontrollData.getPersonDokument()) ?
             Unntak_periode_begrunnelser.BOSATT_I_NORGE : null;
+    }
+
+    static Unntak_periode_begrunnelser arbeidssted(UfmKontrollData kontrollData) {
+        return ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(kontrollData.getSedDokument()) ?
+            Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND : null;
     }
 }

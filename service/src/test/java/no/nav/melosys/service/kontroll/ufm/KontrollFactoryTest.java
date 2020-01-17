@@ -10,31 +10,30 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class KontrollFactoryTest {
-
     private final KontrollFactory kontrollFactory = new KontrollFactory();
 
     @Test
     public void hentKontrollerA001_verifiserKontroller() {
         List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A001);
-        assertThat(kontroller).hasSize(10);
+        assertThat(kontroller).hasSize(11);
     }
 
     @Test
     public void hentKontrollerA003_verifiserKontroller() {
         List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A003);
-        assertThat(kontroller).hasSize(10);
+        assertThat(kontroller).hasSize(11);
     }
 
     @Test
     public void hentKontrollerA009_verifiserKontroller() {
         List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A009);
-        assertThat(kontroller).hasSize(10);
+        assertThat(kontroller).hasSize(11);
     }
 
     @Test
     public void hentKontrollerA010_verifiserKontroller() {
         List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A010);
-        assertThat(kontroller).hasSize(9);
+        assertThat(kontroller).hasSize(10);
     }
 
     @Test(expected = UnsupportedOperationException.class)
