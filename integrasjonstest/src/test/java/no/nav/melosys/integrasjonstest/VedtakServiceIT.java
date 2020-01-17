@@ -112,7 +112,7 @@ public class VedtakServiceIT {
             .utfyllVilkaarForArt113A()
             .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A);
 
-        vedtakService.fattVedtak(utfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "");
+        vedtakService.fattVedtak(utfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, "");
 
         prosessinstansTestService.ventPå(utfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(utfyller.getBehandlingsid(), FERDIG);
@@ -130,7 +130,7 @@ public class VedtakServiceIT {
             .utfyllVilkaarForArt113A()
             .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART11_3A);
 
-        vedtakService.fattVedtak(utfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "");
+        vedtakService.fattVedtak(utfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, "");
 
         prosessinstansTestService.ventPå(utfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(utfyller.getBehandlingsid(), FERDIG);
