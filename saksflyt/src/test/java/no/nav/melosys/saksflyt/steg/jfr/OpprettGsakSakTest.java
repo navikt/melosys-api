@@ -40,7 +40,7 @@ public class OpprettGsakSakTest {
     public void utfoerSteg() throws FunksjonellException, TekniskException {
         Behandlingstyper behandlingstyper = Behandlingstyper.SOEKNAD;
         String saksnummer = "MEL-009";
-        String aktørID = "FJERNET93";
+        String aktørID = "1000104568393";
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);

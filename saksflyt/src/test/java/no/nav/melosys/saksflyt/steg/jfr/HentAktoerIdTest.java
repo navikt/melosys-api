@@ -36,7 +36,7 @@ public class HentAktoerIdTest {
         String brukerID = "99999999991";
         p.setData(ProsessDataKey.BRUKER_ID, brukerID);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("FJERNET93");
+        when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("1000104568393");
 
         agent.utførSteg(p);
 
@@ -51,7 +51,7 @@ public class HentAktoerIdTest {
         String brukerID = "99999999991";
         p.setData(ProsessDataKey.BRUKER_ID, brukerID);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("FJERNET93");
+        when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("1000104568393");
 
         agent.utførSteg(p);
 
