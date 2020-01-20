@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import org.junit.Before;
@@ -82,6 +83,7 @@ public class VedtakKontrollServiceTest {
 
         Medlemsperiode medlemsperiode = new Medlemsperiode();
         medlemsperiode.periode = new Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2));
+        medlemsperiode.status = PeriodestatusMedl.GYLD.getKode();
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
         Collection<Unntak_periode_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID);
