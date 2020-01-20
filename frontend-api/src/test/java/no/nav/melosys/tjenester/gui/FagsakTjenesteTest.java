@@ -34,10 +34,7 @@ import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
-import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
+import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -66,6 +63,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String FAGSAKER_SCHEMA = "fagsaker-schema.json";
     private static final String FAGSAKER_OPPRETT_SCHEMA = "fagsaker-opprett-post-schema.json";
     private static final String SOK_FAGSAKER_SCHEMA = "fagsaker-sok-schema.json";
+    private static final String FAGSAKER_UTPEK_POST_SCHEMA = "fagsaker-utpek-post-schema.json";
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
@@ -104,6 +102,14 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         String jsonString = new ObjectMapper().registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).writeValueAsString(opprettSakDto);
         valider(jsonString, FAGSAKER_OPPRETT_SCHEMA, log);
+    }
+
+    @Test
+    public void fagsakUtpekSchemaValidering() throws IOException {
+        UtpekDto utpekDto = random.nextObject(UtpekDto.class);
+
+        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekDto);
+        valider(jsonString, FAGSAKER_UTPEK_POST_SCHEMA, log);
     }
 
     @Test

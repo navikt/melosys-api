@@ -13,6 +13,8 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.SoeknadService;
@@ -133,6 +135,18 @@ public class FagsakTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.getAktivBehandling());
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{saksnummer}/utpek")
+    @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
+    public ResponseEntity utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
+                                            @RequestBody UtpekDto utpekDto)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        tilgangService.sjekkSak(fagsak);
 
         return ResponseEntity.noContent().build();
     }
