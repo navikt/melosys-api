@@ -20,15 +20,15 @@ public final class MedlemskapKontroller {
         return landkode.equals(Landkoder.NO);
     }
 
-    public static boolean overlappendeMedlemsperiodeIkkeAvvist(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
-        return overlappendeMedlemsperiode(fom, tom, medlemskapDokument, MedlemskapKontroller::periodeIkkeAvvist);
+    public static boolean overlappendeMedlemsperiodeIkkeAvvistPeriode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
+        return overlappendeMedlemsperiodeMedPredikatFinnes(fom, tom, medlemskapDokument, MedlemskapKontroller::periodeIkkeAvvist);
     }
 
-    public static boolean overlappendeGyldigMedlemsperiode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
-        return overlappendeMedlemsperiode(fom, tom, medlemskapDokument, MedlemskapKontroller::periodeGyldig);
+    public static boolean overlappendeMedlemsperiodeGyldigPeriode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
+        return overlappendeMedlemsperiodeMedPredikatFinnes(fom, tom, medlemskapDokument, MedlemskapKontroller::periodeGyldig);
     }
 
-    private static boolean overlappendeMedlemsperiode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument, Predicate<Medlemsperiode> medlemsperiodeFilter) {
+    private static boolean overlappendeMedlemsperiodeMedPredikatFinnes(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument, Predicate<Medlemsperiode> medlemsperiodeFilter) {
         for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {
             Periode periode = medlemsperiode.getPeriode();
             if (medlemsperiodeFilter.test(medlemsperiode) && PeriodeKontroller.periodeOverlapper(fom, tom, periode.getFom(), periode.getTom())) {

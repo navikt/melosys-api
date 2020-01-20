@@ -72,7 +72,7 @@ final class UfmKontroller {
         LocalDate fom = kontrollData.getSedDokument().getLovvalgsperiode().getFom();
         LocalDate tom = kontrollData.getSedDokument().getLovvalgsperiode().getTom();
 
-        return MedlemskapKontroller.overlappendeMedlemsperiodeIkkeAvvist(fom, tom, kontrollData.getMedlemskapDokument()) ?
+        return MedlemskapKontroller.overlappendeMedlemsperiodeIkkeAvvistPeriode(fom, tom, kontrollData.getMedlemskapDokument()) ?
             Unntak_periode_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
 
