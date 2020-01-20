@@ -20,6 +20,7 @@ import no.nav.melosys.domain.dokument.utbetaling.Utbetaling;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,6 +111,7 @@ public class UfmKontrollerTest {
         MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
         Medlemsperiode medlemsperiode = new Medlemsperiode();
         medlemsperiode.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+        medlemsperiode.status = PeriodestatusMedl.UAVK.getKode();
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
         InntektDokument inntektDokument = new InntektDokument();

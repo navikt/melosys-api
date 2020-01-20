@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Predicate;
 
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
@@ -19,17 +20,27 @@ public final class MedlemskapKontroller {
         return landkode.equals(Landkoder.NO);
     }
 
-    public static boolean overlappendeMedlemsperiode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
+    public static boolean overlappendeMedlemsperiodeIkkeAvvist(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
+        return overlappendeMedlemsperiode(fom, tom, medlemskapDokument, MedlemskapKontroller::periodeIkkeAvvist);
+    }
 
+    public static boolean overlappendeGyldigMedlemsperiode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument) {
+        return overlappendeMedlemsperiode(fom, tom, medlemskapDokument, MedlemskapKontroller::periodeGyldig);
+    }
 
+    private static boolean overlappendeMedlemsperiode(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument, Predicate<Medlemsperiode> medlemsperiodeFilter) {
         for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {
             Periode periode = medlemsperiode.getPeriode();
-            if (periodeIkkeAvvist(medlemsperiode) && PeriodeKontroller.periodeOverlapper(fom, tom, periode.getFom(), periode.getTom())) {
+            if (medlemsperiodeFilter.test(medlemsperiode) && PeriodeKontroller.periodeOverlapper(fom, tom, periode.getFom(), periode.getTom())) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static boolean periodeGyldig(Medlemsperiode medlemsperiode) {
+        return PeriodestatusMedl.GYLD.getKode().equals(medlemsperiode.status);
     }
 
     private static boolean periodeIkkeAvvist(Medlemsperiode medlemsperiode) {
