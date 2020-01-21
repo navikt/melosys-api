@@ -15,7 +15,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,9 +37,9 @@ public class UfmKontrollServiceTest {
 
     private final Behandling behandling = new Behandling();
 
-    private Function<UfmKontrollData, Unntak_periode_begrunnelser> f1 = (o) -> Unntak_periode_begrunnelser.BOSATT_I_NORGE;
-    private Function<UfmKontrollData, Unntak_periode_begrunnelser> f2 = (o) -> Unntak_periode_begrunnelser.INGEN_SLUTTDATO;
-    private Function<UfmKontrollData, Unntak_periode_begrunnelser> f3 = (o) -> Unntak_periode_begrunnelser.MOTTAR_YTELSER;
+    private Function<UfmKontrollData, Kontroll_begrunnelser> f1 = (o) -> Kontroll_begrunnelser.BOSATT_I_NORGE;
+    private Function<UfmKontrollData, Kontroll_begrunnelser> f2 = (o) -> Kontroll_begrunnelser.INGEN_SLUTTDATO;
+    private Function<UfmKontrollData, Kontroll_begrunnelser> f3 = (o) -> Kontroll_begrunnelser.MOTTAR_YTELSER;
 
     @Before
     public void setup() {
@@ -61,16 +61,16 @@ public class UfmKontrollServiceTest {
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().minusYears(1)));
         assertThat(ufmKontrollService.utførKontroller(behandling))
-            .containsExactly(Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
+            .containsExactly(Kontroll_begrunnelser.FEIL_I_PERIODEN);
     }
 
     @Test
     public void utførKontroller_periodeGyldig_forventTreTreff() throws Exception {
         assertThat(ufmKontrollService.utførKontroller(behandling))
             .containsExactly(
-                Unntak_periode_begrunnelser.BOSATT_I_NORGE,
-                Unntak_periode_begrunnelser.INGEN_SLUTTDATO,
-                Unntak_periode_begrunnelser.MOTTAR_YTELSER
+                Kontroll_begrunnelser.BOSATT_I_NORGE,
+                Kontroll_begrunnelser.INGEN_SLUTTDATO,
+                Kontroll_begrunnelser.MOTTAR_YTELSER
             );
     }
 
