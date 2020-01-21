@@ -11,7 +11,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
@@ -30,14 +30,14 @@ public class UfmKontrollService {
     }
 
     static {
-        Arrays.stream(Unntak_periode_begrunnelser.values())
+        Arrays.stream(Kontroll_begrunnelser.values())
             .forEach(b -> Metrics.counter(UNNTAKSPERIODE_KONTROLL_TREFF, TAG_BEGRUNNELSE, b.getKode()));
     }
 
-    public List<Unntak_periode_begrunnelser> utførKontroller(Behandling behandling) throws TekniskException {
+    public List<Kontroll_begrunnelser> utførKontroller(Behandling behandling) throws TekniskException {
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
         if (feilIPeriode(sedDokument)) {
-            return Collections.singletonList(Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
+            return Collections.singletonList(Kontroll_begrunnelser.FEIL_I_PERIODEN);
         }
 
         PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
@@ -49,8 +49,8 @@ public class UfmKontrollService {
         return utførKontroller(kontrollData, kontrollFactory.hentKontrollerForSedType(sedDokument.getSedType()));
     }
 
-    private List<Unntak_periode_begrunnelser> utførKontroller(UfmKontrollData kontrollData,
-                                                              Collection<Function<UfmKontrollData, Unntak_periode_begrunnelser>> kontroller) {
+    private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData,
+                                                              Collection<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller) {
         return kontroller.stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
@@ -58,7 +58,7 @@ public class UfmKontrollService {
             .collect(Collectors.toList());
     }
 
-    private void registrerMetrikk(Unntak_periode_begrunnelser unntak_periode_begrunnelse) {
+    private void registrerMetrikk(Kontroll_begrunnelser unntak_periode_begrunnelse) {
         Metrics.counter(UNNTAKSPERIODE_KONTROLL_TREFF, TAG_BEGRUNNELSE, unntak_periode_begrunnelse.getKode()).increment();
     }
 

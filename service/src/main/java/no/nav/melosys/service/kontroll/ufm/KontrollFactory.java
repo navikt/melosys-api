@@ -3,15 +3,14 @@ package no.nav.melosys.service.kontroll.ufm;
 import java.util.List;
 import java.util.function.Function;
 
-import com.google.common.collect.Lists;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import org.springframework.stereotype.Service;
 
 @Service
 class KontrollFactory {
 
-    List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> hentKontrollerForSedType(final SedType sedType) {
+    List<Function<UfmKontrollData, Kontroll_begrunnelser>> hentKontrollerForSedType(final SedType sedType) {
         switch (sedType) {
             case A001:
                 return a001Kontroller();
@@ -26,8 +25,8 @@ class KontrollFactory {
         }
     }
 
-    private List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> a001Kontroller() {
-        return Lists.newArrayList(
+    private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a001Kontroller() {
+        return List.of(
             UfmKontroller::periodeErÅpen,
             UfmKontroller::periodeEldreEnn3År,
             UfmKontroller::periodeOver5År,
@@ -37,12 +36,13 @@ class KontrollFactory {
             UfmKontroller::personDød,
             UfmKontroller::personBosattINorge,
             UfmKontroller::utbetaltYtelserFraOffentligIPeriode,
-            UfmKontroller::utbetaltBarnetrygdytelser
+            UfmKontroller::utbetaltBarnetrygdytelser,
+            UfmKontroller::arbeidssted
         );
     }
 
-    private List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> a003Kontroller() {
-        return Lists.newArrayList(
+    private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a003Kontroller() {
+        return List.of(
             UfmKontroller::periodeErÅpen,
             UfmKontroller::periodeEldreEnn3År,
             UfmKontroller::periodeOver24Mnd,
@@ -52,12 +52,13 @@ class KontrollFactory {
             UfmKontroller::personDød,
             UfmKontroller::personBosattINorge,
             UfmKontroller::utbetaltYtelserFraOffentligIPeriode,
-            UfmKontroller::utbetaltBarnetrygdytelser
+            UfmKontroller::utbetaltBarnetrygdytelser,
+            UfmKontroller::arbeidssted
         );
     }
 
-    private List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> a009Kontroller() {
-        return Lists.newArrayList(
+    private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a009Kontroller() {
+        return List.of(
             UfmKontroller::periodeErÅpen,
             UfmKontroller::periodeEldreEnn3År,
             UfmKontroller::periodeOver24Mnd,
@@ -67,12 +68,13 @@ class KontrollFactory {
             UfmKontroller::statsborgerskapIkkeMedlemsland,
             UfmKontroller::personDød,
             UfmKontroller::utbetaltYtelserFraOffentligIPeriode,
-            UfmKontroller::utbetaltBarnetrygdytelser
+            UfmKontroller::utbetaltBarnetrygdytelser,
+            UfmKontroller::arbeidssted
         );
     }
 
-    private List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> a010Kontroller() {
-        return Lists.newArrayList(
+    private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a010Kontroller() {
+        return List.of(
             UfmKontroller::periodeErÅpen,
             UfmKontroller::periodeEldreEnn3År,
             UfmKontroller::periodeOver1ÅrFremITid,
@@ -81,7 +83,8 @@ class KontrollFactory {
             UfmKontroller::statsborgerskapIkkeMedlemsland,
             UfmKontroller::personDød,
             UfmKontroller::utbetaltYtelserFraOffentligIPeriode,
-            UfmKontroller::utbetaltBarnetrygdytelser
+            UfmKontroller::utbetaltBarnetrygdytelser,
+            UfmKontroller::arbeidssted
         );
     }
 }

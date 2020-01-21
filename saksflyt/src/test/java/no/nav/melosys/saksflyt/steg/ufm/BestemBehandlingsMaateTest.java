@@ -6,7 +6,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -55,7 +55,7 @@ public class BestemBehandlingsMaateTest {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setType(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
         AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
-        registrering.setBegrunnelseKode(Unntak_periode_begrunnelser.FEIL_I_PERIODEN.getKode());
+        registrering.setBegrunnelseKode(Kontroll_begrunnelser.FEIL_I_PERIODEN.getKode());
         avklartefakta.getRegistreringer().add(registrering);
 
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE)))
