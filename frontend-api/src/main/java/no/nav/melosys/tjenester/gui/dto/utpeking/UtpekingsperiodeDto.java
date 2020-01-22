@@ -8,7 +8,7 @@ public class UtpekingsperiodeDto {
     @JsonUnwrapped(suffix = "Dato")
     public PeriodeDto periode;
     private String lovvalgsbestemmelse;
-    private String tilleggBestemmelse;
+    private String tilleggsbestemmelse;
     private String lovvalgsland;
 
     public PeriodeDto getPeriode() {
@@ -23,12 +23,12 @@ public class UtpekingsperiodeDto {
         this.lovvalgsbestemmelse = lovvalgsbestemmelse;
     }
 
-    public String getTilleggBestemmelse() {
-        return tilleggBestemmelse;
+    public String getTilleggsbestemmelse() {
+        return tilleggsbestemmelse;
     }
 
-    public void setTilleggBestemmelse(String tilleggBestemmelse) {
-        this.tilleggBestemmelse = tilleggBestemmelse;
+    public void setTilleggsbestemmelse(String tilleggsbestemmelse) {
+        this.tilleggsbestemmelse = tilleggsbestemmelse;
     }
 
     public String getLovvalgsland() {

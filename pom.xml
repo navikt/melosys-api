@@ -38,7 +38,7 @@
 
         <!-- Melosys -->
         <!-- FIXME: Oppdater til ny release-versjon -->
-        <melosys.jsonschema.version>1.35.13-PR-130-SNAPSHOT</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.16-20200121.091346-1</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.14.19</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
