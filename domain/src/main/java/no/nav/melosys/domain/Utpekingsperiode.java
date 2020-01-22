@@ -16,7 +16,7 @@ public class Utpekingsperiode {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
-    private Behandling behandling;
+    private Behandlingsresultat behandlingsresultat;
 
     @Column(name = "fom_dato", nullable = false, updatable = false)
     private LocalDate fom;
@@ -53,12 +53,12 @@ public class Utpekingsperiode {
         return id;
     }
 
-    public Behandling getBehandling() {
-        return behandling;
+    public Behandlingsresultat getBehandlingsresultat() {
+        return behandlingsresultat;
     }
 
     public void setBehandlingsresultat(Behandling behandling) {
-        this.behandling = behandling;
+        this.behandlingsresultat = behandlingsresultat;
     }
 
     public LocalDate getFom() {

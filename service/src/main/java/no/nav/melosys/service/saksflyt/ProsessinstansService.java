@@ -2,6 +2,7 @@ package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.Counter;
@@ -327,6 +328,17 @@ public class ProsessinstansService {
             .medBehandling(behandling)
             .medEessiMottaker(mottakerinstitusjon)
             .build();
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, List<String> mottakerinstitusjoner) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.UTPEK_LAND)
+            .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
+            .medBehandling(behandling)
+            .build();
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, mottakerinstitusjoner);
 
         lagre(prosessinstans);
     }

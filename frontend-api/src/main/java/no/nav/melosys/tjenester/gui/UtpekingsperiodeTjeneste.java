@@ -6,6 +6,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.UtpekingsperiodeService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -22,10 +23,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class UtpekingsperiodeTjeneste {
 
     private final TilgangService tilgangService;
+    private final UtpekingsperiodeService utpekingsperiodeService;
 
     @Autowired
-    public UtpekingsperiodeTjeneste(TilgangService tilgangService) {
+    public UtpekingsperiodeTjeneste(TilgangService tilgangService, UtpekingsperiodeService utpekingsperiodeService) {
         this.tilgangService = tilgangService;
+        this.utpekingsperiodeService = utpekingsperiodeService;
     }
 
     @GetMapping("{behandlingID}")
