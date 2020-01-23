@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -38,5 +39,19 @@ public class Periode implements ErPeriode {
     @Override
     public String toString() {
         return new StringBuilder().append(fom).append(" → ").append(tom).toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Periode)) return false;
+        Periode periode = (Periode) o;
+        return getFom().equals(periode.getFom()) &&
+            Objects.equals(getTom(), periode.getTom());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFom(), getTom());
     }
 }
