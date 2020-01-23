@@ -187,7 +187,7 @@ public class EessiConsumerTest {
         server.expect(requestTo("/sed/A001/pdf"))
             .andRespond(withSuccess(PDF, MediaType.APPLICATION_PDF));
 
-        byte[] pdf = eessiConsumer.genererSedForhåndsvisning(new SedDataDto(), SedType.A001);
+        byte[] pdf = eessiConsumer.genererPdfFraSed(new SedDataDto(), SedType.A001);
         assertThat(pdf).isEqualTo(PDF);
     }
 }

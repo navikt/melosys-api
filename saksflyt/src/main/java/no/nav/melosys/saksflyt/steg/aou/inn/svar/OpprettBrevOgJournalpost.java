@@ -60,7 +60,7 @@ public class OpprettBrevOgJournalpost extends AbstraktStegBehandler {
 
         String brukerFnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
         SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(behandling.getId());
-        byte[] sedPdf = eessiService.genererSedForhåndsvisning(behandling.getId(), sedType);
+        byte[] sedPdf = eessiService.genererPdfFraSed(behandling.getId(), sedType);
 
         Landkoder landkode = fagsak.hentMyndighetLandkode();
         UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);

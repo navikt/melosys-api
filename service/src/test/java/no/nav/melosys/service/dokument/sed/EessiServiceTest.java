@@ -274,14 +274,14 @@ public class EessiServiceTest {
     @Test
     public void genererSedForhåndsvisning_forventPdf() throws MelosysException {
         final byte[] PDF = "pdf".getBytes();
-        when(eessiConsumer.genererSedForhåndsvisning(any(), any())).thenReturn(PDF);
+        when(eessiConsumer.genererPdfFraSed(any(), any())).thenReturn(PDF);
 
-        byte[] pdf = eessiService.genererSedForhåndsvisning(1L, SedType.A001);
+        byte[] pdf = eessiService.genererPdfFraSed(1L, SedType.A001);
 
         verify(behandlingService).hentBehandling(eq(1L));
         verify(dokumentdataGrunnlagFactory).av(any());
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
-        verify(eessiConsumer).genererSedForhåndsvisning(any(), any());
+        verify(eessiConsumer).genererPdfFraSed(any(), any());
         assertThat(pdf).isEqualTo(PDF);
     }
 

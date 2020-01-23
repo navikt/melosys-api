@@ -124,7 +124,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
         String fnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
-            fagsak.getGsakSaksnummer(), fnr, SedType.A008, eessiService.genererSedForhåndsvisning(behandling.getId(), SedType.A008),
+            fagsak.getGsakSaksnummer(), fnr, SedType.A008, eessiService.genererPdfFraSed(behandling.getId(), SedType.A008),
             institusjonID, institusjonNavn, landkode.getKode(), lagSøknadVedlegg(behandling)
         );
 

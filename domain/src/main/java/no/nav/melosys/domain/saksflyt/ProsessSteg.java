@@ -89,6 +89,7 @@ public enum ProsessSteg implements Kodeverk {
     //Utpek annet land
     UL_SEND_BREV("UL_SEND_BREV", "Send brev til bruker om at vedkommende ikke er omfattet av norsk trygd"),
     UL_SEND_SED("UL_SEND_SED", "Send SED A003"),
+    UL_DISTRIBUER_JOURNALPOST("UL_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),
 
     //Henlegg sak
     HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),

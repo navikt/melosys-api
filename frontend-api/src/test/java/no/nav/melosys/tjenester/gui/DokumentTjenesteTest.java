@@ -68,7 +68,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void hentSedForhåndsvisning() throws MelosysException {
         final byte[] MOCK_PDF = "bytes fra en pdf".getBytes();
-        when(eessiService.genererSedForhåndsvisning(anyLong(), any())).thenReturn(MOCK_PDF);
+        when(eessiService.genererPdfFraSed(anyLong(), any())).thenReturn(MOCK_PDF);
 
         ResponseEntity response = dokumentTjeneste.produserUtkastSed(1L, SedType.A001);
         assertThat(response.getBody()).isEqualTo(MOCK_PDF);
