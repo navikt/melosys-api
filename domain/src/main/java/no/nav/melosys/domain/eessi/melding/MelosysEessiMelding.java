@@ -119,7 +119,7 @@ public class MelosysEessiMelding {
         this.erEndring = erEndring;
     }
 
-    public boolean erMidlertidigBestemmelse() {
+    public boolean isMidlertidigBestemmelse() {
         return midlertidigBestemmelse;
     }
 
