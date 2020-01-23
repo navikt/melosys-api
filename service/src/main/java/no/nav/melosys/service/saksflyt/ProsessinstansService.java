@@ -332,12 +332,13 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, List<String> mottakerinstitusjoner) {
+    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, List<String> mottakerinstitusjoner) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEK_LAND)
             .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
             .build();
+        prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, mottakerinstitusjoner);
 
         lagre(prosessinstans);

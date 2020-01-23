@@ -35,13 +35,21 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
     }
 
     protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg) throws MelosysException {
+        return sendUtland(bucType, prosessinstans, null, null, vedlegg);
+    }
+
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, String land, String mottakerInstitusjon, byte[] vedlegg) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (skalSendesUtland(behandlingsresultat)) {
-            Optional<String> landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst().map(Landkoder::getKode);
+            Optional<String> landkode = land != null
+                ? Optional.of(land)
+                : landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst().map(Landkoder::getKode);
             if (landkode.isPresent()) {
                 if (eessiService.landErEessiReady(bucType.name(), landkode.get())) {
-                    String mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
+                    if (mottakerInstitusjon == null) {
+                        mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
+                    }
                     if (StringUtils.isEmpty(mottakerInstitusjon)) {
                         mottakerInstitusjon = eessiService.hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), bucType);
                     }

@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import no.nav.dok.melosysbrev._000072.Fag;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -346,19 +345,6 @@ public class FagsakService {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
         prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, mottakerinstitusjon);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    @Transactional(rollbackFor = MelosysException.class)
-    public void utpekLovvalgsland(Fagsak fagsak, List<String> mottakerinstitusjoner) throws TekniskException, FunksjonellException {
-        long behandlingId = fagsak.getAktivBehandling().getId();
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
-
-        behandling.setStatus(Behandlingsstatus.UTPEKING_SENDT);
-        log.info("Utpeking av annet land for sak: {} behandling: {} mottakerinstitusjoner: {}",
-            behandling.getFagsak().getSaksnummer(), behandlingId, String.join(", ", mottakerinstitusjoner));
-
-        prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, mottakerinstitusjoner);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

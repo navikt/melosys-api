@@ -6,7 +6,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.UtpekingsperiodeService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -23,31 +23,32 @@ import org.springframework.web.context.WebApplicationContext;
 public class UtpekingsperiodeTjeneste {
 
     private final TilgangService tilgangService;
-    private final UtpekingsperiodeService utpekingsperiodeService;
+    private final UtpekingService utpekingService;
 
     @Autowired
-    public UtpekingsperiodeTjeneste(TilgangService tilgangService, UtpekingsperiodeService utpekingsperiodeService) {
+    public UtpekingsperiodeTjeneste(TilgangService tilgangService, UtpekingService utpekingService) {
         this.tilgangService = tilgangService;
-        this.utpekingsperiodeService = utpekingsperiodeService;
+        this.utpekingService = utpekingService;
     }
 
     @GetMapping("{behandlingID}")
     @ApiOperation(value = "Henter utpekingsperioder for en gitt behandling", response = UtpekingsperioderDto.class)
-    public UtpekingsperioderDto hentAnmodningsperioder(@PathVariable("behandlingID") long behandlingID)
+    public UtpekingsperioderDto hentUtpekingsperioder(@PathVariable("behandlingID") long behandlingID)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
 
         tilgangService.sjekkTilgang(behandlingID);
+        // FIXME hent utpekingsperioder
         return null;
     }
 
     @PostMapping("{behandlingID}")
     @ApiOperation("Lagrer utpekingssperioder for en gitt behandling.")
-    public UtpekingsperioderDto lagreAnmodningsperioder(@PathVariable("behandlingID") long behandlingID,
+    public UtpekingsperioderDto lagreUtpekingsperioder(@PathVariable("behandlingID") long behandlingID,
                                                            @RequestBody UtpekingsperioderDto utpekingsperioderDto)
         throws TekniskException, FunksjonellException {
 
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
-
+        // FIXME lagre utpekingsperioder
         return null;
     }
 }

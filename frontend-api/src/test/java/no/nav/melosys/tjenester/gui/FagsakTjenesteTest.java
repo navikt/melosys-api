@@ -34,6 +34,7 @@ import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
@@ -68,6 +69,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
     private static TilgangService tilgangService;
+    private static UtpekingService utpekingService;
 
     private EasyRandom random;
 
@@ -290,6 +292,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
         tilgangService = mock(TilgangService.class);
         fagsakService = mock(FagsakService.class);
+        utpekingService = mock(UtpekingService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         SoeknadService søknadService = mock(SoeknadService.class);
         PersonDokument personDokument = (PersonDokument)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
@@ -301,7 +304,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, saksopplysningerService, søknadService, tilgangService);
+        return new FagsakTjeneste(fagsakService, saksopplysningerService, søknadService, tilgangService, utpekingService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {

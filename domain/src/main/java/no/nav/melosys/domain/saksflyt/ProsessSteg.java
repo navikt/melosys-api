@@ -38,6 +38,7 @@ public enum ProsessSteg implements Kodeverk {
     GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i Oppgave"),
 
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
+    MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
@@ -72,7 +73,7 @@ public enum ProsessSteg implements Kodeverk {
     AOU_MOTTAK_SVAR_DISTRIBUER_JOURNALPOST("AOU_MOTTAK_SVAR_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten"),
     AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET("AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET","Oppdaterer status på sak i sob til avsluttet"),
 
-    //Iverksett Vedtak
+    //Iverksett Vedtak,
     IV_FORKORT_PERIODE("IV_FORKORT_PERIODE", "Legger til endringsgrunn i AVKLARTEFAKTA for hvorfor perioden er forkortet"),
     IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),
     IV_OPPDATER_RESULTAT("IV_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
@@ -85,7 +86,9 @@ public enum ProsessSteg implements Kodeverk {
     IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
     IV_STATUS_BEH_AVSL("IV_STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling"),
 
-    MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
+    //Utpek annet land
+    UL_SEND_BREV("UL_SEND_BREV", "Send brev til bruker om at vedkommende ikke er omfattet av norsk trygd"),
+    UL_SEND_SED("UL_SEND_SED", "Send SED A003"),
 
     //Henlegg sak
     HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
@@ -132,6 +135,8 @@ public enum ProsessSteg implements Kodeverk {
     REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET("REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET", "Oppdaterer status på sak i sob til avsluttet"),
     REG_UNNTAK_PERIODE_IKKE_GODKJENT("REG_UNNTAK_PERIODE_IKKE_GODKJENT", "Unntaksperiode avvist av saksbehandler"),
     REG_UNNTAK_UNDER_AVKLARING("REG_UNNTAK_UNDER_AVKLARING", "Unntaksperiode under avklaring"),
+
+
 
     FERDIG("FERDIG", "Prosessen er ferdig");
 
