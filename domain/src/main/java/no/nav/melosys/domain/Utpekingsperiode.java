@@ -57,7 +57,7 @@ public class Utpekingsperiode {
         return behandlingsresultat;
     }
 
-    public void setBehandlingsresultat(Behandling behandling) {
+    public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         this.behandlingsresultat = behandlingsresultat;
     }
 

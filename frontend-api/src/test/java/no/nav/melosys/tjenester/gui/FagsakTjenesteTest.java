@@ -29,6 +29,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
@@ -331,5 +332,19 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         resultat.setSakstype(fagsak.getType());
         resultat.setSaksstatus(fagsak.getStatus());
         return resultat;
+    }
+
+    @Test
+    public void utpekLovvalgsland() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste fagsakTjeneste = lagFagsakTjeneste(fagsak);
+        UtpekDto utpekDto = random.nextObject(UtpekDto.class);
+
+        when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
+
+        fagsakTjeneste.utpekLovvalgsland(fagsak.getSaksnummer(), utpekDto);
+
+        verify(tilgangService).sjekkSak(fagsak);
+        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner());
     }
 }

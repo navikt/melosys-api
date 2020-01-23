@@ -1,7 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collection;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -37,8 +40,10 @@ public class UtpekingsperiodeTjeneste {
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
 
         tilgangService.sjekkTilgang(behandlingID);
-        // FIXME hent utpekingsperioder
-        return null;
+
+        Collection<Utpekingsperiode> utpekingsperioder = utpekingService.hentUtpekingsperioder(behandlingID);
+
+        return UtpekingsperioderDto.av(utpekingsperioder);
     }
 
     @PostMapping("{behandlingID}")
@@ -48,7 +53,10 @@ public class UtpekingsperiodeTjeneste {
         throws TekniskException, FunksjonellException {
 
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
-        // FIXME lagre utpekingsperioder
-        return null;
+
+        Collection<Utpekingsperiode> utpekingsperioder = UtpekingsperioderDto.tilDomene(utpekingsperioderDto);
+        utpekingsperioder = utpekingService.lagreUtpekingsperioder(behandlingID, utpekingsperioder);
+
+        return UtpekingsperioderDto.av(utpekingsperioder);
     }
 }

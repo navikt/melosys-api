@@ -1,19 +1,17 @@
 package no.nav.melosys.service.utpeking;
 
+import java.util.Collection;
 import java.util.List;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.Utpekingsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -30,22 +28,40 @@ public class UtpekingService {
     private static final Logger log = LoggerFactory.getLogger(UtpekingService.class);
 
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final EessiService eessiService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
 
-    public UtpekingService(BehandlingService behandlingService, EessiService eessiService,
-                           OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
+    public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+                           EessiService eessiService, OppgaveService oppgaveService,
+                           ProsessinstansService prosessinstansService,
                            UtenlandskMyndighetService utenlandskMyndighetService,
                            UtpekingsperiodeRepository utpekingsperiodeRepository) {
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
+    }
+
+    public Collection<Utpekingsperiode> hentUtpekingsperioder(long behandlingID) {
+        return utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
+    }
+
+    @Transactional(rollbackFor = MelosysException.class)
+    public Collection<Utpekingsperiode> lagreUtpekingsperioder(long behandlingID, Collection<Utpekingsperiode> utpekingsperioder) throws FunksjonellException {
+        List<Utpekingsperiode> eksisterende = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
+
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        utpekingsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat);
+        utpekingsperiodeRepository.flush();
+        utpekingsperioder.forEach(a -> a.setBehandlingsresultat(behandlingsresultat));
+        return utpekingsperiodeRepository.saveAll(utpekingsperioder);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
