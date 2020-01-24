@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -244,7 +244,7 @@ public class VedtakServiceTest {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         behandlingsresultat.setType(resultatType);
         when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
-            .thenReturn(Collections.singletonList(Unntak_periode_begrunnelser.OVERLAPPENDE_MEDL_PERIODER));
+            .thenReturn(Collections.singletonList(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER));
 
         ValideringException forventetException = null;
         try {
@@ -254,7 +254,7 @@ public class VedtakServiceTest {
         }
 
         assertThat(forventetException).isNotNull();
-        assertThat(forventetException.getFeilkoder()).containsExactly(Unntak_periode_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
+        assertThat(forventetException.getFeilkoder()).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
     }
 
     @Test

@@ -5,13 +5,13 @@ import java.util.function.Function;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import org.springframework.stereotype.Service;
 
 @Service
 class KontrollFactory {
 
-    List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> hentKontrollerForSedType(final SedType sedType) {
+    List<Function<UfmKontrollData, Kontroll_begrunnelser>> hentKontrollerForSedType(final SedType sedType) {
         switch (sedType) {
             case A001:
                 return a001Kontroller();
@@ -26,7 +26,7 @@ class KontrollFactory {
         }
     }
 
-    private List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> a001Kontroller() {
+    private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a001Kontroller() {
         return Lists.newArrayList(
             UfmKontroller::periodeErÅpen,
             UfmKontroller::periodeEldreEnn3År,
@@ -41,7 +41,7 @@ class KontrollFactory {
         );
     }
 
-    private List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> a003Kontroller() {
+    private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a003Kontroller() {
         return Lists.newArrayList(
             UfmKontroller::periodeErÅpen,
             UfmKontroller::periodeEldreEnn3År,
@@ -56,7 +56,7 @@ class KontrollFactory {
         );
     }
 
-    private List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> a009Kontroller() {
+    private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a009Kontroller() {
         return Lists.newArrayList(
             UfmKontroller::periodeErÅpen,
             UfmKontroller::periodeEldreEnn3År,
@@ -71,7 +71,7 @@ class KontrollFactory {
         );
     }
 
-    private List<Function<UfmKontrollData, Unntak_periode_begrunnelser>> a010Kontroller() {
+    private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a010Kontroller() {
         return Lists.newArrayList(
             UfmKontroller::periodeErÅpen,
             UfmKontroller::periodeEldreEnn3År,

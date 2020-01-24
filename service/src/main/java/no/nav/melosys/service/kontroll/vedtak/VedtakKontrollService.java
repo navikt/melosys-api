@@ -10,7 +10,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -29,7 +29,7 @@ public class VedtakKontrollService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
-    public Collection<Unntak_periode_begrunnelser> utførKontroller(long behandlingID, Vedtakstyper vedtakstype) throws FunksjonellException, TekniskException {
+    public Collection<Kontroll_begrunnelser> utførKontroller(long behandlingID, Vedtakstyper vedtakstype) throws FunksjonellException, TekniskException {
         return utførKontroller(
             behandlingService.hentBehandling(behandlingID),
             lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID),
@@ -37,10 +37,10 @@ public class VedtakKontrollService {
         );
     }
 
-    private Collection<Unntak_periode_begrunnelser> utførKontroller(
+    private Collection<Kontroll_begrunnelser> utførKontroller(
         Behandling behandling,
         Lovvalgsperiode lovvalgsperiode,
-        Set<Function<VedtakKontrollData, Unntak_periode_begrunnelser>> kontroller
+        Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> kontroller
     ) throws TekniskException {
         MedlemskapDokument medlemskapDokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
         VedtakKontrollData vedtakKontrollData = new VedtakKontrollData(medlemskapDokument, lovvalgsperiode);
