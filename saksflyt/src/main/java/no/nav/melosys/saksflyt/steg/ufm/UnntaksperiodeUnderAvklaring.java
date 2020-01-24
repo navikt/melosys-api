@@ -3,12 +3,14 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import java.util.Collections;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -90,7 +92,7 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
              .orElse(Collections.emptySet())
              .stream()
              .map(AvklartefaktaRegistrering::getBegrunnelseKode)
-             .anyMatch(Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD.getKode()::equals);
+             .anyMatch(Kontroll_begrunnelser.PERIODEN_OVER_24_MD.getKode()::equals);
 
     }
 }
