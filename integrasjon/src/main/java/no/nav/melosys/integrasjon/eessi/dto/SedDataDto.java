@@ -29,7 +29,7 @@ public class SedDataDto {
     private List<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();
 
     private String mottakerLand;
-    private String mottakerId;
+    private List<String> mottakerIder;
 
     private SvarAnmodningUnntakDto svarAnmodningUnntak;
 
@@ -137,12 +137,12 @@ public class SedDataDto {
         this.mottakerLand = mottakerLand;
     }
 
-    public String getMottakerId() {
-        return mottakerId;
+    public List<String> getMottakerIder() {
+        return mottakerIder;
     }
 
-    public void setMottakerId(String mottakerId) {
-        this.mottakerId = mottakerId;
+    public void setMottakerIder(List<String> mottakerIder) {
+        this.mottakerIder = mottakerIder;
     }
 
     public SvarAnmodningUnntakDto getSvarAnmodningUnntak() {

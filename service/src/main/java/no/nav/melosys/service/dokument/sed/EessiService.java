@@ -59,11 +59,11 @@ public class EessiService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public void opprettOgSendSed(long behandlingID, String mottakerInstitusjon, BucType bucType) throws MelosysException {
-        opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, null);
+    public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType) throws MelosysException {
+        opprettOgSendSed(behandlingID, mottakerInstitusjoner, bucType, null);
     }
 
-    public void opprettOgSendSed(long behandlingID, String mottakerInstitusjon, BucType bucType, byte[] vedlegg) throws MelosysException {
+    public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType, byte[] vedlegg) throws MelosysException {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -72,7 +72,7 @@ public class EessiService {
 
             SedDataGrunnlag datagrunnlag = dataGrunnlagFactory.av(behandling);
             SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
-            sedData.setMottakerId(mottakerInstitusjon);
+            sedData.setMottakerIder(mottakerInstitusjoner);
             sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
             log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
@@ -83,17 +83,17 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId) throws MelosysException {
+    public String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, List<String> mottakerId) throws MelosysException {
         return opprettBucOgSed(behandling, bucType, mottakerLand, mottakerId, null);
     }
 
-    private String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId, byte[] vedlegg) throws MelosysException {
+    private String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, List<String> mottakerId, byte[] vedlegg) throws MelosysException {
         if (skalSendeSed) {
             SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
             sedDataDto.setMottakerLand(mottakerLand);
-            sedDataDto.setMottakerId(mottakerId);
+            sedDataDto.setMottakerIder(mottakerId);
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
             log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);

@@ -2,6 +2,8 @@ package no.nav.melosys.saksflyt.steg;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -40,30 +42,36 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
     protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        SendUtlandStatus sendUtlandStatus = SendUtlandStatus.IKKE_SENDT;
         if (skalSendesUtland(behandlingsresultat)) {
-            Optional<String> landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst().map(Landkoder::getKode);
-            if (landkode.isPresent()) {
-                if (eessiService.landErEessiReady(bucType.name(), landkode.get())) {
-                    String mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {}).get(0);
-                    if (StringUtils.isEmpty(mottakerInstitusjon)) {
-                        mottakerInstitusjon = eessiService.hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), bucType);
-                    }
+            List<String> trygdemyndinghetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().map(Landkoder::getKode).collect(Collectors.toList());
+            List<String> sedmottakere = trygdemyndinghetsland.stream().filter(erEessiReady(bucType)).collect(Collectors.toList());
+            List<String> brevmottakere = trygdemyndinghetsland.stream().filter(land -> !sedmottakere.contains(land)).collect(Collectors.toList());
 
-                    eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, vedlegg);
-                    return SendUtlandStatus.SED_SENDT;
-                } else {
-                    sendBrev(prosessinstans);
-                    return SendUtlandStatus.BREV_SENDT;
+            if (!sedmottakere.isEmpty()) {
+                List<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {});
+                if (mottakerinstitusjoner.isEmpty()) {
+                    mottakerinstitusjoner.add(eessiService.hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), bucType));
                 }
+                eessiService.opprettOgSendSed(behandlingID, mottakerinstitusjoner, bucType, vedlegg);
+                sendUtlandStatus = SendUtlandStatus.SED_SENDT;
+            }
+            if (!brevmottakere.isEmpty()) {
+                sendBrev(prosessinstans);
+                sendUtlandStatus = SendUtlandStatus.BREV_SENDT;
             }
         }
-
-        return SendUtlandStatus.IKKE_SENDT;
+        return sendUtlandStatus;
     }
 
-    private void sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg, List<String> mottakerinstitusjoner) {
-
-
+    private Predicate<String> erEessiReady(BucType bucType) {
+        return land -> {
+            try {
+                return eessiService.landErEessiReady(bucType.name(), land);
+            } catch (MelosysException e) {
+                return false;
+            }
+        };
     }
 
     protected abstract void sendBrev(Prosessinstans prosessinstans) throws MelosysException;
@@ -105,4 +113,5 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Optional<String> landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst().map(Landkoder::getKode);
     }
+
 }

@@ -98,7 +98,7 @@ public class EessiServiceTest {
     @Test
     public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
         when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true))).thenReturn(new OpprettSedDto());
-        eessiService.opprettOgSendSed(behandling.getId(), "SE:123", BucType.LA_BUC_03);
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_03);
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_03), eq(true));
     }
 
@@ -108,7 +108,7 @@ public class EessiServiceTest {
         opprettSedDto.setRinaUrl("localhost:3000");
         when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean())).thenReturn(opprettSedDto);
 
-        eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, "SE", "SE:001");
+        eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, "SE", List.of("SE:001"));
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_01), eq(false));
     }
 

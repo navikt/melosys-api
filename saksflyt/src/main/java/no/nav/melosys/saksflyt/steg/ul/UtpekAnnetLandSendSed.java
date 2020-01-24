@@ -101,6 +101,7 @@ public class UtpekAnnetLandSendSed extends AbstraktStegBehandler {
     }
 
     private void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+        // FIXME Håndter utsending av brev til flere land (også i UtenlandsMyndighetService)
         Behandling behandling = prosessinstans.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
         Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
