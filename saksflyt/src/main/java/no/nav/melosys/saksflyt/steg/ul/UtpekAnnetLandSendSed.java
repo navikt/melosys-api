@@ -17,9 +17,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -29,8 +27,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class UtpekAnnetLandSendSed extends AbstraktStegBehandler {
 
-    private final BehandlingService behandlingService;
-    private final BrevBestiller brevBestiller;
     private final EessiService eessiService;
     private final FagsakService fagsakService;
     private final JoarkFasade joarkFasade;
@@ -38,13 +34,10 @@ public class UtpekAnnetLandSendSed extends AbstraktStegBehandler {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final ProsessinstansRepository prosessinstansRepository;
 
-    protected UtpekAnnetLandSendSed(EessiService eessiService, BehandlingService behandlingService,
-                                    BrevBestiller brevBestiller, FagsakService fagsakService,
+    protected UtpekAnnetLandSendSed(EessiService eessiService, FagsakService fagsakService,
                                     JoarkFasade joarkFasade, TpsFasade tpsFasade,
                                     UtenlandskMyndighetService utenlandskMyndighetService,
                                     ProsessinstansRepository prosessinstansRepository) {
-        this.behandlingService = behandlingService;
-        this.brevBestiller = brevBestiller;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
         this.joarkFasade = joarkFasade;
@@ -76,6 +69,7 @@ public class UtpekAnnetLandSendSed extends AbstraktStegBehandler {
             sendBrev(prosessinstans);
             prosessinstans.setSteg(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
         } else {
+            // FIXME: Skal kunne sende alle samtidig. Foreløpig løsning f.eks. å bare sende første til eux-rina-api kan ta imot liste
             for (String mottakerinstitusjon : mottakerinstitusjoner) {
                 if (mottakerinstitusjonerSendt.contains(mottakerinstitusjon)) {
                     continue;

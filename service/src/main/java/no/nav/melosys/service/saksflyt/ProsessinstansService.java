@@ -335,7 +335,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, List<String> mottakerinstitusjoner) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEK_LAND)
-            .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
+            .medSteg(ProsessSteg.UL_SEND_BREV)
             .medBehandling(behandling)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);

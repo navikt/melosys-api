@@ -39,5 +39,7 @@ public class UtpekAnnetLandSendBrev extends AbstraktStegBehandler {
             .medMottakere(Mottaker.av(BRUKER))
             .build();
         brevBestiller.bestill(brevbestilling);
+
+        prosessinstans.setSteg(ProsessSteg.UL_SEND_SED);
     }
 }
