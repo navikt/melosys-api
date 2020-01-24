@@ -41,10 +41,10 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.IKKE_NORSK_AG_REGNING;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.saksflyt.SaksflytTestUtils.lagVilkaarsresultat;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -130,12 +130,13 @@ public class SendVedtaksbrevInnlandTest {
         AvklarteVirksomheterService avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any())).thenReturn(Sets.newHashSet("123456789"));
         BehandlingService behandlingService = mockBehandlingService();
+        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         BrevDataService brevDataService = mock(BrevDataService.class);
         DoksysFasade dokSysFasade = mock(DoksysFasade.class);
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(any())).thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
-        BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService);
+        BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService);
         return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagFactory.class)));
     }
 
