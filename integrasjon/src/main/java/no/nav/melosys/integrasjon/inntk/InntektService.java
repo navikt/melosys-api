@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.XmlFormaterer;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektConsumer;
@@ -97,7 +98,7 @@ public class InntektService implements InntektFasade {
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        final String dokumentXml = xmlWriter.toString();
+        final String dokumentXml = XmlFormaterer.formaterXml(xmlWriter.toString());
         if (dokumentXml != null) {
             saksopplysning.setDokumentXml(dokumentXml);
         } else {

@@ -88,7 +88,7 @@ public class VedtakService {
 
         if (behandlingsresultat.erInnvilgelse()) {
             saksopplysningerService.hentSaksopplysningMedl(behandlingID, behandlingsresultat.hentValidertLovvalgsperiode());
-            validerFattVedtak(behandlingID);
+            validerFattVedtak(behandlingID, vedtakstype);
         }
 
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
@@ -103,8 +103,8 @@ public class VedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerFattVedtak(long behandlingID) throws MelosysException {
-        Collection<Kontroll_begrunnelser> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID);
+    private void validerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
+        Collection<Kontroll_begrunnelser> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID, vedtakstype);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
                 feilValideringer.stream().map(Kodeverk::getKode).collect(Collectors.toList()));
