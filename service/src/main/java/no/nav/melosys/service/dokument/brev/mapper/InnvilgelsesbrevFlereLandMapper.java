@@ -10,6 +10,7 @@ import javax.xml.bind.JAXBException;
 import no.nav.dok.melosysbrev._000083.*;
 import no.nav.dok.melosysbrev._000083.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000083.ObjectFactory;
+import no.nav.dok.melosysbrev._000108.EndretPeriodeBegrunnelseKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
@@ -46,7 +47,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
     private Fag mapFag(Behandling behandling, BrevDataInnvilgelseFlereLand brevdata) {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
-        fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
+        // FIXME fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
         // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
         int antallArbeidsgivere = brevdata.arbeidsgivere.size();
@@ -99,7 +100,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
         }
         if (brevdata.begrunnelseKode != null) {
-            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.begrunnelseKode));
+            // FIXME fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.begrunnelseKode));
         }
 
         fag.setFritekst(brevdata.fritekst);
