@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.BucType;
@@ -91,7 +92,7 @@ public class UtpekAnnetLandSendSed extends AbstraktStegBehandler {
     private void sendSed(Prosessinstans prosessinstans, String mottakerInstitusjon) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         if (mottakerInstitusjon == null) {
-            mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKER);
+            mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>(){}).get(0);
         }
         if (StringUtils.isEmpty(mottakerInstitusjon)) {
             mottakerInstitusjon = eessiService.hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), BucType.LA_BUC_02);

@@ -147,7 +147,7 @@ public class ProsessinstansService {
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medSteg(ProsessSteg.AOU_VALIDERING)
             .medBehandling(behandling)
-            .medEessiMottaker(mottakerInstitusjon)
+            .medEessiMottakere(List.of(mottakerInstitusjon))
             .build();
 
         lagre(prosessinstans);
@@ -183,7 +183,7 @@ public class ProsessinstansService {
             .medSteg(ProsessSteg.IV_VALIDERING)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
-            .medEessiMottaker(mottakerInstitusjon)
+            .medEessiMottakere(List.of(mottakerInstitusjon))
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
@@ -326,7 +326,7 @@ public class ProsessinstansService {
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
-            .medEessiMottaker(mottakerinstitusjon)
+            .medEessiMottakere(List.of(mottakerinstitusjon))
             .build();
 
         lagre(prosessinstans);

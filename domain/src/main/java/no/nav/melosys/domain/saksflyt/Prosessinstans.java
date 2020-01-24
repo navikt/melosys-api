@@ -11,9 +11,11 @@ import java.util.UUID;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.sun.xml.bind.v2.model.core.TypeRef;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -112,6 +114,18 @@ public class Prosessinstans {
             return dataMapper.readValue(dataString, type);
         } catch (IOException e) {
             // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
+            throw new IllegalStateException("Feil ved deserialisering", e);
+        }
+    }
+
+    public <T> T getData(ProsessDataKey key, TypeReference<T> type) {
+        String dataString = getData(key);
+        if (dataString == null) {
+            return null;
+        }
+        try {
+            return dataMapper.readValue(dataString, type);
+        } catch (JsonProcessingException e) {
             throw new IllegalStateException("Feil ved deserialisering", e);
         }
     }

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
@@ -64,7 +65,7 @@ public class SendVedtakUtlandTest {
         behandling.setId(BEHANDLING_ID);
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, MOTTAKER_INSTITUSJON);
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -122,7 +123,7 @@ public class SendVedtakUtlandTest {
     public void utførSteg_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() throws MelosysException {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SE));
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), eq(Landkoder.SE.name()))).thenReturn(Boolean.TRUE);
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, "");
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(""));
 
         Aktoer myndighet = new Aktoer();
         myndighet.setInstitusjonId(MOTTAKER_INSTITUSJON);

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.vs;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -98,7 +99,7 @@ public class VideresendSoknadTest {
     @Test
     public void utfør_skalSendesUtlandErEessiKlar_senderSedIBuc3() throws MelosysException {
         Prosessinstans prosessinstans = opprettProsessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, "SE:123");
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of("SE:123"));
 
         Behandling behandling = prosessinstans.getBehandling();
         Long behandlingID = 1L;

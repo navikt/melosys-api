@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.aou.ut;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -70,7 +68,7 @@ public class SendUtlandTest {
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setId(BEHANDLING_ID);
         prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, MOTTAKER_INSTITSJON);
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
 
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SJ));
 
