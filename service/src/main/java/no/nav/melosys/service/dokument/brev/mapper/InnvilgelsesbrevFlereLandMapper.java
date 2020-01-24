@@ -7,9 +7,9 @@ import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import no.nav.dok.melosysbrev._000083.*;
 import no.nav.dok.melosysbrev._000083.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000083.ObjectFactory;
+import no.nav.dok.melosysbrev._000083.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
@@ -17,6 +17,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
@@ -37,16 +38,15 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
         vedleggMapper.map(brevDataInnvilgelse.vedleggA1);
 
-        Fag fag = mapFag(behandling, brevDataInnvilgelse);
+        Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag, vedleggMapper.hent());
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, BrevDataInnvilgelseFlereLand brevdata) {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelseFlereLand brevdata) throws TekniskException {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
-        fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
         // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
         int antallArbeidsgivere = brevdata.arbeidsgivere.size();
@@ -98,13 +98,31 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
         }
-        if (brevdata.begrunnelseKode != null) {
-            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.begrunnelseKode));
+
+        if (resultat.getVedtakMetadata() != null) {
+            fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
         }
 
         fag.setFritekst(brevdata.fritekst);
 
         return fag;
+    }
+
+    private VedtaksTypeKode tilVedtaksTypeKode(Vedtakstyper vedtakstype) throws TekniskException {
+        if (vedtakstype == null) {
+            return null;
+        }
+
+        switch (vedtakstype) {
+            case FØRSTEGANGSVEDTAK:
+                return VedtaksTypeKode.FOERSTEGANGSVEDTAK;
+            case KORRIGERT_VEDTAK:
+                return VedtaksTypeKode.KORRIGERT_VEDTAK;
+            case OMGJØRINGSVEDTAK:
+                return VedtaksTypeKode.OMGJOERINGSVEDTAK;
+            default:
+                throw new TekniskException("Ukjent vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
+        }
     }
 
     private VirksomhetslandListeType mapVirksomhetsListe(List<String> næringsdrivendeILand) {
