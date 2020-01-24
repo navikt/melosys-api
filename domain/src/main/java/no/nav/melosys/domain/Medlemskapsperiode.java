@@ -1,11 +1,11 @@
 package no.nav.melosys.domain;
 
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*;
 
 
@@ -18,6 +18,10 @@ public interface Medlemskapsperiode extends ErPeriode {
     LovvalgBestemmelse getTilleggsbestemmelse();
 
     Trygdedekninger getDekning();
+
+    default boolean erArtikkel12_1() {
+        return getBestemmelse() == FO_883_2004_ART12_1;
+    }
 
     default boolean erArtikkel13() {
         return getBestemmelse() == FO_883_2004_ART13_1A
