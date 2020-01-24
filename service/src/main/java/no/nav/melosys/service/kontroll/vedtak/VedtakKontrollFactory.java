@@ -4,14 +4,14 @@ import java.util.Set;
 import java.util.function.Function;
 
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 
 public class VedtakKontrollFactory {
 
     private VedtakKontrollFactory() {
     }
 
-    public static Set<Function<VedtakKontrollData, Unntak_periode_begrunnelser>> hentKontrollerForVedtakstype(Vedtakstyper vedtakstype) {
+    public static Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> hentKontrollerForVedtakstype(Vedtakstyper vedtakstype) {
         switch (vedtakstype) {
             case FØRSTEGANGSVEDTAK:
                 return førstegangsvedtakKontroller();
@@ -23,14 +23,14 @@ public class VedtakKontrollFactory {
         }
     }
 
-    private static Set<Function<VedtakKontrollData, Unntak_periode_begrunnelser>> førstegangsvedtakKontroller() {
+    private static Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> førstegangsvedtakKontroller() {
         return Set.of(
             VedtakKontroller::overlappendeMedlemsperiode,
             VedtakKontroller::periodeOver24Mnd
         );
     }
 
-    private static Set<Function<VedtakKontrollData, Unntak_periode_begrunnelser>> korrigertVedtakKontroller() {
+    private static Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> korrigertVedtakKontroller() {
         return Set.of(
             VedtakKontroller::periodeOver24Mnd
         );
