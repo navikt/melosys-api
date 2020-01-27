@@ -7,10 +7,11 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import org.junit.Before;
@@ -61,7 +62,7 @@ public class VedtakKontrollServiceTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        Collection<Unntak_periode_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID);
+        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat).isEmpty();
     }
 
@@ -70,7 +71,7 @@ public class VedtakKontrollServiceTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        Collection<Unntak_periode_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID);
+        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat).isEmpty();
     }
 
@@ -82,9 +83,10 @@ public class VedtakKontrollServiceTest {
 
         Medlemsperiode medlemsperiode = new Medlemsperiode();
         medlemsperiode.periode = new Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2));
+        medlemsperiode.status = PeriodestatusMedl.GYLD.getKode();
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
-        Collection<Unntak_periode_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID);
-        assertThat(resultat).containsExactlyInAnyOrder(Unntak_periode_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD);
+        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID);
+        assertThat(resultat).containsExactlyInAnyOrder(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
     }
 }

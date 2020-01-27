@@ -3,7 +3,6 @@ package no.nav.melosys.domain.eessi.melding;
 import java.util.List;
 
 public class MelosysEessiMelding {
-
     private String sedId;
     private String rinaSaksnummer;
     private String journalpostId;
@@ -11,6 +10,7 @@ public class MelosysEessiMelding {
     private Long gsakSaksnummer;
     private String aktoerId;
     private List<Statsborgerskap> statsborgerskap;
+    private List<Arbeidssted> arbeidssteder;
     private Periode periode;
     private String lovvalgsland;
     private String artikkel;
@@ -79,6 +79,14 @@ public class MelosysEessiMelding {
         this.statsborgerskap = statsborgerskap;
     }
 
+    public List<Arbeidssted> getArbeidssteder() {
+        return arbeidssteder;
+    }
+
+    public void setArbeidssteder(List<Arbeidssted> arbeidssteder) {
+        this.arbeidssteder = arbeidssteder;
+    }
+
     public Periode getPeriode() {
         return periode;
     }
@@ -111,7 +119,7 @@ public class MelosysEessiMelding {
         this.erEndring = erEndring;
     }
 
-    public boolean erMidlertidigBestemmelse() {
+    public boolean isMidlertidigBestemmelse() {
         return midlertidigBestemmelse;
     }
 

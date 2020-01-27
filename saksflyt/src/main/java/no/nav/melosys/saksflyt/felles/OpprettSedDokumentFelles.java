@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OpprettSedDokumentFelles {
     private static final Logger log = LoggerFactory.getLogger(OpprettSedDokumentFelles.class);
-    private static final String SED_DOKUMENT_VERSJON = "0.2-SNAPSHOT";
+    private static final String SED_DOKUMENT_VERSJON = "1.0";
 
     private final DokumentFactory dokumentFactory;
     private final SaksopplysningRepository saksopplysningRepository;
@@ -73,6 +73,7 @@ public class OpprettSedDokumentFelles {
         sedDokument.setStatsborgerskapKoder(
             melosysEessiMelding.getStatsborgerskap().stream().map(Statsborgerskap::getLandkode).collect(Collectors.toList())
         );
+        sedDokument.setArbeidssteder(melosysEessiMelding.getArbeidssteder());
         sedDokument.setErEndring(melosysEessiMelding.getErEndring());
         sedDokument.setSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
         sedDokument.setBucType(BucType.valueOf(melosysEessiMelding.getBucType()));

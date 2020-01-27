@@ -1,7 +1,8 @@
 package no.nav.melosys.domain.eessi.melding;
 
-public class SvarAnmodningUnntak {
+import java.util.Objects;
 
+public class SvarAnmodningUnntak {
     public enum Beslutning {
         INNVILGELSE, DELVIS_INNVILGELSE, AVSLAG
     }
@@ -32,5 +33,20 @@ public class SvarAnmodningUnntak {
 
     public void setDelvisInnvilgetPeriode(Periode delvisInnvilgetPeriode) {
         this.delvisInnvilgetPeriode = delvisInnvilgetPeriode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SvarAnmodningUnntak)) return false;
+        SvarAnmodningUnntak that = (SvarAnmodningUnntak) o;
+        return getBeslutning() == that.getBeslutning() &&
+            Objects.equals(getBegrunnelse(), that.getBegrunnelse()) &&
+            Objects.equals(getDelvisInnvilgetPeriode(), that.getDelvisInnvilgetPeriode());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getBeslutning(), getBegrunnelse(), getDelvisInnvilgetPeriode());
     }
 }

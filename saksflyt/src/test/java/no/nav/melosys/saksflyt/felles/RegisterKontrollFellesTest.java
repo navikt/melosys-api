@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.felles;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
@@ -39,8 +39,8 @@ public class RegisterKontrollFellesTest {
         registerKontrollFelles = new RegisterKontrollFelles(behandlingService, ufmKontrollService, avklartefaktaService);
         when(ufmKontrollService.utførKontroller(any(Behandling.class)))
             .thenReturn(Lists.newArrayList(
-                Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND,
-                Unntak_periode_begrunnelser.MOTTAR_YTELSER)
+                Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND,
+                Kontroll_begrunnelser.MOTTAR_YTELSER)
             );
     }
 
@@ -55,8 +55,8 @@ public class RegisterKontrollFellesTest {
         verify(avklartefaktaService, times(2)).leggTilRegistrering(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE), captor.capture());
 
         assertThat(captor.getAllValues()).containsExactly(
-            Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode(),
-            Unntak_periode_begrunnelser.MOTTAR_YTELSER.getKode()
+            Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode(),
+            Kontroll_begrunnelser.MOTTAR_YTELSER.getKode()
         );
     }
 }

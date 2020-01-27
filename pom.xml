@@ -38,8 +38,7 @@
 
         <!-- Melosys -->
         <melosys.jsonschema.version>1.35.16-85</melosys.jsonschema.version>
-        <!-- FIXME: Oppdater til ny release-versjon -->
-        <melosys.internt.kodeverk.version>5.14.20-SNAPSHOT</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.6</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
