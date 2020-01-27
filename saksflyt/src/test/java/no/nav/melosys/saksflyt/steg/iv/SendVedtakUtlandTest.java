@@ -88,7 +88,7 @@ public class SendVedtakUtlandTest {
     public void utførSteg_artikkel12Suksessfull_statusErAvgiftsoppgave() throws Exception {
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), eq(Landkoder.AX.name()))).thenReturn(Boolean.TRUE);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(MOTTAKER_INSTITUSJON), eq(BucType.LA_BUC_04), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(null));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
@@ -97,7 +97,7 @@ public class SendVedtakUtlandTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_02.name()), eq(Landkoder.AX.name()))).thenReturn(Boolean.TRUE);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(MOTTAKER_INSTITUSJON), eq(BucType.LA_BUC_02), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_02), eq(null));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
@@ -115,10 +115,11 @@ public class SendVedtakUtlandTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_05.name()), eq(Landkoder.AX.name()))).thenReturn(Boolean.TRUE);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(MOTTAKER_INSTITUSJON), eq(BucType.LA_BUC_05), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(null));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void utførSteg_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() throws MelosysException {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SE));
@@ -138,9 +139,9 @@ public class SendVedtakUtlandTest {
 
         sendVedtakUtland.utfør(prosessinstans);
 
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<List<String>> captor = ArgumentCaptor.forClass(List.class);
         verify(eessiService).opprettOgSendSed(anyLong(), captor.capture(), any(), any());
 
-        assertThat(captor.getValue()).isEqualTo(MOTTAKER_INSTITUSJON);
+        assertThat(captor.getValue()).containsExactly(MOTTAKER_INSTITUSJON);
     }
 }

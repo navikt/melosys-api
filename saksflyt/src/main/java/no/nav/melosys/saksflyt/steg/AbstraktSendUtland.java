@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.kodeverk.Landkode;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
@@ -50,6 +48,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
 
             if (!sedmottakere.isEmpty()) {
                 List<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {});
+                mottakerinstitusjoner.removeIf(String::isBlank);
                 if (mottakerinstitusjoner.isEmpty()) {
                     mottakerinstitusjoner.add(eessiService.hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), bucType));
                 }
@@ -103,15 +102,4 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         BREV_SENDT,
         SED_SENDT
     }
-
-    class EessiMottaker {
-        Landkode landkode;
-        String institusjonId;
-    }
-
-    private void hentPåkobledeEssiMottakere(BucType bucType, Prosessinstans prosessinstans) throws IkkeFunnetException {
-        Long behandlingID = prosessinstans.getBehandling().getId();
-        Optional<String> landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst().map(Landkoder::getKode);
-    }
-
 }

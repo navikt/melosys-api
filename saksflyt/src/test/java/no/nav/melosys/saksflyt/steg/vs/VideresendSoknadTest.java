@@ -116,7 +116,7 @@ public class VideresendSoknadTest {
 
         videresendSoknad.utfør(prosessinstans);
 
-        verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(MOTTAKER_INSTITUSJON), eq(BucType.LA_BUC_03), eq(vedlegg));
+        verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_03), eq(vedlegg));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_STATUS_BEH_AVSL);
     }
 

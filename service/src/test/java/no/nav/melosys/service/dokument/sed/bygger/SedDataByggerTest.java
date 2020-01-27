@@ -114,7 +114,6 @@ public class SedDataByggerTest {
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotNull();
         assertThat(sedData.getUtenlandskeVirksomheter()).isNotNull();
         assertThat(sedData.getUtenlandskIdent()).isNotNull();
-        assertThat(sedData.getMottakerLand()).isEqualTo("SE");
 
         assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
         assertThat(sedData.getLovvalgsperioder().get(0).getFom()).isEqualTo(lovvalgsperiode.getFom());
@@ -347,7 +346,6 @@ public class SedDataByggerTest {
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotEmpty();
         assertThat(sedData.getUtenlandskeVirksomheter()).isNotNull();
         assertThat(sedData.getTidligereLovvalgsperioder()).isNotNull();
-        assertThat(sedData.getMottakerLand()).isNull();
         assertThat(sedData.getArbeidsgivendeVirksomheter().isEmpty()).isFalse();
     }
 }

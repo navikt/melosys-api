@@ -1,10 +1,5 @@
 package no.nav.melosys.saksflyt.steg.ul;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.BucType;
@@ -14,19 +9,19 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UtpekAnnetLandSendSed extends AbstraktStegBehandler {
+public class UtpekAnnetLandSendSed extends AbstraktSendUtland {
 
     private final EessiService eessiService;
     private final FagsakService fagsakService;
@@ -35,10 +30,12 @@ public class UtpekAnnetLandSendSed extends AbstraktStegBehandler {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final ProsessinstansRepository prosessinstansRepository;
 
-    protected UtpekAnnetLandSendSed(EessiService eessiService, FagsakService fagsakService,
-                                    JoarkFasade joarkFasade, TpsFasade tpsFasade,
+    protected UtpekAnnetLandSendSed(BehandlingsresultatService behandlingsresultatService, EessiService eessiService,
+                                    FagsakService fagsakService, JoarkFasade joarkFasade,
+                                    LandvelgerService landvelgerService, TpsFasade tpsFasade,
                                     UtenlandskMyndighetService utenlandskMyndighetService,
                                     ProsessinstansRepository prosessinstansRepository) {
+        super(eessiService, behandlingsresultatService, landvelgerService);
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
         this.joarkFasade = joarkFasade;
@@ -52,55 +49,18 @@ public class UtpekAnnetLandSendSed extends AbstraktStegBehandler {
         return ProsessSteg.UL_SEND_BREV;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        List<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, List.class);
-        Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
-        String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
+        SendUtlandStatus status = sendUtland(BucType.LA_BUC_02, prosessinstans);
 
-        fagsakService.oppdaterMyndigheter(saksnummer, mottakerinstitusjoner);
-
-        Set<String> mottakerinstitusjonerSendt = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE_SENDT, HashSet.class);
-        if (mottakerinstitusjonerSendt == null) {
-            mottakerinstitusjonerSendt = new HashSet<>();
-        }
-
-        if (!eessiService.landErEessiReady(BucType.LA_BUC_02.name(), utpektLand.getKode())) {
-            sendBrev(prosessinstans);
+        if (status == SendUtlandStatus.BREV_SENDT) {
             prosessinstans.setSteg(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
         } else {
-            // FIXME: Skal kunne sende alle samtidig. Foreløpig løsning f.eks. å bare sende første til eux-rina-api kan ta imot liste
-            for (String mottakerinstitusjon : mottakerinstitusjoner) {
-                if (mottakerinstitusjonerSendt.contains(mottakerinstitusjon)) {
-                    continue;
-                }
-                try {
-                    sendSed(prosessinstans, mottakerinstitusjon);
-                    mottakerinstitusjonerSendt.add(mottakerinstitusjon);
-                } catch (Exception e) {
-                    prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE_SENDT, mottakerinstitusjonerSendt);
-                    prosessinstansRepository.save(prosessinstans);
-                    throw new TekniskException("Sending av SED feilet for behandlingID " + prosessinstans.getBehandling().getId()
-                        + " til mottakerinstitusjon" + mottakerinstitusjon, e);
-                }
-            }
             prosessinstans.setSteg(ProsessSteg.FERDIG);
         }
     }
 
-    private void sendSed(Prosessinstans prosessinstans, String mottakerInstitusjon) throws MelosysException {
-        Long behandlingID = prosessinstans.getBehandling().getId();
-        if (mottakerInstitusjon == null) {
-            mottakerInstitusjon = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>(){}).get(0);
-        }
-        if (StringUtils.isEmpty(mottakerInstitusjon)) {
-            mottakerInstitusjon = eessiService.hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), BucType.LA_BUC_02);
-        }
-        eessiService.opprettOgSendSed(behandlingID, mottakerInstitusjon, BucType.LA_BUC_02);
-    }
-
-    private void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
         // FIXME Håndter utsending av brev til flere land (også i UtenlandsMyndighetService)
         Behandling behandling = prosessinstans.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
@@ -116,5 +76,10 @@ public class UtpekAnnetLandSendSed extends AbstraktStegBehandler {
         );
         String journalpostId = joarkFasade.opprettJournalpost(opprettJournalpost, true);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostId);
+    }
+
+    @Override
+    protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
+        return true;
     }
 }

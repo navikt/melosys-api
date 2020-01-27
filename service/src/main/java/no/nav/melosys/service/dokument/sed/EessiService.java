@@ -92,7 +92,6 @@ public class EessiService {
             SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
-            sedDataDto.setMottakerLand(mottakerLand);
             sedDataDto.setMottakerIder(mottakerId);
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
