@@ -15,7 +15,7 @@ public class Utpekingsperiode {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
+    @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
 
     @Column(name = "fom_dato", nullable = false, updatable = false)
