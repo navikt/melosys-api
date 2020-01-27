@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -70,8 +69,13 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         fag.setTrygdemyndighetsland(" "); //TODO: Kun når Norge er utpekt. XSD må tillate EmptyString
 
         // Virksomhetsland er arbeidsland for selvstendig næringsdrivende
-        fag.setAntallVirksomhetsland(BigInteger.ZERO);
-        fag.setVirksomhetslandListe(mapVirksomhetsListe(Collections.emptyList()));
+        int antallVirksomhetsland = brevdata.alleArbeidsland.size();
+        fag.setAntallVirksomhetsland(BigInteger.valueOf(antallVirksomhetsland));
+        if (antallVirksomhetsland == 1) {
+            String virksomhetsland = brevdata.alleArbeidsland.iterator().next();
+            fag.setVirksomhetsland(virksomhetsland);
+        }
+        fag.setVirksomhetslandListe(mapVirksomhetsListe(brevdata.alleArbeidsland));
 
         if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
             fag.setArbeidPåSkip(JA);
