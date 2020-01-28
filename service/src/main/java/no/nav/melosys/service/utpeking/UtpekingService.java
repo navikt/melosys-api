@@ -97,7 +97,6 @@ public class UtpekingService {
     }
 
     boolean validerInstitusjonForLand(UtenlandskMyndighet utenlandskMyndighet, String mottakerinstitusjon) throws MelosysException {
-        // TODO lagre påkoblet/ikke påkoblet på prosessinstans for filtrering ved utsending av SED
         if (eessiService.erGyldigInstitusjonForLand(BucType.LA_BUC_02.name(), utenlandskMyndighet.land, mottakerinstitusjon)) {
             return true;
         } else {
