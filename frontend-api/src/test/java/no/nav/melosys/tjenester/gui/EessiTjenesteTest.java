@@ -81,7 +81,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void opprettBuc() throws IOException, MelosysException {
-        when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyString(), anyList())).thenReturn(MOCK_RINA_URL);
+        when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList())).thenReturn(MOCK_RINA_URL);
 
         BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, "NAVT002", "NO");
         ResponseEntity response = eessiTjeneste.opprettBuc(nyBucDto, 123L);

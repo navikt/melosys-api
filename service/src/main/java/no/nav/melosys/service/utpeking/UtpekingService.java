@@ -55,8 +55,6 @@ public class UtpekingService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public Collection<Utpekingsperiode> lagreUtpekingsperioder(long behandlingID, Collection<Utpekingsperiode> utpekingsperioder) throws FunksjonellException {
-        List<Utpekingsperiode> eksisterende = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
-
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         utpekingsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat);
         utpekingsperiodeRepository.flush();

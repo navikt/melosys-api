@@ -1,31 +1,24 @@
 package no.nav.melosys.saksflyt.steg.ul;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,14 +33,12 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UtpekAnnetLandSendSedTest {
+public class UtpekAnnetLandSendUtlandTest {
 
     @Mock
     BehandlingsresultatService behandlingsresultatService;
     @Mock
     private EessiService eessiService;
-    @Mock
-    private FagsakService fagsakService;
     @Mock
     private JoarkFasade joarkFasade;
     @Mock
@@ -56,16 +47,14 @@ public class UtpekAnnetLandSendSedTest {
     LandvelgerService landvelgerService;
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
-    @Mock
-    private ProsessinstansRepository prosessinstansRepository;
-    private UtpekAnnetLandSendSed utpekAnnetLandSendSed;
+    private UtpekAnnetLandSendUtland utpekAnnetLandSendUtland;
 
     private List<Landkoder> trygdemyndighetsland = List.of(Landkoder.SE);
 
     @Before
     public void settOpp() throws MelosysException {
-        utpekAnnetLandSendSed = spy(new UtpekAnnetLandSendSed(behandlingsresultatService, eessiService, fagsakService,
-            joarkFasade, landvelgerService, tpsFasade, utenlandskMyndighetService, prosessinstansRepository));
+        utpekAnnetLandSendUtland = spy(new UtpekAnnetLandSendUtland(behandlingsresultatService, eessiService,
+            joarkFasade, landvelgerService, tpsFasade, utenlandskMyndighetService));
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.landkode = Landkoder.SE;
@@ -83,7 +72,7 @@ public class UtpekAnnetLandSendSedTest {
 
         when(eessiService.landErEessiReady(anyString(), eq("SE"))).thenReturn(true);
 
-        utpekAnnetLandSendSed.utfør(prosessinstans);
+        utpekAnnetLandSendUtland.utfør(prosessinstans);
 
         verify(eessiService).opprettOgSendSed(123L, List.of("SE:001", "SE:002"), LA_BUC_02, null);
 
@@ -98,9 +87,9 @@ public class UtpekAnnetLandSendSedTest {
 
         when(eessiService.landErEessiReady(anyString(), eq("SE"))).thenReturn(false);
 
-        utpekAnnetLandSendSed.utfør(prosessinstans);
+        utpekAnnetLandSendUtland.utfør(prosessinstans);
 
-        verify(utpekAnnetLandSendSed).sendBrev(prosessinstans);
+        verify(utpekAnnetLandSendUtland).sendBrev(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(UL_DISTRIBUER_JOURNALPOST);
     }

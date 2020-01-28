@@ -83,11 +83,11 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, List<String> mottakerId) throws MelosysException {
-        return opprettBucOgSed(behandling, bucType, mottakerLand, mottakerId, null);
+    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId) throws MelosysException {
+        return opprettBucOgSed(behandling, bucType, mottakerId, null);
     }
 
-    private String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, List<String> mottakerId, byte[] vedlegg) throws MelosysException {
+    private String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId, byte[] vedlegg) throws MelosysException {
         if (skalSendeSed) {
             SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());

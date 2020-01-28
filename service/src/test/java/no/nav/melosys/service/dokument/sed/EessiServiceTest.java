@@ -108,7 +108,7 @@ public class EessiServiceTest {
         opprettSedDto.setRinaUrl("localhost:3000");
         when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean())).thenReturn(opprettSedDto);
 
-        eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, "SE", List.of("SE:001"));
+        eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, List.of("SE:001"));
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_01), eq(false));
     }
 

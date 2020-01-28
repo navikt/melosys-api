@@ -25,7 +25,7 @@ public class UtpekAnnetLandSendBrev extends AbstraktStegBehandler {
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.UL_SEND_SED;
+        return ProsessSteg.UL_SEND_BREV;
     }
 
     @Override
@@ -40,6 +40,6 @@ public class UtpekAnnetLandSendBrev extends AbstraktStegBehandler {
             .build();
         brevBestiller.bestill(brevbestilling);
 
-        prosessinstans.setSteg(ProsessSteg.UL_SEND_SED);
+        prosessinstans.setSteg(ProsessSteg.UL_SEND_UTLAND);
     }
 }

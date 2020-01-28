@@ -11,42 +11,34 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UtpekAnnetLandSendSed extends AbstraktSendUtland {
+public class UtpekAnnetLandSendUtland extends AbstraktSendUtland {
 
     private final EessiService eessiService;
-    private final FagsakService fagsakService;
     private final JoarkFasade joarkFasade;
     private final TpsFasade tpsFasade;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final ProsessinstansRepository prosessinstansRepository;
 
-    protected UtpekAnnetLandSendSed(BehandlingsresultatService behandlingsresultatService, EessiService eessiService,
-                                    FagsakService fagsakService, JoarkFasade joarkFasade,
-                                    LandvelgerService landvelgerService, TpsFasade tpsFasade,
-                                    UtenlandskMyndighetService utenlandskMyndighetService,
-                                    ProsessinstansRepository prosessinstansRepository) {
+    protected UtpekAnnetLandSendUtland(BehandlingsresultatService behandlingsresultatService, EessiService eessiService,
+                                       JoarkFasade joarkFasade, LandvelgerService landvelgerService,
+                                       TpsFasade tpsFasade, UtenlandskMyndighetService utenlandskMyndighetService) {
         super(eessiService, behandlingsresultatService, landvelgerService);
         this.eessiService = eessiService;
-        this.fagsakService = fagsakService;
         this.joarkFasade = joarkFasade;
         this.tpsFasade = tpsFasade;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
-        this.prosessinstansRepository = prosessinstansRepository;
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.UL_SEND_BREV;
+        return ProsessSteg.UL_SEND_UTLAND;
     }
 
     @Override

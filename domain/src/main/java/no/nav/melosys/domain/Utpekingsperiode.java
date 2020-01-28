@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 
 @Entity
 @Table(name = "utpekingsperiode")
-public class Utpekingsperiode {
+public class Utpekingsperiode implements ErPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -61,10 +61,12 @@ public class Utpekingsperiode {
         this.behandlingsresultat = behandlingsresultat;
     }
 
+    @Override
     public LocalDate getFom() {
         return fom;
     }
 
+    @Override
     public LocalDate getTom() {
         return tom;
     }

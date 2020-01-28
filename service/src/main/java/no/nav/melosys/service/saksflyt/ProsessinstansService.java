@@ -337,9 +337,9 @@ public class ProsessinstansService {
             .medType(ProsessType.UTPEK_LAND)
             .medSteg(ProsessSteg.UL_SEND_BREV)
             .medBehandling(behandling)
+            .medEessiMottakere(mottakerinstitusjoner)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, mottakerinstitusjoner);
 
         lagre(prosessinstans);
     }

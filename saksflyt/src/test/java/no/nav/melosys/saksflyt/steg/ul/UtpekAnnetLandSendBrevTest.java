@@ -40,6 +40,6 @@ public class UtpekAnnetLandSendBrevTest {
         Brevbestilling brevbestilling = captor.getValue();
         assertThat(brevbestilling.getDokumentType()).isEqualTo(Produserbaredokumenter.ORIENTERING_UTPEKING_UTLAND);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.UL_SEND_SED);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.UL_SEND_UTLAND);
     }
 }
