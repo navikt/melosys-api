@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -30,7 +30,8 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA001;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
