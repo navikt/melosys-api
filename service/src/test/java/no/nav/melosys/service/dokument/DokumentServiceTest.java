@@ -56,6 +56,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Test;
 
@@ -327,8 +328,9 @@ public final class DokumentServiceTest {
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         SoeknadService soeknadService = mock(SoeknadService.class);
         LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, soeknadService, vilkaarsresultatRepository);
+        UtpekingService utpekingService = mock(UtpekingService.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
-            utenlandskMyndighetService, vilkaarsresultatRepository, vilkaarsresultatService, joarkService, landvelgerService);
+            utenlandskMyndighetService, vilkaarsresultatRepository, vilkaarsresultatService, joarkService, landvelgerService, utpekingService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() throws FunksjonellException, TekniskException {
