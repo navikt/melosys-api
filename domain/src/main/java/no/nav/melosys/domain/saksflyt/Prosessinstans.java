@@ -15,7 +15,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.sun.xml.bind.v2.model.core.TypeRef;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;

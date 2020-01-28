@@ -9,6 +9,10 @@ import no.nav.melosys.domain.Utpekingsperiode;
 public class UtpekingsperioderDto {
     private List<UtpekingsperiodeDto> utpekingsperioder;
 
+    public UtpekingsperioderDto() {
+        // Brukes av Jackson
+    }
+
     public UtpekingsperioderDto(Collection<Utpekingsperiode> utpekingsperioder) {
         this.utpekingsperioder = utpekingsperioder.stream()
             .map(UtpekingsperiodeDto::av)

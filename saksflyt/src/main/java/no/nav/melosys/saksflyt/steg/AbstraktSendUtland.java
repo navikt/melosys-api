@@ -43,6 +43,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         SendUtlandStatus sendUtlandStatus = SendUtlandStatus.IKKE_SENDT;
         if (skalSendesUtland(behandlingsresultat)) {
             List<String> trygdemyndinghetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().map(Landkoder::getKode).collect(Collectors.toList());
+            // FIXME Hvis minst en av mottakerne i et land ikke kan motta SED, skal alle få brev
             List<String> sedmottakere = trygdemyndinghetsland.stream().filter(erEessiReady(bucType)).collect(Collectors.toList());
             List<String> brevmottakere = trygdemyndinghetsland.stream().filter(land -> !sedmottakere.contains(land)).collect(Collectors.toList());
 
