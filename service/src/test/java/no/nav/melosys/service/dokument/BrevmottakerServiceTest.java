@@ -9,8 +9,11 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -22,6 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -34,16 +38,25 @@ public class BrevmottakerServiceTest {
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
     @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+    @Mock
     private Behandling behandling;
+
+    private Behandlingsresultat behandlingsresultat;
 
     private BrevmottakerService brevmottakerService;
 
     @Before
-    public void setup() throws TekniskException {
-        brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService);
+    public void setup() throws TekniskException, IkkeFunnetException {
+        brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
 
+        behandlingsresultat = new Behandlingsresultat();
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test
@@ -91,11 +104,20 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void avklarMottakere_CZerReservertFraA1_forventerIkkeAktør() throws FunksjonellException, TekniskException {
+    public void avklarMottakere_art12_1_CZerReservertFraA1_forventerIkkeAktør() throws FunksjonellException, TekniskException {
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(MYNDIGHET), behandling);
         assertThat(myndigheter.stream()
                 .map(Aktoer::getInstitusjonId))
                 .isEmpty();
+    }
+
+    @Test
+    public void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerMyndighetAktør() throws FunksjonellException, TekniskException {
+        behandlingsresultat.hentValidertLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
+        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(MYNDIGHET), behandling);
+        assertThat(myndigheter.stream()
+            .map(Aktoer::getInstitusjonId))
+            .containsExactly("CZ:SZUC10416");
     }
 
     @Test
@@ -105,7 +127,7 @@ public class BrevmottakerServiceTest {
                 .map(Aktoer::getInstitusjonId))
                 .containsExactly("CZ:SZUC10416");
     }
-    
+
 
     private Fagsak lagFagsakMedRepresentant(Representerer representerer) {
         Fagsak fagsak = new Fagsak();
@@ -118,16 +140,16 @@ public class BrevmottakerServiceTest {
         }
         return fagsak;
     }
-    
+
     private UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.landkode = Landkoder.CZ;
         utenlandskMyndighet.institusjonskode = "SZUC10416";
         utenlandskMyndighet.preferanser = Collections.singleton(new Preferanse(1L, Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
-        
+
         return utenlandskMyndighet;
     }
-    
+
     private Aktoer lagAktoerUtenlandskMyndighet() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(MYNDIGHET);

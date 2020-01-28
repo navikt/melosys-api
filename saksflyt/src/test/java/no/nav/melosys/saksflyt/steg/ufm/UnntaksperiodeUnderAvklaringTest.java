@@ -9,7 +9,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -106,7 +106,7 @@ public class UnntaksperiodeUnderAvklaringTest {
     public void utfør_eksisterendePeriodeUtenMedlIdPeriodeForLang_ikkeOpprettPeriodeIMedl() throws Exception {
         Avklartefakta avklartefakta = new Avklartefakta();
         AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
-        registrering.setBegrunnelseKode(Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD.getKode());
+        registrering.setBegrunnelseKode(Kontroll_begrunnelser.PERIODEN_OVER_24_MD.getKode());
         avklartefakta.getRegistreringer().add(registrering);
 
         when(avklartefaktaService.hentVurderingUnntakPeriode(anyLong())).thenReturn(Optional.of(avklartefakta));

@@ -174,6 +174,13 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
 
+    public boolean harSøknad() {
+        return type == Behandlingstyper.SOEKNAD
+            || type == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
+            || type == Behandlingstyper.ENDRET_PERIODE
+            || type == Behandlingstyper.NY_VURDERING;
+    }
+
     public boolean isAktiv() {
         return status != Behandlingsstatus.AVSLUTTET;
     }

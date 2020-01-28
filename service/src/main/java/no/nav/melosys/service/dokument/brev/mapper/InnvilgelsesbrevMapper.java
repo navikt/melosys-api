@@ -134,6 +134,8 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
                 return VedtaksTypeKode.KORRIGERT_VEDTAK;
             case OMGJØRINGSVEDTAK:
                 return VedtaksTypeKode.OMGJOERINGSVEDTAK;
+            case ENDRINGSVEDTAK:
+                return null; //Brev har ikke koder for ENDRINGSVEDTAK
             default:
                 throw new TekniskException("Ukjent vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
         }
