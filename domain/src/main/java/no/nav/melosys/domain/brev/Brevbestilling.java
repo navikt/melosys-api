@@ -46,8 +46,13 @@ public final class Brevbestilling {
             return this;
         }
 
-        public Builder medMottakere(Mottaker... mottaker) {
-            this.mottakere = Arrays.asList(mottaker);
+        public Builder medMottakere(Mottaker... mottakere) {
+            this.mottakere = Arrays.asList(mottakere);
+            return this;
+        }
+
+        public Builder medMottakere(Collection<Mottaker> mottakere) {
+            this.mottakere = mottakere;
             return this;
         }
 

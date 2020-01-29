@@ -294,6 +294,15 @@ public class SendVedtaksbrevInnlandTest {
     }
 
     @Test
+    public final void utførSteg_avslagManglendeOppl_senderIkkeTilSkattOgHelfo() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MANGLENDE_OPPL);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+        instans.utførSteg(prosessinstans);
+        verify(dokService, never()).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(FastMottaker.av(SKATT)), anyLong(), any());
+        verify(dokService, never()).produserDokument(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), eq(FastMottaker.av(HELFO)), anyLong(), any());
+    }
+
+    @Test
     public final void utførSteg_sendBrev_girUnntak() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTEN_PERIODER);
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());

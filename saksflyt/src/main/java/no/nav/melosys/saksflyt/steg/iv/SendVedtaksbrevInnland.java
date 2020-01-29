@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
+import java.util.List;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -85,16 +87,22 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
 
     private void sendAvslagsbrev(Prosessinstans prosessinstans, Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String saksbehandler)
         throws FunksjonellException, TekniskException {
-
-        String fritekst = hentBegrunnelseFritekst(prosessinstans);
-
         Produserbaredokumenter avslagTypeBruker = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
             ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
+
+        List<Mottaker> mottakerListe;
+        if (avslagTypeBruker == AVSLAG_YRKESAKTIV) {
+            mottakerListe = List.of(Mottaker.av(BRUKER), av(HELFO), av(SKATT));
+        } else {
+            mottakerListe = List.of(Mottaker.av(BRUKER));
+        }
+
+        String fritekst = hentBegrunnelseFritekst(prosessinstans);
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(avslagTypeBruker)
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
-            .medMottakere(Mottaker.av(BRUKER), FastMottaker.av(HELFO), FastMottaker.av(SKATT))
+            .medMottakere(mottakerListe)
             .medFritekst(fritekst)
             .build();
         brevBestiller.bestill(brevbestilling);
