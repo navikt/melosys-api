@@ -39,9 +39,13 @@ public final class JournalpostDto {
         Avsendertyper avsenderType = journalpost.getAvsenderType();
         boolean erBrukerAvsender = brukerID != null && brukerID.equalsIgnoreCase(avsenderID);
         JournalpostDto dto = new JournalpostDto(mottattDato, brukerID, avsenderID, avsenderNavn, avsenderType, erBrukerAvsender);
-        DokumentDto dokumentDto = new DokumentDto(journalpost.getHoveddokument().getDokumentId(), journalpost.getHoveddokument().getTittel());
+        DokumentDto dokumentDto = new DokumentDto(journalpost.getHoveddokument().getDokumentId(),
+            journalpost.getHoveddokument().getTittel(), journalpost.getHoveddokument().mapLogiskeVedlegg());
         dto.setHoveddokument(dokumentDto);
-        dto.setVedlegg(journalpost.getVedleggListe().stream().map(v -> new DokumentDto(v.getDokumentId(), v.getTittel())).collect(Collectors.toList()));
+        dto.setVedlegg(journalpost.getVedleggListe().stream()
+            .map(v -> new DokumentDto(v.getDokumentId(), v.getTittel(), v.mapLogiskeVedlegg()))
+            .collect(Collectors.toList()));
+
         return dto;
     }
 

@@ -63,6 +63,15 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
     }
 
     @Override
+    public void fjernLogiskeVedlegg(String dokumentInfoId, String logiskVedleggId) throws SikkerhetsbegrensningException, IntegrasjonException {
+        if (log.isInfoEnabled()) {
+            log.info("Fjerner logisk vedlegg {} for dokument med id {}", logiskVedleggId, dokumentInfoId);
+        }
+
+        exchange(String.format("/dokumentInfo/%s/logiskVedlegg/%s", dokumentInfoId, logiskVedleggId), HttpMethod.DELETE, new HttpEntity<>(getHttpHeaders()), Void.class);
+    }
+
+    @Override
     public void ferdigstillJournalpost(FerdigstillJournalpostRequest request, String journalpostId) throws SikkerhetsbegrensningException, IntegrasjonException {
         if (log.isInfoEnabled()) {
             log.info("Ferdigstill journalpost med id {}", journalpostId);

@@ -194,7 +194,7 @@ public class JoarkService implements JoarkFasade {
         arkivDokument.setTittel(detaljertDokumentinformasjon.getTittel());
 
         detaljertDokumentinformasjon.getSkannetInnholdListe()
-            .forEach(vedlegg -> arkivDokument.getLogiskeVedlegg().add(new LogiskeVedlegg(vedlegg.getVedleggInnhold())));
+            .forEach(vedlegg -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(vedlegg.getVedleggInnhold())));
         return arkivDokument;
     }
 
@@ -211,6 +211,8 @@ public class JoarkService implements JoarkFasade {
     @Override
     public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
         throws SikkerhetsbegrensningException, TekniskException {
+
+        fjernEksisterendeLogiskeVedlegg(journalpostID);
 
         OppdaterJournalpostRequest.Builder request = new OppdaterJournalpostRequest.Builder()
             .medDatoMottatt(journalpostOppdatering.getMottattDato())
@@ -248,6 +250,15 @@ public class JoarkService implements JoarkFasade {
 
         if (forsøkFerdigstill) {
             journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
+        }
+    }
+
+    private void fjernEksisterendeLogiskeVedlegg(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+        GetJournalpostResponse journalpost = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
+        if (!journalpost.getDokumentListe().isEmpty()) {
+            for (var logiskVedlegg : journalpost.getDokumentListe().get(0).getLogiskVedleggListe()) {
+                journalpostapiConsumer.fjernLogiskeVedlegg(journalpostID, logiskVedlegg.getLogiskVedleggId());
+            }
         }
     }
 

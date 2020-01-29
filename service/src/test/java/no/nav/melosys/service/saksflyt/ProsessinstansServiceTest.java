@@ -264,21 +264,19 @@ public class ProsessinstansServiceTest {
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
         journalfoeringDto.setDokumentID("hovedDokumentID");
         List<DokumentDto> vedlegg = new ArrayList<>();
-        DokumentDto fysiskVedlegg = new DokumentDto("ID_F_01", "Fysisk");
+        DokumentDto fysiskVedlegg = new DokumentDto("dokID1", "tittel1");
         vedlegg.add(fysiskVedlegg);
-        DokumentDto logiskVedlegg_1 = new DokumentDto(null, "Logisk");
-        vedlegg.add(logiskVedlegg_1);
-        DokumentDto logiskVedlegg_2 = new DokumentDto("hovedDokumentID", "Logisk ??");
-        vedlegg.add(logiskVedlegg_2);
+        DokumentDto fysiskVedlegg2 = new DokumentDto("hovedDokumentID", "Logisk ??");
+        vedlegg.add(fysiskVedlegg2);
         journalfoeringDto.setVedlegg(vedlegg);
+        journalfoeringDto.getHovedDokument().getLogiskeVedlegg().add("tittel");
 
         Prosessinstans prosessinstans = service.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
-        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_1.getTittel());
-        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_2.getTittel());
-
-        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsOnlyKeys(fysiskVedlegg.getDokumentID());
-        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsValues(fysiskVedlegg.getTittel());
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsKeys(fysiskVedlegg.getDokumentID(), fysiskVedlegg2.getDokumentID());
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsValues(fysiskVedlegg.getTittel(), fysiskVedlegg2.getTittel());
+        List<String> logiskeVedlegg = prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class);
+        assertThat(logiskeVedlegg).containsExactly("tittel");
     }
 
     @Test

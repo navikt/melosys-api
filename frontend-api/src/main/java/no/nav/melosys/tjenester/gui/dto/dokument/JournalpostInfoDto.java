@@ -7,7 +7,7 @@ import java.util.List;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
-import no.nav.melosys.domain.arkiv.LogiskeVedlegg;
+import no.nav.melosys.domain.arkiv.LogiskVedlegg;
 import no.nav.melosys.domain.kodeverk.Mottaksretning;
 
 public class JournalpostInfoDto {
@@ -41,13 +41,14 @@ public class JournalpostInfoDto {
             journalpost.getForsendelseJournalfoert(),
             av(journalpost.getJournalposttype()),
             journalpost.getKorrespondansepartNavn(),
-            new DokumentDto(journalpost.getHoveddokument().getDokumentId(), journalpost.getHoveddokument().getTittel()),
+            new DokumentDto(journalpost.getHoveddokument().getDokumentId(),
+                journalpost.getHoveddokument().getTittel(), journalpost.getHoveddokument().mapLogiskeVedlegg()),
             lagVedlegg(journalpost.getVedleggListe(), journalpost.getHoveddokument().getLogiskeVedlegg()));
     }
 
-    private static List<DokumentDto> lagVedlegg(List<ArkivDokument> vedlegg, List<LogiskeVedlegg> interneVedlegg) {
+    private static List<DokumentDto> lagVedlegg(List<ArkivDokument> vedlegg, List<LogiskVedlegg> interneVedlegg) {
         List<DokumentDto> vedleggListe = new ArrayList<>();
-        vedlegg.forEach(v -> vedleggListe.add(new DokumentDto(v.getDokumentId(), v.getTittel())));
+        vedlegg.forEach(v -> vedleggListe.add(new DokumentDto(v.getDokumentId(), v.getTittel(), v.mapLogiskeVedlegg())));
         interneVedlegg.forEach(v -> vedleggListe.add(new DokumentDto(v.getTittel())));
         return vedleggListe;
     }

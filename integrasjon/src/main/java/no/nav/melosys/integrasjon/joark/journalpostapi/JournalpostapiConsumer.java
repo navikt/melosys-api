@@ -15,5 +15,7 @@ public interface JournalpostapiConsumer {
 
     void leggTilLogiskVedlegg(String dokumentID, String tittel) throws SikkerhetsbegrensningException, IntegrasjonException;
 
+    void fjernLogiskeVedlegg(String dokumentInfoId, String logiskVedleggId) throws SikkerhetsbegrensningException, IntegrasjonException;
+
     void ferdigstillJournalpost(FerdigstillJournalpostRequest request, String journalpostId) throws SikkerhetsbegrensningException, IntegrasjonException;
 }

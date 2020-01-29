@@ -90,11 +90,9 @@ public class ProsessinstansService {
         }
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
-            final String hovedDokumentID = journalfoeringDto.getDokumentID();
-            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER,
-                journalfoeringDto.getVedlegg().stream().filter(v -> v.erLogiskVedlegg(hovedDokumentID)).map(DokumentDto::getTittel).collect(Collectors.toList()));
+            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, journalfoeringDto.getHovedDokument().getLogiskeVedlegg());
             prosessinstans.setData(ProsessDataKey.FYSISKE_VEDLEGG,
-                journalfoeringDto.getVedlegg().stream().filter(v -> v.erFysiskVedlegg(hovedDokumentID)).collect(Collectors.toMap(DokumentDto::getDokumentID, DokumentDto::getTittel)));
+                journalfoeringDto.getVedlegg().stream().collect(Collectors.toMap(DokumentDto::getDokumentID, DokumentDto::getTittel)));
         }
 
         return prosessinstans;

@@ -6,6 +6,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
 import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
+import no.nav.dok.tjenester.journalfoerinngaaende.LogiskVedlegg;
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
@@ -159,8 +160,19 @@ public class JoarkServiceTest {
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.ORGANISASJON)
             .medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
             .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).medDokumentkategori(true).build();
+
+        GetJournalpostResponse eksisterendeJournalpost = new GetJournalpostResponse();
+        eksisterendeJournalpost.getDokumentListe().add(
+            new Dokument().withLogiskVedleggListe(
+                List.of(new LogiskVedlegg().withLogiskVedleggTittel("tittel1").withLogiskVedleggId("id1"),
+                    new LogiskVedlegg().withLogiskVedleggTittel("tittel2").withLogiskVedleggId("id2"))
+            )
+        );
+
+        when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(eksisterendeJournalpost);
         joarkService.oppdaterJournalpost("123",journalpostOppdatering, false);
 
+        verify(journalpostapiConsumer, times(2)).fjernLogiskeVedlegg(anyString(), anyString());
         verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
         OppdaterJournalpostRequest request = oppdaterJournalpostRequestCaptor.getValue();
 
@@ -200,8 +212,11 @@ public class JoarkServiceTest {
             .medBrukerID("12345").medHovedDokumentID(hovedDokumentID)
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
             .medLogiskeVedleggTitler(null).medDokumentkategori(true).build();
+
+        when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(new GetJournalpostResponse());
         joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);
 
+        verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());
         verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
         OppdaterJournalpostRequest request = oppdaterJournalpostRequestCaptor.getValue();
 
@@ -230,8 +245,11 @@ public class JoarkServiceTest {
     public void oppdaterJournalpost_skalFerdigstilles_ferdigstillJournalpostBlirKalt() throws Exception {
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
             .medBrukerID("12345").build();
+
+        when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(new GetJournalpostResponse());
         joarkService.oppdaterJournalpost("123", journalpostOppdatering, true);
 
+        verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());
         verify(journalpostapiConsumer).oppdaterJournalpost(any(OppdaterJournalpostRequest.class), anyString());
         verify(journalpostapiConsumer).ferdigstillJournalpost(any(FerdigstillJournalpostRequest.class), eq("123"));
     }
