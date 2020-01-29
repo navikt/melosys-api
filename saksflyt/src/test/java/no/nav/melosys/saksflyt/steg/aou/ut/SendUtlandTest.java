@@ -92,7 +92,7 @@ public class SendUtlandTest {
     public void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
-        when(eessiService.landErEessiReady(any(), any())).thenReturn(Boolean.FALSE);
+        prosessinstans.setData(ProsessDataKey.ER_EESSI_READY, false);
 
         sendUtland.utfør(prosessinstans);
 

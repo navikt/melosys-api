@@ -149,6 +149,7 @@ public class ProsessinstansService {
             .medBehandling(behandling)
             .medEessiMottakere(List.of(mottakerInstitusjon))
             .build();
+        prosessinstans.setData(ProsessDataKey.ER_EESSI_READY, true);
 
         lagre(prosessinstans);
     }
@@ -177,7 +178,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
                                                      String fritekst, String mottakerInstitusjon,
-                                                     Vedtakstyper vedtakstype, String revurderBegrunnelse) {
+                                                     Vedtakstyper vedtakstype, String revurderBegrunnelse, boolean skalSendeSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
             .medSteg(ProsessSteg.IV_VALIDERING)
@@ -186,6 +187,7 @@ public class ProsessinstansService {
             .medEessiMottakere(List.of(mottakerInstitusjon))
             .build();
 
+        prosessinstans.setData(ProsessDataKey.ER_EESSI_READY, skalSendeSed);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
         prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, vedtakstype.getKode());
         if (StringUtils.isNotEmpty(revurderBegrunnelse)) {
@@ -332,7 +334,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, List<String> mottakerinstitusjoner) {
+    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, List<String> mottakerinstitusjoner, boolean erEessiReady) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEK_LAND)
             .medSteg(ProsessSteg.UL_SEND_BREV)
@@ -340,6 +342,7 @@ public class ProsessinstansService {
             .medEessiMottakere(mottakerinstitusjoner)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
+        prosessinstans.setData(ProsessDataKey.ER_EESSI_READY, erEessiReady);
 
         lagre(prosessinstans);
     }

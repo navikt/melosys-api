@@ -2,6 +2,7 @@ package no.nav.melosys.service.utpeking;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
@@ -13,6 +14,7 @@ import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -30,19 +32,22 @@ public class UtpekingService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final EessiService eessiService;
+    private final LandvelgerService landvelgerService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
 
-    public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                           EessiService eessiService, OppgaveService oppgaveService,
-                           ProsessinstansService prosessinstansService,
+    public UtpekingService(BehandlingService behandlingService,
+                           BehandlingsresultatService behandlingsresultatService,
+                           EessiService eessiService, LandvelgerService landvelgerService,
+                           OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                            UtenlandskMyndighetService utenlandskMyndighetService,
                            UtpekingsperiodeRepository utpekingsperiodeRepository) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
+        this.landvelgerService = landvelgerService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
@@ -74,7 +79,11 @@ public class UtpekingService {
         List<Utpekingsperiode> utpekingsperioder = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingId);
         validerUtpeking(utpekingsperioder, mottakerinstitusjoner);
 
-        prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner);
+        boolean erEessiReady = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingId)
+            .stream().map(Landkoder::getKode)
+            .allMatch(erEessiReady(BucType.LA_BUC_02));
+
+        prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner, erEessiReady);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -101,4 +110,15 @@ public class UtpekingService {
             return utenlandskMyndighet.institusjonskode.equals(mottakerinstitusjon);
         }
     }
+
+    private Predicate<String> erEessiReady(BucType bucType) {
+        return land -> {
+            try {
+                return eessiService.landErEessiReady(bucType.name(), land);
+            } catch (MelosysException e) {
+                return false;
+            }
+        };
+    }
+
 }
