@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.arkiv.ArkivDokument;
-import no.nav.melosys.domain.arkiv.ArkivDokumentVedlegg;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.domain.arkiv.LogiskeVedlegg;
 import no.nav.melosys.domain.kodeverk.Mottaksretning;
 
 public class JournalpostInfoDto {
@@ -42,10 +42,10 @@ public class JournalpostInfoDto {
             av(journalpost.getJournalposttype()),
             journalpost.getKorrespondansepartNavn(),
             new DokumentDto(journalpost.getHoveddokument().getDokumentId(), journalpost.getHoveddokument().getTittel()),
-            lagVedlegg(journalpost.getVedleggListe(), journalpost.getHoveddokument().getInterneVedlegg()));
+            lagVedlegg(journalpost.getVedleggListe(), journalpost.getHoveddokument().getLogiskeVedlegg()));
     }
 
-    private static List<DokumentDto> lagVedlegg(List<ArkivDokument> vedlegg, List<ArkivDokumentVedlegg> interneVedlegg) {
+    private static List<DokumentDto> lagVedlegg(List<ArkivDokument> vedlegg, List<LogiskeVedlegg> interneVedlegg) {
         List<DokumentDto> vedleggListe = new ArrayList<>();
         vedlegg.forEach(v -> vedleggListe.add(new DokumentDto(v.getDokumentId(), v.getTittel())));
         interneVedlegg.forEach(v -> vedleggListe.add(new DokumentDto(v.getTittel())));

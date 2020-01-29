@@ -194,7 +194,7 @@ public class JoarkService implements JoarkFasade {
         arkivDokument.setTittel(detaljertDokumentinformasjon.getTittel());
 
         detaljertDokumentinformasjon.getSkannetInnholdListe()
-            .forEach(vedlegg -> arkivDokument.getInterneVedlegg().add(new ArkivDokumentVedlegg(vedlegg.getVedleggInnhold())));
+            .forEach(vedlegg -> arkivDokument.getLogiskeVedlegg().add(new LogiskeVedlegg(vedlegg.getVedleggInnhold())));
         return arkivDokument;
     }
 

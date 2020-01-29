@@ -5,12 +5,12 @@ import java.util.List;
 
 public class ArkivDokument {
     private String dokumentId;
-    private List<ArkivDokumentVedlegg> interneVedlegg; // Til sammensatte dokumenter der vedlegg er scannet inn i ett dokument.
+    private List<LogiskeVedlegg> logiskeVedlegg; // Til sammensatte dokumenter der vedlegg er scannet inn i ett dokument.
     private String tittel;
     private String navSkjemaID;
 
     public ArkivDokument() {
-        this.interneVedlegg = new ArrayList<>();
+        this.logiskeVedlegg = new ArrayList<>();
     }
 
     public String getDokumentId() {
@@ -21,8 +21,8 @@ public class ArkivDokument {
         this.dokumentId = dokumentId;
     }
 
-    public List<ArkivDokumentVedlegg> getInterneVedlegg() {
-        return interneVedlegg;
+    public List<LogiskeVedlegg> getLogiskeVedlegg() {
+        return logiskeVedlegg;
     }
 
     public String getTittel() {
