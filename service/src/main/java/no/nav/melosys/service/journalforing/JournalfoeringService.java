@@ -184,7 +184,7 @@ public class JournalfoeringService {
         if (StringUtils.isEmpty(journalfoeringDto.getBrukerID())) {
             throw new FunksjonellException("BrukerID mangler");
         }
-        if (StringUtils.isEmpty(journalfoeringDto.getHoveddokumentTittel())) {
+        if (StringUtils.isEmpty(journalfoeringDto.getHovedDokument().getTittel())) {
             throw new FunksjonellException("Dokumenttittel mangler");
         }
     }

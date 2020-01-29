@@ -3,7 +3,6 @@ package no.nav.melosys.service.journalforing.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 
 public class JournalfoeringDto {
@@ -15,7 +14,7 @@ public class JournalfoeringDto {
     private String avsenderNavn;
     private Avsendertyper avsenderType;
     private String dokumentID;
-    private String hoveddokumentTittel;
+    private DokumentDto hovedDokument;
     private List<DokumentDto> vedlegg;
     private boolean skalTilordnes;
     private Boolean ikkeSendForvaltingsmelding;
@@ -85,12 +84,12 @@ public class JournalfoeringDto {
         this.dokumentID = dokumentID;
     }
 
-    public String getHoveddokumentTittel() {
-        return hoveddokumentTittel;
+    public DokumentDto getHovedDokument() {
+        return hovedDokument;
     }
 
-    public void setHoveddokumentTittel(String hoveddokumentTittel) {
-        this.hoveddokumentTittel = hoveddokumentTittel;
+    public void setHovedDokument(DokumentDto hovedDokument) {
+        this.hovedDokument = hovedDokument;
     }
 
     public List<DokumentDto> getVedlegg() {

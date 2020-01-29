@@ -394,7 +394,7 @@ public class ProsessinstansServiceTest {
         journalfoeringDto.setBrukerID("brukerid");
         journalfoeringDto.setAvsenderID("avsenderid");
         journalfoeringDto.setAvsenderNavn("avsendernavn");
-        journalfoeringDto.setHoveddokumentTittel("hovedkokumenttittel");
+        journalfoeringDto.setHovedDokument(new DokumentDto(null, "hovedkokumenttittel"));
         return journalfoeringDto;
     }
 
