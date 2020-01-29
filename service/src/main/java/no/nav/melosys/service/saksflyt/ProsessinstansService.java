@@ -249,6 +249,7 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(fritekst)
             .build();
 
+        nyprosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.ENDRINGSVEDTAK.getKode());
         nyprosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiode);
         lagre(nyprosessinstans);
     }

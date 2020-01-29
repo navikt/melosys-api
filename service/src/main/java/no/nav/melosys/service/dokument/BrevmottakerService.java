@@ -9,7 +9,9 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -28,14 +30,16 @@ public class BrevmottakerService {
     private final KontaktopplysningService kontaktopplysningService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
     public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
-                               UtenlandskMyndighetService utenlandskMyndighetService) {
+                               UtenlandskMyndighetService utenlandskMyndighetService, BehandlingsresultatService behandlingsresultatService) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
@@ -131,7 +135,7 @@ public class BrevmottakerService {
 
     private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker,
                                                        Behandling behandling,
-                                                       Produserbaredokumenter produserbartDokument) {
+                                                       Produserbaredokumenter produserbartDokument) throws IkkeFunnetException {
         if (mottaker.getAktør().getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
             return Collections.singletonList(mottaker.getAktør());
@@ -139,7 +143,7 @@ public class BrevmottakerService {
             // Utenlandsk myndighet
             Map<UtenlandskMyndighet, Aktoer> utenlandskMyndighetAktoerMap = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
 
-            if (produserbartDokument == ATTEST_A1) {
+            if (produserbartDokument == ATTEST_A1 && behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode().erArtikkel12_1()) {
                 return utenlandskMyndighetAktoerMap.entrySet()
                         .stream()
                         .filter(e -> myndighetØnskerInnvilgelsesbrev(e.getKey()))

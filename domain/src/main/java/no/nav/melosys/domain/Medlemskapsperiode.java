@@ -19,6 +19,10 @@ public interface Medlemskapsperiode extends ErPeriode {
 
     Trygdedekninger getDekning();
 
+    default boolean erArtikkel12_1() {
+        return getBestemmelse() == FO_883_2004_ART12_1;
+    }
+
     default boolean erArtikkel13() {
         return getBestemmelse() == FO_883_2004_ART13_1A
             || getBestemmelse() == FO_883_2004_ART13_1B1 || getBestemmelse() == FO_883_2004_ART13_1B2 || getBestemmelse() == FO_883_2004_ART13_1B3 || getBestemmelse() == FO_883_2004_ART13_1B4
