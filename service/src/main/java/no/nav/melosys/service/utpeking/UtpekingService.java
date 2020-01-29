@@ -77,37 +77,32 @@ public class UtpekingService {
             behandling.getFagsak().getSaksnummer(), behandlingId, String.join(", ", mottakerinstitusjoner));
 
         List<Utpekingsperiode> utpekingsperioder = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingId);
-        validerUtpeking(utpekingsperioder, mottakerinstitusjoner);
+        validerUtpekingsperioder(utpekingsperioder);
 
-        boolean erEessiReady = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingId)
-            .stream().map(Landkoder::getKode)
-            .allMatch(erEessiReady(BucType.LA_BUC_02));
+        if (CollectionUtils.isEmpty(mottakerinstitusjoner)) {
+            validerMottakerinstitusjoner(utpekingsperioder.get(0), mottakerinstitusjoner);
+        }
 
-        prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner, erEessiReady);
+        prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    void validerUtpeking(List<Utpekingsperiode> utpekingsperioder, List<String> mottakerinstitusjoner) throws MelosysException {
+    void validerUtpekingsperioder(List<Utpekingsperiode> utpekingsperioder) throws MelosysException {
         if (CollectionUtils.isEmpty(utpekingsperioder)) {
             throw new FunksjonellException("Du må velge en utpekingsperiode for å kunne utpeke et annet land");
         }
         if (utpekingsperioder.size() != 1) {
             throw new FunksjonellException("Flere utpekingsperioder er ikke støttet ved utpeking av et annet land");
         }
-        Landkoder utpektLand = utpekingsperioder.get(0).getLovvalgsland();
-        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(utpektLand);
-        for (String mottakerinstitusjon : mottakerinstitusjoner) {
-            if (!validerInstitusjonForLand(utenlandskMyndighet, mottakerinstitusjon)) {
-               throw new FunksjonellException("Valgt mottakerinstitusjon " + mottakerinstitusjon + " er ikke gyldig for utpekt land " + utpektLand.getKode());
-            }
-        }
     }
 
-    boolean validerInstitusjonForLand(UtenlandskMyndighet utenlandskMyndighet, String mottakerinstitusjon) throws MelosysException {
-        if (eessiService.erGyldigInstitusjonForLand(BucType.LA_BUC_02.name(), utenlandskMyndighet.land, mottakerinstitusjon)) {
-            return true;
-        } else {
-            return utenlandskMyndighet.institusjonskode.equals(mottakerinstitusjon);
+    void validerMottakerinstitusjoner(Utpekingsperiode utpekingsperiode, List<String> mottakerinstitusjoner) throws MelosysException {
+        Landkoder utpektLand = utpekingsperiode.getLovvalgsland();
+        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(utpektLand);
+        for (String mottakerinstitusjon : mottakerinstitusjoner) {
+            if (!eessiService.erGyldigInstitusjonForLand(BucType.LA_BUC_02.name(), utenlandskMyndighet.land, mottakerinstitusjon)) {
+                throw new FunksjonellException("Valgt mottakerinstitusjon " + mottakerinstitusjon + " er ikke gyldig for utpekt land " + utpektLand.getKode());
+            }
         }
     }
 

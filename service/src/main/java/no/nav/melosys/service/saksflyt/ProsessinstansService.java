@@ -334,7 +334,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, List<String> mottakerinstitusjoner, boolean erEessiReady) {
+    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, List<String> mottakerinstitusjoner) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEK_LAND)
             .medSteg(ProsessSteg.UL_SEND_BREV)
@@ -342,7 +342,7 @@ public class ProsessinstansService {
             .medEessiMottakere(mottakerinstitusjoner)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
-        prosessinstans.setData(ProsessDataKey.ER_EESSI_READY, erEessiReady);
+        prosessinstans.setData(ProsessDataKey.ER_EESSI_READY, CollectionUtils.isEmpty(mottakerinstitusjoner));
 
         lagre(prosessinstans);
     }
