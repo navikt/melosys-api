@@ -10,7 +10,7 @@ public class XmlFormatererTest {
     public void formaterXml_xmlUtenIdentering_xmlBlirFormatert() {
         final String xmlString = "<d><key>verdi</key></d>";
         final String formatertXml = XmlFormaterer.formaterXml(xmlString);
-        assertThat(formatertXml).isEqualTo(
+        assertThat(formatertXml).isEqualToIgnoringNewLines(
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<d>\n" +
             "    <key>verdi</key>\n" +
