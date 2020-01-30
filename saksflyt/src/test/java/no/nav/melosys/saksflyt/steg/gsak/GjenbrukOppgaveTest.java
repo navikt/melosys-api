@@ -44,7 +44,8 @@ public class GjenbrukOppgaveTest {
         assertThat(oppgaveCaptor.getValue()).hasFieldOrPropertyWithValue("saksnummer", saksnummer)
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
             .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
-            .hasFieldOrPropertyWithValue("behandlingstype", Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV);
+            .hasFieldOrPropertyWithValue("behandlingstype", Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV)
+            .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321");
     }
 
     private static Prosessinstans lagProsessinstans(String oppgaveID, String saksnummer) {
@@ -52,6 +53,8 @@ public class GjenbrukOppgaveTest {
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, oppgaveID);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV);
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
+        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "Deg321");
         return prosessinstans;
     }
 }
