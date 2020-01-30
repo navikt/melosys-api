@@ -3,7 +3,10 @@ package no.nav.melosys.service.utpeking;
 import java.util.Collection;
 import java.util.List;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
@@ -11,7 +14,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -31,20 +34,20 @@ public class UtpekingService {
     private final EessiService eessiService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
-    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
+    private final LandvelgerService landvelgerService;
 
     public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                            EessiService eessiService, OppgaveService oppgaveService,
-                           ProsessinstansService prosessinstansService, UtenlandskMyndighetService utenlandskMyndighetService,
-                           UtpekingsperiodeRepository utpekingsperiodeRepository) {
+                           ProsessinstansService prosessinstansService,
+                           UtpekingsperiodeRepository utpekingsperiodeRepository, LandvelgerService landvelgerService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
-        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
+        this.landvelgerService = landvelgerService;
     }
 
     public Collection<Utpekingsperiode> hentUtpekingsperioder(long behandlingID) {
@@ -62,19 +65,21 @@ public class UtpekingService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void utpekLovvalgsland(Fagsak fagsak, List<String> mottakerinstitusjoner) throws MelosysException {
-        long behandlingId = fagsak.getAktivBehandling().getId();
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
+        long behandlingID = fagsak.getAktivBehandling().getId();
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         behandling.setStatus(Behandlingsstatus.UTPEKING_SENDT);
-        log.info("Utpeking av annet land for sak: {} behandling: {} mottakerinstitusjoner: {}",
-            behandling.getFagsak().getSaksnummer(), behandlingId, String.join(", ", mottakerinstitusjoner));
+        log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
+            behandling.getFagsak().getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
 
-        List<Utpekingsperiode> utpekingsperioder = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingId);
+        List<Utpekingsperiode> utpekingsperioder = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
         validerUtpekingsperioder(utpekingsperioder);
 
-        if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
-            validerMottakerinstitusjoner(mottakerinstitusjoner);
-        }
+        mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjoner(
+            mottakerinstitusjoner,
+            landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID),
+            BucType.LA_BUC_02
+        );
 
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
@@ -86,21 +91,6 @@ public class UtpekingService {
         }
         if (utpekingsperioder.size() != 1) {
             throw new FunksjonellException("Flere utpekingsperioder er ikke støttet ved utpeking av et annet land");
-        }
-    }
-
-    void validerMottakerinstitusjoner(List<String> mottakerinstitusjoner) throws MelosysException {
-        for (String mottakerinstitusjon : mottakerinstitusjoner) {
-            UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonsId(mottakerinstitusjon);
-            if (utenlandskMyndighet == null) {
-                throw new FunksjonellException("Finner ikke utenlandsk myndighet for valgt mottakerinstitusjon " + mottakerinstitusjon);
-            }
-            if (!eessiService.erGyldigInstitusjonForLand(BucType.LA_BUC_02.name(), utenlandskMyndighet.land, mottakerinstitusjon)) {
-                throw new FunksjonellException("Valgt mottakerinstitusjon " + mottakerinstitusjon + " er ikke gyldig for land " + utenlandskMyndighet.land + " og BUC " + BucType.LA_BUC_02);
-            }
-            if (!eessiService.landErEessiReady(BucType.LA_BUC_02.name(), utenlandskMyndighet.land)) {
-                throw new FunksjonellException("Valgt mottakerland " + utenlandskMyndighet.land + " kan ikke motta SED på BUC " + BucType.LA_BUC_02);
-            }
         }
     }
 }

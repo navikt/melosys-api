@@ -1,8 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -15,8 +13,10 @@ import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Primary
 @Service
@@ -208,5 +209,29 @@ public class EessiService {
 
         return mottakerinstitusjoner.stream().findFirst()
             .orElseThrow(() -> new TekniskException("MottakerInstitusjon er ikke satt"));
+    }
+
+    public List<String> validerOgAvklarMottakerInstitusjoner(final List<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerLand, BucType bucType) throws MelosysException {
+
+        StringBuilder feilmelding = new StringBuilder();
+
+        for (var mottaker : mottakerLand) {
+            Collection<String> alleInstitusjoner = hentEessiMottakerinstitusjoner(bucType.name(), mottaker.getKode())
+                .stream().map(Institusjon::getId).collect(Collectors.toList());
+            if (alleInstitusjoner.isEmpty()) {
+                log.info("{} er ikke EESSI-ready, sender ikke SED", mottaker.getBeskrivelse());
+                return Collections.emptyList();
+            }
+
+            if (!CollectionUtils.containsAny(alleInstitusjoner, valgteMottakerinstitusjoner)) {
+                feilmelding.append("Finner ingen gyldig mottakerinstitusjon for ").append(mottaker.getBeskrivelse()).append("\n");
+            }
+        }
+
+        if (feilmelding.length() != 0) {
+            throw new FunksjonellException(feilmelding.toString());
+        }
+
+        return valgteMottakerinstitusjoner;
     }
 }
