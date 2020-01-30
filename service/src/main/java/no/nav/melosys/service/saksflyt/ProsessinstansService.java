@@ -69,7 +69,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()));
         }
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getHovedDokument().getDokumentID());
+        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getHoveddokument().getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
 
@@ -81,7 +81,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
         }
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHovedDokument().getTittel());
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokument().getTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
         prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, skalSendesForvaltningsmelding(journalfoeringDto));
 
@@ -90,7 +90,7 @@ public class ProsessinstansService {
         }
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
-            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, journalfoeringDto.getHovedDokument().getLogiskeVedlegg());
+            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, journalfoeringDto.getHoveddokument().getLogiskeVedlegg());
             prosessinstans.setData(ProsessDataKey.FYSISKE_VEDLEGG,
                 journalfoeringDto.getVedlegg().stream().collect(Collectors.toMap(DokumentDto::getDokumentID, DokumentDto::getTittel)));
         }

@@ -14,7 +14,7 @@ public class JournalfoeringDto {
     private String avsenderID;
     private String avsenderNavn;
     private Avsendertyper avsenderType;
-    private DokumentDto hovedDokument;
+    private DokumentDto hoveddokument;
     private List<DokumentDto> vedlegg = new ArrayList<>();
     private boolean skalTilordnes;
     private Boolean ikkeSendForvaltingsmelding;
@@ -76,12 +76,12 @@ public class JournalfoeringDto {
         this.avsenderType = avsenderType;
     }
 
-    public DokumentDto getHovedDokument() {
-        return hovedDokument;
+    public DokumentDto getHoveddokument() {
+        return hoveddokument;
     }
 
-    public void setHovedDokument(DokumentDto hovedDokument) {
-        this.hovedDokument = hovedDokument;
+    public void setHoveddokument(DokumentDto hoveddokument) {
+        this.hoveddokument = hoveddokument;
     }
 
     public List<DokumentDto> getVedlegg() {

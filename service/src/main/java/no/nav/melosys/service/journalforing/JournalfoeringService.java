@@ -181,14 +181,17 @@ public class JournalfoeringService {
         if (StringUtils.isEmpty(journalfoeringDto.getBrukerID())) {
             throw new FunksjonellException("BrukerID mangler");
         }
-        if (StringUtils.isEmpty(journalfoeringDto.getHovedDokument().getDokumentID())) {
+        if (StringUtils.isEmpty(journalfoeringDto.getHoveddokument().getDokumentID())) {
             throw new FunksjonellException("DokumentID til hoveddokument mangler");
+        }
+        if (StringUtils.isEmpty(journalfoeringDto.getHoveddokument().getTittel())) {
+            throw new FunksjonellException("Hoveddokument mangler tittel");
         }
         if (journalfoeringDto.getVedlegg().stream().map(DokumentDto::getDokumentID).anyMatch(StringUtils::isEmpty)) {
             throw new FunksjonellException("DokumentID mangler for et vedlegg");
         }
-        if (StringUtils.isEmpty(journalfoeringDto.getHovedDokument().getTittel())) {
-            throw new FunksjonellException("Dokumenttittel mangler");
+        if (journalfoeringDto.getVedlegg().stream().map(DokumentDto::getTittel).anyMatch(StringUtils::isEmpty)) {
+            throw new FunksjonellException("Tittel mangler for et vedlegg");
         }
     }
 

@@ -262,14 +262,14 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansJournalføring_medVedlegg_setterVedleggOgTitler() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
-        journalfoeringDto.getHovedDokument().setDokumentID("hovedDokumentID");
+        journalfoeringDto.getHoveddokument().setDokumentID("hovedDokumentID");
         List<DokumentDto> vedlegg = new ArrayList<>();
         DokumentDto fysiskVedlegg = new DokumentDto("dokID1", "tittel1");
         vedlegg.add(fysiskVedlegg);
         DokumentDto fysiskVedlegg2 = new DokumentDto("hovedDokumentID", "Logisk ??");
         vedlegg.add(fysiskVedlegg2);
         journalfoeringDto.setVedlegg(vedlegg);
-        journalfoeringDto.getHovedDokument().getLogiskeVedlegg().add("tittel");
+        journalfoeringDto.getHoveddokument().getLogiskeVedlegg().add("tittel");
 
         Prosessinstans prosessinstans = service.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
@@ -313,7 +313,7 @@ public class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.SED_GENERELL_SAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getHovedDokument().getDokumentID());
+        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getHoveddokument().getDokumentID());
     }
 
     @Test
@@ -391,7 +391,7 @@ public class ProsessinstansServiceTest {
         journalfoeringDto.setBrukerID("brukerid");
         journalfoeringDto.setAvsenderID("avsenderid");
         journalfoeringDto.setAvsenderNavn("avsendernavn");
-        journalfoeringDto.setHovedDokument(new DokumentDto("dokumentid", "hovedkokumenttittel"));
+        journalfoeringDto.setHoveddokument(new DokumentDto("dokumentid", "hovedkokumenttittel"));
         return journalfoeringDto;
     }
 

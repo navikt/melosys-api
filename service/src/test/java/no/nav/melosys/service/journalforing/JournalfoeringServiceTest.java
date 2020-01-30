@@ -62,7 +62,7 @@ public class JournalfoeringServiceTest {
         opprettDto.setAvsenderID("setAvsenderID");
         opprettDto.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
         opprettDto.setBrukerID("setBrukerID");
-        opprettDto.setHovedDokument(new DokumentDto("3333","setDokumenttittel"));
+        opprettDto.setHoveddokument(new DokumentDto("3333","setDokumenttittel"));
         opprettDto.setArbeidsgiverID("123456789");
         opprettDto.setBehandlingstypeKode(Behandlingstyper.SOEKNAD.getKode());
 
@@ -73,7 +73,7 @@ public class JournalfoeringServiceTest {
         tilordneDto.setAvsenderID("setAvsenderID");
         tilordneDto.setAvsenderType(Avsendertyper.PERSON);
         tilordneDto.setBrukerID("setBrukerID");
-        tilordneDto.setHovedDokument(new DokumentDto("123", "setDokumenttittel"));
+        tilordneDto.setHoveddokument(new DokumentDto("123", "setDokumenttittel"));
 
         journalfoeringSedDto = new JournalfoeringSedDto();
         journalfoeringSedDto.setBrukerID("brukerID");
