@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -152,9 +151,7 @@ public class OppgaveService {
             behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
-            if (behandling.getType() == Behandlingstyper.SOEKNAD
-                || behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
-                || behandling.getType() == Behandlingstyper.ENDRET_PERIODE) {
+            if (behandling.harSøknad()) {
                 SoeknadDokument søknadDokument = søknadService.hentSøknad(behandling.getId());
                 behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
                 behOppgaveDto.setPeriode(mapPeriode(søknadDokument));

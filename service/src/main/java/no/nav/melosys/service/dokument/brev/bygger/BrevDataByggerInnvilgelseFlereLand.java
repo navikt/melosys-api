@@ -16,6 +16,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.apache.commons.collections4.ListUtils;
 
 public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
@@ -60,7 +61,9 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
 
         brevdata.erMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(behandlingID);
-        brevdata.erBegrensetPeriode = true;
+        brevdata.erBegrensetPeriode = !PeriodeKontroller.periodeErLik(
+            søknad.periode.getFom(), søknad.periode.getTom(), brevdata.lovvalgsperiode.getFom(), brevdata.lovvalgsperiode.getTom()
+        );
 
         return brevdata;
     }

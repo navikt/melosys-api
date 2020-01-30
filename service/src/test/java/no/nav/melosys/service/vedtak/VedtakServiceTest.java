@@ -243,7 +243,7 @@ public class VedtakServiceTest {
     public void fattVedtak_feilIValidering_kasterExceptionMedFeilkode() throws MelosysException {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         behandlingsresultat.setType(resultatType);
-        when(vedtakKontrollService.utførKontroller(anyLong()))
+        when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
             .thenReturn(Collections.singletonList(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER));
 
         ValideringException forventetException = null;

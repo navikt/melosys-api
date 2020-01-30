@@ -2,7 +2,8 @@ package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;

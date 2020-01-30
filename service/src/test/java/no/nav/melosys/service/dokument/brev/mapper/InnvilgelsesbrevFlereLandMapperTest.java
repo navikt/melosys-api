@@ -40,8 +40,19 @@ public class InnvilgelsesbrevFlereLandMapperTest {
     }
 
     @Test
+    public void testSakstypeKode() throws Exception {
+        List<String> koderSomIkkeErAktuelleForBrev = Collections.singletonList(
+            "UKJENT" // Vet ikke om det er aktuelt med brev for denne
+        );
+
+        hentAlleVerdierFraKodeverk(Sakstyper.class)
+            .filter(k -> !koderSomIkkeErAktuelleForBrev.contains(k))
+            .forEach(SakstypeKode::fromValue);
+    }
+
+    @Test
     public void testEndretBegrunnelseKoder() throws Exception {
-        //FIXME hentAlleVerdierFraKodeverk(Endretperiode.class).forEach(EndretPeriodeBegrunnelseKode::fromValue);
+        // FIXME hentAlleVerdierFraKodeverk(Endretperiode.class).forEach(EndretPeriodeBegrunnelseKode::fromValue);
     }
 
     @Test

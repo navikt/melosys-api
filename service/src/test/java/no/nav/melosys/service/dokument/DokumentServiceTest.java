@@ -81,11 +81,13 @@ public final class DokumentServiceTest {
     private final DoksysFasade dokSysFasade;
     private final DokumentService instans;
     private final ProsessinstansService prosessinstansService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     public DokumentServiceTest() throws Exception {
         avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
         dokSysFasade = mock(DoksysFasade.class);
         prosessinstansService = mock(ProsessinstansService.class);
+        behandlingsresultatService = mock(BehandlingsresultatService.class);
         instans = lagDokumentService(null);
     }
 
@@ -249,7 +251,7 @@ public final class DokumentServiceTest {
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
-        BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class), avklarteVirksomheterService, mock(UtenlandskMyndighetService.class));
+        BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class), avklarteVirksomheterService, mock(UtenlandskMyndighetService.class), behandlingsresultatService);
         return new DokumentService(behandlingService, brevDataService, dokSysFasade,
             prosessinstansService, brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
     }

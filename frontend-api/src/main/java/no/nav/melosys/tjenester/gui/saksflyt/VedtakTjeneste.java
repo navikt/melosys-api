@@ -9,6 +9,7 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.RevurderingOpprettetDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -64,6 +65,6 @@ public class VedtakTjeneste {
         tilgangService.sjekkTilgang(behandlingID);
 
         long nyBehandlingID = vedtakService.revurderVedtak(behandlingID);
-        return ResponseEntity.ok(nyBehandlingID);
+        return ResponseEntity.ok(new RevurderingOpprettetDto(nyBehandlingID));
     }
 }
