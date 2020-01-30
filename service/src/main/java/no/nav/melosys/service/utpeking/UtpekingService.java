@@ -2,11 +2,9 @@ package no.nav.melosys.service.utpeking;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -14,7 +12,6 @@ import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -32,22 +29,18 @@ public class UtpekingService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final EessiService eessiService;
-    private final LandvelgerService landvelgerService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
 
-    public UtpekingService(BehandlingService behandlingService,
-                           BehandlingsresultatService behandlingsresultatService,
-                           EessiService eessiService, LandvelgerService landvelgerService,
-                           OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
-                           UtenlandskMyndighetService utenlandskMyndighetService,
+    public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+                           EessiService eessiService, OppgaveService oppgaveService,
+                           ProsessinstansService prosessinstansService, UtenlandskMyndighetService utenlandskMyndighetService,
                            UtpekingsperiodeRepository utpekingsperiodeRepository) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
-        this.landvelgerService = landvelgerService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
@@ -80,7 +73,7 @@ public class UtpekingService {
         validerUtpekingsperioder(utpekingsperioder);
 
         if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
-            validerMottakerinstitusjoner(utpekingsperioder.get(0), mottakerinstitusjoner);
+            validerMottakerinstitusjoner(mottakerinstitusjoner);
         }
 
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner);
@@ -96,24 +89,18 @@ public class UtpekingService {
         }
     }
 
-    void validerMottakerinstitusjoner(Utpekingsperiode utpekingsperiode, List<String> mottakerinstitusjoner) throws MelosysException {
-        Landkoder utpektLand = utpekingsperiode.getLovvalgsland();
-        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(utpektLand);
+    void validerMottakerinstitusjoner(List<String> mottakerinstitusjoner) throws MelosysException {
         for (String mottakerinstitusjon : mottakerinstitusjoner) {
+            UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonsId(mottakerinstitusjon);
+            if (utenlandskMyndighet == null) {
+                throw new FunksjonellException("Finner ikke utenlandsk myndighet for valgt mottakerinstitusjon " + mottakerinstitusjon);
+            }
             if (!eessiService.erGyldigInstitusjonForLand(BucType.LA_BUC_02.name(), utenlandskMyndighet.land, mottakerinstitusjon)) {
-                throw new FunksjonellException("Valgt mottakerinstitusjon " + mottakerinstitusjon + " er ikke gyldig for utpekt land " + utpektLand.getKode());
+                throw new FunksjonellException("Valgt mottakerinstitusjon " + mottakerinstitusjon + " er ikke gyldig for land " + utenlandskMyndighet.land + " og BUC " + BucType.LA_BUC_02);
+            }
+            if (!eessiService.landErEessiReady(BucType.LA_BUC_02.name(), utenlandskMyndighet.land)) {
+                throw new FunksjonellException("Valgt mottakerland " + utenlandskMyndighet.land + " kan ikke motta SED på BUC " + BucType.LA_BUC_02);
             }
         }
     }
-
-    private Predicate<String> erEessiReady(BucType bucType) {
-        return land -> {
-            try {
-                return eessiService.landErEessiReady(bucType.name(), land);
-            } catch (MelosysException e) {
-                return false;
-            }
-        };
-    }
-
 }
