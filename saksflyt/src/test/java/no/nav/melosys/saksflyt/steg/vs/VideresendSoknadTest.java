@@ -64,8 +64,6 @@ public class VideresendSoknadTest {
     @Before
     public void setup() throws IkkeFunnetException {
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, landvelgerService, tpsFasade, utenlandskMyndighetService, joarkFasade, fagsakService);
-
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SE));
     }
 
     @Test
@@ -112,7 +110,6 @@ public class VideresendSoknadTest {
         when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(behandling.getInitierendeDokumentId())))
             .thenReturn(vedlegg);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_03.name()), eq("SE"))).thenReturn(Boolean.TRUE);
 
         videresendSoknad.utfør(prosessinstans);
 

@@ -60,7 +60,6 @@ public class UtpekAnnetLandSendUtlandTest {
         utenlandskMyndighet.landkode = Landkoder.SE;
         utenlandskMyndighet.navn = "Sverige";
 
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(trygdemyndighetsland);
         when(utenlandskMyndighetService.hentUtenlandskMyndighet(Landkoder.SE)).thenReturn(utenlandskMyndighet);
         when(joarkFasade.opprettJournalpost(any(OpprettJournalpost.class), anyBoolean())).thenReturn("journalpostId");
     }
@@ -69,8 +68,6 @@ public class UtpekAnnetLandSendUtlandTest {
     public void utfør_sendSed() throws MelosysException {
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of("SE:001", "SE:002"));
-
-        when(eessiService.landErEessiReady(anyString(), eq("SE"))).thenReturn(true);
 
         utpekAnnetLandSendUtland.utfør(prosessinstans);
 
@@ -82,10 +79,7 @@ public class UtpekAnnetLandSendUtlandTest {
     @Test
     public void utfør_sendBrev() throws MelosysException {
         Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of("SE:001", "SE:002"));
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.SE);
-
-        when(eessiService.landErEessiReady(anyString(), eq("SE"))).thenReturn(false);
 
         utpekAnnetLandSendUtland.utfør(prosessinstans);
 

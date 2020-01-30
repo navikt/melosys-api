@@ -135,7 +135,7 @@ public class VedtakServiceTest {
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq(mottakerInstitusjon), eq(vedtakstype), isNull(), eq(true));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq(mottakerInstitusjon), eq(vedtakstype), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 
@@ -156,7 +156,7 @@ public class VedtakServiceTest {
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), isNull(), eq(vedtakstype), isNull(), eq(true));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), isNull(), eq(vedtakstype), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 
@@ -210,7 +210,7 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST",null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq("FRITEKST"), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull(), eq(false));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq("FRITEKST"), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
     @Test
@@ -223,7 +223,7 @@ public class VedtakServiceTest {
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService)
-            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull(), eq(false));
+            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
     @Test
@@ -236,7 +236,7 @@ public class VedtakServiceTest {
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         verify(eessiService, never()).landErEessiReady(anyString(), anyString());
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull(), eq(false));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
     @Test

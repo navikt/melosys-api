@@ -92,16 +92,14 @@ public class VedtakService {
         }
 
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
-        boolean skalSendeSed = false;
         if (skalSendesSed(behandlingsresultat, landkoder)) {
             String landkode = landkoder.iterator().next().getKode();
             validerMottakerInstitusjon(landkode, behandlingsresultat, mottakerInstitusjon);
-            skalSendeSed = true;
         }
 
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerInstitusjon, vedtakstype, revurderBegrunnelse, skalSendeSed);
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerInstitusjon, vedtakstype, revurderBegrunnelse);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 

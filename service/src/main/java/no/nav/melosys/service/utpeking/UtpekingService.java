@@ -79,7 +79,7 @@ public class UtpekingService {
         List<Utpekingsperiode> utpekingsperioder = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingId);
         validerUtpekingsperioder(utpekingsperioder);
 
-        if (CollectionUtils.isEmpty(mottakerinstitusjoner)) {
+        if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
             validerMottakerinstitusjoner(utpekingsperioder.get(0), mottakerinstitusjoner);
         }
 

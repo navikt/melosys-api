@@ -68,9 +68,6 @@ public class SendUtlandTest {
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setId(BEHANDLING_ID);
         prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
-
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SJ));
 
         sendUtland = new SendUtland(eessiService, brevBestiller, behandlingService, behandlingsresultatService, landvelgerService, anmodningsperiodeService);
     }
@@ -79,7 +76,7 @@ public class SendUtlandTest {
     public void utfør_artikkel16_verifiserStegFerdig() throws Exception {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
-        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_01.name()), eq(Landkoder.SJ.getKode()))).thenReturn(Boolean.TRUE);
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
 
         sendUtland.utfør(prosessinstans);
 
@@ -92,7 +89,6 @@ public class SendUtlandTest {
     public void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
-        prosessinstans.setData(ProsessDataKey.ER_EESSI_READY, false);
 
         sendUtland.utfør(prosessinstans);
 
@@ -110,6 +106,7 @@ public class SendUtlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(eq(2L))).thenReturn(behandlingsresultat);
         prosessinstans.getBehandling().setId(2L);
         Instant nå = prosessinstans.getBehandling().getDokumentasjonSvarfristDato();
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
 
         sendUtland.utfør(prosessinstans);
 

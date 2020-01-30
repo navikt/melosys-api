@@ -128,7 +128,7 @@ public class ProsessinstansServiceTest {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         String mottakerInstitusjon = "DE:2332";
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
-        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", mottakerInstitusjon, vedtakstype, "BEGRUNNELSE", true);
+        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", mottakerInstitusjon, vedtakstype, "BEGRUNNELSE");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
