@@ -262,7 +262,7 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansJournalføring_medVedlegg_setterVedleggOgTitler() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
-        journalfoeringDto.setDokumentID("hovedDokumentID");
+        journalfoeringDto.getHovedDokument().setDokumentID("hovedDokumentID");
         List<DokumentDto> vedlegg = new ArrayList<>();
         DokumentDto fysiskVedlegg = new DokumentDto("dokID1", "tittel1");
         vedlegg.add(fysiskVedlegg);
@@ -313,7 +313,7 @@ public class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.SED_GENERELL_SAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getDokumentID());
+        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getHovedDokument().getDokumentID());
     }
 
     @Test
@@ -387,12 +387,11 @@ public class ProsessinstansServiceTest {
     private static JournalfoeringDto lagJournalfoeringDTO() {
         JournalfoeringDto journalfoeringDto = new JournalfoeringDto();
         journalfoeringDto.setJournalpostID("journalpostid");
-        journalfoeringDto.setDokumentID("dokumentid");
         journalfoeringDto.setOppgaveID("oppgaveid");
         journalfoeringDto.setBrukerID("brukerid");
         journalfoeringDto.setAvsenderID("avsenderid");
         journalfoeringDto.setAvsenderNavn("avsendernavn");
-        journalfoeringDto.setHovedDokument(new DokumentDto(null, "hovedkokumenttittel"));
+        journalfoeringDto.setHovedDokument(new DokumentDto("dokumentid", "hovedkokumenttittel"));
         return journalfoeringDto;
     }
 

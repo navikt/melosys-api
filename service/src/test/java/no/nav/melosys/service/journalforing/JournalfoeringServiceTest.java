@@ -57,7 +57,6 @@ public class JournalfoeringServiceTest {
         this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
-        opprettDto.setDokumentID("setDokumentID");
         opprettDto.setOppgaveID("setOppgaveID");
         opprettDto.setAvsenderNavn("setAvsenderNavn");
         opprettDto.setAvsenderID("setAvsenderID");
@@ -69,7 +68,6 @@ public class JournalfoeringServiceTest {
 
         tilordneDto = new JournalfoeringTilordneDto();
         tilordneDto.setJournalpostID("setJournalpostID");
-        tilordneDto.setDokumentID("setDokumentID");
         tilordneDto.setOppgaveID("setOppgaveID");
         tilordneDto.setAvsenderNavn("setAvsenderNavn");
         tilordneDto.setAvsenderID("setAvsenderID");

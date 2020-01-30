@@ -212,7 +212,7 @@ public class JoarkService implements JoarkFasade {
     public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
         throws SikkerhetsbegrensningException, TekniskException {
 
-        fjernEksisterendeLogiskeVedlegg(journalpostID);
+        fjernEksisterendeLogiskeVedleggPåHovddokument(journalpostID);
 
         OppdaterJournalpostRequest.Builder request = new OppdaterJournalpostRequest.Builder()
             .medDatoMottatt(journalpostOppdatering.getMottattDato())
@@ -253,7 +253,7 @@ public class JoarkService implements JoarkFasade {
         }
     }
 
-    private void fjernEksisterendeLogiskeVedlegg(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+    private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
         GetJournalpostResponse journalpost = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
         if (!journalpost.getDokumentListe().isEmpty()) {
             for (var logiskVedlegg : journalpost.getDokumentListe().get(0).getLogiskVedleggListe()) {

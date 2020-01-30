@@ -1,6 +1,7 @@
 package no.nav.melosys.service.journalforing.dto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -13,9 +14,8 @@ public class JournalfoeringDto {
     private String avsenderID;
     private String avsenderNavn;
     private Avsendertyper avsenderType;
-    private String dokumentID;
     private DokumentDto hovedDokument;
-    private List<DokumentDto> vedlegg;
+    private List<DokumentDto> vedlegg = new ArrayList<>();
     private boolean skalTilordnes;
     private Boolean ikkeSendForvaltingsmelding;
     private LocalDate mottattDato;
@@ -74,14 +74,6 @@ public class JournalfoeringDto {
 
     public void setAvsenderType(Avsendertyper avsenderType) {
         this.avsenderType = avsenderType;
-    }
-
-    public String getDokumentID() {
-        return dokumentID;
-    }
-
-    public void setDokumentID(String dokumentID) {
-        this.dokumentID = dokumentID;
     }
 
     public DokumentDto getHovedDokument() {
