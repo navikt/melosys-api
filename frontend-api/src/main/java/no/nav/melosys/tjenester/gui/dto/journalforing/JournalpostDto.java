@@ -40,10 +40,10 @@ public final class JournalpostDto {
         boolean erBrukerAvsender = brukerID != null && brukerID.equalsIgnoreCase(avsenderID);
         JournalpostDto dto = new JournalpostDto(mottattDato, brukerID, avsenderID, avsenderNavn, avsenderType, erBrukerAvsender);
         DokumentDto dokumentDto = new DokumentDto(journalpost.getHoveddokument().getDokumentId(),
-            journalpost.getHoveddokument().getTittel(), journalpost.getHoveddokument().mapLogiskeVedlegg());
+            journalpost.getHoveddokument().getTittel(), journalpost.getHoveddokument().hentLogiskeVedleggTitler());
         dto.setHoveddokument(dokumentDto);
         dto.setVedlegg(journalpost.getVedleggListe().stream()
-            .map(v -> new DokumentDto(v.getDokumentId(), v.getTittel(), v.mapLogiskeVedlegg()))
+            .map(v -> new DokumentDto(v.getDokumentId(), v.getTittel(), v.hentLogiskeVedleggTitler()))
             .collect(Collectors.toList()));
 
         return dto;

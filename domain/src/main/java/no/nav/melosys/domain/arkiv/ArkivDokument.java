@@ -42,7 +42,7 @@ public class ArkivDokument {
         this.navSkjemaID = navSkjemaID;
     }
 
-    public List<String> mapLogiskeVedlegg() {
+    public List<String> hentLogiskeVedleggTitler() {
         return logiskeVedlegg.stream().map(LogiskVedlegg::getTittel).collect(Collectors.toList());
     }
 }

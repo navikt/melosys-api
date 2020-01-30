@@ -1,13 +1,12 @@
 package no.nav.melosys.tjenester.gui.dto.dokument;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
-import no.nav.melosys.domain.arkiv.LogiskVedlegg;
 import no.nav.melosys.domain.kodeverk.Mottaksretning;
 
 public class JournalpostInfoDto {
@@ -42,15 +41,12 @@ public class JournalpostInfoDto {
             av(journalpost.getJournalposttype()),
             journalpost.getKorrespondansepartNavn(),
             new DokumentDto(journalpost.getHoveddokument().getDokumentId(),
-                journalpost.getHoveddokument().getTittel(), journalpost.getHoveddokument().mapLogiskeVedlegg()),
-            lagVedlegg(journalpost.getVedleggListe(), journalpost.getHoveddokument().getLogiskeVedlegg()));
+                journalpost.getHoveddokument().getTittel(), journalpost.getHoveddokument().hentLogiskeVedleggTitler()),
+            lagVedlegg(journalpost.getVedleggListe()));
     }
 
-    private static List<DokumentDto> lagVedlegg(List<ArkivDokument> vedlegg, List<LogiskVedlegg> interneVedlegg) {
-        List<DokumentDto> vedleggListe = new ArrayList<>();
-        vedlegg.forEach(v -> vedleggListe.add(new DokumentDto(v.getDokumentId(), v.getTittel(), v.mapLogiskeVedlegg())));
-        interneVedlegg.forEach(v -> vedleggListe.add(new DokumentDto(v.getTittel())));
-        return vedleggListe;
+    private static List<DokumentDto> lagVedlegg(List<ArkivDokument> vedlegg) {
+        return vedlegg.stream().map(v -> new DokumentDto(v.getDokumentId(), v.getTittel(), v.hentLogiskeVedleggTitler())).collect(Collectors.toList());
     }
 
     public Instant hentGjeldendeTidspunkt() {
