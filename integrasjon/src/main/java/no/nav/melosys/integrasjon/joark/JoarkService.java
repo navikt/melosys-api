@@ -256,8 +256,9 @@ public class JoarkService implements JoarkFasade {
     private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
         GetJournalpostResponse journalpost = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
         if (!journalpost.getDokumentListe().isEmpty()) {
-            for (var logiskVedlegg : journalpost.getDokumentListe().get(0).getLogiskVedleggListe()) {
-                journalpostapiConsumer.fjernLogiskeVedlegg(journalpostID, logiskVedlegg.getLogiskVedleggId());
+            var hoveddokument = journalpost.getDokumentListe().get(0);
+            for (var logiskVedlegg : hoveddokument.getLogiskVedleggListe()) {
+                journalpostapiConsumer.fjernLogiskeVedlegg(hoveddokument.getDokumentId(), logiskVedlegg.getLogiskVedleggId());
             }
         }
     }

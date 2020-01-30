@@ -89,7 +89,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringDto.getMottattDato());
         }
 
-        if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
+        if (!CollectionUtils.isEmpty(journalfoeringDto.getHoveddokument().getLogiskeVedlegg())) {
             prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, journalfoeringDto.getHoveddokument().getLogiskeVedlegg());
             prosessinstans.setData(ProsessDataKey.FYSISKE_VEDLEGG,
                 journalfoeringDto.getVedlegg().stream().collect(Collectors.toMap(DokumentDto::getDokumentID, DokumentDto::getTittel)));

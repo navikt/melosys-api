@@ -163,7 +163,7 @@ public class JoarkServiceTest {
 
         GetJournalpostResponse eksisterendeJournalpost = new GetJournalpostResponse();
         eksisterendeJournalpost.getDokumentListe().add(
-            new Dokument().withLogiskVedleggListe(
+            new Dokument().withDokumentId("dokID").withLogiskVedleggListe(
                 List.of(new LogiskVedlegg().withLogiskVedleggTittel("tittel1").withLogiskVedleggId("id1"),
                     new LogiskVedlegg().withLogiskVedleggTittel("tittel2").withLogiskVedleggId("id2"))
             )
