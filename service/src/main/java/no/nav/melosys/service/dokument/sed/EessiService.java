@@ -211,25 +211,39 @@ public class EessiService {
             .orElseThrow(() -> new TekniskException("MottakerInstitusjon er ikke satt"));
     }
 
-    public List<String> validerOgAvklarMottakerInstitusjoner(final List<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerLand, BucType bucType) throws MelosysException {
+    /**
+     * Avklarer om alle land er påkoblet bestemt BUC.
+     * Hvis minst et land ikke er påkoblet - returner tom liste. Det skal ikke åpnes BUC med valgte land som mottakere da ikke alle er påkoblet
+     * Hvis alle er påkoblet - valider at det er satt nøyaktig èn institusjon for hvert land
+     */
+    public List<String> validerOgAvklarMottakerInstitusjonerForBuc(final List<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
 
+        List<String> validerteMottakerinstitusjoner = new ArrayList<>();
         StringBuilder feilmelding = new StringBuilder();
 
-        for (var mottaker : mottakerLand) {
-            Collection<String> alleInstitusjoner = hentEessiMottakerinstitusjoner(bucType.name(), mottaker.getKode())
+        for (var land : mottakerland) {
+            Collection<String> alleInstitusjonerForLand = hentEessiMottakerinstitusjoner(bucType.name(), land.getKode())
                 .stream().map(Institusjon::getId).collect(Collectors.toList());
-            if (alleInstitusjoner.isEmpty()) {
-                log.info("{} er ikke EESSI-ready, sender ikke SED", mottaker.getBeskrivelse());
+            if (alleInstitusjonerForLand.isEmpty()) {
+                log.info("{} er ikke EESSI-ready, skal ikke sendes SED", land.getBeskrivelse());
                 return Collections.emptyList();
             }
 
-            if (!CollectionUtils.containsAny(alleInstitusjoner, valgteMottakerinstitusjoner)) {
-                feilmelding.append("Finner ingen gyldig mottakerinstitusjon for ").append(mottaker.getBeskrivelse()).append("\n");
+            String validertInstitusjon = CollectionUtils.findFirstMatch(alleInstitusjonerForLand, valgteMottakerinstitusjoner);
+
+            if (validertInstitusjon == null) {
+                feilmelding.append("Finner ingen gyldig mottakerinstitusjon for arbeidsland ")
+                    .append(land.getBeskrivelse()).append(System.lineSeparator());
+            } else {
+                validerteMottakerinstitusjoner.add(validertInstitusjon);
             }
         }
 
         if (feilmelding.length() != 0) {
             throw new FunksjonellException(feilmelding.toString());
+        } else if (valgteMottakerinstitusjoner.size() != validerteMottakerinstitusjoner.size()) {
+            throw new FunksjonellException("Kan kun velge en mottakerinstitusjon per land. Validerte mottakere: " + validerteMottakerinstitusjoner
+                + ". Valgte mottakere " + valgteMottakerinstitusjoner);
         }
 
         return valgteMottakerinstitusjoner;

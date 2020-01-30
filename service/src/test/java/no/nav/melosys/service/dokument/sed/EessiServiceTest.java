@@ -364,7 +364,7 @@ public class EessiServiceTest {
     }
 
     @Test
-    public void validerOgAvklarMottakerInstitusjoner_toMottakereToMottakerLandMottakereKorrektSatt_returnererMottakerInstitusjoner() throws MelosysException {
+    public void validerOgAvklarMottakerInstitusjonerForBuc_toMottakereToMottakerLandMottakereKorrektSatt_returnererMottakerInstitusjoner() throws MelosysException {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
 
@@ -383,13 +383,13 @@ public class EessiServiceTest {
         when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
             .thenReturn(List.of(institusjonTyskland1, institusjonTyskland2));
 
-        List<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjoner(valgteMottakerInstitusjoner, mottakerLand, bucType);
+        List<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
         verify(eessiConsumer, times(2)).hentMottakerinstitusjoner(eq(bucType.name()), anyString());
         assertThat(avklarteMottakerInstitusjoner).isEqualTo(valgteMottakerInstitusjoner);
     }
 
     @Test
-    public void validerOgAvklarMottakerInstitusjoner_toMottakereSisteErIkkeEessiReady_returnererTomListe() throws MelosysException {
+    public void validerOgAvklarMottakerInstitusjonerForBuc_toMottakereSisteErIkkeEessiReady_returnererTomListe() throws MelosysException {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
 
@@ -405,13 +405,13 @@ public class EessiServiceTest {
         when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
             .thenReturn(Collections.emptyList());
 
-        List<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjoner(valgteMottakerInstitusjoner, mottakerLand, bucType);
+        List<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
         verify(eessiConsumer, times(2)).hentMottakerinstitusjoner(eq(bucType.name()), anyString());
         assertThat(avklarteMottakerInstitusjoner).isEmpty();
     }
 
     @Test
-    public void validerOgAvklarMottakerInstitusjoner_toLandInstitusjonManglerForSiste_returnererTomListe() throws MelosysException {
+    public void validerOgAvklarMottakerInstitusjonerForBuc_toLandInstitusjonManglerForSiste_kasterException() throws MelosysException {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
 
@@ -431,9 +431,77 @@ public class EessiServiceTest {
             .thenReturn(List.of(institusjonTyskland1, institusjonTyskland2));
 
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Finner ingen gyldig mottakerinstitusjon for Tyskland\n");
+        expectedException.expectMessage("Finner ingen gyldig mottakerinstitusjon for arbeidsland Tyskland");
 
-        eessiService.validerOgAvklarMottakerInstitusjoner(valgteMottakerInstitusjoner, mottakerLand, bucType);
+        eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
+    }
+
+    @Test
+    public void validerOgAvklarMottakerInstitusjonerForBuc_toLandInstitusjonManglerForSiste2_kasterException() throws MelosysException {
+        final BucType bucType = BucType.LA_BUC_02;
+        final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
+
+        final String mottakerBelgia = "BE:12222";
+        final String mottakerBelgia2 = "BE:123131";
+        final String mottakerTyskland = "DE:4444";
+        final List<String> valgteMottakerInstitusjoner = List.of(mottakerBelgia, mottakerBelgia2, mottakerTyskland);
+
+        final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
+        final Institusjon institusjonBelgia2 = new Institusjon(mottakerBelgia2, null, Landkoder.BE.getKode());
+        final Institusjon institusjonBelgia3 = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
+        final Institusjon institusjonTyskland1 = new Institusjon(mottakerTyskland, null, Landkoder.DE.getKode());
+        final Institusjon institusjonTyskland2 = new Institusjon("DE:9999", null, Landkoder.DE.getKode());
+
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.BE.getKode()))
+            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonBelgia3));
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
+            .thenReturn(List.of(institusjonTyskland1, institusjonTyskland2));
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Kan kun velge en mottakerinstitusjon per land. Validerte mottakere:");
+
+        eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
+    }
+
+    @Test
+    public void validerOgAvklarMottakerInstitusjonerForBuc_toLandErPåkobletIngenInstitusjonValgt_kasterException() throws MelosysException {
+        final BucType bucType = BucType.LA_BUC_02;
+        final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
+
+        final List<String> valgteMottakerInstitusjoner = Collections.emptyList();
+
+        final Institusjon institusjonBelgia = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
+        final Institusjon institusjonTyskland = new Institusjon("DE:9999", null, Landkoder.DE.getKode());
+
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.BE.getKode()))
+            .thenReturn(List.of(institusjonBelgia));
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
+            .thenReturn(List.of(institusjonTyskland));
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage(
+            "Finner ingen gyldig mottakerinstitusjon for arbeidsland " + Landkoder.BE.getBeskrivelse() + System.lineSeparator() +
+            "Finner ingen gyldig mottakerinstitusjon for arbeidsland " + Landkoder.DE.getBeskrivelse());
+
+        eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
+    }
+
+    @Test
+    public void validerOgAvklarMottakerInstitusjonerForBuc_toLandEnErIkkePåkobletIngenInstitusjonValgt_returnererTomListe() throws MelosysException {
+        final BucType bucType = BucType.LA_BUC_02;
+        final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
+
+        final List<String> valgteMottakerInstitusjoner = Collections.emptyList();
+
+        final Institusjon institusjonBelgia = new Institusjon("BE:44444", null, Landkoder.BE.getKode());
+
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.BE.getKode()))
+            .thenReturn(List.of(institusjonBelgia));
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
+            .thenReturn(Collections.emptyList());
+
+        List<String> avklarteMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
+        assertThat(avklarteMottakere).isEmpty();
     }
 
     private static Fagsak lagFagsak() {

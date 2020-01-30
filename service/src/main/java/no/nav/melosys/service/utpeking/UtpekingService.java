@@ -75,7 +75,7 @@ public class UtpekingService {
         List<Utpekingsperiode> utpekingsperioder = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
         validerUtpekingsperioder(utpekingsperioder);
 
-        mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjoner(
+        mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjoner,
             landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID),
             BucType.LA_BUC_02
