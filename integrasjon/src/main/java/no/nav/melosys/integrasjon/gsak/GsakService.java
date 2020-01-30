@@ -123,6 +123,7 @@ public class GsakService implements GsakFasade {
             .medBehandlingstema(behandlingstema == null ? null : behandlingstema.getKode())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
             .medTildeltRessurs(false);
 
         if (!oppgavetyper.equals(Collections.singleton(Oppgavetyper.JFR))) {
@@ -250,6 +251,7 @@ public class GsakService implements GsakFasade {
         OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTilordnetRessurs(tilordnetRessurs)
             .medSorteringsfelt(SORTERINGSFELT)
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN);
 
         return hentOppgaverAlleTyper(oppgaveSearchRequestBuilder);
