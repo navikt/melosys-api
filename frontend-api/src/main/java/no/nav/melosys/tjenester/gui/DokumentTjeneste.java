@@ -85,7 +85,7 @@ public class DokumentTjeneste {
                                       @PathVariable("sedType") SedType sedType) throws MelosysException {
 
         tilgangService.sjekkTilgang(behandlingID);
-        byte[] dokument = eessiService.genererPdfFraSed(behandlingID, sedType);
+        byte[] dokument = eessiService.genererSedPdf(behandlingID, sedType);
         return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
     }
 

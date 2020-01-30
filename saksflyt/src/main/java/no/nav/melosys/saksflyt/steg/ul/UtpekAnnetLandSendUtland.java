@@ -60,7 +60,7 @@ public class UtpekAnnetLandSendUtland extends AbstraktSendUtland {
         String institusjonsId = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
 
         String fnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
-        byte[] pdf = eessiService.genererPdfFraSed(behandling.getId(), SedType.A003);
+        byte[] pdf = eessiService.genererSedPdf(behandling.getId(), SedType.A003);
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
             fagsak.getGsakSaksnummer(), fnr, SedType.A003, pdf,
             institusjonsId, utenlandskMyndighet.navn, utpektLand.getKode(), null

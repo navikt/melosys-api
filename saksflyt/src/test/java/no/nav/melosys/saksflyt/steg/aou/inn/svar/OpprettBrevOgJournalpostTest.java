@@ -47,7 +47,7 @@ public class OpprettBrevOgJournalpostTest {
     public void setup() throws MelosysException {
         when(joarkFasade.opprettJournalpost(any(OpprettJournalpost.class), anyBoolean())).thenReturn("1234");
         when(eessiService.hentSedTypeForAnmodningUnntakSvar(anyLong())).thenReturn(SedType.A002);
-        when(eessiService.genererPdfFraSed(anyLong(), any(SedType.class))).thenReturn("pdf".getBytes());
+        when(eessiService.genererSedPdf(anyLong(), any(SedType.class))).thenReturn("pdf".getBytes());
         when(utenlandskMyndighetService.hentUtenlandskMyndighet(any(Landkoder.class))).thenReturn(lagUtenlandskMyndighet());
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("123");
 

@@ -159,7 +159,7 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public byte[] genererPdfFraSed(long behandlingID, SedType sedType) throws MelosysException {
+    public byte[] genererSedPdf(long behandlingID, SedType sedType) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -173,7 +173,7 @@ public class EessiService {
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
-        return eessiConsumer.genererPdfFraSed(sedDataDto, sedType);
+        return eessiConsumer.genererSedPdf(sedDataDto, sedType);
     }
 
     public SedType hentSedTypeForAnmodningUnntakSvar(Long behandlingID) throws IkkeFunnetException {
