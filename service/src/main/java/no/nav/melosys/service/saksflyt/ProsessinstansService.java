@@ -70,7 +70,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()));
         }
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getDokumentID());
+        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getHoveddokument().getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
 
@@ -82,7 +82,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
         }
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokument().getTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
         prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, skalSendesForvaltningsmelding(journalfoeringDto));
 
@@ -90,12 +90,10 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringDto.getMottattDato());
         }
 
-        if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
-            final String hovedDokumentID = journalfoeringDto.getDokumentID();
-            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER,
-                journalfoeringDto.getVedlegg().stream().filter(v -> v.erLogiskVedlegg(hovedDokumentID)).map(DokumentDto::getTittel).collect(Collectors.toList()));
+        if (!CollectionUtils.isEmpty(journalfoeringDto.getHoveddokument().getLogiskeVedlegg())) {
+            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, journalfoeringDto.getHoveddokument().getLogiskeVedlegg());
             prosessinstans.setData(ProsessDataKey.FYSISKE_VEDLEGG,
-                journalfoeringDto.getVedlegg().stream().filter(v -> v.erFysiskVedlegg(hovedDokumentID)).collect(Collectors.toMap(DokumentDto::getDokumentID, DokumentDto::getTittel)));
+                journalfoeringDto.getVedlegg().stream().collect(Collectors.toMap(DokumentDto::getDokumentID, DokumentDto::getTittel)));
         }
 
         return prosessinstans;

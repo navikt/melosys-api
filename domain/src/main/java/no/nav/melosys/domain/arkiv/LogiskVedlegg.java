@@ -3,10 +3,10 @@ package no.nav.melosys.domain.arkiv;
 /*
  * Til bruk for journalposter der hoveddokument er ett scannet dokument som inneholder både hoveddokument og vedlegg
  */
-public class ArkivDokumentVedlegg {
+public class LogiskVedlegg {
     private String tittel;
 
-    public ArkivDokumentVedlegg(String tittel) {
+    public LogiskVedlegg(String tittel) {
         this.tittel = tittel;
     }
 

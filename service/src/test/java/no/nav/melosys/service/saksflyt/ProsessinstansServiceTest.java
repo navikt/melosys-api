@@ -263,23 +263,21 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansJournalføring_medVedlegg_setterVedleggOgTitler() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
-        journalfoeringDto.setDokumentID("hovedDokumentID");
+        journalfoeringDto.getHoveddokument().setDokumentID("hovedDokumentID");
         List<DokumentDto> vedlegg = new ArrayList<>();
-        DokumentDto fysiskVedlegg = new DokumentDto("ID_F_01", "Fysisk");
+        DokumentDto fysiskVedlegg = new DokumentDto("dokID1", "tittel1");
         vedlegg.add(fysiskVedlegg);
-        DokumentDto logiskVedlegg_1 = new DokumentDto(null, "Logisk");
-        vedlegg.add(logiskVedlegg_1);
-        DokumentDto logiskVedlegg_2 = new DokumentDto("hovedDokumentID", "Logisk ??");
-        vedlegg.add(logiskVedlegg_2);
+        DokumentDto fysiskVedlegg2 = new DokumentDto("hovedDokumentID", "Logisk ??");
+        vedlegg.add(fysiskVedlegg2);
         journalfoeringDto.setVedlegg(vedlegg);
+        journalfoeringDto.getHoveddokument().getLogiskeVedlegg().add("tittel");
 
         Prosessinstans prosessinstans = service.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
-        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_1.getTittel());
-        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_2.getTittel());
-
-        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsOnlyKeys(fysiskVedlegg.getDokumentID());
-        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsValues(fysiskVedlegg.getTittel());
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsKeys(fysiskVedlegg.getDokumentID(), fysiskVedlegg2.getDokumentID());
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsValues(fysiskVedlegg.getTittel(), fysiskVedlegg2.getTittel());
+        List<String> logiskeVedlegg = prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class);
+        assertThat(logiskeVedlegg).containsExactly("tittel");
     }
 
     @Test
@@ -316,7 +314,7 @@ public class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.SED_GENERELL_SAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getDokumentID());
+        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getHoveddokument().getDokumentID());
     }
 
     @Test
@@ -390,12 +388,11 @@ public class ProsessinstansServiceTest {
     private static JournalfoeringDto lagJournalfoeringDTO() {
         JournalfoeringDto journalfoeringDto = new JournalfoeringDto();
         journalfoeringDto.setJournalpostID("journalpostid");
-        journalfoeringDto.setDokumentID("dokumentid");
         journalfoeringDto.setOppgaveID("oppgaveid");
         journalfoeringDto.setBrukerID("brukerid");
         journalfoeringDto.setAvsenderID("avsenderid");
         journalfoeringDto.setAvsenderNavn("avsendernavn");
-        journalfoeringDto.setHoveddokumentTittel("hovedkokumenttittel");
+        journalfoeringDto.setHoveddokument(new DokumentDto("dokumentid", "hovedkokumenttittel"));
         return journalfoeringDto;
     }
 

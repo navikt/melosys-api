@@ -2,15 +2,16 @@ package no.nav.melosys.domain.arkiv;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ArkivDokument {
     private String dokumentId;
-    private List<ArkivDokumentVedlegg> interneVedlegg; // Til sammensatte dokumenter der vedlegg er scannet inn i ett dokument.
+    private List<LogiskVedlegg> logiskeVedlegg; // Til sammensatte dokumenter der vedlegg er scannet inn i ett dokument.
     private String tittel;
     private String navSkjemaID;
 
     public ArkivDokument() {
-        this.interneVedlegg = new ArrayList<>();
+        this.logiskeVedlegg = new ArrayList<>();
     }
 
     public String getDokumentId() {
@@ -21,8 +22,8 @@ public class ArkivDokument {
         this.dokumentId = dokumentId;
     }
 
-    public List<ArkivDokumentVedlegg> getInterneVedlegg() {
-        return interneVedlegg;
+    public List<LogiskVedlegg> getLogiskeVedlegg() {
+        return logiskeVedlegg;
     }
 
     public String getTittel() {
@@ -39,5 +40,9 @@ public class ArkivDokument {
 
     public void setNavSkjemaID(String navSkjemaID) {
         this.navSkjemaID = navSkjemaID;
+    }
+
+    public List<String> hentLogiskeVedleggTitler() {
+        return logiskeVedlegg.stream().map(LogiskVedlegg::getTittel).collect(Collectors.toList());
     }
 }
