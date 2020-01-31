@@ -58,10 +58,16 @@ node {
             imageVersion = "${branchName}-${BUILD_NUMBER}-${commitId}"
         }
 
-        stage("Build application") {
-            configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
-                sh "mvn clean package -B -e -U -s $MAVEN_SETTINGS"
-            }
+        if (branchName.toLowerCase().startsWith("sprint-")) {
+            buildAndTestApplication(mvnSettings)
+        } else {
+            buildApplication(mvnSettings)
+        }
+
+        if (environment == '--ingen--') {
+            echo "Bygd OK uten deployment"
+            currentBuild.result = "SUCCESS"
+            return
         }
 
         if (environment == '--ingen--') {
@@ -97,7 +103,6 @@ node {
             GString message = ":clap: Siste commit på ${branchName} bygd og deployet OK til miljø ${environment}.\nCommit: ${commit}"
             sendSlackMessage("good", message)
         }
-
     } catch (e) {
         GString message = ":crying_cat_face: \n Siste commit på ${branchName} kunne ikke deployes til ${environment}. Se logg for mer info ${env.BUILD_URL}\nCommit ${commit}"
         sendSlackMessage("danger", message)
@@ -158,4 +163,43 @@ def resolveBranchName(String branchName) {
     }
 
     return branchName
+}
+
+def buildApplication(String mvnSettings) {
+    stage("Build application") {
+        configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
+            sh "mvn clean package -B -e -U -s $MAVEN_SETTINGS"
+        }
+    }
+}
+
+def buildAndTestApplication(String mvnSettings) {
+    stage("Build and test application") {
+        withCredentials([
+            usernamePassword(credentialsId: 'MELOSYS_Q3', passwordVariable: 'dbpassword', usernameVariable: 'dbusername'),
+            string(credentialsId: '690b28ff-2ecd-4b67-8a2b-99493b736c12', variable: 'stsTestPassword'),
+            certificate(credentialsId: 'T8_KEYSTORE', keystoreVariable: 'KEYSTORE', passwordVariable: 'KEYSTORE_PASSWORD')
+        ]) {
+            env.testUsername = dbusername
+            env.testPassword = dbpassword
+            env.stsTestPassword = stsTestPassword
+
+            configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
+                sh 'mvn package failsafe:integration-test -DfailIfNoTests=false -Pitest \
+                    -Djavax.net.ssl.trustStore=${KEYSTORE} \
+                    -Djavax.net.ssl.trustStorePassword=${KEYSTORE_PASSWORD} \
+                    -Dspring.profiles.active="local,itest" -e -U -s $MAVEN_SETTINGS'
+            }
+        }
+    }
+
+    stage("Report") {
+        allure([
+            includeProperties: false,
+            jdk: '',
+            properties: [],
+            reportBuildPolicy: 'ALWAYS',
+            results: [[path: 'integrasjonstest/target/allure-results']]
+        ])
+    }
 }
