@@ -1,8 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -15,8 +13,10 @@ import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Primary
 @Service
@@ -208,5 +209,56 @@ public class EessiService {
 
         return mottakerinstitusjoner.stream().findFirst()
             .orElseThrow(() -> new TekniskException("MottakerInstitusjon er ikke satt"));
+    }
+
+    /**
+     * Avklarer om alle land er påkoblet bestemt BUC.
+     * Hvis minst et land ikke er påkoblet - returner tom liste. Det skal ikke åpnes BUC med valgte land som mottakere da ikke alle er påkoblet
+     * Hvis alle er påkoblet - valider at det er satt nøyaktig èn institusjon for hvert land, returner dermed liste med validerte institusjoner
+     */
+    public List<String> validerOgAvklarMottakerInstitusjonerForBuc(final List<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
+
+        Map<Landkoder, Collection<String>> institusjonerPerLand = new EnumMap<>(Landkoder.class);
+
+        for (var land : mottakerland) {
+            Collection<String> alleInstitusjonerForLand = hentEessiMottakerinstitusjoner(bucType.name(), land.getKode())
+                .stream().map(Institusjon::getId).collect(Collectors.toList());
+            if (alleInstitusjonerForLand.isEmpty()) {
+                log.info("{} er ikke EESSI-ready, skal ikke sendes SED", land.getBeskrivelse());
+                return Collections.emptyList();
+            }
+
+            institusjonerPerLand.put(land, alleInstitusjonerForLand);
+        }
+
+        validerMottakerInstitusjonerForLand(mottakerland, valgteMottakerinstitusjoner, institusjonerPerLand);
+        return valgteMottakerinstitusjoner;
+    }
+
+    private void validerMottakerInstitusjonerForLand(Collection<Landkoder> mottakerland,
+                                                     Collection<String> valgteMottakerinstitusjoner,
+                                                     Map<Landkoder, Collection<String>> institusjonerPerLand) throws FunksjonellException {
+
+        List<String> validerteMottakerinstitusjoner = new ArrayList<>();
+        StringBuilder feilmelding = new StringBuilder();
+        for (var land : mottakerland) {
+
+            Collection<String> alleInstitusjonerForLand = institusjonerPerLand.get(land);
+            String validertInstitusjon = CollectionUtils.findFirstMatch(alleInstitusjonerForLand, valgteMottakerinstitusjoner);
+
+            if (validertInstitusjon == null) {
+                feilmelding.append("Finner ingen gyldig mottakerinstitusjon for arbeidsland ")
+                    .append(land.getBeskrivelse()).append(System.lineSeparator());
+            } else {
+                validerteMottakerinstitusjoner.add(validertInstitusjon);
+            }
+        }
+
+        if (feilmelding.length() != 0) {
+            throw new FunksjonellException(feilmelding.toString());
+        } else if (valgteMottakerinstitusjoner.size() != validerteMottakerinstitusjoner.size()) {
+            throw new FunksjonellException("Kan kun velge en mottakerinstitusjon per land. Validerte mottakere: " + validerteMottakerinstitusjoner
+                + ". Valgte mottakere " + valgteMottakerinstitusjoner);
+        }
     }
 }
