@@ -214,12 +214,11 @@ public class EessiService {
     /**
      * Avklarer om alle land er påkoblet bestemt BUC.
      * Hvis minst et land ikke er påkoblet - returner tom liste. Det skal ikke åpnes BUC med valgte land som mottakere da ikke alle er påkoblet
-     * Hvis alle er påkoblet - valider at det er satt nøyaktig èn institusjon for hvert land
+     * Hvis alle er påkoblet - valider at det er satt nøyaktig èn institusjon for hvert land, returner dermed liste med validerte institusjoner
      */
     public List<String> validerOgAvklarMottakerInstitusjonerForBuc(final List<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
 
-        List<String> validerteMottakerinstitusjoner = new ArrayList<>();
-        StringBuilder feilmelding = new StringBuilder();
+        Map<Landkoder, Collection<String>> institusjonerPerLand = new EnumMap<>(Landkoder.class);
 
         for (var land : mottakerland) {
             Collection<String> alleInstitusjonerForLand = hentEessiMottakerinstitusjoner(bucType.name(), land.getKode())
@@ -229,6 +228,22 @@ public class EessiService {
                 return Collections.emptyList();
             }
 
+            institusjonerPerLand.put(land, alleInstitusjonerForLand);
+        }
+
+        validerMottakerInstitusjonerForLand(mottakerland, valgteMottakerinstitusjoner, institusjonerPerLand);
+        return valgteMottakerinstitusjoner;
+    }
+
+    private void validerMottakerInstitusjonerForLand(Collection<Landkoder> mottakerland,
+                                                     Collection<String> valgteMottakerinstitusjoner,
+                                                     Map<Landkoder, Collection<String>> institusjonerPerLand) throws FunksjonellException {
+
+        List<String> validerteMottakerinstitusjoner = new ArrayList<>();
+        StringBuilder feilmelding = new StringBuilder();
+        for (var land : mottakerland) {
+
+            Collection<String> alleInstitusjonerForLand = institusjonerPerLand.get(land);
             String validertInstitusjon = CollectionUtils.findFirstMatch(alleInstitusjonerForLand, valgteMottakerinstitusjoner);
 
             if (validertInstitusjon == null) {
@@ -245,7 +260,5 @@ public class EessiService {
             throw new FunksjonellException("Kan kun velge en mottakerinstitusjon per land. Validerte mottakere: " + validerteMottakerinstitusjoner
                 + ". Valgte mottakere " + valgteMottakerinstitusjoner);
         }
-
-        return valgteMottakerinstitusjoner;
     }
 }
