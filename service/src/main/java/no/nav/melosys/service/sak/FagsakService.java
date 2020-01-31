@@ -122,8 +122,8 @@ public class FagsakService {
     @Transactional(rollbackFor = MelosysException.class)
     public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
         validerOpprettSakDto(opprettSakDto);
-        validerOppgave(opprettSakDto.oppgaveID);
-        prosessinstansService.opprettProsessinstansNySak(opprettSakDto);
+        final Oppgave oppgave = validerOppgave(opprettSakDto.oppgaveID);
+        prosessinstansService.opprettProsessinstansNySak(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) throws FunksjonellException {
@@ -163,7 +163,7 @@ public class FagsakService {
         }
     }
 
-    private void validerOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
+    private Oppgave validerOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
         if (StringUtils.isEmpty(oppgaveID)) {
             throw new FunksjonellException("OppgaveID mangler.");
         }
@@ -171,6 +171,7 @@ public class FagsakService {
         if (oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK_MK && oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK) {
             throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype());
         }
+        return oppgave;
     }
 
     // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.
