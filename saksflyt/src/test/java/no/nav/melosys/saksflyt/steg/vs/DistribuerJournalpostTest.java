@@ -5,7 +5,6 @@ import java.util.Collections;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -25,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.saksflyt.SaksflytTestUtils.lagUtenlandskMyndighet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -78,16 +78,5 @@ public class DistribuerJournalpostTest {
         assertThat(strukturertAdresse).isNotNull();
         assertThat(strukturertAdresse.gatenavn).isEqualTo("Svenskegatan 38");
         assertThat(strukturertAdresse.postnummer).isEqualTo("8080");
-    }
-
-    private UtenlandskMyndighet lagUtenlandskMyndighet() {
-        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.institusjonskode = "123456";
-        utenlandskMyndighet.landkode = Landkoder.SE;
-        utenlandskMyndighet.navn = "Svenska myndighetan";
-        utenlandskMyndighet.gateadresse = "Svenskegatan 38";
-        utenlandskMyndighet.poststed = "Svenska stan";
-        utenlandskMyndighet.postnummer = "8080";
-        return utenlandskMyndighet;
     }
 }

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.dok.melosysbrev._000108.SakstypeKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
@@ -30,6 +31,7 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStruktur
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InnvilgelsesbrevFlereLandMapperTest {
@@ -37,6 +39,22 @@ public class InnvilgelsesbrevFlereLandMapperTest {
 
     public InnvilgelsesbrevFlereLandMapperTest() {
         instans = new InnvilgelsesbrevFlereLandMapper();
+    }
+
+    @Test
+    public void testSakstypeKode() throws Exception {
+        List<String> koderSomIkkeErAktuelleForBrev = Collections.singletonList(
+            "UKJENT" // Vet ikke om det er aktuelt med brev for denne
+        );
+
+        hentAlleVerdierFraKodeverk(Sakstyper.class)
+            .filter(k -> !koderSomIkkeErAktuelleForBrev.contains(k))
+            .forEach(SakstypeKode::fromValue);
+    }
+
+    @Test
+    public void testEndretBegrunnelseKoder() throws Exception {
+        // FIXME hentAlleVerdierFraKodeverk(Endretperiode.class).forEach(EndretPeriodeBegrunnelseKode::fromValue);
     }
 
     @Test

@@ -60,7 +60,7 @@ public class EessiTjeneste {
     public ResponseEntity opprettBuc(@RequestBody BucBestillingDto nyBucDto, @PathVariable("behandlingID") long behandlingID) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
-            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), nyBucDto.getMottakerLand(), nyBucDto.getMottakerId())
+            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), List.of(nyBucDto.getMottakerId()))
         );
 
         return ResponseEntity.ok(opprettBucSvarDto);

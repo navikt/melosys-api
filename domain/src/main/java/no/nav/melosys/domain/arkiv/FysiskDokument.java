@@ -27,6 +27,8 @@ public class FysiskDokument extends ArkivDokument {
         switch (sedType) {
             case A002:
                 return "Delvis eller fullt avslag på søknad om unntak";
+            case A003:
+                return "Beslutning om lovvalg";
             case A008:
                 return "Melding om relevant informasjon";
             case A011:

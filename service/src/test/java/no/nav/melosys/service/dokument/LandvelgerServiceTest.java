@@ -84,7 +84,12 @@ public class LandvelgerServiceTest {
     }
 
     private Behandlingsresultat lagBehandlingsresultat(Medlemskapsperiode periode) throws IkkeFunnetException {
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+        behandling.setId(behandlingID);
+        behandling.setFagsak(fagsak);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(behandling);
         if (periode instanceof Lovvalgsperiode) {
             behandlingsresultat.setLovvalgsperioder(Collections.singleton((Lovvalgsperiode) periode));
         } else if (periode instanceof Anmodningsperiode) {
@@ -256,21 +261,23 @@ public class LandvelgerServiceTest {
     public void hentUtenlandskTrygdemyndighetsland_medArt13BostedsadresseIkkeNorge() throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(avklartBostedsland));
-
-        Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
-        assertThat(land).containsExactly(avklartBostedsland);
-    }
-
-    @Test
-    public void hentUtenlandskTrygdemyndighetsland_medArt13BostedsadresseNorge_girTomTrygdemyndighetsland() throws IkkeFunnetException {
-        lagBehandlingsresultat(lovvalgsperiode);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(Landkoder.NO));
+        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(){{
+            add(avklartBostedsland);
+        }});
 
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
-        assertThat(land).isEmpty();
+        assertThat(land).containsExactlyInAnyOrder(søknadsland, avklartBostedsland);
+    }
+
+    @Test
+    public void hentUtenlandskTrygdemyndighetsland_medArt13BostedsadresseNorge_girSøknadsland() throws IkkeFunnetException {
+        lagBehandlingsresultat(lovvalgsperiode);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+
+        søknad.soeknadsland.landkoder.add(søknadsland.getKode());
+        Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
+        assertThat(land).containsExactly(søknadsland);
     }
 
     @Test

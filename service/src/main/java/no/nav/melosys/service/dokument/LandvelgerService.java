@@ -4,10 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -69,9 +66,13 @@ public class LandvelgerService {
             Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsperiode();
             return medlemskapsperiode.erArtikkel13();
         } else {
-            Fagsak fagsak = behandlingsresultat.getBehandling().getFagsak();
-            return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
+            return erVideresendt(behandlingsresultat);
         }
+    }
+
+    private boolean erVideresendt(Behandlingsresultat behandlingsresultat) {
+        Fagsak fagsak = behandlingsresultat.getBehandling().getFagsak();
+        return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
@@ -87,7 +88,8 @@ public class LandvelgerService {
             return Lists.newArrayList(hentBostedsland(behandlingID, søknad));
         }
 
-        if (erArtikkel13(behandlingID)) {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if (erVideresendt(behandlingsresultat)) {
             return Lists.newArrayList(hentBostedsland(behandlingID, søknad));
         }
 

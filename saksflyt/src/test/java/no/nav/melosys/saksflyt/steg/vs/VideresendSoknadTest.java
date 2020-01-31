@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.vs;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -63,8 +64,6 @@ public class VideresendSoknadTest {
     @Before
     public void setup() throws IkkeFunnetException {
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, landvelgerService, tpsFasade, utenlandskMyndighetService, joarkFasade, fagsakService);
-
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.SE));
     }
 
     @Test
@@ -98,7 +97,7 @@ public class VideresendSoknadTest {
     @Test
     public void utfør_skalSendesUtlandErEessiKlar_senderSedIBuc3() throws MelosysException {
         Prosessinstans prosessinstans = opprettProsessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKER, "SE:123");
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of("SE:123"));
 
         Behandling behandling = prosessinstans.getBehandling();
         Long behandlingID = 1L;
@@ -111,11 +110,10 @@ public class VideresendSoknadTest {
         when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(behandling.getInitierendeDokumentId())))
             .thenReturn(vedlegg);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_03.name()), eq("SE"))).thenReturn(Boolean.TRUE);
 
         videresendSoknad.utfør(prosessinstans);
 
-        verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(MOTTAKER_INSTITUSJON), eq(BucType.LA_BUC_03), eq(vedlegg));
+        verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_03), eq(vedlegg));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_STATUS_BEH_AVSL);
     }
 

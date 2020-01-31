@@ -29,15 +29,14 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
-import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
+import no.nav.melosys.service.utpeking.UtpekingService;
+import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -66,10 +65,12 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String FAGSAKER_SCHEMA = "fagsaker-schema.json";
     private static final String FAGSAKER_OPPRETT_SCHEMA = "fagsaker-opprett-post-schema.json";
     private static final String SOK_FAGSAKER_SCHEMA = "fagsaker-sok-schema.json";
+    private static final String FAGSAKER_UTPEK_POST_SCHEMA = "fagsaker-utpek-post-schema.json";
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
     private static TilgangService tilgangService;
+    private static UtpekingService utpekingService;
 
     private EasyRandom random;
 
@@ -104,6 +105,14 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         String jsonString = new ObjectMapper().registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).writeValueAsString(opprettSakDto);
         valider(jsonString, FAGSAKER_OPPRETT_SCHEMA, log);
+    }
+
+    @Test
+    public void fagsakUtpekSchemaValidering() throws IOException {
+        UtpekDto utpekDto = random.nextObject(UtpekDto.class);
+
+        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekDto);
+        valider(jsonString, FAGSAKER_UTPEK_POST_SCHEMA, log);
     }
 
     @Test
@@ -284,6 +293,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
         tilgangService = mock(TilgangService.class);
         fagsakService = mock(FagsakService.class);
+        utpekingService = mock(UtpekingService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         SoeknadService søknadService = mock(SoeknadService.class);
         PersonDokument personDokument = (PersonDokument)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
@@ -295,7 +305,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, saksopplysningerService, søknadService, tilgangService);
+        return new FagsakTjeneste(fagsakService, saksopplysningerService, søknadService, tilgangService, utpekingService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {
@@ -322,5 +332,19 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         resultat.setSakstype(fagsak.getType());
         resultat.setSaksstatus(fagsak.getStatus());
         return resultat;
+    }
+
+    @Test
+    public void utpekLovvalgsland() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste fagsakTjeneste = lagFagsakTjeneste(fagsak);
+        UtpekDto utpekDto = random.nextObject(UtpekDto.class);
+
+        when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
+
+        fagsakTjeneste.utpekLovvalgsland(fagsak.getSaksnummer(), utpekDto);
+
+        verify(tilgangService).sjekkSak(fagsak);
+        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner());
     }
 }

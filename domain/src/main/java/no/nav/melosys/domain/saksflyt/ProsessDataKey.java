@@ -23,7 +23,7 @@ public enum ProsessDataKey {
     BRUKER_ID("brukerID"),
     DOKUMENT_ID("dokumentID"),
     EESSI_MELDING("eessiMelding"),
-    EESSI_MOTTAKER("eessiMottaker"),
+    EESSI_MOTTAKERE("eessiMottakere"),
     ER_OPPDATERT_SED("erOppdatertSed"),
     FYSISKE_VEDLEGG("fysiskeVedlegg"),
     GSAK_SAK_ID("gsakSakID"),
@@ -52,6 +52,7 @@ public enum ProsessDataKey {
     TEMA("tema"),
     UNNTAK_FRA_LOVVALGSBESTEMMELSE("unntakFraLovvalgsbestemmelse"),
     UNNTAK_FRA_LOVVALGSLAND("unntakFraLovvalgsland"),
+    UTPEKT_LAND("utpektLand"),
     VEDTAKSTYPE("vedtakstype");
 
     private String kode;
