@@ -56,6 +56,14 @@ public class UtpekingService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public Collection<Utpekingsperiode> lagreUtpekingsperioder(long behandlingID, Collection<Utpekingsperiode> utpekingsperioder) throws FunksjonellException {
+        List<Utpekingsperiode> eksisterende = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
+
+        for (Utpekingsperiode utpekingsperiode : eksisterende) {
+            if (utpekingsperiode.getSendtUtland() != null) {
+                throw new FunksjonellException("Kan ikke oppdatere utpekingsperiode etter at A003 er sendt!");
+            }
+        }
+
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         utpekingsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat);
         utpekingsperiodeRepository.flush();

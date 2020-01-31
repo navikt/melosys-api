@@ -15,17 +15,17 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTE
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 
 @Component
-public class UtpekAnnetLandSendBrev extends AbstraktStegBehandler {
+public class UtpekAnnetLandSendOrienteringsbrev extends AbstraktStegBehandler {
 
     private final BrevBestiller brevBestiller;
 
-    public UtpekAnnetLandSendBrev(BrevBestiller brevBestiller) {
+    public UtpekAnnetLandSendOrienteringsbrev(BrevBestiller brevBestiller) {
         this.brevBestiller = brevBestiller;
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.UL_SEND_BREV;
+        return ProsessSteg.UL_SEND_ORIENTERINGSBREV;
     }
 
     @Override

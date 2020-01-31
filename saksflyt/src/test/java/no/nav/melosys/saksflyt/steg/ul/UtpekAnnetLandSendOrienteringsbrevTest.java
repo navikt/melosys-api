@@ -17,22 +17,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UtpekAnnetLandSendBrevTest {
+public class UtpekAnnetLandSendOrienteringsbrevTest {
 
     @Mock
     BrevBestiller brevBestiller;
-    private UtpekAnnetLandSendBrev utpekAnnetLandSendBrev;
+    private UtpekAnnetLandSendOrienteringsbrev utpekAnnetLandSendOrienteringsbrev;
 
     @Before
     public void settOpp() {
-        utpekAnnetLandSendBrev = new UtpekAnnetLandSendBrev(brevBestiller);
+        utpekAnnetLandSendOrienteringsbrev = new UtpekAnnetLandSendOrienteringsbrev(brevBestiller);
     }
 
     @Test
     public void utfør() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        utpekAnnetLandSendBrev.utfør(prosessinstans);
+        utpekAnnetLandSendOrienteringsbrev.utfør(prosessinstans);
 
         ArgumentCaptor<Brevbestilling> captor = ArgumentCaptor.forClass(Brevbestilling.class);
         verify(brevBestiller).bestill(captor.capture());

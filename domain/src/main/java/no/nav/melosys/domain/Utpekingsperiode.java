@@ -36,6 +36,12 @@ public class Utpekingsperiode implements ErPeriode {
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse tilleggsbestemmelse;
 
+    @Column(name = "medlperiode_id")
+    private Long medlPeriodeID;
+
+    @Column(name = "sendt_utland")
+    private LocalDate sendtUtland;
+
     @SuppressWarnings("unused") // Trengs av Hibernate
     public Utpekingsperiode() {
     }
@@ -81,5 +87,21 @@ public class Utpekingsperiode implements ErPeriode {
 
     public LovvalgBestemmelse getTilleggsbestemmelse() {
         return tilleggsbestemmelse;
+    }
+
+    public Long getMedlPeriodeID() {
+        return medlPeriodeID;
+    }
+
+    public void setMedlPeriodeID(Long medlPeriodeID) {
+        this.medlPeriodeID = medlPeriodeID;
+    }
+
+    public LocalDate getSendtUtland() {
+        return sendtUtland;
+    }
+
+    public void setSendtUtland(LocalDate sendtUtland) {
+        this.sendtUtland = sendtUtland;
     }
 }

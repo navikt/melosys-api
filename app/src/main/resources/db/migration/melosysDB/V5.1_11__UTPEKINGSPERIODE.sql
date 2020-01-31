@@ -6,6 +6,8 @@ CREATE TABLE utpekingsperiode (
     lovvalgsland            VARCHAR2(99)   NULL,
     lovvalgsbestemmelse     VARCHAR2(99)   NULL,
     tilleggsbestemmelse     VARCHAR2(99)   NULL,
+    medlperiode_id          NUMBER(19)     NULL,
+    sendt_utland            DATE           NULL,
     CONSTRAINT pk_utpekingsperiode PRIMARY KEY (id)
 );
 
