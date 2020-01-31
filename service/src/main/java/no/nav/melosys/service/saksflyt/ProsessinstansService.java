@@ -174,14 +174,14 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                                                     String fritekst, String mottakerInstitusjon,
+                                                     String fritekst, List<String> mottakerinstitusjoner,
                                                      Vedtakstyper vedtakstype, String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
             .medSteg(ProsessSteg.IV_VALIDERING)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
-            .medEessiMottakere(List.of(mottakerInstitusjon))
+            .medEessiMottakere(mottakerinstitusjoner)
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());

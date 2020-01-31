@@ -1,6 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -117,7 +118,7 @@ public class VedtakServiceTest {
 
     @Test
     public void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() throws MelosysException {
-        String mottakerInstitusjon = "AB:CDEF123";
+        var mottakerinstitusjoner = List.of("AB:CDEF123");
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
@@ -127,15 +128,15 @@ public class VedtakServiceTest {
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         behandlingsresultat.setType(resultatType);
         when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
-        when(eessiService.erGyldigInstitusjonForLand(eq("LA_BUC_04"), eq("SE"), eq(mottakerInstitusjon)))
+        when(eessiService.erGyldigInstitusjonForLand(eq("LA_BUC_04"), eq("SE"), eq(mottakerinstitusjoner.get(0))))
             .thenReturn(Boolean.TRUE);
 
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", mottakerInstitusjon, vedtakstype, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", mottakerinstitusjoner, vedtakstype, null);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq(mottakerInstitusjon), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq(mottakerinstitusjoner), eq(vedtakstype), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 
@@ -180,7 +181,7 @@ public class VedtakServiceTest {
 
     @Test
     public void fattVedtak_medMottakerLandErEessiReadyFeilMottaker_kasterException() throws MelosysException {
-        String mottakerInstitusjon = "SE:123";
+        var mottakerinstitusjoner = List.of("SE:123");
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
@@ -192,9 +193,9 @@ public class VedtakServiceTest {
         when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
 
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage(String.format("MottakerID %s er ugyldig for land SE", mottakerInstitusjon));
+        expectedException.expectMessage(String.format("MottakerID %s er ugyldig for land SE", mottakerinstitusjoner));
 
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", mottakerInstitusjon, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", mottakerinstitusjoner, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
     }
 
     @Test

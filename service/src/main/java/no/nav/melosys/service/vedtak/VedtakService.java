@@ -1,11 +1,13 @@
 package no.nav.melosys.service.vedtak;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsystem;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -79,7 +81,7 @@ public class VedtakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType,
-                           String fritekst, String mottakerInstitusjon,
+                           String fritekst, List<String> mottakerinstitusjoner,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
@@ -91,15 +93,15 @@ public class VedtakService {
             validerFattVedtak(behandlingID, vedtakstype);
         }
 
-        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
-        if (skalSendesSed(behandlingsresultat, landkoder)) {
-            String landkode = landkoder.iterator().next().getKode();
-            validerMottakerInstitusjon(landkode, behandlingsresultat, mottakerInstitusjon);
-        }
+        mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+            mottakerinstitusjoner,
+            landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID),
+            BucType.LA_BUC_02
+        );
 
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerInstitusjon, vedtakstype, revurderBegrunnelse);
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
