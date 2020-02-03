@@ -1,6 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -91,11 +93,16 @@ public class VedtakService {
             validerFattVedtak(behandlingID, vedtakstype);
         }
 
-        mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
-            mottakerinstitusjoner,
-            landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID),
-            avklarBucType(behandlingsresultat)
-        );
+        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
+        if (skalSendesSed(behandlingsresultat, landkoder)) {
+            mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                mottakerinstitusjoner,
+                landkoder,
+                avklarBucType(behandlingsresultat)
+            );
+        } else {
+            mottakerinstitusjoner = Collections.emptyList();
+        }
 
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
@@ -109,6 +116,16 @@ public class VedtakService {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
                 feilValideringer.stream().map(Kodeverk::getKode).collect(Collectors.toList()));
         }
+    }
+
+    private static boolean skalSendesSed(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {
+        if (behandlingsresultat.erAvslag()) {
+            return false;
+        }
+        if (landkoder.isEmpty()) {
+            return false;
+        }
+        return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
     }
 
     private static BucType avklarBucType(Behandlingsresultat behandlingsresultat) {

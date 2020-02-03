@@ -6,7 +6,6 @@ import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -72,48 +71,11 @@ public class AnmodningUnntakServiceTest {
         behandling.setFagsak(fagsak);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
-        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_01.name()), eq(Landkoder.SE.getKode()))).thenReturn(Boolean.TRUE);
-        when(eessiService.erGyldigInstitusjonForLand(eq(BucType.LA_BUC_01.name()), eq(Landkoder.SE.getKode()), eq(mottakerInstitusjon)))
-            .thenReturn(Boolean.TRUE);
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon);
 
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), eq(mottakerInstitusjon));
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anyList());
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
-    }
-
-    @Test
-    public void anmodningOmUnntak_landErEessiKlarUtenMottaker_kasterException() throws MelosysException {
-        final long behandlingID = 1L;
-        final String mottakerInstitusjon = null;
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
-        behandling.setFagsak(fagsak);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
-        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_01.name()), eq(Landkoder.SE.getKode()))).thenReturn(Boolean.TRUE);
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("SE er EESSI-ready, men mottakerinstitusjon er ikke definert");
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon);
-    }
-
-    @Test
-    public void anmodningOmUnntak_landErEessiKlarMottakerIkkeGyldigForLand_kasterException() throws MelosysException {
-        final long behandlingID = 1L;
-        final String mottakerInstitusjon = "SE:123";
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
-        behandling.setFagsak(fagsak);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
-        when(eessiService.landErEessiReady(eq(BucType.LA_BUC_01.name()), eq(Landkoder.SE.getKode()))).thenReturn(Boolean.TRUE);
-        when(eessiService.erGyldigInstitusjonForLand(eq(BucType.LA_BUC_01.name()), eq(Landkoder.SE.getKode()), eq(mottakerInstitusjon)))
-            .thenReturn(Boolean.FALSE);
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("MottakerID "+ mottakerInstitusjon + " er ugyldig for land SE");
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon);
     }
 
     @Test

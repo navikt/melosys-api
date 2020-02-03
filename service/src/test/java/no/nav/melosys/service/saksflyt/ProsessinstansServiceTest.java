@@ -111,7 +111,7 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansAnmodningOmUnntak() {
         final String mottakerInstitusjon = "SE:123";
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerInstitusjon);
+        service.opprettProsessinstansAnmodningOmUnntak(behandling, List.of(mottakerInstitusjon));
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
