@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -40,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Service
 public class VedtakService {
@@ -96,7 +94,7 @@ public class VedtakService {
         mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjoner,
             landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID),
-            BucType.LA_BUC_02
+            avklarBucType(behandlingsresultat)
         );
 
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
@@ -113,32 +111,10 @@ public class VedtakService {
         }
     }
 
-    private boolean skalSendesSed(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {
-        if (behandlingsresultat.erAvslag()) {
-            return false;
-        }
-        if (landkoder.isEmpty()) {
-            return false;
-        }
-        return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
-    }
-
-    private void validerMottakerInstitusjon(String landkode, Behandlingsresultat behandlingsresultat, String mottakerInstitusjon) throws MelosysException {
-        String bucType = avklarBucType(behandlingsresultat);
-        boolean landErEessiReady = eessiService.landErEessiReady(bucType, landkode);
-        if (landErEessiReady) {
-            if (StringUtils.isEmpty(mottakerInstitusjon)) {
-                throw new FunksjonellException(String.format("Kan ikke fatte vedtak: %s er EESSI-ready, men mottaker er ikke satt", landkode));
-            } else if (!eessiService.erGyldigInstitusjonForLand(bucType, landkode, mottakerInstitusjon)) {
-                throw new FunksjonellException(String.format("MottakerID %s er ugyldig for land %s", mottakerInstitusjon, landkode));
-            }
-        }
-    }
-
-    private String avklarBucType(Behandlingsresultat behandlingsresultat) {
+    private static BucType avklarBucType(Behandlingsresultat behandlingsresultat) {
         return LovvalgBestemmelseUtils.hentBucTypeFraBestemmelse(
             behandlingsresultat.hentValidertMedlemskapsperiode().getBestemmelse()
-        ).name();
+        );
     }
 
     @Transactional(rollbackFor = MelosysException.class)

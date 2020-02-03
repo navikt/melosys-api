@@ -64,6 +64,7 @@ public class ForkortPeriodeTest {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(behandlingId);
+        behandling.setFagsak(new Fagsak());
         p.setBehandling(behandling);
         p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
 
