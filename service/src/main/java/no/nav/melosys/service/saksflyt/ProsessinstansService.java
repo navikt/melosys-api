@@ -204,7 +204,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySak(OpprettSakDto opprettSakDto) throws FunksjonellException {
+    public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto) throws FunksjonellException {
         if (opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD
             && opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
             throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
@@ -217,6 +217,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.behandlingstype);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.brukerID);
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.oppgaveID);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.soknadDto.periode);
         prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.soknadDto.land);
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.skalTilordnes);

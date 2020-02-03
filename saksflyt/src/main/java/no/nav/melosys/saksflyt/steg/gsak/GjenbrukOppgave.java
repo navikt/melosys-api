@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.gsak;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.GJENBRUK_OPPGAVE;
 
 @Component
@@ -40,6 +43,7 @@ public class GjenbrukOppgave extends AbstraktStegBehandler {
         final String oppgaveID = prosessinstans.getData(ProsessDataKey.OPPGAVE_ID);
         final String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         final Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
+        final boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
 
         final OppgaveFactory.OppgaveParametere oppgaveParametere = OppgaveFactory.hentOppgaveParametere(behandlingstype);
         OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
@@ -49,6 +53,7 @@ public class GjenbrukOppgave extends AbstraktStegBehandler {
             .behandlingstema(oppgaveParametere.behandlingstema)
             .saksnummer(saksnummer)
             .behandlesAvApplikasjon(Fagsystem.MELOSYS)
+            .tilordnetRessurs(skalTilordnes ? prosessinstans.getData(SAKSBEHANDLER) : null)
             .build();
         gsakFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
 

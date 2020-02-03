@@ -322,14 +322,15 @@ public class ProsessinstansServiceTest {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.behandlingstype = Behandlingstyper.ANKE;
         expectedException.expect(FunksjonellException.class);
-        service.opprettProsessinstansNySak(opprettSakDto);
+        service.opprettProsessinstansNySak("journalpostID", opprettSakDto);
     }
 
     @Test
     public void opprettProsessinstansNySak_behandlingstypeSøknad() throws FunksjonellException {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV;
-        service.opprettProsessinstansNySak(opprettSakDto);
+        String journalpostID = "journalpostID";
+        service.opprettProsessinstansNySak(journalpostID, opprettSakDto);
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
@@ -337,6 +338,7 @@ public class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(opprettSakDto.behandlingstype);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.brukerID);
         assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.oppgaveID);
+        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
         assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.soknadDto.periode);
         assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class)).isEqualTo(opprettSakDto.soknadDto.land);
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakDto.skalTilordnes);
