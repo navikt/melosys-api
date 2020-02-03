@@ -121,6 +121,15 @@ public class FagsakServiceTest {
     }
 
     @Test
+    public void bestillNySakOgBehandling_utenJournalpostID_feiler() throws FunksjonellException, TekniskException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(null).build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.oppgaveID))).thenReturn(oppgave);
+        expectedException.expect(FunksjonellException.class);
+        fagsakService.bestillNySakOgBehandling(opprettSakDto);
+    }
+
+    @Test
     public void bestillNySakOgBehandling_oppgaveTypeUgyldig_feiler() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SED).build();

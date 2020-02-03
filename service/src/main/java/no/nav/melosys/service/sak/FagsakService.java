@@ -171,6 +171,9 @@ public class FagsakService {
         if (oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK_MK && oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK) {
             throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype());
         }
+        if (StringUtils.isEmpty(oppgave.getJournalpostId())) {
+            throw new FunksjonellException("Ny sak kan ikke opprettes fordi oppgave " + oppgaveID + " mangler journalpost med søknad.");
+        }
         return oppgave;
     }
 
