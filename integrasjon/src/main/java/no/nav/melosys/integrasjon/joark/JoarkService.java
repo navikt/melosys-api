@@ -131,6 +131,7 @@ public class JoarkService implements JoarkFasade {
         arkivDokument.setDokumentId(dokument.getDokumentId());
         arkivDokument.setTittel(dokument.getTittel());
         arkivDokument.setNavSkjemaID(dokument.getNavSkjemaId());
+        dokument.getLogiskVedleggListe().forEach(l -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(l.getLogiskVedleggTittel())));
         return arkivDokument;
     }
 

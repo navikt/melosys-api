@@ -279,10 +279,12 @@ public class JoarkServiceTest {
 
         List<Dokument> dokumentListe = new ArrayList<>();
         String dokumentTittel = "titteldok", dokumentId = "123dok", navSkjemaID = "123skjemaID";
+        String hovedDokLogiskVedlegg = "logisk vedlegg tittel";
         Dokument hoveddokument = new Dokument();
         hoveddokument.setTittel(dokumentTittel);
         hoveddokument.setDokumentId(dokumentId);
         hoveddokument.setNavSkjemaId(navSkjemaID);
+        hoveddokument.getLogiskVedleggListe().add(new LogiskVedlegg().withLogiskVedleggTittel(hovedDokLogiskVedlegg));
         dokumentListe.add(hoveddokument);
 
         Dokument vedlegg1 = new Dokument();
@@ -308,6 +310,8 @@ public class JoarkServiceTest {
         assertThat(journalpost.getHoveddokument().getDokumentId()).isEqualTo(dokumentId);
         assertThat(journalpost.getHoveddokument().getTittel()).isEqualTo(dokumentTittel);
         assertThat(journalpost.getHoveddokument().getNavSkjemaID()).isEqualTo(navSkjemaID);
+        assertThat(journalpost.getHoveddokument().getLogiskeVedlegg().size()).isEqualTo(1);
+        assertThat(journalpost.getHoveddokument().getLogiskeVedlegg().get(0).getTittel()).isEqualTo(hovedDokLogiskVedlegg);
         assertThat(journalpost.getArkivSakId()).isEqualTo(arkivsakId);
         assertThat(journalpost.getVedleggListe().size()).isEqualTo(2);
         assertThat(journalpost.getMottaksKanal()).isEqualTo(mottaksKanal);
