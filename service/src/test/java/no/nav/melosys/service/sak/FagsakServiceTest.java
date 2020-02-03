@@ -106,16 +106,25 @@ public class FagsakServiceTest {
     @Test
     public void bestillNySakOgBehandling_oppretterProsess() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).build();
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.oppgaveID))).thenReturn(oppgave);
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
-        verify(prosessinstansService).opprettProsessinstansNySak(eq(opprettSakDto));
+        verify(prosessinstansService).opprettProsessinstansNySak(eq(oppgave.getJournalpostId()), eq(opprettSakDto));
     }
 
     @Test
     public void bestillNySakOgBehandling_oppgaveIdMangler_feiler() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.oppgaveID = "";
+        expectedException.expect(FunksjonellException.class);
+        fagsakService.bestillNySakOgBehandling(opprettSakDto);
+    }
+
+    @Test
+    public void bestillNySakOgBehandling_utenJournalpostID_feiler() throws FunksjonellException, TekniskException {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(null).build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.oppgaveID))).thenReturn(oppgave);
         expectedException.expect(FunksjonellException.class);
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
     }
