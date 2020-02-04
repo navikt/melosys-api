@@ -40,7 +40,7 @@ public class VedtakTjeneste {
         }
         tilgangService.sjekkTilgang(behandlingID);
         vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(),
-            fattVedtakDto.getMottakerinstitusjoner().get(0), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse()); // TODO: MELOSYS-1501
+            fattVedtakDto.getMottakerinstitusjoner(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
         return ResponseEntity.ok().build();
     }
 

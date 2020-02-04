@@ -1,11 +1,14 @@
 package no.nav.melosys.service.vedtak;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsystem;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -16,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -38,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Service
 public class VedtakService {
@@ -79,7 +80,7 @@ public class VedtakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType,
-                           String fritekst, String mottakerInstitusjon,
+                           String fritekst, List<String> mottakerinstitusjoner,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
@@ -93,13 +94,18 @@ public class VedtakService {
 
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         if (skalSendesSed(behandlingsresultat, landkoder)) {
-            String landkode = landkoder.iterator().next().getKode();
-            validerMottakerInstitusjon(landkode, behandlingsresultat, mottakerInstitusjon);
+            mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                mottakerinstitusjoner,
+                landkoder,
+                avklarBucType(behandlingsresultat)
+            );
+        } else {
+            mottakerinstitusjoner = Collections.emptyList();
         }
 
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerInstitusjon, vedtakstype, revurderBegrunnelse);
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -111,7 +117,7 @@ public class VedtakService {
         }
     }
 
-    private boolean skalSendesSed(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {
+    private static boolean skalSendesSed(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {
         if (behandlingsresultat.erAvslag()) {
             return false;
         }
@@ -121,22 +127,10 @@ public class VedtakService {
         return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
     }
 
-    private void validerMottakerInstitusjon(String landkode, Behandlingsresultat behandlingsresultat, String mottakerInstitusjon) throws MelosysException {
-        String bucType = avklarBucType(behandlingsresultat);
-        boolean landErEessiReady = eessiService.landErEessiReady(bucType, landkode);
-        if (landErEessiReady) {
-            if (StringUtils.isEmpty(mottakerInstitusjon)) {
-                throw new FunksjonellException(String.format("Kan ikke fatte vedtak: %s er EESSI-ready, men mottaker er ikke satt", landkode));
-            } else if (!eessiService.erGyldigInstitusjonForLand(bucType, landkode, mottakerInstitusjon)) {
-                throw new FunksjonellException(String.format("MottakerID %s er ugyldig for land %s", mottakerInstitusjon, landkode));
-            }
-        }
-    }
-
-    private String avklarBucType(Behandlingsresultat behandlingsresultat) {
-        return LovvalgBestemmelseUtils.hentBucTypeFraBestemmelse(
+    private static BucType avklarBucType(Behandlingsresultat behandlingsresultat) {
+        return BucType.fraBestemmelse(
             behandlingsresultat.hentValidertMedlemskapsperiode().getBestemmelse()
-        ).name();
+        );
     }
 
     @Transactional(rollbackFor = MelosysException.class)

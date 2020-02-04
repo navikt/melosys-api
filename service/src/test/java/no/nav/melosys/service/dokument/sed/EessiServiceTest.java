@@ -15,7 +15,10 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -318,7 +321,7 @@ public class EessiServiceTest {
     }
 
     @Test
-    public void hentMottakerinstitusjonerFraBuc_medFlereMottakerinstitusjoner_forventRettInstitusjon() throws MelosysException {
+    public void hentMottakerinstitusjonerFraBuc_medFlereMottakerinstitusjonerMenEnMyndighet_forventRettInstitusjon() throws MelosysException {
         when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
             .thenReturn(List.of(
                 new BucInformasjon(
@@ -329,27 +332,12 @@ public class EessiServiceTest {
                     List.of()
                 )));
 
-        String mottakerinstitusjon = eessiService.hentMottakerinstitusjonFraBuc(lagFagsak(), BucType.LA_BUC_04);
-        assertThat(mottakerinstitusjon).isEqualTo(MOTTAKER_INSTITUSJON);
+        List<String> mottakerinstitusjoner = eessiService.hentMottakerinstitusjonerFraBuc(lagFagsak(), BucType.LA_BUC_04);
+        assertThat(mottakerinstitusjoner).containsExactlyInAnyOrder(MOTTAKER_INSTITUSJON);
     }
 
-    @Test(expected = TekniskException.class)
-    public void hentMottakerinstitusjonerFraBuc_medFlereMottakerinstitusjonerFraSammeLand_forventException() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
-            .thenReturn(List.of(
-                new BucInformasjon(
-                    "id",
-                    BucType.LA_BUC_04.name(),
-                    LocalDate.now(),
-                    List.of("DE:111", "FR:222", MOTTAKER_INSTITUSJON, "SE:333"),
-                    List.of()
-                )));
-
-        eessiService.hentMottakerinstitusjonFraBuc(lagFagsak(), BucType.LA_BUC_04);
-    }
-
-    @Test(expected = TekniskException.class)
-    public void hentMottakerinstitusjonerFraBuc_ingenMottakerinstitusjoner_forventException() throws MelosysException {
+    @Test
+    public void hentMottakerinstitusjonerFraBuc_ingenMottakerinstitusjoner_forventTomListe() throws MelosysException {
         when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
             .thenReturn(List.of(
                 new BucInformasjon(
@@ -360,7 +348,35 @@ public class EessiServiceTest {
                     List.of()
                 )));
 
-        eessiService.hentMottakerinstitusjonFraBuc(lagFagsak(), BucType.LA_BUC_04);
+        List<String> mottakerinstitusjoner = eessiService.hentMottakerinstitusjonerFraBuc(lagFagsak(), BucType.LA_BUC_04);
+        assertThat(mottakerinstitusjoner).isEmpty();
+    }
+
+    @Test
+    public void hentMottakerinstitusjonerFraBuc_medFlereMottakerinstitusjonerOgFlereMyndigheter_forventRettInstitusjoner() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
+            .thenReturn(List.of(
+                new BucInformasjon(
+                    "id",
+                    BucType.LA_BUC_04.name(),
+                    LocalDate.now(),
+                    List.of("DE:111", "FR:222", "SE:333"),
+                    List.of()
+                )));
+
+        Aktoer tyskland = new Aktoer();
+        tyskland.setRolle(Aktoersroller.MYNDIGHET);
+        tyskland.setInstitusjonId("DE:111");
+
+        Aktoer sverige = new Aktoer();
+        sverige.setRolle(Aktoersroller.MYNDIGHET);
+        sverige.setInstitusjonId("SE:333");
+
+        Fagsak fagsak = lagFagsak();
+        fagsak.setAktører(Set.of(tyskland, sverige));
+
+        List<String> mottakerinstitusjoner = eessiService.hentMottakerinstitusjonerFraBuc(fagsak, BucType.LA_BUC_04);
+        assertThat(mottakerinstitusjoner).containsExactlyInAnyOrder("DE:111", "SE:333");
     }
 
     @Test
