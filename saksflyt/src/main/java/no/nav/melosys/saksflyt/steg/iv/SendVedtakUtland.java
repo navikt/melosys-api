@@ -9,7 +9,6 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -91,7 +90,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         return behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
             .getLovvalgsperioder().stream().findFirst()
             .map(Lovvalgsperiode::getBestemmelse)
-            .map(LovvalgBestemmelseUtils::hentBucTypeFraBestemmelse)
+            .map(BucType::fraBestemmelse)
             .orElseThrow(() -> new TekniskException("Finner ikke lovvalgsbestemmelse for behandling " + behandling.getId()));
     }
 }

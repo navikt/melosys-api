@@ -53,7 +53,7 @@ public class ForkortPeriodeTest {
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        when(eessiService.hentMottakerinstitusjonFraBuc(any(Fagsak.class), any(BucType.class))).thenReturn("SE:123");
+        when(eessiService.hentMottakerinstitusjonerFraBuc(any(Fagsak.class), any(BucType.class))).thenReturn(List.of("SE:123"));
     }
 
     @Test

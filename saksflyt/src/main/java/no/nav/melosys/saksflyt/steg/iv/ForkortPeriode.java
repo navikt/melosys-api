@@ -9,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -61,10 +60,9 @@ public class ForkortPeriode extends AbstraktStegBehandler {
 
         avklartefakteService.leggTilBegrunnelse(behandling.getId(), Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
 
-        BucType bucType = LovvalgBestemmelseUtils.hentBucTypeFraBestemmelse(
-            behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode().getBestemmelse());
-        String mottakerinstitusjonFraTidlBuc = eessiService.hentMottakerinstitusjonFraBuc(prosessinstans.getBehandling().getFagsak(), bucType);
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(mottakerinstitusjonFraTidlBuc));
+        BucType bucType = BucType.fraBestemmelse(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode().getBestemmelse());
+        List<String> mottakerinstitusjonerFraTidlBuc = eessiService.hentMottakerinstitusjonerFraBuc(prosessinstans.getBehandling().getFagsak(), bucType);
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, mottakerinstitusjonerFraTidlBuc);
 
         prosessinstans.setSteg(IV_VALIDERING);
         log.info("Oppdatert avklarteFakta for prosessinstans {}.", prosessinstans.getId());

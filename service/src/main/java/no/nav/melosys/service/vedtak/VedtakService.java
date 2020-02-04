@@ -19,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -129,7 +128,7 @@ public class VedtakService {
     }
 
     private static BucType avklarBucType(Behandlingsresultat behandlingsresultat) {
-        return LovvalgBestemmelseUtils.hentBucTypeFraBestemmelse(
+        return BucType.fraBestemmelse(
             behandlingsresultat.hentValidertMedlemskapsperiode().getBestemmelse()
         );
     }
