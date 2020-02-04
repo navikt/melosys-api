@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.sed;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -27,7 +28,6 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -193,16 +193,21 @@ public class EessiService {
 
     public List<String> hentMottakerinstitusjonerFraBuc(Fagsak fagsak, BucType bucType) throws MelosysException {
         Long gsakSaksnummer = fagsak.getGsakSaksnummer();
-        String[] landkoder = fagsak.hentMyndighetLandkoder().stream()
-            .map(Landkoder::getKode).toArray(String[]::new);
+        List<String> landkoder = fagsak.hentMyndighetLandkoder().stream()
+            .map(Landkoder::getKode).collect(Collectors.toList());
 
         List<BucInformasjon> bucer = hentTilknyttedeBucer(gsakSaksnummer, List.of("sendt")).stream()
             .filter(buc -> bucType.name().equalsIgnoreCase(buc.getBucType())).collect(Collectors.toList());
 
         return bucer.stream()
             .flatMap(buc -> buc.getMottakerinstitusjoner().stream())
-            .filter(inst -> StringUtils.startsWithAny(inst, landkoder)) // Mottakerinstitusjoner har format LANDKODE:ID
+            .filter(starterMedEnAv(landkoder)) // Mottakerinstitusjoner har format LANDKODE:ID
             .distinct().collect(Collectors.toList());
+    }
+
+    private Predicate<String> starterMedEnAv(List<String> landkoder) {
+        return inst -> landkoder.stream()
+            .anyMatch(landkode -> inst.toLowerCase().startsWith(landkode.toLowerCase()));
     }
 
     /**
