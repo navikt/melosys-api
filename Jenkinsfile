@@ -180,6 +180,7 @@ def buildAndTestApplication(String mvnSettings) {
             string(credentialsId: '690b28ff-2ecd-4b67-8a2b-99493b736c12', variable: 'stsTestPassword'),
             certificate(credentialsId: 'T8_KEYSTORE', keystoreVariable: 'KEYSTORE', passwordVariable: 'KEYSTORE_PASSWORD')
         ]) {
+            env.testDb = "jdbc:oracle:thin:@a01dbfl042.adeo.no:1521/MELOSYS_Q3"
             env.testUsername = dbusername
             env.testPassword = dbpassword
             env.stsTestPassword = stsTestPassword

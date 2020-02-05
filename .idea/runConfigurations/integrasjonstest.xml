@@ -1,0 +1,26 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="integrasjonstest" type="JUnit" factoryName="JUnit">
+    <module name="integrasjonstest" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="no.nav.melosys.integrasjonstest.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="PACKAGE_NAME" value="no.nav.melosys.integrasjonstest" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="package" />
+    <option name="VM_PARAMETERS" value="-DfailIfNoTests=false -Dspring.profiles.active=local,itest" />
+    <option name="PARAMETERS" value="" />
+    <envs>
+      <env name="testDb" value="CHANGEME_DB_URL" />
+      <env name="testUsername" value="CHANGEME_DB_USERNAME" />
+      <env name="testPassword" value="CHANGEME_DB_PASSWORD" />
+      <env name="stsTestPassword" value="CHANGEME_SYSTEMUSER_PASSWORD" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

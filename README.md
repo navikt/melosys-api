@@ -32,6 +32,8 @@ For enklest mulig lokal kjøring under utvikling, kan man gjøre følgende:
 
 ## Integrasjonstester
 
+### Jenkins
+
 For å kjøre integrasjonstester på Jenkins, må man angi en gyldig truststore ved kjøring.
 Denne kan lastes ned fra et miljø på NAIS, f.eks. `t8` i `dev-fss` og konverteres til PKCS #12-format:
 
@@ -47,3 +49,12 @@ keytool -importkeystore -srckeystore t8-ca-bundle.jks -destkeystore t8-ca-bundle
 
 Den konverterte fila med tilhørende passord kan deretter legges inn i Jenkins som en credential av typen
 `Certificate` med valget `Upload PKCS#12 certificate`.
+
+### Lokalt
+
+Kjøring av integrasjonstester fra IntelliJ forutsetter at keystore er lagt til, som beskrevet over.
+I tillegg må miljøvariablene i `integrasjonstest`-konfigurasjonen populeres med riktige
+verdier fra Vault:
+ * testDb - f.eks. [oracle/dev/config/melosys_q3](https://vault.adeo.no/ui/vault/secrets/oracle/show/dev/config/melosys_q3)
+ * testUsername og testPassword - f.eks. [oracle/dev/creds/melosys_q3-user](https://vault.adeo.no/ui/vault/secrets/oracle/show/dev/creds/melosys_q3-user)
+ * stsTestPassword - `SRVMELOSYS_PASSWORD` fra [kv/preprod/fss/melosys/t8](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/melosys/t8)
