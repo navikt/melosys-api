@@ -1,0 +1,150 @@
+#!groovy
+
+node {
+    def KUBECTL = "/usr/local/bin/kubectl"
+    def KUBECONFIG_NAISERATOR = "/var/lib/jenkins/kubeconfigs/kubeconfig-teammelosys.json"
+    def NAISERATOR_CONFIG = "nais.yaml"
+
+    def cluster = "dev-fss"
+    def dockerRepo = "repo.adeo.no:5443"
+    def namespace = "default"
+
+    def mvnSettings = "navRepoAdeoMavenSettings"
+    def branchName, commit, commitId, imageVersion
+    def application = "melosys", springProfiles = "nais"
+    def javaHome = tool "jdk-11"
+    def mvnHome = tool "maven-3.6.0"
+    env.PATH = "${javaHome}/bin:${mvnHome}/bin:${env.PATH}"
+
+    def errorThreshold = 0 // Broken tests
+    def failureThreshold = 60 // Failing tests
+
+    try {
+
+        stage("Docker login") {
+            withCredentials([[$class: "UsernamePasswordMultiBinding", credentialsId: "nexus-uploader", usernameVariable: "NEXUS_USERNAME", passwordVariable: "NEXUS_PASSWORD"]]) {
+                sh "echo ${NEXUS_PASSWORD} | docker login -u ${NEXUS_USERNAME} --password-stdin ${dockerRepo}"
+            }
+        }
+
+        stage("Checkout") {
+            scmInfo = checkout scm
+
+            branchName = resolveBranchName(scmInfo.GIT_BRANCH.toString())
+            commitId = scmInfo.GIT_COMMIT
+
+            commit = sh(script: "git log -1 --oneline", returnStdout: true)
+            imageVersion = "${branchName}-${BUILD_NUMBER}-${commitId}"
+        }
+
+        stage("Build & test application") {
+            withCredentials([
+                usernamePassword(credentialsId: 'MELOSYS_Q3', passwordVariable: 'dbpassword', usernameVariable: 'dbusername'),
+                string(credentialsId: 'MELOSYS_STS_Q2', variable: 'stsTestPassword'),
+                certificate(credentialsId: 'T8_KEYSTORE', keystoreVariable: 'KEYSTORE', passwordVariable: 'KEYSTORE_PASSWORD'),
+                string(credentialsId: 'MELOSYS_LDAP_Q2', variable: 'ldapTestPassword')
+            ]) {
+                env.testDb = "jdbc:oracle:thin:@d26dbfl029.test.local:1521/melosys_t13"
+                env.testUsername = dbusername
+                env.testPassword = dbpassword
+                env.stsTestPassword = stsTestPassword
+                env.ldapTestPassword = ldapTestPassword
+
+                configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
+                    sh 'mvn package failsafe:integration-test -Pitest \
+                        -Djavax.net.ssl.trustStore=${KEYSTORE} \
+                        -Djavax.net.ssl.trustStorePassword=${KEYSTORE_PASSWORD} \
+                        -Dspring.profiles.active="local,itest" -e -U -s $MAVEN_SETTINGS'
+                }
+            }
+        }
+
+        stage("Report") {
+            allure([
+                includeProperties: false,
+                jdk: '',
+                properties: [],
+                reportBuildPolicy: 'ALWAYS',
+                results: [[path: 'integrasjonstest/target/allure-results']]
+            ])
+        }
+
+        stage("Check test results") {
+            // Allure har ikke støtte for å feile bygget på errors/failures, så vi sjekker failsafe-rapporten
+            if (areResultsWithinThresholds("integrasjonstest/target/failsafe-reports/failsafe-summary.xml", errorThreshold, failureThreshold)) {
+                echo("Test results within current thresholds of ${errorThreshold}% errors and ${failureThreshold}% failures")
+            } else {
+                currentBuild.result = "FAILURE"
+                error("Test results outside current thresholds of ${errorThreshold}% errors and ${failureThreshold}% failures")
+            }
+        }
+
+        stage("Build & publish Docker image") {
+            sh "docker build --build-arg JAR_FILE=${application}-${imageVersion}.jar --build-arg SPRING_PROFILES=${springProfiles} -t ${dockerRepo}/melosys/${application}:${imageVersion} ."
+            // TODO sh "docker push ${dockerRepo}/melosys/${application}:${imageVersion}"
+        }
+
+        // TODO deploy to default on dev-fss if not failed (change branch filter on melosys-api-it-cd on Jenkins)
+        /*
+        stage("Deploy to NAIS") {
+            prepareNaisYaml(NAISERATOR_CONFIG, imageVersion, namespace)
+
+            sh "${KUBECTL} config --kubeconfig=${KUBECONFIG_NAISERATOR} set-context ${cluster} --namespace=${namespace}"
+            sh "${KUBECTL} config --kubeconfig=${KUBECONFIG_NAISERATOR} use-context ${cluster}"
+            sh "${KUBECTL} apply --kubeconfig=${KUBECONFIG_NAISERATOR} -f ${NAISERATOR_CONFIG}"
+            sh "${KUBECTL} rollout status deployment/${application} --kubeconfig=${KUBECONFIG_NAISERATOR}"
+        }
+         */
+
+        stage("Publish to Nexus") {
+            configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
+                sh "mvn -DskipTests -DdeployAtEnd=true -DretryFailedDeploymentCount=5 --settings $MAVEN_SETTINGS deploy"
+            }
+        }
+
+        // TODO Send Slack-message
+
+    } catch (e) {
+        // TODO Send Slack-message
+        throw e
+    }
+}
+
+def prepareNaisYaml(naiseratorFile, imageVersion, namespace) {
+    // set version in yaml-file:
+    replaceInFile('@@IMAGE_VERSION@@', imageVersion, naiseratorFile)
+
+    def domain = ".nais.preprod.local"
+
+    replaceInFile('@@URL@@', 'melosys-api' + domain, naiseratorFile)
+    replaceInFile('@@NAMESPACE@@', namespace, naiseratorFile)
+}
+
+def replaceInFile(oldString, newString, file) {
+    sh "sed -i -e 's/${oldString}/${newString}/g' ${file}"
+}
+
+def resolveBranchName(String branchName) {
+    if (branchName.contains('/')) {
+        split = branchName.split('/')
+        branchName = split[split.length - 1]
+    }
+
+    return branchName
+}
+
+def areResultsWithinThresholds(String resultSummaryFile, Integer errorThreshold, Integer failureThreshold) {
+    def completed = parseResults(resultSummaryFile, "completed")
+    def failures = parseResults(resultSummaryFile, "failures")
+    def errors = parseResults(resultSummaryFile, "errors")
+
+    Integer errorPercentage = errors / completed * 100
+    Integer failurePercentage = failures / completed * 100
+
+    return errorPercentage <= errorThreshold && failurePercentage <= failureThreshold
+}
+
+def parseResults(String file, String field) {
+    return sh(script: "xmllint --xpath '//${field}/text()' ${file}",
+        returnStdout: true).toInteger()
+}
