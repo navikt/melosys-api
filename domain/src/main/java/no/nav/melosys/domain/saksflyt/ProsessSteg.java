@@ -38,6 +38,7 @@ public enum ProsessSteg implements Kodeverk {
     GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i Oppgave"),
 
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
+    MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
@@ -85,7 +86,11 @@ public enum ProsessSteg implements Kodeverk {
     IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
     IV_STATUS_BEH_AVSL("IV_STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling"),
 
-    MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
+    //Utpek annet land
+    UL_SEND_ORIENTERINGSBREV("UL_SEND_ORIENTERINGSBREV", "Send brev til bruker om at vedkommende ikke er omfattet av norsk trygd"),
+    UL_SEND_UTLAND("UL_SEND_UTLAND", "Send SED A003 eller brev til utenlandsk trygdemyndighet"),
+    UL_DISTRIBUER_JOURNALPOST("UL_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),
+    UL_OPPDATER_MEDL("UL_OPPDATER_MEDL", "Oppdatering av medlemskap"),
 
     //Henlegg sak
     HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),

@@ -50,7 +50,7 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
     public void validerBehandlingsresultat() throws IOException {
         EasyRandomParameters easyRandomParameters = defaultEasyRandomParameters()
             .randomize(named("behandlingsresultatTypeKode").and(ofType(String.class)), () -> new EnumRandomizer<>(Behandlingsresultattyper.class).getRandomValue().getKode())
-            .randomize(named("vedtakstype").and(ofType(String.class)), () -> new EnumRandomizer<>(Vedtakstyper.class).getRandomValue().getKode());
+            .randomize(named("vedtakstype").and(ofType(String.class)), () -> new EnumRandomizer<>(Vedtakstyper.class, Vedtakstyper.ENDRINGSVEDTAK).getRandomValue().getKode());
         BehandlingsresultatDto behandlingsresultat = new EasyRandom(easyRandomParameters).nextObject(BehandlingsresultatDto.class);
         String jsonString = objectMapper().writeValueAsString(behandlingsresultat);
         assertThat(jsonString).isNotEmpty();

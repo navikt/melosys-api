@@ -14,7 +14,7 @@ class VedtakKontroller {
     static Kontroll_begrunnelser overlappendeMedlemsperiode(VedtakKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
-
+        
         return MedlemskapKontroller.overlappendeMedlemsperiodeGyldigPeriode(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), medlemskapDokument)
             ? Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }

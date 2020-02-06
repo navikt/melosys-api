@@ -1,9 +1,12 @@
 package no.nav.melosys.service.vedtak;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -32,9 +35,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -69,9 +70,6 @@ public class VedtakServiceTest {
     private SaksopplysningerService saksopplysningerService;
 
     private VedtakService vedtakService;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private long behandlingID;
     private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -117,7 +115,7 @@ public class VedtakServiceTest {
 
     @Test
     public void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() throws MelosysException {
-        String mottakerInstitusjon = "AB:CDEF123";
+        var mottakerinstitusjoner = List.of("AB:CDEF123");
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
@@ -126,16 +124,17 @@ public class VedtakServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         behandlingsresultat.setType(resultatType);
-        when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
-        when(eessiService.erGyldigInstitusjonForLand(eq("LA_BUC_04"), eq("SE"), eq(mottakerInstitusjon)))
-            .thenReturn(Boolean.TRUE);
+
+        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anyList(), anyCollection(), any(BucType.class))).thenCallRealMethod();
+        when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_04.name()), eq(Landkoder.SE.getKode())))
+            .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));
 
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", mottakerInstitusjon, vedtakstype, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", mottakerinstitusjoner, vedtakstype, null);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq(mottakerInstitusjon), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq(mottakerinstitusjoner), eq(vedtakstype), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 
@@ -149,52 +148,14 @@ public class VedtakServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         behandlingsresultat.setType(resultatType);
-        when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(false);
 
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
         vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", null, vedtakstype, null);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), isNull(), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), anyList(), eq(vedtakstype), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
-    }
-
-    @Test
-    public void fattVedtak_utenMottakerLandErEessiReady_kasterException() throws MelosysException {
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgaveId("1");
-        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        behandlingsresultat.setType(resultatType);
-        when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Kan ikke fatte vedtak: SE er EESSI-ready, men mottaker er ikke satt");
-
-        vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-    }
-
-    @Test
-    public void fattVedtak_medMottakerLandErEessiReadyFeilMottaker_kasterException() throws MelosysException {
-        String mottakerInstitusjon = "SE:123";
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgaveId("1");
-        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        behandlingsresultat.setType(resultatType);
-        when(eessiService.landErEessiReady(eq("LA_BUC_04"), eq("SE"))).thenReturn(true);
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage(String.format("MottakerID %s er ugyldig for land SE", mottakerInstitusjon));
-
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", mottakerInstitusjon, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
     }
 
     @Test
@@ -210,7 +171,7 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST",null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq("FRITEKST"), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq("FRITEKST"), anyList(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
     @Test
@@ -223,7 +184,7 @@ public class VedtakServiceTest {
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService)
-            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), anyList(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
     @Test
@@ -236,7 +197,7 @@ public class VedtakServiceTest {
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         verify(eessiService, never()).landErEessiReady(anyString(), anyString());
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), anyList(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
     @Test

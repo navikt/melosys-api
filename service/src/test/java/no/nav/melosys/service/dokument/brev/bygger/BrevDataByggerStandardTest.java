@@ -1,7 +1,8 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

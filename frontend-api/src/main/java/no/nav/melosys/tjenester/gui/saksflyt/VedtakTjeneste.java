@@ -40,7 +40,7 @@ public class VedtakTjeneste {
         }
         tilgangService.sjekkTilgang(behandlingID);
         vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(),
-            fattVedtakDto.getMottakerinstitusjon(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
+            fattVedtakDto.getMottakerinstitusjoner(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
         return ResponseEntity.ok().build();
     }
 

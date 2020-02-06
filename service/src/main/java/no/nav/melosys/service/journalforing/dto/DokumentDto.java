@@ -1,10 +1,12 @@
 package no.nav.melosys.service.journalforing.dto;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DokumentDto {
     private String dokumentID;
     private String tittel;
+    private List<String> logiskeVedlegg = new ArrayList<>();
 
     private DokumentDto() {
         // Jackson
@@ -31,11 +33,11 @@ public class DokumentDto {
         this.tittel = tittel;
     }
 
-    public boolean erLogiskVedlegg(String hovedDokumentID) {
-        return StringUtils.isEmpty(dokumentID) || dokumentID.equals(hovedDokumentID);
+    public List<String> getLogiskeVedlegg() {
+        return logiskeVedlegg;
     }
 
-    public boolean erFysiskVedlegg(String hovedDokumentID) {
-        return !erLogiskVedlegg(hovedDokumentID);
+    public void setLogiskeVedlegg(List<String> logiskeVedlegg) {
+        this.logiskeVedlegg = logiskeVedlegg;
     }
 }

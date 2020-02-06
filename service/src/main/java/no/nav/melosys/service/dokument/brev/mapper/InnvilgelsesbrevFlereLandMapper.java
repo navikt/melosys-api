@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -17,6 +16,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
@@ -37,16 +37,16 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
         vedleggMapper.map(brevDataInnvilgelse.vedleggA1);
 
-        Fag fag = mapFag(behandling, brevDataInnvilgelse);
+        Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag, vedleggMapper.hent());
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, BrevDataInnvilgelseFlereLand brevdata) {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelseFlereLand brevdata) throws TekniskException {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
-        fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
+        // FIXME fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
         // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
         int antallArbeidsgivere = brevdata.arbeidsgivere.size();
@@ -70,8 +70,13 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         fag.setTrygdemyndighetsland(" "); //TODO: Kun når Norge er utpekt. XSD må tillate EmptyString
 
         // Virksomhetsland er arbeidsland for selvstendig næringsdrivende
-        fag.setAntallVirksomhetsland(BigInteger.ZERO);
-        fag.setVirksomhetslandListe(mapVirksomhetsListe(Collections.emptyList()));
+        int antallVirksomhetsland = brevdata.alleArbeidsland.size();
+        fag.setAntallVirksomhetsland(BigInteger.valueOf(antallVirksomhetsland));
+        if (antallVirksomhetsland == 1) {
+            String virksomhetsland = brevdata.alleArbeidsland.iterator().next();
+            fag.setVirksomhetsland(virksomhetsland);
+        }
+        fag.setVirksomhetslandListe(mapVirksomhetsListe(brevdata.alleArbeidsland));
 
         if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
             fag.setArbeidPåSkip(JA);
@@ -98,13 +103,31 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
         }
-        if (brevdata.begrunnelseKode != null) {
-            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.begrunnelseKode));
+
+        if (resultat.getVedtakMetadata() != null) {
+            // FIXME fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
         }
 
         fag.setFritekst(brevdata.fritekst);
 
         return fag;
+    }
+
+    private VedtaksTypeKode tilVedtaksTypeKode(Vedtakstyper vedtakstype) throws TekniskException {
+        if (vedtakstype == null) {
+            return null;
+        }
+
+        switch (vedtakstype) {
+            case FØRSTEGANGSVEDTAK:
+                return VedtaksTypeKode.FOERSTEGANGSVEDTAK;
+            case KORRIGERT_VEDTAK:
+                return VedtaksTypeKode.KORRIGERT_VEDTAK;
+            case OMGJØRINGSVEDTAK:
+                return VedtaksTypeKode.OMGJOERINGSVEDTAK;
+            default:
+                throw new TekniskException("Ukjent vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
+        }
     }
 
     private VirksomhetslandListeType mapVirksomhetsListe(List<String> næringsdrivendeILand) {

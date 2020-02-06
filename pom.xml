@@ -37,8 +37,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.15-83</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.5</melosys.internt.kodeverk.version>
+        <melosys.jsonschema.version>1.35.19-89</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.6</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -46,7 +46,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.2.12</dokprod.melosysbrev.version>
+        <dokprod.melosysbrev.version>1.2.16</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
@@ -67,7 +67,7 @@
         <commons-lang.version>3.9</commons-lang.version>
         <everit.jsonschema.validator.version>1.9.1</everit.jsonschema.validator.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
-        <guava.version>21.0</guava.version>
+        <guava.version>28.2-jre</guava.version>
         <logback.version>1.2.3</logback.version>
         <logstash.version>4.10</logstash.version>
         <hikaricp.version>3.3.0</hikaricp.version>

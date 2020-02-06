@@ -28,5 +28,5 @@ public interface EessiConsumer {
 
     List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException;
 
-    byte[] genererSedForhåndsvisning(SedDataDto sedDataDto, SedType sedType) throws MelosysException;
+    byte[] genererSedPdf(SedDataDto sedDataDto, SedType sedType) throws MelosysException;
 }

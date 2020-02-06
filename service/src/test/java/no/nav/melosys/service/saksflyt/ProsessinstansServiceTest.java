@@ -3,6 +3,7 @@ package no.nav.melosys.service.saksflyt;
 import java.time.LocalDate;
 import java.util.*;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -110,14 +111,14 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansAnmodningOmUnntak() {
         final String mottakerInstitusjon = "SE:123";
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerInstitusjon);
+        service.opprettProsessinstansAnmodningOmUnntak(behandling, List.of(mottakerInstitusjon));
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.AOU_VALIDERING);
-        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKER)).isEqualTo(mottakerInstitusjon);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>(){}).get(0)).isEqualTo(mottakerInstitusjon);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
     }
 
@@ -127,14 +128,14 @@ public class ProsessinstansServiceTest {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         String mottakerInstitusjon = "DE:2332";
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
-        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", mottakerInstitusjon, vedtakstype, "BEGRUNNELSE");
+        service.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", List.of(mottakerInstitusjon), vedtakstype, "BEGRUNNELSE");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
-        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKER)).isEqualTo(mottakerInstitusjon);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>(){}).get(0)).isEqualTo(mottakerInstitusjon);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
         assertThat(Behandlingsresultattyper.valueOf(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
         assertThat(lagretInstans.getData(ProsessDataKey.REVURDER_BEGRUNNELSE)).isEqualTo("BEGRUNNELSE");
@@ -262,23 +263,21 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansJournalføring_medVedlegg_setterVedleggOgTitler() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
-        journalfoeringDto.setDokumentID("hovedDokumentID");
+        journalfoeringDto.getHoveddokument().setDokumentID("hovedDokumentID");
         List<DokumentDto> vedlegg = new ArrayList<>();
-        DokumentDto fysiskVedlegg = new DokumentDto("ID_F_01", "Fysisk");
+        DokumentDto fysiskVedlegg = new DokumentDto("dokID1", "tittel1");
         vedlegg.add(fysiskVedlegg);
-        DokumentDto logiskVedlegg_1 = new DokumentDto(null, "Logisk");
-        vedlegg.add(logiskVedlegg_1);
-        DokumentDto logiskVedlegg_2 = new DokumentDto("hovedDokumentID", "Logisk ??");
-        vedlegg.add(logiskVedlegg_2);
+        DokumentDto fysiskVedlegg2 = new DokumentDto("hovedDokumentID", "Logisk ??");
+        vedlegg.add(fysiskVedlegg2);
         journalfoeringDto.setVedlegg(vedlegg);
+        journalfoeringDto.getHoveddokument().getLogiskeVedlegg().add("tittel");
 
         Prosessinstans prosessinstans = service.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
-        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_1.getTittel());
-        assertThat(prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class)).contains(logiskVedlegg_2.getTittel());
-
-        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsOnlyKeys(fysiskVedlegg.getDokumentID());
-        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsValues(fysiskVedlegg.getTittel());
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsKeys(fysiskVedlegg.getDokumentID(), fysiskVedlegg2.getDokumentID());
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, Map.class)).containsValues(fysiskVedlegg.getTittel(), fysiskVedlegg2.getTittel());
+        List<String> logiskeVedlegg = prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, List.class);
+        assertThat(logiskeVedlegg).containsExactly("tittel");
     }
 
     @Test
@@ -315,7 +314,7 @@ public class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.SED_GENERELL_SAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getDokumentID());
+        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getHoveddokument().getDokumentID());
     }
 
     @Test
@@ -391,12 +390,11 @@ public class ProsessinstansServiceTest {
     private static JournalfoeringDto lagJournalfoeringDTO() {
         JournalfoeringDto journalfoeringDto = new JournalfoeringDto();
         journalfoeringDto.setJournalpostID("journalpostid");
-        journalfoeringDto.setDokumentID("dokumentid");
         journalfoeringDto.setOppgaveID("oppgaveid");
         journalfoeringDto.setBrukerID("brukerid");
         journalfoeringDto.setAvsenderID("avsenderid");
         journalfoeringDto.setAvsenderNavn("avsendernavn");
-        journalfoeringDto.setHoveddokumentTittel("hovedkokumenttittel");
+        journalfoeringDto.setHoveddokument(new DokumentDto("dokumentid", "hovedkokumenttittel"));
         return journalfoeringDto;
     }
 

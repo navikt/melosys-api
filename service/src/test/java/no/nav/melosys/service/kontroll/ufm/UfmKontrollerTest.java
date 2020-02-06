@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll.ufm;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Collections;
+import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
@@ -18,6 +19,8 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.Utbetaling;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
+import no.nav.melosys.domain.eessi.melding.Adresse;
+import no.nav.melosys.domain.eessi.melding.Arbeidssted;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
@@ -26,8 +29,6 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class UfmKontrollerTest {
-
-
     @Test
     public void feilIPeriode_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.feilIPeriode(kontrollData(null, null))).isEqualTo(Kontroll_begrunnelser.FEIL_I_PERIODEN);
@@ -93,6 +94,11 @@ public class UfmKontrollerTest {
         assertThat(UfmKontroller.personBosattINorge(kontrollData())).isEqualTo(Kontroll_begrunnelser.BOSATT_I_NORGE);
     }
 
+    @Test
+    public void arbeidssted_erSvalbard_verifiserBegrunnelse() {
+        assertThat(UfmKontroller.arbeidssted(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS);
+    }    
+
     private UfmKontrollData kontrollData() {
         return kontrollData(LocalDate.now().plusMonths(15), LocalDate.now().plusYears(10));
     }
@@ -102,6 +108,16 @@ public class UfmKontrollerTest {
         sedDokument.setLovvalgsperiode(new Periode(fom, tom));
         sedDokument.setLovvalgslandKode(Landkoder.NO);
         sedDokument.getStatsborgerskapKoder().add("US");
+        Adresse adresse_1 = new Adresse();
+        adresse_1.by = "By_1";
+        adresse_1.land = "XY";
+        Adresse adresse_2 = new Adresse();
+        adresse_2.by = "By_2";
+        adresse_2.land = "SJ";
+        Arbeidssted arbeidssted_1 = new Arbeidssted("sted1", adresse_1);
+        Arbeidssted arbeidssted_2 = new Arbeidssted("sted2", adresse_2);
+        List<Arbeidssted> arbeidssteder = List.of(arbeidssted_1, arbeidssted_2);
+        sedDokument.setArbeidssteder(arbeidssteder);
 
         PersonDokument personDokument = new PersonDokument();
         personDokument.dødsdato = LocalDate.now();
@@ -128,5 +144,4 @@ public class UfmKontrollerTest {
 
         return new UfmKontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
     }
-
 }

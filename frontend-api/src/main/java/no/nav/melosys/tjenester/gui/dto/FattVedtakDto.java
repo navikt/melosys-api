@@ -1,12 +1,14 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import java.util.List;
+
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 
 public class FattVedtakDto {
     private Behandlingsresultattyper behandlingsresultatTypeKode;
     private String fritekst;
-    private String mottakerinstitusjon;
+    private List<String> mottakerinstitusjoner;
     private Vedtakstyper vedtakstype;
     private String revurderBegrunnelse;
 
@@ -26,12 +28,12 @@ public class FattVedtakDto {
         this.fritekst = fritekst;
     }
 
-    public String getMottakerinstitusjon() {
-        return mottakerinstitusjon;
+    public List<String> getMottakerinstitusjoner() {
+        return mottakerinstitusjoner;
     }
 
-    public void setMottakerinstitusjon(String mottakerinstitusjon) {
-        this.mottakerinstitusjon = mottakerinstitusjon;
+    public void setMottakerinstitusjoner(List<String> mottakerinstitusjoner) {
+        this.mottakerinstitusjoner = mottakerinstitusjoner;
     }
 
     public Vedtakstyper getVedtakstype() {

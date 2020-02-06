@@ -1,9 +1,9 @@
 package no.nav.melosys.domain;
 
 
-import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
@@ -106,6 +106,15 @@ public class Fagsak extends RegistreringsInfo {
 
     public Aktoer hentBruker() throws TekniskException {
         return hentAktørMedRolleTypeBruker();
+    }
+
+    public List<Landkoder> hentMyndighetLandkoder() throws TekniskException {
+        List<Landkoder> landkoder = new ArrayList<>();
+        for (var myndighet : hentMyndigheter()) {
+            landkoder.add(myndighet.hentMyndighetLandkode());
+        }
+
+        return landkoder;
     }
 
     public List<Aktoer> hentMyndigheter() {

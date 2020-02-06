@@ -9,6 +9,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ public class BrevDataByggerVelger {
     private final VilkaarsresultatService vilkaarsresultatService;
     private final JoarkService joarkService;
     private final LandvelgerService landvelgerService;
+    private final UtpekingService utpekingService;
 
     @Autowired
     public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
@@ -32,7 +34,8 @@ public class BrevDataByggerVelger {
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
                                 VilkaarsresultatService vilkaarsresultatService,
                                 JoarkService joarkService,
-                                LandvelgerService landvelgerService) {
+                                LandvelgerService landvelgerService,
+                                UtpekingService utpekingService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -41,6 +44,7 @@ public class BrevDataByggerVelger {
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.joarkService = joarkService;
         this.landvelgerService = landvelgerService;
+        this.utpekingService = utpekingService;
     }
 
     // For brevbygging i saksflyt
@@ -71,6 +75,8 @@ public class BrevDataByggerVelger {
                                                     anmodningsperiodeService,
                                                     brevbestillingDto,
                                                     vilkaarsresultatService);
+            case ORIENTERING_UTPEKING_UTLAND:
+                return new BrevDataByggerUtpekingAnnetLand(utpekingService, brevbestillingDto);
             case ORIENTERING_VIDERESENDT_SOEKNAD:
                 return new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService, brevbestillingDto);
             case MELDING_HENLAGT_SAK:

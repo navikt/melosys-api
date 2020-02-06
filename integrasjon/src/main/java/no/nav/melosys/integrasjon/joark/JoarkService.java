@@ -131,6 +131,7 @@ public class JoarkService implements JoarkFasade {
         arkivDokument.setDokumentId(dokument.getDokumentId());
         arkivDokument.setTittel(dokument.getTittel());
         arkivDokument.setNavSkjemaID(dokument.getNavSkjemaId());
+        dokument.getLogiskVedleggListe().forEach(l -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(l.getLogiskVedleggTittel())));
         return arkivDokument;
     }
 
@@ -194,7 +195,7 @@ public class JoarkService implements JoarkFasade {
         arkivDokument.setTittel(detaljertDokumentinformasjon.getTittel());
 
         detaljertDokumentinformasjon.getSkannetInnholdListe()
-            .forEach(vedlegg -> arkivDokument.getInterneVedlegg().add(new ArkivDokumentVedlegg(vedlegg.getVedleggInnhold())));
+            .forEach(vedlegg -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(vedlegg.getVedleggInnhold())));
         return arkivDokument;
     }
 
@@ -211,6 +212,8 @@ public class JoarkService implements JoarkFasade {
     @Override
     public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
         throws SikkerhetsbegrensningException, TekniskException {
+
+        fjernEksisterendeLogiskeVedleggPåHovddokument(journalpostID);
 
         OppdaterJournalpostRequest.Builder request = new OppdaterJournalpostRequest.Builder()
             .medDatoMottatt(journalpostOppdatering.getMottattDato())
@@ -248,6 +251,16 @@ public class JoarkService implements JoarkFasade {
 
         if (forsøkFerdigstill) {
             journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
+        }
+    }
+
+    private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+        GetJournalpostResponse journalpost = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
+        if (!journalpost.getDokumentListe().isEmpty()) {
+            var hoveddokument = journalpost.getDokumentListe().get(0);
+            for (var logiskVedlegg : hoveddokument.getLogiskVedleggListe()) {
+                journalpostapiConsumer.fjernLogiskeVedlegg(hoveddokument.getDokumentId(), logiskVedlegg.getLogiskVedleggId());
+            }
         }
     }
 

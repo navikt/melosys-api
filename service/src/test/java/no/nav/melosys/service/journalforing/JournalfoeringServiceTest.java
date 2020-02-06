@@ -3,13 +3,13 @@ package no.nav.melosys.service.journalforing;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -57,25 +57,23 @@ public class JournalfoeringServiceTest {
         this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
-        opprettDto.setDokumentID("setDokumentID");
         opprettDto.setOppgaveID("setOppgaveID");
         opprettDto.setAvsenderNavn("setAvsenderNavn");
         opprettDto.setAvsenderID("setAvsenderID");
         opprettDto.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
         opprettDto.setBrukerID("setBrukerID");
-        opprettDto.setHoveddokumentTittel("setDokumenttittel");
+        opprettDto.setHoveddokument(new DokumentDto("3333","setDokumenttittel"));
         opprettDto.setArbeidsgiverID("123456789");
         opprettDto.setBehandlingstypeKode(Behandlingstyper.SOEKNAD.getKode());
 
         tilordneDto = new JournalfoeringTilordneDto();
         tilordneDto.setJournalpostID("setJournalpostID");
-        tilordneDto.setDokumentID("setDokumentID");
         tilordneDto.setOppgaveID("setOppgaveID");
         tilordneDto.setAvsenderNavn("setAvsenderNavn");
         tilordneDto.setAvsenderID("setAvsenderID");
         tilordneDto.setAvsenderType(Avsendertyper.PERSON);
         tilordneDto.setBrukerID("setBrukerID");
-        tilordneDto.setHoveddokumentTittel("setDokumenttittel");
+        tilordneDto.setHoveddokument(new DokumentDto("123", "setDokumenttittel"));
 
         journalfoeringSedDto = new JournalfoeringSedDto();
         journalfoeringSedDto.setBrukerID("brukerID");

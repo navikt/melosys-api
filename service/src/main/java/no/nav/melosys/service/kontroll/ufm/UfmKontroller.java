@@ -3,13 +3,9 @@ package no.nav.melosys.service.kontroll.ufm;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.service.kontroll.MedlemskapKontroller;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
-import no.nav.melosys.service.kontroll.PersonKontroller;
-import no.nav.melosys.service.kontroll.YtelseKontroller;
+import no.nav.melosys.service.kontroll.*;
 
 final class UfmKontroller {
-
     private UfmKontroller() {
     }
 
@@ -71,7 +67,6 @@ final class UfmKontroller {
     static Kontroll_begrunnelser overlappendeMedlemsperiode(UfmKontrollData kontrollData) {
         LocalDate fom = kontrollData.getSedDokument().getLovvalgsperiode().getFom();
         LocalDate tom = kontrollData.getSedDokument().getLovvalgsperiode().getTom();
-
         return MedlemskapKontroller.overlappendeMedlemsperiodeIkkeAvvistPeriode(fom, tom, kontrollData.getMedlemskapDokument()) ?
             Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
@@ -89,5 +84,10 @@ final class UfmKontroller {
     static Kontroll_begrunnelser personBosattINorge(UfmKontrollData kontrollData) {
         return PersonKontroller.personBosattINorge(kontrollData.getPersonDokument()) ?
             Kontroll_begrunnelser.BOSATT_I_NORGE : null;
+    }
+
+    static Kontroll_begrunnelser arbeidssted(UfmKontrollData kontrollData) {
+        return ArbeidsstedKontroller.arbeidstedSvalbardOgJanMayen(kontrollData.getSedDokument()) ?
+            Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
     }
 }

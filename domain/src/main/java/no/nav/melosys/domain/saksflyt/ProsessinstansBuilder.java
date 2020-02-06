@@ -1,7 +1,10 @@
 package no.nav.melosys.domain.saksflyt;
 
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 public class ProsessinstansBuilder {
     private ProsessType type;
@@ -9,7 +12,7 @@ public class ProsessinstansBuilder {
     private Behandling behandling;
     private Object begrunnelser;
     private String begrunnelseFritekst;
-    private String eessiMottaker;
+    private List<String> eessiMottakere;
 
     public ProsessinstansBuilder medType(ProsessType type) {
         this.type = type;
@@ -36,8 +39,8 @@ public class ProsessinstansBuilder {
         return this;
     }
 
-    public ProsessinstansBuilder medEessiMottaker(String eessiMottaker) {
-        this.eessiMottaker = eessiMottaker;
+    public ProsessinstansBuilder medEessiMottakere(List<String> eessiMottakere) {
+        this.eessiMottakere = eessiMottakere;
         return this;
     }
 
@@ -53,8 +56,8 @@ public class ProsessinstansBuilder {
         if (StringUtils.isNotEmpty(begrunnelseFritekst)) {
             pi.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
         }
-        if (StringUtils.isNotEmpty(eessiMottaker)) {
-            pi.setData(ProsessDataKey.EESSI_MOTTAKER, eessiMottaker);
+        if (!CollectionUtils.isEmpty(eessiMottakere)) {
+            pi.setData(ProsessDataKey.EESSI_MOTTAKERE, eessiMottakere);
         }
         return pi;
     }

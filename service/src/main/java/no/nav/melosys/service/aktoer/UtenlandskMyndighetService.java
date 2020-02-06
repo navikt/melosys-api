@@ -89,4 +89,18 @@ public class UtenlandskMyndighetService {
         return utenlandskMyndighet.landkode
             + (utenlandskMyndighet.institusjonskode == null ? "" : ":" + utenlandskMyndighet.institusjonskode);
     }
+
+    public UtenlandskMyndighet hentUtenlandskMyndighetForInstitusjonsId(String institusjonsId) throws TekniskException {
+        if (institusjonsId == null) {
+            return null;
+        }
+        try {
+            Landkoder landkode = !institusjonsId.contains(":")
+                ? Landkoder.valueOf(institusjonsId)
+                : Landkoder.valueOf(institusjonsId.substring(0, institusjonsId.indexOf(":")));
+            return hentUtenlandskMyndighet(landkode);
+        } catch (IllegalArgumentException e) {
+            throw new TekniskException("Finner ikke utenlandskMyndighet for institusjonsId " + institusjonsId + ".");
+        }
+    }
 }

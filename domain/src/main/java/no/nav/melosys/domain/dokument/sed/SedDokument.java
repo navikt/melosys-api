@@ -11,38 +11,27 @@ import no.nav.melosys.domain.dokument.jaxb.LovvalgBestemmelseXmlAdapter;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.melding.Arbeidssted;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 
 @XmlRootElement
 public class SedDokument implements SaksopplysningDokument {
-
     private String rinaSaksnummer;
-
     private String rinaDokumentID;
-
     private String fnr;
-
     private Periode lovvalgsperiode;
-
     @XmlJavaTypeAdapter(LovvalgBestemmelseXmlAdapter.class)
     private LovvalgBestemmelse lovvalgBestemmelse;
-
     private Landkoder lovvalgslandKode;
-
     @XmlJavaTypeAdapter(LovvalgBestemmelseXmlAdapter.class)
     private LovvalgBestemmelse unntakFraLovvalgBestemmelse;
-
     private Landkoder unntakFraLovvalgslandKode;
-
     private boolean erEndring;
-
     private SedType sedType;
-
     private BucType bucType;
-
     private List<String> statsborgerskapKoder = new ArrayList<>();
-
+    private List<Arbeidssted> arbeidssteder = new ArrayList<>();
     private boolean erElektronisk = true;
 
     public String getRinaSaksnummer() {
@@ -125,6 +114,14 @@ public class SedDokument implements SaksopplysningDokument {
 
     public void setStatsborgerskapKoder(List<String> statsborgerskapKoder) {
         this.statsborgerskapKoder = statsborgerskapKoder;
+    }
+
+    public List<Arbeidssted> getArbeidssteder() {
+        return arbeidssteder;
+    }
+
+    public void setArbeidssteder(List<Arbeidssted> arbeidssteder) {
+        this.arbeidssteder = arbeidssteder;
     }
 
     public SedType getSedType() {

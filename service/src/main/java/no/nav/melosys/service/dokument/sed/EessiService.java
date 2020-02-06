@@ -1,8 +1,7 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -15,11 +14,12 @@ import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Primary
 @Service
@@ -59,11 +60,11 @@ public class EessiService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public void opprettOgSendSed(long behandlingID, String mottakerInstitusjon, BucType bucType) throws MelosysException {
-        opprettOgSendSed(behandlingID, mottakerInstitusjon, bucType, null);
+    public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType) throws MelosysException {
+        opprettOgSendSed(behandlingID, mottakerInstitusjoner, bucType, null);
     }
 
-    public void opprettOgSendSed(long behandlingID, String mottakerInstitusjon, BucType bucType, byte[] vedlegg) throws MelosysException {
+    public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType, byte[] vedlegg) throws MelosysException {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -72,7 +73,7 @@ public class EessiService {
 
             SedDataGrunnlag datagrunnlag = dataGrunnlagFactory.av(behandling);
             SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
-            sedData.setMottakerId(mottakerInstitusjon);
+            sedData.setMottakerIder(mottakerInstitusjoner);
             sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
             log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
@@ -83,17 +84,16 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId) throws MelosysException {
-        return opprettBucOgSed(behandling, bucType, mottakerLand, mottakerId, null);
+    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId) throws MelosysException {
+        return opprettBucOgSed(behandling, bucType, mottakerId, null);
     }
 
-    private String opprettBucOgSed(Behandling behandling, BucType bucType, String mottakerLand, String mottakerId, byte[] vedlegg) throws MelosysException {
+    private String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId, byte[] vedlegg) throws MelosysException {
         if (skalSendeSed) {
             SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
-            sedDataDto.setMottakerLand(mottakerLand);
-            sedDataDto.setMottakerId(mottakerId);
+            sedDataDto.setMottakerIder(mottakerId);
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
             log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
@@ -160,7 +160,7 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public byte[] genererSedForhåndsvisning(long behandlingID, SedType sedType) throws MelosysException {
+    public byte[] genererSedPdf(long behandlingID, SedType sedType) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -174,7 +174,7 @@ public class EessiService {
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
-        return eessiConsumer.genererSedForhåndsvisning(sedDataDto, sedType);
+        return eessiConsumer.genererSedPdf(sedDataDto, sedType);
     }
 
     public SedType hentSedTypeForAnmodningUnntakSvar(Long behandlingID) throws IkkeFunnetException {
@@ -191,23 +191,73 @@ public class EessiService {
         return SedType.A002;
     }
 
-    public String hentMottakerinstitusjonFraBuc(Fagsak fagsak, BucType bucType) throws MelosysException {
+    public List<String> hentMottakerinstitusjonerFraBuc(Fagsak fagsak, BucType bucType) throws MelosysException {
         Long gsakSaksnummer = fagsak.getGsakSaksnummer();
-        String landkode = fagsak.hentMyndighetLandkode().getKode();
+        List<String> landkoder = fagsak.hentMyndighetLandkoder().stream()
+            .map(Landkoder::getKode).collect(Collectors.toList());
 
         List<BucInformasjon> bucer = hentTilknyttedeBucer(gsakSaksnummer, List.of("sendt")).stream()
             .filter(buc -> bucType.name().equalsIgnoreCase(buc.getBucType())).collect(Collectors.toList());
 
-        List<String> mottakerinstitusjoner = bucer.stream()
+        return bucer.stream()
             .flatMap(buc -> buc.getMottakerinstitusjoner().stream())
-            .filter(inst -> inst.toLowerCase().startsWith(landkode.toLowerCase())) // Mottakerinstitusjoner har format LANDKODE:ID
+            .filter(starterMedEnAv(landkoder)) // Mottakerinstitusjoner har format LANDKODE:ID
             .distinct().collect(Collectors.toList());
+    }
 
-        if (mottakerinstitusjoner.size() > 1) {
-            throw new TekniskException("Flere mottakerinstitusjoner er satt");
+    private Predicate<String> starterMedEnAv(List<String> landkoder) {
+        return inst -> landkoder.stream()
+            .anyMatch(landkode -> inst.toLowerCase().startsWith(landkode.toLowerCase()));
+    }
+
+    /**
+     * Avklarer om alle land er påkoblet bestemt BUC.
+     * Hvis minst et land ikke er påkoblet - returner tom liste. Det skal ikke åpnes BUC med valgte land som mottakere da ikke alle er påkoblet
+     * Hvis alle er påkoblet - valider at det er satt nøyaktig èn institusjon for hvert land, returner dermed liste med validerte institusjoner
+     */
+    public List<String> validerOgAvklarMottakerInstitusjonerForBuc(final List<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
+
+        Map<Landkoder, Collection<String>> institusjonerPerLand = new EnumMap<>(Landkoder.class);
+
+        for (var land : mottakerland) {
+            Collection<String> alleInstitusjonerForLand = hentEessiMottakerinstitusjoner(bucType.name(), land.getKode())
+                .stream().map(Institusjon::getId).collect(Collectors.toList());
+            if (alleInstitusjonerForLand.isEmpty()) {
+                log.info("{} er ikke EESSI-ready, skal ikke sendes SED", land.getBeskrivelse());
+                return Collections.emptyList();
+            }
+
+            institusjonerPerLand.put(land, alleInstitusjonerForLand);
         }
 
-        return mottakerinstitusjoner.stream().findFirst()
-            .orElseThrow(() -> new TekniskException("MottakerInstitusjon er ikke satt"));
+        validerMottakerInstitusjonerForLand(mottakerland, valgteMottakerinstitusjoner, institusjonerPerLand);
+        return valgteMottakerinstitusjoner;
+    }
+
+    private void validerMottakerInstitusjonerForLand(Collection<Landkoder> mottakerland,
+                                                     Collection<String> valgteMottakerinstitusjoner,
+                                                     Map<Landkoder, Collection<String>> institusjonerPerLand) throws FunksjonellException {
+
+        List<String> validerteMottakerinstitusjoner = new ArrayList<>();
+        StringBuilder feilmelding = new StringBuilder();
+        for (var land : mottakerland) {
+
+            Collection<String> alleInstitusjonerForLand = institusjonerPerLand.get(land);
+            String validertInstitusjon = CollectionUtils.findFirstMatch(alleInstitusjonerForLand, valgteMottakerinstitusjoner);
+
+            if (validertInstitusjon == null) {
+                feilmelding.append("Finner ingen gyldig mottakerinstitusjon for arbeidsland ")
+                    .append(land.getBeskrivelse()).append(System.lineSeparator());
+            } else {
+                validerteMottakerinstitusjoner.add(validertInstitusjon);
+            }
+        }
+
+        if (feilmelding.length() != 0) {
+            throw new FunksjonellException(feilmelding.toString());
+        } else if (valgteMottakerinstitusjoner.size() != validerteMottakerinstitusjoner.size()) {
+            throw new FunksjonellException("Kan kun velge en mottakerinstitusjon per land. Validerte mottakere: " + validerteMottakerinstitusjoner
+                + ". Valgte mottakere " + valgteMottakerinstitusjoner);
+        }
     }
 }

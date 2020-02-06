@@ -12,13 +12,13 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -47,16 +47,19 @@ public class FagsakTjeneste {
     private final SaksopplysningerService saksopplysningerService;
     private final SoeknadService søknadService;
     private final TilgangService tilgangService;
+    private final UtpekingService utpekingService;
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService,
                           SaksopplysningerService saksopplysningerService,
                           SoeknadService soeknadService,
-                          TilgangService tilgangService) {
+                          TilgangService tilgangService,
+                          UtpekingService utpekingService) {
         this.fagsakService = fagsakService;
         this.saksopplysningerService = saksopplysningerService;
         this.søknadService = soeknadService;
         this.tilgangService = tilgangService;
+        this.utpekingService = utpekingService;
     }
 
     @GetMapping("{saksnr}")
@@ -133,6 +136,18 @@ public class FagsakTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.getAktivBehandling());
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{saksnummer}/utpek")
+    @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
+    public ResponseEntity utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
+                                            @RequestBody UtpekDto utpekDto) throws MelosysException {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        tilgangService.sjekkSak(fagsak);
+
+        utpekingService.utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner());
 
         return ResponseEntity.noContent().build();
     }
