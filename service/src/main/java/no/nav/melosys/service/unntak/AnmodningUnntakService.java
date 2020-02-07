@@ -1,10 +1,12 @@
 package no.nav.melosys.service.unntak;
 
+import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -20,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Service
 public class AnmodningUnntakService {
@@ -49,27 +50,21 @@ public class AnmodningUnntakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntak(long behandlingID, String mottakerInstitusjon) throws MelosysException {
-        validerMottakerInstitusjon(behandlingID, mottakerInstitusjon);
+    public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon) throws MelosysException {
+        List<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerInstitusjon);
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerMottakerInstitusjon(long behandlingID, String mottakerInstitusjon) throws MelosysException {
-        String landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
-            .orElseThrow(() -> new FunksjonellException("Finner ikke utenlandsk myndighet for behandling " + behandlingID)).getKode();
-        String bucType = BucType.LA_BUC_01.name();
-        if (eessiService.landErEessiReady(bucType, landkode)) {
-            if (StringUtils.isEmpty(mottakerInstitusjon)) {
-                throw new FunksjonellException(String.format("%s er EESSI-ready, men mottakerinstitusjon er ikke definert", landkode));
-            } else if (!eessiService.erGyldigInstitusjonForLand(bucType, landkode, mottakerInstitusjon)) {
-                throw new FunksjonellException(String.format("MottakerID %s er ugyldig for land %s", mottakerInstitusjon, landkode));
-            }
-        }
+    private List<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) throws MelosysException {
+        Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
+            .orElseThrow(() -> new FunksjonellException("Finner ikke utenlandsk myndighet for behandling " + behandlingID));
+
+        return eessiService.validerOgAvklarMottakerInstitusjonerForBuc(List.of(mottakerinstitusjon), List.of(landkode), BucType.LA_BUC_01);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
