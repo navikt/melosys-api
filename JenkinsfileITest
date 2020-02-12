@@ -44,7 +44,7 @@ node {
                 certificate(credentialsId: 'T8_KEYSTORE', keystoreVariable: 'KEYSTORE', passwordVariable: 'KEYSTORE_PASSWORD'),
                 string(credentialsId: 'MELOSYS_LDAP_Q2', variable: 'ldapTestPassword')
             ]) {
-                env.testDb = "jdbc:oracle:thin:@d26dbfl029.test.local:1521/melosys_t13"
+                env.testDb = "jdbc:oracle:thin:@a01dbfl042.adeo.no:1521/melosys_q3"
                 env.testUsername = dbusername
                 env.testPassword = dbpassword
                 env.stsTestPassword = stsTestPassword
