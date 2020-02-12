@@ -1,6 +1,9 @@
 package no.nav.melosys.domain;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
@@ -57,6 +60,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>(1);
+
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Registerkontroll> registerkontroller = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
@@ -163,6 +169,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setBehandlingsresultatBegrunnelser(Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser) {
         this.behandlingsresultatBegrunnelser = behandlingsresultatBegrunnelser;
+    }
+
+    public Set<Registerkontroll> getRegisterkontroller() {
+        return registerkontroller;
+    }
+
+    public void setRegisterkontroller(Set<Registerkontroll> registerkontroller) {
+        this.registerkontroller = registerkontroller;
     }
 
     @Override

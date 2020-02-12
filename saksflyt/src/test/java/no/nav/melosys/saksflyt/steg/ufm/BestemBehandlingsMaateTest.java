@@ -1,17 +1,15 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.Registerkontroll;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +19,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -29,22 +26,20 @@ public class BestemBehandlingsMaateTest {
 
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
-    @Mock
-    private AvklarteFaktaRepository avklarteFaktaRepository;
 
     private BestemBehandlingsMaate bestemBehandlingsMaate;
 
     @Before
     public void setUp() {
-        bestemBehandlingsMaate = new BestemBehandlingsMaate(behandlingsresultatRepository, avklarteFaktaRepository);
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        bestemBehandlingsMaate = new BestemBehandlingsMaate(behandlingsresultatRepository);
     }
 
     @Test
     public void utførSteg_ingenTreffIRegister_verifiserNesteSteg() throws Exception {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(1L);
+        when(behandlingsresultatRepository.findWithSaksbehandlingById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+
         Prosessinstans prosessinstans = hentProsessinstans();
         bestemBehandlingsMaate.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
@@ -52,15 +47,13 @@ public class BestemBehandlingsMaateTest {
 
     @Test
     public void utførSteg_treffIRegister_verifiserNesteSteg() throws Exception {
+        Registerkontroll registerkontroll = new Registerkontroll();
+        registerkontroll.setBegrunnelse(Kontroll_begrunnelser.FEIL_I_PERIODEN);
 
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
-        AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
-        registrering.setBegrunnelseKode(Kontroll_begrunnelser.FEIL_I_PERIODEN.getKode());
-        avklartefakta.getRegistreringer().add(registrering);
-
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE)))
-            .thenReturn(Optional.of(avklartefakta));
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(1L);
+        behandlingsresultat.setRegisterkontroller(Set.of(registerkontroll));
+        when(behandlingsresultatRepository.findWithSaksbehandlingById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
         Prosessinstans prosessinstans = hentProsessinstans();
         bestemBehandlingsMaate.utfør(prosessinstans);
