@@ -22,11 +22,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+import static org.springframework.util.ClassUtils.convertClassNameToResourcePath;
+
 @SuppressWarnings("unused")
 public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
     private static final Logger log = LoggerFactory.getLogger(V1_1_05__SAKSOPPLYSNING_data.class);
-
-    private static final String DB_FLYWAY_MIGRATION_TESTDATA_XML = "db/local/testdata/xml";
 
     private final ResourcePatternResolver resourcePatternResolver;
     private int currentRowNum = 0;
@@ -37,6 +37,7 @@ public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
 
     @Override
     public void migrate(Context context) throws Exception {
+        final String DB_FLYWAY_MIGRATION_TESTDATA_XML = convertClassNameToResourcePath(getClass().getPackageName()) + "/xml";
         Resource resource = new DefaultResourceLoader().getResource("classpath:" + DB_FLYWAY_MIGRATION_TESTDATA_XML);
         if (!resource.exists()) {
             throw new IOException("Filområdet for Flyway-migreringstestdata script finnes ikke : " + DB_FLYWAY_MIGRATION_TESTDATA_XML);

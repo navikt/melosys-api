@@ -18,6 +18,7 @@
       <env name="testUsername" value="CHANGEME_DB_USERNAME" />
       <env name="testPassword" value="CHANGEME_DB_PASSWORD" />
       <env name="stsTestPassword" value="CHANGEME_SYSTEMUSER_PASSWORD" />
+      <env name="ldapTestPassword" value="CHANGEME_LDAP_PASSWORD" />
     </envs>
     <method v="2">
       <option name="Make" enabled="true" />

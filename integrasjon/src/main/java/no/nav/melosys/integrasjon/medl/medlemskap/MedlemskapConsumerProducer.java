@@ -6,6 +6,7 @@ import no.nav.tjeneste.virksomhet.medlemskap.v2.MedlemskapV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SYSTEM_SAML;
 
@@ -20,10 +21,17 @@ public class MedlemskapConsumerProducer {
         this.config = config;
     }
 
+    @Profile("!itest")
     @Bean
     MedlemskapConsumer medlemskapConsumer() {
         MedlemskapV2 port = wrapWithSts(config.getPort(), SYSTEM_SAML);
         return new MedlemskapConsumerImpl(port);
+    }
+
+    @Profile("itest")
+    @Bean
+    MedlemskapConsumer medlemskapConsumerMock() {
+        return new MedlemskapConsumerMock();
     }
 
     private MedlemskapV2 wrapWithSts(MedlemskapV2 port, NAVSTSClient.StsClientType samlTokenType) {

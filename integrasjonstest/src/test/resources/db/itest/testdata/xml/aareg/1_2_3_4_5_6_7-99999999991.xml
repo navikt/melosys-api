@@ -1,0 +1,194 @@
+<ns2:finnArbeidsforholdPrArbeidstakerResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3">
+    <parameters>
+        <arbeidsforhold applikasjonsID="KONVERTERING" endretAv="EDAG-1456"
+                        endringstidspunkt="2015-05-31T14:43:22.488+02:00"
+                        opprettelsestidspunkt="2014-12-13T15:02:35.399+01:00" opprettetAv="BAAREG002"
+                        sistBekreftet="1979-07-15T00:00:00.000+01:00">
+            <arbeidsforholdID>konvertert_97a38348-1041-4037-9ebe-f00aea12b1a8</arbeidsforholdID>
+            <arbeidsforholdIDnav>12498433</arbeidsforholdIDnav>
+            <ansettelsesPeriode applikasjonsID="KONVERTERING" endretAv="BAAREG002"
+                                endringstidspunkt="2014-12-13T15:02:35.399+01:00" fomBruksperiode="2014-12-13+01:00">
+                <periode>
+                    <fom>1978-08-19T00:00:00.000+01:00</fom>
+                    <tom>1979-07-15T00:00:00.000+01:00</tom>
+                </periode>
+            </ansettelsesPeriode>
+            <arbeidsforholdstype kodeRef="ordinaertArbeidsforhold">Ordinært arbeidsforhold</arbeidsforholdstype>
+            <arbeidsavtale applikasjonsID="KONVERTERING" endretAv="BAAREG002"
+                           endringstidspunkt="2014-12-13T15:02:35.399+01:00" fomBruksperiode="2014-12-13+01:00"
+                           fomGyldighetsperiode="1978-08-01T00:00:00.000+01:00">
+                <yrke kodeRef="INGEN_YRKESKODE"/>
+                <beregnetAntallTimerPrUke>19.0</beregnetAntallTimerPrUke>
+                <endringsdatoStillingsprosent>1978-08-19+01:00</endringsdatoStillingsprosent>
+            </arbeidsavtale>
+            <arbeidsgiver xsi:type="ns4:Organisasjon"
+                          xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>910253158</orgnummer>
+            </arbeidsgiver>
+            <arbeidstaker>
+                <ident>
+                    <ident>99999999991</ident>
+                </ident>
+            </arbeidstaker>
+            <opplysningspliktig xsi:type="ns4:Organisasjon"
+                                xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>68628695001</orgnummer>
+            </opplysningspliktig>
+            <arbeidsforholdInnrapportertEtterAOrdningen>false</arbeidsforholdInnrapportertEtterAOrdningen>
+        </arbeidsforhold>
+        <arbeidsforhold applikasjonsID="KONVERTERING" endretAv="EDAG-1456"
+                        endringstidspunkt="2015-05-31T14:43:22.488+02:00"
+                        opprettelsestidspunkt="2014-12-13T15:02:35.399+01:00" opprettetAv="BAAREG002"
+                        sistBekreftet="1980-08-01T00:00:00.000+02:00">
+            <arbeidsforholdID>konvertert_8d5297c3-a409-4fcf-a41f-6a8c95b42dce</arbeidsforholdID>
+            <arbeidsforholdIDnav>12498435</arbeidsforholdIDnav>
+            <ansettelsesPeriode applikasjonsID="KONVERTERING" endretAv="BAAREG002"
+                                endringstidspunkt="2014-12-13T15:02:35.399+01:00" fomBruksperiode="2014-12-13+01:00">
+                <periode>
+                    <fom>1980-06-23T00:00:00.000+02:00</fom>
+                    <tom>1980-08-01T00:00:00.000+02:00</tom>
+                </periode>
+            </ansettelsesPeriode>
+            <arbeidsforholdstype kodeRef="ordinaertArbeidsforhold">Ordinært arbeidsforhold</arbeidsforholdstype>
+            <arbeidsavtale applikasjonsID="KONVERTERING" endretAv="BAAREG002"
+                           endringstidspunkt="2014-12-13T15:02:35.399+01:00" fomBruksperiode="2014-12-13+01:00"
+                           fomGyldighetsperiode="1980-06-01T00:00:00.000+02:00">
+                <yrke kodeRef="INGEN_YRKESKODE"/>
+                <beregnetAntallTimerPrUke>37.5</beregnetAntallTimerPrUke>
+                <endringsdatoStillingsprosent>1980-06-23+02:00</endringsdatoStillingsprosent>
+            </arbeidsavtale>
+            <arbeidsgiver xsi:type="ns4:Organisasjon"
+                          xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>967032271</orgnummer>
+            </arbeidsgiver>
+            <arbeidstaker>
+                <ident>
+                    <ident>99999999991</ident>
+                </ident>
+            </arbeidstaker>
+            <opplysningspliktig xsi:type="ns4:Organisasjon"
+                                xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>951237116</orgnummer>
+            </opplysningspliktig>
+            <arbeidsforholdInnrapportertEtterAOrdningen>false</arbeidsforholdInnrapportertEtterAOrdningen>
+        </arbeidsforhold>
+        <arbeidsforhold applikasjonsID="KONVERTERING" endretAv="EDAG-1456"
+                        endringstidspunkt="2015-05-31T14:43:22.488+02:00"
+                        opprettelsestidspunkt="2014-12-13T15:02:35.399+01:00" opprettetAv="BAAREG002"
+                        sistBekreftet="1981-07-31T00:00:00.000+02:00">
+            <arbeidsforholdID>konvertert_9936a0a6-f990-40bb-92a4-cb8509686d6c</arbeidsforholdID>
+            <arbeidsforholdIDnav>12498436</arbeidsforholdIDnav>
+            <ansettelsesPeriode applikasjonsID="KONVERTERING" endretAv="BAAREG002"
+                                endringstidspunkt="2014-12-13T15:02:35.399+01:00" fomBruksperiode="2014-12-13+01:00">
+                <periode>
+                    <fom>1981-06-22T00:00:00.000+02:00</fom>
+                    <tom>1981-07-31T00:00:00.000+02:00</tom>
+                </periode>
+            </ansettelsesPeriode>
+            <arbeidsforholdstype kodeRef="ordinaertArbeidsforhold">Ordinært arbeidsforhold</arbeidsforholdstype>
+            <arbeidsavtale applikasjonsID="KONVERTERING" endretAv="BAAREG002"
+                           endringstidspunkt="2014-12-13T15:02:35.399+01:00" fomBruksperiode="2014-12-13+01:00"
+                           fomGyldighetsperiode="1981-06-01T00:00:00.000+02:00">
+                <yrke kodeRef="INGEN_YRKESKODE"/>
+                <beregnetAntallTimerPrUke>37.5</beregnetAntallTimerPrUke>
+                <endringsdatoStillingsprosent>1981-06-22+02:00</endringsdatoStillingsprosent>
+            </arbeidsavtale>
+            <arbeidsgiver xsi:type="ns4:Organisasjon"
+                          xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>967170234</orgnummer>
+            </arbeidsgiver>
+            <arbeidstaker>
+                <ident>
+                    <ident>99999999991</ident>
+                </ident>
+            </arbeidstaker>
+            <opplysningspliktig xsi:type="ns4:Organisasjon"
+                                xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>951237116</orgnummer>
+            </opplysningspliktig>
+            <arbeidsforholdInnrapportertEtterAOrdningen>false</arbeidsforholdInnrapportertEtterAOrdningen>
+        </arbeidsforhold>
+        <arbeidsforhold applikasjonsID="EDAG" endretAv="srvappserver" endringstidspunkt="2017-06-28T14:31:32.102+02:00"
+                        opphavREF="eda00000-0000-0000-0000-000641358209"
+                        opprettelsestidspunkt="2015-02-02T14:31:53.927+01:00" opprettetAv="srvappserver"
+                        sistBekreftet="2017-06-28T14:01:30.000+02:00">
+            <arbeidsforholdID>V995816598R69435S1001L0001</arbeidsforholdID>
+            <arbeidsforholdIDnav>34697962</arbeidsforholdIDnav>
+            <ansettelsesPeriode applikasjonsID="EDAG" endretAv="srvappserver"
+                                endringstidspunkt="2015-02-02T14:31:53.927+01:00" fomBruksperiode="2015-02-02+01:00"
+                                opphavREF="e090c86a-9d6b-4264-96b9-964b40e619bf">
+                <periode>
+                    <fom>2013-11-01T00:00:00.000+01:00</fom>
+                </periode>
+            </ansettelsesPeriode>
+            <arbeidsforholdstype kodeRef="ordinaertArbeidsforhold">Ordinært arbeidsforhold</arbeidsforholdstype>
+            <antallTimerForTimeloennet applikasjonsID="EDAG" endretAv="srvappserver"
+                                       endringstidspunkt="2015-07-07T09:18:44.689+02:00"
+                                       opphavREF="d073519c-fac7-480c-b3fb-d2a8dba5203a">
+                <periode>
+                    <fom>2015-04-30T00:00:00.000+02:00</fom>
+                    <tom>2015-04-30T00:00:00.000+02:00</tom>
+                </periode>
+                <antallTimer>2.0</antallTimer>
+                <rapporteringsperiode>2015-06+02:00</rapporteringsperiode>
+            </antallTimerForTimeloennet>
+            <antallTimerForTimeloennet applikasjonsID="EDAG" endretAv="srvappserver"
+                                       endringstidspunkt="2015-07-16T08:51:25.444+02:00"
+                                       opphavREF="55428fdf-5939-4b93-b272-45a31bfea338">
+                <periode>
+                    <fom>2015-06-16T00:00:00.000+02:00</fom>
+                    <tom>2015-06-16T00:00:00.000+02:00</tom>
+                </periode>
+                <antallTimer>2.0</antallTimer>
+                <rapporteringsperiode>2015-07+02:00</rapporteringsperiode>
+            </antallTimerForTimeloennet>
+            <antallTimerForTimeloennet applikasjonsID="EDAG" endretAv="srvappserver"
+                                       endringstidspunkt="2016-05-13T10:32:35.201+02:00"
+                                       opphavREF="eda00000-0000-0000-0000-000009016460">
+                <periode>
+                    <fom>2016-04-18T00:00:00.000+02:00</fom>
+                    <tom>2016-04-18T00:00:00.000+02:00</tom>
+                </periode>
+                <antallTimer>2.0</antallTimer>
+                <rapporteringsperiode>2016-05+02:00</rapporteringsperiode>
+            </antallTimerForTimeloennet>
+            <arbeidsavtale applikasjonsID="EDAG" endretAv="srvappserver"
+                           endringstidspunkt="2016-01-12T16:35:21.100+01:00" fomBruksperiode="2016-01-12+01:00"
+                           fomGyldighetsperiode="2015-12-01T00:00:00.000+01:00"
+                           opphavREF="7cb24f71-5cdb-445e-bb00-4b6bdbeb772e">
+                <arbeidstidsordning kodeRef="doegnkontinuerligSkiftOgTurnus355">Døgnkontinuerlig skiftarbeid og
+                    turnusarbeid (35,5 t/u)
+                </arbeidstidsordning>
+                <avloenningstype kodeRef="fast">Fastlønn</avloenningstype>
+                <yrke kodeRef="5132101">HJELPEPLEIER</yrke>
+                <avtaltArbeidstimerPerUke>35.5</avtaltArbeidstimerPerUke>
+                <stillingsprosent>62.44</stillingsprosent>
+                <sisteLoennsendringsdato>2014-05-01+02:00</sisteLoennsendringsdato>
+                <beregnetAntallTimerPrUke>22.1662</beregnetAntallTimerPrUke>
+                <endringsdatoStillingsprosent>2013-11-01+01:00</endringsdatoStillingsprosent>
+            </arbeidsavtale>
+            <arbeidsgiver xsi:type="ns4:Organisasjon"
+                          xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>967170234</orgnummer>
+            </arbeidsgiver>
+            <arbeidstaker>
+                <ident>
+                    <ident>99999999991</ident>
+                </ident>
+            </arbeidstaker>
+            <opplysningspliktig xsi:type="ns4:Organisasjon"
+                                xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>964338531</orgnummer>
+            </opplysningspliktig>
+            <arbeidsforholdInnrapportertEtterAOrdningen>true</arbeidsforholdInnrapportertEtterAOrdningen>
+        </arbeidsforhold>
+    </parameters>
+</ns2:finnArbeidsforholdPrArbeidstakerResponse>

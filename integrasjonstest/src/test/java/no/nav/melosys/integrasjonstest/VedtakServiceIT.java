@@ -34,6 +34,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
+import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testsubjekter.AVKLART_ARBEIDSGIVER_ORGNR;
 import static no.nav.melosys.integrasjonstest.felles.verifisering.ForventetDokumentBestilling.forventDokument;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -48,7 +49,6 @@ public class VedtakServiceIT {
     private static final String SKATTEETATEN_ORGNR = "974761076";
 
     private static final String INSTITUSJONSKODE_ØSTERRIKET = "AT:9600";
-    private static final String AVKLART_ARBEIDSGIVER_ORGNR = "982683955";
 
     @MockBean
     JoarkService joarkService;
