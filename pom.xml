@@ -602,4 +602,17 @@
             </build>
         </profile>
     </profiles>
+
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>NAV Maven2 Internal Repository</name>
+            <url>https://repo.adeo.no/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <name>NAV Maven2 Snapshot Repository</name>
+            <url>https://repo.adeo.no/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
