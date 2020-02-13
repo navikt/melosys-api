@@ -22,3 +22,5 @@ CREATE TABLE BEHANDLINGSGRUNNLAG
     CONSTRAINT fk_behandlingsgrunnlag_behandling FOREIGN KEY (behandling_id) REFERENCES BEHANDLING,
     CONSTRAINT json_constraint CHECK (data IS JSON) ENABLE
 );
+
+CREATE UNIQUE INDEX idx_behandling_unik ON BEHANDLINGSGRUNNLAG (behandling_id);
