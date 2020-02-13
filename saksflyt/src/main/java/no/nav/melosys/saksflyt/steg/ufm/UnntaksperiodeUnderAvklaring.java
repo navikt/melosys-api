@@ -4,8 +4,8 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Registerkontroll;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -49,7 +49,7 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
         final long behandlingId = prosessinstans.getBehandling().getId();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithSaksbehandlingById(behandlingId)
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithKontrollresultaterById(behandlingId)
             .orElseThrow(() -> new TekniskException("Behandlingsresultat ikke funnet for behandling" + behandlingId));
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
@@ -82,8 +82,8 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
     }
 
     private boolean harAvklartefaktaPeriodeForLang(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.getRegisterkontroller().stream()
-            .map(Registerkontroll::getBegrunnelse)
+        return behandlingsresultat.getKontrollresultater().stream()
+            .map(Kontrollresultat::getBegrunnelse)
             .anyMatch(Kontroll_begrunnelser.PERIODEN_OVER_24_MD::equals);
     }
 }

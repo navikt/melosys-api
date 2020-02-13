@@ -5,11 +5,11 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Registerkontroll;
+import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.RegisterkontrollRepository;
+import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,9 +24,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RegisterkontrollServiceTest {
+public class KontrollresultatServiceTest {
     @Mock
-    private RegisterkontrollRepository registerkontrollRepository;
+    private KontrollresultatRepository kontrollresultatRepository;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
@@ -34,15 +34,15 @@ public class RegisterkontrollServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Captor
-    private ArgumentCaptor<List<Registerkontroll>> registerkontrollerCaptor;
+    private ArgumentCaptor<List<Kontrollresultat>> kontrollresultaterCaptor;
 
-    private RegisterkontrollService registerkontrollService;
+    private KontrollresultatService kontrollresultatService;
 
     @Before
     public void setUp() throws IkkeFunnetException, TekniskException {
-        registerkontrollService = new RegisterkontrollService(registerkontrollRepository, behandlingsresultatService, ufmKontrollService, behandlingService);
+        kontrollresultatService = new KontrollresultatService(kontrollresultatRepository, behandlingsresultatService, ufmKontrollService, behandlingService);
 
-        when(registerkontrollRepository.saveAll(anyCollection())).thenReturn(List.of());
+        when(kontrollresultatRepository.saveAll(anyCollection())).thenReturn(List.of());
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsresultat());
         when(ufmKontrollService.utførKontroller(any(Behandling.class)))
             .thenReturn(Lists.newArrayList(
@@ -54,13 +54,13 @@ public class RegisterkontrollServiceTest {
     @Test
     public void utførKontrollerOgRegistrerFeil() throws Exception {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
-        registerkontrollService.utførKontrollerOgRegistrerFeil(1L);
+        kontrollresultatService.utførKontrollerOgRegistrerFeil(1L);
 
         verify(behandlingService).hentBehandling(anyLong());
         verify(ufmKontrollService).utførKontroller(any(Behandling.class));
-        verify(registerkontrollRepository).saveAll(registerkontrollerCaptor.capture());
+        verify(kontrollresultatRepository).saveAll(kontrollresultaterCaptor.capture());
 
-        assertThat(registerkontrollerCaptor.getValue()).extracting(Registerkontroll::getBegrunnelse)
+        assertThat(kontrollresultaterCaptor.getValue()).extracting(Kontrollresultat::getBegrunnelse)
             .containsExactlyInAnyOrder(
                 Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND,
                 Kontroll_begrunnelser.MOTTAR_YTELSER
@@ -68,21 +68,21 @@ public class RegisterkontrollServiceTest {
     }
 
     @Test
-    public void leggTilRegisterkontroller_medTreff_validerLagring() throws IkkeFunnetException {
-        registerkontrollService.lagreRegisterkontroller(1L, List.of(
+    public void lagreKontrollresultater_medTreff_validerLagring() throws IkkeFunnetException {
+        kontrollresultatService.lagreKontrollresultater(1L, List.of(
             Kontroll_begrunnelser.LOVVALGSLAND_NORGE,
             Kontroll_begrunnelser.MOTTAR_YTELSER
         ));
 
-        verify(registerkontrollRepository).saveAll(registerkontrollerCaptor.capture());
-        List<Registerkontroll> registerkontroller = registerkontrollerCaptor.getValue();
+        verify(kontrollresultatRepository).saveAll(kontrollresultaterCaptor.capture());
+        List<Kontrollresultat> kontrollresultater = kontrollresultaterCaptor.getValue();
 
-        assertThat(registerkontroller).hasSize(2);
+        assertThat(kontrollresultater).hasSize(2);
 
-        assertThat(registerkontroller).extracting(Registerkontroll::getBegrunnelse)
+        assertThat(kontrollresultater).extracting(Kontrollresultat::getBegrunnelse)
             .containsExactlyInAnyOrder(Kontroll_begrunnelser.LOVVALGSLAND_NORGE, Kontroll_begrunnelser.MOTTAR_YTELSER);
 
-        assertThat(registerkontroller).extracting(Registerkontroll::getBehandlingsresultat)
+        assertThat(kontrollresultater).extracting(Kontrollresultat::getBehandlingsresultat)
             .extracting(Behandlingsresultat::getId)
             .containsExactlyInAnyOrder(1L, 1L);
     }

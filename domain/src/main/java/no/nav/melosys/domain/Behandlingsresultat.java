@@ -62,7 +62,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<Registerkontroll> registerkontroller = new HashSet<>(1);
+    private Set<Kontrollresultat> kontrollresultater = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
@@ -171,12 +171,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.behandlingsresultatBegrunnelser = behandlingsresultatBegrunnelser;
     }
 
-    public Set<Registerkontroll> getRegisterkontroller() {
-        return registerkontroller;
+    public Set<Kontrollresultat> getKontrollresultater() {
+        return kontrollresultater;
     }
 
-    public void setRegisterkontroller(Set<Registerkontroll> registerkontroller) {
-        this.registerkontroller = registerkontroller;
+    public void setKontrollresultater(Set<Kontrollresultat> kontrollresultater) {
+        this.kontrollresultater = kontrollresultater;
     }
 
     @Override

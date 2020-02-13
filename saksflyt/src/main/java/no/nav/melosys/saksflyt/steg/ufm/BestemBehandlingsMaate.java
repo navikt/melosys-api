@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsmaate;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Registerkontroll;
+import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -39,18 +39,18 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithSaksbehandlingById(prosessinstans.getBehandling().getId())
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithKontrollresultaterById(prosessinstans.getBehandling().getId())
             .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat for behandling " + prosessinstans.getBehandling().getId()));
 
-        Set<Registerkontroll> registerkontroller = behandlingsresultat.getRegisterkontroller();
-        if (registerkontroller.isEmpty()) {
+        Set<Kontrollresultat> kontrollresultater = behandlingsresultat.getKontrollresultater();
+        if (kontrollresultater.isEmpty()) {
             behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
             log.info("Behandling {}, type {} blir registrer automatisk",
                 prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getType());
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
         } else {
-            String registreringerStr = registerkontroller.stream()
-                .map(Registerkontroll::getBegrunnelse).map(Kontroll_begrunnelser::getKode).collect(Collectors.joining(", "));
+            String registreringerStr = kontrollresultater.stream()
+                .map(Kontrollresultat::getBegrunnelse).map(Kontroll_begrunnelser::getKode).collect(Collectors.joining(", "));
             log.info("Funnet treff {} for behandling {}. Flyttet til manuell behandling.",
                 registreringerStr, prosessinstans.getBehandling().getId());
 

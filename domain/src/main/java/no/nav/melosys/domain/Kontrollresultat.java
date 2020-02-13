@@ -6,8 +6,8 @@ import javax.persistence.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 
 @Entity
-@Table(name = "registerkontroll")
-public class Registerkontroll {
+@Table(name = "kontrollresultat")
+public class Kontrollresultat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +18,7 @@ public class Registerkontroll {
     private Kontroll_begrunnelser begrunnelse;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "behandlingsresultat_id", nullable = false, updatable = false)
+    @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
 
     public Long getId() {
@@ -49,7 +49,7 @@ public class Registerkontroll {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Registerkontroll that = (Registerkontroll) o;
+        Kontrollresultat that = (Kontrollresultat) o;
         return id.equals(that.id) &&
             begrunnelse == that.begrunnelse &&
             behandlingsresultat.equals(that.behandlingsresultat);

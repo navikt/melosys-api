@@ -5,7 +5,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Registerkontroll;
+import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -38,7 +38,7 @@ public class BestemBehandlingsMaateTest {
     public void utførSteg_ingenTreffIRegister_verifiserNesteSteg() throws Exception {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
-        when(behandlingsresultatRepository.findWithSaksbehandlingById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepository.findWithKontrollresultaterById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
         Prosessinstans prosessinstans = hentProsessinstans();
         bestemBehandlingsMaate.utfør(prosessinstans);
@@ -47,13 +47,13 @@ public class BestemBehandlingsMaateTest {
 
     @Test
     public void utførSteg_treffIRegister_verifiserNesteSteg() throws Exception {
-        Registerkontroll registerkontroll = new Registerkontroll();
-        registerkontroll.setBegrunnelse(Kontroll_begrunnelser.FEIL_I_PERIODEN);
+        Kontrollresultat kontrollresultat = new Kontrollresultat();
+        kontrollresultat.setBegrunnelse(Kontroll_begrunnelser.FEIL_I_PERIODEN);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
-        behandlingsresultat.setRegisterkontroller(Set.of(registerkontroll));
-        when(behandlingsresultatRepository.findWithSaksbehandlingById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        behandlingsresultat.setKontrollresultater(Set.of(kontrollresultat));
+        when(behandlingsresultatRepository.findWithKontrollresultaterById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
         Prosessinstans prosessinstans = hentProsessinstans();
         bestemBehandlingsMaate.utfør(prosessinstans);

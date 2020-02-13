@@ -40,7 +40,7 @@ public class UnntaksperiodeUnderAvklaringTest {
     @Before
     public void setUp() {
         unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingService, behandlingsresultatRepository);
-        when(behandlingsresultatRepository.findWithSaksbehandlingById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepository.findWithKontrollresultaterById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
     }
 
     @Test
@@ -99,9 +99,9 @@ public class UnntaksperiodeUnderAvklaringTest {
 
     @Test
     public void utfør_eksisterendePeriodeUtenMedlIdPeriodeForLang_ikkeOpprettPeriodeIMedl() throws Exception {
-        Registerkontroll registerkontroll = new Registerkontroll();
-        registerkontroll.setBegrunnelse(Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
-        behandlingsresultat.getRegisterkontroller().add(registerkontroll);
+        Kontrollresultat kontrollresultat = new Kontrollresultat();
+        kontrollresultat.setBegrunnelse(Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
+        behandlingsresultat.getKontrollresultater().add(kontrollresultat);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = new Behandling();
