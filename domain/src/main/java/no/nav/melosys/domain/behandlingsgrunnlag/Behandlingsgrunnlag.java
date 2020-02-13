@@ -1,5 +1,6 @@
-package no.nav.melosys.domain.grunnlag;
+package no.nav.melosys.domain.behandlingsgrunnlag;
 
+import java.time.Instant;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandling;
@@ -19,6 +20,12 @@ public class Behandlingsgrunnlag {
 
     @Column(name = "versjon", nullable = false)
     private String versjon;
+
+    @Column(name = "registrert_dato", nullable = false, updatable = false)
+    private Instant registrertDato;
+
+    @Column(name = "endret_dato", nullable = false)
+    private Instant endretDato;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
@@ -49,6 +56,22 @@ public class Behandlingsgrunnlag {
 
     public void setVersjon(String versjon) {
         this.versjon = versjon;
+    }
+
+    public Instant getRegistrertDato() {
+        return registrertDato;
+    }
+
+    public void setRegistrertDato(Instant registrertDato) {
+        this.registrertDato = registrertDato;
+    }
+
+    public Instant getEndretDato() {
+        return endretDato;
+    }
+
+    public void setEndretDato(Instant endretDato) {
+        this.endretDato = endretDato;
     }
 
     public Behandling getBehandling() {

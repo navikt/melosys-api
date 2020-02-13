@@ -7,10 +7,10 @@ import javax.persistence.PrePersist;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.grunnlag.BehandlingsGrunnlagType;
-import no.nav.melosys.domain.grunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.grunnlag.BehandlingsgrunnlagData;
 
 public class BehandlingsgrunnlagListener {
 
@@ -19,8 +19,8 @@ public class BehandlingsgrunnlagListener {
     private static final EnumMap<BehandlingsGrunnlagType, Class<? extends BehandlingsgrunnlagData>> mapper = new EnumMap<>(BehandlingsGrunnlagType.class);
 
     static {
-        mapper.put(BehandlingsGrunnlagType.BEH_GRUNNLAG, BehandlingsgrunnlagData.class);
-        mapper.put(BehandlingsGrunnlagType.SOEKNAD_GRUNNLAG, SoeknadDokument.class);
+        mapper.put(BehandlingsGrunnlagType.GENERELT, BehandlingsgrunnlagData.class);
+        mapper.put(BehandlingsGrunnlagType.SØKNAD, SoeknadDokument.class);
         objectMapper.registerModule(new JavaTimeModule());
     }
 

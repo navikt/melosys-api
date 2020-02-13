@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.grunnlag;
+package no.nav.melosys.domain.behandlingsgrunnlag;
 
 import java.util.ArrayList;
 import java.util.List;

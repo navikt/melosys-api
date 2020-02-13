@@ -8,10 +8,10 @@ import java.nio.file.Paths;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.grunnlag.BehandlingsGrunnlagType;
-import no.nav.melosys.domain.grunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.grunnlag.BehandlingsgrunnlagData;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,12 +31,12 @@ public class BehandlingsgrunnlagListenerTest {
     }
 
     @Test
-    public void lastBehandlingsgrunnlag_erSoeknad_forventTypeSoeknadDokument() throws URISyntaxException, IOException {
+    public void lastBehandlingsgrunnlag_erSøknad_forventTypeSoeknadDokument() throws URISyntaxException, IOException {
         URI søknadURI = (getClass().getClassLoader().getResource("soeknad/soeknad.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
         behandlingsgrunnlag.setJsonData(json);
-        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.SOEKNAD_GRUNNLAG);
+        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.SØKNAD);
         behandlingsgrunnlagListener.lastBehandlingsgrunnlag(behandlingsgrunnlag);
 
         BehandlingsgrunnlagData data = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
@@ -51,12 +51,12 @@ public class BehandlingsgrunnlagListenerTest {
     }
 
     @Test
-    public void lastBehandlingsgrunnlag_erBehGrunnlag_forventTypeBehandlingsgrunnlag() throws URISyntaxException, IOException {
+    public void lastBehandlingsgrunnlag_erGenerelt_forventBehGrunnlag() throws URISyntaxException, IOException {
         URI søknadURI = (getClass().getClassLoader().getResource("soeknad/soeknad.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
         behandlingsgrunnlag.setJsonData(json);
-        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.BEH_GRUNNLAG);
+        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.GENERELT);
         behandlingsgrunnlagListener.lastBehandlingsgrunnlag(behandlingsgrunnlag);
 
         assertThat(behandlingsgrunnlag.getBehandlingsgrunnlagdata()).isNotNull();
@@ -74,6 +74,4 @@ public class BehandlingsgrunnlagListenerTest {
         assertThat(data.personOpplysninger.utenlandskIdent.size()).isEqualTo(jsonNode.get("personOpplysninger").withArray("utenlandskIdent").size());
         assertThat(data.selvstendigArbeid.selvstendigForetak.get(0).orgnr).isEqualTo(jsonNode.get("selvstendigArbeid").withArray("selvstendigForetak").get(0).get("orgnr").textValue());
     }
-
-
 }

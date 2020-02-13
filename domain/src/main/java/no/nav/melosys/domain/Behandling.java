@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.grunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
