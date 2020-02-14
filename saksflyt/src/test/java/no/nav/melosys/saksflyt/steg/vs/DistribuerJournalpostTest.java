@@ -5,17 +5,19 @@ import java.util.Collections;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +37,7 @@ public class DistribuerJournalpostTest {
     @Mock
     private DoksysFasade doksysFasade;
     @Mock
-    private SoeknadService soeknadService;
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
@@ -44,10 +46,11 @@ public class DistribuerJournalpostTest {
     private DistribuerJournalpost distribuerJournalpost;
 
     @Before
-    public void setup() throws TekniskException {
-        distribuerJournalpost = new DistribuerJournalpost(doksysFasade, soeknadService, landvelgerService, utenlandskMyndighetService);
+    public void setup() throws TekniskException, IkkeFunnetException {
+        distribuerJournalpost = new DistribuerJournalpost(doksysFasade, behandlingsgrunnlagService, landvelgerService, utenlandskMyndighetService);
         when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(Landkoder.SE);
         when(utenlandskMyndighetService.hentUtenlandskMyndighet(any())).thenReturn(lagUtenlandskMyndighet());
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(new Behandlingsgrunnlag());
     }
 
     @Test

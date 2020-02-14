@@ -9,8 +9,8 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
 import no.nav.melosys.domain.util.LandkoderUtils;
-import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +35,7 @@ public class BostedGrunnlag {
     }
 
     public Optional<StrukturertAdresse> finnBostedsadresse() {
-        StrukturertAdresse bostedsadresse = søknad != null ? SoeknadUtils.hentBostedsadresse(søknad) : null;
+        StrukturertAdresse bostedsadresse = søknad != null ? BehandlingsgrunnlagUtils.hentBostedsadresse(søknad) : null;
         if (bostedsadresse == null) {
             return finnBostedsadresseFraRegister();
         }

@@ -25,6 +25,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
@@ -54,7 +55,7 @@ public class OppgaveServiceTest {
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
-    private SoeknadService soeknadService;
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     private OppgaveService oppgaveService;
 
@@ -65,8 +66,7 @@ public class OppgaveServiceTest {
                 fagsakService,
                 gsakFasade,
                 saksopplysningerService,
-                soeknadService,
-                tpsFasade);
+            behandlingsgrunnlagService, tpsFasade);
 
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);

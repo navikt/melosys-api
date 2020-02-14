@@ -1,12 +1,12 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.service.SoeknadService;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,17 +21,17 @@ import static org.mockito.Mockito.*;
 public class OpprettSoeknadTest {
 
     @Mock
-    private SoeknadService søknadService;
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     private OpprettSoeknad opprettSoeknad;
 
     @Before
     public void setUp() {
-        opprettSoeknad = new OpprettSoeknad(søknadService);
+        opprettSoeknad = new OpprettSoeknad(behandlingsgrunnlagService);
     }
 
     @Test
-    public void utfoerSteg() throws IkkeFunnetException {
+    public void utfoerSteg() throws FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
@@ -40,7 +40,7 @@ public class OpprettSoeknadTest {
 
         opprettSoeknad.utførSteg(p);
 
-        verify(søknadService, times(1)).registrerSøknad(anyLong(), any(SoeknadDokument.class));
+        verify(behandlingsgrunnlagService, times(1)).opprettSøknadGrunnlag(eq(behandling), any(SoeknadDokument.class));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);
     }
 }

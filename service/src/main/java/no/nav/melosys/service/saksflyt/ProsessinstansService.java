@@ -39,8 +39,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
 
 @Service
 public class ProsessinstansService {

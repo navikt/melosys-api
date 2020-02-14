@@ -1,5 +1,7 @@
 package no.nav.melosys.service.behandlingsgrunnlag;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -56,5 +58,9 @@ public class BehandlingsgrunnlagService {
 
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
         return behandlingsgrunnlagRepository.save(behandlingsgrunnlag);
+    }
+
+    public Optional<Behandlingsgrunnlag> finnBehandlingsgrunnlag(Long behandlingID) {
+        return behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID);
     }
 }

@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
 
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
