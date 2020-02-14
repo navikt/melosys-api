@@ -214,18 +214,6 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentVurderingUnntakPeriode_forventVurderingUnntakPeriodeType() {
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE)))
-            .thenReturn(Optional.of(avklartefakta));
-
-        Optional<Avklartefakta> avklartefaktaOptional = avklartefaktaService.hentVurderingUnntakPeriode(2L);
-        assertThat(avklartefaktaOptional.isPresent()).isTrue();
-        assertThat(avklartefaktaOptional.get().getType()).isEqualTo(Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
-    }
-
-    @Test
     public void testAvklarteOrganisasjoner() {
         String orgnr1 = "12345678910";
         Avklartefakta avklartefakta = new Avklartefakta();
