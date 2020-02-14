@@ -58,29 +58,18 @@ public class KontrollresultatServiceTest {
 
         verify(behandlingService).hentBehandling(anyLong());
         verify(ufmKontrollService).utførKontroller(any(Behandling.class));
+        verify(kontrollresultatRepository).deleteByBehandlingsresultat(any(Behandlingsresultat.class));
         verify(kontrollresultatRepository).saveAll(kontrollresultaterCaptor.capture());
 
-        assertThat(kontrollresultaterCaptor.getValue()).extracting(Kontrollresultat::getBegrunnelse)
-            .containsExactlyInAnyOrder(
-                Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND,
-                Kontroll_begrunnelser.MOTTAR_YTELSER
-            );
-    }
-
-    @Test
-    public void lagreKontrollresultater_medTreff_validerLagring() throws IkkeFunnetException {
-        kontrollresultatService.lagreKontrollresultater(1L, List.of(
-            Kontroll_begrunnelser.LOVVALGSLAND_NORGE,
-            Kontroll_begrunnelser.MOTTAR_YTELSER
-        ));
-
-        verify(kontrollresultatRepository).saveAll(kontrollresultaterCaptor.capture());
         List<Kontrollresultat> kontrollresultater = kontrollresultaterCaptor.getValue();
 
         assertThat(kontrollresultater).hasSize(2);
 
         assertThat(kontrollresultater).extracting(Kontrollresultat::getBegrunnelse)
-            .containsExactlyInAnyOrder(Kontroll_begrunnelser.LOVVALGSLAND_NORGE, Kontroll_begrunnelser.MOTTAR_YTELSER);
+            .containsExactlyInAnyOrder(
+                Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND,
+                Kontroll_begrunnelser.MOTTAR_YTELSER
+            );
 
         assertThat(kontrollresultater).extracting(Kontrollresultat::getBehandlingsresultat)
             .extracting(Behandlingsresultat::getId)

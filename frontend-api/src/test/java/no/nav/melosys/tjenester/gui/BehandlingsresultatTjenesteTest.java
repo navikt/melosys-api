@@ -7,8 +7,8 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.VedtakMetadata;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -69,7 +69,7 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
         vedtakMetadata.setVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK);
         vedtakMetadata.setRevurderBegrunnelse("BEGRUNNELSE");
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultatMedKontrollresultat(anyLong())).thenReturn(behandlingsresultat);
 
         ResponseEntity response = behandlingsresultatTjeneste.hentBehandlingsresultat(4L);
         String jsonString = objectMapper().writeValueAsString(response.getBody());

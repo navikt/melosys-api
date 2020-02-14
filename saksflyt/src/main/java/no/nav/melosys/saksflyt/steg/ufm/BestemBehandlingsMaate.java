@@ -11,8 +11,8 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +23,11 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(BestemBehandlingsMaate.class);
 
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public BestemBehandlingsMaate(BehandlingsresultatRepository behandlingsresultatRepository) {
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+    public BestemBehandlingsMaate(BehandlingsresultatService behandlingsresultatService) {
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Override
@@ -39,8 +39,7 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithKontrollresultaterById(prosessinstans.getBehandling().getId())
-            .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat for behandling " + prosessinstans.getBehandling().getId()));
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
 
         Set<Kontrollresultat> kontrollresultater = behandlingsresultat.getKontrollresultater();
         if (kontrollresultater.isEmpty()) {
@@ -58,6 +57,6 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_OPPGAVE);
         }
 
-        behandlingsresultatRepository.save(behandlingsresultat);
+        behandlingsresultatService.lagre(behandlingsresultat);
     }
 }

@@ -48,8 +48,7 @@ public class KontrollresultatService {
         lagreKontrollresultater(behandlingId, registrerteTreff);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void lagreKontrollresultater(Long behandlingID, List<Kontroll_begrunnelser> kontrollBegrunnelser) throws IkkeFunnetException {
+    private void lagreKontrollresultater(Long behandlingID, List<Kontroll_begrunnelser> kontrollBegrunnelser) throws IkkeFunnetException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         kontrollresultatRepository.deleteByBehandlingsresultat(behandlingsresultat);

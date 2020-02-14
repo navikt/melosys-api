@@ -16,19 +16,19 @@ public class BehandlingsresultatDto {
     private final String begrunnelseFritekst;
     private final String utfallRegistreringUnntak;
     private final String vedtakstype;
-    private final List<String> kontrollBegrunnelseKoder;
+    private final List<String> kontrollresultatBegrunnelseKoder;
 
     private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
                                    String begrunnelseFritekst,
                                    String utfallRegistreringUnntak,
                                    String vedtakstype,
-                                   List<String> kontrollBegrunnelseKoder) {
+                                   List<String> kontrollresultatBegrunnelseKoder) {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode.getKode();
         this.begrunnelseKoder = new ArrayList<>();
         this.begrunnelseFritekst = begrunnelseFritekst;
         this.utfallRegistreringUnntak = utfallRegistreringUnntak;
         this.vedtakstype = vedtakstype;
-        this.kontrollBegrunnelseKoder = kontrollBegrunnelseKoder;
+        this.kontrollresultatBegrunnelseKoder = kontrollresultatBegrunnelseKoder;
     }
 
     public static BehandlingsresultatDto av(Behandlingsresultat resultat) {
@@ -70,7 +70,7 @@ public class BehandlingsresultatDto {
         return vedtakstype;
     }
 
-    public List<String> getKontrollBegrunnelseKoder() {
-        return kontrollBegrunnelseKoder;
+    public List<String> getKontrollresultatBegrunnelseKoder() {
+        return kontrollresultatBegrunnelseKoder;
     }
 }

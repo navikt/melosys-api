@@ -16,11 +16,11 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,14 +30,14 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
     private final OppdaterMedlFelles felles;
     private final MedlFasade medlFasade;
     private final BehandlingService behandlingService;
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public UnntaksperiodeUnderAvklaring(OppdaterMedlFelles felles, MedlFasade medlFasade, BehandlingService behandlingService, BehandlingsresultatRepository behandlingsresultatRepository) {
+    public UnntaksperiodeUnderAvklaring(OppdaterMedlFelles felles, MedlFasade medlFasade, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
         this.felles = felles;
         this.medlFasade = medlFasade;
         this.behandlingService = behandlingService;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Override
@@ -49,8 +49,7 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
         final long behandlingId = prosessinstans.getBehandling().getId();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithKontrollresultaterById(behandlingId)
-            .orElseThrow(() -> new TekniskException("Behandlingsresultat ikke funnet for behandling" + behandlingId));
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (lovvalgsperioder.isEmpty()) {

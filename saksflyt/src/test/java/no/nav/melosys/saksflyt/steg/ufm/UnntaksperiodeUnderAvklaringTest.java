@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
@@ -9,10 +8,11 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,16 +31,16 @@ public class UnntaksperiodeUnderAvklaringTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private BehandlingsresultatService behandlingsresultatService;
 
     private UnntaksperiodeUnderAvklaring unntaksperiodeUnderAvklaring;
 
     private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
     @Before
-    public void setUp() {
-        unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingService, behandlingsresultatRepository);
-        when(behandlingsresultatRepository.findWithKontrollresultaterById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+    public void setUp() throws IkkeFunnetException {
+        unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingService, behandlingsresultatService);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test

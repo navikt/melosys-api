@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
@@ -10,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,20 +24,20 @@ import static org.mockito.Mockito.when;
 public class BestemBehandlingsMaateTest {
 
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private BehandlingsresultatService behandlingsresultatService;
 
     private BestemBehandlingsMaate bestemBehandlingsMaate;
 
     @Before
     public void setUp() {
-        bestemBehandlingsMaate = new BestemBehandlingsMaate(behandlingsresultatRepository);
+        bestemBehandlingsMaate = new BestemBehandlingsMaate(behandlingsresultatService);
     }
 
     @Test
     public void utførSteg_ingenTreffIRegister_verifiserNesteSteg() throws Exception {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
-        when(behandlingsresultatRepository.findWithKontrollresultaterById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         Prosessinstans prosessinstans = hentProsessinstans();
         bestemBehandlingsMaate.utfør(prosessinstans);
@@ -53,7 +52,7 @@ public class BestemBehandlingsMaateTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
         behandlingsresultat.setKontrollresultater(Set.of(kontrollresultat));
-        when(behandlingsresultatRepository.findWithKontrollresultaterById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         Prosessinstans prosessinstans = hentProsessinstans();
         bestemBehandlingsMaate.utfør(prosessinstans);
