@@ -5,9 +5,14 @@ import java.util.*;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
@@ -21,18 +26,17 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class InnvilgelsesbrevMapperTest {
 
@@ -51,17 +55,6 @@ public class InnvilgelsesbrevMapperTest {
     public void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
                 Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))));
-    }
-
-    @Test
-    public void mapTilBrevXmlUtenArbeidslandISøknadGirUnntak() {
-        Behandling behandlingUtenSaksopplysninger = lagBehandling(lagFagsak(), Collections.emptySet());
-        Behandlingsresultat behandlingsresultatUtenAvklartArbeidsland = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789")));
-        Throwable unntak = catchThrowable(() -> testMapTilBrevXml(behandlingUtenSaksopplysninger,
-                behandlingsresultatUtenAvklartArbeidsland));
-        assertThat(unntak).isInstanceOf(TekniskException.class)
-            .hasMessageContaining("Finner ikke søknaddokument");
     }
 
     private void testMapTilBrevXml() throws Exception {
@@ -141,8 +134,7 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
-        Saksopplysning søknad = lagSoeknadssaksopplysning(lagSoeknadDokument());
-        return lagBehandling(fagsak, Collections.singleton(søknad));
+        return lagBehandling(fagsak, lagSoeknadDokument());
     }
 
     private static SoeknadDokument lagSoeknadDokument() {
@@ -162,11 +154,12 @@ public class InnvilgelsesbrevMapperTest {
         return maritimtArbeid;
     }
 
-    private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {
+    private static Behandling lagBehandling(Fagsak fagsak, BehandlingsgrunnlagData behandlingsgrunnlagData) {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.KLAGE);
         behandling.setFagsak(fagsak);
-        behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         return behandling;
     }
 }

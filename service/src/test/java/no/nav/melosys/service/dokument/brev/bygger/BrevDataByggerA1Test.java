@@ -5,6 +5,7 @@ import java.util.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
@@ -42,7 +43,6 @@ public class BrevDataByggerA1Test {
     @Mock
     private AvklartefaktaService avklartefaktaService;
 
-    @Mock
     private Behandling behandling;
 
     private Set<String> avklarteOrganisasjoner;
@@ -61,6 +61,8 @@ public class BrevDataByggerA1Test {
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        behandling = new Behandling();
+        behandling.setId(123L);
 
         avklarteOrganisasjoner = new HashSet<>();
 
@@ -77,15 +79,13 @@ public class BrevDataByggerA1Test {
         søknad = new SoeknadDokument();
         søknad.bosted.oppgittAdresse = oppgittAdresse;
 
-        Saksopplysning soeknad = new Saksopplysning();
-        soeknad.setDokument(søknad);
-        soeknad.setType(SaksopplysningType.SØKNAD);
-
         ForetakUtland foretakUtland = new ForetakUtland();
-        String orgnr1 = "12345678910";
-        foretakUtland.orgnr = orgnr1;
+        foretakUtland.orgnr = "12345678910";
         foretakUtland.navn = "Utenlandsk arbeidsgiver AS";
         søknad.foretakUtland.add(foretakUtland);
+
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(søknad);
 
         Saksopplysning person = new Saksopplysning();
         PersonDokument personDok = new PersonDokument();
@@ -93,7 +93,7 @@ public class BrevDataByggerA1Test {
         person.setType(SaksopplysningType.PERSOPL);
 
         Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(Collections.singletonList(orgnr2));
-        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(soeknad, person, arbeidsforhold)));
+        behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(person, arbeidsforhold)));
 
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
@@ -173,6 +173,6 @@ public class BrevDataByggerA1Test {
         assertThat(brevDataDto.arbeidssteder.stream()
             .filter(Arbeidssted::erFysisk)
             .map(FysiskArbeidssted.class::cast)
-            .map(uv -> uv.getAdresse())).contains(arbeidUtland.adresse);
+            .map(FysiskArbeidssted::getAdresse)).contains(arbeidUtland.adresse);
     }
 }

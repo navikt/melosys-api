@@ -1,8 +1,8 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -13,7 +13,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataGrunnlag implements DataGrunnlag {
     private final Behandling behandling;
-    private final SoeknadDokument søknad;
+    private final BehandlingsgrunnlagData behandlingsgrunnlagData;
     private PersonDokument person;
 
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
@@ -25,19 +25,19 @@ public class BrevDataGrunnlag implements DataGrunnlag {
                             AvklarteVirksomheterService avklarteVirksomheterService,
                             AvklartefaktaService avklartefaktaService) throws TekniskException {
         this.behandling = behandling;
-        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService, kodeverkService);
-        this.bostedGrunnlag = new BostedGrunnlag(getSøknad(), getPerson(), kodeverkService);
-        this.arbeidssteder = new ArbeidsstedGrunnlag(behandling, getSøknad(), getAvklarteVirksomheterGrunnlag(), avklartefaktaService);
+        this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, getPerson(), kodeverkService);
+        this.arbeidssteder = new ArbeidsstedGrunnlag(behandling, behandlingsgrunnlagData, getAvklarteVirksomheterGrunnlag(), avklartefaktaService);
     }
 
     public Behandling getBehandling() {
         return behandling;
     }
 
-    public SoeknadDokument getSøknad() {
-        return søknad;
+    public BehandlingsgrunnlagData getBehandlingsgrunnlagData() {
+        return behandlingsgrunnlagData;
     }
 
     public PersonDokument getPerson() {

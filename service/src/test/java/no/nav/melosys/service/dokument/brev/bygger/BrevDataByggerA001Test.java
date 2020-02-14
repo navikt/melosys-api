@@ -1,12 +1,10 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -69,7 +67,6 @@ public class BrevDataByggerA001Test {
     @Mock
     private EregFasade ereg;
 
-    @Mock
     private Behandling behandling;
 
     private Set<String> avklarteOrganisasjoner;
@@ -84,6 +81,9 @@ public class BrevDataByggerA001Test {
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        behandling = new Behandling();
+        behandling.setId(123L);
+
         avklarteOrganisasjoner = new HashSet<>();
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
 
@@ -91,7 +91,7 @@ public class BrevDataByggerA001Test {
         Anmodningsperiode periode = new Anmodningsperiode();
         periode.setUnntakFraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setUnntakFraLovvalgsland(unntakFraLovvalgsland);
-        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Arrays.asList(periode));
+        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(periode));
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         when(myndighetsService.hentUtenlandskMyndighet(any())).thenReturn(utenlandskMyndighet);
@@ -107,10 +107,6 @@ public class BrevDataByggerA001Test {
 
         søknad = new SoeknadDokument();
         søknad.bosted.oppgittAdresse = oppgittAdresse;
-
-        Saksopplysning soeknad = new Saksopplysning();
-        soeknad.setDokument(søknad);
-        soeknad.setType(SaksopplysningType.SØKNAD);
 
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.orgnr = orgnr1;
@@ -134,7 +130,11 @@ public class BrevDataByggerA001Test {
         PersonDokument personDok = new PersonDokument();
         person.setDokument(personDok);
         person.setType(SaksopplysningType.PERSOPL);
-        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(soeknad, person, medl, aareg)));
+        behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(person, medl, aareg)));
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknad);
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
         when(detaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
@@ -161,7 +161,7 @@ public class BrevDataByggerA001Test {
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
-        orgDok.setNavn(Arrays.asList(navn));
+        orgDok.setNavn(Collections.singletonList(navn));
         orgDok.setOrgnummer(orgnummer);
         orgDok.setOrganisasjonDetaljer(detaljer);
         Saksopplysning saksopplysning = new Saksopplysning();

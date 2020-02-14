@@ -9,6 +9,8 @@ import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
 import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -80,7 +82,7 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagA1_tilUtenlandskMyndighet() throws TekniskException, FunksjonellException {
-        Behandling behandling = lagBehandling(lagSaksopplysninger());
+        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         String institusjonID = "HR:Zxcd";
         Aktoer aktoerMyndighet = lagAktoerMyndighet(institusjonID);
         behandling.getFagsak().getAktører().add(aktoerMyndighet);
@@ -121,7 +123,7 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException, FunksjonellException {
-        Behandling behandling = lagBehandling(lagSaksopplysninger());
+        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
@@ -152,7 +154,7 @@ public class BrevDataServiceTest {
     @Test
     public void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException, FunksjonellException {
 
-        Behandling behandling = lagBehandling(lagSaksopplysninger());
+        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
@@ -172,7 +174,7 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagMangelbrevXml_mottakerErbrukerID() throws TekniskException, FunksjonellException {
-        Behandling behandling = lagBehandling(lagSaksopplysninger());
+        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
@@ -198,7 +200,7 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException, FunksjonellException {
-        Behandling behandling = lagBehandling(lagSaksopplysninger());
+        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
@@ -223,7 +225,7 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagBrevXml_medBrukerMedAdresseIRegister_skalBerikes() throws TekniskException, FunksjonellException {
-        Behandling behandling = lagBehandling(lagSaksopplysninger());
+        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
@@ -236,7 +238,7 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagBrevXml_medBrukerUtenAdresseIRegister_skalIkkeBerikes() throws TekniskException, FunksjonellException {
-        Behandling behandling = lagBehandling(lagSaksopplysningerUtenAdresseIRegister());
+        Behandling behandling = lagBehandling(lagSaksopplysningerUtenAdresseIRegister(), lagSøknadDokument());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
@@ -269,7 +271,7 @@ public class BrevDataServiceTest {
 
     @Test
     public final void avklarMottakerId_representantOgKontaktOpplysningFinnes_kontaktOpplysningForRepresentantBrukes() throws TekniskException, FunksjonellException {
-        Behandling behandling = lagBehandling(lagSaksopplysninger());
+        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
 
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
@@ -306,7 +308,7 @@ public class BrevDataServiceTest {
     public void lagBestillingMetadata_medBrukerMottakerOgBrukerUtenAdresseIRegister_skalHaBrukernavnOgPostadresse() throws FunksjonellException, TekniskException {
         Collection<Saksopplysning> saksopplysninger = lagSaksopplysningerUtenAdresseIRegister();
 
-        Behandling behandling = lagBehandling(saksopplysninger);
+        Behandling behandling = lagBehandling(saksopplysninger, lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
 
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
@@ -319,7 +321,7 @@ public class BrevDataServiceTest {
     @Test
     public void lagBestillingMetadata_medBrukerMedAdresseIRegister_skalIkkeHaBrukerNavnEllerPostAdresse() throws FunksjonellException, TekniskException {
         Collection<Saksopplysning> saksopplysninger = lagSaksopplysninger();
-        Behandling behandling = lagBehandling(saksopplysninger);
+        Behandling behandling = lagBehandling(saksopplysninger, lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
 
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
@@ -331,8 +333,7 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagBestillingMetadata_medUtenlandskMyndighet_skalUtfyllesMedBrukerNavn() throws FunksjonellException, TekniskException {
-        Collection<Saksopplysning> saksopplysninger = lagSaksopplysninger();
-        Behandling behandling = lagBehandling(saksopplysninger);
+        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
 
         Aktoer mottaker = lagAktør(Aktoersroller.MYNDIGHET);
@@ -354,7 +355,7 @@ public class BrevDataServiceTest {
         Aktoer mottaker = lagAktør(Aktoersroller.ARBEIDSGIVER);
         brevData.fritekst = "Test";
 
-        Behandling behandling = lagBehandling(lagSaksopplysninger());
+        Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, kontaktopplysning, behandling, brevData);
         assertThat(metadata.mottakerID).isEqualTo("KONTAKTORG_999");
 
@@ -368,7 +369,9 @@ public class BrevDataServiceTest {
     }
 
     private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Aktoersroller rolle) throws Exception {
-        DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, mottaker, kontaktopplysning, lagBehandling(lagSaksopplysninger()), lagBrevData());
+        DokumentbestillingMetadata resultat = service.lagBestillingMetadata(
+            doktype, mottaker, kontaktopplysning, lagBehandling(lagSaksopplysninger(), lagSøknadDokument()), lagBrevData()
+        );
         DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype, rolle);
         assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
     }
@@ -399,7 +402,7 @@ public class BrevDataServiceTest {
         return brevDataDto;
     }
 
-    private static Behandling lagBehandling(Collection<Saksopplysning> saksopplysninger) {
+    private static Behandling lagBehandling(Collection<Saksopplysning> saksopplysninger, BehandlingsgrunnlagData behandlingsgrunnlagData) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MOCK-1");
         fagsak.setGsakSaksnummer(123L);
@@ -420,6 +423,9 @@ public class BrevDataServiceTest {
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setFagsak(fagsak);
 
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
         behandling.getSaksopplysninger().addAll(saksopplysninger);
         return behandling;
     }
@@ -430,10 +436,6 @@ public class BrevDataServiceTest {
         PersonDokument person = new PersonDokument();
         person.bostedsadresse = lagBostedsadresse();
         saksopplysninger.add(lagPersonsaksopplysning(person));
-
-        SoeknadDokument søknad = new SoeknadDokument();
-        søknad.bosted.oppgittAdresse = lagStrukturertAdresse();
-        saksopplysninger.add(lagSoeknadssaksopplysning(søknad));
         return saksopplysninger;
     }
 
@@ -443,5 +445,11 @@ public class BrevDataServiceTest {
         aktørArbRep.setOrgnr(REP_ORGNR);
         aktørArbRep.setRepresenterer(Representerer.ARBEIDSGIVER);
         return aktørArbRep;
+    }
+
+    private SoeknadDokument lagSøknadDokument() {
+        SoeknadDokument søknad = new SoeknadDokument();
+        søknad.bosted.oppgittAdresse = lagStrukturertAdresse();
+        return søknad;
     }
 }

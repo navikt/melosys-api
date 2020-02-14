@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -22,11 +23,12 @@ import static org.mockito.Mockito.when;
 
 //For gjenbruk av AbstraktSedDatabygger implementasjonen i nåværende og fremtidige tester
 
-public class DataByggerStubs {
+class DataByggerStubs {
 
-    public static Behandling hentBehandlingStub() {
+    static Behandling hentBehandlingStub() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
 
         Fagsak fagsak = new Fagsak();
         Aktoer myndighet = new Aktoer();
@@ -43,7 +45,6 @@ public class DataByggerStubs {
         foretakUtland.orgnr = "orgnr";
         foretakUtland.navn = "navn foretak";
 
-        Saksopplysning saksopplysning = new Saksopplysning();
         SoeknadDokument søknadDokument = new SoeknadDokument();
         søknadDokument.selvstendigArbeid = new SelvstendigArbeid();
         søknadDokument.foretakUtland = Lists.newArrayList(foretakUtland);
@@ -60,11 +61,9 @@ public class DataByggerStubs {
         utenlandskIdent.ident = "439205843";
         utenlandskIdent.landkode = "SE";
         søknadDokument.personOpplysninger.utenlandskIdent.add(utenlandskIdent);
-        saksopplysning.setDokument(søknadDokument);
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-        saksopplysninger.add(saksopplysning);
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(søknadDokument);
 
-        saksopplysning = new Saksopplysning();
+        Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setDokument(new ArbeidsforholdDokument());
         saksopplysninger.add(saksopplysning);
@@ -104,7 +103,7 @@ public class DataByggerStubs {
         return behandling;
     }
 
-    public static StrukturertAdresse hentStrukturertAddresseStub() {
+    private static StrukturertAdresse hentStrukturertAddresseStub() {
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
         strukturertAdresse.husnummer = "25";
         strukturertAdresse.gatenavn = "Gatenavn";
@@ -115,7 +114,7 @@ public class DataByggerStubs {
         return strukturertAdresse;
     }
 
-    public static Set hentOrganisasjonDokumentSetStub() {
+    static Set hentOrganisasjonDokumentSetStub() {
         HashSet<OrganisasjonDokument> orgDokumentHashSet = new HashSet<>();
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.organisasjonDetaljer = mock(OrganisasjonsDetaljer.class);

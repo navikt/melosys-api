@@ -49,10 +49,9 @@ public class SaksopplysningStubs {
         return saksopplysning;
     }
 
-    public static Set<Saksopplysning> lagSøknadOgArbeidsforholdOpplysninger(List<String> selvstendigeForetak, List<String> ekstraArbeidsgivere, List<String> registrerteArbeidsgivere) {
-        Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, Collections.emptyList(), ekstraArbeidsgivere);
+    public static Set<Saksopplysning> lagArbeidsforholdOpplysninger(List<String> registrerteArbeidsgivere) {
         Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(registrerteArbeidsgivere);
-        return new HashSet<>(Arrays.asList(søknad, arbeidsforhold));
+        return new HashSet<>(Collections.singletonList(arbeidsforhold));
     }
 
     public static Set<OrganisasjonDokument> lagOrganisasjonDokumenter(Collection<String> organisasjonsnumre)  {

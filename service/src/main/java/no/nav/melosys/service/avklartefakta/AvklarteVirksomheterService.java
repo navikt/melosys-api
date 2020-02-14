@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.Adresse;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentArbeidsforholdDokument;
-import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentSøknadDokument;
 
 @Service
 @Primary
@@ -37,19 +36,19 @@ public class AvklarteVirksomheterService {
         this.registerOppslagService = registerOppslagService;
     }
 
-    public List<AvklartVirksomhet> hentUtenlandskeVirksomheter(Behandling behandling) throws TekniskException {
-        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+    public List<AvklartVirksomhet> hentUtenlandskeVirksomheter(Behandling behandling) {
+        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
 
-        return søknad.foretakUtland.stream()
+        return grunnlagData.foretakUtland.stream()
             .filter(uf -> avklarteOrgnumreOgUuider.contains(uf.uuid))
             .map(AvklartVirksomhet::new)
             .collect(Collectors.toList());
     }
 
-    public Set<String> hentNorskeSelvstendigeForetakOrgnumre(Behandling behandling) throws TekniskException {
-        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-        Set<String> organisasjonsnumre = søknad.selvstendigArbeid.hentAlleOrganisasjonsnumre()
+    Set<String> hentNorskeSelvstendigeForetakOrgnumre(Behandling behandling) {
+        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        Set<String> organisasjonsnumre = grunnlagData.selvstendigArbeid.hentAlleOrganisasjonsnumre()
             .collect(Collectors.toSet());
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
@@ -60,8 +59,12 @@ public class AvklarteVirksomheterService {
     public Set<String> hentNorskeArbeidsgivendeOrgnumre(Behandling behandling) throws TekniskException {
         ArbeidsforholdDokument arbDok = hentArbeidsforholdDokument(behandling);
         Set<String> arbeidsgivendeOrgnumre = arbDok.hentOrgnumre();
-        SoeknadDokument søknad = hentSøknadDokument(behandling);
-        arbeidsgivendeOrgnumre.addAll(søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
+        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        if (grunnlagData instanceof SoeknadDokument) {
+            arbeidsgivendeOrgnumre.addAll(
+                ((SoeknadDokument) grunnlagData).juridiskArbeidsgiverNorge.ekstraArbeidsgivere
+            );
+        }
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
         arbeidsgivendeOrgnumre.retainAll(avklarteOrgnumreOgUuider);

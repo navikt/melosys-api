@@ -28,7 +28,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.KORT_OPPDRAG_RETUR_NORSK_AG;
-import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
+import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
+import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -79,10 +80,10 @@ public class BrevDataByggerAvslagYrkesaktivTest {
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
         List<String> arbeidsgivereRegister = Collections.singletonList("123456789");
 
-        Set<Saksopplysning> saksopplysninger =
-            lagSøknadOgArbeidsforholdOpplysninger(selvstendigeForetak, Collections.emptyList(), arbeidsgivereRegister);
+        Set<Saksopplysning> saksopplysninger = lagArbeidsforholdOpplysninger(arbeidsgivereRegister);
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);

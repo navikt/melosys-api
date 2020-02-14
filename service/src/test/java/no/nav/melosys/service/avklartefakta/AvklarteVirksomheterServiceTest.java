@@ -21,7 +21,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.SaksopplysningStubs.*;
+import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
+import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
+import static no.nav.melosys.service.SaksopplysningStubs.lagOrganisasjonDokumenter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,27 +33,27 @@ import static org.mockito.Mockito.when;
 public class AvklarteVirksomheterServiceTest {
 
     @Mock
-    AvklartefaktaService avklartefaktaService;
+    private AvklartefaktaService avklartefaktaService;
 
     @Mock
-    RegisterOppslagService registerOppslagService;
+    private RegisterOppslagService registerOppslagService;
 
-    @Mock
-    Behandling behandling;
+    private Behandling behandling;
 
-    AvklarteVirksomheterService avklarteVirksomheterService;
+    private AvklarteVirksomheterService avklarteVirksomheterService;
 
-    String orgnr1 = "111111111";
-    String orgnr2 = "222222222";
-    String orgnr3 = "333333333";
-    String uuid1 = "a2k2jf-a3khs";
-    String uuid2 = "0dkf93-kj701";
+    private String orgnr1 = "111111111";
+    private String orgnr2 = "222222222";
+    private String orgnr3 = "333333333";
+    private String uuid1 = "a2k2jf-a3khs";
+    private String uuid2 = "0dkf93-kj701";
 
     Function<OrganisasjonDokument, Adresse> ingenAdresse = org -> null;
 
     @Before
     public void setUp() {
-        when(behandling.getId()).thenReturn(1L);
+        behandling = new Behandling();
+        behandling.setId(1L);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, uuid1)));
 
         avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
@@ -61,9 +63,7 @@ public class AvklarteVirksomheterServiceTest {
     public void hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() throws TekniskException {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, null);
         ForetakUtland foretak2 = lagForetakUtland("Utland2", uuid2, "SE-123456789");
-
-        Saksopplysning søknad = lagSøknadOpplysning(Collections.emptyList(), Arrays.asList(foretak1, foretak2), Collections.emptyList());
-        when(behandling.getSaksopplysninger()).thenReturn(Collections.singleton(søknad));
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Arrays.asList(foretak1, foretak2), Collections.emptyList()));
 
         List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
         assertThat(avklarteSelvstendigeOrgnumre.stream().map(av -> av.navn)).containsOnly("Utland1");
@@ -72,9 +72,7 @@ public class AvklarteVirksomheterServiceTest {
     @Test
     public void hentUtenlandskeVirksomheter_girListeAvklartVirksomhetMedOrgnrIkkeUuid() throws TekniskException {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, "SE-123456789");
-
-        Saksopplysning søknad = lagSøknadOpplysning(Collections.emptyList(), Collections.singletonList(foretak1), Collections.emptyList());
-        when(behandling.getSaksopplysninger()).thenReturn(Collections.singleton(søknad));
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.singletonList(foretak1), Collections.emptyList()));
 
         List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
         assertThat(avklarteSelvstendigeOrgnumre.stream().map(av -> av.orgnr)).containsOnly("SE-123456789");
@@ -91,8 +89,7 @@ public class AvklarteVirksomheterServiceTest {
     @Test
     public void hentSelvstendigeForetakOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
         List<String> selvstendigeForetak = Arrays.asList(orgnr1, orgnr2);
-        Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, Collections.emptyList(), Collections.emptyList());
-        when(behandling.getSaksopplysninger()).thenReturn(Collections.singleton(søknad));
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
         Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeSelvstendigeForetakOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
@@ -102,8 +99,9 @@ public class AvklarteVirksomheterServiceTest {
     public void hentArbeidsgivendeEkstraOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
         List<String> arbeidgivendeEkstraOrgnumre = Arrays.asList(orgnr2, orgnr1);
         Set<Saksopplysning> saksopplysninger =
-            lagSøknadOgArbeidsforholdOpplysninger(Collections.emptyList(), arbeidgivendeEkstraOrgnumre, Collections.emptyList());
-        when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
+            lagArbeidsforholdOpplysninger(Collections.emptyList());
+        behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(),Collections.emptyList(), arbeidgivendeEkstraOrgnumre));
 
         Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
@@ -113,8 +111,9 @@ public class AvklarteVirksomheterServiceTest {
     public void hentArbeidsgivendeRegistreOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
         List<String> arbeidgivendeOrgnumreEkstra = Arrays.asList(orgnr1, orgnr2, orgnr3);
         Set<Saksopplysning> saksopplysninger =
-            lagSøknadOgArbeidsforholdOpplysninger(Collections.emptyList(), Collections.emptyList(), arbeidgivendeOrgnumreEkstra);
-        when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
+            lagArbeidsforholdOpplysninger(arbeidgivendeOrgnumreEkstra);
+        behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(),Collections.emptyList(), Collections.emptyList()));
 
         Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
@@ -126,11 +125,10 @@ public class AvklarteVirksomheterServiceTest {
         List<String> arbeidsgivereRegister = Collections.singletonList(orgnr3);
 
         Set<Saksopplysning> saksopplysninger =
-            lagSøknadOgArbeidsforholdOpplysninger(Collections.emptyList(),
-                                                  arbeidsgivereEkstra,
-                                                  arbeidsgivereRegister);
+            lagArbeidsforholdOpplysninger(arbeidsgivereRegister);
 
-        when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
+        behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.emptyList(), arbeidsgivereEkstra));
 
         Set<String> avklarteOrganisasjoner = new HashSet<>(Arrays.asList(orgnr2, orgnr3));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
@@ -148,11 +146,10 @@ public class AvklarteVirksomheterServiceTest {
         List<String> selvstendigeForetak = Collections.singletonList(orgnr1);
 
         Set<Saksopplysning> saksopplysninger =
-            lagSøknadOgArbeidsforholdOpplysninger(selvstendigeForetak,
-                                                  Collections.emptyList(),
-                                                  Collections.emptyList());
+            lagArbeidsforholdOpplysninger(Collections.emptyList());
 
-        when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
+        behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
         Set<String> avklarteOrganisasjoner = new HashSet<>(selvstendigeForetak);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);

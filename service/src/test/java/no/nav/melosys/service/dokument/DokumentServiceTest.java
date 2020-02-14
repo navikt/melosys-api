@@ -7,6 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -284,16 +285,21 @@ public final class DokumentServiceTest {
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.KLAGE);
         behandling.setId(BEHANDLINGSID);
-        SoeknadDokument dok = new SoeknadDokument();
+
+        SoeknadDokument søknad = new SoeknadDokument();
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.orgnr = "12345678910";
-        dok.foretakUtland.add(foretakUtland);
-        dok.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        dok.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
-        dok.oppholdUtland.oppholdslandkoder.add("DK");
-        Saksopplysning søknad = lagSaksopplysning(SaksopplysningType.SØKNAD, dok);
+        søknad.foretakUtland.add(foretakUtland);
+        søknad.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
+        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
+        søknad.oppholdUtland.oppholdslandkoder.add("DK");
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknad);
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+
         Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument());
-        behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(søknad, personopplysninger)));
+        behandling.setSaksopplysninger(Set.of(personopplysninger));
         return behandling;
     }
 

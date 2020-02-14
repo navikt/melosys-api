@@ -106,10 +106,10 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     private Optional<String> hentUtenlandskIdent(Landkoder landkode) {
-        return dataGrunnlag.getSøknad().personOpplysninger.utenlandskIdent.stream()
-            .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
-            .map(utenlandskIdent -> utenlandskIdent.ident)
-            .findFirst();
+        return dataGrunnlag.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
+                .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
+                .map(utenlandskIdent -> utenlandskIdent.ident)
+                .findFirst();
     }
 
     private Collection<Anmodningsperiode> hentAnmodningsperioder() throws FunksjonellException {
