@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.exception.TekniskException;
 import org.junit.Test;
@@ -26,21 +25,18 @@ public class SaksopplysningerUtilsTest {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
         Saksopplysning saksopplysning_1 = new Saksopplysning();
         saksopplysning_1.setType(SaksopplysningType.ARBFORH);
+        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
+        saksopplysning_1.setDokument(arbeidsforholdDokument);
         saksopplysninger.add(saksopplysning_1);
-        Saksopplysning saksopplysning_2 = new Saksopplysning();
-        saksopplysning_2.setType(SaksopplysningType.SØKNAD);
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
-        saksopplysning_2.setDokument(soeknadDokument);
-        saksopplysninger.add(saksopplysning_2);
         Saksopplysning saksopplysning_3 = new Saksopplysning();
         saksopplysning_3.setType(SaksopplysningType.MEDL);
         saksopplysninger.add(saksopplysning_3);
 
         behandling.setSaksopplysninger(saksopplysninger);
 
-        Optional<SaksopplysningDokument> saksopplysningDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.SØKNAD);
+        Optional<SaksopplysningDokument> saksopplysningDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.ARBFORH);
         assertThat(saksopplysningDokument).isNotEmpty();
-        assertThat(saksopplysningDokument.get()).isEqualTo(soeknadDokument);
+        assertThat(saksopplysningDokument.get()).isEqualTo(arbeidsforholdDokument);
     }
 
     @Test

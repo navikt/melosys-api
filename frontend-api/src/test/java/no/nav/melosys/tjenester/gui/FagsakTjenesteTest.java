@@ -298,10 +298,10 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
         PersonDokument personDokument = (PersonDokument)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
         when(saksopplysningerService.finnPersonOpplysninger(eq(1L))).thenReturn(Optional.ofNullable(personDokument));
-        SoeknadDokument søknadDokument = (SoeknadDokument) FagsakBehandlingFactory.lagSøknadOpplysning().getDokument();
+        SoeknadDokument søknadDokument = FagsakBehandlingFactory.lagSøknadDokument();
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
-        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(eq(1L))).thenReturn(Optional.ofNullable(behandlingsgrunnlag));
+        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(eq(1L))).thenReturn(Optional.of(behandlingsgrunnlag));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(fagsakService.hentFagsak("Finnes ikke")).thenThrow(new IkkeFunnetException("Finnes ikke"));
         ArrayList<Fagsak> fagsaker = new ArrayList<>();

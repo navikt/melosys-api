@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
@@ -66,10 +65,6 @@ public class BrevDataTestUtils {
         foretakUtland.adresse.landkode = "NO";
         foretakUtland.selvstendigNæringsvirksomhet = selvstendig;
         return foretakUtland;
-    }
-
-    public static Saksopplysning lagSoeknadssaksopplysning(SoeknadDokument søknad) {
-        return lagSaksopplysning(SaksopplysningType.SØKNAD, søknad);
     }
 
     public static Saksopplysning lagPersonsaksopplysning(PersonDokument person) {

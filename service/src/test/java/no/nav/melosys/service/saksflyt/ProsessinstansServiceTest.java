@@ -7,7 +7,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
@@ -163,8 +164,7 @@ public class ProsessinstansServiceTest {
 
         String aktørID = "aktørID";
         String brukerID = "br";
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
-        service.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID, soeknadDokument);
+        service.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -178,6 +178,8 @@ public class ProsessinstansServiceTest {
         fagsak.setSaksnummer("12354");
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         return behandling;
     }
 

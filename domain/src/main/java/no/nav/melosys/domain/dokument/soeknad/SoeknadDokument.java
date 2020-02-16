@@ -6,12 +6,11 @@ import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import org.apache.commons.lang3.StringUtils;
 
 //TODO: flytte til no.nav.melosys.domain.behandlingsgrunnlag
 @XmlRootElement
-public class SoeknadDokument extends BehandlingsgrunnlagData implements SaksopplysningDokument {
+public class SoeknadDokument extends BehandlingsgrunnlagData {
     // Opplysninger om juridiske arbeidsgiver i Norge
     public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
 

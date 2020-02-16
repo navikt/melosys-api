@@ -297,10 +297,6 @@ public class BrevDataServiceTest {
     private Collection<Saksopplysning> lagSaksopplysningerUtenAdresseIRegister() {
         Collection<Saksopplysning> saksopplysninger = new HashSet<>();
         saksopplysninger.add(lagPersonsaksopplysning(new PersonDokument()));
-
-        SoeknadDokument søknad = new SoeknadDokument();
-        søknad.bosted.oppgittAdresse = lagStrukturertAdresse();
-        saksopplysninger.add(lagSoeknadssaksopplysning(søknad));
         return saksopplysninger;
     }
 

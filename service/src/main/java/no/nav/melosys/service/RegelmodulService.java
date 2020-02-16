@@ -135,9 +135,6 @@ public class RegelmodulService {
                 case SOB_SAK:
                     // Brukes ikke av regelmodulen
                     break;
-                case SØKNAD:
-                    dokumentnoder.put("soeknadDokument", dokumentnode);
-                    break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
             }

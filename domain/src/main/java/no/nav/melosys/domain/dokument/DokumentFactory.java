@@ -118,10 +118,6 @@ public class DokumentFactory {
      *  hver gang de lastes fordi de er redigerbare og versjonerte
      */
     private String hentInternXml(Saksopplysning saksopplysning) {
-        if (saksopplysning.getType() == SaksopplysningType.SØKNAD) {
-            return lagInternXml(saksopplysning);
-        }
-
         if (saksopplysning.getInternXml() == null) {
             return lagInternXml(saksopplysning);
         }

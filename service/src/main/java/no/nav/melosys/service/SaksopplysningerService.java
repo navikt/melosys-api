@@ -2,18 +2,16 @@ package no.nav.melosys.service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -31,8 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-
-import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 
 @Service
 public class SaksopplysningerService {
@@ -116,26 +112,19 @@ public class SaksopplysningerService {
             throw new IkkeFunnetException("Behandling ikke funnet med behandlingID: " + behandlingID);
         }
 
-        SoeknadDokument søknadDokument;
-        Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
-        if (opt.isPresent()) {
-            søknadDokument = (SoeknadDokument) opt.get();
-        } else {
-            throw new TekniskException("Oppfriskning feilet på grunn av manglende søknad opplysning");
-        }
 
-        behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
+        behandling.setSaksopplysninger(new HashSet<>());
         behandlingRepository.save(behandling);
 
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
-        opprettOppfriskningsprosess(behandling, søknadDokument);
+        opprettOppfriskningsprosess(behandling);
     }
 
-    private void opprettOppfriskningsprosess(Behandling behandling, SoeknadDokument søknadDokument) throws IkkeFunnetException, TekniskException {
+    private void opprettOppfriskningsprosess(Behandling behandling) throws IkkeFunnetException, TekniskException {
         String aktørID = behandling.getFagsak().hentBruker().getAktørId();
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
-        prosessinstansService.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID, søknadDokument);
+        prosessinstansService.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)

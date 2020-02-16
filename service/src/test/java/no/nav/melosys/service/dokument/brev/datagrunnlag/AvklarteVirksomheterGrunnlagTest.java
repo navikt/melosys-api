@@ -9,13 +9,11 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -27,7 +25,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagForetakUtland;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagNorskVirksomhet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -40,25 +39,17 @@ public class AvklarteVirksomheterGrunnlagTest {
 
     @Mock
     private KodeverkService kodeverkService;
-    
+
     private AvklarteVirksomheterGrunnlag dataGrunnlag;
-    
+
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         AvklartVirksomhet arbeidsgiver = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Arrays.asList(arbeidsgiver));
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(arbeidsgiver));
 
         when(kodeverkService.dekod(any(FellesKodeverk.class), anyString(), any(LocalDate.class))).thenReturn("Poststed");
-        
-        dataGrunnlag = new AvklarteVirksomheterGrunnlag(mock(Behandling.class), avklarteVirksomheterService, kodeverkService);
-    }
 
-    private Behandling lagBehandling(SoeknadDokument søknad, PersonDokument person) {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(søknad));
-        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(person));
-        return behandling;
+        dataGrunnlag = new AvklarteVirksomheterGrunnlag(mock(Behandling.class), avklarteVirksomheterService, kodeverkService);
     }
 
     @Test
@@ -168,7 +159,7 @@ public class AvklarteVirksomheterGrunnlagTest {
 
         assertThat(bivirksomheter.iterator().next()).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
     }
-    
+
     @Test
     public void utfyllManglendeAdressefelter_gyldigForretningsadresse_girForretningsadresse() {
         StrukturertAdresse adresse = dataGrunnlag.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", "Forretningsgatenavn"));
@@ -180,7 +171,7 @@ public class AvklarteVirksomheterGrunnlagTest {
 
         verify(kodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
     }
-    
+
     @Test
     public void utfyllManglendeAdressefelter_forretningsadresseManglerGatenavn_girForretningsadresseMedBlanktGatenavn() {
         StrukturertAdresse adresse = dataGrunnlag.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", null));
@@ -192,7 +183,7 @@ public class AvklarteVirksomheterGrunnlagTest {
 
         verify(kodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
     }
-    
+
     @Test
     public void utfyllManglendeAdressefelter_forretningsadresseManglerPostnr_girPostadresse() {
         StrukturertAdresse adresse = dataGrunnlag.utfyllManglendeAdressefelter(lagOrganisasjonDokument(null, null));
@@ -204,7 +195,7 @@ public class AvklarteVirksomheterGrunnlagTest {
 
         verify(kodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("6789"), any(LocalDate.class));
     }
-    
+
     private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn) {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
@@ -223,7 +214,7 @@ public class AvklarteVirksomheterGrunnlagTest {
         postadresse.setPoststed("Postpoststed");
         postadresse.setLandkode("NO");
         postadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
-        
+
         return organisasjonDokument;
     }
 }

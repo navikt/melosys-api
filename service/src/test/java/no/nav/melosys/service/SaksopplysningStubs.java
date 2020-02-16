@@ -7,10 +7,6 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,29 +20,6 @@ public class SaksopplysningStubs {
         arbeidsforhold.setDokument(arbeidsforholdDokument);
         arbeidsforhold.setType(SaksopplysningType.ARBFORH);
         return arbeidsforhold;
-    }
-
-    public static Saksopplysning lagSøknadOpplysning(List<String> selvstendigeForetak, List<ForetakUtland> foretakUtland, List<String> ekstraArbeidsgivere) {
-        SoeknadDokument søknad = new SoeknadDokument();
-        for (String orgnr : selvstendigeForetak) {
-            SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-            selvstendigForetak.orgnr = orgnr;
-            søknad.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
-        }
-
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landkode = "DE";
-        søknad.arbeidUtland = new ArrayList<>();
-        søknad.arbeidUtland.add(arbeidUtland);
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere;
-        søknad.foretakUtland = foretakUtland;
-        søknad.soeknadsland.landkoder.add("DE");
-
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(søknad);
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-
-        return saksopplysning;
     }
 
     public static Set<Saksopplysning> lagArbeidsforholdOpplysninger(List<String> registrerteArbeidsgivere) {

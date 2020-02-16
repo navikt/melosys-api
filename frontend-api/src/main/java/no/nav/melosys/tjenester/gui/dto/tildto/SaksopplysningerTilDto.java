@@ -22,7 +22,6 @@ import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.PersonhistorikkDto;
@@ -32,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
 
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
@@ -99,10 +97,6 @@ public class SaksopplysningerTilDto {
                     if (!personhistorikk.statsborgerskapListe.isEmpty()) {
                         historiskStatsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
                     }
-                    break;
-                case SØKNAD:
-                    søknadsperiode = hentPeriode((SoeknadDokument) dokument);
-                    // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
                 case SEDOPPL:
                     dto.setSed(SedDokumentDto.fra((SedDokument) dokument));
