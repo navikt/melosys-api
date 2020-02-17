@@ -87,7 +87,9 @@ public class BrevmottakerService {
         // Dokumenter til bruker sendes i utgangspunkt bare til fullmektig dersom fullmektig finnes.
         // Vedtaksbrevene er imidlertid sendt til både bruker og fullmektig (gjelder ikke forhåndsvisning).
         boolean tilBegge = false;
-        if (produserbartDokument == INNVILGELSE_YRKESAKTIV || produserbartDokument == AVSLAG_YRKESAKTIV) {
+        if (produserbartDokument == INNVILGELSE_YRKESAKTIV || produserbartDokument == AVSLAG_YRKESAKTIV
+            || produserbartDokument == INNVILGELSE_YRKESAKTIV_FLERE_LAND
+            || produserbartDokument == AVSLAG_MANGLENDE_OPPLYSNINGER) {
             tilBegge = !forhåndsvisning;
         }
 
