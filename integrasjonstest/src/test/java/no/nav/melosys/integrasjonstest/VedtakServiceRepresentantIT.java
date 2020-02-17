@@ -1,7 +1,9 @@
 package no.nav.melosys.integrasjonstest;
 
 import java.util.Collections;
+import java.util.List;
 
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -40,6 +43,7 @@ import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testbehandling
 import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testsubjekter.*;
 import static no.nav.melosys.integrasjonstest.felles.verifisering.ForventetDokumentBestilling.forventDokument;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -64,6 +68,7 @@ public class VedtakServiceRepresentantIT {
     OppgaveService oppgaveService;
 
     @MockBean
+    @Qualifier("system")
     EessiService eessiService;
 
     @Autowired
@@ -95,15 +100,15 @@ public class VedtakServiceRepresentantIT {
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)
         .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", List.of(INSTITUSJONSKODE_ØSTERRIKET), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(faktagrunnlag.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(faktagrunnlag.getBehandlingsid(), FERDIG);
 
         dokumentSjekker.sjekkBrevBestilt(
-            forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
             forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR));
+        verify(eessiService).opprettOgSendSed(faktagrunnlag.getBehandlingsid(), List.of(INSTITUSJONSKODE_ØSTERRIKET), BucType.LA_BUC_04, null);
     }
 
     @Test
@@ -114,7 +119,7 @@ public class VedtakServiceRepresentantIT {
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)
         .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", List.of(INSTITUSJONSKODE_ØSTERRIKET), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
@@ -122,8 +127,8 @@ public class VedtakServiceRepresentantIT {
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
-            forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR),
-            forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
+            forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, AVKLART_ARBEIDSGIVER_ORGNR));
+        verify(eessiService).opprettOgSendSed(testdataUtfyller.getBehandlingsid(), List.of(INSTITUSJONSKODE_ØSTERRIKET), BucType.LA_BUC_04, null);
     }
 
     @Test
@@ -134,7 +139,7 @@ public class VedtakServiceRepresentantIT {
             .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)
             .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", List.of(INSTITUSJONSKODE_ØSTERRIKET), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
@@ -142,8 +147,8 @@ public class VedtakServiceRepresentantIT {
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
             forventDokument(INNVILGELSE_YRKESAKTIV, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
-            forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
-            forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
+            forventDokument(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR));
+        verify(eessiService).opprettOgSendSed(testdataUtfyller.getBehandlingsid(), List.of(INSTITUSJONSKODE_ØSTERRIKET), BucType.LA_BUC_04, null);
     }
 
 
@@ -154,15 +159,15 @@ public class VedtakServiceRepresentantIT {
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)
         .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", List.of(INSTITUSJONSKODE_ØSTERRIKET), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
         dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.BRUKER),
-            forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
+            forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR));
             // HELFO skal ikke ha kopi ved Art13 (MELOSYS-3039)
-            forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
+        verify(eessiService).opprettOgSendSed(testdataUtfyller.getBehandlingsid(), List.of(INSTITUSJONSKODE_ØSTERRIKET), BucType.LA_BUC_02, null);
     }
 
     @Test
@@ -172,16 +177,16 @@ public class VedtakServiceRepresentantIT {
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)
         .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", List.of(INSTITUSJONSKODE_ØSTERRIKET), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
         dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
-            forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
+            forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR));
             // HELFO skal ikke ha kopi ved Art13 (MELOSYS-3039)
-            forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
+        verify(eessiService).opprettOgSendSed(testdataUtfyller.getBehandlingsid(), List.of(INSTITUSJONSKODE_ØSTERRIKET), BucType.LA_BUC_02, null);
     }
 
     @Test
@@ -191,16 +196,16 @@ public class VedtakServiceRepresentantIT {
         .opprettInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)
         .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", List.of(INSTITUSJONSKODE_ØSTERRIKET), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
         dokumentSjekker.sjekkBrevBestilt(
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.BRUKER),
             forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.REPRESENTANT, DELOITTE_ORGNR),
-            forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR),
+            forventDokument(INNVILGELSE_YRKESAKTIV_FLERE_LAND, Aktoersroller.MYNDIGHET, SKATTEETATEN_ORGNR));
             // HELFO skal ikke ha kopi ved Art13 (MELOSYS-3039)
-            forventDokument(ATTEST_A1, Aktoersroller.MYNDIGHET, INSTITUSJONSKODE_ØSTERRIKET));
+        verify(eessiService).opprettOgSendSed(testdataUtfyller.getBehandlingsid(), List.of(INSTITUSJONSKODE_ØSTERRIKET), BucType.LA_BUC_02, null);
     }
 
     @Test
@@ -211,7 +216,7 @@ public class VedtakServiceRepresentantIT {
         .opprettAvslåttLovvalgsperiode(FO_883_2004_ART12_1)
         .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", List.of(), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(faktagrunnlag.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(faktagrunnlag.getBehandlingsid(), FERDIG);
 
@@ -231,7 +236,7 @@ public class VedtakServiceRepresentantIT {
         .opprettAvslåttLovvalgsperiode(FO_883_2004_ART12_1)
         .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", List.of(), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
@@ -251,7 +256,7 @@ public class VedtakServiceRepresentantIT {
         .opprettAvslåttLovvalgsperiode(FO_883_2004_ART12_1)
         .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(faktagrunnlag.getBehandlingsid(), Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, "", List.of(), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(faktagrunnlag.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(faktagrunnlag.getBehandlingsid(), FERDIG);
 
@@ -270,7 +275,7 @@ public class VedtakServiceRepresentantIT {
             .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
             .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "", List.of(), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
@@ -287,7 +292,7 @@ public class VedtakServiceRepresentantIT {
             .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
             .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "", List.of(), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
@@ -305,7 +310,7 @@ public class VedtakServiceRepresentantIT {
             .utfyllAvklartefaktaForArt12(Landkoder.AT, AVKLART_ARBEIDSGIVER_ORGNR)
             .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR);
 
-        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "", "", Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(testdataUtfyller.getBehandlingsid(), Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, "", List.of(), Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         prosessinstansTestService.ventPå(testdataUtfyller.getBehandlingsid());
         prosessinstansTestService.sjekkProsessteg(testdataUtfyller.getBehandlingsid(), FERDIG);
 
