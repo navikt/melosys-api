@@ -89,7 +89,8 @@ public class BrevmottakerService {
         boolean tilBegge = false;
         if (produserbartDokument == INNVILGELSE_YRKESAKTIV || produserbartDokument == AVSLAG_YRKESAKTIV
             || produserbartDokument == INNVILGELSE_YRKESAKTIV_FLERE_LAND
-            || produserbartDokument == AVSLAG_MANGLENDE_OPPLYSNINGER) {
+            || produserbartDokument == AVSLAG_MANGLENDE_OPPLYSNINGER
+            || produserbartDokument == MELDING_HENLAGT_SAK) {
             tilBegge = !forhåndsvisning;
         }
 

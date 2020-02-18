@@ -39,7 +39,8 @@ public class MedlemskapConsumerMock implements MedlemskapConsumer {
                 .withLovvalg(new LovvalgMedTerm().withValue("UAVK"))
                 .withTrygdedekning(new TrygdedekningMedTerm().withValue("Full"))
                 .withKildedokumenttype(new KildedokumenttypeMedTerm().withValue("Henv_Soknad"))
-                .withKilde(new KildeMedTerm().withValue("srvmelosys"));
+                .withKilde(new KildeMedTerm().withValue("srvmelosys"))
+                .withVersjon(0);
         } catch (DatatypeConfigurationException e) {
             return null;
         }

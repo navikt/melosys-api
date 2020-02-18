@@ -2,8 +2,10 @@ package no.nav.melosys.integrasjonstest;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -28,6 +30,7 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,9 +40,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
+import static no.nav.melosys.integrasjonstest.felles.opplysninger.Testsubjekter.INSTITUSJONSKODE_ØSTERRIKET;
 import static no.nav.melosys.integrasjonstest.felles.verifisering.ForventetDokumentBestilling.forventDokument;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -62,6 +67,7 @@ public class AnmodningUnntakTilVedtakIT {
     OppgaveService oppgaveService;
 
     @MockBean
+    @Qualifier("system")
     EessiService eessiService;
 
     @Autowired
@@ -112,7 +118,7 @@ public class AnmodningUnntakTilVedtakIT {
     void anmodningOmUnntak_anmodningOmUnntakMedAnmodningsperiode() throws MelosysException {
         Oppgave oppgave = new Oppgave.Builder().setFristFerdigstillelse(LocalDate.now()).build();
         when(gsakSystemService.hentOppgaveMedSaksnummer(any())).thenReturn(oppgave);
-        anmodningUnntakService.anmodningOmUnntak(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12, "");
+        anmodningUnntakService.anmodningOmUnntak(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12, INSTITUSJONSKODE_ØSTERRIKET);
 
         prosessinstansTestService.ventPå(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12);
         prosessinstansTestService.sjekkProsessteg(Testbehandlinger.UTFYLT_BEHANDLING_ART16_UTEN_ART12, FERDIG);
@@ -121,9 +127,9 @@ public class AnmodningUnntakTilVedtakIT {
         assertThat(behandling.getStatus()).isEqualTo(ANMODNING_UNNTAK_SENDT);
 
         dokumentSjekker.sjekkBrevBestilt(
-            forventDokument(ORIENTERING_ANMODNING_UNNTAK, Aktoersroller.BRUKER),
-            forventDokument(ANMODNING_UNNTAK, Aktoersroller.MYNDIGHET)
+            forventDokument(ORIENTERING_ANMODNING_UNNTAK, Aktoersroller.BRUKER)
         );
+        verify(eessiService).opprettOgSendSed(behandling.getId(), List.of(INSTITUSJONSKODE_ØSTERRIKET), BucType.LA_BUC_01, null);
     }
 
     @Test
