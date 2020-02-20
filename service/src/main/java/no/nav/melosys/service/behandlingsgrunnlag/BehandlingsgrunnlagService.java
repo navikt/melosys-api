@@ -2,6 +2,7 @@ package no.nav.melosys.service.behandlingsgrunnlag;
 
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BehandlingsgrunnlagService {
 
-    private static final String VERSJON_SOEKNAD_GRUNNLAG = "1";
+    private static final String VERSJON_SOEKNAD_GRUNNLAG = "1.2";
 
     private final BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
 
@@ -51,13 +52,13 @@ public class BehandlingsgrunnlagService {
     }
 
     @Transactional
-    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(long behandlingID, BehandlingsgrunnlagData behandlingsgrunnlagdata) throws IkkeFunnetException {
+    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(long behandlingID, JsonNode behandlingsgrunnlagDataJson) throws IkkeFunnetException {
 
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
 
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
-        return behandlingsgrunnlagRepository.save(behandlingsgrunnlag);
+        behandlingsgrunnlag.setJsonData(behandlingsgrunnlagDataJson.toString());
+        return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
     }
 
     public Optional<Behandlingsgrunnlag> finnBehandlingsgrunnlag(Long behandlingID) {

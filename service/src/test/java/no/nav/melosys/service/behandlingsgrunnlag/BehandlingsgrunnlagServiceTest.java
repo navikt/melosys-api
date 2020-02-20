@@ -2,6 +2,9 @@ package no.nav.melosys.service.behandlingsgrunnlag;
 
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -77,19 +80,24 @@ public class BehandlingsgrunnlagServiceTest {
     }
 
     @Test
-    public void oppdaterBehandlingsgrunnlag_eksisterer_oppdatererBehandlingsgrunnlagData() throws IkkeFunnetException {
+    public void oppdaterBehandlingsgrunnlag_eksisterer_oppdatererBehandlingsgrunnlagData() throws IkkeFunnetException, JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         BehandlingsgrunnlagData originalData = new BehandlingsgrunnlagData();
         originalData.arbeidNorge.kontaktNavn = "Nils Nilsersenenen";
+        String originalJsonData = objectMapper.writeValueAsString(originalData);
+        behandlingsgrunnlag.setJsonData(originalJsonData);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         when(behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)).thenReturn(Optional.of(behandlingsgrunnlag));
 
         BehandlingsgrunnlagData nyData = new SoeknadDokument();
         nyData.arbeidNorge.kontaktNavn = "Per Pererersen";
+        JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(nyData));
 
-        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, nyData);
-        verify(behandlingsgrunnlagRepository).save(any(Behandlingsgrunnlag.class));
+        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, jsonNode);
+        verify(behandlingsgrunnlagRepository).saveAndFlush(any(Behandlingsgrunnlag.class));
 
-        assertThat(originalData.arbeidNorge.kontaktNavn).isNotEqualTo(behandlingsgrunnlag.getBehandlingsgrunnlagdata().arbeidNorge.kontaktNavn);
+        assertThat(behandlingsgrunnlag.getJsonData()).isNotEqualTo(originalJsonData);
     }
 }

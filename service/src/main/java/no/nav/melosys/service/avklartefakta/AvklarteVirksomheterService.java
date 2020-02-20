@@ -11,7 +11,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.Adresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -60,11 +59,7 @@ public class AvklarteVirksomheterService {
         ArbeidsforholdDokument arbDok = hentArbeidsforholdDokument(behandling);
         Set<String> arbeidsgivendeOrgnumre = arbDok.hentOrgnumre();
         BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        if (grunnlagData instanceof SoeknadDokument) {
-            arbeidsgivendeOrgnumre.addAll(
-                ((SoeknadDokument) grunnlagData).juridiskArbeidsgiverNorge.ekstraArbeidsgivere
-            );
-        }
+        arbeidsgivendeOrgnumre.addAll(grunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
         arbeidsgivendeOrgnumre.retainAll(avklarteOrgnumreOgUuider);
