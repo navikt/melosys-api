@@ -5,26 +5,34 @@ import java.sql.Clob;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.transform.stream.StreamSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
 import oracle.jdbc.OracleResultSet;
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.flywaydb.core.api.migration.Context;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 @SuppressWarnings("unused")
 public class V6_0_02__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG extends BaseJavaMigration {
 
     private final ObjectMapper objectMapper;
+    private final Jaxb2Marshaller jaxb2Marshaller;
 
     public V6_0_02__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG() {
         this.objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+        jaxb2Marshaller = new Jaxb2Marshaller();
+        jaxb2Marshaller.setPackagesToScan("no.nav.melosys.domain.dokument");
+        jaxb2Marshaller.setValidationEventHandler(new DefaultValidationEventHandler());
     }
 
     @Override
@@ -77,12 +85,12 @@ public class V6_0_02__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG extends BaseJavaMigr
 
     private String lagSøknadDokumentJson(String søknadXml) throws Exception {
         StringReader stringReader = new StringReader(søknadXml);
-        SoeknadDokument soeknadDokument = (SoeknadDokument) JaxbConfig.jaxb2Marshaller().unmarshal(new StreamSource(stringReader));
+        SoeknadDokument soeknadDokument = (SoeknadDokument) jaxb2Marshaller.unmarshal(new StreamSource(stringReader));
         return objectMapper.writeValueAsString(soeknadDokument);
     }
 
     @Override
     public Integer getChecksum() {
-        return 1764893572;
+        return 1_764_893_572;
     }
 }
