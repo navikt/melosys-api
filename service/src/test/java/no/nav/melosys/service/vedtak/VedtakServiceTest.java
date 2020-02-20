@@ -25,11 +25,11 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -67,7 +67,7 @@ public class VedtakServiceTest {
     @Mock
     private VedtakKontrollService vedtakKontrollService;
     @Mock
-    private SaksopplysningerService saksopplysningerService;
+    private RegisteropplysningerService registeropplysningerService;
 
     private VedtakService vedtakService;
 
@@ -79,7 +79,7 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, vedtakKontrollService, saksopplysningerService);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, vedtakKontrollService, registeropplysningerService);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;

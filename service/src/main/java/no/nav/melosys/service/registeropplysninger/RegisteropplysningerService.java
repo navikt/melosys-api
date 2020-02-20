@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.felles;
+package no.nav.melosys.service.registeropplysninger;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.slf4j.Logger;
@@ -31,10 +32,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class HentOpplysningerFelles { // todo -> HentOpplysningerService ? RegisteropplysningerService ? HentRegisteropplysningerService
-    private static final Logger log = LoggerFactory.getLogger(HentOpplysningerFelles.class);
+public class RegisteropplysningerService {
+    private static final Logger log = LoggerFactory.getLogger(RegisteropplysningerService.class);
 
-    private final Map<SaksopplysningType, ThrowingFunction<RegisteropplysningerRequest, List<Saksopplysning>, MelosysException>> SAKSOPPLYSNING_TYPE_CONSUMER_MAP =
+    private final Map<SaksopplysningType, ThrowingFunction<RegisteropplysningerRequest, List<Saksopplysning>, MelosysException>> SAKSOPPLYSNING_TYPE_FUNCTION_MAP =
         Maps.immutableEnumMap(ImmutableMap.<SaksopplysningType, ThrowingFunction<RegisteropplysningerRequest, List<Saksopplysning>, MelosysException>>builder()
             .put(SaksopplysningType.ARBFORH, this::hentArbeidsforholdopplysninger)
             .put(SaksopplysningType.INNTK, this::hentInntektsopplysninger)
@@ -50,6 +51,7 @@ public class HentOpplysningerFelles { // todo -> HentOpplysningerService ? Regis
     private final MedlFasade medlFasade;
     private final EregFasade eregFasade;
     private final AaregFasade aaregFasade;
+    private final BehandlingService behandlingService;
     private final SakOgBehandlingFasade sakOgBehandlingFasade;
     private final InntektService inntektService;
     private final UtbetaldataService utbetaldataService;
@@ -58,21 +60,23 @@ public class HentOpplysningerFelles { // todo -> HentOpplysningerService ? Regis
     private final Integer medlemskaphistorikkAntallÅr;
 
     @Autowired
-    public HentOpplysningerFelles(@Qualifier("system") TpsFasade tpsFasade,
-                                  MedlFasade medlFasade,
-                                  EregFasade eregFasade,
-                                  AaregFasade aaregFasade,
-                                  SakOgBehandlingFasade sakOgBehandlingFasade,
-                                  InntektService inntektService,
-                                  UtbetaldataService utbetaldataService,
-                                  SaksopplysningerService saksopplysningerService,
-                                  @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}") Integer arbeidsforholdhistorikkAntallMåneder,
-                                  @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr
+    public RegisteropplysningerService(@Qualifier("system") TpsFasade tpsFasade,
+                                       MedlFasade medlFasade,
+                                       EregFasade eregFasade,
+                                       AaregFasade aaregFasade,
+                                       BehandlingService behandlingService,
+                                       SakOgBehandlingFasade sakOgBehandlingFasade,
+                                       InntektService inntektService,
+                                       UtbetaldataService utbetaldataService,
+                                       SaksopplysningerService saksopplysningerService,
+                                       @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}") Integer arbeidsforholdhistorikkAntallMåneder,
+                                       @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr
     ) {
         this.tpsFasade = tpsFasade;
         this.medlFasade = medlFasade;
         this.eregFasade = eregFasade;
         this.aaregFasade = aaregFasade;
+        this.behandlingService = behandlingService;
         this.sakOgBehandlingFasade = sakOgBehandlingFasade;
         this.inntektService = inntektService;
         this.utbetaldataService = utbetaldataService;
@@ -82,31 +86,44 @@ public class HentOpplysningerFelles { // todo -> HentOpplysningerService ? Regis
     }
 
     public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws MelosysException {
+        if (registeropplysningerRequest.getBehandling() == null) {
+            Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
+            registeropplysningerRequest = new RegisteropplysningerRequest(
+                behandling,
+                registeropplysningerRequest.getOpplysningstyper(),
+                registeropplysningerRequest.getFnr(),
+                registeropplysningerRequest.getFom(),
+                registeropplysningerRequest.getTom());
+        }
+
+        hentOgLagreOpplysningerMedBehandling(registeropplysningerRequest);
+    }
+
+    private void hentOgLagreOpplysningerMedBehandling(RegisteropplysningerRequest registeropplysningerRequest) throws MelosysException {
         for (var opplysningstype : registeropplysningerRequest.getOpplysningstyper()) {
-            if (!SAKSOPPLYSNING_TYPE_CONSUMER_MAP.containsKey(opplysningstype)) {
+            if (!SAKSOPPLYSNING_TYPE_FUNCTION_MAP.containsKey(opplysningstype)) {
                 throw new TekniskException("Støtter ikke å hente opplysninger for saksopplysningType " + opplysningstype);
             }
 
             List<Saksopplysning> saksopplysninger = hentSaksopplysninger(opplysningstype, registeropplysningerRequest);
             lagreSaksopplysninger(saksopplysninger, registeropplysningerRequest.getBehandling());
-
-            log.info("{} hentet for behandling {}", opplysningstype.getBeskrivelse(), registeropplysningerRequest.getBehandling().getId());
         }
     }
 
     private List<Saksopplysning> hentSaksopplysninger(SaksopplysningType opplysningstype, RegisteropplysningerRequest registeropplysningerRequest) throws MelosysException {
-        return SAKSOPPLYSNING_TYPE_CONSUMER_MAP.get(opplysningstype).apply(registeropplysningerRequest);
+        return SAKSOPPLYSNING_TYPE_FUNCTION_MAP.get(opplysningstype).apply(registeropplysningerRequest);
     }
 
     private void lagreSaksopplysninger(List<Saksopplysning> saksopplysninger, Behandling behandling) {
         for (Saksopplysning saksopplysning : saksopplysninger) {
             saksopplysningerService.lagreSaksopplysning(saksopplysning, behandling);
+            log.info("Registeropplysninger for {} hentet for behandling {}", saksopplysning.getType().getBeskrivelse(), behandling.getId());
         }
     }
 
     private List<Saksopplysning> hentArbeidsforholdopplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws TekniskException, SikkerhetsbegrensningException {
         LocalDate fom = registeropplysningerRequest.getFom();
-        LocalDate tom = registeropplysningerRequest.getFom();
+        LocalDate tom = registeropplysningerRequest.getTom();
 
         if (PeriodeKontroller.feilIPeriode(fom, tom)) {
             log.info("Kunne ikke hente arbeidsforholdopplysninger grunnet feil i periode");
@@ -135,7 +152,7 @@ public class HentOpplysningerFelles { // todo -> HentOpplysningerService ? Regis
 
     private List<Saksopplysning> hentMedlemskapsopplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
         LocalDate fom = registeropplysningerRequest.getFom();
-        LocalDate tom = registeropplysningerRequest.getFom();
+        LocalDate tom = registeropplysningerRequest.getTom();
 
         if (PeriodeKontroller.feilIPeriode(fom, tom)) {
             log.info("Kunne ikke hente medlemskapsopplysninger grunnet feil i periode");
@@ -148,7 +165,7 @@ public class HentOpplysningerFelles { // todo -> HentOpplysningerService ? Regis
 
     private List<Saksopplysning> hentInntektsopplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws TekniskException, SikkerhetsbegrensningException {
         LocalDate fom = registeropplysningerRequest.getFom();
-        LocalDate tom = registeropplysningerRequest.getFom();
+        LocalDate tom = registeropplysningerRequest.getTom();
 
         if (PeriodeKontroller.feilIPeriode(fom, tom)) {
             log.info("Kunne ikke hente inntektopplysninger grunnet feil i periode");
@@ -164,7 +181,7 @@ public class HentOpplysningerFelles { // todo -> HentOpplysningerService ? Regis
     private List<Saksopplysning> hentUtbetalingsopplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws FunksjonellException, TekniskException {
         Behandling behandling = registeropplysningerRequest.getBehandling();
         LocalDate fom = registeropplysningerRequest.getFom();
-        LocalDate tom = registeropplysningerRequest.getFom();
+        LocalDate tom = registeropplysningerRequest.getTom();
 
         if (PeriodeKontroller.feilIPeriode(fom, tom)) {
             log.info("Kunne ikke hente utbetalingsopplysninger grunnet feil i periode");
@@ -191,7 +208,7 @@ public class HentOpplysningerFelles { // todo -> HentOpplysningerService ? Regis
         Behandling behandling = registeropplysningerRequest.getBehandling();
         Set<String> orgnumre = new HashSet<>();
 
-        Optional<SaksopplysningDokument> arbeidsforholdDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.ARBFORH); // TODO: må teste om vi kan hente i samme transaksjon
+        Optional<SaksopplysningDokument> arbeidsforholdDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.ARBFORH);
         Optional<SaksopplysningDokument> inntektDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.INNTK);
 
         arbeidsforholdDokument.ifPresent(dokument -> orgnumre.addAll(((ArbeidsforholdDokument) dokument).hentOrgnumre()));

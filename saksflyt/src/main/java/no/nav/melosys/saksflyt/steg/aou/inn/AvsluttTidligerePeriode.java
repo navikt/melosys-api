@@ -36,6 +36,6 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
             oppdaterMedlFelles.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
         }
 
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_HENT_PERSON);
+        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER);
     }
 }

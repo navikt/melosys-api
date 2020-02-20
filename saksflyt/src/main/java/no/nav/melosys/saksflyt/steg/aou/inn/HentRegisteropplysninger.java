@@ -8,30 +8,30 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
-import no.nav.melosys.saksflyt.felles.RegisteropplysningerRequest;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("AnmodningUnntakMottakHentRegisteropplysninger")
 public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
-    private final HentOpplysningerFelles hentOpplysningerFelles;
+    private final RegisteropplysningerService registeropplysningerService;
     private final BehandlingService behandlingService;
     private final TpsFasade tpsFasade;
 
     @Autowired
-    public HentRegisteropplysninger(HentOpplysningerFelles hentOpplysningerFelles, BehandlingService behandlingService, TpsFasade tpsFasade) {
-        this.hentOpplysningerFelles = hentOpplysningerFelles;
+    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService, BehandlingService behandlingService, TpsFasade tpsFasade) {
+        this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
         this.tpsFasade = tpsFasade;
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return null; // todo - slette gamle steg og legg til nytt
+        return ProsessSteg.AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, fnr);
 
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
-        hentOpplysningerFelles.hentOgLagreOpplysninger(
+        registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandling(behandling)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()

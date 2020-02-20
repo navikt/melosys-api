@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.felles;
+package no.nav.melosys.service.registeropplysninger;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -6,9 +6,11 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.exception.TekniskException;
 
 public class RegisteropplysningerRequest {
     private final Behandling behandling;
+    private final Long behandlingID;
     private final List<SaksopplysningType> opplysningstyper;
     private final String fnr;
     private final LocalDate fom;
@@ -16,6 +18,16 @@ public class RegisteropplysningerRequest {
 
     public RegisteropplysningerRequest(Behandling behandling, List<SaksopplysningType> opplysningstyper, String fnr, LocalDate fom, LocalDate tom) {
         this.behandling = behandling;
+        this.behandlingID = null;
+        this.opplysningstyper = opplysningstyper;
+        this.fnr = fnr;
+        this.fom = fom;
+        this.tom = tom;
+    }
+
+    public RegisteropplysningerRequest(Long behandlingID, List<SaksopplysningType> opplysningstyper, String fnr, LocalDate fom, LocalDate tom) {
+        this.behandling = null;
+        this.behandlingID = behandlingID;
         this.opplysningstyper = opplysningstyper;
         this.fnr = fnr;
         this.fom = fom;
@@ -28,6 +40,10 @@ public class RegisteropplysningerRequest {
 
     public Behandling getBehandling() {
         return behandling;
+    }
+
+    public Long getBehandlingID() {
+        return behandlingID;
     }
 
     public List<SaksopplysningType> getOpplysningstyper() {
@@ -48,7 +64,8 @@ public class RegisteropplysningerRequest {
 
     public static class RegisteropplysningerRequestBuilder {
         private Behandling behandling;
-        private SaksopplysningTyper saksopplysningTyper;
+        private Long behandlingID;
+        private SaksopplysningTyper saksopplysningTyper = new SaksopplysningTyper(new ArrayList<>());
         private String fnr;
         private LocalDate fom;
         private LocalDate tom;
@@ -58,6 +75,11 @@ public class RegisteropplysningerRequest {
 
         public RegisteropplysningerRequestBuilder behandling(Behandling behandling) {
             this.behandling = behandling;
+            return this;
+        }
+
+        public RegisteropplysningerRequestBuilder behandlingID(Long behandlingID) {
+            this.behandlingID = behandlingID;
             return this;
         }
 
@@ -81,23 +103,24 @@ public class RegisteropplysningerRequest {
             return this;
         }
 
-        public RegisteropplysningerRequest build() {
-            // valider();
-            return new RegisteropplysningerRequest(behandling, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom);
-        }
-
-         // todo
-        private void valider() {
-            if (behandling == null) {
-
-            }
-
-            // felter som kreves
-            if (saksopplysningTyper.getOpplysningstyper().contains(SaksopplysningType.ARBFORH)) {
-
+        public RegisteropplysningerRequest build() throws TekniskException {
+            valider();
+            if (behandling != null) {
+                return new RegisteropplysningerRequest(behandling, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom);
+            } else {
+                return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom);
             }
         }
 
+        private void valider() throws TekniskException {
+            if (behandling == null && behandlingID == null) {
+                throw new TekniskException("Behandling eller behandlingID er påkrevd for å hente registeropplysninger");
+            }
+
+            if (saksopplysningTyper.getOpplysningstyper().isEmpty()) {
+                throw new TekniskException("Krever minst én saksopplysningstype for å hente registeropplysninger");
+            }
+        }
     }
 
     public static class SaksopplysningTyper {

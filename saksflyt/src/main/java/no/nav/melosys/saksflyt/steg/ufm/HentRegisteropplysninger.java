@@ -11,10 +11,10 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
-import no.nav.melosys.saksflyt.felles.RegisteropplysningerRequest;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,18 +31,18 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
     private final BehandlingService behandlingService;
     private final TpsFasade tpsFasade;
-    private final HentOpplysningerFelles hentOpplysningerFelles;
+    private final RegisteropplysningerService registeropplysningerService;
 
     @Autowired
-    public HentRegisteropplysninger(BehandlingService behandlingService, TpsFasade tpsFasade, HentOpplysningerFelles hentOpplysningerFelles) {
+    public HentRegisteropplysninger(BehandlingService behandlingService, TpsFasade tpsFasade, RegisteropplysningerService registeropplysningerService) {
         this.behandlingService = behandlingService;
         this.tpsFasade = tpsFasade;
-        this.hentOpplysningerFelles = hentOpplysningerFelles;
+        this.registeropplysningerService = registeropplysningerService;
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return null; // todo
+        return ProsessSteg.REG_UNNTAK_HENT_REGISTEROPPLYSNINGER;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, fnr);
 
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
-        hentOpplysningerFelles.hentOgLagreOpplysninger(
+        registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandling(behandling)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
@@ -62,7 +62,6 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
                     .medlemskapsopplysninger()
                     .inntektsopplysninger()
                     .utbetalingsopplysninger()
-                    .arbeidsforholdopplysninger()
                     .build())
                 .fom(sedDokument.getLovvalgsperiode().getFom())
                 .tom(sedDokument.getLovvalgsperiode().getTom())

@@ -75,8 +75,7 @@ public class BehandlingTjeneste {
     }
 
     @GetMapping("{behandlingID}")
-    @ApiOperation(value = "Hent en spesifikk behandling",
-        response = TidligereMedlemsperioderDto.class)
+    @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
     public ResponseEntity hentBehandling(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);

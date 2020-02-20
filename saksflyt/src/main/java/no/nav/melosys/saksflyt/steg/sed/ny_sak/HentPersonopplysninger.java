@@ -4,17 +4,21 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.felles.HentOpplysningerFelles;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.stereotype.Component;
 
 @Component("sedGenerellBehandlingHentPersonOpplysninger")
 public class HentPersonopplysninger extends AbstraktStegBehandler {
 
-    private final HentOpplysningerFelles hentOpplysningerFelles;
+    private final RegisteropplysningerService registeropplysningerService;
+    private final TpsFasade tpsFasade;
 
-    public HentPersonopplysninger(HentOpplysningerFelles hentOpplysningerFelles) {
-        this.hentOpplysningerFelles = hentOpplysningerFelles;
+    public HentPersonopplysninger(RegisteropplysningerService registeropplysningerService, TpsFasade tpsFasade) {
+        this.registeropplysningerService = registeropplysningerService;
+        this.tpsFasade = tpsFasade;
     }
 
     @Override
@@ -25,7 +29,18 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String aktørID = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
-        hentOpplysningerFelles.hentOgLagrePersonopplysninger(aktørID, prosessinstans.getBehandling());
+        String fnr = tpsFasade.hentIdentForAktørId(aktørID);
+
+        registeropplysningerService.hentOgLagreOpplysninger(
+            RegisteropplysningerRequest.builder()
+                .behandlingID(prosessinstans.getBehandling().getId())
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .personopplysninger()
+                    .build())
+                .fnr(fnr)
+                .build()
+        );
+
         prosessinstans.setSteg(ProsessSteg.SED_GENERELL_SAK_OPPRETT_OPPGAVE);
     }
 }

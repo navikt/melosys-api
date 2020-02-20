@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsystem;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -26,12 +27,13 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -54,13 +56,13 @@ public class VedtakService {
     private final FagsakService fagsakService;
     private final GsakFasade gsakFasade;
     private final VedtakKontrollService vedtakKontrollService;
-    private final SaksopplysningerService saksopplysningerService;
+    private final RegisteropplysningerService registeropplysningerService;
 
     @Autowired
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
-                         FagsakService fagsakService, GsakFasade gsakFasade, VedtakKontrollService vedtakKontrollService, SaksopplysningerService saksopplysningerService) {
+                         FagsakService fagsakService, GsakFasade gsakFasade, VedtakKontrollService vedtakKontrollService, RegisteropplysningerService registeropplysningerService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -70,7 +72,7 @@ public class VedtakService {
         this.gsakFasade = gsakFasade;
         this.fagsakService = fagsakService;
         this.vedtakKontrollService = vedtakKontrollService;
-        this.saksopplysningerService = saksopplysningerService;
+        this.registeropplysningerService = registeropplysningerService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -88,7 +90,16 @@ public class VedtakService {
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         if (behandlingsresultat.erInnvilgelse()) {
-            saksopplysningerService.hentSaksopplysningMedl(behandlingID, behandlingsresultat.hentValidertLovvalgsperiode());
+            Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+            registeropplysningerService.hentOgLagreOpplysninger(
+                RegisteropplysningerRequest.builder()
+                    .behandlingID(behandlingID)
+                    .fom(lovvalgsperiode.getFom())
+                    .tom(lovvalgsperiode.getTom())
+                    .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                        .medlemskapsopplysninger().build())
+                    .build());
+
             validerFattVedtak(behandlingID, vedtakstype);
         }
 
