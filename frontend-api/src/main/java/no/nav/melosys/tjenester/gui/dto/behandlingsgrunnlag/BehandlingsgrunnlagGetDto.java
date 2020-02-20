@@ -3,35 +3,33 @@ package no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.tjenester.gui.dto.BehandlingsgrunnlagTilleggsData;
 
 public class BehandlingsgrunnlagGetDto {
 
-    private BehandlingsgrunnlagData data;
+    private final BehandlingsgrunnlagData data;
+    private final BehandlingsGrunnlagType type;
+    private final BehandlingsgrunnlagTilleggsData tilleggsData;
 
-    private BehandlingsGrunnlagType type;
-
-    public BehandlingsgrunnlagGetDto(Behandlingsgrunnlag behandlingsgrunnlag) {
-        this(behandlingsgrunnlag.getBehandlingsgrunnlagdata(), behandlingsgrunnlag.getType());
+    public BehandlingsgrunnlagGetDto(Behandlingsgrunnlag behandlingsgrunnlag, BehandlingsgrunnlagTilleggsData tilleggsData) {
+        this(behandlingsgrunnlag.getBehandlingsgrunnlagdata(), behandlingsgrunnlag.getType(), tilleggsData);
     }
 
-    public BehandlingsgrunnlagGetDto(BehandlingsgrunnlagData data, BehandlingsGrunnlagType type) {
+    private BehandlingsgrunnlagGetDto(BehandlingsgrunnlagData data, BehandlingsGrunnlagType type, BehandlingsgrunnlagTilleggsData tilleggsData) {
         this.data = data;
         this.type = type;
+        this.tilleggsData = tilleggsData;
     }
 
     public BehandlingsgrunnlagData getData() {
         return data;
     }
 
-    public void setData(BehandlingsgrunnlagData data) {
-        this.data = data;
-    }
-
     public BehandlingsGrunnlagType getType() {
         return type;
     }
 
-    public void setType(BehandlingsGrunnlagType type) {
-        this.type = type;
+    public BehandlingsgrunnlagTilleggsData getTilleggsData() {
+        return tilleggsData;
     }
 }
