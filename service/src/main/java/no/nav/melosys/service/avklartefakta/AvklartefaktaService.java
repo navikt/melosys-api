@@ -120,10 +120,6 @@ public class AvklartefaktaService {
             .collect(Collectors.groupingBy(Avklartefakta::getSubjekt, Collectors.toList()));
     }
 
-    public Optional<Avklartefakta> hentVurderingUnntakPeriode(long behandlingsid) {
-        return avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.VURDERING_UNNTAK_PERIODE);
-    }
-
     @Transactional(rollbackFor = MelosysException.class)
     public void lagreAvklarteFakta(long behandlingsid, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)

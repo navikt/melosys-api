@@ -40,7 +40,7 @@ public class BehandlingsresultatTjeneste {
     public ResponseEntity hentBehandlingsresultat(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
 
-        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultatMedKontrollresultat(behandlingID);
         return ResponseEntity.ok(BehandlingsresultatDto.av(resultat));
     }
 }

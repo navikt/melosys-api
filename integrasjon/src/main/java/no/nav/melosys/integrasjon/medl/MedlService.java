@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
@@ -145,18 +146,19 @@ public class MedlService implements MedlFasade {
     }
 
 
-    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         Foedselsnummer ident = new Foedselsnummer();
         ident.setValue(fnr);
 
         HentPeriodeListeRequest req = new HentPeriodeListeRequest();
         req.setIdent(ident);
 
-        req.setInkluderPerioderFraOgMed(KonverteringsUtils.javaLocalDateToJodaLocalDate(fom));
-        req.setInkluderPerioderTilOgMed(KonverteringsUtils.javaLocalDateToJodaLocalDate(tom));
-
         try {
+            req.setInkluderPerioderFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
+            req.setInkluderPerioderTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
             return medlemskapConsumer.hentPeriodeListe(req);
+        } catch (DatatypeConfigurationException e) {
+            throw new IntegrasjonException(e);
         } catch (Sikkerhetsbegrensning sikkerhetsbegrensning) {
             throw new SikkerhetsbegrensningException(sikkerhetsbegrensning);
         } catch (PersonIkkeFunnet personIkkeFunnet) {

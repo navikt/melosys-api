@@ -67,7 +67,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
         verify(tilgangService).sjekkTilgang(behandlingID);
         verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), null,
-            fattVedtakDto.getMottakerinstitusjoner().get(0), fattVedtakDto.getVedtakstype(), null);
+            fattVedtakDto.getMottakerinstitusjoner(), fattVedtakDto.getVedtakstype(), null);
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
