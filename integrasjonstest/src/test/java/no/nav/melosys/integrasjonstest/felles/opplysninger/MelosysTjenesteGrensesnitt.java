@@ -70,12 +70,12 @@ public class MelosysTjenesteGrensesnitt {
     private ProsessinstansRepository prosessinstansRepository;
 
     public void nullstill(long behandlingsId) {
-        vilkårRepo.deleteAllInBatch();
-        avklartefaktaRepo.deleteAllInBatch();
-        anmodningsperiodeRepo.deleteAllInBatch();
-        lovvalgsperiodeRepo.deleteAllInBatch();
-        aktoerRepository.deleteAllInBatch();
-        prosessinstansRepository.deleteAllInBatch();
+        vilkårRepo.deleteAll();
+        avklartefaktaRepo.deleteAll();
+        anmodningsperiodeRepo.deleteAll();
+        lovvalgsperiodeRepo.deleteAll();
+        aktoerRepository.deleteAll();
+        prosessinstansRepository.deleteAll();
 
         setUnderBehandling(behandlingsId);
         setFagsakOpprettet(behandlingsId);
