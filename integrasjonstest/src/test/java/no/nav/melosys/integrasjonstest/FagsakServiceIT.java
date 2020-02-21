@@ -26,6 +26,7 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,9 +86,12 @@ public class FagsakServiceIT {
         SpringSubjectHandler.set(new TestSubjectHandler());
         when(eessiService.hentEessiMottakerinstitusjoner(any(), any())).thenReturn(Collections.emptyList());
         when(gsakFasade.opprettOppgave(any(Oppgave.class))).thenReturn("");
+
+        prosessinstansTestService.nullstill();
     }
 
     @Test
+    @Order(4)
     public void fagsak_henleggFagsak() throws FunksjonellException, TekniskException {
         TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt);
 
@@ -103,6 +107,7 @@ public class FagsakServiceIT {
     }
 
     @Test
+    @Order(0)
     public void fagsak_henleggFagsak_medArbeidsgiver() throws FunksjonellException, TekniskException {
         TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
         .utfyllAvklartefaktaForArt12(Landkoder.SE, AVKLART_ARBEIDSGIVER_ORGNR);
@@ -120,6 +125,7 @@ public class FagsakServiceIT {
     }
 
     @Test
+    @Order(5)
     public void fagsak_henleggFagsak_medRepresentantForArbeidsgiver() throws FunksjonellException, TekniskException {
         TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
         .opprettAktørRepresentant(Representerer.ARBEIDSGIVER, DELOITTE_ORGNR)
@@ -139,6 +145,7 @@ public class FagsakServiceIT {
     }
 
     @Test
+    @Order(1)
     public void fagsak_henleggFagsak_medRepresentantForBruker() throws FunksjonellException, TekniskException {
         TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
         .opprettAktørRepresentant(Representerer.BRUKER, DELOITTE_ORGNR)
@@ -159,6 +166,7 @@ public class FagsakServiceIT {
     }
 
     @Test
+    @Order(3)
     public void fagsak_henleggFagsak_medRepresentantForBegge() throws FunksjonellException, TekniskException {
         TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
         .opprettAktørRepresentant(Representerer.BEGGE, DELOITTE_ORGNR)
@@ -178,6 +186,7 @@ public class FagsakServiceIT {
     }
 
     @Test
+    @Order(2)
     public void fagsak_henleggVideresend() throws FunksjonellException, TekniskException {
         TestdataUtfyller.til(Testbehandlinger.TOM_BEHANDLING, melosysGrensesnitt)
             .utfyllAvklartefaktaForArt13(Landkoder.SE, Landkoder.NO, AVKLART_ARBEIDSGIVER_ORGNR, Landkoder.SE);

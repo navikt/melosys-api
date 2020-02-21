@@ -53,6 +53,6 @@ public class ProsessinstansTestService {
     }
 
     public void nullstill() {
-        prosessinstansRepository.deleteAllInBatch();
+        prosessinstansRepository.deleteAll();
     }
 }
