@@ -2,7 +2,6 @@ package no.nav.melosys.service;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -113,7 +112,7 @@ public class SaksopplysningerService {
         }
 
 
-        behandling.setSaksopplysninger(new HashSet<>());
+        behandling.getSaksopplysninger().clear();
         behandlingRepository.save(behandling);
 
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);

@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
+import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +35,8 @@ public class BehandlingsgrunnlagServiceTest {
 
     @Mock
     private BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
+    @Mock
+    private BehandlingService behandlingService;
 
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
@@ -46,7 +50,7 @@ public class BehandlingsgrunnlagServiceTest {
 
     @Before
     public void setup() {
-        behandlingsgrunnlagService = new BehandlingsgrunnlagService(behandlingsgrunnlagRepository);
+        behandlingsgrunnlagService = new BehandlingsgrunnlagService(behandlingsgrunnlagRepository, behandlingService);
     }
 
     @Test
@@ -65,10 +69,12 @@ public class BehandlingsgrunnlagServiceTest {
 
     @Test
     public void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() throws FunksjonellException {
+        final long behandlingID = 1234L;
         Behandling behandling = new Behandling();
-        behandling.setId(123L);
+        behandling.setId(behandlingID);
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
         SoeknadDokument soeknadDokument = new SoeknadDokument();
-        behandlingsgrunnlagService.opprettSøknadGrunnlag(behandling, soeknadDokument);
+        behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknadDokument);
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();

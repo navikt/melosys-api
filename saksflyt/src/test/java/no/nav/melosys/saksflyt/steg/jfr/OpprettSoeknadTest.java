@@ -40,7 +40,7 @@ public class OpprettSoeknadTest {
 
         opprettSoeknad.utførSteg(p);
 
-        verify(behandlingsgrunnlagService, times(1)).opprettSøknadGrunnlag(eq(behandling), any(SoeknadDokument.class));
+        verify(behandlingsgrunnlagService, times(1)).opprettSøknadGrunnlag(eq(behandling.getId()), any(SoeknadDokument.class));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);
     }
 }
