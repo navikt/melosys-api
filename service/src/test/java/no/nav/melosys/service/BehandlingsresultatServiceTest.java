@@ -13,11 +13,15 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -32,6 +36,9 @@ public class BehandlingsresultatServiceTest {
     private BehandlingsresultatRepository behandlingsresultatRepo;
 
     private BehandlingsresultatService behandlingsresultatService;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -80,26 +87,15 @@ public class BehandlingsresultatServiceTest {
     }
 
     @Test
-    public void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections()
-        throws NoSuchMethodException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
+    public void replikerBehandlingOgBehandlingsresultat_erEndretPeriode_replikererBehandlingsresultatMedObjekterOgCollections()
+        throws NoSuchMethodException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException, TekniskException {
         Behandling tidligsteInaktiveBehandling = new Behandling();
         tidligsteInaktiveBehandling.setId(1L);
         Behandling behandlingsreplika = new Behandling();
+        behandlingsreplika.setType(Behandlingstyper.ENDRET_PERIODE);
         behandlingsreplika.setId(2L);
 
         Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling);
-
-        Avklartefakta avklartefakta = opprettAvklartefakta();
-        behandlingsresultat.getAvklartefakta().add(avklartefakta);
-
-        Vilkaarsresultat vilkaarsresultat = opprettVilkaarsresultat();
-        behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
-
-        Lovvalgsperiode lovvalgsperiode = opprettLovvalgsperiode();
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-
-        BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = opprettBehandlingsresultatBegrunnelse();
-        behandlingsresultat.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelse);
 
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
@@ -133,6 +129,55 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getKode().equals("begrunnelsekode"));
+    }
+
+    @Test
+    public void replikerBehandlingOgBehandlingsresultat_erNyVurdering_replikererBehandlingsresultatUtenObjekterOgCollections()
+        throws NoSuchMethodException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException, TekniskException {
+        Behandling tidligsteInaktiveBehandling = new Behandling();
+        tidligsteInaktiveBehandling.setId(1L);
+        Behandling behandlingsreplika = new Behandling();
+        behandlingsreplika.setType(Behandlingstyper.NY_VURDERING);
+        behandlingsreplika.setId(2L);
+
+        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling);
+
+        doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
+
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
+
+        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
+        verify(behandlingsresultatRepo).save(captor.capture());
+        Behandlingsresultat behandlingsresultatreplika = captor.getValue();
+
+        assertThat(behandlingsresultatreplika.getId()).isNull();
+        assertThat(behandlingsresultatreplika.getBehandling()).isEqualTo(behandlingsreplika);
+        assertThat(behandlingsresultatreplika.getBehandlingsmåte()).isEqualTo(behandlingsresultat.getBehandlingsmåte());
+        assertThat(behandlingsresultatreplika.getType()).isEqualTo(behandlingsresultat.getType());
+        assertThat(behandlingsresultatreplika.getVedtakMetadata()).isNull();
+
+        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).isEmpty();
+        assertThat(behandlingsresultatreplika.getAvklartefakta()).isEmpty();
+        assertThat(behandlingsresultatreplika.getVilkaarsresultater()).isEmpty();
+        assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).isEmpty();
+    }
+
+    @Test
+    public void replikerBehandlingOgBehandlingsresultat_erAnnenBehandlingstype_kasterException()
+        throws NoSuchMethodException, TekniskException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
+        Behandling tidligsteInaktiveBehandling = new Behandling();
+        tidligsteInaktiveBehandling.setId(1L);
+        Behandling behandlingsreplika = new Behandling();
+        behandlingsreplika.setType(Behandlingstyper.SOEKNAD);
+        behandlingsreplika.setId(2L);
+
+        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling);
+
+        doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
+
+        expectedException.expect(TekniskException.class);
+
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
     }
 
     @Test
@@ -215,8 +260,12 @@ public class BehandlingsresultatServiceTest {
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
 
         behandlingsresultat.setAvklartefakta(new LinkedHashSet<>());
+        behandlingsresultat.getAvklartefakta().add(opprettAvklartefakta());
         behandlingsresultat.setLovvalgsperioder(new LinkedHashSet<>());
+        behandlingsresultat.getLovvalgsperioder().add(opprettLovvalgsperiode());
         behandlingsresultat.setVilkaarsresultater(new LinkedHashSet<>());
+        behandlingsresultat.getVilkaarsresultater().add(opprettVilkaarsresultat());
+        behandlingsresultat.getBehandlingsresultatBegrunnelser().add(opprettBehandlingsresultatBegrunnelse());
 
         return behandlingsresultat;
     }

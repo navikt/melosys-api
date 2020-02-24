@@ -10,6 +10,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -55,37 +56,33 @@ public class BehandlingsresultatService {
 
     @Transactional(rollbackFor = Exception.class)
     public void replikerBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandling behandlingsreplika)
-        throws IkkeFunnetException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        throws IkkeFunnetException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, TekniskException {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(tidligsteInaktiveBehandling.getId());
 
         Behandlingsresultat behandlingsresultatsreplika = (Behandlingsresultat) BeanUtils.cloneBean(behandlingsresultat);
         behandlingsresultatsreplika.setBehandling(behandlingsreplika);
         behandlingsresultatsreplika.setId(null);
         behandlingsresultatsreplika.setVedtakMetadata(null);
+        behandlingsresultatsreplika.setAnmodningsperioder(new HashSet<>(1));
 
-        replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
-        replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);
-        replikerVilkaarsresultat(behandlingsresultat, behandlingsresultatsreplika);
-        replikerAnmodningsperioder(behandlingsresultat, behandlingsresultatsreplika);
-        replikerBehandlingsresultatBegrunnelser(behandlingsresultat, behandlingsresultatsreplika);
+        switch (behandlingsreplika.getType()) {
+            case ENDRET_PERIODE:
+                replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
+                replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);
+                replikerVilkaarsresultat(behandlingsresultat, behandlingsresultatsreplika);
+                replikerBehandlingsresultatBegrunnelser(behandlingsresultat, behandlingsresultatsreplika);
+                break;
+            case NY_VURDERING:
+                behandlingsresultatsreplika.setAvklartefakta(new HashSet<>(1));
+                behandlingsresultatsreplika.setLovvalgsperioder(new HashSet<>(1));
+                behandlingsresultatsreplika.setVilkaarsresultater(new HashSet<>(1));
+                behandlingsresultatsreplika.setBehandlingsresultatBegrunnelser(new HashSet<>(1));
+                break;
+            default:
+                throw new TekniskException("Kan ikke replikere behandlingsresultat med behandlingstype " + behandlingsreplika.getType());
+        }
 
         behandlingsresultatRepository.save(behandlingsresultatsreplika);
-    }
-
-    private void replikerAnmodningsperioder(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
-        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        behandlingsresultatsreplika.setAnmodningsperioder(new HashSet<>());
-        for (Anmodningsperiode anmodningsperiodeOrig : behandlingsresultat.getAnmodningsperioder()) {
-            Anmodningsperiode anmodningsperiodereplika = (Anmodningsperiode) BeanUtils.cloneBean(anmodningsperiodeOrig);
-            anmodningsperiodereplika.setBehandlingsresultat(behandlingsresultatsreplika);
-            anmodningsperiodereplika.setMedlPeriodeID(null);
-            if (anmodningsperiodeOrig.getAnmodningsperiodeSvar() != null) {
-                AnmodningsperiodeSvar anmodningsperiodeSvarReplika = (AnmodningsperiodeSvar) BeanUtils.cloneBean(anmodningsperiodeOrig.getAnmodningsperiodeSvar());
-                anmodningsperiodeSvarReplika.setAnmodningsperiode(anmodningsperiodereplika);
-                anmodningsperiodereplika.setAnmodningsperiodeSvar(anmodningsperiodeSvarReplika);
-            }
-            behandlingsresultatsreplika.getAnmodningsperioder().add(anmodningsperiodereplika);
-        }
     }
 
     private void replikerVilkaarsresultat(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
