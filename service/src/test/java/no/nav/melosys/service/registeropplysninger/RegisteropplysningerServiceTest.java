@@ -19,7 +19,9 @@ import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -52,6 +54,8 @@ public class RegisteropplysningerServiceTest {
     private UtbetaldataService utbetaldataService;
     @Mock
     private SaksopplysningerService saksopplysningerService;
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private Integer arbeidsforholdhistorikkAntallMåneder = 6;
     private Integer medlemskaphistorikkAntallÅr = 5;
@@ -109,7 +113,51 @@ public class RegisteropplysningerServiceTest {
         verify(saksopplysningerService, times(8)).lagreSaksopplysning(anySaksopplysning(), eq(behandling));
         verify(behandlingService, never()).hentBehandling(anyLong());
 
-        // Noen av stegene er avhengige av hverandre. Det er viktig at vi ivaretar rekkefølgen som blir definert i requesten.
+        InOrder inOrder = inOrder(tpsFasade, medlFasade, eregFasade, aaregFasade, sakOgBehandlingFasade, inntektService, utbetaldataService, saksopplysningerService);
+        inOrder.verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
+        inOrder.verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
+        inOrder.verify(medlFasade).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
+        inOrder.verify(eregFasade).hentOrganisasjon(anyString());
+        inOrder.verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
+        inOrder.verify(tpsFasade).hentPersonMedAdresse(anyString());
+        inOrder.verify(sakOgBehandlingFasade).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        inOrder.verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
+    }
+
+    @Test
+    public void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() throws MelosysException {
+        Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
+        arbeidsforhold.arbeidsgiverID = "123456789";
+
+        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(List.of(arbeidsforhold));
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(arbeidsforholdDokument);
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
+        saksopplysning.setKilde(SaksopplysningKilde.AAREG);
+        Behandling behandling = hentBehandling(saksopplysning);
+
+        registeropplysningerService.hentOgLagreOpplysninger(
+            RegisteropplysningerRequest.builder()
+                .behandling(behandling)
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .sakOgBehandlingopplysninger()
+                    .medlemskapsopplysninger()
+                    .personhistorikkopplysninger()
+                    .utbetalingsopplysninger()
+                    .arbeidsforholdopplysninger()
+                    .organisasjonsopplysninger()
+                    .personopplysninger()
+                    .inntektsopplysninger()
+                    .build())
+                .fom(LocalDate.now().minusYears(1))
+                .tom(LocalDate.now().plusYears(1))
+                .fnr(FNR)
+                .build());
+
+        verify(saksopplysningerService, times(8)).lagreSaksopplysning(anySaksopplysning(), eq(behandling));
+        verify(behandlingService, never()).hentBehandling(anyLong());
+
+        // Noen av stegene er avhengige av hverandre. Det er viktig at vi ivaretar rekkefølgen.
         InOrder inOrder = inOrder(tpsFasade, medlFasade, eregFasade, aaregFasade, sakOgBehandlingFasade, inntektService, utbetaldataService, saksopplysningerService);
         inOrder.verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
         inOrder.verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
@@ -136,16 +184,6 @@ public class RegisteropplysningerServiceTest {
 
         verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(eq(FNR), eq(forventetFom), eq(forventetTom));
         verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
-    }
-
-    @Test
-    public void hentArbeidsforholdopplysninger_feilIPeriode_ingenSaksopplysningerBlirHentet() throws MelosysException {
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(null, null)
-            .saksopplysningTyper(saksopplysningstyper().arbeidsforholdopplysninger().build())
-            .build());
-
-        verify(aaregFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
-        verify(saksopplysningerService, never()).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
     }
 
     @Test

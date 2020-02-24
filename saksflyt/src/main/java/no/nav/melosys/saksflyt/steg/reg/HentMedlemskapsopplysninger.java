@@ -5,6 +5,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
@@ -29,10 +30,12 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(HentMedlemskapsopplysninger.class);
 
     private final RegisteropplysningerService registeropplysningerService;
+    private final TpsFasade tpsFasade;
 
     @Autowired
-    public HentMedlemskapsopplysninger(RegisteropplysningerService registeropplysningerService) {
+    public HentMedlemskapsopplysninger(RegisteropplysningerService registeropplysningerService, TpsFasade tpsFasade) {
         this.registeropplysningerService = registeropplysningerService;
+        this.tpsFasade = tpsFasade;
     }
 
     @Override
@@ -42,12 +45,14 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+        String aktørId = prosessinstans.getBehandling().getFagsak().hentBruker().getAktørId();
+        String fnr = tpsFasade.hentIdentForAktørId(aktørId);
 
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())
+                .fnr(fnr)
                 .fom(periode.getFom())
                 .tom(periode.getTom())
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()

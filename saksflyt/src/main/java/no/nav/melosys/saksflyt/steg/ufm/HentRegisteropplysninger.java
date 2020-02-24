@@ -1,9 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
-import java.util.List;
-
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -20,14 +17,6 @@ import org.springframework.stereotype.Component;
 
 @Component("UnntakFraMedlemskapHentRegisteropplysninger")
 public class HentRegisteropplysninger extends AbstraktStegBehandler {
-
-    private static final List<SaksopplysningType> opplysningstyper = List.of(
-        SaksopplysningType.PERSOPL,
-        SaksopplysningType.MEDL,
-        SaksopplysningType.INNTK,
-        SaksopplysningType.UTBETAL,
-        SaksopplysningType.ARBFORH
-    );
 
     private final BehandlingService behandlingService;
     private final TpsFasade tpsFasade;

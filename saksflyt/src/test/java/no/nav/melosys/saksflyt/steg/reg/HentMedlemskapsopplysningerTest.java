@@ -2,12 +2,16 @@ package no.nav.melosys.saksflyt.steg.reg;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.junit.Before;
@@ -20,21 +24,25 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_SOB_SAKER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HentMedlemskapsopplysningerTest {
 
     @Mock
     private RegisteropplysningerService registeropplysningerService;
+    @Mock
+    private TpsFasade tpsFasade;
     @Captor
     private ArgumentCaptor<RegisteropplysningerRequest> captor;
 
     private HentMedlemskapsopplysninger hentMedlemskapsopplysninger;
 
     @Before
-    public void setUp() {
-        hentMedlemskapsopplysninger = new HentMedlemskapsopplysninger(registeropplysningerService);
+    public void setUp() throws IkkeFunnetException {
+        hentMedlemskapsopplysninger = new HentMedlemskapsopplysninger(registeropplysningerService, tpsFasade);
+        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("123");
     }
 
     @Test
@@ -42,6 +50,12 @@ public class HentMedlemskapsopplysningerTest {
         final long behandlingID = 222L;
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
+
+        Aktoer bruker = mock(Aktoer.class);
+        when(bruker.getAktørId()).thenReturn("321");
+        Fagsak fagsak = mock(Fagsak.class);
+        when(fagsak.hentBruker()).thenReturn(bruker);
+        behandling.setFagsak(fagsak);
 
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);

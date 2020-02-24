@@ -3,6 +3,7 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -23,20 +24,22 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RegisteropplysningerService {
     private static final Logger log = LoggerFactory.getLogger(RegisteropplysningerService.class);
 
-    private final Map<SaksopplysningType, ThrowingFunction<RegisteropplysningerRequest, List<Saksopplysning>, MelosysException>> SAKSOPPLYSNING_TYPE_FUNCTION_MAP =
-        Maps.immutableEnumMap(ImmutableMap.<SaksopplysningType, ThrowingFunction<RegisteropplysningerRequest, List<Saksopplysning>, MelosysException>>builder()
+    // Ligger i logisk rekkefølge
+    private final Map<SaksopplysningType, HentRegisteropplysninger<RegisteropplysningerRequest>> SAKSOPPLYSNING_TYPE_FUNCTION_MAP =
+        Maps.immutableEnumMap(ImmutableMap.<SaksopplysningType, HentRegisteropplysninger<RegisteropplysningerRequest>>builder()
             .put(SaksopplysningType.ARBFORH, this::hentArbeidsforholdopplysninger)
             .put(SaksopplysningType.INNTK, this::hentInntektsopplysninger)
             .put(SaksopplysningType.MEDL, this::hentMedlemskapsopplysninger)
@@ -85,6 +88,7 @@ public class RegisteropplysningerService {
         this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws MelosysException {
         if (registeropplysningerRequest.getBehandling() == null) {
             Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
@@ -100,7 +104,7 @@ public class RegisteropplysningerService {
     }
 
     private void hentOgLagreOpplysningerMedBehandling(RegisteropplysningerRequest registeropplysningerRequest) throws MelosysException {
-        for (var opplysningstype : registeropplysningerRequest.getOpplysningstyper()) {
+        for (var opplysningstype : sorterteSaksopplysningstyper(registeropplysningerRequest.getOpplysningstyper())) {
             if (!SAKSOPPLYSNING_TYPE_FUNCTION_MAP.containsKey(opplysningstype)) {
                 throw new TekniskException("Støtter ikke å hente opplysninger for saksopplysningType " + opplysningstype);
             }
@@ -110,8 +114,15 @@ public class RegisteropplysningerService {
         }
     }
 
+    // Sorterer opplysningstypene etter rekkefølgen definert i SAKSOPPLYSNING_TYPE_FUNCTION_MAP.
+    private Set<SaksopplysningType> sorterteSaksopplysningstyper(Set<SaksopplysningType> saksopplysningTyper) {
+        return SAKSOPPLYSNING_TYPE_FUNCTION_MAP.keySet().stream()
+            .filter(saksopplysningTyper::contains)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
     private List<Saksopplysning> hentSaksopplysninger(SaksopplysningType opplysningstype, RegisteropplysningerRequest registeropplysningerRequest) throws MelosysException {
-        return SAKSOPPLYSNING_TYPE_FUNCTION_MAP.get(opplysningstype).apply(registeropplysningerRequest);
+        return SAKSOPPLYSNING_TYPE_FUNCTION_MAP.get(opplysningstype).hent(registeropplysningerRequest);
     }
 
     private void lagreSaksopplysninger(List<Saksopplysning> saksopplysninger, Behandling behandling) {
@@ -124,11 +135,6 @@ public class RegisteropplysningerService {
     private List<Saksopplysning> hentArbeidsforholdopplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws TekniskException, SikkerhetsbegrensningException {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
-
-        if (PeriodeKontroller.feilIPeriode(fom, tom)) {
-            log.info("Kunne ikke hente arbeidsforholdopplysninger grunnet feil i periode");
-            return Collections.emptyList();
-        }
 
         final LocalDate iDag = LocalDate.now();
         if (fom.isAfter(iDag)) {
@@ -154,11 +160,6 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        if (PeriodeKontroller.feilIPeriode(fom, tom)) {
-            log.info("Kunne ikke hente medlemskapsopplysninger grunnet feil i periode");
-            return Collections.emptyList();
-        }
-
         Saksopplysning saksopplysning = medlFasade.hentPeriodeListe(registeropplysningerRequest.getFnr(), fom.minusYears(medlemskaphistorikkAntallÅr), tom);
         return List.of(saksopplysning);
     }
@@ -166,11 +167,6 @@ public class RegisteropplysningerService {
     private List<Saksopplysning> hentInntektsopplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws TekniskException, SikkerhetsbegrensningException {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
-
-        if (PeriodeKontroller.feilIPeriode(fom, tom)) {
-            log.info("Kunne ikke hente inntektopplysninger grunnet feil i periode");
-            return Collections.emptyList();
-        }
 
         Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom);
         Saksopplysning saksopplysning = inntektService.hentInntektListe(registeropplysningerRequest.getFnr(), periodeForYtelser.fom, periodeForYtelser.tom);
@@ -182,11 +178,6 @@ public class RegisteropplysningerService {
         Behandling behandling = registeropplysningerRequest.getBehandling();
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
-
-        if (PeriodeKontroller.feilIPeriode(fom, tom)) {
-            log.info("Kunne ikke hente utbetalingsopplysninger grunnet feil i periode");
-            return Collections.emptyList();
-        }
 
         LocalDate treÅrTilbake = LocalDate.now().minusYears(3);
         if (fom.isBefore(treÅrTilbake)) {
@@ -268,7 +259,7 @@ public class RegisteropplysningerService {
     }
 
     @FunctionalInterface
-    private interface ThrowingFunction<T, R, E extends Exception> {
-        R apply(T t) throws E;
+    private interface HentRegisteropplysninger<T> {
+        List<Saksopplysning> hent(T t) throws MelosysException;
     }
 }

@@ -80,7 +80,7 @@ public class HentRegisteropplysningerTest {
         assertThat(registeropplysningerRequest.getFnr()).isEqualTo(FNR);
         assertThat(registeropplysningerRequest.getFom()).isEqualTo(LocalDate.now());
         assertThat(registeropplysningerRequest.getTom()).isEqualTo(LocalDate.now().plusYears(1));
-        assertThat(registeropplysningerRequest.getOpplysningstyper()).containsExactly( // krever at steg kjører i rett rekkefølge
+        assertThat(registeropplysningerRequest.getOpplysningstyper()).contains(
             SaksopplysningType.PERSOPL,
             SaksopplysningType.MEDL,
             SaksopplysningType.INNTK,

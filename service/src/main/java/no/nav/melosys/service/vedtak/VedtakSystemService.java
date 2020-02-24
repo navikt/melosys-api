@@ -1,6 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -24,9 +25,10 @@ public class VedtakSystemService extends VedtakService {
                                @Qualifier("system") EessiService eessiService,
                                LandvelgerService landvelgerService,
                                FagsakService fagsakService,
+                               TpsFasade tpsFasade,
                                GsakFasade gsakFasade,
                                VedtakKontrollService vedtakKontrollService,
                                RegisteropplysningerService registeropplysningerService) {
-        super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, vedtakKontrollService, registeropplysningerService);
+        super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, tpsFasade, vedtakKontrollService, registeropplysningerService);
     }
 }

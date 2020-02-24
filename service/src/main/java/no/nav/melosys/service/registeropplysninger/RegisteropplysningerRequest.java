@@ -1,22 +1,26 @@
 package no.nav.melosys.service.registeropplysninger;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import org.apache.commons.lang3.StringUtils;
 
 public class RegisteropplysningerRequest {
     private final Behandling behandling;
     private final Long behandlingID;
-    private final List<SaksopplysningType> opplysningstyper;
+    private final Set<SaksopplysningType> opplysningstyper;
     private final String fnr;
     private final LocalDate fom;
     private final LocalDate tom;
 
-    public RegisteropplysningerRequest(Behandling behandling, List<SaksopplysningType> opplysningstyper, String fnr, LocalDate fom, LocalDate tom) {
+    public RegisteropplysningerRequest(Behandling behandling, Set<SaksopplysningType> opplysningstyper, String fnr, LocalDate fom, LocalDate tom) {
         this.behandling = behandling;
         this.behandlingID = null;
         this.opplysningstyper = opplysningstyper;
@@ -25,7 +29,7 @@ public class RegisteropplysningerRequest {
         this.tom = tom;
     }
 
-    public RegisteropplysningerRequest(Long behandlingID, List<SaksopplysningType> opplysningstyper, String fnr, LocalDate fom, LocalDate tom) {
+    public RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper, String fnr, LocalDate fom, LocalDate tom) {
         this.behandling = null;
         this.behandlingID = behandlingID;
         this.opplysningstyper = opplysningstyper;
@@ -46,7 +50,7 @@ public class RegisteropplysningerRequest {
         return behandlingID;
     }
 
-    public List<SaksopplysningType> getOpplysningstyper() {
+    public Set<SaksopplysningType> getOpplysningstyper() {
         return opplysningstyper;
     }
 
@@ -65,7 +69,7 @@ public class RegisteropplysningerRequest {
     public static class RegisteropplysningerRequestBuilder {
         private Behandling behandling;
         private Long behandlingID;
-        private SaksopplysningTyper saksopplysningTyper = new SaksopplysningTyper(new ArrayList<>());
+        private SaksopplysningTyper saksopplysningTyper = new SaksopplysningTyper(new HashSet<>());
         private String fnr;
         private LocalDate fom;
         private LocalDate tom;
@@ -120,17 +124,56 @@ public class RegisteropplysningerRequest {
             if (saksopplysningTyper.getOpplysningstyper().isEmpty()) {
                 throw new TekniskException("Krever minst én saksopplysningstype for å hente registeropplysninger");
             }
+
+            if (StringUtils.isEmpty(fnr) && !Collections.disjoint(kreverFnr, saksopplysningTyper.getOpplysningstyper())) {
+                String påkrevdeSaksopplysningstyper = intersect(kreverFnr, saksopplysningTyper.getOpplysningstyper())
+                    .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
+
+                throw new TekniskException(String.format("Krever at fnr er satt ved henting av %s", påkrevdeSaksopplysningstyper));
+            }
+
+            if (PeriodeKontroller.feilIPeriode(fom, tom) && !Collections.disjoint(kreverPeriode, saksopplysningTyper.getOpplysningstyper())) {
+                String påkrevdeSaksopplysningstyper = intersect(kreverPeriode, saksopplysningTyper.getOpplysningstyper())
+                    .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
+
+                throw new TekniskException(String.format("Feil i periode: %s krever en gyldig periode", påkrevdeSaksopplysningstyper));
+            }
         }
+
+        private static <T> Set<T> intersect(Set<T> l1, Set<T> l2) {
+            return l1.stream()
+                .distinct()
+                .filter(l2::contains)
+                .collect(Collectors.toSet());
+        }
+
+        private static final Set<SaksopplysningType> kreverFnr = Set.of(
+            SaksopplysningType.ARBFORH,
+            SaksopplysningType.INNTK,
+            SaksopplysningType.MEDL,
+            SaksopplysningType.PERSHIST,
+            SaksopplysningType.PERSOPL,
+            SaksopplysningType.SOB_SAK,
+            SaksopplysningType.UTBETAL
+        );
+
+        private static final Set<SaksopplysningType> kreverPeriode = Set.of(
+            SaksopplysningType.ARBFORH,
+            SaksopplysningType.INNTK,
+            SaksopplysningType.MEDL,
+            SaksopplysningType.PERSHIST,
+            SaksopplysningType.UTBETAL
+        );
     }
 
     public static class SaksopplysningTyper {
-        private final List<SaksopplysningType> opplysningstyper;
+        private final Set<SaksopplysningType> opplysningstyper;
 
-        SaksopplysningTyper(List<SaksopplysningType> opplysningstyper) {
+        SaksopplysningTyper(Set<SaksopplysningType> opplysningstyper) {
             this.opplysningstyper = opplysningstyper;
         }
 
-        public List<SaksopplysningType> getOpplysningstyper() {
+        public Set<SaksopplysningType> getOpplysningstyper() {
             return opplysningstyper;
         }
 
@@ -139,7 +182,7 @@ public class RegisteropplysningerRequest {
         }
 
         public static class SaksopplysningTyperBuilder {
-            private List<SaksopplysningType> opplysningstyper = new ArrayList<>();
+            private Set<SaksopplysningType> opplysningstyper = new HashSet<>();
 
             SaksopplysningTyperBuilder() {
             }

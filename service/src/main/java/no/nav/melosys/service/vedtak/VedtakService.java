@@ -25,6 +25,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -55,6 +56,7 @@ public class VedtakService {
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
     private final GsakFasade gsakFasade;
+    private final TpsFasade tpsFasade;
     private final VedtakKontrollService vedtakKontrollService;
     private final RegisteropplysningerService registeropplysningerService;
 
@@ -62,7 +64,7 @@ public class VedtakService {
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
-                         FagsakService fagsakService, GsakFasade gsakFasade, VedtakKontrollService vedtakKontrollService, RegisteropplysningerService registeropplysningerService) {
+                         FagsakService fagsakService, GsakFasade gsakFasade, TpsFasade tpsFasade, VedtakKontrollService vedtakKontrollService, RegisteropplysningerService registeropplysningerService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -71,6 +73,7 @@ public class VedtakService {
         this.landvelgerService = landvelgerService;
         this.gsakFasade = gsakFasade;
         this.fagsakService = fagsakService;
+        this.tpsFasade = tpsFasade;
         this.vedtakKontrollService = vedtakKontrollService;
         this.registeropplysningerService = registeropplysningerService;
     }
@@ -91,9 +94,12 @@ public class VedtakService {
 
         if (behandlingsresultat.erInnvilgelse()) {
             Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+            String fnr = tpsFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
+
             registeropplysningerService.hentOgLagreOpplysninger(
                 RegisteropplysningerRequest.builder()
                     .behandlingID(behandlingID)
+                    .fnr(fnr)
                     .fom(lovvalgsperiode.getFom())
                     .tom(lovvalgsperiode.getTom())
                     .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
