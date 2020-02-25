@@ -30,14 +30,14 @@ import org.flywaydb.core.api.migration.Context;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 @SuppressWarnings("unused")
-public class V6_0_2__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG extends BaseJavaMigration {
+public class V6_0_02__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG extends BaseJavaMigration {
 
     private final ObjectMapper objectMapper;
     private final Jaxb2Marshaller jaxb2Marshaller;
     private final TransformerFactory transformerFactory;
     private final Map<String, Transformer> transformerMap = new HashMap<>();
 
-    public V6_0_2__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG() {
+    public V6_0_02__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG() {
         this.objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
