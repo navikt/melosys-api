@@ -6,6 +6,8 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -57,6 +59,16 @@ public class SaksopplysningerService {
             .map(s -> (SedDokument) s.getDokument());
     }
 
+    public Optional<ArbeidsforholdDokument> finnArbeidsforholdsopplysninger(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.ARBFORH)
+            .map(s -> (ArbeidsforholdDokument) s.getDokument());
+    }
+
+    public Optional<InntektDokument> finnInntektsopplysninger(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.INNTK)
+            .map(s -> (InntektDokument) s.getDokument());
+    }
+
     public PersonhistorikkDokument hentPersonhistorikk(long behandlingID) throws IkkeFunnetException {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSHIST)
             .map(s -> (PersonhistorikkDokument) s.getDokument())
@@ -67,12 +79,6 @@ public class SaksopplysningerService {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSOPL)
             .map(s -> (PersonDokument) s.getDokument())
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke persondokument"));
-    }
-
-    public SedDokument hentSedOpplysninger(long behandlingID) throws IkkeFunnetException {
-        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.SEDOPPL)
-            .map(s -> (SedDokument) s.getDokument())
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke SedDokument for behandling " + behandlingID));
     }
 
     /***

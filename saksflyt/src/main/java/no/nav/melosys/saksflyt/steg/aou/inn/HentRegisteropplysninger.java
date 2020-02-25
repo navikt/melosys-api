@@ -52,6 +52,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
                     .inntektsopplysninger()
                     .utbetalingsopplysninger()
                     .arbeidsforholdopplysninger()
+                    .organisasjonsopplysninger()
                     .build())
                 .fom(sedDokument.getLovvalgsperiode().getFom())
                 .tom(sedDokument.getLovvalgsperiode().getTom())

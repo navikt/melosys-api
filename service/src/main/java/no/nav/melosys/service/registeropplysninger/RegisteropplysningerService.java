@@ -10,10 +10,8 @@ import com.google.common.collect.Maps;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -96,7 +94,7 @@ public class RegisteropplysningerService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws MelosysException {
         if (registeropplysningerRequest.getBehandling() == null) {
-            Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
+            Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(registeropplysningerRequest.getBehandlingID());
             registeropplysningerRequest = new RegisteropplysningerRequest(
                 behandling,
                 registeropplysningerRequest.getOpplysningstyper(),
@@ -203,11 +201,11 @@ public class RegisteropplysningerService {
         Behandling behandling = registeropplysningerRequest.getBehandling();
         Set<String> orgnumre = new HashSet<>();
 
-        Optional<SaksopplysningDokument> arbeidsforholdDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.ARBFORH);
-        Optional<SaksopplysningDokument> inntektDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.INNTK);
+        Optional<ArbeidsforholdDokument> arbeidsforholdDokument = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId());
+        Optional<InntektDokument> inntektDokument = saksopplysningerService.finnInntektsopplysninger(behandling.getId());
 
-        arbeidsforholdDokument.ifPresent(dokument -> orgnumre.addAll(((ArbeidsforholdDokument) dokument).hentOrgnumre()));
-        inntektDokument.ifPresent(dokument -> orgnumre.addAll(((InntektDokument) dokument).hentOrgnumre()));
+        arbeidsforholdDokument.ifPresent(dokument -> orgnumre.addAll(dokument.hentOrgnumre()));
+        inntektDokument.ifPresent(dokument -> orgnumre.addAll(dokument.hentOrgnumre()));
 
         List<Saksopplysning> saksopplysninger = new ArrayList<>();
         for (String orgnr : orgnumre) {

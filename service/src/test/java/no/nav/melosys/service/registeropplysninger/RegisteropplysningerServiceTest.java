@@ -3,6 +3,7 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
@@ -78,20 +79,14 @@ public class RegisteropplysningerServiceTest {
         when(tpsFasade.hentPersonhistorikk(anyString(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.PERSHIST));
         when(sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.SOB_SAK));
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(hentBehandling());
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling());
+        when(saksopplysningerService.finnArbeidsforholdsopplysninger(anyLong())).thenReturn(Optional.of(lagArbeidsforholdDokument()));
+        when(saksopplysningerService.finnInntektsopplysninger(anyLong())).thenReturn(Optional.empty());
     }
 
     @Test
     public void hentOgLagreOpplysninger_medAlleOpplysninger_alleBlirHentetOgLagret() throws MelosysException {
-        Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = "123456789";
-
-        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(List.of(arbeidsforhold));
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(arbeidsforholdDokument);
-        saksopplysning.setType(SaksopplysningType.ARBFORH);
-        saksopplysning.setKilde(SaksopplysningKilde.AAREG);
-        Behandling behandling = hentBehandling(saksopplysning);
+        Behandling behandling = hentBehandling();
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
@@ -334,7 +329,7 @@ public class RegisteropplysningerServiceTest {
             .saksopplysningTyper(saksopplysningstyper().personopplysninger().build())
             .build());
 
-        verify(behandlingService).hentBehandling(eq(1L));
+        verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(1L));
     }
 
     private Behandling hentBehandling() {
@@ -371,6 +366,19 @@ public class RegisteropplysningerServiceTest {
         saksopplysning.setType(saksopplysningType);
 
         return saksopplysning;
+    }
+
+    private ArbeidsforholdDokument lagArbeidsforholdDokument() {
+        Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
+        arbeidsforhold.arbeidsgiverID = "123456789";
+
+        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(List.of(arbeidsforhold));
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(arbeidsforholdDokument);
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
+        saksopplysning.setKilde(SaksopplysningKilde.AAREG);
+
+        return arbeidsforholdDokument;
     }
 
     private RegisteropplysningerRequest.RegisteropplysningerRequestBuilder registeropplysningerRequest() {
