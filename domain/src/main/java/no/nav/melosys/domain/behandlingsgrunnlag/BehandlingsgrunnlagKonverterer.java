@@ -19,6 +19,8 @@ public final class BehandlingsgrunnlagKonverterer {
         objectMapper.registerModule(new JavaTimeModule());
     }
 
+    private BehandlingsgrunnlagKonverterer() {}
+
     public static void oppdaterBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
         if (behandlingsgrunnlag.getBehandlingsgrunnlagdata() != null) {
             try {

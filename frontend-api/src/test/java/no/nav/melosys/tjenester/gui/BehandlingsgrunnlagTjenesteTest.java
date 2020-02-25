@@ -90,7 +90,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     public void hentBehandlingsgrunnlag_erGenereltBehandlingsgrunnlagData_validerSchema() throws Exception{
         BehandlingsgrunnlagData soeknadDokument = random.nextObject(BehandlingsgrunnlagData.class);
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.SØKNAD);
+        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.GENERELT);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
