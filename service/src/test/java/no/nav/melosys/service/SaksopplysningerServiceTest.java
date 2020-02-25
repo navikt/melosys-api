@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -40,17 +39,13 @@ public class SaksopplysningerServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private SaksopplysningRepository saksopplysningRepository;
-    @Mock
-    private MedlFasade medlFasade;
-
-    private Integer medlemskaphistorikkAntallÅr = 5;
 
     private SaksopplysningerService saksopplysningerService;
 
     @Before
     public void setUp() {
         saksopplysningerService = new SaksopplysningerService(tpsFasade, prosessinstansService,
-            behandlingRepo, behandlingsresultatService, saksopplysningRepository, medlFasade, medlemskaphistorikkAntallÅr);
+            behandlingRepo, behandlingsresultatService, saksopplysningRepository);
     }
 
     @Test

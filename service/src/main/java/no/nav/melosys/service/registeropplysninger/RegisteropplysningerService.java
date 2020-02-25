@@ -37,7 +37,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class RegisteropplysningerService {
     private static final Logger log = LoggerFactory.getLogger(RegisteropplysningerService.class);
 
-    // Ligger i logisk rekkefølge
+    private static final Comparator<SaksopplysningType> SAKSOPPLYSNINGSTYPE_COMPARATOR = (s1, s2) -> {
+        if (s1 == SaksopplysningType.ARBFORH || s1 == SaksopplysningType.INNTK) return -1;
+        if (s2 == SaksopplysningType.ARBFORH || s2 == SaksopplysningType.INNTK) return 1;
+        return 0;
+    };
+
     private final Map<SaksopplysningType, HentRegisteropplysninger<RegisteropplysningerRequest>> SAKSOPPLYSNING_TYPE_FUNCTION_MAP =
         Maps.immutableEnumMap(ImmutableMap.<SaksopplysningType, HentRegisteropplysninger<RegisteropplysningerRequest>>builder()
             .put(SaksopplysningType.ARBFORH, this::hentArbeidsforholdopplysninger)
@@ -65,7 +70,7 @@ public class RegisteropplysningerService {
     @Autowired
     public RegisteropplysningerService(@Qualifier("system") TpsFasade tpsFasade,
                                        MedlFasade medlFasade,
-                                       EregFasade eregFasade,
+                                       @Qualifier("system") EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
                                        SakOgBehandlingFasade sakOgBehandlingFasade,
@@ -114,10 +119,9 @@ public class RegisteropplysningerService {
         }
     }
 
-    // Sorterer opplysningstypene etter rekkefølgen definert i SAKSOPPLYSNING_TYPE_FUNCTION_MAP.
     private Set<SaksopplysningType> sorterteSaksopplysningstyper(Set<SaksopplysningType> saksopplysningTyper) {
-        return SAKSOPPLYSNING_TYPE_FUNCTION_MAP.keySet().stream()
-            .filter(saksopplysningTyper::contains)
+        return saksopplysningTyper.stream()
+            .sorted(SAKSOPPLYSNINGSTYPE_COMPARATOR)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 

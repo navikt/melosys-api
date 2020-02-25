@@ -125,29 +125,29 @@ public class RegisteropplysningerRequest {
                 throw new TekniskException("Krever minst én saksopplysningstype for å hente registeropplysninger");
             }
 
-            if (StringUtils.isEmpty(fnr) && !Collections.disjoint(kreverFnr, saksopplysningTyper.getOpplysningstyper())) {
-                String påkrevdeSaksopplysningstyper = intersect(kreverFnr, saksopplysningTyper.getOpplysningstyper())
+            if (StringUtils.isEmpty(fnr) && !Collections.disjoint(KREVER_FNR, saksopplysningTyper.getOpplysningstyper())) {
+                String påkrevdeSaksopplysningstyper = intersect(KREVER_FNR, saksopplysningTyper.getOpplysningstyper())
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
 
                 throw new TekniskException(String.format("Krever at fnr er satt ved henting av %s", påkrevdeSaksopplysningstyper));
             }
 
-            if (PeriodeKontroller.feilIPeriode(fom, tom) && !Collections.disjoint(kreverPeriode, saksopplysningTyper.getOpplysningstyper())) {
-                String påkrevdeSaksopplysningstyper = intersect(kreverPeriode, saksopplysningTyper.getOpplysningstyper())
+            if (PeriodeKontroller.feilIPeriode(fom, tom) && !Collections.disjoint(KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())) {
+                String påkrevdeSaksopplysningstyper = intersect(KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
 
                 throw new TekniskException(String.format("Feil i periode: %s krever en gyldig periode", påkrevdeSaksopplysningstyper));
             }
         }
 
-        private static <T> Set<T> intersect(Set<T> l1, Set<T> l2) {
-            return l1.stream()
+        private static <T> Set<T> intersect(Set<T> left, Set<T> right) {
+            return left.stream()
                 .distinct()
-                .filter(l2::contains)
+                .filter(right::contains)
                 .collect(Collectors.toSet());
         }
 
-        private static final Set<SaksopplysningType> kreverFnr = Set.of(
+        private static final Set<SaksopplysningType> KREVER_FNR = Set.of(
             SaksopplysningType.ARBFORH,
             SaksopplysningType.INNTK,
             SaksopplysningType.MEDL,
@@ -157,7 +157,7 @@ public class RegisteropplysningerRequest {
             SaksopplysningType.UTBETAL
         );
 
-        private static final Set<SaksopplysningType> kreverPeriode = Set.of(
+        private static final Set<SaksopplysningType> KREVER_PERIODE = Set.of(
             SaksopplysningType.ARBFORH,
             SaksopplysningType.INNTK,
             SaksopplysningType.MEDL,

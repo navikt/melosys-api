@@ -14,7 +14,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -22,7 +21,6 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -38,8 +36,6 @@ public class SaksopplysningerService {
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatService behandlingsresultatService;
     private final SaksopplysningRepository saksopplysningRepo;
-    private final MedlFasade medlFasade;
-    private final Integer medlemskaphistorikkAntallÅr;
 
 
     @Autowired
@@ -47,16 +43,12 @@ public class SaksopplysningerService {
                                    ProsessinstansService prosessinstansService,
                                    BehandlingRepository behandlingRepository,
                                    BehandlingsresultatService behandlingsresultatService,
-                                   SaksopplysningRepository saksopplysningRepo,
-                                   MedlFasade medlFasade,
-                                   @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr) {
+                                   SaksopplysningRepository saksopplysningRepo) {
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.saksopplysningRepo = saksopplysningRepo;
-        this.medlFasade = medlFasade;
-        this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
     }
 
     public Optional<PersonDokument> finnPersonOpplysninger(long behandlingID) {

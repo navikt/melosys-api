@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -113,15 +114,14 @@ public class RegisteropplysningerServiceTest {
         verify(saksopplysningerService, times(8)).lagreSaksopplysning(anySaksopplysning(), eq(behandling));
         verify(behandlingService, never()).hentBehandling(anyLong());
 
-        InOrder inOrder = inOrder(tpsFasade, medlFasade, eregFasade, aaregFasade, sakOgBehandlingFasade, inntektService, utbetaldataService, saksopplysningerService);
-        inOrder.verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
-        inOrder.verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
-        inOrder.verify(medlFasade).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
-        inOrder.verify(eregFasade).hentOrganisasjon(anyString());
-        inOrder.verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        inOrder.verify(tpsFasade).hentPersonMedAdresse(anyString());
-        inOrder.verify(sakOgBehandlingFasade).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
-        inOrder.verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
+        verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
+        verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
+        verify(medlFasade).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
+        verify(eregFasade).hentOrganisasjon(anyString());
+        verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
+        verify(tpsFasade).hentPersonMedAdresse(anyString());
+        verify(sakOgBehandlingFasade).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
     @Test
@@ -143,9 +143,9 @@ public class RegisteropplysningerServiceTest {
                     .sakOgBehandlingopplysninger()
                     .medlemskapsopplysninger()
                     .personhistorikkopplysninger()
+                    .organisasjonsopplysninger()
                     .utbetalingsopplysninger()
                     .arbeidsforholdopplysninger()
-                    .organisasjonsopplysninger()
                     .personopplysninger()
                     .inntektsopplysninger()
                     .build())
@@ -158,15 +158,19 @@ public class RegisteropplysningerServiceTest {
         verify(behandlingService, never()).hentBehandling(anyLong());
 
         // Noen av stegene er avhengige av hverandre. Det er viktig at vi ivaretar rekkefølgen.
-        InOrder inOrder = inOrder(tpsFasade, medlFasade, eregFasade, aaregFasade, sakOgBehandlingFasade, inntektService, utbetaldataService, saksopplysningerService);
-        inOrder.verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
-        inOrder.verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
-        inOrder.verify(medlFasade).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
-        inOrder.verify(eregFasade).hentOrganisasjon(anyString());
-        inOrder.verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        inOrder.verify(tpsFasade).hentPersonMedAdresse(anyString());
-        inOrder.verify(sakOgBehandlingFasade).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
-        inOrder.verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
+        InOrder inntektFørOrg = inOrder(inntektService, eregFasade);
+        inntektFørOrg.verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
+        inntektFørOrg.verify(eregFasade).hentOrganisasjon(anyString());
+
+        InOrder arbeidsforholdFørOrg = inOrder(aaregFasade, eregFasade);
+        arbeidsforholdFørOrg.verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
+        arbeidsforholdFørOrg.verify(eregFasade).hentOrganisasjon(anyString());
+
+        verify(medlFasade).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
+        verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
+        verify(tpsFasade).hentPersonMedAdresse(anyString());
+        verify(sakOgBehandlingFasade).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
     @Test
@@ -336,13 +340,13 @@ public class RegisteropplysningerServiceTest {
     private Behandling hentBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(2L);
+        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
         return behandling;
     }
 
     private Behandling hentBehandling(Saksopplysning saksopplysning) {
-        Behandling behandling = new Behandling();
-        behandling.setId(2L);
+        Behandling behandling = hentBehandling();
         behandling.getSaksopplysninger().add(saksopplysning);
 
         return behandling;

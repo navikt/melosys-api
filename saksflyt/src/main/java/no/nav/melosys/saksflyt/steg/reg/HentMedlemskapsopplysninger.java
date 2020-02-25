@@ -48,7 +48,7 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
         String aktørId = prosessinstans.getBehandling().getFagsak().hentBruker().getAktørId();
         String fnr = tpsFasade.hentIdentForAktørId(aktørId);
 
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())
