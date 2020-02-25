@@ -2,15 +2,14 @@ package no.nav.melosys.saksflyt.steg.gsak;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.slf4j.Logger;
@@ -42,22 +41,22 @@ public class GjenbrukOppgave extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         final String oppgaveID = prosessinstans.getData(ProsessDataKey.OPPGAVE_ID);
         final String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
+        final String aktørID = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         final Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
         final boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
 
-        final OppgaveFactory.OppgaveParametere oppgaveParametere = OppgaveFactory.hentOppgaveParametere(behandlingstype);
-        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
-            .oppgavetype(oppgaveParametere.oppgavetype)
-            .behandlingstype(behandlingstype)
-            .tema(oppgaveParametere.tema)
-            .behandlingstema(oppgaveParametere.behandlingstema)
-            .saksnummer(saksnummer)
-            .behandlesAvApplikasjon(Fagsystem.MELOSYS)
-            .tilordnetRessurs(skalTilordnes ? prosessinstans.getData(SAKSBEHANDLER) : null)
+        final Oppgave gjenbruktOppgave = gsakFasade.hentOppgave(oppgaveID);
+
+        final Oppgave nyOppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstype)
+            .setSaksnummer(saksnummer)
+            .setTilordnetRessurs(skalTilordnes ? prosessinstans.getData(SAKSBEHANDLER) : null)
+            .setAktørId(aktørID)
+            .setBeskrivelse(gjenbruktOppgave.getBeskrivelse())
             .build();
-        gsakFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
+
+        final String opprettetOppgaveID = gsakFasade.opprettOppgave(nyOppgave);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
-        log.info("PID {} har knyttet oppgave {} til sak {}", prosessinstans.getId(), oppgaveID, saksnummer);
+        log.info("PID {} har opprettet ny oppgave med ID {} til sak {}, med beskrivelse fra oppgave {}", prosessinstans.getId(), opprettetOppgaveID, saksnummer, oppgaveID);
     }
 }
