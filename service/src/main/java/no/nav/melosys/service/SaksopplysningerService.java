@@ -1,21 +1,19 @@
 package no.nav.melosys.service;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -23,9 +21,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -38,8 +34,6 @@ public class SaksopplysningerService {
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatService behandlingsresultatService;
     private final SaksopplysningRepository saksopplysningRepo;
-    private final MedlFasade medlFasade;
-    private final Integer medlemskaphistorikkAntallÅr;
 
 
     @Autowired
@@ -47,16 +41,12 @@ public class SaksopplysningerService {
                                    ProsessinstansService prosessinstansService,
                                    BehandlingRepository behandlingRepository,
                                    BehandlingsresultatService behandlingsresultatService,
-                                   SaksopplysningRepository saksopplysningRepo,
-                                   MedlFasade medlFasade,
-                                   @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr) {
+                                   SaksopplysningRepository saksopplysningRepo) {
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.saksopplysningRepo = saksopplysningRepo;
-        this.medlFasade = medlFasade;
-        this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
     }
 
     public Optional<PersonDokument> finnPersonOpplysninger(long behandlingID) {
@@ -69,6 +59,16 @@ public class SaksopplysningerService {
             .map(s -> (SedDokument) s.getDokument());
     }
 
+    public Optional<ArbeidsforholdDokument> finnArbeidsforholdsopplysninger(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.ARBFORH)
+            .map(s -> (ArbeidsforholdDokument) s.getDokument());
+    }
+
+    public Optional<InntektDokument> finnInntektsopplysninger(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.INNTK)
+            .map(s -> (InntektDokument) s.getDokument());
+    }
+
     public PersonhistorikkDokument hentPersonhistorikk(long behandlingID) throws IkkeFunnetException {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSHIST)
             .map(s -> (PersonhistorikkDokument) s.getDokument())
@@ -79,12 +79,6 @@ public class SaksopplysningerService {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSOPL)
             .map(s -> (PersonDokument) s.getDokument())
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke persondokument"));
-    }
-
-    public SedDokument hentSedOpplysninger(long behandlingID) throws IkkeFunnetException {
-        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.SEDOPPL)
-            .map(s -> (SedDokument) s.getDokument())
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke SedDokument for behandling " + behandlingID));
     }
 
     /***
@@ -126,21 +120,7 @@ public class SaksopplysningerService {
         prosessinstansService.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)
-    public void hentSaksopplysningMedl(long behandlingID, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        hentSaksopplysningMedl(behandlingID, lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
-    }
-
-    public void hentSaksopplysningMedl(long behandlingID, LocalDate fom, LocalDate tom) throws IkkeFunnetException, TekniskException, SikkerhetsbegrensningException {
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med ID " + behandlingID));
-        String aktørId = behandling.getFagsak().hentBruker().getAktørId();
-        String ident = tpsFasade.hentIdentForAktørId(aktørId);
-
-        behandling.getSaksopplysninger().removeIf(s -> s.getType().equals(SaksopplysningType.MEDL));
-        behandlingRepository.save(behandling);
-
-        Saksopplysning saksopplysning = medlFasade.hentPeriodeListe(ident, fom.minusYears(medlemskaphistorikkAntallÅr), tom);
+    public void lagreSaksopplysning(Saksopplysning saksopplysning, Behandling behandling) {
         Instant nå = Instant.now();
         saksopplysning.setBehandling(behandling);
         saksopplysning.setRegistrertDato(nå);

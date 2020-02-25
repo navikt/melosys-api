@@ -3,7 +3,6 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
@@ -11,9 +10,7 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -40,17 +37,13 @@ public class SaksopplysningerServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private SaksopplysningRepository saksopplysningRepository;
-    @Mock
-    private MedlFasade medlFasade;
-
-    private Integer medlemskaphistorikkAntallÅr = 5;
 
     private SaksopplysningerService saksopplysningerService;
 
     @Before
     public void setUp() {
         saksopplysningerService = new SaksopplysningerService(tpsFasade, prosessinstansService,
-            behandlingRepo, behandlingsresultatService, saksopplysningRepository, medlFasade, medlemskaphistorikkAntallÅr);
+            behandlingRepo, behandlingsresultatService, saksopplysningRepository);
     }
 
     @Test
@@ -93,36 +86,5 @@ public class SaksopplysningerServiceTest {
 
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
         verify(prosessinstansService).opprettProsessinstansOppfriskning(eq(behandling), eq(aktørID), eq(brukerID));
-    }
-
-    @Test
-    public void hentSaksopplysningMedl() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        final long behandlingID = 11;
-        Behandling behandling = new Behandling();
-        behandling.setId(behandlingID);
-        behandling.setFagsak(new Fagsak());
-        when(behandlingRepo.findById(eq(behandlingID))).thenReturn(Optional.of(behandling));
-
-        final String aktørID = "2222";
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId(aktørID);
-        behandling.getFagsak().getAktører().add(aktoer);
-
-        final String brukerID = "432534";
-        final Saksopplysning medlSaksopplysning = new Saksopplysning();
-        when(tpsFasade.hentIdentForAktørId(eq(aktørID))).thenReturn(brukerID);
-        when(medlFasade.hentPeriodeListe(eq(brukerID), any(LocalDate.class), any(LocalDate.class))).thenReturn(medlSaksopplysning);
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(LocalDate.now());
-        lovvalgsperiode.setTom(LocalDate.now().plusYears(2));
-
-        saksopplysningerService.hentSaksopplysningMedl(behandlingID, lovvalgsperiode);
-
-        verify(behandlingRepo).save(eq(behandling));
-        verify(tpsFasade).hentIdentForAktørId(eq(aktørID));
-        verify(medlFasade).hentPeriodeListe(eq(brukerID), eq(lovvalgsperiode.getFom().minusYears(5)), eq(lovvalgsperiode.getTom()));
-        verify(saksopplysningRepository).save(eq(medlSaksopplysning));
     }
 }

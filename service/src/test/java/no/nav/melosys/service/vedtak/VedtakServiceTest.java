@@ -1,5 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -23,13 +24,14 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -65,9 +67,11 @@ public class VedtakServiceTest {
     @Mock
     private GsakFasade gsakFasade;
     @Mock
+    private TpsFasade tpsFasade;
+    @Mock
     private VedtakKontrollService vedtakKontrollService;
     @Mock
-    private SaksopplysningerService saksopplysningerService;
+    private RegisteropplysningerService registeropplysningerService;
 
     private VedtakService vedtakService;
 
@@ -79,7 +83,7 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, vedtakKontrollService, saksopplysningerService);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, tpsFasade, vedtakKontrollService, registeropplysningerService);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -111,6 +115,8 @@ public class VedtakServiceTest {
             .thenReturn(replikertBehandling);
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+
+        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("123");
     }
 
     @Test
@@ -162,6 +168,9 @@ public class VedtakServiceTest {
     public void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() throws MelosysException {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
@@ -202,6 +211,13 @@ public class VedtakServiceTest {
 
     @Test
     public void fattVedtak_feilIValidering_kasterExceptionMedFeilkode() throws MelosysException {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setFom(LocalDate.now());
+        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         behandlingsresultat.setType(resultatType);
         when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
