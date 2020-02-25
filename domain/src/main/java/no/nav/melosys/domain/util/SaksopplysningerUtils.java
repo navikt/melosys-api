@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.exception.TekniskException;
 
@@ -39,15 +38,6 @@ public final class SaksopplysningerUtils {
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
     }
 
-    public static SoeknadDokument hentSøknadDokument(Behandling behandling) throws TekniskException {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.SØKNAD);
-        return (SoeknadDokument) saksopplysning
-            .orElseThrow(() -> new TekniskException("Finner ikke søknaddokument"));
-    }
-
-    public static Optional<SoeknadDokument> finnSøknadDokument(Behandling behandling) {
-        return hentDokument(behandling, SaksopplysningType.SØKNAD).map(d -> (SoeknadDokument) d);
-    }
 
     public static MedlemskapDokument hentMedlemskapDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.MEDL);

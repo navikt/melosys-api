@@ -12,10 +12,11 @@ import no.nav.melosys.domain.jpa.BehandlingsgrunnlagListener;
 public class Behandlingsgrunnlag {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @MapsId
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     private Behandling behandling;
 
     @Column(name = "versjon", nullable = false)

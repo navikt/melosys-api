@@ -116,7 +116,7 @@ public class SedDataBygger {
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()));
 
         sedDataDto.setAvklartBostedsland(
-            landvelgerService.hentBostedsland(dataGrunnlag.getBehandling().getId(), dataGrunnlag.getSøknad()).getKode()
+            landvelgerService.hentBostedsland(dataGrunnlag.getBehandling().getId(), dataGrunnlag.getBehandlingsgrunnlagData()).getKode()
         );
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
@@ -130,7 +130,7 @@ public class SedDataBygger {
         sedDataDto.setUtenlandskeVirksomheter(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter().stream().map(
             SedDataBygger::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));
 
-        sedDataDto.setUtenlandskIdent(dataGrunnlag.getSøknad().personOpplysninger.utenlandskIdent.stream()
+        sedDataDto.setUtenlandskIdent(dataGrunnlag.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
         return sedDataDto;

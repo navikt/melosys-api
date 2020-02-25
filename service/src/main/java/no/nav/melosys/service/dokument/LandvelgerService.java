@@ -1,11 +1,16 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
@@ -13,30 +18,29 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART11_3A;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentOppgittBostedsland;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadslandkoder;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentOppgittBostedsland;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadslandkoder;
 
 @Service
 public class LandvelgerService {
-    private AvklartefaktaService avklartefaktaService;
-    private BehandlingsresultatService behandlingsresultatService;
-    private SoeknadService søknadService;
-    private VilkaarsresultatRepository vilkaarsresultatRepository;
+    private final AvklartefaktaService avklartefaktaService;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
     @Autowired
     public LandvelgerService(AvklartefaktaService avklartefaktaService,
                              BehandlingsresultatService behandlingsresultatService,
-                             SoeknadService søknadService,
-                             VilkaarsresultatRepository vilkaarsresultatRepository) {
+                             BehandlingsgrunnlagService behandlingsgrunnlagService, VilkaarsresultatRepository vilkaarsresultatRepository) {
         this.avklartefaktaService = avklartefaktaService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.søknadService = søknadService;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
@@ -51,8 +55,8 @@ public class LandvelgerService {
     public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
-            SoeknadDokument søknad = søknadService.hentSøknad(behandlingID);
-            alleArbeidsland.addAll(hentSøknadslandkoder(søknad));
+            BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
+            alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
         }
 
         Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
@@ -83,14 +87,14 @@ public class LandvelgerService {
 
     private Collection<Landkoder> hentTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
         Collection<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandlingID);
-        SoeknadDokument søknad = søknadService.hentSøknad(behandlingID);
+        BehandlingsgrunnlagData grunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
         if (oppfylteVilkår.contains(FO_883_2004_ART11_3A)) {
-            return Lists.newArrayList(hentBostedsland(behandlingID, søknad));
+            return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata));
         }
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (erVideresendt(behandlingsresultat)) {
-            return Lists.newArrayList(hentBostedsland(behandlingID, søknad));
+            return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata));
         }
 
         Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
@@ -104,17 +108,17 @@ public class LandvelgerService {
             .collect(Collectors.toSet());
     }
 
-    public Landkoder hentBostedsland(long behandlingID, SoeknadDokument søknad) {
-        Optional<Landkoder> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandlingID, søknad);
+    public Landkoder hentBostedsland(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
+        Optional<Landkoder> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandlingID, grunnlagData);
         return bostedslandOppgittAvSaksbehandler.orElse(Landkoder.NO);
     }
 
-    private Optional<Landkoder> hentBostedslandOppgittAvSaksbehandler(long behandlingID, SoeknadDokument søknad) {
+    private Optional<Landkoder> hentBostedslandOppgittAvSaksbehandler(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
         Optional<Landkoder> bostedsland = avklartefaktaService.hentBostedland(behandlingID);
         if (bostedsland.isPresent()) {
             return bostedsland;
         } else {
-            return hentOppgittBostedsland(søknad);
+            return hentOppgittBostedsland(grunnlagData);
         }
     }
 }

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -39,8 +39,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
 
 @Service
 public class ProsessinstansService {
@@ -224,7 +224,8 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOppfriskning(Behandling behandling, String aktørID, String brukerID, SoeknadDokument søknadDokument) {
+    public void opprettProsessinstansOppfriskning(Behandling behandling, String aktørID, String brukerID) {
+        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         Prosessinstans nyprosessinstans = new Prosessinstans();
         nyprosessinstans.setBehandling(behandling);
         nyprosessinstans.setType(ProsessType.OPPFRISKNING);
@@ -233,8 +234,8 @@ public class ProsessinstansService {
         nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
         nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
 
-        nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(søknadDokument));
-        nyprosessinstans.setData(ProsessDataKey.SØKNADSLAND, hentSøknadsland(søknadDokument));
+        nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(grunnlagData));
+        nyprosessinstans.setData(ProsessDataKey.SØKNADSLAND, hentSøknadsland(grunnlagData));
 
         nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
 

@@ -7,6 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -40,13 +41,17 @@ import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
-import no.nav.melosys.service.*;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerInnvilgelse;
@@ -280,16 +285,21 @@ public final class DokumentServiceTest {
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.KLAGE);
         behandling.setId(BEHANDLINGSID);
-        SoeknadDokument dok = new SoeknadDokument();
+
+        SoeknadDokument søknad = new SoeknadDokument();
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.orgnr = "12345678910";
-        dok.foretakUtland.add(foretakUtland);
-        dok.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        dok.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
-        dok.oppholdUtland.oppholdslandkoder.add("DK");
-        Saksopplysning søknad = lagSaksopplysning(SaksopplysningType.SØKNAD, dok);
+        søknad.foretakUtland.add(foretakUtland);
+        søknad.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
+        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
+        søknad.oppholdUtland.oppholdslandkoder.add("DK");
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknad);
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+
         Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument());
-        behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(søknad, personopplysninger)));
+        behandling.setSaksopplysninger(Set.of(personopplysninger));
         return behandling;
     }
 
@@ -328,8 +338,8 @@ public final class DokumentServiceTest {
         VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
         JoarkService joarkService = mock(JoarkService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        SoeknadService soeknadService = mock(SoeknadService.class);
-        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, soeknadService, vilkaarsresultatRepository);
+        BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
+        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, behandlingsgrunnlagService, vilkaarsresultatRepository);
         UtpekingService utpekingService = mock(UtpekingService.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
             utenlandskMyndighetService, vilkaarsresultatRepository, vilkaarsresultatService, joarkService, landvelgerService, utpekingService);

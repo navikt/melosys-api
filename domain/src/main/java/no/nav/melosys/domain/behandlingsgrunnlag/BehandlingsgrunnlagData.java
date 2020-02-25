@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import no.nav.melosys.domain.dokument.soeknad.*;
@@ -32,12 +33,17 @@ public class BehandlingsgrunnlagData {
 
     public SelvstendigArbeid selvstendigArbeid = new SelvstendigArbeid();
 
+    // Opplysninger om juridiske arbeidsgiver i Norge
+    public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
+
     public List<MaritimtArbeid> maritimtArbeid = new ArrayList<>();
 
     public Bosted bosted = new Bosted();
 
     public Set<String> hentAlleOrganisasjonsnumre() {
-        return selvstendigArbeid.hentAlleOrganisasjonsnumre()
+        return Stream.of(selvstendigArbeid.hentAlleOrganisasjonsnumre(),
+            juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre())
+            .flatMap(i -> i)
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toSet());
     }

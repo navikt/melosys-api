@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -312,6 +313,7 @@ public class BehandlingServiceTest {
         behandling.setDokumentasjonSvarfristDato(Instant.parse("2017-12-11T09:37:30.00Z"));
         behandling.setSaksopplysninger(new LinkedHashSet<>());
 
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getSaksopplysninger().add(opprettSaksopplysning("dokxml", SaksopplysningType.INNTK, "2020-02-11T09:37:30Z"));
         return behandling;
     }

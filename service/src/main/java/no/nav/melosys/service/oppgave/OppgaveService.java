@@ -15,7 +15,7 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
-import no.nav.melosys.service.SoeknadService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
@@ -25,8 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
 
 @Service
 @Primary
@@ -37,7 +37,7 @@ public class OppgaveService {
     private final FagsakService fagsakService;
     private final GsakFasade gsakFasade;
     private final SaksopplysningerService saksopplysningerService;
-    private final SoeknadService søknadService;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final TpsFasade tpsFasade;
     private static final String UKJENT = "UKJENT";
 
@@ -46,14 +46,13 @@ public class OppgaveService {
                           FagsakService fagsakService,
                           GsakFasade gsakFasade,
                           SaksopplysningerService saksopplysningerService,
-                          SoeknadService søknadService,
-                          TpsFasade tpsFasade) {
+                          BehandlingsgrunnlagService behandlingsgrunnlagService, TpsFasade tpsFasade) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.gsakFasade = gsakFasade;
         this.saksopplysningerService = saksopplysningerService;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.tpsFasade = tpsFasade;
-        this.søknadService = søknadService;
     }
 
     public List<Oppgave> finnOppgaverMedBrukerID(String brukerIdent) throws FunksjonellException, TekniskException {
@@ -152,7 +151,8 @@ public class OppgaveService {
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
             if (behandling.harSøknad()) {
-                SoeknadDokument søknadDokument = søknadService.hentSøknad(behandling.getId());
+                SoeknadDokument søknadDokument = (SoeknadDokument) behandlingsgrunnlagService
+                    .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
                 behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
                 behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
             } else {

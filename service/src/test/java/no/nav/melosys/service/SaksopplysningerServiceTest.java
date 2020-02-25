@@ -21,9 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,10 +49,13 @@ public class SaksopplysningerServiceTest {
     @Test
     public void oppfriskSaksopplysning() throws IkkeFunnetException, TekniskException {
 
+        final String aktørID = "123";
+        final String brukerID = "322211";
+
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
         Aktoer aktør = new Aktoer();
-        aktør.setAktørId("123");
+        aktør.setAktørId(aktørID);
         aktør.setRolle(Aktoersroller.BRUKER);
         HashSet<Aktoer> aktører = new HashSet<>();
         aktører.add(aktør);
@@ -75,21 +76,15 @@ public class SaksopplysningerServiceTest {
 
         soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
 
-        Saksopplysning saksopplysningSøknad = new Saksopplysning();
-        saksopplysningSøknad.setType(SaksopplysningType.SØKNAD);
-        saksopplysningSøknad.setDokument(soeknadDokument);
-        saksopplysninger.add(saksopplysningSøknad);
-
         behandling.setSaksopplysninger(saksopplysninger);
 
         when(prosessinstansService.harAktivProsessinstans(anyLong())).thenReturn(false);
         when(behandlingRepo.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
-        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("12345");
+        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(brukerID);
 
         saksopplysningerService.oppfriskSaksopplysning(13L);
 
-        assertThat(behandling.getSaksopplysninger().size()).isEqualTo(1);
-        assertThat(behandling.getSaksopplysninger().stream().findFirst().get().getType()).isEqualTo(SaksopplysningType.SØKNAD);
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
+        verify(prosessinstansService).opprettProsessinstansOppfriskning(eq(behandling), eq(aktørID), eq(brukerID));
     }
 }

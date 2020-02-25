@@ -8,14 +8,17 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.SaksopplysningerService;
-import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -31,8 +34,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
 
 @Protected
 @RestController
@@ -45,19 +48,18 @@ public class FagsakTjeneste {
 
     private final FagsakService fagsakService;
     private final SaksopplysningerService saksopplysningerService;
-    private final SoeknadService søknadService;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final TilgangService tilgangService;
     private final UtpekingService utpekingService;
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService,
                           SaksopplysningerService saksopplysningerService,
-                          SoeknadService soeknadService,
-                          TilgangService tilgangService,
+                          BehandlingsgrunnlagService behandlingsgrunnlagService, TilgangService tilgangService,
                           UtpekingService utpekingService) {
         this.fagsakService = fagsakService;
         this.saksopplysningerService = saksopplysningerService;
-        this.søknadService = soeknadService;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.tilgangService = tilgangService;
         this.utpekingService = utpekingService;
     }
@@ -202,9 +204,10 @@ public class FagsakTjeneste {
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
         if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
-            søknadService.finnSøknad(behandling.getId()).ifPresent(soeknadDokument -> {
-                    behandlingOversiktDto.setLand(hentSøknadsland(soeknadDokument));
-                    Periode periode = hentPeriode(soeknadDokument);
+            behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
+                .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
+                    behandlingOversiktDto.setLand(hentSøknadsland(grunnlagData));
+                    Periode periode = hentPeriode(grunnlagData);
                     behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
                 });
         } else {

@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
@@ -29,10 +30,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.SaksopplysningerService;
-import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -295,17 +295,19 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         fagsakService = mock(FagsakService.class);
         utpekingService = mock(UtpekingService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
-        SoeknadService søknadService = mock(SoeknadService.class);
+        BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
         PersonDokument personDokument = (PersonDokument)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
         when(saksopplysningerService.finnPersonOpplysninger(eq(1L))).thenReturn(Optional.ofNullable(personDokument));
-        SoeknadDokument søknadDokument = (SoeknadDokument) FagsakBehandlingFactory.lagSøknadOpplysning().getDokument();
-        when(søknadService.finnSøknad(eq(1L))).thenReturn(Optional.ofNullable(søknadDokument));
+        SoeknadDokument søknadDokument = FagsakBehandlingFactory.lagSøknadDokument();
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
+        when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(eq(1L))).thenReturn(Optional.of(behandlingsgrunnlag));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(fagsakService.hentFagsak("Finnes ikke")).thenThrow(new IkkeFunnetException("Finnes ikke"));
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, saksopplysningerService, søknadService, tilgangService, utpekingService);
+        return new FagsakTjeneste(fagsakService, saksopplysningerService, behandlingsgrunnlagService, tilgangService, utpekingService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {

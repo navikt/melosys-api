@@ -4,22 +4,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Metoder for å trekke ut opplysninger fra et {@code SoeknadDokument}.
+ * Metoder for å trekke ut opplysninger fra et {@code BehandlingsgrunnlagData}.
  */
-public final class SoeknadUtils {
+public final class BehandlingsgrunnlagUtils {
 
-    private SoeknadUtils() {
+    private BehandlingsgrunnlagUtils() {
         throw new UnsupportedOperationException();
     }
 
-    public static Periode hentPeriode(SoeknadDokument soeknadDokument) {
+    public static Periode hentPeriode(BehandlingsgrunnlagData soeknadDokument) {
         return soeknadDokument.periode;
     }
 
@@ -27,8 +27,8 @@ public final class SoeknadUtils {
      * Returnerer søknadsland som landkoder,
      * og sjekker at det er minst et søknadsland oppgitt i søknad
      */
-    public static List<Landkoder> hentSøknadslandkoder(SoeknadDokument søknad) {
-        List<String> søknadsland = hentSøknadsland(søknad);
+    public static List<Landkoder> hentSøknadslandkoder(BehandlingsgrunnlagData grunnlagdata) {
+        List<String> søknadsland = hentSøknadsland(grunnlagdata);
         if (søknadsland.isEmpty()) {
             throw new IllegalStateException("Søknad mangler søknadsland");
         }
@@ -37,12 +37,12 @@ public final class SoeknadUtils {
             .collect(Collectors.toList());
     }
 
-    public static List<String> hentSøknadsland(SoeknadDokument søknad) {
-        return søknad.soeknadsland.landkoder;
+    public static List<String> hentSøknadsland(BehandlingsgrunnlagData grunnlagdata) {
+        return grunnlagdata.soeknadsland.landkoder;
     }
 
-    public static StrukturertAdresse hentBostedsadresse(SoeknadDokument søknad) {
-        StrukturertAdresse oppgittAdresse = søknad.bosted.oppgittAdresse;
+    public static StrukturertAdresse hentBostedsadresse(BehandlingsgrunnlagData grunnlagdata) {
+        StrukturertAdresse oppgittAdresse = grunnlagdata.bosted.oppgittAdresse;
         if ((StringUtils.isNotEmpty(oppgittAdresse.gatenavn) ||
             StringUtils.isNotEmpty(oppgittAdresse.husnummer) ||
             StringUtils.isNotEmpty(oppgittAdresse.region) ||
@@ -55,7 +55,7 @@ public final class SoeknadUtils {
         }
     }
 
-    public static Optional<Landkoder> hentOppgittBostedsland(SoeknadDokument søknad) {
-        return Optional.ofNullable(søknad.bosted.oppgittAdresse.landkode).map(Landkoder::valueOf);
+    public static Optional<Landkoder> hentOppgittBostedsland(BehandlingsgrunnlagData grunnlagdata) {
+        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.landkode).map(Landkoder::valueOf);
     }
 }

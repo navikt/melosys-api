@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -65,10 +66,9 @@ public class AvklarMyndighetTest {
         arbeidUtland.adresse.landkode = "HR";
         søknadDokument.arbeidUtland.add(arbeidUtland);
         søknadDokument.bosted.oppgittAdresse.landkode = "IT";
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-        saksopplysning.setDokument(søknadDokument);
-        behandling.getSaksopplysninger().add(saksopplysning);
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandling;
     }
 

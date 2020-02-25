@@ -11,13 +11,12 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -31,7 +30,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.Vilkaarbegrunne
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
-    static final String JA = "true";
+    private static final String JA = "true";
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000108.xsd";
 
@@ -64,10 +63,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setArbeidsland(brevdata.arbeidsland);
         fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
 
-        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         fag.setFlaggland(brevdata.arbeidsland);
-        if (!søknad.maritimtArbeid.isEmpty()) {
-            MaritimtArbeid maritimtArbeid = søknad.maritimtArbeid.iterator().next();
+        if (!grunnlagData.maritimtArbeid.isEmpty()) {
+            MaritimtArbeid maritimtArbeid = grunnlagData.maritimtArbeid.iterator().next();
             if (Fartsomraade.INNENRIKS.getKode().equalsIgnoreCase(maritimtArbeid.fartsomradeKode)) {
                 fag.setArbeidPåTerritorialfarvann(JA);
             }

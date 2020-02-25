@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
@@ -32,8 +29,8 @@ public class SedDataGrunnlagFactory {
     }
 
     public SedDataGrunnlag av(Behandling behandling) throws TekniskException {
-        Optional<SoeknadDokument> søknad = SaksopplysningerUtils.finnSøknadDokument(behandling);
-        if (søknad.isPresent()) {
+        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+        if (behandlingsgrunnlag != null) {
             return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
         } else {
             return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService);

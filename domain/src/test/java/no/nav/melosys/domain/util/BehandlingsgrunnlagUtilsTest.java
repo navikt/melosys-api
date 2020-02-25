@@ -15,14 +15,14 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SoeknadUtilsTest {
+public class BehandlingsgrunnlagUtilsTest {
 
     @Test
     public void hentSoeknadsland() {
         SoeknadDokument soeknad = new SoeknadDokument();
         soeknad.soeknadsland.landkoder = Arrays.asList(Landkoder.BE.getKode(), Landkoder.BG.getKode());
 
-        List<String> strings = SoeknadUtils.hentSøknadsland(soeknad);
+        List<String> strings = BehandlingsgrunnlagUtils.hentSøknadsland(soeknad);
         assertThat(strings).contains(Landkoder.BE.getKode(), Landkoder.BG.getKode());
     }
 
@@ -33,7 +33,7 @@ public class SoeknadUtilsTest {
         oppgittAdresse.gatenavn = "HjemGata";
         oppgittAdresse.landkode = "NO";
         søknad.bosted.oppgittAdresse = oppgittAdresse;
-        assertThat(SoeknadUtils.hentBostedsadresse(søknad)).isNotNull();
+        assertThat(BehandlingsgrunnlagUtils.hentBostedsadresse(søknad)).isNotNull();
     }
 
     @Test
@@ -41,7 +41,7 @@ public class SoeknadUtilsTest {
         SoeknadDokument søknad = new SoeknadDokument();
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
         søknad.bosted.oppgittAdresse = oppgittAdresse;
-        assertThat(SoeknadUtils.hentBostedsadresse(søknad)).isNull();
+        assertThat(BehandlingsgrunnlagUtils.hentBostedsadresse(søknad)).isNull();
     }
 
     @Test
@@ -52,7 +52,7 @@ public class SoeknadUtilsTest {
         Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
         soeknad.periode = periode_2;
 
-        Periode res = SoeknadUtils.hentPeriode(soeknad);
+        Periode res = BehandlingsgrunnlagUtils.hentPeriode(soeknad);
         assertThat(res).isEqualTo(periode_2);
     }
 
@@ -61,7 +61,8 @@ public class SoeknadUtilsTest {
         SoeknadDokument soeknad = new SoeknadDokument();
         soeknad.bosted.oppgittAdresse.landkode = "SE";
 
-        Optional<Landkoder> landkoder = SoeknadUtils.hentOppgittBostedsland(soeknad);
+        Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
+        assertThat(landkoder).isPresent();
         assertThat(landkoder.get()).isEqualTo(Landkoder.SE);
     }
 
@@ -69,7 +70,7 @@ public class SoeknadUtilsTest {
     public void hentOppgittBostedsland_eksistererIkke_girEmpty() {
         SoeknadDokument soeknad = new SoeknadDokument();
 
-        Optional<Landkoder> landkoder = SoeknadUtils.hentOppgittBostedsland(soeknad);
+        Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder.isPresent()).isFalse();
     }
 
