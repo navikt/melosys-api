@@ -1,13 +1,15 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
@@ -31,8 +33,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
-import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
+import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
+import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
@@ -74,7 +78,6 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     public void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(new SoeknadDokument()));
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
 
         PersonDokument personDokument = new PersonDokument();
@@ -83,9 +86,11 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         person.setDokument(personDokument);
         person.setType(SaksopplysningType.PERSOPL);
 
-        Set<Saksopplysning> saksopplysninger = lagSøknadOgArbeidsforholdOpplysninger(Arrays.asList("987654321"),
+        Set<Saksopplysning> saksopplysninger = lagArbeidsforholdOpplysninger(Collections.singletonList("123456789"));
+
+        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.singletonList("987654321"),
             Collections.emptyList(),
-            Arrays.asList("123456789"));
+            Collections.emptyList()));
 
         saksopplysninger.add(person);
         behandling.setSaksopplysninger(saksopplysninger);

@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -42,7 +42,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     @Override
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
         long behandlingID = dataGrunnlag.getBehandling().getId();
-        SoeknadDokument søknad = dataGrunnlag.getSøknad();
+        BehandlingsgrunnlagData grunnlagData = dataGrunnlag.getBehandlingsgrunnlagData();
 
         BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(dataGrunnlag, saksbehandler);
 
@@ -55,14 +55,14 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
             .map(Landkoder::getBeskrivelse)
             .collect(Collectors.toList());
 
-        brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, søknad).getBeskrivelse();
+        brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, grunnlagData).getBeskrivelse();
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandlingID);
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
 
         brevdata.erMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(behandlingID);
         brevdata.erBegrensetPeriode = !PeriodeKontroller.periodeErLik(
-            søknad.periode.getFom(), søknad.periode.getTom(), brevdata.lovvalgsperiode.getFom(), brevdata.lovvalgsperiode.getTom()
+            grunnlagData.periode.getFom(), grunnlagData.periode.getTom(), brevdata.lovvalgsperiode.getFom(), brevdata.lovvalgsperiode.getTom()
         );
 
         return brevdata;

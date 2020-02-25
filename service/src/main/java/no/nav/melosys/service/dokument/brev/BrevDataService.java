@@ -15,6 +15,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -90,7 +91,8 @@ public class BrevDataService {
 
         if (mottaker.getRolle() == BRUKER) {
             if (brukerHarIkkeAdresseiTps(behandling)) {
-                StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
+                BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+                StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
                 if (!oppgittAdresse.erTom()) {
                     metadata.berik = false;
                     metadata.postadresse = oppgittAdresse;
@@ -237,7 +239,8 @@ public class BrevDataService {
 
         String navn = tpsFasade.hentSammensattNavn(mottakerID);
         if (brukerHarIkkeAdresseiTps(behandling)) {
-            StrukturertAdresse oppgittAdresse = SaksopplysningerUtils.hentSøknadDokument(behandling).bosted.oppgittAdresse;
+            BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+            StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
             if (oppgittAdresse.erTom()) {
                 throw new TekniskException("Bruker har verken adresse i TPS eller oppgitt adresse i søknad");
             }

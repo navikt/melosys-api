@@ -11,6 +11,7 @@ import java.util.Optional;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -176,6 +177,7 @@ public class BehandlingService {
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(behandlingsstatus);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
+        behandlingsreplika.setBehandlingsgrunnlag(repolikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
@@ -186,6 +188,14 @@ public class BehandlingService {
         }
         behandlingRepository.save(behandlingsreplika);
         return behandlingsreplika;
+    }
+
+    private Behandlingsgrunnlag repolikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Behandlingsgrunnlag replikertBehandlingsgrunnlag = (Behandlingsgrunnlag) BeanUtils.cloneBean(opprinneligBehandlingsgrunnlag);
+        replikertBehandlingsgrunnlag.setId(null);
+        replikertBehandlingsgrunnlag.setBehandling(behandlingsreplika);
+        return replikertBehandlingsgrunnlag;
     }
 
     public void avsluttBehandling(long behandlingId) throws IkkeFunnetException {

@@ -9,12 +9,13 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public class FagsakBehandlingFactory {
     public static Fagsak fagsakMedBehandlinger(Behandlingsstatus behandlingsstatusFørst,
@@ -32,7 +33,10 @@ public class FagsakBehandlingFactory {
 
         HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
         saksopplysninger.add(lagPersonSaksopplysning());
-        saksopplysninger.add(lagSøknadOpplysning());
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(lagSøknadDokument());
+        b1.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
         b1.setSaksopplysninger(saksopplysninger);
 
@@ -64,7 +68,7 @@ public class FagsakBehandlingFactory {
         return saksopplysningPerson;
     }
 
-    public static Saksopplysning lagSøknadOpplysning() {
+    public static SoeknadDokument lagSøknadDokument() {
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse.landkode = "SE";
@@ -74,9 +78,6 @@ public class FagsakBehandlingFactory {
         soeknadDokument.oppholdUtland.oppholdslandkoder.add("FI");
         soeknadDokument.periode = new no.nav.melosys.domain.dokument.soeknad.Periode(
             LocalDate.of(2019,1,1), LocalDate.of(2019,2,1));
-        Saksopplysning saksopplysningSøknad = new Saksopplysning();
-        saksopplysningSøknad.setType(SaksopplysningType.SØKNAD);
-        saksopplysningSøknad.setDokument(soeknadDokument);
-        return saksopplysningSøknad;
+        return soeknadDokument;
     }
 }

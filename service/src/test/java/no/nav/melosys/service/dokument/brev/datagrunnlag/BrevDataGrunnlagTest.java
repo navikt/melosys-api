@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -66,8 +67,11 @@ public class BrevDataGrunnlagTest {
     private Behandling lagBehandling(SoeknadDokument søknad, PersonDokument person) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(søknad));
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(person));
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknad);
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandling;
     }
 

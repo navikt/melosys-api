@@ -6,6 +6,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -29,7 +30,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagSoeknadssaksopplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -65,8 +65,10 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     public void setUp() throws FunksjonellException, TekniskException {
         behandling = new Behandling();
         behandling.setId(1L);
-        behandling.getSaksopplysninger().add(lagSøknadsopplysning());
         behandling.getSaksopplysninger().add(lagPersonsopplysning());
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
+
 
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
 
@@ -85,11 +87,6 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
 
     private BrevDataGrunnlag lagBrevressurser() throws TekniskException {
         return new BrevDataGrunnlag(behandling, null, avklarteVirksomheterService, avklartefaktaService);
-    }
-
-    private static Saksopplysning lagSøknadsopplysning() {
-        SoeknadDokument søknad = new SoeknadDokument();
-        return lagSoeknadssaksopplysning(søknad);
     }
 
     private static Saksopplysning lagPersonsopplysning() {
