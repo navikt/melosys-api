@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.ufm;
+package no.nav.melosys.saksflyt.steg.aou.inn;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -48,7 +48,7 @@ public class HentRegisteropplysningerTest {
 
     @Before
     public void setUp() throws Exception {
-        hentRegisteropplysninger = new HentRegisteropplysninger(behandlingService, tpsFasade, registeropplysningerService);
+        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, tpsFasade);
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -70,7 +70,7 @@ public class HentRegisteropplysningerTest {
         hentRegisteropplysninger.utfør(prosessinstans);
 
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(FNR);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_REGISTERKONTROLL);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_REGISTERKONTROLL);
 
         verify(tpsFasade).hentIdentForAktørId(AKTØR_ID);
         verify(behandlingService).hentBehandling(eq(1L));
@@ -85,7 +85,9 @@ public class HentRegisteropplysningerTest {
             SaksopplysningType.PERSHIST,
             SaksopplysningType.MEDL,
             SaksopplysningType.INNTK,
-            SaksopplysningType.UTBETAL
+            SaksopplysningType.UTBETAL,
+            SaksopplysningType.ORG,
+            SaksopplysningType.ARBFORH
         );
     }
 

@@ -48,6 +48,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
                 .behandling(behandling)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                     .personopplysninger()
+                    .personhistorikkopplysninger()
                     .medlemskapsopplysninger()
                     .inntektsopplysninger()
                     .utbetalingsopplysninger()
