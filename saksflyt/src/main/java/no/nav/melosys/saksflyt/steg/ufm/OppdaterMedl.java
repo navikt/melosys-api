@@ -61,11 +61,11 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             Collection<Lovvalgsperiode> lagretLovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(
                 behandlingId, Collections.singletonList(UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument))
             );
-
-            Long medlId = opprettOgLagrePeriodeEndelig(behandlingId, behandling, lagretLovvalgsperiode);
+            Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
+            Long medlId = opprettOgLagrePeriode(behandlingId, behandling, lagretLovvalgsperiode, !lovvalgsperiode.erArtikkel13());
             log.info("Lovvalgsperiode opprettet for behandling {} med medlId {}", behandlingId, medlId);
         } else if (lovvalgsperioder.iterator().next().getMedlPeriodeID() == null) {
-            Long medlId = opprettOgLagrePeriodeEndelig(behandlingId, behandling, lovvalgsperioder);
+            Long medlId = opprettOgLagrePeriode(behandlingId, behandling, lovvalgsperioder, true);
             log.info("Lovvalgsperiode for behandling {} opprettet og lagret i Medl med medlId {}", behandlingId, medlId);
         } else {
             Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
@@ -76,10 +76,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
-    private Long opprettOgLagrePeriodeEndelig(long behandlingId, Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder) throws TekniskException, FunksjonellException {
+    private Long opprettOgLagrePeriode(long behandlingId, Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder, boolean erEndelig) throws TekniskException, FunksjonellException {
         String ident = SaksopplysningerUtils.hentPersonDokument(behandling).fnr;
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
-        Long medlId = medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
+        Long medlId = erEndelig
+            ? medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED)
+            : medlFasade.opprettPeriodeForeløpig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
         felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, behandlingId);
 
         return medlId;
