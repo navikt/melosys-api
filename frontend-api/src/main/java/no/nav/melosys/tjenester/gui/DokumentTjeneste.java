@@ -97,6 +97,8 @@ public class DokumentTjeneste {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
         tilgangService.sjekkTilgang(behandlingID);
+        // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
+        dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
         dokumentService.produserDokumentISaksflyt(produserbartDokument, brevBestillingDto.mottaker, behandlingID, new BrevData(brevBestillingDto));
         return ResponseEntity.noContent().build();
     }
