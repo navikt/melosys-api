@@ -1,9 +1,9 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
@@ -33,6 +33,6 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         opprettSedDokumentFelles.opprettSedSaksopplysning(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class), prosessinstans.getBehandling());
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_HENT_PERSON);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_HENT_REGISTEROPPLYSNINGER);
     }
 }

@@ -3,7 +3,8 @@ package no.nav.melosys.saksflyt.steg.aou.inn;
 import java.time.Instant;
 import java.util.Collections;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -44,7 +45,7 @@ public class AvsluttTidligerePeriodeTest {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
 
         avsluttTidligerePeriode.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_HENT_PERSON);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER);
     }
 
     @Test
@@ -57,7 +58,7 @@ public class AvsluttTidligerePeriodeTest {
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligerePeriode.utfør(prosessinstans);
         verify(oppdaterMedlFelles).avsluttTidligerMedlPeriode(any(Fagsak.class));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_HENT_PERSON);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER);
     }
 
     private Fagsak hentFagsak() {

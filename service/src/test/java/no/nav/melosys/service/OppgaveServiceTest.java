@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
@@ -25,6 +26,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
@@ -54,7 +56,7 @@ public class OppgaveServiceTest {
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
-    private SoeknadService soeknadService;
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     private OppgaveService oppgaveService;
 
@@ -65,8 +67,7 @@ public class OppgaveServiceTest {
                 fagsakService,
                 gsakFasade,
                 saksopplysningerService,
-                soeknadService,
-                tpsFasade);
+            behandlingsgrunnlagService, tpsFasade);
 
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
@@ -151,11 +152,6 @@ public class OppgaveServiceTest {
         personOpplysning.setDokument(lagPersonDokument());
         saksopplysninger.add(personOpplysning);
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-        saksopplysning.setDokument(lagSoeknadDokument());
-        saksopplysninger.add(saksopplysning);
-
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setRegistrertDato(Instant.ofEpochMilli(111L));
@@ -163,6 +159,11 @@ public class OppgaveServiceTest {
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setDokumentasjonSvarfristDato(Instant.ofEpochMilli(333L));
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(lagSoeknadDokument());
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+
         return behandling;
     }
 

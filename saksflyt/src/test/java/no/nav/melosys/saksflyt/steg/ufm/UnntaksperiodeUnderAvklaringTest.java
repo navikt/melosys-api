@@ -1,21 +1,18 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,18 +31,16 @@ public class UnntaksperiodeUnderAvklaringTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-    @Mock
-    private AvklartefaktaService avklartefaktaService;
+    private BehandlingsresultatService behandlingsresultatService;
 
     private UnntaksperiodeUnderAvklaring unntaksperiodeUnderAvklaring;
 
     private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
     @Before
-    public void setUp() {
-        unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingService, behandlingsresultatRepository, avklartefaktaService);
-        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+    public void setUp() throws IkkeFunnetException {
+        unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingService, behandlingsresultatService);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test
@@ -104,12 +99,9 @@ public class UnntaksperiodeUnderAvklaringTest {
 
     @Test
     public void utfør_eksisterendePeriodeUtenMedlIdPeriodeForLang_ikkeOpprettPeriodeIMedl() throws Exception {
-        Avklartefakta avklartefakta = new Avklartefakta();
-        AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
-        registrering.setBegrunnelseKode(Kontroll_begrunnelser.PERIODEN_OVER_24_MD.getKode());
-        avklartefakta.getRegistreringer().add(registrering);
-
-        when(avklartefaktaService.hentVurderingUnntakPeriode(anyLong())).thenReturn(Optional.of(avklartefakta));
+        Kontrollresultat kontrollresultat = new Kontrollresultat();
+        kontrollresultat.setBegrunnelse(Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
+        behandlingsresultat.getKontrollresultater().add(kontrollresultat);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = new Behandling();

@@ -13,6 +13,7 @@ public class OppgaveDto {
     public ZonedDateTime registrertDato;
     public LocalDate frist;
     public String sakID;
+    public String journalpostID;
 
     private OppgaveDto(String oppgaveID) {
         this.oppgaveID = oppgaveID;
@@ -25,6 +26,7 @@ public class OppgaveDto {
         oppgaveDto.registrertDato = oppgave.getOpprettetTidspunkt();
         oppgaveDto.frist = oppgave.getFristFerdigstillelse();
         oppgaveDto.sakID = oppgave.getSaksnummer();
+        oppgaveDto.journalpostID = oppgave.getJournalpostId();
         return oppgaveDto;
     }
 }

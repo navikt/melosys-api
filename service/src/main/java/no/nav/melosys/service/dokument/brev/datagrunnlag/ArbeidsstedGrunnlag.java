@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -19,15 +19,15 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidsst
 
 public class ArbeidsstedGrunnlag {
     private final Behandling behandling;
-    private final SoeknadDokument søknad;
+    private final BehandlingsgrunnlagData grunnlagData;
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final AvklartefaktaService avklartefaktaService;
 
-    public ArbeidsstedGrunnlag(Behandling behandling, SoeknadDokument søknad,
-                               AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag,
-                               AvklartefaktaService avklartefaktaService) {
+    ArbeidsstedGrunnlag(Behandling behandling, BehandlingsgrunnlagData grunnlagData,
+                        AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag,
+                        AvklartefaktaService avklartefaktaService) {
         this.behandling = behandling;
-        this.søknad = søknad;
+        this.grunnlagData = grunnlagData;
         this.avklarteVirksomheterGrunnlag = avklarteVirksomheterGrunnlag;
         this.avklartefaktaService = avklartefaktaService;
     }
@@ -39,7 +39,7 @@ public class ArbeidsstedGrunnlag {
     }
 
     private List<Arbeidssted> hentFysiskearbeidssteder() throws TekniskException {
-        List<Arbeidssted> fysiskeArbeidssteder = søknad.arbeidUtland.stream()
+        List<Arbeidssted> fysiskeArbeidssteder = grunnlagData.arbeidUtland.stream()
             .map(au -> new FysiskArbeidssted(au.foretakNavn, au.foretakOrgnr, au.adresse))
             .collect(Collectors.toList());
 
@@ -56,7 +56,7 @@ public class ArbeidsstedGrunnlag {
             avklartefaktaService.hentAlleMaritimeAvklartfakta(behandling.getId());
 
         // Arbeidssted for maritimt arbeid benytter foretakNavn og foretakOrgnr fra søknad, og arbeidsland fra avklartfakta
-        return søknad.maritimtArbeid.stream()
+        return grunnlagData.maritimtArbeid.stream()
             .map(ma -> lagMaritimtArbeidssted(ma, avklartMaritimtArbeid))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());

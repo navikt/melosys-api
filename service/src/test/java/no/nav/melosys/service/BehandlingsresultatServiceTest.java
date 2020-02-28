@@ -12,6 +12,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -101,6 +102,9 @@ public class BehandlingsresultatServiceTest {
         BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = opprettBehandlingsresultatBegrunnelse();
         behandlingsresultat.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelse);
 
+        Kontrollresultat kontrollresultat = opprettKontrollresultat();
+        behandlingsresultat.getKontrollresultater().add(kontrollresultat);
+
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
         behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
@@ -133,6 +137,10 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getKode().equals("begrunnelsekode"));
+
+        assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getId() == null);
+        assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
+        assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getBegrunnelse() == Kontroll_begrunnelser.FEIL_I_PERIODEN);
     }
 
     @Test
@@ -202,6 +210,14 @@ public class BehandlingsresultatServiceTest {
         begrunnelser.add(vilkaarBegrunnelse);
         vilkaarsresultat.setBegrunnelser(begrunnelser);
         return vilkaarsresultat;
+    }
+
+    private Kontrollresultat opprettKontrollresultat() {
+        Kontrollresultat kontrollresultat = new Kontrollresultat();
+        kontrollresultat.setId(123L);
+        kontrollresultat.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
+        kontrollresultat.setBegrunnelse(Kontroll_begrunnelser.FEIL_I_PERIODEN);
+        return kontrollresultat;
     }
 
     private Behandlingsresultat opprettBehandlingsresultatMedData(Behandling tidligsteInaktiveBehandling) {

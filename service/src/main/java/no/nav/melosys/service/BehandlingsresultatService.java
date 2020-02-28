@@ -44,6 +44,11 @@ public class BehandlingsresultatService {
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
     }
 
+    public Behandlingsresultat hentBehandlingsresultatMedKontrollresultat(long behandlingsid) throws IkkeFunnetException {
+        return behandlingsresultatRepository.findWithKontrollresultaterById(behandlingsid)
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
+    }
+
     public void lagre(Behandlingsresultat resultat) {
         behandlingsresultatRepository.save(resultat);
     }
@@ -63,6 +68,7 @@ public class BehandlingsresultatService {
         replikerVilkaarsresultat(behandlingsresultat, behandlingsresultatsreplika);
         replikerAnmodningsperioder(behandlingsresultat, behandlingsresultatsreplika);
         replikerBehandlingsresultatBegrunnelser(behandlingsresultat, behandlingsresultatsreplika);
+        replikerKontrollResultater(behandlingsresultat, behandlingsresultatsreplika);
 
         behandlingsresultatRepository.save(behandlingsresultatsreplika);
     }
@@ -138,6 +144,16 @@ public class BehandlingsresultatService {
                 avklartefaktareplika.getRegistreringer().add(avklartefaktaRegistreringreplika);
             }
             behandlingsresultatsreplika.getAvklartefakta().add(avklartefaktareplika);
+        }
+    }
+
+    private void replikerKontrollResultater(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        behandlingsresultatsreplika.setKontrollresultater(new HashSet<>());
+        for (var kontrollresultatOrig : behandlingsresultat.getKontrollresultater()) {
+            Kontrollresultat kontrollresultatreplika = (Kontrollresultat) BeanUtils.cloneBean(kontrollresultatOrig);
+            kontrollresultatreplika.setId(null);
+            kontrollresultatreplika.setBehandlingsresultat(behandlingsresultatsreplika);
+            behandlingsresultatsreplika.getKontrollresultater().add(kontrollresultatreplika);
         }
     }
 

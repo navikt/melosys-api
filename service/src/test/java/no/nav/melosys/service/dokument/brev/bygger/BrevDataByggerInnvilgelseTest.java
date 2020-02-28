@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -9,6 +8,7 @@ import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -35,7 +35,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -80,7 +81,8 @@ public class BrevDataByggerInnvilgelseTest {
     public void setUp() throws FunksjonellException, TekniskException {
         behandling = new Behandling();
         behandling.setId(1L);
-        behandling.getSaksopplysninger().add(lagSoeknadssaksopplysning(new SoeknadDokument()));
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
 
         PersonDokument person = new PersonDokument();
         person.sammensattNavn = "Tom Mestokk";
@@ -89,7 +91,7 @@ public class BrevDataByggerInnvilgelseTest {
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("Bedrift AS", "123456789", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Arrays.asList(virksomhet));
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(virksomhet));
 
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(periode);

@@ -37,27 +37,20 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.19-89</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.22-93</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.6</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
-        <aareg.arbeidsforhold.version>3.0.0</aareg.arbeidsforhold.version>
+        <nav.tjenestespesifikasjoner.version>1.2020.01.09-12.44-3713b7c04e1c</nav.tjenestespesifikasjoner.version>
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <dokprod.melosysbrev.version>1.2.16</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
-        <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
-        <inntekt-v3.version>2.0.0</inntekt-v3.version>
-        <joark.inngaaendejournal.version>1.1.3</joark.inngaaendejournal.version>
         <joark.journalfoerinngaaende.version>0.0.21</joark.journalfoerinngaaende.version>
-        <joark.journal.version>3.1.2</joark.journal.version>
-        <medl2-v2.version>2.0.6</medl2-v2.version>
         <sakogbehandling.version>1.0.0-alpha011</sakogbehandling.version>
         <token-support.version>1.1.3</token-support.version>
-        <tps.aktoer.version>2.0.1</tps.aktoer.version>
-        <tps.person.version>3.4.1</tps.person.version>
         <utbetaling.version>1.1.3</utbetaling.version>
 
         <!-- Versjoner av eksterne biblioteker -->
@@ -324,10 +317,9 @@
                 <version>${abac.spring.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenester.fim</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-arbeidsforhold-v3-tjenestespesifikasjon</artifactId>
-                <version>${aareg.arbeidsforhold.version}</version>
-                <classifier>jaxws</classifier>
+                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenester.fim</groupId>
@@ -335,10 +327,9 @@
                 <version>${joark.journalfoerinngaaende.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenester.fim</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
-                <version>${tps.aktoer.version}</version>
-                <classifier>jaxws</classifier>
+                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenester</groupId>
@@ -347,40 +338,35 @@
                 <classifier>jaxws</classifier>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenester.fim</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-fim-inntekt-v3-tjenestespesifikasjon</artifactId>
-                <version>${inntekt-v3.version}</version>
-                <classifier>jaxws</classifier>
+                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenester</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-inngaaendeJournal-v1-tjenestespesifikasjon</artifactId>
-                <version>${joark.inngaaendejournal.version}</version>
-                <classifier>jaxws</classifier>
+                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenester</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-journal-v3-tjenestespesifikasjon</artifactId>
-                <version>${joark.journal.version}</version>
-                <classifier>jaxws</classifier>
+                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenester.fim</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-fim-organisasjon-v4-tjenestespesifikasjon</artifactId>
-                <version>${ereg.organisasjon.version}</version>
-                <classifier>jaxws</classifier>
+                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenester</groupId>
-                <artifactId>nav-person-v3-tjenestespesifikasjon</artifactId>
-                <version>${tps.person.version}</version>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
+                <artifactId>person-v3-tjenestespesifikasjon</artifactId>
+                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <!-- SOB -->
             <dependency>
-                <groupId>no.nav.meldinger.virksomhet</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-virksomhet-hendelsehandterer-behandlingstatus-v1-meldingsdefinisjon</artifactId>
-                <version>${behandlingstatus.version}</version>
-                <classifier>jaxb</classifier>
+                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenester.fim</groupId>
@@ -390,10 +376,9 @@
             </dependency>
             <!--MEDL2 -->
             <dependency>
-                <groupId>no.nav.tjenester</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-medlemskap-v2-tjenestespesifikasjon</artifactId>
-                <version>${medl2-v2.version}</version>
-                <classifier>joda</classifier>
+                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenester</groupId>

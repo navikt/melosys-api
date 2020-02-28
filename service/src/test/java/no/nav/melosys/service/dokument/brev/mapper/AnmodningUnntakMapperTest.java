@@ -12,6 +12,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -123,10 +124,10 @@ public class AnmodningUnntakMapperTest {
         soeknadDokument.arbeidUtland = new ArrayList<>();
         soeknadDokument.arbeidUtland.add(arbeidUtland);
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(soeknadDokument);
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+
         return behandling;
     }
 

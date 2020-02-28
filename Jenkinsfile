@@ -8,7 +8,7 @@ node {
 
     properties([
         parameters([
-            choice(choices: ['t8', 'q0', 'q1', 'q2', 'p'],
+            choice(choices: ['--ingen--', 't8', 'q0', 'q1', 'q2', 'p'],
                 description: 'Hvilket miljø skal applikasjon deployes til.', name: 'ENV')
         ])
     ])
@@ -22,7 +22,7 @@ node {
     def dockerRepo = "repo.adeo.no:5443"
     def environment = "${params.ENV}".toString()
     def namespace
-    def mvnSettings = "navMavenSettingsUtenProxy"
+    def mvnSettings = "navRepoAdeoMavenSettings"
     def branchName, commit, commitId, imageVersion
     def application = "melosys", springProfiles = "nais"
     def javaHome = tool "jdk-11"
@@ -62,6 +62,12 @@ node {
             configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
                 sh "mvn clean package -B -e -U -s $MAVEN_SETTINGS"
             }
+        }
+
+        if (environment == '--ingen--') {
+            echo "Bygd OK uten deployment"
+            currentBuild.result = "SUCCESS"
+            return
         }
 
         stage("Build & publish Docker image") {

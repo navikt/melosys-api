@@ -4,8 +4,8 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.felles.RegisterKontrollFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.KontrollresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
 public class RegisterKontroll extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(RegisterKontroll.class);
 
-    private final RegisterKontrollFelles registerKontrollFelles;
+    private final KontrollresultatService kontrollresultatService;
 
     @Autowired
-    public RegisterKontroll(RegisterKontrollFelles registerKontrollFelles) {
-        this.registerKontrollFelles = registerKontrollFelles;
+    public RegisterKontroll(KontrollresultatService kontrollresultatService) {
+        this.kontrollresultatService = kontrollresultatService;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class RegisterKontroll extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        registerKontrollFelles.utførKontrollerOgRegistrerFeil(prosessinstans.getBehandling().getId());
+        kontrollresultatService.utførKontrollerOgRegistrerFeil(prosessinstans.getBehandling().getId());
         prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_PERIODE_MEDL);
     }
 }

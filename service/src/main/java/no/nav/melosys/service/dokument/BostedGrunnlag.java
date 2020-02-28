@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
 import no.nav.melosys.domain.util.LandkoderUtils;
-import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
@@ -18,13 +18,13 @@ import org.apache.commons.lang3.StringUtils;
 public class BostedGrunnlag {
     private final KodeverkService kodeverkService;
 
-    private final SoeknadDokument søknad;
+    private final BehandlingsgrunnlagData grunnlagData;
     private final PersonDokument person;
 
-    public BostedGrunnlag(SoeknadDokument søknad,
+    public BostedGrunnlag(BehandlingsgrunnlagData grunnlagData,
                           PersonDokument person,
                           KodeverkService kodeverkService) {
-        this.søknad = søknad;
+        this.grunnlagData = grunnlagData;
         this.person = person;
         this.kodeverkService = kodeverkService;
     }
@@ -35,7 +35,7 @@ public class BostedGrunnlag {
     }
 
     public Optional<StrukturertAdresse> finnBostedsadresse() {
-        StrukturertAdresse bostedsadresse = søknad != null ? SoeknadUtils.hentBostedsadresse(søknad) : null;
+        StrukturertAdresse bostedsadresse = grunnlagData != null ? BehandlingsgrunnlagUtils.hentBostedsadresse(grunnlagData) : null;
         if (bostedsadresse == null) {
             return finnBostedsadresseFraRegister();
         }

@@ -24,8 +24,6 @@ public final class XsltConfig {
 
     private static final String SOB_MAPPE = "sob";
 
-    public static final String SØKNAD_MAPPE = "soeknad";
-
     public static final String TPS_MAPPE = "tps";
 
     public static final String UTBETAL_MAPPE = "utbetaling";
@@ -44,8 +42,6 @@ public final class XsltConfig {
     private static final String PERSONHISTORIKK_TJENESTE = "personhistorikk";
 
     private static final String SAKOGBEHANDLING_TJENESTE = "sakogbehandling";
-
-    private static final String SØKNAD = "soeknad";
 
     private static final String UTBETAL = "utbetaldata";
 
@@ -72,7 +68,6 @@ public final class XsltConfig {
             case INNTK: return XsltConfig.INNTEKT_TJENESTE;
             case MEDL: return XsltConfig.MEDLEMSKAP_TJENESTE;
             case SOB_SAK: return XsltConfig.SAKOGBEHANDLING_TJENESTE;
-            case SØKNAD: return XsltConfig.SØKNAD;
             case UTBETAL: return XsltConfig.UTBETAL;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
@@ -86,7 +81,6 @@ public final class XsltConfig {
             case INNTK: return XsltConfig.INNTK_MAPPE;
             case MEDL: return XsltConfig.MEDL_MAPPE;
             case SOB_SAK: return XsltConfig.SOB_MAPPE;
-            case SØKNAD: return XsltConfig.SØKNAD_MAPPE;
             case UTBETAL: return XsltConfig.UTBETAL_MAPPE;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }

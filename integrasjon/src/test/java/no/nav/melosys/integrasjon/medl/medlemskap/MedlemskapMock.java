@@ -31,7 +31,7 @@ public class MedlemskapMock implements MedlemskapConsumer {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
             if (is == null) {
-                throw new PersonIkkeFunnet("Person med ident " + ident + " ikke funnet.", null);
+                throw new PersonIkkeFunnet("Person med ident " + ident + " ikke funnet.");
             }
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

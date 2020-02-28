@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -48,6 +49,9 @@ public class Behandling extends RegistreringsInfo {
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
+
+    @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Behandlingsgrunnlag behandlingsgrunnlag;
 
     @ManyToOne()
     @JoinColumn(name="opprinnelig_behandling_id")
@@ -139,6 +143,14 @@ public class Behandling extends RegistreringsInfo {
 
     public void setOpprinneligBehandling(Behandling opprinneligBehandling) {
         this.opprinneligBehandling = opprinneligBehandling;
+    }
+
+    public Behandlingsgrunnlag getBehandlingsgrunnlag() {
+        return behandlingsgrunnlag;
+    }
+
+    public void setBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
+        this.behandlingsgrunnlag = behandlingsgrunnlag;
     }
 
     @Override
