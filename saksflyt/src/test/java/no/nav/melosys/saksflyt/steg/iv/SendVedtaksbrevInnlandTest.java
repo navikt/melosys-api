@@ -6,9 +6,9 @@ import java.util.*;
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -22,7 +22,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
@@ -190,7 +189,8 @@ public class SendVedtaksbrevInnlandTest {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingsid);
         behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.getSaksopplysninger().add(lagSaksopplysning(new SoeknadDokument()));
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
         behandling.setFagsak(fagsak != null ? fagsak : lagFagsak());
         return behandling;
     }
@@ -351,7 +351,7 @@ public class SendVedtaksbrevInnlandTest {
     @Test
     public void utførSteg_utenlandsForetak_A1SendesTilSkatteoppkreverUtland() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
-        SaksopplysningerUtils.hentSøknadDokument(prosessinstans.getBehandling()).foretakUtland.add(new ForetakUtland());
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
 
         instans.utførSteg(prosessinstans);
@@ -482,12 +482,5 @@ public class SendVedtaksbrevInnlandTest {
         BrevData brevdata = new BrevData();
         resultat.setData(ProsessDataKey.BREVDATA, brevdata);
         return resultat;
-    }
-
-    private static Saksopplysning lagSaksopplysning(SaksopplysningDokument saksopplysningDokument) {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(saksopplysningDokument);
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-        return saksopplysning;
     }
 }

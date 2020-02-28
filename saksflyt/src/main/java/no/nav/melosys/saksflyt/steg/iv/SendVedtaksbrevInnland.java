@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
@@ -143,7 +142,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
 
         final boolean erArtikkel13 = resultat.hentValidertLovvalgsperiode().erArtikkel13();
         if (erArtikkel13) {
-            if (!SaksopplysningerUtils.hentSøknadDokument(behandling).foretakUtland.isEmpty()) {
+            if (!behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.isEmpty()) {
                 Brevbestilling a1SkatteoppkreverUtland = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
                     .medAvsender(saksbehandler)
                     .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
