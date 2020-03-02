@@ -86,11 +86,9 @@ public class RegisteropplysningerServiceTest {
 
     @Test
     public void hentOgLagreOpplysninger_medAlleOpplysninger_alleBlirHentetOgLagret() throws MelosysException {
-        Behandling behandling = hentBehandling();
-
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
-                .behandling(behandling)
+                .behandlingID(2L)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                     .arbeidsforholdopplysninger()
                     .inntektsopplysninger()
@@ -106,7 +104,7 @@ public class RegisteropplysningerServiceTest {
                 .fnr(FNR)
                 .build());
 
-        verify(saksopplysningerService, times(8)).lagreSaksopplysning(anySaksopplysning(), eq(behandling));
+        verify(behandlingService).lagre(any(Behandling.class));
         verify(behandlingService, never()).hentBehandling(anyLong());
 
         verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
@@ -129,11 +127,11 @@ public class RegisteropplysningerServiceTest {
         saksopplysning.setDokument(arbeidsforholdDokument);
         saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setKilde(SaksopplysningKilde.AAREG);
-        Behandling behandling = hentBehandling(saksopplysning);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling(saksopplysning));
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
-                .behandling(behandling)
+                .behandlingID(2L)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                     .sakOgBehandlingopplysninger()
                     .medlemskapsopplysninger()
@@ -149,7 +147,7 @@ public class RegisteropplysningerServiceTest {
                 .fnr(FNR)
                 .build());
 
-        verify(saksopplysningerService, times(8)).lagreSaksopplysning(anySaksopplysning(), eq(behandling));
+        verify(behandlingService).lagre(any(Behandling.class));
         verify(behandlingService, never()).hentBehandling(anyLong());
 
         // Noen av stegene er avhengige av hverandre. Det er viktig at vi ivaretar rekkefølgen.
@@ -182,7 +180,7 @@ public class RegisteropplysningerServiceTest {
         LocalDate forventetTom = LocalDate.now();
 
         verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(eq(FNR), eq(forventetFom), eq(forventetTom));
-        verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
     @Test
@@ -199,7 +197,7 @@ public class RegisteropplysningerServiceTest {
         LocalDate forventetTom = LocalDate.now();
 
         verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(eq(FNR), eq(forventetFom), eq(forventetTom));
-        verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
 
@@ -215,7 +213,7 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(tpsFasade).hentPersonMedAdresse(FNR);
-        verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
     @Test
@@ -230,7 +228,7 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(medlFasade).hentPeriodeListe(anyString(), any(), any());
-        verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
     @Test
@@ -244,7 +242,7 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(inntektService).hentInntektListe(anyString(), eq(YearMonth.from(fom)), eq(YearMonth.from(fom.plusYears(2))));
-        verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
     @Test
@@ -259,7 +257,7 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(inntektService).hentInntektListe(anyString(), eq(YearMonth.from(fom.minusMonths(2))), eq(YearMonth.from(tom)));
-        verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
     @Test
@@ -274,7 +272,7 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(inntektService).hentInntektListe(anyString(), eq(YearMonth.from(LocalDate.now().minusMonths(2))), eq(YearMonth.from(LocalDate.now())));
-        verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
     @Test
@@ -290,7 +288,7 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(inntektService).hentInntektListe(anyString(), eq(YearMonth.from(fom)), eq(YearMonth.from(tom)));
-        verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
     @Test
@@ -305,7 +303,7 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), any(), any());
-        verify(saksopplysningerService).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
     @Test
@@ -318,7 +316,7 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(utbetaldataService, never()).hentUtbetalingerBarnetrygd(anyString(), any(), any());
-        verify(saksopplysningerService, never()).lagreSaksopplysning(anySaksopplysning(), any(Behandling.class));
+        verify(behandlingService).lagre(any(Behandling.class));
     }
 
     @Test
@@ -387,7 +385,7 @@ public class RegisteropplysningerServiceTest {
 
     private RegisteropplysningerRequest.RegisteropplysningerRequestBuilder registeropplysningerRequest(LocalDate fom, LocalDate tom) {
         return RegisteropplysningerRequest.builder()
-            .behandling(hentBehandling())
+            .behandlingID(2L)
             .fom(fom)
             .tom(tom)
             .fnr(FNR);

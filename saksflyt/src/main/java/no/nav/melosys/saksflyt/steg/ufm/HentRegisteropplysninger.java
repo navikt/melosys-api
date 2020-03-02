@@ -45,7 +45,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
-                .behandling(behandling)
+                .behandlingID(behandling.getId())
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                     .personopplysninger()
                     .personhistorikkopplysninger()
