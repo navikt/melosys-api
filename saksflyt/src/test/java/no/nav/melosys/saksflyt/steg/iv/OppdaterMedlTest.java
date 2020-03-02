@@ -158,6 +158,8 @@ public class OppdaterMedlTest {
     public void utførSteg_erArtikkel13_opprettForeløpigPeriode() throws FunksjonellException, TekniskException {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
 
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
