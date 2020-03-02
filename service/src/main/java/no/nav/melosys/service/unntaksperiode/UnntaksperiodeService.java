@@ -5,7 +5,6 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -47,14 +46,6 @@ public class UnntaksperiodeService {
         validerBegrunnelser(ikkeGodkjentBegrunnelser, fritekst);
         prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, ikkeGodkjentBegrunnelser, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    @Transactional(rollbackFor = MelosysException.class)
-    public void behandlingUnderAvklaring(long behandlingID) throws FunksjonellException, TekniskException {
-        Behandling behandling = hentOgValiderBehandling(behandlingID);
-        validerBehandling(behandling);
-        prosessinstansService.opprettProsessinstansUnntaksperiodeUnderAvklaring(behandling);
-        behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.AVVENT_DOK_UTL);
     }
 
     private Set<Ikke_godkjent_begrunnelser> tilIkkeGodkjentBegrunnelser(Set<String> begrunnelser) {

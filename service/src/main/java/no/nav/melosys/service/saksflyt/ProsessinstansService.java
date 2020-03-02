@@ -276,15 +276,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUnntaksperiodeUnderAvklaring(Behandling behandling) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.REGISTRERING_UNNTAK)
-            .medSteg(ProsessSteg.REG_UNNTAK_UNDER_AVKLARING)
-            .medBehandling(behandling)
-            .build();
-        lagre(prosessinstans);
-    }
-
     public void opprettProsessinstansForvaltningsmelding(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.FORVALTNINGSMELDING_SEND);

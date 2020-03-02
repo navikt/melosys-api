@@ -39,10 +39,4 @@ public class UnntakTjeneste {
         unntaksperiodeService.godkjennPeriode(behandlingId);
         return ResponseEntity.noContent().build();
     }
-
-    @PutMapping(value = "/{behandlingID}/innhentinfo", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity innhentInformasjonUnntaksperiode(@PathVariable("behandlingID") Long behandlingId) throws FunksjonellException, TekniskException {
-        unntaksperiodeService.behandlingUnderAvklaring(behandlingId);
-        return ResponseEntity.noContent().build();
-    }
 }
