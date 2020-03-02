@@ -62,11 +62,13 @@ public class FellesBrevtypeMappingTest {
             "ANKE", // Ikke i bruk enda
             "REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING",
             "REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE",
-            "UTL_MYND_UTPEKT_SEG_SELV",
-            "UTL_MYND_UTPEKT_NORGE",
+            "BESLUTNING_LOVVALG_ANNET_LAND",
+            "BESLUTNING_LOVVALG_NORGE",
             "ANMODNING_OM_UNNTAK_HOVEDREGEL",
             "ØVRIGE_SED",
-            "VURDER_TRYGDETID"
+            "VURDER_TRYGDETID",
+            "SOEKNAD_ARBEID_FLERE_LAND",
+            "SOEKNAD_ARBEID_NORGE_BOSATT_ANNET_LAND"
         );
 
         hentAlleVerdierFraKodeverk(Behandlingstyper.class)
