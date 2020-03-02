@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -150,6 +151,20 @@ public class OppdaterMedlTest {
         agent.utfør(p);
 
         verify(medlFasade).avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
+        assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
+    }
+
+    @Test
+    public void utførSteg_erArtikkel13_opprettForeløpigPeriode() throws FunksjonellException, TekniskException {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+
+        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        agent.utfør(p);
+
+        verify(medlFasade).opprettPeriodeForeløpig(any(), any(), any());
         assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
     }
 }

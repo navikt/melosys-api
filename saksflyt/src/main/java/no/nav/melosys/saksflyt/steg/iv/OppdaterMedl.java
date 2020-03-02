@@ -57,6 +57,9 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
         if (lovvalgsperiode.getMedlPeriodeID() != null) {
             oppdaterEksisterendeMedlPeriode(lovvalgsperiode);
+        } else if (erArtikkel13(behandlingsresultat)) {
+            Long medlPeriodeID = medlFasade.opprettPeriodeForeløpig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+            felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
         } else if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
             Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
             felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
@@ -73,6 +76,13 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
         return behandlingsresultat.getType() == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
+    }
+
+    private boolean erArtikkel13(Behandlingsresultat behandlingsresultat) {
+        if (!behandlingsresultat.harMedlemskapsperiode()) {
+            return false;
+        }
+        return behandlingsresultat.hentValidertMedlemskapsperiode().erArtikkel13();
     }
 
     private void oppdaterEksisterendeMedlPeriode(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
