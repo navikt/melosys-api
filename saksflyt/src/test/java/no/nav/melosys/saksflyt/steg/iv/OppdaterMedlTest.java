@@ -83,7 +83,7 @@ public class OppdaterMedlTest {
 
         lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setLovvalgsland(Landkoder.CH);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
         lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
 
@@ -131,7 +131,8 @@ public class OppdaterMedlTest {
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        assertThat(agent.erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)).isTrue();
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
     }
 
     @Test
