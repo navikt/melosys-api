@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 public enum ProsessType implements Kodeverk {
 
     //alfabetisk rekkefølge
+    ARBEID_FLERE_LAND("ARBEID_FLERE_LAND","Mottak av A003"),
     ANMODNING_OM_UNNTAK("ANMODNING_OM_UNNTAK", "Anmodning om unntak"),
     ANMODNING_OM_UNNTAK_MOTTAK("ANMODNING_OM_UNNTAK_MOTTAK", "Mottar anmodning om unntak"),
     ANMODNING_OM_UNNTAK_MOTTAK_SVAR("ANMODNING_OM_UNNTAK_MOTTAK_SVAR", "Svar på mottatt anmodning om unntak"),

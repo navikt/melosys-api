@@ -120,6 +120,15 @@ public enum ProsessSteg implements Kodeverk {
     JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST("JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST", "Journalføring av anmodning om unntak brev"),
     JFR_AOU_BREV_OPPRETT_SEDDOKUMENT("JFR_AOU_BREV_OPPRETT_SEDDOKUMENT", "Oppretter sed-dokument"),
 
+    //Arbeid i flere land, mottak av A003
+    AFL_SAK_OG_BEHANDLING_OPPRETTET("AFL_SAK_OG_BEHANDLING_OPPRETTET","Oppdaterer status på sak i sob til opprettet"),
+    AFL_AVSLUTT_TIDLIGERE_PERIODE("AFL_AVSLUTT_TIDLIGERE_PERIODE","Avslutter tidligere periode hvis oppdatert SED"),
+    AFL_HENT_REGISTEROPPLYSNINGER("AFL_HENT_REGISTEROPPLYSNINGER","Innhenter registeropplysninger"),
+    AFL_OPPRETT_BEHANDLINGSGRUNNLAG("AFL_OPPRETT_BEHANDLINGSGRUNNLAG","Oppretter behandlingsgrunnlag"),
+    AFL_REGISTERKONTROLL("AFL_REGISTERKONTROLL","Utfører registerkontroll"),
+    AFL_OPPRETT_OPPGAVE("AFL_OPPRETT_OPPGAVE","Oppretter oppgave til manuell behandling"),
+    AFL_OPPDATER_MEDL("AFL_OPPDATER_MEDL", "Setter status i MEDL"),
+
     //Unntak medlemskap
     REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
     REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
@@ -164,6 +173,8 @@ public enum ProsessSteg implements Kodeverk {
                 return AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE;
             case SED_GENERELL_SAK:
                 return SED_GENERELL_SAK_HENT_PERSON;
+            case ARBEID_FLERE_LAND:
+                return AFL_SAK_OG_BEHANDLING_OPPRETTET;
 
             default:
                 throw new TekniskException("Første steg for prosesstype" + prosessType + " er ukjent");

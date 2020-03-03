@@ -40,6 +40,11 @@ public class BehandlingsgrunnlagService {
         return opprettBehandlingsgrunnlag(behandlingID, soeknadDokument, BehandlingsGrunnlagType.SØKNAD, VERSJON_SOEKNAD_GRUNNLAG);
     }
 
+    public Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
+                                                          BehandlingsgrunnlagData behandlingsgrunnlagData) throws FunksjonellException {
+        return opprettBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagData, BehandlingsGrunnlagType.GENERELT, "1");
+    }
+
     private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID, BehandlingsgrunnlagData behandlingsgrunnlagData,
                                                            BehandlingsGrunnlagType type, String versjon) throws FunksjonellException {
 
