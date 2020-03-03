@@ -87,7 +87,7 @@ public class ForkortPeriode extends AbstraktStegBehandler {
                 .stream().filter(bi -> bucType.name().equals(bi.getBucType())).collect(Collectors.toList());
 
             if (tilknyttedeBucer.isEmpty()) {
-                throw new TekniskException(utlMyndighetLand.stream().map(Landkoder::getKode).collect(Collectors.joining(", "))
+                throw new TekniskException(utlMyndighetLand.stream().map(Landkoder::getBeskrivelse).collect(Collectors.joining(", "))
                     + " er EESSI-ready, men har ingen tidligere buc tilknyttet seg");
             }
 

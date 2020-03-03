@@ -25,7 +25,9 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -50,6 +52,9 @@ public class ForkortPeriodeTest {
     private LandvelgerService landvelgerService;
 
     private final long behandlingId = 34;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws MelosysException {
@@ -108,7 +113,7 @@ public class ForkortPeriodeTest {
         assertThat(p.getSteg()).isEqualTo(IV_VALIDERING);
     }
 
-    @Test(expected = TekniskException.class)
+    @Test
     public void utfør_erEessiReadyFinnerIngenBuc_kasterException() throws MelosysException {
         Endretperiode endretperiodeKode = Endretperiode.ARBEIDSFORHOLD_AVSLUTTET;
 
@@ -119,6 +124,8 @@ public class ForkortPeriodeTest {
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(Collections.emptyList());
 
+        expectedException.expect(TekniskException.class);
+        expectedException.expectMessage("er EESSI-ready, men har ingen tidligere buc tilknyttet seg");
         forkortPeriode.utfør(p);
     }
 

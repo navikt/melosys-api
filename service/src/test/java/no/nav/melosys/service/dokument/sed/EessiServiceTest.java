@@ -460,6 +460,28 @@ public class EessiServiceTest {
         assertThat(avklarteMottakere).isEmpty();
     }
 
+    @Test
+    public void landErEessiReady_toLandEtErEessiReady_forventFalse() throws MelosysException {
+        final BucType bucType = BucType.LA_BUC_01;
+        final List<Landkoder> land = List.of(Landkoder.SE, Landkoder.DK);
+
+        when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), eq(Landkoder.SE.getKode())))
+            .thenReturn(List.of(new Institusjon("2","","")));
+
+        assertThat(eessiService.landErEessiReady(bucType.name(), land)).isFalse();
+    }
+
+    @Test
+    public void landErEessiReady_toLandAlleErEessiReady_forventTrue() throws MelosysException {
+        final BucType bucType = BucType.LA_BUC_01;
+        final List<Landkoder> land = List.of(Landkoder.SE, Landkoder.DK);
+
+        when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), any()))
+            .thenReturn(List.of(new Institusjon("2","","")));
+
+        assertThat(eessiService.landErEessiReady(bucType.name(), land)).isTrue();
+    }
+
     private static Fagsak lagFagsak() {
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.MYNDIGHET);

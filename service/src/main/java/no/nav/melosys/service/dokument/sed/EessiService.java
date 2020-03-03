@@ -120,7 +120,7 @@ public class EessiService {
 
     public boolean landErEessiReady(String bucType, Collection<Landkoder> landkoder) throws MelosysException {
         for (Landkoder landkode : landkoder) {
-            if (!hentEessiMottakerinstitusjoner(bucType, landkode.getKode()).isEmpty()){
+            if (!landErEessiReady(bucType, landkode.getKode())){
                 return false;
             }
         }
