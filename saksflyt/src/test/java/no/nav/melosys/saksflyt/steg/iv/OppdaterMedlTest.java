@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -82,7 +83,7 @@ public class OppdaterMedlTest {
 
         lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setLovvalgsland(Landkoder.CH);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
         lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
 
@@ -130,7 +131,8 @@ public class OppdaterMedlTest {
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        assertThat(agent.erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)).isTrue();
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
     }
 
     @Test
@@ -150,6 +152,22 @@ public class OppdaterMedlTest {
         agent.utfør(p);
 
         verify(medlFasade).avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
+        assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
+    }
+
+    @Test
+    public void utførSteg_erArtikkel13_opprettForeløpigPeriode() throws FunksjonellException, TekniskException {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+
+        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        agent.utfør(p);
+
+        verify(medlFasade).opprettPeriodeForeløpig(any(), any(), any());
         assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
     }
 }

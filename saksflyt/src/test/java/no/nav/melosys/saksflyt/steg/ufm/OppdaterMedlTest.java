@@ -9,6 +9,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
@@ -51,17 +52,11 @@ public class OppdaterMedlTest {
 
     @Test
     public void utfør_ingenLovvalgsperiode_opprettNyLovvalgsperiode() throws Exception {
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "123";
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(personDokument);
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), any())).thenReturn(Collections.singleton(lovvalgsperiode));
 
         behandling.setId(12L);
-        behandling.getSaksopplysninger().addAll(Sets.newHashSet(saksopplysning, hentSedSaksopplysning()));
+        behandling.getSaksopplysninger().addAll(Sets.newHashSet(lagPersonSaksopplysning(), hentSedSaksopplysning()));
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
@@ -74,19 +69,32 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void utfør_erEksisterendeLovvalgsperiodeMedMedlId_oppdaterPeriodeEndeligMedl() throws Exception {
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "123";
-        Saksopplysning personSaksopplysning = new Saksopplysning();
-        personSaksopplysning.setDokument(personDokument);
-        personSaksopplysning.setType(SaksopplysningType.PERSOPL);
+    public void utfør_ingenLovvalgsperiodeArtikkel13_opprettNyLovvalgsperiode() throws Exception {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), any())).thenReturn(Collections.singleton(lovvalgsperiode));
 
+        behandling.setId(12L);
+        behandling.getSaksopplysninger().addAll(Sets.newHashSet(lagPersonSaksopplysning(), hentSedSaksopplysning()));
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        oppdaterMedl.utfør(prosessinstans);
+
+        verify(medlFasade).opprettPeriodeForeløpig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
+        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+    }
+
+    @Test
+    public void utfør_erEksisterendeLovvalgsperiodeMedMedlId_oppdaterPeriodeEndeligMedl() throws Exception {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setMedlPeriodeID(123456L);
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singleton(lovvalgsperiode));
 
         behandling.setId(12L);
-        behandling.getSaksopplysninger().addAll(Sets.newHashSet(personSaksopplysning, hentSedSaksopplysning()));
+        behandling.getSaksopplysninger().addAll(Sets.newHashSet(lagPersonSaksopplysning(), hentSedSaksopplysning()));
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
@@ -99,17 +107,11 @@ public class OppdaterMedlTest {
 
     @Test
     public void utfør_erEksisterendeLovvalgsperiodeUtenMedlId_opprettOgLagrePeriodeEndelig() throws Exception {
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "123";
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(personDokument);
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singleton(lovvalgsperiode));
 
         behandling.setId(12L);
-        behandling.getSaksopplysninger().addAll(Sets.newHashSet(saksopplysning, hentSedSaksopplysning()));
+        behandling.getSaksopplysninger().addAll(Sets.newHashSet(lagPersonSaksopplysning(), hentSedSaksopplysning()));
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
@@ -118,6 +120,15 @@ public class OppdaterMedlTest {
         verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+    }
+
+    private Saksopplysning lagPersonSaksopplysning() {
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.fnr = "123";
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personDokument);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+        return saksopplysning;
     }
 
     private Saksopplysning hentSedSaksopplysning() {
