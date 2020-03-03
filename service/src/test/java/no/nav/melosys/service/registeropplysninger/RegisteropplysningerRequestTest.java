@@ -1,8 +1,5 @@
 package no.nav.melosys.service.registeropplysninger;
 
-import java.time.LocalDate;
-
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.exception.TekniskException;
 import org.junit.Rule;
@@ -17,9 +14,9 @@ public class RegisteropplysningerRequestTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void valider_ingenBehandlingEllerBehandlingID_forventException() throws TekniskException {
+    public void valider_ingenBehandlingID_forventException() throws TekniskException {
         expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("Behandling eller behandlingID er påkrevd for å hente registeropplysninger");
+        expectedException.expectMessage("BehandlingID er påkrevd for å hente registeropplysninger");
         RegisteropplysningerRequest.builder().build();
     }
 
@@ -94,20 +91,5 @@ public class RegisteropplysningerRequestTest {
 
         assertThat(registeropplysningerRequest.getFom()).isNull();
         assertThat(registeropplysningerRequest.getTom()).isNull();
-    }
-
-    @Test
-    public void valider_bådeBehandlingOgBehandlingID_forventBehandling() throws TekniskException {
-        RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
-            .behandlingID(1L)
-            .behandling(new Behandling())
-            .fnr("123")
-            .fom(LocalDate.now())
-            .tom(LocalDate.now().plusDays(1))
-            .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder().personopplysninger().build())
-            .build();
-
-        assertThat(registeropplysningerRequest.getBehandlingID()).isNull();
-        assertThat(registeropplysningerRequest.getBehandling()).isNotNull();
     }
 }

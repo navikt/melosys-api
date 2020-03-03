@@ -6,31 +6,19 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.apache.commons.lang3.StringUtils;
 
 public class RegisteropplysningerRequest {
-    private final Behandling behandling;
     private final Long behandlingID;
     private final Set<SaksopplysningType> opplysningstyper;
     private final String fnr;
     private final LocalDate fom;
     private final LocalDate tom;
 
-    public RegisteropplysningerRequest(Behandling behandling, Set<SaksopplysningType> opplysningstyper, String fnr, LocalDate fom, LocalDate tom) {
-        this.behandling = behandling;
-        this.behandlingID = null;
-        this.opplysningstyper = opplysningstyper;
-        this.fnr = fnr;
-        this.fom = fom;
-        this.tom = tom;
-    }
-
     public RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper, String fnr, LocalDate fom, LocalDate tom) {
-        this.behandling = null;
         this.behandlingID = behandlingID;
         this.opplysningstyper = opplysningstyper;
         this.fnr = fnr;
@@ -40,10 +28,6 @@ public class RegisteropplysningerRequest {
 
     public static RegisteropplysningerRequestBuilder builder() {
         return new RegisteropplysningerRequestBuilder();
-    }
-
-    public Behandling getBehandling() {
-        return behandling;
     }
 
     public Long getBehandlingID() {
@@ -67,7 +51,6 @@ public class RegisteropplysningerRequest {
     }
 
     public static class RegisteropplysningerRequestBuilder {
-        private Behandling behandling;
         private Long behandlingID;
         private SaksopplysningTyper saksopplysningTyper = new SaksopplysningTyper(new HashSet<>());
         private String fnr;
@@ -75,11 +58,6 @@ public class RegisteropplysningerRequest {
         private LocalDate tom;
 
         RegisteropplysningerRequestBuilder() {
-        }
-
-        public RegisteropplysningerRequestBuilder behandling(Behandling behandling) {
-            this.behandling = behandling;
-            return this;
         }
 
         public RegisteropplysningerRequestBuilder behandlingID(Long behandlingID) {
@@ -109,16 +87,12 @@ public class RegisteropplysningerRequest {
 
         public RegisteropplysningerRequest build() throws TekniskException {
             valider();
-            if (behandling != null) {
-                return new RegisteropplysningerRequest(behandling, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom);
-            } else {
-                return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom);
-            }
+            return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom);
         }
 
         private void valider() throws TekniskException {
-            if (behandling == null && behandlingID == null) {
-                throw new TekniskException("Behandling eller behandlingID er påkrevd for å hente registeropplysninger");
+            if (behandlingID == null) {
+                throw new TekniskException("BehandlingID er påkrevd for å hente registeropplysninger");
             }
 
             if (saksopplysningTyper.getOpplysningstyper().isEmpty()) {
