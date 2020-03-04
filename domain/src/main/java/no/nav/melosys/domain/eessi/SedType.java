@@ -14,6 +14,7 @@ public enum SedType {
     X011,
     X012,
     X013,
+    X050,
     A001,
     A002,
     A003,
