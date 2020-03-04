@@ -10,7 +10,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -90,7 +89,6 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
         Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
             .setAktørId(aktørID)
             .setJournalpostId(behandling.getInitierendeJournalpostId())
-            .setPrioritet(PrioritetType.NORM)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
             .setBeskrivelse(lagMottattSedBeskrivelse(sedType));
 

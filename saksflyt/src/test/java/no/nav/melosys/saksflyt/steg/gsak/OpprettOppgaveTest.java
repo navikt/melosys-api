@@ -9,10 +9,8 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +22,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static no.nav.melosys.domain.oppgave.Behandlingstema.EU_EOS;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettOppgaveTest {
-    @Mock
-    private BehandlingService behandlingService;
     @Mock
     private GsakFasade gsakFasade;
 
@@ -40,7 +36,7 @@ public class OpprettOppgaveTest {
 
     @Before
     public void setUp() {
-        agent = new OpprettOppgave(behandlingService, gsakFasade);
+        agent = new OpprettOppgave(gsakFasade);
     }
 
     @Test
@@ -59,8 +55,6 @@ public class OpprettOppgaveTest {
 
         p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.JFR_NY_SAK);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         agent.utførSteg(p);
 
@@ -89,8 +83,6 @@ public class OpprettOppgaveTest {
         p.setType(ProsessType.JFR_NY_SAK);
         p.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, false);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
         agent.utførSteg(p);
 
         verify(gsakFasade).opprettOppgave(oppgave.capture());
@@ -116,8 +108,6 @@ public class OpprettOppgaveTest {
 
         p.getBehandling().setType(Behandlingstyper.ENDRET_PERIODE);
         p.setType(ProsessType.JFR_NY_BEHANDLING);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         agent.utførSteg(p);
 
@@ -150,8 +140,6 @@ public class OpprettOppgaveTest {
         p.setData(ProsessDataKey.SKAL_TILORDNES, true);
         p.setData(ProsessDataKey.SAKSBEHANDLER, bruker);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
         agent.utførSteg(p);
 
         verify(gsakFasade).opprettOppgave(oppgave.capture());
@@ -174,8 +162,6 @@ public class OpprettOppgaveTest {
         p.setBehandling(behandling);
         p.setType(ProsessType.JFR_NY_BEHANDLING);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
         agent.utførSteg(p);
 
         verify(gsakFasade).opprettOppgave(oppgave.capture());
@@ -186,7 +172,7 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg_feilSakstype_feiler() throws IkkeFunnetException {
+    public void utfoerSteg_feilSakstype_feiler() {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
@@ -198,15 +184,13 @@ public class OpprettOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
         agent.utførSteg(p);
 
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
     @Test
-    public void utfoerSteg_feilBehandlingstype_feiler() throws IkkeFunnetException {
+    public void utfoerSteg_feilBehandlingstype_feiler() {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
@@ -219,15 +203,13 @@ public class OpprettOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
         agent.utførSteg(p);
 
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
     @Test
-    public void utfoerSteg_feilProsessType_feiler() throws IkkeFunnetException {
+    public void utfoerSteg_feilProsessType_feiler() {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
@@ -240,8 +222,6 @@ public class OpprettOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.MANGELBREV);
         p.setBehandling(behandling);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         agent.utførSteg(p);
 
