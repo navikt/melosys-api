@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
@@ -42,7 +43,6 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
             .setTema(Tema.TRY).setOppgavetype(Oppgavetyper.VUR)
             .setJournalpostId(behandling.getInitierendeJournalpostId())
             .setBehandlesAvApplikasjon(Fagsystem.INTET)
-            .setJournalpostId(prosessinstans.getBehandling().getInitierendeJournalpostId())
             .setAktørId(fagsak.hentBruker().getAktørId())
             .setBeskrivelse(AVGIFTSVURDERING_BESKRIVELSE)
             .setFristFerdigstillelse(LocalDate.now().plusMonths(FRIST_AVGIFTSVURDERING_MD))

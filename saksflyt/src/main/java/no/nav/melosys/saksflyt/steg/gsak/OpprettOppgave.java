@@ -9,10 +9,9 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.saksflyt.AbstraktOpprettBehandlingsoppgave;
+import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
@@ -22,12 +21,15 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDIN
  * Oppretter en oppgave i GSAK.
  */
 @Component
-public class OpprettOppgave extends AbstraktOpprettBehandlingsoppgave {
+public class OpprettOppgave extends AbstraktStegBehandler {
+
     private static final String STØTTES_IKKE = " er ikke støttet";
 
+    private final OppgaveService oppgaveService;
+
     @Autowired
-    public OpprettOppgave(@Qualifier("system") GsakFasade gsakFasade) {
-        super(gsakFasade);
+    public OpprettOppgave(OppgaveService oppgaveService) {
+        this.oppgaveService = oppgaveService;
     }
 
     @Override
@@ -38,7 +40,12 @@ public class OpprettOppgave extends AbstraktOpprettBehandlingsoppgave {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         validerSakstype(prosessinstans.getBehandling().getFagsak().getType());
-        super.opprettOppgave(prosessinstans);
+        oppgaveService.opprettBehandlingsoppgave(
+            prosessinstans.getBehandling(),
+            prosessinstans.hentJournalpostID(),
+            prosessinstans.getData(ProsessDataKey.AKTØR_ID),
+            prosessinstans.hentSaksbehandlerHvisTilordnes()
+        );
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             boolean skalSendesForvaltningsmelding =

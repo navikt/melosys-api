@@ -2,6 +2,7 @@ package no.nav.melosys.service.oppgave;
 
 
 import java.util.*;
+import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -110,6 +111,18 @@ public class OppgaveService {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         return Optional.ofNullable(fagsak.getAktivBehandling())
             .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"));
+    }
+
+    public void opprettBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) throws FunksjonellException, TekniskException {
+        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
+            .setTilordnetRessurs(tilordnetRessurs)
+            .setJournalpostId(journalpostID)
+            .setAktørId(aktørID)
+            .setSaksnummer(behandling.getFagsak().getSaksnummer())
+            .build();
+
+        String oppgaveID = gsakFasade.opprettOppgave(oppgave);
+        log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
