@@ -8,8 +8,10 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -91,6 +93,14 @@ public class UtpekingService {
 
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws IkkeFunnetException {
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
+        behandlingService.lagre(behandling);
+
+        prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, utpekingAvvis);
     }
 
     void validerUtpekingsperioder(List<Utpekingsperiode> utpekingsperioder) throws MelosysException {

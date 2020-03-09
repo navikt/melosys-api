@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -332,6 +333,17 @@ public class ProsessinstansService {
             .medEessiMottakere(mottakerinstitusjoner)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansAvvisUtpeking(Behandling behandling, UtpekingAvvis utpekingAvvis) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.UTPEK_LAND)
+            .medSteg(ProsessSteg.UL_SVAR_SEND_SED)
+            .medBehandling(behandling)
+            .build();
+        prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, utpekingAvvis);
 
         lagre(prosessinstans);
     }

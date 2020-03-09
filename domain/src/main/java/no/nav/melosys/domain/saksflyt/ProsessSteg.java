@@ -90,6 +90,9 @@ public enum ProsessSteg implements Kodeverk {
     UL_DISTRIBUER_JOURNALPOST("UL_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),
     UL_OPPDATER_MEDL("UL_OPPDATER_MEDL", "Oppdatering av medlemskap"),
 
+    //Svar på utpeking av land
+    UL_SVAR_SEND_SED("UL_SVAR_SEND_SED", "Send SED A004 til alle arbeidsland"),
+
     //Henlegg sak
     HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
     HS_HENLEGG_SAK("HS_HENLEGG_SAK", "Henlegg en sak"),
@@ -141,6 +144,7 @@ public enum ProsessSteg implements Kodeverk {
     REG_UNNTAK_AVSLUTT_BEHANDLING("REG_UNNTAK_AVSLUTT_BEHANDLING", "Avslutt behandling"),
     REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET("REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET", "Oppdaterer status på sak i sob til avsluttet"),
     REG_UNNTAK_PERIODE_IKKE_GODKJENT("REG_UNNTAK_PERIODE_IKKE_GODKJENT", "Unntaksperiode avvist av saksbehandler"),
+    REG_UNNTAK_UNDER_AVKLARING("REG_UNNTAK_UNDER_AVKLARING", "Unntaksperiode under avklaring"),
 
     FERDIG("FERDIG", "Prosessen er ferdig");
 
