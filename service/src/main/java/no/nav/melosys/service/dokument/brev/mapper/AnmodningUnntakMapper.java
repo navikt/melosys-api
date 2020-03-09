@@ -85,7 +85,6 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
     LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) {
         Anmodningsperiode anmodningsperiode = resultat.hentValidertAnmodningsperiode();
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
-        lovvalgsperiodeType.setUnntakFraLovvalgsland(anmodningsperiode.getUnntakFraLovvalgsland().getBeskrivelse());
 
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(anmodningsperiode.getFom()));

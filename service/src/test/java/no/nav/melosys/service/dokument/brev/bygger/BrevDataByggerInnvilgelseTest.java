@@ -3,12 +3,10 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -44,28 +42,20 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataByggerInnvilgelseTest {
-
     @Mock
     AvklartefaktaService avklartefaktaService;
-
     @Mock
     AvklarteVirksomheterService avklarteVirksomheterService;
-
     @Mock
     KodeverkService kodeverkService;
-
     @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
-
     @Mock
     LandvelgerService landvelgerService;
-
     @Mock
     BrevDataByggerA1 brevDataByggerA1;
-
     @Mock
     AnmodningsperiodeService anmodningsperiodeService;
-
     @Mock
     VilkaarsresultatService vilkaarsresultatService;
 
@@ -81,6 +71,7 @@ public class BrevDataByggerInnvilgelseTest {
     public void setUp() throws FunksjonellException, TekniskException {
         behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
 
@@ -97,6 +88,7 @@ public class BrevDataByggerInnvilgelseTest {
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(periode);
 
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
+        when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(Landkoder.NO);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
