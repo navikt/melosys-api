@@ -36,9 +36,11 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
+        Behandling behandling = prosessinstans.getBehandling();
+        Fagsak fagsak = behandling.getFagsak();
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder()
             .setTema(Tema.TRY).setOppgavetype(Oppgavetyper.VUR)
+            .setJournalpostId(behandling.getInitierendeJournalpostId())
             .setBehandlesAvApplikasjon(Fagsystem.INTET)
             .setJournalpostId(prosessinstans.getBehandling().getInitierendeJournalpostId())
             .setAktørId(fagsak.hentBruker().getAktørId())

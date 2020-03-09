@@ -2,11 +2,11 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import java.util.List;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -20,18 +20,18 @@ import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.IKKE_NORSK_AG_REGNING;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 
 
@@ -45,14 +45,17 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     @Autowired
     public SendVedtaksbrevInnland(BrevBestiller brevBestiller,
                                   BehandlingService behandlingService,
-                                  BehandlingsresultatService behandlingsresultatService) {
+                                  BehandlingsresultatService behandlingsresultatService,
+                                  AvklarteVirksomheterService avklarteVirksomheterService) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
     @Override
@@ -136,29 +139,36 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
             .build();
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
 
-        // Saker for art13 eller med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
-        if (!resultat.hentValidertLovvalgsperiode().erArtikkel13()) {
+
+        final boolean erArtikkel13 = resultat.hentValidertLovvalgsperiode().erArtikkel13();
+        if (erArtikkel13) {
+            if (!behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.isEmpty()) {
+                Brevbestilling a1SkatteoppkreverUtland = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
+                    .medAvsender(saksbehandler)
+                    .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
+                    .medBehandling(behandling)
+                    .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans)).build();
+                brevBestiller.bestill(a1SkatteoppkreverUtland);
+            }
+        } else {
+            // Saker for art. 13 eller med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
             Fagsak fagsak = behandling.getFagsak();
             if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
                 brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
             }
-        }
-
-        if (erLønnetAvUtenlandskKonsern(resultat)) {
-            Brevbestilling a1SkatteoppkreverUtland = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-                .medAvsender(saksbehandler)
-                .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
-                .medBehandling(behandling)
-                .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans)).build();
-            brevBestiller.bestill(a1SkatteoppkreverUtland);
+            if (harValgteUtenlandskeVirksomheter(behandling)) {
+                Brevbestilling a1SkatteoppkreverUtland = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
+                    .medAvsender(saksbehandler)
+                    .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
+                    .medBehandling(behandling)
+                    .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans)).build();
+                brevBestiller.bestill(a1SkatteoppkreverUtland);
+            }
         }
     }
 
-    private boolean erLønnetAvUtenlandskKonsern(Behandlingsresultat resultat) {
-        return resultat.hentVilkaarbegrunnelser(Vilkaar.FO_883_2004_ART12_1).stream()
-            .map(VilkaarBegrunnelse::getKode)
-            .map(Art12_1_begrunnelser::valueOf)
-            .anyMatch(kode -> kode == IKKE_NORSK_AG_REGNING);
+    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) throws TekniskException {
+        return !avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty();
     }
 
     private String hentBegrunnelseKode(Prosessinstans prosessinstans) {

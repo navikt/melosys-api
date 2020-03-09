@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.time.LocalDate;
 import java.util.*;
 
 import com.google.common.collect.Sets;
@@ -321,65 +320,6 @@ public class EessiServiceTest {
     }
 
     @Test
-    public void hentMottakerinstitusjonerFraBuc_medFlereMottakerinstitusjonerMenEnMyndighet_forventRettInstitusjon() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
-            .thenReturn(List.of(
-                new BucInformasjon(
-                    "id",
-                    BucType.LA_BUC_04.name(),
-                    LocalDate.now(),
-                    List.of("DE:111", "FR:222", MOTTAKER_INSTITUSJON),
-                    List.of()
-                )));
-
-        List<String> mottakerinstitusjoner = eessiService.hentMottakerinstitusjonerFraBuc(lagFagsak(), BucType.LA_BUC_04);
-        assertThat(mottakerinstitusjoner).containsExactlyInAnyOrder(MOTTAKER_INSTITUSJON);
-    }
-
-    @Test
-    public void hentMottakerinstitusjonerFraBuc_ingenMottakerinstitusjoner_forventTomListe() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
-            .thenReturn(List.of(
-                new BucInformasjon(
-                    "id",
-                    BucType.LA_BUC_04.name(),
-                    LocalDate.now(),
-                    List.of("DE:111", "FR:222"),
-                    List.of()
-                )));
-
-        List<String> mottakerinstitusjoner = eessiService.hentMottakerinstitusjonerFraBuc(lagFagsak(), BucType.LA_BUC_04);
-        assertThat(mottakerinstitusjoner).isEmpty();
-    }
-
-    @Test
-    public void hentMottakerinstitusjonerFraBuc_medFlereMottakerinstitusjonerOgFlereMyndigheter_forventRettInstitusjoner() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList()))
-            .thenReturn(List.of(
-                new BucInformasjon(
-                    "id",
-                    BucType.LA_BUC_04.name(),
-                    LocalDate.now(),
-                    List.of("DE:111", "FR:222", "SE:333"),
-                    List.of()
-                )));
-
-        Aktoer tyskland = new Aktoer();
-        tyskland.setRolle(Aktoersroller.MYNDIGHET);
-        tyskland.setInstitusjonId("DE:111");
-
-        Aktoer sverige = new Aktoer();
-        sverige.setRolle(Aktoersroller.MYNDIGHET);
-        sverige.setInstitusjonId("SE:333");
-
-        Fagsak fagsak = lagFagsak();
-        fagsak.setAktører(Set.of(tyskland, sverige));
-
-        List<String> mottakerinstitusjoner = eessiService.hentMottakerinstitusjonerFraBuc(fagsak, BucType.LA_BUC_04);
-        assertThat(mottakerinstitusjoner).containsExactlyInAnyOrder("DE:111", "SE:333");
-    }
-
-    @Test
     public void validerOgAvklarMottakerInstitusjonerForBuc_toMottakereToMottakerLandMottakereKorrektSatt_returnererMottakerInstitusjoner() throws MelosysException {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
@@ -518,6 +458,28 @@ public class EessiServiceTest {
 
         List<String> avklarteMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
         assertThat(avklarteMottakere).isEmpty();
+    }
+
+    @Test
+    public void landErEessiReady_toLandEtErEessiReady_forventFalse() throws MelosysException {
+        final BucType bucType = BucType.LA_BUC_01;
+        final List<Landkoder> land = List.of(Landkoder.SE, Landkoder.DK);
+
+        when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), eq(Landkoder.SE.getKode())))
+            .thenReturn(List.of(new Institusjon("2","","")));
+
+        assertThat(eessiService.landErEessiReady(bucType.name(), land)).isFalse();
+    }
+
+    @Test
+    public void landErEessiReady_toLandAlleErEessiReady_forventTrue() throws MelosysException {
+        final BucType bucType = BucType.LA_BUC_01;
+        final List<Landkoder> land = List.of(Landkoder.SE, Landkoder.DK);
+
+        when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), any()))
+            .thenReturn(List.of(new Institusjon("2","","")));
+
+        assertThat(eessiService.landErEessiReady(bucType.name(), land)).isTrue();
     }
 
     private static Fagsak lagFagsak() {

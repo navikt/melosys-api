@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -57,7 +56,11 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
         if (lovvalgsperiode.getMedlPeriodeID() != null) {
             oppdaterEksisterendeMedlPeriode(lovvalgsperiode);
-        } else if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
+        } else if (behandlingsresultat.erInnvilgelseFlereLand()) {
+            KildedokumenttypeMedl kildedokumenttypeMedl = behandling.harSøknad() ? KildedokumenttypeMedl.HENV_SOKNAD : KildedokumenttypeMedl.SED;
+            Long medlPeriodeID = medlFasade.opprettPeriodeForeløpig(fnr, lovvalgsperiode, kildedokumenttypeMedl);
+            felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
+        } else if (behandlingsresultat.erInnvilgelse()) {
             Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
             felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
         } else if (lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT) {
@@ -68,11 +71,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         }
 
         prosessinstans.setSteg(IV_SEND_BREV);
-    }
-
-    boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
-        return behandlingsresultat.getType() == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
     }
 
     private void oppdaterEksisterendeMedlPeriode(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {

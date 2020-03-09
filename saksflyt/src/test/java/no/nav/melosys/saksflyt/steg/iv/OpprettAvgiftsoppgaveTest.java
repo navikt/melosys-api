@@ -45,6 +45,7 @@ public class OpprettAvgiftsoppgaveTest {
         verify(gsakFasade).opprettOppgave(oppgave.capture());
         assertThat(oppgave.getValue().getTema()).isEqualTo(Tema.TRY);
         assertThat(oppgave.getValue().getOppgavetype()).isEqualTo(Oppgavetyper.VUR);
+        assertThat(oppgave.getValue().getJournalpostId()).isNotBlank();
         assertThat(oppgave.getValue().getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.INTET);
         assertThat(oppgave.getValue().getAktørId()).isEqualTo(DUMM_ID);
         assertThat(oppgave.getValue().getBeskrivelse()).isEqualTo(OpprettAvgiftsoppgave.AVGIFTSVURDERING_BESKRIVELSE);
@@ -84,6 +85,7 @@ public class OpprettAvgiftsoppgaveTest {
         behandling.setId(1L);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setFagsak(fagsak);
+        behandling.setInitierendeJournalpostId("JOURNALPOSTID");
         return behandling;
     }
 }
