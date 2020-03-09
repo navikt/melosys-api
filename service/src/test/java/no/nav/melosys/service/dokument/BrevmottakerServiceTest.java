@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -18,7 +20,9 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -42,8 +46,10 @@ public class BrevmottakerServiceTest {
     @Mock
     private Behandling behandling;
 
-    private Behandlingsresultat behandlingsresultat;
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
+    private Behandlingsresultat behandlingsresultat;
     private BrevmottakerService brevmottakerService;
 
     @Before
@@ -60,6 +66,17 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
+    public void avklarMottakere_medArbeidsgiverRolleOgIngenArbeidsgivere_feiler() throws FunksjonellException, TekniskException {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Collections.emptySet());
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(eq(behandling))).thenReturn(Collections.emptyList());
+        expectedException.expect(FunksjonellException.class);
+
+        brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
+        expectedException.expectMessage("Arbeidsgiver er ikke registrert");
+    }
+
+    @Test
     public void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
@@ -68,6 +85,17 @@ public class BrevmottakerServiceTest {
         assertThat(arbeidsgivere.stream()
             .map(Aktoer::getOrgnr))
             .containsExactlyInAnyOrder("123456789", "987654321");
+    }
+
+    @Test
+    public void avklarMottakere_medBareUtenlandskeArbeidsgivere_girIngenMottakere() throws FunksjonellException, TekniskException {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Collections.emptySet());
+        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(eq(behandling)))
+            .thenReturn(Collections.singletonList(new AvklartVirksomhet(new ForetakUtland())));
+
+        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
+        assertThat(arbeidsgivere).isEmpty();
     }
 
     @Test

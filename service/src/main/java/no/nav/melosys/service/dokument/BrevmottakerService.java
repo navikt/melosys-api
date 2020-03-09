@@ -15,6 +15,8 @@ import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Service
 public class BrevmottakerService {
+    private static final Logger log = LoggerFactory.getLogger(BrevmottakerService.class);
     private static final Set<Produserbaredokumenter> DOKUMENTER_TIL_BRUKER = Collections.unmodifiableSet(EnumSet.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV));
 
@@ -118,7 +121,12 @@ public class BrevmottakerService {
     private List<Aktoer> avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
         Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         if (arbeidsgivendeOrgnumre.isEmpty()) {
-            throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
+            if (avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
+                throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
+            } else {
+                log.debug("Melosys sender ikke brev til utenlandske arbeidsgivere uten orgnr.");
+                return Collections.emptyList();
+            }
         } else {
             return arbeidsgivendeOrgnumre.stream()
                 .map(BrevmottakerService::lagAktoerForArbeidsgiver)
