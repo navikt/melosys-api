@@ -11,6 +11,7 @@ public class BrevDataInnvilgelse extends BrevData {
 
     public Lovvalgsperiode lovvalgsperiode;
     public String arbeidsland;
+    public String bostedsland;
     public AvklartVirksomhet hovedvirksomhet;
     public Maritimtyper avklartMaritimType;
     public String trygdemyndighetsland;
