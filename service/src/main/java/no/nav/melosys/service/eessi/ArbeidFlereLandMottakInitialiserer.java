@@ -51,8 +51,8 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
     @Override
     public Behandlingstyper hentBehandlingstype(MelosysEessiMelding melosysEessiMelding) {
         return Landkoder.NO.getKode().equals(melosysEessiMelding.getLovvalgsland())
-            ? Behandlingstyper.UTL_MYND_UTPEKT_NORGE
-            : Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV;
+            ? Behandlingstyper.BESLUTNING_LOVVALG_NORGE
+            : Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 
     @Override

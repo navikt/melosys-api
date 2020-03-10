@@ -69,7 +69,7 @@ public class GsakService implements GsakFasade {
     private final OppgaveConsumer oppgaveConsumer;
 
     private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_MED = EnumSet.of(
-        SOEKNAD, SOEKNAD_IKKE_YRKESAKTIV, VURDER_TRYGDETID, UTL_MYND_UTPEKT_NORGE
+        SOEKNAD, SOEKNAD_IKKE_YRKESAKTIV, VURDER_TRYGDETID, BESLUTNING_LOVVALG_NORGE
     );
 
     private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_UFM = EnumSet.of(

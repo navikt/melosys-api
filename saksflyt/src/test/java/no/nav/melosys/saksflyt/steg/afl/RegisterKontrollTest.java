@@ -37,7 +37,7 @@ public class RegisterKontrollTest {
 
     @Test
     public void utfør_ingenTreffIKontrollNorgeIkkeUtpekt_nesteStegOppdaterMedl() throws MelosysException {
-        Prosessinstans prosessinstans = prosessinstans(Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV);
+        Prosessinstans prosessinstans = prosessinstans(Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat(false));
         registerKontroll.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_OPPDATER_MEDL);
@@ -45,7 +45,7 @@ public class RegisterKontrollTest {
 
     @Test
     public void utfør_erTreffIKontrollNorgeIkkeUtpekt_nesteStegOpprettOppgave() throws MelosysException {
-        Prosessinstans prosessinstans = prosessinstans(Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV);
+        Prosessinstans prosessinstans = prosessinstans(Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat(true));
         registerKontroll.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_OPPRETT_OPPGAVE);
@@ -53,7 +53,7 @@ public class RegisterKontrollTest {
 
     @Test
     public void utfør_ingenTreffIKontrollNorgeErUtpekt_nesteStegOpprettOppgave() throws MelosysException {
-        Prosessinstans prosessinstans = prosessinstans(Behandlingstyper.UTL_MYND_UTPEKT_NORGE);
+        Prosessinstans prosessinstans = prosessinstans(Behandlingstyper.BESLUTNING_LOVVALG_NORGE);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat(false));
         registerKontroll.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_OPPRETT_OPPGAVE);

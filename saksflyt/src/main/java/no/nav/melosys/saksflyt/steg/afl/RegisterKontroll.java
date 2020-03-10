@@ -36,7 +36,7 @@ public class RegisterKontroll extends AbstraktStegBehandler {
 
         Set<Kontrollresultat> kontrollresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID).getKontrollresultater();
 
-        if (behandlingstype == Behandlingstyper.UTL_MYND_UTPEKT_NORGE || !kontrollresultat.isEmpty()) {
+        if (behandlingstype == Behandlingstyper.BESLUTNING_LOVVALG_NORGE || !kontrollresultat.isEmpty()) {
             prosessinstans.setSteg(ProsessSteg.AFL_OPPRETT_OPPGAVE);
         } else {
             prosessinstans.setSteg(ProsessSteg.AFL_OPPDATER_MEDL);
