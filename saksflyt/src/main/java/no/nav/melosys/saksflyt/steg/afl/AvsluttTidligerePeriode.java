@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @Component("AFLAvsluttTidligerePeriode")
 public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
 
-    private final MedlPeriodeService felles;
+    private final MedlPeriodeService medlPeriodeService;
 
-    public AvsluttTidligerePeriode(MedlPeriodeService felles) {
-        this.felles = felles;
+    public AvsluttTidligerePeriode(MedlPeriodeService medlPeriodeService) {
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         if (Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class))) {
-            felles.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
+            medlPeriodeService.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
         }
 
         prosessinstans.setSteg(ProsessSteg.AFL_HENT_REGISTEROPPLYSNINGER);

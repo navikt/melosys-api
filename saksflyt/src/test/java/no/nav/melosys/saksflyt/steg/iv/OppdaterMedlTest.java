@@ -61,8 +61,8 @@ public class OppdaterMedlTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        MedlPeriodeService felles = new MedlPeriodeService(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
-        agent = new OppdaterMedl(medlFasade, felles);
+        MedlPeriodeService medlPeriodeService = new MedlPeriodeService(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
+        agent = new OppdaterMedl(medlFasade, medlPeriodeService);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();

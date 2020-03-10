@@ -32,11 +32,11 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
-    private final MedlPeriodeService felles;
+    private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService felles) {
-        this.felles = felles;
+    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService) {
+        this.medlPeriodeService = medlPeriodeService;
         this.medlFasade = medlFasade;
         log.info("AnmodningOmUnntakOppdaterMEDL initialisert");
     }
@@ -51,10 +51,10 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = prosessinstans.getBehandling();
 
-        String fnr = felles.hentFnr(behandling);
-        Anmodningsperiode anmodningsperiode = felles.hentAnmodningsperiode(behandling);
+        String fnr = medlPeriodeService.hentFnr(behandling);
+        Anmodningsperiode anmodningsperiode = medlPeriodeService.hentAnmodningsperiode(behandling);
         Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, anmodningsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-        felles.lagreMedlPeriodeId(medlPeriodeID, anmodningsperiode, behandling.getId());
+        medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, anmodningsperiode, behandling.getId());
 
         prosessinstans.setSteg(AOU_SEND_BREV);
     }

@@ -23,12 +23,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
-    private final MedlPeriodeService felles;
+    private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService felles) {
+    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService) {
         this.medlFasade = medlFasade;
-        this.felles = felles;
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
@@ -41,11 +41,11 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = prosessinstans.getBehandling();
 
-        String fnr = felles.hentFnr(behandling);
-        Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(behandling);
+        String fnr = medlPeriodeService.hentFnr(behandling);
+        Lovvalgsperiode lovvalgsperiode = medlPeriodeService.hentLovvalgsperiode(behandling);
 
         Long medlPeriodeID = medlFasade.opprettPeriodeForeløpig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-        felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
+        medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
 
         prosessinstans.setSteg(UL_SEND_ORIENTERINGSBREV);
     }

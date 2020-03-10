@@ -21,11 +21,11 @@ public class AvsluttTidligerePeriodeTest {
     private AvsluttTidligerePeriode avsluttTidligerePeriode;
 
     @Mock
-    private MedlPeriodeService felles;
+    private MedlPeriodeService medlPeriodeService;
 
     @Before
     public void setup() {
-        avsluttTidligerePeriode = new AvsluttTidligerePeriode(felles);
+        avsluttTidligerePeriode = new AvsluttTidligerePeriode(medlPeriodeService);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class AvsluttTidligerePeriodeTest {
 
         avsluttTidligerePeriode.utfør(prosessinstans);
 
-        verify(felles).avsluttTidligerMedlPeriode(eq(behandling.getFagsak()));
+        verify(medlPeriodeService).avsluttTidligerMedlPeriode(eq(behandling.getFagsak()));
 
     }
 

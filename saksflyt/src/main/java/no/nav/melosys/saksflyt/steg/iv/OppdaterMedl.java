@@ -34,12 +34,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
-    private final MedlPeriodeService felles;
+    private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService felles) {
+    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService) {
         this.medlFasade = medlFasade;
-        this.felles = felles;
+        this.medlPeriodeService = medlPeriodeService;
         log.info("IverksetteVedtakOppdaterMEDL initialisert");
     }
 
@@ -53,19 +53,19 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = prosessinstans.getBehandling();
 
-        String fnr = felles.hentFnr(behandling);
-        Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(behandling);
+        String fnr = medlPeriodeService.hentFnr(behandling);
+        Lovvalgsperiode lovvalgsperiode = medlPeriodeService.hentLovvalgsperiode(behandling);
 
-        Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
+        Behandlingsresultat behandlingsresultat = medlPeriodeService.hentBehandlingsresultat(behandling);
         if (lovvalgsperiode.getMedlPeriodeID() != null) {
             oppdaterEksisterendeMedlPeriode(lovvalgsperiode);
         } else if (behandlingsresultat.erInnvilgelseFlereLand()) {
             KildedokumenttypeMedl kildedokumenttypeMedl = behandling.harSøknad() ? KildedokumenttypeMedl.HENV_SOKNAD : KildedokumenttypeMedl.SED;
             Long medlPeriodeID = medlFasade.opprettPeriodeForeløpig(fnr, lovvalgsperiode, kildedokumenttypeMedl);
-            felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
+            medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
         } else if (behandlingsresultat.erInnvilgelse()) {
             Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-            felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
+            medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
         } else if (lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT) {
             log.debug("Behandling {}: MEDL oppdateres ikke i forbindelse med avslag.", behandling.getId());
         } else {

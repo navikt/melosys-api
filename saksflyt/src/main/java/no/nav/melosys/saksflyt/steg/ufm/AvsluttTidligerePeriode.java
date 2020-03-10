@@ -17,11 +17,11 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AvsluttTidligerePeriode.class);
 
-    private final MedlPeriodeService felles;
+    private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public AvsluttTidligerePeriode(MedlPeriodeService felles) {
-        this.felles = felles;
+    public AvsluttTidligerePeriode(MedlPeriodeService medlPeriodeService) {
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         if (Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class))) {
-            felles.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
+            medlPeriodeService.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
         }
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);

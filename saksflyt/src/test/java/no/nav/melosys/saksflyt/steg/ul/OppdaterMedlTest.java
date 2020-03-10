@@ -35,17 +35,17 @@ public class OppdaterMedlTest {
     @Mock
     private LovvalgsperiodeRepository lovvalgsperiodeRepository;
 
-    private MedlPeriodeService felles;
+    private MedlPeriodeService medlPeriodeService;
     private OppdaterMedl oppdaterMedl;
 
     private Prosessinstans prosessinstans;
 
     @Before
     public void settOpp() throws IkkeFunnetException {
-        felles = new MedlPeriodeService(
+        medlPeriodeService = new MedlPeriodeService(
             mock(TpsFasade.class), medlFasade, behandlingsresultatService,
             lovvalgsperiodeRepository, mock(AnmodningsperiodeRepository.class));
-        oppdaterMedl = new OppdaterMedl(medlFasade, felles);
+        oppdaterMedl = new OppdaterMedl(medlFasade, medlPeriodeService);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-0");

@@ -28,14 +28,14 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
-    private final MedlPeriodeService felles;
+    private final MedlPeriodeService medlPeriodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final BehandlingService behandlingService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService felles, LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
+    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
         this.medlFasade = medlFasade;
-        this.felles = felles;
+        this.medlPeriodeService = medlPeriodeService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.behandlingService = behandlingService;
     }
@@ -81,7 +81,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Long medlId = erEndelig
             ? medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED)
             : medlFasade.opprettPeriodeForeløpig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
-        felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, behandlingId);
+        medlPeriodeService.lagreMedlPeriodeId(medlId, lovvalgsperiode, behandlingId);
 
         return medlId;
     }
