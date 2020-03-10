@@ -51,12 +51,15 @@ public class GsakService implements GsakFasade {
             .put(ENDRET_PERIODE, "ae0052")
             .put(ANKE, "ae0046")
             .put(KLAGE, "ae0058")
-            .put(UTL_MYND_UTPEKT_NORGE, "ae0112")
+            .put(BESLUTNING_LOVVALG_NORGE, "ae0112")
             .put(NY_VURDERING, "ae0240")
-            .put(UTL_MYND_UTPEKT_SEG_SELV, "ae0113")
+            .put(BESLUTNING_LOVVALG_ANNET_LAND, "ae0113")
             .put(ANMODNING_OM_UNNTAK_HOVEDREGEL, "ae0110")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, "ae0235")
+            // FIXME: Mangler behandlingstype i kodeverk
+            .put(SOEKNAD_ARBEID_FLERE_LAND, "FIXME #1")
+            .put(SOEKNAD_ARBEID_NORGE_BOSATT_ANNET_LAND, "FIXME #2")
             .put(ØVRIGE_SED, "ukjent")
             .put(VURDER_TRYGDETID, "ae0236")
             .build();
@@ -71,7 +74,7 @@ public class GsakService implements GsakFasade {
 
     private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_UFM = EnumSet.of(
         REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
-        ANMODNING_OM_UNNTAK_HOVEDREGEL, UTL_MYND_UTPEKT_SEG_SELV
+        ANMODNING_OM_UNNTAK_HOVEDREGEL, BESLUTNING_LOVVALG_ANNET_LAND
     );
 
     @Autowired

@@ -40,9 +40,9 @@ public final class OppgaveFactory {
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
             case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
                 return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2), Behandlingstema.EU_EOS);
-            case UTL_MYND_UTPEKT_NORGE:
+            case BESLUTNING_LOVVALG_NORGE:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(4), Behandlingstema.EU_EOS);
-            case UTL_MYND_UTPEKT_SEG_SELV:
+            case BESLUTNING_LOVVALG_ANNET_LAND:
                 return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4), Behandlingstema.EU_EOS);
             case ANMODNING_OM_UNNTAK_HOVEDREGEL:
             case ØVRIGE_SED:
