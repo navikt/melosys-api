@@ -77,7 +77,7 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
         } else if (sedType == SedType.A010) {
             return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
         } else if (sedType == SedType.A003) {
-            return Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV;
+            return Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND;
         }
 
         throw new IllegalArgumentException("UnntaksperiodeMottakInitialiserer støtter ikke sedtype " + sedType);
