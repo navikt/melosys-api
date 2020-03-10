@@ -4,7 +4,10 @@ import java.time.LocalDate;
 import java.util.Collections;
 
 import com.google.common.collect.Sets;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -14,9 +17,9 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +37,7 @@ public class OppdaterMedlTest {
     @Mock
     private MedlFasade medlFasade;
     @Mock
-    private OppdaterMedlFelles oppdaterMedlFelles;
+    private MedlPeriodeService medlPeriodeService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
@@ -46,7 +49,7 @@ public class OppdaterMedlTest {
 
     @Before
     public void setUp() throws Exception {
-        oppdaterMedl = new OppdaterMedl(medlFasade, oppdaterMedlFelles, lovvalgsperiodeService, behandlingService);
+        oppdaterMedl = new OppdaterMedl(medlFasade, medlPeriodeService, lovvalgsperiodeService, behandlingService);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
     }
 
@@ -64,7 +67,7 @@ public class OppdaterMedlTest {
 
         verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
-        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
+        verify(medlPeriodeService).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
@@ -83,7 +86,7 @@ public class OppdaterMedlTest {
 
         verify(medlFasade).opprettPeriodeForeløpig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
-        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
+        verify(medlPeriodeService).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
@@ -118,7 +121,7 @@ public class OppdaterMedlTest {
         oppdaterMedl.utfør(prosessinstans);
 
         verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
-        verify(oppdaterMedlFelles).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
+        verify(medlPeriodeService).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 

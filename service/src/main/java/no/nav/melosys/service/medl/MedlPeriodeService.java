@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.felles;
+package no.nav.melosys.service.medl;
 
 import java.util.Optional;
 
@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OppdaterMedlFelles {
-    private static final Logger log = LoggerFactory.getLogger(OppdaterMedlFelles.class);
+public class MedlPeriodeService {
+    private static final Logger log = LoggerFactory.getLogger(MedlPeriodeService.class);
 
     private final TpsFasade tpsFasade;
     private final MedlFasade medlFasade;
@@ -26,7 +26,7 @@ public class OppdaterMedlFelles {
     private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
     private final AnmodningsperiodeRepository anmodningsperiodeRepository;
 
-    public OppdaterMedlFelles(TpsFasade tpsFasade,
+    public MedlPeriodeService(TpsFasade tpsFasade,
                               MedlFasade medlFasade,
                               BehandlingsresultatService behandlingsresultatService,
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,

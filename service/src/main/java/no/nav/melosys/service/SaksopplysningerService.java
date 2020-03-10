@@ -54,9 +54,19 @@ public class SaksopplysningerService {
             .map(s -> (PersonDokument) s.getDokument());
     }
 
+    public PersonDokument hentPersonOpplysninger(long behandlingID) throws IkkeFunnetException {
+        return finnPersonOpplysninger(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke persondokument for behandling " + behandlingID));
+    }
+
     public Optional<SedDokument> finnSedOpplysninger(long behandlingID) {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.SEDOPPL)
             .map(s -> (SedDokument) s.getDokument());
+    }
+
+    public SedDokument hentSedOpplysninger(long behandlingID) throws IkkeFunnetException {
+        return finnSedOpplysninger(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke seddokument for behandling " + behandlingID));
     }
 
     public Optional<ArbeidsforholdDokument> finnArbeidsforholdsopplysninger(long behandlingID) {
@@ -72,13 +82,7 @@ public class SaksopplysningerService {
     public PersonhistorikkDokument hentPersonhistorikk(long behandlingID) throws IkkeFunnetException {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSHIST)
             .map(s -> (PersonhistorikkDokument) s.getDokument())
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke personhistorikkDokument"));
-    }
-
-    public PersonDokument hentPersonOpplysninger(long behandlingID) throws IkkeFunnetException {
-        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSOPL)
-            .map(s -> (PersonDokument) s.getDokument())
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke persondokument"));
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke personhistorikkDokument for behandling " + behandlingID));
     }
 
     /***

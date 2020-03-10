@@ -8,8 +8,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +20,12 @@ public class OpprettPeriodeIMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettPeriodeIMedl.class);
 
     private final MedlFasade medlFasade;
-    private final OppdaterMedlFelles oppdaterMedlFelles;
+    private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OpprettPeriodeIMedl(MedlFasade medlFasade, OppdaterMedlFelles oppdaterMedlFelles) {
+    public OpprettPeriodeIMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService) {
         this.medlFasade = medlFasade;
-        this.oppdaterMedlFelles = oppdaterMedlFelles;
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
@@ -38,11 +38,11 @@ public class OpprettPeriodeIMedl extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = prosessinstans.getBehandling();
 
-        Anmodningsperiode anmodningsperiode = oppdaterMedlFelles.hentAnmodningsperiode(behandling);
-        String fnr = oppdaterMedlFelles.hentFnr(behandling);
+        Anmodningsperiode anmodningsperiode = medlPeriodeService.hentAnmodningsperiode(behandling);
+        String fnr = medlPeriodeService.hentFnr(behandling);
 
         Long medlPeriodeId = medlFasade.opprettPeriodeUnderAvklaring(fnr, anmodningsperiode, KildedokumenttypeMedl.SED);
-        oppdaterMedlFelles.lagreMedlPeriodeId(medlPeriodeId, anmodningsperiode, behandling.getId());
+        medlPeriodeService.lagreMedlPeriodeId(medlPeriodeId, anmodningsperiode, behandling.getId());
 
         log.info("Periode under avklaring opprettet i Medl for behandling {}", behandling.getId());
         prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_OPPGAVE);

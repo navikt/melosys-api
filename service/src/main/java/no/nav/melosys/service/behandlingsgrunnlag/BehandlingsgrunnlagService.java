@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BehandlingsgrunnlagService {
 
     private static final String VERSJON_SOEKNAD_GRUNNLAG = "1.2";
+    private static final String VERSJON_GENERELT_GRUNNLAG = "1";
 
     private final BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
     private final BehandlingService behandlingService;
@@ -42,7 +43,7 @@ public class BehandlingsgrunnlagService {
 
     public Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
                                                           BehandlingsgrunnlagData behandlingsgrunnlagData) throws FunksjonellException {
-        return opprettBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagData, BehandlingsGrunnlagType.GENERELT, "1");
+        return opprettBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagData, BehandlingsGrunnlagType.GENERELT, VERSJON_GENERELT_GRUNNLAG);
     }
 
     private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID, BehandlingsgrunnlagData behandlingsgrunnlagData,

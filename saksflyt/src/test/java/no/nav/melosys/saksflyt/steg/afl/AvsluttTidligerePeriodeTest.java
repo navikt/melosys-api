@@ -5,7 +5,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +21,7 @@ public class AvsluttTidligerePeriodeTest {
     private AvsluttTidligerePeriode avsluttTidligerePeriode;
 
     @Mock
-    private OppdaterMedlFelles felles;
+    private MedlPeriodeService felles;
 
     @Before
     public void setup() {

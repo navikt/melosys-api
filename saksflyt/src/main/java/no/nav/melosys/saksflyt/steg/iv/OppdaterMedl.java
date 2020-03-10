@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -8,8 +11,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +34,10 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
-    private final OppdaterMedlFelles felles;
+    private final MedlPeriodeService felles;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles) {
+    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService felles) {
         this.medlFasade = medlFasade;
         this.felles = felles;
         log.info("IverksetteVedtakOppdaterMEDL initialisert");

@@ -8,15 +8,13 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
-import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,15 +25,15 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
-    private final OppdaterMedlFelles oppdaterMedlFelles;
-    private final BehandlingService behandlingService;
+    private final MedlPeriodeService medlPeriodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final SaksopplysningerService saksopplysningerService;
 
-    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles oppdaterMedlFelles, BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService) {
+    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService, SaksopplysningerService saksopplysningerService) {
         this.medlFasade = medlFasade;
-        this.oppdaterMedlFelles = oppdaterMedlFelles;
-        this.behandlingService = behandlingService;
+        this.medlPeriodeService = medlPeriodeService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.saksopplysningerService = saksopplysningerService;
     }
 
     @Override
@@ -49,20 +47,18 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         final String fnr = prosessinstans.getData(ProsessDataKey.BRUKER_ID);
 
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
-        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(
-            behandlingService.hentBehandling(behandlingId)
-        );
+        SedDokument sedDokument = saksopplysningerService.hentSedOpplysninger(prosessinstans.getBehandling().getId());
 
         if (lovvalgsperioder.isEmpty()) {
             lovvalgsperioder = lovvalgsperiodeService.lagreLovvalgsperioder(
-                behandlingId, Collections.singletonList(UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument))
+                behandlingId, Collections.singletonList(sedDokument.opprettInnvilgetLovvalgsperiode())
             );
         }
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
 
         long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode, KildedokumenttypeMedl.SED);
         log.info("Medl-periode opprettet med id {} for behandling {}", medlPeriodeID, behandlingId);
-        oppdaterMedlFelles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingId);
+        medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingId);
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 }

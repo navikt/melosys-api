@@ -5,19 +5,18 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
-import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +28,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
-    private final OppdaterMedlFelles felles;
+    private final MedlPeriodeService felles;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final BehandlingService behandlingService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles, LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
+    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService felles, LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
         this.medlFasade = medlFasade;
         this.felles = felles;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -59,7 +58,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
         if (lovvalgsperioder.isEmpty()) {
             Collection<Lovvalgsperiode> lagretLovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(
-                behandlingId, Collections.singletonList(UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument))
+                behandlingId, Collections.singletonList(sedDokument.opprettInnvilgetLovvalgsperiode())
             );
             Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
             Long medlId = opprettOgLagrePeriode(behandlingId, behandling, lagretLovvalgsperiode, !lovvalgsperiode.erArtikkel13());

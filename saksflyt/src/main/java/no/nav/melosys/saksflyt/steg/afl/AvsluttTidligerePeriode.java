@@ -4,16 +4,16 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.springframework.stereotype.Component;
 
 @Component("AFLAvsluttTidligerePeriode")
 public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
 
-    private final OppdaterMedlFelles felles;
+    private final MedlPeriodeService felles;
 
-    public AvsluttTidligerePeriode(OppdaterMedlFelles felles) {
+    public AvsluttTidligerePeriode(MedlPeriodeService felles) {
         this.felles = felles;
     }
 

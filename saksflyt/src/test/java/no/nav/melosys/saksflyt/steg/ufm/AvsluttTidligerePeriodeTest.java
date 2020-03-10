@@ -3,12 +3,13 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import java.time.Instant;
 import java.util.Collections;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,13 +24,13 @@ import static org.mockito.Mockito.verify;
 public class AvsluttTidligerePeriodeTest {
 
     @Mock
-    private OppdaterMedlFelles oppdaterMedlFelles;
+    private MedlPeriodeService medlPeriodeService;
 
     private AvsluttTidligerePeriode avsluttTidligerePeriode;
 
     @Before
     public void setUp() {
-        avsluttTidligerePeriode = new AvsluttTidligerePeriode(oppdaterMedlFelles);
+        avsluttTidligerePeriode = new AvsluttTidligerePeriode(medlPeriodeService);
     }
 
     @Test
@@ -56,7 +57,7 @@ public class AvsluttTidligerePeriodeTest {
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligerePeriode.utfør(prosessinstans);
-        verify(oppdaterMedlFelles).avsluttTidligerMedlPeriode(any(Fagsak.class));
+        verify(medlPeriodeService).avsluttTidligerMedlPeriode(any(Fagsak.class));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 
