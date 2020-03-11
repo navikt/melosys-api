@@ -140,7 +140,9 @@ public class FagsakService {
         if (feilet) {
             throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en ny sak.").toString());
         }
-        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD || opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD
+            || opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
+            || opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND) {
             final SøknadDto soknadDto = opprettSakDto.soknadDto;
             if (soknadDto == null) {
                 throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");

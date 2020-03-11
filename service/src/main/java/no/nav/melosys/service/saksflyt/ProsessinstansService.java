@@ -206,7 +206,8 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto) throws FunksjonellException {
         if (opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD
-            && opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+            && opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
+            && opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND) {
             throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
                 + " på bakgrunn av journalførte dokumenter er ikke støttet.");
         }

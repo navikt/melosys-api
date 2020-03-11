@@ -189,6 +189,7 @@ public class Behandling extends RegistreringsInfo {
     public boolean harSøknad() {
         return type == Behandlingstyper.SOEKNAD
             || type == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
+            || type == Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND
             || type == Behandlingstyper.ENDRET_PERIODE
             || type == Behandlingstyper.NY_VURDERING;
     }
