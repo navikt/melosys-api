@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -105,5 +106,23 @@ public class BehandlingsgrunnlagServiceTest {
         verify(behandlingsgrunnlagRepository).saveAndFlush(any(Behandlingsgrunnlag.class));
 
         assertThat(behandlingsgrunnlag.getJsonData()).isNotEqualTo(originalJsonData);
+    }
+
+    @Test
+    public void opprettSedGrunnlag_harRettType() throws FunksjonellException {
+        final long behandlingID = 1234L;
+        Behandling behandling = new Behandling();
+        behandling.setId(behandlingID);
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        SedGrunnlag sedGrunnlag = new SedGrunnlag();
+        behandlingsgrunnlagService.opprettSedGrunnlag(behandlingID, sedGrunnlag);
+
+        verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
+        Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
+
+        assertThat(opprettet).isNotNull();
+        assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SedGrunnlag.class);
+        assertThat(opprettet.getType()).isEqualTo(BehandlingsGrunnlagType.SED);
+        assertThat(opprettet.getBehandling()).isEqualTo(behandling);
     }
 }

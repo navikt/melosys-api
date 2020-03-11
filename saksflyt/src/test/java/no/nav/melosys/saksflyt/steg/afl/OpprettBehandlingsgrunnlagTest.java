@@ -1,22 +1,23 @@
 package no.nav.melosys.saksflyt.steg.afl;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettBehandlingsgrunnlagTest {
@@ -27,10 +28,12 @@ public class OpprettBehandlingsgrunnlagTest {
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Mock
     private OpprettSedDokumentFelles opprettSedDokumentFelles;
+    @Mock
+    private EessiService eessiService;
 
     @Before
     public void setup() {
-        opprettBehandlingsgrunnlag = new OpprettBehandlingsgrunnlag(behandlingsgrunnlagService, opprettSedDokumentFelles);
+        opprettBehandlingsgrunnlag = new OpprettBehandlingsgrunnlag(behandlingsgrunnlagService, opprettSedDokumentFelles, eessiService);
     }
 
     @Test
@@ -41,13 +44,18 @@ public class OpprettBehandlingsgrunnlagTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, new MelosysEessiMelding());
         prosessinstans.setBehandling(behandling);
+
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setRinaSaksnummer("123");
+        melosysEessiMelding.setDokumentId("abc");
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        when(eessiService.hentSedGrunnlag(anyString(), anyString())).thenReturn(new SedGrunnlag());
 
         opprettBehandlingsgrunnlag.utfør(prosessinstans);
 
-        verify(behandlingsgrunnlagService).opprettBehandlingsgrunnlag(eq(behandling.getId()), any(BehandlingsgrunnlagData.class));
+        verify(behandlingsgrunnlagService).opprettSedGrunnlag(eq(behandling.getId()), any(SedGrunnlag.class));
         verify(opprettSedDokumentFelles).opprettSedSaksopplysning(any(MelosysEessiMelding.class), eq(behandling));
-
+        verify(eessiService).hentSedGrunnlag(eq("123"), eq("abc"));
     }
 }

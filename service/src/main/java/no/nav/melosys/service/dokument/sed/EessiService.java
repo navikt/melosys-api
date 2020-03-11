@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.MedlemsperiodeType;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
@@ -253,7 +253,7 @@ public class EessiService {
         }
     }
 
-    public BehandlingsgrunnlagData hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) throws MelosysException {
+    public SedGrunnlag hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) throws MelosysException {
         return SedGrunnlagMapper.lagSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
     }
 }
