@@ -7,6 +7,7 @@ import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
 import org.springframework.util.Assert;
@@ -42,6 +43,11 @@ public final class LovvalgTilBestemmelseDtoMapper {
         mapper.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET, Bestemmelse.ANNET);
         mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A, Bestemmelse.ART_87_a);
         mapper.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8, Bestemmelse.ART_87_8);
+        mapper.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A, Bestemmelse.ART_14_2_a);
+        mapper.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B, Bestemmelse.ART_14_2_b);
+        mapper.put(Overgangsregelbestemmelser.FO_1408_1971_ART14A_2, Bestemmelse.ART_14_a_2);
+        mapper.put(Overgangsregelbestemmelser.FO_1408_1971_ART14C_A, Bestemmelse.ART_14_c_a);
+        mapper.put(Overgangsregelbestemmelser.FO_1408_1971_ART14C_B, Bestemmelse.ART_14_c_b);
     }
 
     public static Bestemmelse mapMelosysLovvalgTilBestemmelseDto(LovvalgBestemmelse lovvalgBestemmelse) {
@@ -64,7 +70,7 @@ public final class LovvalgTilBestemmelseDtoMapper {
         return mapBestemmelseDtoTilMelosysLovvalgBestemmelse(bestemmelseEnum);
     }
 
-    private static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse bestemmelse) {
+    public static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse bestemmelse) {
         Assert.notNull(bestemmelse, "LovvalgBestemmelse er null.");
 
         if (mapper.inverse().containsKey(bestemmelse)) {

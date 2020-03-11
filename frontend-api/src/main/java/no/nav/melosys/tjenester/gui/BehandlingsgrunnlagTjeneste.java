@@ -1,8 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.HashSet;
+
 import io.swagger.annotations.Api;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.abac.TilgangService;
@@ -34,7 +37,7 @@ public class BehandlingsgrunnlagTjeneste {
     public ResponseEntity hentBehandlingsgrunnlag(@PathVariable(value = "behandlingID") long behandlingID) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
-        return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag, hentTilleggsData(behandlingsgrunnlag.getBehandlingsgrunnlagdata())));
+        return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag, hentTilleggsData(behandlingsgrunnlag)));
     }
 
     @PostMapping("/{behandlingID}")
@@ -42,12 +45,18 @@ public class BehandlingsgrunnlagTjeneste {
                                                       @RequestBody BehandlingsgrunnlagPostDto behandlingsgrunnlagPostDto) throws FunksjonellException, TekniskException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagPostDto.getData());
-        return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag, hentTilleggsData(behandlingsgrunnlag.getBehandlingsgrunnlagdata())));
+        return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag, hentTilleggsData(behandlingsgrunnlag)));
     }
 
-    private BehandlingsgrunnlagTilleggsData hentTilleggsData(BehandlingsgrunnlagData behandlingsgrunnlagData) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private BehandlingsgrunnlagTilleggsData hentTilleggsData(Behandlingsgrunnlag behandlingsgrunnlag) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        if (behandlingsgrunnlag.getType() == BehandlingsGrunnlagType.SED && behandlingsgrunnlag.getBehandlingsgrunnlagdata() instanceof SedGrunnlag) {
+            SedGrunnlag sedGrunnlag = (SedGrunnlag) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+            if (!sedGrunnlag.norskeArbeidsgivere.isEmpty()) {
+                return new BehandlingsgrunnlagTilleggsData(new HashSet<>(sedGrunnlag.norskeArbeidsgivere));
+            }
+        }
         return new BehandlingsgrunnlagTilleggsData(
-            registerOppslagService.hentOrganisasjoner(behandlingsgrunnlagData.hentAlleOrganisasjonsnumre())
+            registerOppslagService.hentOrganisasjoner(behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentAlleOrganisasjonsnumre())
         );
     }
 }

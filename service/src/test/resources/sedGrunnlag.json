@@ -1,0 +1,132 @@
+{
+  "sedType": "A003",
+  "utenlandskIdent": [
+    {
+      "ident": "15225345345",
+      "landkode": "BG"
+    }
+  ],
+  "bostedsadresse": {
+    "poststed": "Testby",
+    "postnr": "Testpostkode",
+    "land": "BE",
+    "gateadresse": "Testgate Testbyggnavn",
+    "region": null,
+    "adressetype": "BOSTEDSADRESSE"
+  },
+  "arbeidsgivendeVirksomheter": [
+    {
+      "navn": "EQUINOR ASA",
+      "adresse": {
+        "poststed": "STAVANGER",
+        "postnr": "4035",
+        "land": "BE",
+        "gateadresse": "Forusbeen 50",
+        "region": null,
+        "adressetype": null
+      },
+      "orgnr": "923609016",
+      "type": null
+    },
+    {
+      "navn": "adf",
+      "adresse": {
+        "poststed": "by",
+        "postnr": null,
+        "land": "BE",
+        "gateadresse": "",
+        "region": null,
+        "adressetype": null
+      },
+      "orgnr": "123321",
+      "type": null
+    },
+    {
+      "navn": "swe",
+      "adresse": {
+        "poststed": "stck",
+        "postnr": null,
+        "land": "SE",
+        "gateadresse": "",
+        "region": null,
+        "adressetype": null
+      },
+      "orgnr": "123",
+      "type": null
+    }
+  ],
+  "selvstendigeVirksomheter": [
+    {
+      "navn": "Testselvstendignavn",
+      "adresse": {
+        "poststed": "Testselvstendigby",
+        "postnr": "Testselvstendigpostkode",
+        "land": "BG",
+        "gateadresse": "Testselvstendiggate Testselvstendigbygning",
+        "region": "Testselvstendigregion",
+        "adressetype": null
+      },
+      "orgnr": "Testselvstendignummer",
+      "type": null
+    }
+  ],
+  "arbeidssteder": [
+    {
+      "navn": "Testarbeidsstednavn",
+      "adresse": {
+        "poststed": "Testarbeidsstedby",
+        "postnr": "Testarbeidsstedpostkode",
+        "land": "EE",
+        "gateadresse": "Testarbeidsstedgate Testarbeidsstedbygning",
+        "region": "Testarbeidsstedregion",
+        "adressetype": null
+      },
+      "fysisk": false,
+      "hjemmebase": "Testarbeidsstedbase"
+    },
+    {
+      "navn": "Testarbeidsstednavn2",
+      "adresse": {
+        "poststed": "Testarbeidsstedby2",
+        "postnr": null,
+        "land": "CY",
+        "gateadresse": "Testarbeidsstedgate2 Testarbeidsstedbygning2",
+        "region": null,
+        "adressetype": null
+      },
+      "fysisk": true,
+      "hjemmebase": "Testarbeidsstedbase2"
+    }
+  ],
+  "lovvalgsperioder": [
+    {
+      "lovvalgsland": "NO",
+      "unntakFraLovvalgsland": null,
+      "bestemmelse": "ART_87_a",
+      "fom": "2019-01-01",
+      "tom": "2020-02-02",
+      "unntaksBegrunnelse": null,
+      "unntakFraBestemmelse": null
+    }
+  ],
+  "ytterligereInformasjon": null,
+  "overgangsregelbestemmelser": [
+    "ART_14_a_2",
+    "ART_14_c_a"
+  ],
+  "norskeArbeidsgivendeVirksomheter": [
+    {
+      "navn": "norsk",
+      "adresse": {
+        "poststed": "oslo",
+        "postnr": null,
+        "land": "NO",
+        "gateadresse": "",
+        "region": null,
+        "adressetype": null
+      },
+      "orgnr": "115511",
+      "type": null
+    }
+  ]
+}

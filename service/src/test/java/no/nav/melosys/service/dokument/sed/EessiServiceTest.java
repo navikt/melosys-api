@@ -1,16 +1,23 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -22,6 +29,7 @@ import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.SedGrunnlagDto;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -38,6 +46,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -482,15 +491,35 @@ public class EessiServiceTest {
         assertThat(eessiService.landErEessiReady(bucType.name(), land)).isTrue();
     }
 
-    private static Fagsak lagFagsak() {
-        Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
-        myndighet.setInstitusjonId(MOTTAKER_INSTITUSJON);
+    @Test
+    public void hentSedGrunnlag() throws MelosysException, IOException, URISyntaxException {
+        when(eessiConsumer.hentSedGrunnlag(anyString(), anyString())).thenReturn(lagSedGrunnlag());
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(1L);
-        fagsak.setAktører(Set.of(myndighet));
+        BehandlingsgrunnlagData behandlingsgrunnlagData = eessiService.hentSedGrunnlag("123", "abc");
 
-        return fagsak;
+        assertThat(behandlingsgrunnlagData).isNotNull();
+        assertThat(behandlingsgrunnlagData).isInstanceOf(SedGrunnlag.class);
+
+        assertThat(behandlingsgrunnlagData.bosted)
+            .extracting("oppgittAdresse")
+            .extracting("landkode", "postnummer", "poststed")
+            .containsExactly("BE", "Testpostkode", "Testby");
+
+        assertThat(behandlingsgrunnlagData.personOpplysninger.utenlandskIdent)
+            .extracting("ident", "landkode")
+            .containsExactly(tuple("15225345345", "BG"));
+
+        assertThat(behandlingsgrunnlagData.arbeidUtland)
+            .extracting("foretakNavn", "foretakOrgnr")
+            .containsExactlyInAnyOrder(
+                tuple("Testarbeidsstednavn", null),
+                tuple("Testarbeidsstednavn2", null)
+            );
+    }
+
+    private SedGrunnlagDto lagSedGrunnlag() throws IOException, URISyntaxException {
+        URI uri = Objects.requireNonNull(getClass().getClassLoader().getResource("sedGrunnlag.json")).toURI();
+        String json = new String(Files.readAllBytes(Paths.get(uri)));
+        return new ObjectMapper().readValue(json, SedGrunnlagDto.class);
     }
 }

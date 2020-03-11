@@ -14,9 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
-import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.*;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
@@ -189,5 +187,18 @@ public class EessiConsumerTest {
 
         byte[] pdf = eessiConsumer.genererSedPdf(new SedDataDto(), SedType.A001);
         assertThat(pdf).isEqualTo(PDF);
+    }
+
+    @Test
+    public void hentSedGrunnlag_medSedType_rettInstans() throws MelosysException, URISyntaxException, IOException {
+        server.expect(requestTo("/buc/1234/sed/abcdef/grunnlag"))
+            .andRespond(withSuccess("{\"sedType\": \"A003\"}", MediaType.APPLICATION_JSON));
+
+        String rinaSaksnummer = "1234";
+        String rinaDokumentID = "abcdef";
+        SedGrunnlagDto response = eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID);
+
+        assertThat(response).isNotNull();
+        assertThat(response).isInstanceOf(SedGrunnlagA003Dto.class);
     }
 }
