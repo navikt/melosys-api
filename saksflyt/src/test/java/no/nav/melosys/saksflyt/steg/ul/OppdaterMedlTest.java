@@ -12,8 +12,8 @@ import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,17 +35,17 @@ public class OppdaterMedlTest {
     @Mock
     private LovvalgsperiodeRepository lovvalgsperiodeRepository;
 
-    private OppdaterMedlFelles felles;
+    private MedlPeriodeService medlPeriodeService;
     private OppdaterMedl oppdaterMedl;
 
     private Prosessinstans prosessinstans;
 
     @Before
     public void settOpp() throws IkkeFunnetException {
-        felles = new OppdaterMedlFelles(
+        medlPeriodeService = new MedlPeriodeService(
             mock(TpsFasade.class), medlFasade, behandlingsresultatService,
             lovvalgsperiodeRepository, mock(AnmodningsperiodeRepository.class));
-        oppdaterMedl = new OppdaterMedl(medlFasade, felles);
+        oppdaterMedl = new OppdaterMedl(medlFasade, medlPeriodeService);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-0");

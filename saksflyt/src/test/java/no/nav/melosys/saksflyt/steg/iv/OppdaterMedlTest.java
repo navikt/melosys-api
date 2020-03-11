@@ -23,8 +23,8 @@ import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,8 +61,8 @@ public class OppdaterMedlTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
-        agent = new OppdaterMedl(medlFasade, felles);
+        MedlPeriodeService medlPeriodeService = new MedlPeriodeService(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
+        agent = new OppdaterMedl(medlFasade, medlPeriodeService);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();

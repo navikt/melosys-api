@@ -1,8 +1,9 @@
 package no.nav.melosys.saksflyt.steg.hs;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class HenleggSakTest {
     @Mock
-    OppdaterFagsakOgBehandling felles;
+    OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling;
 
     @InjectMocks
     HenleggSak henleggSak;
@@ -38,7 +39,7 @@ public class HenleggSakTest {
 
         henleggSak.utfør(prosessinstans);
 
-        verify(felles).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.HENLAGT), eq(Behandlingsstatus.AVSLUTTET));
+        verify(oppdaterFagsakOgBehandling).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.HENLAGT), eq(Behandlingsstatus.AVSLUTTET));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.HS_SEND_BREV);
     }
 }

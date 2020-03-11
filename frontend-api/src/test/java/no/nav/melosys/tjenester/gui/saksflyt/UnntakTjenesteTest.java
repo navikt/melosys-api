@@ -39,12 +39,6 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void innhentInfoUnntaksperiode() throws FunksjonellException, TekniskException {
-        unntakTjeneste.innhentInformasjonUnntaksperiode(1L);
-        verify(unntaksperiodeService).behandlingUnderAvklaring(anyLong());
-    }
-
-    @Test
     public void ikkeGodkjennUnntaksperiode() throws FunksjonellException, IOException, TekniskException {
         VurderUnntaksperiodeDto dto = new VurderUnntaksperiodeDto(
             Sets.newHashSet(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name()), null);

@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -192,6 +189,16 @@ public class Prosessinstans {
 
     public List<ProsessinstansHendelse> getHendelser() {
         return hendelser;
+    }
+
+    public String hentJournalpostID() {
+        return Optional.ofNullable(getData(ProsessDataKey.JOURNALPOST_ID))
+            .orElse(behandling.getInitierendeJournalpostId());
+    }
+
+    public String hentSaksbehandlerHvisTilordnes() {
+        return Optional.ofNullable(getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class))
+            .orElse(Boolean.FALSE) ? getData(ProsessDataKey.SAKSBEHANDLER) : null;
     }
 
     private static final int VARCHAR2_MAX_BYTES = 4000;

@@ -5,8 +5,8 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +17,11 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AvsluttTidligerePeriode.class);
 
-    private final OppdaterMedlFelles felles;
+    private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public AvsluttTidligerePeriode(OppdaterMedlFelles felles) {
-        this.felles = felles;
+    public AvsluttTidligerePeriode(MedlPeriodeService medlPeriodeService) {
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         if (Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class))) {
-            felles.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
+            medlPeriodeService.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
         }
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);

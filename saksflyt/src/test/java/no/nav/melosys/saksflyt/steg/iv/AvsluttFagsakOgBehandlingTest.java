@@ -4,11 +4,11 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,12 +27,12 @@ public class AvsluttFagsakOgBehandlingTest {
     private AvsluttFagsakOgBehandling agent;
 
     @Mock
-    private OppdaterFagsakOgBehandling felles;
+    private OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling;
 
 
     @Before
     public void setUp() {
-        agent = new AvsluttFagsakOgBehandling(felles);
+        agent = new AvsluttFagsakOgBehandling(oppdaterFagsakOgBehandling);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
-        verify(felles).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART), eq(Behandlingsstatus.AVSLUTTET));
+        verify(oppdaterFagsakOgBehandling).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART), eq(Behandlingsstatus.AVSLUTTET));
         assertThat(p.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
 
     }

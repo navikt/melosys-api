@@ -1,41 +1,34 @@
-package no.nav.melosys.saksflyt.steg.aou.inn;
+package no.nav.melosys.saksflyt.steg.afl;
 
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.medl.MedlPeriodeService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("AnmodningUnntakMottakAvsluttTidligerePeriode")
+@Component("AFLAvsluttTidligerePeriode")
 public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(AvsluttTidligerePeriode.class);
 
     private final MedlPeriodeService medlPeriodeService;
 
-    @Autowired
     public AvsluttTidligerePeriode(MedlPeriodeService medlPeriodeService) {
         this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE;
+        return ProsessSteg.AFL_AVSLUTT_TIDLIGERE_PERIODE;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         if (Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class))) {
             medlPeriodeService.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
         }
 
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER);
+        prosessinstans.setSteg(ProsessSteg.AFL_HENT_REGISTEROPPLYSNINGER);
     }
 }

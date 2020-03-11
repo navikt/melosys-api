@@ -6,6 +6,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.jaxb.LovvalgBestemmelseXmlAdapter;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -14,6 +16,8 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 @XmlRootElement
 public class SedDokument implements SaksopplysningDokument {
@@ -146,5 +150,23 @@ public class SedDokument implements SaksopplysningDokument {
 
     public void setErElektronisk(boolean erElektronisk) {
         this.erElektronisk = erElektronisk;
+    }
+
+    public Lovvalgsperiode opprettInnvilgetLovvalgsperiode() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(getLovvalgBestemmelse());
+        lovvalgsperiode.setFom(getLovvalgsperiode().getFom());
+        lovvalgsperiode.setTom(getLovvalgsperiode().getTom());
+        lovvalgsperiode.setLovvalgsland(getLovvalgslandKode());
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        if (Landkoder.NO != lovvalgslandKode) {
+            lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
+            lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
+        } else {
+            lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
+            lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
+        }
+
+        return lovvalgsperiode;
     }
 }

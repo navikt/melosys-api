@@ -68,6 +68,10 @@ public class GsakService implements GsakFasade {
 
     private final OppgaveConsumer oppgaveConsumer;
 
+    private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_MED = EnumSet.of(
+        SOEKNAD, SOEKNAD_IKKE_YRKESAKTIV, VURDER_TRYGDETID, BESLUTNING_LOVVALG_NORGE
+    );
+
     private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_UFM = EnumSet.of(
         REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
         ANMODNING_OM_UNNTAK_HOVEDREGEL, BESLUTNING_LOVVALG_ANNET_LAND
@@ -83,7 +87,7 @@ public class GsakService implements GsakFasade {
     public Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
         SakDto sakDto = new SakDto();
 
-        if (SOEKNAD == behandlingstype || SOEKNAD_IKKE_YRKESAKTIV == behandlingstype || VURDER_TRYGDETID == behandlingstype) {
+        if (GYLDIGE_BEHANDLINGSTYPER_MED.contains(behandlingstype)) {
             sakDto.setTema(Tema.MED.getKode());
         } else if (GYLDIGE_BEHANDLINGSTYPER_UFM.contains(behandlingstype)) {
             sakDto.setTema(Tema.UFM.getKode());

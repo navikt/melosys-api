@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.steg.aou.inn.svar;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -10,9 +12,9 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
-import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +24,13 @@ import org.springframework.stereotype.Component;
 public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
-    private final OppdaterMedlFelles oppdaterMedlFelles;
+    private final MedlPeriodeService medlPeriodeService;
     private final MedlFasade medlFasade;
     private final BehandlingService behandlingService;
 
     @Autowired
-    public OppdaterMedl(OppdaterMedlFelles oppdaterMedlFelles, MedlFasade medlFasade, BehandlingService behandlingService) {
-        this.oppdaterMedlFelles = oppdaterMedlFelles;
+    public OppdaterMedl(MedlPeriodeService medlPeriodeService, MedlFasade medlFasade, BehandlingService behandlingService) {
+        this.medlPeriodeService = medlPeriodeService;
         this.medlFasade = medlFasade;
         this.behandlingService = behandlingService;
     }
@@ -43,7 +45,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
 
-        Lovvalgsperiode lovvalgsperiode = oppdaterMedlFelles.hentLovvalgsperiode(behandling);
+        Lovvalgsperiode lovvalgsperiode = medlPeriodeService.hentLovvalgsperiode(behandling);
         if (lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET) {
             medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.SED);
             log.info("Lovvalgsperiode for behandling {} satt til endelig i Medl", behandling.getId());

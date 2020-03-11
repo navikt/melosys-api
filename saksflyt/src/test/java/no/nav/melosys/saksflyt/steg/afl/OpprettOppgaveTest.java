@@ -1,13 +1,10 @@
-package no.nav.melosys.saksflyt.steg.aou.inn;
+package no.nav.melosys.saksflyt.steg.afl;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,10 +20,10 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettOppgaveTest {
 
+    private OpprettOppgave opprettOppgave;
+
     @Mock
     private OppgaveService oppgaveService;
-
-    private OpprettOppgave opprettOppgave;
 
     @Before
     public void setup() {
@@ -34,18 +31,14 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfør() throws FunksjonellException, TekniskException {
-        final String journalpostID = "3124";
-        final String aktørID = "432523";
+    public void utfør() throws MelosysException {
+        final String aktørID = "32313";
+        final String journalpostID = "412423";
+
+        Behandling behandling = new Behandling();
 
         Prosessinstans prosessinstans = new Prosessinstans();
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("123");
-        behandling.setFagsak(fagsak);
         prosessinstans.setBehandling(behandling);
-
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
 
