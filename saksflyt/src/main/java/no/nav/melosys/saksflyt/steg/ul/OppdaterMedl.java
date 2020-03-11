@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.UL_OPPDATER_MEDL;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.UL_SEND_ORIENTERINGSBREV;
 
-@Component
+@Component("ULOppdaterMedl")
 public class OppdaterMedl extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
