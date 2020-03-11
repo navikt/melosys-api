@@ -9,6 +9,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,8 @@ public class OppdaterOppgaveTest {
 
     @Mock
     private GsakFasade gsakFasade;
+    @Mock
+    private OppgaveService oppgaveService;
 
     @Captor
     private ArgumentCaptor<OppgaveOppdatering> oppgaveCaptor;
@@ -40,7 +43,7 @@ public class OppdaterOppgaveTest {
 
     @Before
     public void setUp() {
-        agent = new OppdaterOppgave(gsakFasade);
+        agent = new OppdaterOppgave(gsakFasade, oppgaveService);
         Behandling behandling = new Behandling();
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
         behandling.setDokumentasjonSvarfristDato(Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault())));
@@ -57,12 +60,12 @@ public class OppdaterOppgaveTest {
         LocalDate enMånedFremITid = LocalDate.now().plusMonths(1L);
 
         Oppgave oppgave = lagOppgave(enMånedFremITid, null);
-        when(gsakFasade.hentOppgaveMedSaksnummer(anyString())).thenReturn(oppgave);
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
 
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
 
         agent.utførSteg(prosessinstans);
-        verify(gsakFasade).hentOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(gsakFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(toMånederFremITid);
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);
@@ -76,10 +79,10 @@ public class OppdaterOppgaveTest {
         LocalDate treMånederFremITid = LocalDate.now().plusMonths(3L);
 
         Oppgave oppgave = lagOppgave(treMånederFremITid, eksisterendeBeskrivelse);
-        when(gsakFasade.hentOppgaveMedSaksnummer(anyString())).thenReturn(oppgave);
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
 
         agent.utførSteg(prosessinstans);
-        verify(gsakFasade).hentOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(gsakFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isNull();
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);

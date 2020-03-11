@@ -3,8 +3,10 @@ package no.nav.melosys.saksflyt.steg.afl;
 import java.util.Collection;
 import java.util.Collections;
 
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -15,6 +17,7 @@ import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,12 +31,14 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private final MedlPeriodeService medlPeriodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final SaksopplysningerService saksopplysningerService;
+    private final FagsakService fagsakService;
 
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService, SaksopplysningerService saksopplysningerService) {
+    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService, SaksopplysningerService saksopplysningerService, FagsakService fagsakService) {
         this.medlFasade = medlFasade;
         this.medlPeriodeService = medlPeriodeService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.saksopplysningerService = saksopplysningerService;
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -48,6 +53,8 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
         SedDokument sedDokument = saksopplysningerService.hentSedOpplysninger(prosessinstans.getBehandling().getId());
+        Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, prosessinstans.getBehandling());
 
         if (lovvalgsperioder.isEmpty()) {
             lovvalgsperioder = lovvalgsperiodeService.lagreLovvalgsperioder(

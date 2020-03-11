@@ -60,7 +60,7 @@ public class OppgaveTjeneste {
                 dto.setSaksnummer(oppgave.getSaksnummer());
             }
 
-            Behandling behandling = oppgaveService.hentAktivBehandling(oppgave.getSaksnummer());
+            Behandling behandling = oppgaveService.hentSistAktiveBehandling(oppgave.getSaksnummer());
             dto.setBehandlingID(behandling.getId());
             dto.setBehandlingstype(behandling.getType().getKode());
             dto.setJournalpostID(oppgave.getJournalpostId());

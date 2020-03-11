@@ -7,6 +7,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,6 +35,8 @@ public class TildelBehandlingsoppgaveTest {
 
     @Mock
     private GsakFasade gsakFasade;
+    @Mock
+    private OppgaveService oppgaveService;
 
     private TildelBehandlingsoppgave tildelBehandlingsoppgave;
 
@@ -41,7 +44,7 @@ public class TildelBehandlingsoppgaveTest {
 
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
-        tildelBehandlingsoppgave = new TildelBehandlingsoppgave(gsakFasade);
+        tildelBehandlingsoppgave = new TildelBehandlingsoppgave(gsakFasade, oppgaveService);
 
         prosessinstans = new Prosessinstans();
         prosessinstans.setSteg(ProsessSteg.JFR_TILDEL_BEHANDLINGSOPPGAVE);
@@ -51,7 +54,7 @@ public class TildelBehandlingsoppgaveTest {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId(OPPGAVE_ID);
 
-        when(gsakFasade.hentOppgaveMedSaksnummer(eq(SAKSNUMMER))).thenReturn(oppgaveBuilder.build());
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(eq(SAKSNUMMER))).thenReturn(oppgaveBuilder.build());
     }
 
     @Test
@@ -59,7 +62,7 @@ public class TildelBehandlingsoppgaveTest {
         tildelBehandlingsoppgave.utførSteg(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-        verify(gsakFasade).hentOppgaveMedSaksnummer(eq(SAKSNUMMER));
+        verify(oppgaveService).hentOppgaveMedFagsaksnummer(eq(SAKSNUMMER));
         verify(gsakFasade).tildelOppgave(eq(OPPGAVE_ID), eq(SAKSBEHANDLER));
     }
 }

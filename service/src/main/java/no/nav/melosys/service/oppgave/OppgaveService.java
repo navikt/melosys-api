@@ -91,38 +91,47 @@ public class OppgaveService {
     }
 
     public Optional<Oppgave> finnOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-        try {
-            return Optional.of(gsakFasade.hentOppgaveMedSaksnummer(saksnummer));
-        } catch (IkkeFunnetException e) {
-            log.warn(e.getMessage());
+
+        List<Oppgave> oppgaver = gsakFasade.finnOppgaverMedSaksnummer(saksnummer);
+
+        if (!oppgaver.isEmpty()) {
+            if (oppgaver.size() > 1) {
+                throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
+            }
+            return Optional.of(oppgaver.get(0));
+        } else {
             return Optional.empty();
         }
     }
 
     public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-        return gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
+        return finnOppgaveMedFagsaksnummer(saksnummer)
+            .orElseThrow(() -> new TekniskException("Finner ingen oppgave med saksnummer " + saksnummer));
     }
 
     public Oppgave hentOppgaveMedOppgaveID(String oppgaveID) throws FunksjonellException, TekniskException {
         return gsakFasade.hentOppgave(oppgaveID);
     }
 
-    public Behandling hentAktivBehandling(String saksnummer) throws IkkeFunnetException, TekniskException {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        return Optional.ofNullable(fagsak.getAktivBehandling())
-            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"));
+    public Behandling hentSistAktiveBehandling(String saksnummer) throws FunksjonellException, TekniskException {
+        return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
     public void opprettBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
-            .setTilordnetRessurs(tilordnetRessurs)
-            .setJournalpostId(journalpostID)
-            .setAktørId(aktørID)
-            .setSaksnummer(behandling.getFagsak().getSaksnummer())
-            .build();
 
-        String oppgaveID = gsakFasade.opprettOppgave(oppgave);
-        log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
+        Optional<Oppgave> eksisterendeOppgave = finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+
+        if (eksisterendeOppgave.isEmpty()) {
+            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
+                .setTilordnetRessurs(tilordnetRessurs)
+                .setJournalpostId(journalpostID)
+                .setAktørId(aktørID)
+                .setSaksnummer(behandling.getFagsak().getSaksnummer())
+                .build();
+
+            String oppgaveID = gsakFasade.opprettOppgave(oppgave);
+            log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
+        }
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
@@ -156,10 +165,7 @@ public class OppgaveService {
             behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
             behOppgaveDto.setSakstype(fagsak.getType());
 
-            Behandling behandling = fagsak.getAktivBehandling();
-            if (behandling == null) {
-                throw new TekniskException("Det finnes ingen aktiv behandling for " + fagsak.getSaksnummer() + ".");
-            }
+            Behandling behandling = fagsak.hentSistAktiveBehandling();
             behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 

@@ -38,11 +38,6 @@ public interface GsakFasade {
     Set<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
 
     /**
-     * Finner Oppgave med gitt saksnummer.
-     */
-    Oppgave hentOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException;
-
-    /**
      * Henter tema for aktuell saksnummer
      */
     Tema hentTemaFraSak(Long gsakSaksnummer) throws TekniskException, FunksjonellException;

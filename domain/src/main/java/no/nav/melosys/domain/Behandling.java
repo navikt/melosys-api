@@ -177,7 +177,8 @@ public class Behandling extends RegistreringsInfo {
     public boolean erRedigerbar() {
         return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK
                     || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && type != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV)
-                    || status == Behandlingsstatus.AVSLUTTET);
+                    || status == Behandlingsstatus.AVSLUTTET
+                    || status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
     }
 
     public boolean erVenterForDokumentasjon() {

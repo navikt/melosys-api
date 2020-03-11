@@ -8,6 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,12 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(TildelBehandlingsoppgave.class);
 
     private final GsakFasade gsakFasade;
+    private final OppgaveService oppgaveService;
 
     @Autowired
-    public TildelBehandlingsoppgave(@Qualifier("system") GsakFasade gsakFasade) {
+    public TildelBehandlingsoppgave(@Qualifier("system") GsakFasade gsakFasade, @Qualifier("system") OppgaveService oppgaveService) {
         this.gsakFasade = gsakFasade;
+        this.oppgaveService = oppgaveService;
     }
 
     @Override
@@ -38,7 +41,7 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
 
         log.info("Henter behandlingsoppgave for fagsak {}", saksnummer);
-        Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
         String behandlingsoppgaveId = oppgave.getOppgaveId();
 
         log.info("Tildeler behandlingsoppgave {} til saksbehandler {}", behandlingsoppgaveId, saksbehandler);

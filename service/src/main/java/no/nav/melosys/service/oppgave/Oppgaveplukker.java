@@ -39,14 +39,16 @@ public class Oppgaveplukker {
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
+    private final OppgaveService oppgaveService;
 
     @Autowired
     public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
-                          FagsakService fagsakService, BehandlingService behandlingService) {
+                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
         this.gsakFasade = gsakFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
+        this.oppgaveService = oppgaveService;
     }
 
     /**
@@ -81,7 +83,7 @@ public class Oppgaveplukker {
     private void oppdaterBehandlingsstatus(String saksnummer) throws IkkeFunnetException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling.getStatus() == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.getStatus() == Behandlingsstatus.OPPRETTET) {
+        if (behandling != null && (behandling.getStatus() == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.getStatus() == Behandlingsstatus.OPPRETTET)) {
             behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
             behandlingService.lagre(behandling);
         }
@@ -107,7 +109,7 @@ public class Oppgaveplukker {
         return Behandlingstema.valueOf(KodeverkUtils.dekod(Sakstyper.class, sakstype).name());
     }
 
-    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException, IkkeFunnetException {
+    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException, FunksjonellException {
         Iterator<Oppgave> iter = oppgaver.iterator();
         while (iter.hasNext()) {
             Oppgave oppgave = iter.next();
@@ -117,11 +119,8 @@ public class Oppgaveplukker {
                 log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
                 throw new TekniskException("Fant ikke fagsak " + saksnummer);
             }
-            Behandling behandling = fagsak.getAktivBehandling();
-            if (behandling == null) {
-                throw new TekniskException("Fant ingen aktiv behandling på fagsak " + saksnummer);
-            }
 
+            Behandling behandling = fagsak.hentSistAktiveBehandling();
             if (behandling.erVenterForDokumentasjon()) {
                 if (behandling.getDokumentasjonSvarfristDato() == null) {
                     log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.", behandling.getId(), saksnummer);
@@ -138,7 +137,7 @@ public class Oppgaveplukker {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(tilbakelegging.getBehandlingID());
 
         Fagsak fagsak = behandling.getFagsak();
-        Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(fagsak.getSaksnummer());
 
         String oppgaveId = oppgave.getOppgaveId();
         if (!tilbakelegging.isVenterPåDokumentasjon()) {

@@ -283,20 +283,6 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Oppgave hentOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
-        List<Oppgave> oppgaver = finnOppgaverMedSaksnummer(saksnummer);
-
-        if (!oppgaver.isEmpty()) {
-            if (oppgaver.size() > 1) {
-                throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
-            }
-            return oppgaver.get(0);
-        } else {
-            throw new IkkeFunnetException("Det finnes ingen aktive behandlingsoppgaver for sak " + saksnummer);
-        }
-    }
-
-    @Override
     public List<Oppgave> finnOppgaverMedBrukerID(String aktørId) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)

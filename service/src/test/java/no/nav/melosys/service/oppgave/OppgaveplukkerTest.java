@@ -55,6 +55,8 @@ public class OppgaveplukkerTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private OppgaveService oppgaveService;
 
 
     private Oppgaveplukker oppgaveplukker;
@@ -65,7 +67,7 @@ public class OppgaveplukkerTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService);
+        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService, oppgaveService);
 
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
@@ -233,7 +235,7 @@ public class OppgaveplukkerTest {
         final String saksbehandlerID = "test";
         final String begrunnelse = "Oppgaven er kjedelig";
 
-        when(gsakFasade.hentOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
@@ -260,7 +262,7 @@ public class OppgaveplukkerTest {
         oppgaveBuilder.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
 
-        when(gsakFasade.hentOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
         tilbakelegging.setBehandlingID(BEHANDLING_ID);

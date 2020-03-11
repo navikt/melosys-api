@@ -11,6 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,12 @@ public class OppdaterOppgave extends AbstraktStegBehandler {
     private static final String ANMODNING_OM_UNNTAK_SENDT = "Anmodning om unntak er sendt utenlandsk trygdemyndighet.";
 
     private final GsakFasade gsakFasade;
+    private final OppgaveService oppgaveService;
 
     @Autowired
-    public OppdaterOppgave(@Qualifier("system") GsakFasade gsakFasade) {
+    public OppdaterOppgave(@Qualifier("system") GsakFasade gsakFasade, @Qualifier("system") OppgaveService oppgaveService) {
         this.gsakFasade = gsakFasade;
+        this.oppgaveService = oppgaveService;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class OppdaterOppgave extends AbstraktStegBehandler {
         LocalDate frist = LocalDate.from(prosessinstans.getBehandling().getDokumentasjonSvarfristDato().atZone(ZoneId.systemDefault()).toLocalDate());
 
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
-        Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
 
         OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
             .beskrivelse(ANMODNING_OM_UNNTAK_SENDT)
