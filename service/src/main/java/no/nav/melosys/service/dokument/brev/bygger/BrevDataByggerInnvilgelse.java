@@ -76,6 +76,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         brevdata.personNavn = dataGrunnlag.getPerson().sammensattNavn;
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
         brevdata.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
+        brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getBehandlingsgrunnlagData()).getBeskrivelse();
 
         brevdata.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
             .findFirst()

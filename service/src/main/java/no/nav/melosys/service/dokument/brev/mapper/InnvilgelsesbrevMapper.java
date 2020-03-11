@@ -61,6 +61,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
 
         fag.setArbeidsland(brevdata.arbeidsland);
+        fag.setBostedsland(brevdata.bostedsland);
         fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
 
         BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
