@@ -12,6 +12,7 @@ import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
@@ -223,6 +224,23 @@ public final class OppgaveFasadeImplTest {
             Behandlingstyper mappetType = OppgaveFasadeImpl.hentBehandlingstyper(hentFellesKode(behandlingstype));
             assertThat(mappetType).isEqualTo(behandlingstype);
         }
+    }
+
+    @Test
+    public void testMappingMellomDTOogDomainForOppgave() throws MelosysException {
+        OppgaveDto oppgaveDto = new OppgaveDto();
+        oppgaveDto.setId("1234");
+        oppgaveDto.setSaksreferanse("456");
+        oppgaveDto.setOppgavetype("BEH_SAK_MK");
+        oppgaveDto.setTema("MED");
+        oppgaveDto.setSaksreferanse("MEL-111");
+
+        when(oppgaveConsumer.hentOppgave("1234")).thenReturn(oppgaveDto);
+        Oppgave oppgave = oppgaveFasadeImpl.hentOppgave("1234");
+        assertThat(oppgave.getOppgaveId()).isEqualTo("1234");
+        assertThat(oppgave.getSaksnummer()).isEqualTo("MEL-111");
+        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.valueOf("BEH_SAK_MK"));
+        assertThat(oppgave.getTema()).isEqualTo(Tema.valueOf("MED"));
     }
 
     private Oppgave lagOppgave() {

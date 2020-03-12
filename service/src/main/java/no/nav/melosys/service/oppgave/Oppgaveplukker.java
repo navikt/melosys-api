@@ -75,7 +75,7 @@ public class Oppgaveplukker {
         if (valg.isPresent()) {
             // Tildeler oppgaven
             oppdaterBehandlingsstatus(valg.get().getSaksnummer());
-            oppgaveFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
+            oppgaveService.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
         }
         return valg;
     }

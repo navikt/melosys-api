@@ -13,6 +13,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -132,6 +133,18 @@ public class OppgaveService {
             String oppgaveID = oppgaveFasade.opprettOppgave(oppgave);
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
         }
+    }
+
+    public String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
+        return oppgaveFasade.opprettOppgave(oppgave);
+    }
+
+    public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
+        oppgaveFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
+    }
+
+    public void tildelOppgave(String oppgaveID, String saksbehandler) throws FunksjonellException, TekniskException {
+        oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {

@@ -148,11 +148,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public void tildelOppgave(String oppgaveId, String saksbehandler) throws FunksjonellException, TekniskException {
-        oppdaterOppgave(oppgaveId, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
-    }
-
-    @Override
     public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
         OppgaveDto oppgaveDto = hentOppgaveDto(oppgaveID);
 

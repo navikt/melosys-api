@@ -10,7 +10,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.SakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 public class OpprettJournalfoeringsOppgaveTest {
 
     @Mock
-    private OppgaveFasade oppgaveFasade;
+    private OppgaveService oppgaveService;
     @Mock
     private SakService sakService;
 
@@ -44,7 +44,7 @@ public class OpprettJournalfoeringsOppgaveTest {
 
     @Before
     public void setup() {
-        opprettJournalfoeringsOppgave = new OpprettJournalfoeringsOppgave(oppgaveFasade, sakService);
+        opprettJournalfoeringsOppgave = new OpprettJournalfoeringsOppgave(oppgaveService, sakService);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class OpprettJournalfoeringsOppgaveTest {
         when(sakService.hentTemaFraSak(eq(gsakSaksnummer))).thenReturn(tema);
 
         opprettJournalfoeringsOppgave.utfør(prosessinstans);
-        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         Oppgave oppgave = oppgaveCaptor.getValue();
         assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
         assertThat(oppgave.getTema()).isEqualTo(Tema.UFM);
@@ -78,7 +78,7 @@ public class OpprettJournalfoeringsOppgaveTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         opprettJournalfoeringsOppgave.utfør(prosessinstans);
-        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         Oppgave oppgave = oppgaveCaptor.getValue();
         assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
         assertThat(oppgave.getTema()).isEqualTo(Tema.MED);

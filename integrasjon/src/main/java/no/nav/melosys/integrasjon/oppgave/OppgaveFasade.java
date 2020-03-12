@@ -26,8 +26,6 @@ public interface OppgaveFasade {
                                                   Behandlingstema behandlingstema
     ) throws TekniskException, FunksjonellException;
 
-    void tildelOppgave(String oppgaveId, String saksbehandler) throws FunksjonellException, TekniskException;
-
     void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException;
 
     /**

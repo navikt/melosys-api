@@ -15,9 +15,9 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
@@ -34,15 +34,17 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
 
     private final FagsakService fagsakService;
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final OppgaveFasade oppgaveFasade;
+    private final OppgaveService oppgaveService;
 
     private static final String MOTTATT_SED_BESKRIVELSE = "Mottatt svar på A001: SED %s";
 
     @Autowired
-    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService, AnmodningsperiodeService anmodningsperiodeService, @Qualifier("system") OppgaveFasade oppgaveFasade) {
+    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService,
+                                            AnmodningsperiodeService anmodningsperiodeService,
+                                            @Qualifier("system") OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.oppgaveFasade = oppgaveFasade;
+        this.oppgaveService = oppgaveService;
     }
 
     @Override
@@ -75,11 +77,11 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        Optional<Oppgave> oppgave = oppgaveFasade.finnOppgaverMedSaksnummer(behandling.getFagsak().getSaksnummer()).stream().findFirst();
+        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         if (oppgave.isEmpty()) {
             opprettOppgave(behandling, sedType);
         } else {
-            oppgaveFasade.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().beskrivelse(lagMottattSedBeskrivelse(sedType)).build());
+            oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().beskrivelse(lagMottattSedBeskrivelse(sedType)).build());
         }
     }
 
@@ -92,7 +94,7 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
             .setBeskrivelse(lagMottattSedBeskrivelse(sedType));
 
-        String oppgaveID = oppgaveFasade.opprettOppgave(oppgaveBuilder.build());
+        String oppgaveID = oppgaveService.opprettOppgave(oppgaveBuilder.build());
         log.info("Opprettet behandlingsoppgave med id {} for behandling {}", oppgaveID, behandling.getId());
     }
 

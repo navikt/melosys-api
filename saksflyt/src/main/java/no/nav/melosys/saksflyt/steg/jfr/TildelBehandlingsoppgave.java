@@ -6,7 +6,6 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
@@ -20,12 +19,10 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(TildelBehandlingsoppgave.class);
 
-    private final OppgaveFasade oppgaveFasade;
     private final OppgaveService oppgaveService;
 
     @Autowired
-    public TildelBehandlingsoppgave(@Qualifier("system") OppgaveFasade oppgaveFasade, @Qualifier("system") OppgaveService oppgaveService) {
-        this.oppgaveFasade = oppgaveFasade;
+    public TildelBehandlingsoppgave(@Qualifier("system") OppgaveService oppgaveService) {
         this.oppgaveService = oppgaveService;
     }
 
@@ -45,7 +42,7 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
         String behandlingsoppgaveId = oppgave.getOppgaveId();
 
         log.info("Tildeler behandlingsoppgave {} til saksbehandler {}", behandlingsoppgaveId, saksbehandler);
-        oppgaveFasade.tildelOppgave(behandlingsoppgaveId, saksbehandler);
+        oppgaveService.tildelOppgave(behandlingsoppgaveId, saksbehandler);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Prosessinstans {} har tildelt behandlingsoppgave for fagsak {} til saksbehandler {}",

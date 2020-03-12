@@ -9,7 +9,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettAvgiftsoppgaveTest {
     @Mock
-    private OppgaveFasade oppgaveFasade;
+    private OppgaveService oppgaveService;
     @Captor
     private ArgumentCaptor<Oppgave> oppgave;
 
@@ -35,14 +35,14 @@ public class OpprettAvgiftsoppgaveTest {
 
     @Before
     public void setUp() {
-        opprettAvgiftsoppgave = new OpprettAvgiftsoppgave(oppgaveFasade);
+        opprettAvgiftsoppgave = new OpprettAvgiftsoppgave(oppgaveService);
     }
 
     @Test
     public void utfør_oppretterRiktigOppgave() throws FunksjonellException, TekniskException {
         opprettAvgiftsoppgave.utfør(lagProsessinstans());
 
-        verify(oppgaveFasade).opprettOppgave(oppgave.capture());
+        verify(oppgaveService).opprettOppgave(oppgave.capture());
         assertThat(oppgave.getValue().getTema()).isEqualTo(Tema.TRY);
         assertThat(oppgave.getValue().getOppgavetype()).isEqualTo(Oppgavetyper.VUR);
         assertThat(oppgave.getValue().getJournalpostId()).isNotBlank();
