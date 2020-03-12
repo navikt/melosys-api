@@ -6,14 +6,13 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sak.SakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
@@ -32,12 +31,12 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettGsakSak.class);
 
     private final FagsakRepository fagsakRepository;
-    private final GsakFasade gsakFasade;
+    private final SakService sakService;
 
     @Autowired
-    public OpprettGsakSak(@Qualifier("system")GsakFasade gsakFasade, FagsakRepository fagsakRepository) {
+    public OpprettGsakSak(FagsakRepository fagsakRepository, SakService sakService) {
         this.fagsakRepository = fagsakRepository;
-        this.gsakFasade = gsakFasade;
+        this.sakService = sakService;
         log.info("OpprettGsakSak initialisert");
     }
 
@@ -61,7 +60,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
             return;
         }
 
-        Long gsakSakId = gsakFasade.opprettSak(saksnummer, behandlingstype, aktørId);
+        Long gsakSakId = sakService.opprettSak(saksnummer, behandlingstype, aktørId);
         fagsak.setGsakSaksnummer(gsakSakId);
         fagsakRepository.save(fagsak);
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);

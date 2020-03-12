@@ -7,7 +7,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakService;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,9 +22,8 @@ public class OppgaveMappingMellomDTOogDomainTest {
 
     @Before
     public void setUp() {
-        SakConsumer sakConsumerMock = mock(SakConsumer.class);
         oppgaveConsumerMock = mock(OppgaveConsumer.class);
-        gsakFasade = new GsakService(sakConsumerMock,oppgaveConsumerMock);
+        gsakFasade = new GsakService(oppgaveConsumerMock);
     }
 
     @Test

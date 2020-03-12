@@ -7,9 +7,9 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.gsak.OpprettGsakSak;
+import no.nav.melosys.service.sak.SakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class OpprettGsakSakTest {
 
     @Mock
-    private GsakFasade gsakFasade;
+    private SakService sakService;
 
     @Mock
     private FagsakRepository fagsakRepository;
@@ -33,7 +33,7 @@ public class OpprettGsakSakTest {
 
     @Before
     public void setUp() {
-        agent = new OpprettGsakSak(gsakFasade, fagsakRepository);
+        agent = new OpprettGsakSak(fagsakRepository, sakService);
     }
 
     @Test
@@ -46,14 +46,14 @@ public class OpprettGsakSakTest {
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstyper);
-        when(gsakFasade.opprettSak(anyString(), eq(behandlingstyper), anyString())).thenReturn(123L);
+        when(sakService.opprettSak(anyString(), eq(behandlingstyper), anyString())).thenReturn(123L);
 
         Fagsak fagsak = new Fagsak();
         when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
 
         agent.utførSteg(prosessinstans);
 
-        verify(gsakFasade, times(1)).opprettSak(saksnummer, behandlingstyper, aktørID);
+        verify(sakService, times(1)).opprettSak(saksnummer, behandlingstyper, aktørID);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
         Assert.notNull(fagsak.getGsakSaksnummer(), "Fagsak skal ha fått Gsak saksnummert");
     }

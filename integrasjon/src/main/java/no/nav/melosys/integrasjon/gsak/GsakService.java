@@ -1,7 +1,10 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,14 +20,11 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
-import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
-import no.nav.melosys.integrasjon.gsak.sak.dto.SakDto;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,53 +64,11 @@ public class GsakService implements GsakFasade {
             .put(VURDER_TRYGDETID, "ae0236")
             .build();
 
-    private final SakConsumer sakConsumer;
-
     private final OppgaveConsumer oppgaveConsumer;
 
-    private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_MED = EnumSet.of(
-        SOEKNAD, SOEKNAD_IKKE_YRKESAKTIV, VURDER_TRYGDETID, BESLUTNING_LOVVALG_NORGE
-    );
-
-    private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_UFM = EnumSet.of(
-        REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
-        ANMODNING_OM_UNNTAK_HOVEDREGEL, BESLUTNING_LOVVALG_ANNET_LAND
-    );
-
     @Autowired
-    public GsakService(SakConsumer sakConsumer, OppgaveConsumer oppgaveConsumer) {
-        this.sakConsumer = sakConsumer;
+    public GsakService(OppgaveConsumer oppgaveConsumer) {
         this.oppgaveConsumer = oppgaveConsumer;
-    }
-
-    @Override
-    public Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
-        SakDto sakDto = new SakDto();
-
-        if (GYLDIGE_BEHANDLINGSTYPER_MED.contains(behandlingstype)) {
-            sakDto.setTema(Tema.MED.getKode());
-        } else if (GYLDIGE_BEHANDLINGSTYPER_UFM.contains(behandlingstype)) {
-            sakDto.setTema(Tema.UFM.getKode());
-        } else {
-            throw new TekniskException("Behandlingtype " + behandlingstype.getBeskrivelse() + " er ikke støttet.");
-        }
-
-        sakDto.setAktørId(aktørId);
-        sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
-        sakDto.setSaksnummer(saksnummer);
-        sakDto = sakConsumer.opprettSak(sakDto);
-
-        if (sakDto.getId() == null) {
-            log.error("Feil ved oppretting av sak i GSAK.");
-            throw new IntegrasjonException("Feil ved oppretting av sak i GSAK.");
-        }
-        log.info("Sak opprettet i GSAK med saksnummer: {}", sakDto.getId());
-        return sakDto.getId();
-    }
-
-    @Override
-    public Tema hentTemaFraSak(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
-        return Tema.valueOf(sakConsumer.hentSak(gsakSaksnummer).getTema());
     }
 
     @Override

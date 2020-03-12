@@ -18,7 +18,6 @@ import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
-import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,8 +37,6 @@ public final class GsakServiceTest {
 
     @Mock
     private OppgaveConsumer oppgaveConsumer;
-    @Mock
-    private SakConsumer sakConsumer;
     @Captor
     private ArgumentCaptor<OpprettOppgaveDto> opprettOppgaveDtoCaptor;
     @Captor
@@ -51,7 +48,7 @@ public final class GsakServiceTest {
 
     @Before
     public void setup() {
-        gsakService = new GsakService(sakConsumer, oppgaveConsumer);
+        gsakService = new GsakService(oppgaveConsumer);
     }
 
     @Test

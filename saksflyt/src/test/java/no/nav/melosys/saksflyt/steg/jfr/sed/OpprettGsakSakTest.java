@@ -2,12 +2,12 @@ package no.nav.melosys.saksflyt.steg.jfr.sed;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.SakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 public class OpprettGsakSakTest {
 
     @Mock
-    private GsakFasade gsakFasade;
+    private SakService sakService;
     @Mock
     private FagsakService fagsakService;
 
@@ -32,7 +32,7 @@ public class OpprettGsakSakTest {
 
     @Before
     public void setup() {
-        opprettGsakSak = new OpprettGsakSak(gsakFasade, fagsakService);
+        opprettGsakSak = new OpprettGsakSak(fagsakService, sakService);
     }
 
     @Test
@@ -57,10 +57,10 @@ public class OpprettGsakSakTest {
         Fagsak fagsakIDb = new Fagsak();
         fagsakIDb.setSaksnummer(saksnummer);
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakIDb);
-        when(gsakFasade.opprettSak(any(), any(), any())).thenReturn(gsakSaksnummer);
+        when(sakService.opprettSak(any(), any(), any())).thenReturn(gsakSaksnummer);
         opprettGsakSak.utfør(prosessinstans);
 
-        verify(gsakFasade).opprettSak(
+        verify(sakService).opprettSak(
             eq(saksnummer),
             eq(behandlingstype),
             eq(aktørID)

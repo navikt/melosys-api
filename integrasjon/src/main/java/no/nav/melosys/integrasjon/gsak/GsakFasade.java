@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.gsak;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
@@ -38,11 +37,6 @@ public interface GsakFasade {
     Set<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
 
     /**
-     * Henter tema for aktuell saksnummer
-     */
-    Tema hentTemaFraSak(Long gsakSaksnummer) throws TekniskException, FunksjonellException;
-
-    /**
      * Finner oppgaver relatert til en bruker.
      * Oppgaver sorteres stigende etter frist.
      */
@@ -67,9 +61,4 @@ public interface GsakFasade {
      * Legger tilbake en oppgave i Oppgave
      */
     void leggTilbakeOppgave(String oppgaveId) throws FunksjonellException, TekniskException;
-
-    /**
-     * Oppretter en sak i Oppgave
-     */
-    Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws TekniskException, FunksjonellException;
 }
