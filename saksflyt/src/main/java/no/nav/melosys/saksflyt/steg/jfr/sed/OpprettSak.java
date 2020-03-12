@@ -10,13 +10,13 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.SakService;
 import org.springframework.stereotype.Component;
 
-@Component("SedMottakOpprettGsakSak")
-public class OpprettGsakSak extends AbstraktStegBehandler {
+@Component("SedMottakOpprettSak")
+public class OpprettSak extends AbstraktStegBehandler {
 
     private final FagsakService fagsakService;
     private final SakService sakService;
 
-    public OpprettGsakSak(FagsakService fagsakService, SakService sakService) {
+    public OpprettSak(FagsakService fagsakService, SakService sakService) {
         this.sakService = sakService;
         this.fagsakService = fagsakService;
     }

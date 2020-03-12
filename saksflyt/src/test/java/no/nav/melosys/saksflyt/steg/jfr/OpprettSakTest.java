@@ -8,7 +8,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.saksflyt.steg.gsak.OpprettGsakSak;
 import no.nav.melosys.service.sak.SakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpprettGsakSakTest {
+public class OpprettSakTest {
 
     @Mock
     private SakService sakService;
@@ -28,11 +27,11 @@ public class OpprettGsakSakTest {
     @Mock
     private FagsakRepository fagsakRepository;
 
-    private OpprettGsakSak agent;
+    private OpprettSak agent;
 
     @Before
     public void setUp() {
-        agent = new OpprettGsakSak(fagsakRepository, sakService);
+        agent = new OpprettSak(fagsakRepository, sakService);
     }
 
     @Test

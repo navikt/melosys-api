@@ -21,18 +21,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpprettGsakSakTest {
+public class OpprettSakTest {
 
     @Mock
     private SakService sakService;
     @Mock
     private FagsakService fagsakService;
 
-    private OpprettGsakSak opprettGsakSak;
+    private OpprettSak opprettSak;
 
     @Before
     public void setup() {
-        opprettGsakSak = new OpprettGsakSak(fagsakService, sakService);
+        opprettSak = new OpprettSak(fagsakService, sakService);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class OpprettGsakSakTest {
         fagsakIDb.setSaksnummer(saksnummer);
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakIDb);
         when(sakService.opprettSak(any(), any(), any())).thenReturn(gsakSaksnummer);
-        opprettGsakSak.utfør(prosessinstans);
+        opprettSak.utfør(prosessinstans);
 
         verify(sakService).opprettSak(
             eq(saksnummer),

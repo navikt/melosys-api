@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.gsak;
+package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;

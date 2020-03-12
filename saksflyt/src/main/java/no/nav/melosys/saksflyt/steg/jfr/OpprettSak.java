@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.gsak;
+package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -26,15 +26,15 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.STATUS_BEH_OPPR;
  * JFR_OPPRETT_GSAK_SAK -> STATUS_BEH_OPPR eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OpprettGsakSak extends AbstraktStegBehandler {
+public class OpprettSak extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OpprettGsakSak.class);
+    private static final Logger log = LoggerFactory.getLogger(OpprettSak.class);
 
     private final FagsakRepository fagsakRepository;
     private final SakService sakService;
 
     @Autowired
-    public OpprettGsakSak(FagsakRepository fagsakRepository, SakService sakService) {
+    public OpprettSak(FagsakRepository fagsakRepository, SakService sakService) {
         this.fagsakRepository = fagsakRepository;
         this.sakService = sakService;
         log.info("OpprettGsakSak initialisert");

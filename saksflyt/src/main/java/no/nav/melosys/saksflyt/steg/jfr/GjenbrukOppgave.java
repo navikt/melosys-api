@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.gsak;
+package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.Optional;
 
