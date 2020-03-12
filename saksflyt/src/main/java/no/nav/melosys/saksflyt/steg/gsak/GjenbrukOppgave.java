@@ -9,7 +9,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.slf4j.Logger;
@@ -25,11 +25,11 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.GJENBRUK_OPPGAVE;
 public class GjenbrukOppgave extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(GjenbrukOppgave.class);
 
-    private final GsakFasade gsakFasade;
+    private final OppgaveFasade oppgaveFasade;
 
     @Autowired
-    public GjenbrukOppgave(@Qualifier("system") GsakFasade gsakFasade) {
-        this.gsakFasade = gsakFasade;
+    public GjenbrukOppgave(@Qualifier("system") OppgaveFasade oppgaveFasade) {
+        this.oppgaveFasade = oppgaveFasade;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class GjenbrukOppgave extends AbstraktStegBehandler {
         final Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
         final boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
 
-        final Oppgave gjenbruktOppgave = gsakFasade.hentOppgave(oppgaveID);
+        final Oppgave gjenbruktOppgave = oppgaveFasade.hentOppgave(oppgaveID);
 
         final Oppgave nyOppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstype)
             .setSaksnummer(saksnummer)
@@ -54,7 +54,7 @@ public class GjenbrukOppgave extends AbstraktStegBehandler {
             .setBeskrivelse(gjenbruktOppgave.getBeskrivelse())
             .build();
 
-        final String opprettetOppgaveID = gsakFasade.opprettOppgave(nyOppgave);
+        final String opprettetOppgaveID = oppgaveFasade.opprettOppgave(nyOppgave);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("PID {} har opprettet ny oppgave med ID {} til sak {}, med beskrivelse fra oppgave {}", prosessinstans.getId(), opprettetOppgaveID, saksnummer, oppgaveID);

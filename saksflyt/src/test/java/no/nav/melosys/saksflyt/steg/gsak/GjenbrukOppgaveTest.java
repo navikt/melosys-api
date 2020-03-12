@@ -8,7 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class GjenbrukOppgaveTest {
     @Mock
-    private GsakFasade gsakFasade;
+    private OppgaveFasade oppgaveFasade;
     @Captor
     private ArgumentCaptor<Oppgave> oppgaveCaptor;
 
@@ -33,7 +33,7 @@ public class GjenbrukOppgaveTest {
 
     @Before
     public void setUp() {
-        gjenbrukOppgave = new GjenbrukOppgave(gsakFasade);
+        gjenbrukOppgave = new GjenbrukOppgave(oppgaveFasade);
     }
 
     @Test
@@ -43,10 +43,10 @@ public class GjenbrukOppgaveTest {
         final String oppgaveBeskrivelse = "jeg beskriver oppgave";
 
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
-        when(gsakFasade.hentOppgave(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
+        when(oppgaveFasade.hentOppgave(eq(oppgaveID))).thenReturn(eksisterendeOppgave);
 
         gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer));
-        verify(gsakFasade).opprettOppgave(oppgaveCaptor.capture());
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue()).hasFieldOrPropertyWithValue("saksnummer", saksnummer)
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
             .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)

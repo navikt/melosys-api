@@ -14,8 +14,8 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
@@ -41,13 +41,13 @@ public class SvarAnmodningUnntakInitialisererTest {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
-    private GsakFasade gsakFasade;
+    private OppgaveFasade oppgaveFasade;
 
     private final String AKTØR_ID = "223345325342";
 
     @Before
     public void setUp() {
-        svarAnmodningUnntakInitialiserer = new SvarAnmodningUnntakInitialiserer(fagsakService, anmodningsperiodeService, gsakFasade);
+        svarAnmodningUnntakInitialiserer = new SvarAnmodningUnntakInitialiserer(fagsakService, anmodningsperiodeService, oppgaveFasade);
     }
 
     @Test
@@ -82,11 +82,11 @@ public class SvarAnmodningUnntakInitialisererTest {
         Fagsak fagsak = hentFagsak(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
         Prosessinstans prosessinstans = hentProsessinstans();
-        when(gsakFasade.finnOppgaverMedSaksnummer(eq(fagsak.getSaksnummer())))
+        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(fagsak.getSaksnummer())))
             .thenReturn(Collections.singletonList(new Oppgave.Builder().build()));
         RutingResultat resultat = svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
-        verify(gsakFasade).oppdaterOppgave(any(), any(OppgaveOppdatering.class));
+        verify(oppgaveFasade).oppdaterOppgave(any(), any(OppgaveOppdatering.class));
         assertThat(resultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }

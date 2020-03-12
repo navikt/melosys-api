@@ -12,7 +12,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,11 +23,11 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
     private static final long FRIST_AVGIFTSVURDERING_MD = 1;
     static final String AVGIFTSVURDERING_BESKRIVELSE = "Vurderes for innregistrering i Avgiftssystemet";
 
-    private final GsakFasade gsakFasade;
+    private final OppgaveFasade oppgaveFasade;
 
     @Autowired
-    public OpprettAvgiftsoppgave(@Qualifier("system") GsakFasade gsakFasade) {
-        this.gsakFasade = gsakFasade;
+    public OpprettAvgiftsoppgave(@Qualifier("system") OppgaveFasade oppgaveFasade) {
+        this.oppgaveFasade = oppgaveFasade;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
             .setFristFerdigstillelse(LocalDate.now().plusMonths(FRIST_AVGIFTSVURDERING_MD))
             .setSaksnummer(fagsak.getSaksnummer());
 
-        gsakFasade.opprettOppgave(oppgaveBuilder.build());
+        oppgaveFasade.opprettOppgave(oppgaveBuilder.build());
 
         prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }

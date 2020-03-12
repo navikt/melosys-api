@@ -24,7 +24,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -49,7 +49,7 @@ public class OppgaveServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private GsakFasade gsakFasade;
+    private OppgaveFasade oppgaveFasade;
     @Mock
     private TpsFasade tpsFasade;
     @Mock
@@ -66,7 +66,7 @@ public class OppgaveServiceTest {
         this.oppgaveService = new OppgaveService(
                 behandlingService,
                 fagsakService,
-                gsakFasade,
+            oppgaveFasade,
                 saksopplysningerService,
             behandlingsgrunnlagService, tpsFasade);
 
@@ -75,7 +75,7 @@ public class OppgaveServiceTest {
         oppgaveBuilder.setTilordnetRessurs("Z998877");
         oppgaveBuilder.setSaksnummer(saksnummer);
 
-        when(gsakFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgaveBuilder.build()));
+        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgaveBuilder.build()));
     }
 
     @Test
@@ -96,7 +96,7 @@ public class OppgaveServiceTest {
 
         Set<Oppgave> oppgaver = Set.of(oppgave1.build(), oppgave2.build());
 
-        when(gsakFasade.finnOppgaveListeMedAnsvarlig(eq(tilordnetRessurs))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnOppgaveListeMedAnsvarlig(eq(tilordnetRessurs))).thenReturn(oppgaver);
 
         when(saksopplysningerService.harAktivOppfrisking(anyLong())).thenReturn(true);
 
@@ -150,7 +150,7 @@ public class OppgaveServiceTest {
         behandling.getFagsak().setSaksnummer("MEL-11111");
 
         oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", "Z99999");
-        verify(gsakFasade).opprettOppgave(any(Oppgave.class));
+        verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
     }
 
     @Test
@@ -161,7 +161,7 @@ public class OppgaveServiceTest {
         behandling.getFagsak().setSaksnummer(saksnummer);
 
         oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", "Z99999");
-        verify(gsakFasade, never()).opprettOppgave(any());
+        verify(oppgaveFasade, never()).opprettOppgave(any());
     }
 
     private static Behandling lagBehandling() {

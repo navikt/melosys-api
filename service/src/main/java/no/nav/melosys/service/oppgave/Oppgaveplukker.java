@@ -18,7 +18,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
@@ -35,16 +35,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class Oppgaveplukker {
     private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
-    private final GsakFasade gsakFasade;
+    private final OppgaveFasade oppgaveFasade;
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
 
     @Autowired
-    public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
+    public Oppgaveplukker(OppgaveFasade oppgaveFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
                           FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
-        this.gsakFasade = gsakFasade;
+        this.oppgaveFasade = oppgaveFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
@@ -65,7 +65,7 @@ public class Oppgaveplukker {
         Behandlingstyper behandlingstype = KodeverkUtils.dekod(Behandlingstyper.class, plukkDto.getBehandlingstype());
         Set<Oppgavetyper> oppgavetyper = Collections.singleton(OppgaveFactory.hentOppgavetype(behandlingstype));
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstype, behandlingstema);
+        List<Oppgave> ufordelteOppgaver = oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstype, behandlingstema);
         ufordelteOppgaver.addAll(hentOppgaverGammeltBehandlingstema(oppgavetyper, behandlingstype));
 
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
@@ -75,7 +75,7 @@ public class Oppgaveplukker {
         if (valg.isPresent()) {
             // Tildeler oppgaven
             oppdaterBehandlingsstatus(valg.get().getSaksnummer());
-            gsakFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
+            oppgaveFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
         }
         return valg;
     }
@@ -101,7 +101,7 @@ public class Oppgaveplukker {
 
     private Collection<Oppgave> hentOppgaverGammeltBehandlingstema(Oppgavetyper oppgavetype) throws FunksjonellException, TekniskException {
         //Byttet behandlingstema-kode for EU/EØS 4.10.2019. Må fortsatt kunne plukke med gammelt tema
-        return gsakFasade.finnUtildelteOppgaverEtterFrist(Collections.singleton(oppgavetype),
+        return oppgaveFasade.finnUtildelteOppgaverEtterFrist(Collections.singleton(oppgavetype),
             null, Behandlingstema.EU_EOS_GAMMEL_KODE);
     }
 
@@ -149,7 +149,7 @@ public class Oppgaveplukker {
             oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
         }
 
-        gsakFasade.leggTilbakeOppgave(oppgaveId);
+        oppgaveFasade.leggTilbakeOppgave(oppgaveId);
         log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
     }
 

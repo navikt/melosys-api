@@ -14,8 +14,8 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class ManuellSedBehandlingInitialisererTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private GsakFasade gsakFasade;
+    private OppgaveFasade oppgaveFasade;
 
     private ManuellSedBehandlingInitialiserer manuellSedBehandlingInitialiserer;
 
@@ -46,7 +46,7 @@ public class ManuellSedBehandlingInitialisererTest {
 
     @Before
     public void setup() {
-        manuellSedBehandlingInitialiserer = new ManuellSedBehandlingInitialiserer(fagsakService, behandlingService, gsakFasade);
+        manuellSedBehandlingInitialiserer = new ManuellSedBehandlingInitialiserer(fagsakService, behandlingService, oppgaveFasade);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class ManuellSedBehandlingInitialisererTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
-        verify(gsakFasade, never()).finnOppgaverMedSaksnummer(any());
+        verify(oppgaveFasade, never()).finnOppgaverMedSaksnummer(any());
     }
 
     @Test
@@ -82,14 +82,14 @@ public class ManuellSedBehandlingInitialisererTest {
         Oppgave oppgave = new Oppgave.Builder().setOppgaveId(oppgaveId).build();
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(hentFagsak());
-        when(gsakFasade.finnOppgaverMedSaksnummer(eq(SAKSNUMMER))).thenReturn(Collections.singletonList(oppgave));
+        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(SAKSNUMMER))).thenReturn(Collections.singletonList(oppgave));
         manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SED_JOURNALFØRING);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
-        verify(gsakFasade).finnOppgaverMedSaksnummer(eq(SAKSNUMMER));
-        verify(gsakFasade).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
+        verify(oppgaveFasade).finnOppgaverMedSaksnummer(eq(SAKSNUMMER));
+        verify(oppgaveFasade).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
 
     }
 

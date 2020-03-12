@@ -24,7 +24,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -55,7 +55,7 @@ public class VedtakService {
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
-    private final GsakFasade gsakFasade;
+    private final OppgaveFasade oppgaveFasade;
     private final TpsFasade tpsFasade;
     private final VedtakKontrollService vedtakKontrollService;
     private final RegisteropplysningerService registeropplysningerService;
@@ -64,14 +64,14 @@ public class VedtakService {
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
-                         FagsakService fagsakService, GsakFasade gsakFasade, TpsFasade tpsFasade, VedtakKontrollService vedtakKontrollService, RegisteropplysningerService registeropplysningerService) {
+                         FagsakService fagsakService, OppgaveFasade oppgaveFasade, TpsFasade tpsFasade, VedtakKontrollService vedtakKontrollService, RegisteropplysningerService registeropplysningerService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
-        this.gsakFasade = gsakFasade;
+        this.oppgaveFasade = oppgaveFasade;
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
         this.vedtakKontrollService = vedtakKontrollService;
@@ -199,6 +199,6 @@ public class VedtakService {
             .setTilordnetRessurs(saksbehandler)
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .build();
-        gsakFasade.opprettOppgave(oppgave);
+        oppgaveFasade.opprettOppgave(oppgave);
     }
 }

@@ -12,7 +12,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.sak.SakService;
 import org.slf4j.Logger;
@@ -26,12 +26,12 @@ public class OpprettJournalfoeringsOppgave extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettJournalfoeringsOppgave.class);
 
-    private final GsakFasade gsakFasade;
+    private final OppgaveFasade oppgaveFasade;
     private final SakService sakService;
 
     @Autowired
-    public OpprettJournalfoeringsOppgave(@Qualifier("system") GsakFasade gsakFasade, SakService sakService) {
-        this.gsakFasade = gsakFasade;
+    public OpprettJournalfoeringsOppgave(@Qualifier("system") OppgaveFasade oppgaveFasade, SakService sakService) {
+        this.oppgaveFasade = oppgaveFasade;
         this.sakService = sakService;
     }
 
@@ -55,7 +55,7 @@ public class OpprettJournalfoeringsOppgave extends AbstraktStegBehandler {
             .setFristFerdigstillelse(LocalDate.now().plusDays(7))
             .build();
 
-        String oppgaveID = gsakFasade.opprettOppgave(oppgave);
+        String oppgaveID = oppgaveFasade.opprettOppgave(oppgave);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Journalføringsoppgave opprettet med ID {}", oppgaveID);

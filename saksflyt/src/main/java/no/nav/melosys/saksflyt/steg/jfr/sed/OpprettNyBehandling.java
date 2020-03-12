@@ -3,7 +3,8 @@ package no.nav.melosys.saksflyt.steg.jfr.sed;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -15,7 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -34,14 +35,14 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
-    private final GsakFasade gsakFasade;
+    private final OppgaveFasade oppgaveFasade;
 
     public OpprettNyBehandling(FagsakService fagsakService,
                                BehandlingService behandlingService,
-                               @Qualifier("system") GsakFasade gsakFasade) {
+                               @Qualifier("system") OppgaveFasade oppgaveFasade) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        this.gsakFasade = gsakFasade;
+        this.oppgaveFasade = oppgaveFasade;
     }
 
     @Override
@@ -89,11 +90,11 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
     }
 
     private void ferdigstillOppgave(String saksnummer) throws FunksjonellException, TekniskException {
-        Collection<String> oppgaveIDer = gsakFasade.finnOppgaverMedSaksnummer(saksnummer)
+        Collection<String> oppgaveIDer = oppgaveFasade.finnOppgaverMedSaksnummer(saksnummer)
             .stream().map(Oppgave::getOppgaveId).collect(Collectors.toList());
 
         for (String oppgaveID : oppgaveIDer) {
-            gsakFasade.ferdigstillOppgave(oppgaveID);
+            oppgaveFasade.ferdigstillOppgave(oppgaveID);
         }
     }
 }
