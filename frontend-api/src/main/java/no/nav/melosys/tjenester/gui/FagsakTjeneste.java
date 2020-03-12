@@ -203,7 +203,7 @@ public class FagsakTjeneste {
     }
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
-        if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+        if (behandling.erBehandlingAvSøknad()) {
             behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
                 .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
                     behandlingOversiktDto.setLand(hentSøknadsland(grunnlagData));
