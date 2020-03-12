@@ -60,7 +60,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         if (lovvalgsperiode.getMedlPeriodeID() != null) {
             oppdaterEksisterendeMedlPeriode(lovvalgsperiode);
         } else if (behandlingsresultat.erInnvilgelseFlereLand()) {
-            KildedokumenttypeMedl kildedokumenttypeMedl = behandling.harSøknad() ? KildedokumenttypeMedl.HENV_SOKNAD : KildedokumenttypeMedl.SED;
+            KildedokumenttypeMedl kildedokumenttypeMedl = behandling.erBehandlingAvSøknad() ? KildedokumenttypeMedl.HENV_SOKNAD : KildedokumenttypeMedl.SED;
             Long medlPeriodeID = medlFasade.opprettPeriodeForeløpig(fnr, lovvalgsperiode, kildedokumenttypeMedl);
             medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
         } else if (behandlingsresultat.erInnvilgelse()) {

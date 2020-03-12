@@ -1,6 +1,6 @@
 package no.nav.melosys.service.journalforing.dto;
 
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.Behandling;
 
 public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private FagsakDto fagsak;
@@ -59,8 +59,6 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
     }
 
     public boolean behandlingstypeErSøknad() {
-        return Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(getBehandlingstypeKode())
-            || Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(getBehandlingstypeKode())
-            || Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(getBehandlingstypeKode());
+        return Behandling.erBehandlingAvSøknad(getBehandlingstypeKode());
     }
 }

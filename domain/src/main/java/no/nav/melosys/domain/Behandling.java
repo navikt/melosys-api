@@ -186,14 +186,17 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
 
-    public boolean harSøknad() {
-        return type == Behandlingstyper.SOEKNAD
-            || type == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
-            || type == Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND
-            || type == Behandlingstyper.ENDRET_PERIODE
-            || type == Behandlingstyper.NY_VURDERING;
+    public boolean erBehandlingAvSøknad() {
+        return type != null && erBehandlingAvSøknad(type.getKode());
     }
 
+    public static boolean erBehandlingAvSøknad(String behandlingstypeKode) {
+        return Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(behandlingstypeKode)
+            || Behandlingstyper.ENDRET_PERIODE.getKode().equalsIgnoreCase(behandlingstypeKode)
+            || Behandlingstyper.NY_VURDERING.getKode().equalsIgnoreCase(behandlingstypeKode)
+            || Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstypeKode)
+            || Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstypeKode);
+    }
     public boolean isAktiv() {
         return status != Behandlingsstatus.AVSLUTTET;
     }

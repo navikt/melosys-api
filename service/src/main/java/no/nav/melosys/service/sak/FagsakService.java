@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.metrics.MetrikkerNavn.SAKER_OPPRETTET;
 
 @Service
@@ -140,9 +141,7 @@ public class FagsakService {
         if (feilet) {
             throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en ny sak.").toString());
         }
-        if (opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD
-            || opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
-            || opprettSakDto.behandlingstype == Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND) {
+        if (erBehandlingAvSøknad(opprettSakDto.behandlingstype.getKode())) {
             final SøknadDto soknadDto = opprettSakDto.soknadDto;
             if (soknadDto == null) {
                 throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
