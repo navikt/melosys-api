@@ -54,7 +54,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         if (fagsak.getGsakSaksnummer() != null) {
-            String feilmelding = "Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny GSAK sak: allerede knyttet til " + fagsak.getGsakSaksnummer();
+            String feilmelding = "Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny sak: allerede knyttet til " + fagsak.getGsakSaksnummer();
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
             return;
@@ -66,6 +66,6 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);
 
         prosessinstans.setSteg(STATUS_BEH_OPPR);
-        log.info("Prosessinstans {} opprettet GSAK sak {} for fagsak {}", prosessinstans.getId(), gsakSakId, saksnummer);
+        log.info("Prosessinstans {} opprettet NAV-sak {} for fagsak {}", prosessinstans.getId(), gsakSakId, saksnummer);
     }
 }

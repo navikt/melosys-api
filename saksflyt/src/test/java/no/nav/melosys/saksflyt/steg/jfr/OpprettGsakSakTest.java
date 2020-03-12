@@ -15,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -55,6 +54,6 @@ public class OpprettGsakSakTest {
 
         verify(sakService, times(1)).opprettSak(saksnummer, behandlingstyper, aktørID);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
-        Assert.notNull(fagsak.getGsakSaksnummer(), "Fagsak skal ha fått Gsak saksnummert");
+        assertThat(fagsak.getGsakSaksnummer()).isNotNull();
     }
 }

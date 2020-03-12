@@ -49,7 +49,7 @@ public class SakService {
         sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
         sakDto.setSaksnummer(saksnummer);
         sakDto = sakConsumer.opprettSak(sakDto);
-        log.info("Sak opprettet i GSAK med saksnummer: {}", sakDto.getId());
+        log.info("Sak opprettet med sakID: {}", sakDto.getId());
         return sakDto.getId();
     }
 

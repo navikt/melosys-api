@@ -92,7 +92,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         fagsak.setGsakSaksnummer(gsakSaksnummer);
         fagsakService.lagre(fagsak);
 
-        log.info("Sak {} opprettet i gsak for fagsak {}", gsakSaksnummer, fagsak.getSaksnummer());
+        log.info("NAV-Sak {} opprettet for fagsak {}", gsakSaksnummer, fagsak.getSaksnummer());
         return gsakSaksnummer;
     }
 
