@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
 
@@ -205,8 +206,7 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto) throws FunksjonellException {
-        if (opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD
-            && opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+        if (!erBehandlingAvSøknad(opprettSakDto.behandlingstype.getKode())) {
             throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
                 + " på bakgrunn av journalførte dokumenter er ikke støttet.");
         }

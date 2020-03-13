@@ -182,7 +182,7 @@ public class OppgaveService {
             behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
-            if (behandling.harSøknad()) {
+            if (behandling.erBehandlingAvSøknad()) {
                 SoeknadDokument søknadDokument = (SoeknadDokument) behandlingsgrunnlagService
                     .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
                 behOppgaveDto.setLand(hentSøknadsland(søknadDokument));

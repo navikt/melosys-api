@@ -23,6 +23,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -69,6 +71,8 @@ public class VedtakServiceTest {
     private VedtakKontrollService vedtakKontrollService;
     @Mock
     private RegisteropplysningerService registeropplysningerService;
+    @Mock
+    private MedlFasade medlFasade;
 
     private VedtakService vedtakService;
 
@@ -80,7 +84,7 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, tpsFasade, vedtakKontrollService, registeropplysningerService);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, tpsFasade, vedtakKontrollService, registeropplysningerService, medlFasade);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -96,6 +100,7 @@ public class VedtakServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setMedlPeriodeID(123L);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
         Fagsak fagsak = new Fagsak();
@@ -247,12 +252,14 @@ public class VedtakServiceTest {
 
     @Test
     public void revurderVedtak_fungerer() throws Exception {
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         vedtakService.revurderVedtak(behandlingID);
 
         ArgumentCaptor<Oppgave> oppgaveArgumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
         verify(behandlingService).hentBehandling(behandlingID);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
         verify(oppgaveService).opprettOppgave(oppgaveArgumentCaptor.capture());
+        verify(medlFasade).avvisPeriode(eq(behandlingsresultat.getLovvalgsperioder().iterator().next().getMedlPeriodeID()), eq(StatusaarsakMedl.AVVIST));
         verifyNoMoreInteractions(oppgaveService, behandlingService);
 
         assertThat(oppgaveArgumentCaptor.getValue().getTilordnetRessurs()).isEqualTo("Z990007");
