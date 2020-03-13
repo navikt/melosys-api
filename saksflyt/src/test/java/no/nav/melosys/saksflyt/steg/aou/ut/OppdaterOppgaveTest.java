@@ -7,8 +7,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +29,6 @@ public class OppdaterOppgaveTest {
     private static final String SAKSNUMMER = "234";
 
     @Mock
-    private GsakFasade gsakFasade;
-    @Mock
     private OppgaveService oppgaveService;
 
     @Captor
@@ -43,7 +40,7 @@ public class OppdaterOppgaveTest {
 
     @Before
     public void setUp() {
-        agent = new OppdaterOppgave(gsakFasade, oppgaveService);
+        agent = new OppdaterOppgave(oppgaveService);
         Behandling behandling = new Behandling();
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
         behandling.setDokumentasjonSvarfristDato(Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault())));
@@ -66,7 +63,7 @@ public class OppdaterOppgaveTest {
 
         agent.utførSteg(prosessinstans);
         verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
-        verify(gsakFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
+        verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(toMånederFremITid);
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);
         assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);
@@ -83,7 +80,7 @@ public class OppdaterOppgaveTest {
 
         agent.utførSteg(prosessinstans);
         verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
-        verify(gsakFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
+        verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isNull();
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);
         assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);

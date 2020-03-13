@@ -23,7 +23,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
@@ -65,8 +64,6 @@ public class VedtakServiceTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    private GsakFasade gsakFasade;
-    @Mock
     private TpsFasade tpsFasade;
     @Mock
     private VedtakKontrollService vedtakKontrollService;
@@ -83,7 +80,7 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, tpsFasade, vedtakKontrollService, registeropplysningerService);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, tpsFasade, vedtakKontrollService, registeropplysningerService);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -255,8 +252,8 @@ public class VedtakServiceTest {
         ArgumentCaptor<Oppgave> oppgaveArgumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
         verify(behandlingService).hentBehandling(behandlingID);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
-        verify(gsakFasade).opprettOppgave(oppgaveArgumentCaptor.capture());
-        verifyNoMoreInteractions(gsakFasade, behandlingService);
+        verify(oppgaveService).opprettOppgave(oppgaveArgumentCaptor.capture());
+        verifyNoMoreInteractions(oppgaveService, behandlingService);
 
         assertThat(oppgaveArgumentCaptor.getValue().getTilordnetRessurs()).isEqualTo("Z990007");
         assertThat(oppgaveArgumentCaptor.getValue().getAktørId()).isEqualTo("1234567890123");

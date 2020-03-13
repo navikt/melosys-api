@@ -10,9 +10,6 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
-/**
- * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
- */
 public final class Oppgave {
     private final String aktørId;
     private final Behandlingstema behandlingstema;
@@ -57,7 +54,7 @@ public final class Oppgave {
 
         public Builder() {
         }
-        
+
         public Builder(Oppgave copy) {
             this.aktørId = copy.getAktørId();
             this.behandlingstema = copy.getBehandlingstema();
@@ -79,7 +76,7 @@ public final class Oppgave {
             this.aktivDato = copy.getAktivDato();
             this.status = copy.getStatus();
         }
-        
+
         public Builder setOppgaveId(String oppgaveId) {
             this.oppgaveId = oppgaveId;
             return this;

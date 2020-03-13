@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -8,7 +10,8 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.sak.SakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +29,9 @@ import static org.mockito.Mockito.when;
 public class OpprettJournalfoeringsOppgaveTest {
 
     @Mock
-    private GsakFasade gsakFasade;
+    private OppgaveService oppgaveService;
+    @Mock
+    private SakService sakService;
 
     private OpprettJournalfoeringsOppgave opprettJournalfoeringsOppgave;
 
@@ -39,7 +44,7 @@ public class OpprettJournalfoeringsOppgaveTest {
 
     @Before
     public void setup() {
-        opprettJournalfoeringsOppgave = new OpprettJournalfoeringsOppgave(gsakFasade);
+        opprettJournalfoeringsOppgave = new OpprettJournalfoeringsOppgave(oppgaveService, sakService);
     }
 
     @Test
@@ -55,10 +60,10 @@ public class OpprettJournalfoeringsOppgaveTest {
         prosessinstans.setBehandling(behandling);
 
         Tema tema = Tema.UFM;
-        when(gsakFasade.hentTemaFraSak(eq(gsakSaksnummer))).thenReturn(tema);
+        when(sakService.hentTemaFraSak(eq(gsakSaksnummer))).thenReturn(tema);
 
         opprettJournalfoeringsOppgave.utfør(prosessinstans);
-        verify(gsakFasade).opprettOppgave(oppgaveCaptor.capture());
+        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         Oppgave oppgave = oppgaveCaptor.getValue();
         assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
         assertThat(oppgave.getTema()).isEqualTo(Tema.UFM);
@@ -73,7 +78,7 @@ public class OpprettJournalfoeringsOppgaveTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         opprettJournalfoeringsOppgave.utfør(prosessinstans);
-        verify(gsakFasade).opprettOppgave(oppgaveCaptor.capture());
+        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         Oppgave oppgave = oppgaveCaptor.getValue();
         assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
         assertThat(oppgave.getTema()).isEqualTo(Tema.MED);

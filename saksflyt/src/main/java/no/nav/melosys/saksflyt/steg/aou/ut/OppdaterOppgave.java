@@ -8,8 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
@@ -23,12 +22,10 @@ public class OppdaterOppgave extends AbstraktStegBehandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(OppdaterOppgave.class);
     private static final String ANMODNING_OM_UNNTAK_SENDT = "Anmodning om unntak er sendt utenlandsk trygdemyndighet.";
 
-    private final GsakFasade gsakFasade;
     private final OppgaveService oppgaveService;
 
     @Autowired
-    public OppdaterOppgave(@Qualifier("system") GsakFasade gsakFasade, @Qualifier("system") OppgaveService oppgaveService) {
-        this.gsakFasade = gsakFasade;
+    public OppdaterOppgave(@Qualifier("system") OppgaveService oppgaveService) {
         this.oppgaveService = oppgaveService;
     }
 
@@ -51,7 +48,7 @@ public class OppdaterOppgave extends AbstraktStegBehandler {
             .fristFerdigstillelse(oppgave.getFristFerdigstillelse().isBefore(frist) ? frist : null)
             .build();
 
-        gsakFasade.oppdaterOppgave(oppgave.getOppgaveId(), oppgaveOppdatering);
+        oppgaveService.oppdaterOppgave(oppgave.getOppgaveId(), oppgaveOppdatering);
 
         LOGGER.info("Oppdatert oppgave {} med beskrivelse, og frist som samsvarer med behandlingsfristen", oppgave.getOppgaveId());
         prosessinstans.setSteg(ProsessSteg.FERDIG);

@@ -1,10 +1,10 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -13,8 +13,8 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,7 +38,7 @@ public class OpprettNyBehandlingTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private GsakFasade gsakFasade;
+    private OppgaveService oppgaveFasade;
 
     private OpprettNyBehandling opprettNyBehandling;
 
@@ -47,7 +47,7 @@ public class OpprettNyBehandlingTest {
 
     @Before
     public void setup() {
-        opprettNyBehandling = new OpprettNyBehandling(fagsakService, behandlingService, gsakFasade);
+        opprettNyBehandling = new OpprettNyBehandling(fagsakService, behandlingService, oppgaveFasade);
     }
 
     @Test
@@ -99,12 +99,12 @@ public class OpprettNyBehandlingTest {
         when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer))
             .thenReturn(Optional.of(fagsak));
         when(behandlingService.nyBehandling(any(), any(), any(), any(),any())).thenReturn(new Behandling());
-        when(gsakFasade.finnOppgaverMedSaksnummer(eq(fagsak.getSaksnummer())))
-            .thenReturn(Collections.singletonList(oppgave));
+        when(oppgaveFasade.finnOppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
+            .thenReturn(Optional.of(oppgave));
 
         opprettNyBehandling.utfør(prosessinstans);
 
-        verify(gsakFasade).ferdigstillOppgave(eq(oppgave.getOppgaveId()));
+        verify(oppgaveFasade).ferdigstillOppgave(eq(oppgave.getOppgaveId()));
         verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
         verify(behandlingService).nyBehandling(
             eq(fagsak), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(behandlingstype), eq(journalpostID), eq(dokumentID)
