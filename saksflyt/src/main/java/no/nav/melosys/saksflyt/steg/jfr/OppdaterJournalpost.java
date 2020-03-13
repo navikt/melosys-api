@@ -76,7 +76,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
             arkivSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
         }
         if (arkivSakID == null) {
-            String feilmelding = "Prosessinstansen er ikke knyttet til en gsak sak";
+            String feilmelding = "Prosessinstansen er ikke knyttet til en nav-sak";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;

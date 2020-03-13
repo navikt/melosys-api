@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.util.Assert;
@@ -104,6 +105,10 @@ public class Fagsak extends RegistreringsInfo {
             .orElse(null);
     }
 
+    public Behandling hentSistAktiveBehandling() throws TekniskException, FunksjonellException {
+        return Optional.ofNullable(getAktivBehandling()).orElse(getSistOppdaterteBehandling());
+    }
+
     public Aktoer hentBruker() throws TekniskException {
         return hentAktørMedRolleTypeBruker();
     }
@@ -122,12 +127,12 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     /**
-     * Returnerer den sist oppdaterte behandlingen knyttet til saken eller {@code null} hvis den ikke finnes
+     * Returnerer den sist oppdaterte behandlingen knyttet til saken
      */
-    public Behandling getSistOppdaterteBehandling() {
+    public Behandling getSistOppdaterteBehandling() throws FunksjonellException {
         return getBehandlinger().stream()
             .max(Comparator.comparing(Behandling::getEndretDato))
-            .orElse(null);
+            .orElseThrow(() -> new FunksjonellException("Finner ikke behandlinger for fagsak " + saksnummer));
     }
 
     private Aktoer hentAktørMedRolleTypeBruker() throws TekniskException {

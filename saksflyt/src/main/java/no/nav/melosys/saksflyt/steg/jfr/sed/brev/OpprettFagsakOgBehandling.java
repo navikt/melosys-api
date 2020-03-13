@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed.brev;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -12,15 +13,14 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
+import no.nav.melosys.service.sak.SakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("JournalførAouBrevOpprettFagsakOgBehandling")
@@ -29,15 +29,15 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     private final FagsakService fagsakService;
     private final TpsFasade tpsFasade;
-    private final GsakFasade gsakFasade;
+    private final SakService sakService;
 
     @Autowired
     public OpprettFagsakOgBehandling(FagsakService fagsakService,
                                      TpsFasade tpsFasade,
-                                     @Qualifier("system") GsakFasade gsakFasade) {
+                                     SakService sakService) {
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
-        this.gsakFasade = gsakFasade;
+        this.sakService = sakService;
     }
 
     @Override
@@ -88,11 +88,11 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     }
 
     private long opprettGsakSak(Fagsak fagsak, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
-        Long gsakSaksnummer = gsakFasade.opprettSak(fagsak.getSaksnummer(), behandlingstype, aktørId);
+        Long gsakSaksnummer = sakService.opprettSak(fagsak.getSaksnummer(), behandlingstype, aktørId);
         fagsak.setGsakSaksnummer(gsakSaksnummer);
         fagsakService.lagre(fagsak);
 
-        log.info("Sak {} opprettet i gsak for fagsak {}", gsakSaksnummer, fagsak.getSaksnummer());
+        log.info("NAV-Sak {} opprettet for fagsak {}", gsakSaksnummer, fagsak.getSaksnummer());
         return gsakSaksnummer;
     }
 

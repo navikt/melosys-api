@@ -77,7 +77,7 @@ public class EessiTjeneste {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
 
-        log.info("Henter tilknyttede bucer for gsak {}", gsakSaksnummer);
+        log.info("Henter tilknyttede bucer for sakID {}", gsakSaksnummer);
         BucerTilknyttetBehandlingDto bucerDto = new BucerTilknyttetBehandlingDto(
             eessiService.hentTilknyttedeBucer(gsakSaksnummer, statuser).stream()
                 .map(BucInformasjonDto::av).collect(Collectors.toList())

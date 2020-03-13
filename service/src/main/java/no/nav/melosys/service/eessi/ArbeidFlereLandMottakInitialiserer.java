@@ -7,11 +7,15 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +24,13 @@ import org.springframework.stereotype.Service;
 public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandlingInitialiserer {
 
     private final FagsakService fagsakService;
+    private final BehandlingService behandlingService;
+    private final OppgaveService oppgaveService;
 
-    public ArbeidFlereLandMottakInitialiserer(FagsakService fagsakService) {
+    public ArbeidFlereLandMottakInitialiserer(FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
+        this.behandlingService = behandlingService;
+        this.oppgaveService = oppgaveService;
     }
 
     @Override
@@ -38,9 +46,19 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
             throw new FunksjonellException("Finner ingen sak tilknyttet gsaksaksnummer " + gsakSaksnummer);
         }
 
-        //TODO: avklar hva som gjøres ved oppdatert SED
         Behandling behandling = fagsak.get().getAktivBehandling();
-        return behandling.erAvsluttet() ? RutingResultat.NY_BEHANDLING : RutingResultat.OPPDATER_BEHANDLING;
+        if (behandling == null || behandling.getStatus() == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) {
+            oppgaveService.opprettBehandlingsoppgave(
+                fagsak.get().getSistOppdaterteBehandling(),
+                prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID),
+                prosessinstans.getData(ProsessDataKey.AKTØR_ID),
+                prosessinstans.hentSaksbehandlerHvisTilordnes()
+            );
+        } else {
+            behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+        }
+
+        return RutingResultat.INGEN_BEHANDLING;
     }
 
     @Override

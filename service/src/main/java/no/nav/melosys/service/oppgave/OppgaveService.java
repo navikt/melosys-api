@@ -12,7 +12,8 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -36,7 +37,7 @@ public class OppgaveService {
 
     private final BehandlingService behandlingService;
     private final FagsakService fagsakService;
-    private final GsakFasade gsakFasade;
+    private final OppgaveFasade oppgaveFasade;
     private final SaksopplysningerService saksopplysningerService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final TpsFasade tpsFasade;
@@ -45,12 +46,12 @@ public class OppgaveService {
     @Autowired
     public OppgaveService(BehandlingService behandlingService,
                           FagsakService fagsakService,
-                          GsakFasade gsakFasade,
+                          OppgaveFasade oppgaveFasade,
                           SaksopplysningerService saksopplysningerService,
                           BehandlingsgrunnlagService behandlingsgrunnlagService, TpsFasade tpsFasade) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
-        this.gsakFasade = gsakFasade;
+        this.oppgaveFasade = oppgaveFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.tpsFasade = tpsFasade;
@@ -61,17 +62,17 @@ public class OppgaveService {
         if (aktørId == null) {
             throw new IkkeFunnetException("Finner ikke aktørId for ident " + brukerIdent);
         }
-        return gsakFasade.finnOppgaverMedBrukerID(aktørId);
+        return oppgaveFasade.finnOppgaverMedBrukerID(aktørId);
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
-        Collection<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
+        Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
     public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
         log.info("Ferdigstiller oppgave {}", oppgaveID);
-        gsakFasade.ferdigstillOppgave(oppgaveID);
+        oppgaveFasade.ferdigstillOppgave(oppgaveID);
     }
 
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
@@ -87,42 +88,63 @@ public class OppgaveService {
 
     public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
         Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
-        gsakFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
+        oppgaveFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
     public Optional<Oppgave> finnOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-        try {
-            return Optional.of(gsakFasade.hentOppgaveMedSaksnummer(saksnummer));
-        } catch (IkkeFunnetException e) {
-            log.warn(e.getMessage());
+
+        List<Oppgave> oppgaver = oppgaveFasade.finnOppgaverMedSaksnummer(saksnummer);
+
+        if (!oppgaver.isEmpty()) {
+            if (oppgaver.size() > 1) {
+                throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
+            }
+            return Optional.of(oppgaver.get(0));
+        } else {
             return Optional.empty();
         }
     }
 
     public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-        return gsakFasade.hentOppgaveMedSaksnummer(saksnummer);
+        return finnOppgaveMedFagsaksnummer(saksnummer)
+            .orElseThrow(() -> new TekniskException("Finner ingen oppgave med saksnummer " + saksnummer));
     }
 
     public Oppgave hentOppgaveMedOppgaveID(String oppgaveID) throws FunksjonellException, TekniskException {
-        return gsakFasade.hentOppgave(oppgaveID);
+        return oppgaveFasade.hentOppgave(oppgaveID);
     }
 
-    public Behandling hentAktivBehandling(String saksnummer) throws IkkeFunnetException, TekniskException {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        return Optional.ofNullable(fagsak.getAktivBehandling())
-            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"));
+    public Behandling hentSistAktiveBehandling(String saksnummer) throws FunksjonellException, TekniskException {
+        return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
     public void opprettBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
-            .setTilordnetRessurs(tilordnetRessurs)
-            .setJournalpostId(journalpostID)
-            .setAktørId(aktørID)
-            .setSaksnummer(behandling.getFagsak().getSaksnummer())
-            .build();
 
-        String oppgaveID = gsakFasade.opprettOppgave(oppgave);
-        log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
+        Optional<Oppgave> eksisterendeOppgave = finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+
+        if (eksisterendeOppgave.isEmpty()) {
+            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
+                .setTilordnetRessurs(tilordnetRessurs)
+                .setJournalpostId(journalpostID)
+                .setAktørId(aktørID)
+                .setSaksnummer(behandling.getFagsak().getSaksnummer())
+                .build();
+
+            String oppgaveID = oppgaveFasade.opprettOppgave(oppgave);
+            log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
+        }
+    }
+
+    public String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
+        return oppgaveFasade.opprettOppgave(oppgave);
+    }
+
+    public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
+        oppgaveFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
+    }
+
+    public void tildelOppgave(String oppgaveID, String saksbehandler) throws FunksjonellException, TekniskException {
+        oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
@@ -156,10 +178,7 @@ public class OppgaveService {
             behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
             behOppgaveDto.setSakstype(fagsak.getType());
 
-            Behandling behandling = fagsak.getAktivBehandling();
-            if (behandling == null) {
-                throw new TekniskException("Det finnes ingen aktiv behandling for " + fagsak.getSaksnummer() + ".");
-            }
+            Behandling behandling = fagsak.hentSistAktiveBehandling();
             behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandling.getId());
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 

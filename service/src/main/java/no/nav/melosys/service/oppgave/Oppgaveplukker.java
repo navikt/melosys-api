@@ -18,7 +18,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
@@ -35,18 +35,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class Oppgaveplukker {
     private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
-    private final GsakFasade gsakFasade;
+    private final OppgaveFasade oppgaveFasade;
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
+    private final OppgaveService oppgaveService;
 
     @Autowired
-    public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
-                          FagsakService fagsakService, BehandlingService behandlingService) {
-        this.gsakFasade = gsakFasade;
+    public Oppgaveplukker(OppgaveFasade oppgaveFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
+                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
+        this.oppgaveFasade = oppgaveFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
+        this.oppgaveService = oppgaveService;
     }
 
     /**
@@ -63,7 +65,7 @@ public class Oppgaveplukker {
         Behandlingstyper behandlingstype = KodeverkUtils.dekod(Behandlingstyper.class, plukkDto.getBehandlingstype());
         Set<Oppgavetyper> oppgavetyper = Collections.singleton(OppgaveFactory.hentOppgavetype(behandlingstype));
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstype, behandlingstema);
+        List<Oppgave> ufordelteOppgaver = oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstype, behandlingstema);
         ufordelteOppgaver.addAll(hentOppgaverGammeltBehandlingstema(oppgavetyper, behandlingstype));
 
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
@@ -73,7 +75,7 @@ public class Oppgaveplukker {
         if (valg.isPresent()) {
             // Tildeler oppgaven
             oppdaterBehandlingsstatus(valg.get().getSaksnummer());
-            gsakFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
+            oppgaveService.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
         }
         return valg;
     }
@@ -81,7 +83,7 @@ public class Oppgaveplukker {
     private void oppdaterBehandlingsstatus(String saksnummer) throws IkkeFunnetException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling.getStatus() == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.getStatus() == Behandlingsstatus.OPPRETTET) {
+        if (behandling != null && (behandling.getStatus() == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.getStatus() == Behandlingsstatus.OPPRETTET)) {
             behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
             behandlingService.lagre(behandling);
         }
@@ -99,7 +101,7 @@ public class Oppgaveplukker {
 
     private Collection<Oppgave> hentOppgaverGammeltBehandlingstema(Oppgavetyper oppgavetype) throws FunksjonellException, TekniskException {
         //Byttet behandlingstema-kode for EU/EØS 4.10.2019. Må fortsatt kunne plukke med gammelt tema
-        return gsakFasade.finnUtildelteOppgaverEtterFrist(Collections.singleton(oppgavetype),
+        return oppgaveFasade.finnUtildelteOppgaverEtterFrist(Collections.singleton(oppgavetype),
             null, Behandlingstema.EU_EOS_GAMMEL_KODE);
     }
 
@@ -107,7 +109,7 @@ public class Oppgaveplukker {
         return Behandlingstema.valueOf(KodeverkUtils.dekod(Sakstyper.class, sakstype).name());
     }
 
-    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException, IkkeFunnetException {
+    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException, FunksjonellException {
         Iterator<Oppgave> iter = oppgaver.iterator();
         while (iter.hasNext()) {
             Oppgave oppgave = iter.next();
@@ -117,11 +119,8 @@ public class Oppgaveplukker {
                 log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
                 throw new TekniskException("Fant ikke fagsak " + saksnummer);
             }
-            Behandling behandling = fagsak.getAktivBehandling();
-            if (behandling == null) {
-                throw new TekniskException("Fant ingen aktiv behandling på fagsak " + saksnummer);
-            }
 
+            Behandling behandling = fagsak.hentSistAktiveBehandling();
             if (behandling.erVenterForDokumentasjon()) {
                 if (behandling.getDokumentasjonSvarfristDato() == null) {
                     log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.", behandling.getId(), saksnummer);
@@ -138,7 +137,7 @@ public class Oppgaveplukker {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(tilbakelegging.getBehandlingID());
 
         Fagsak fagsak = behandling.getFagsak();
-        Oppgave oppgave = gsakFasade.hentOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(fagsak.getSaksnummer());
 
         String oppgaveId = oppgave.getOppgaveId();
         if (!tilbakelegging.isVenterPåDokumentasjon()) {
@@ -150,7 +149,7 @@ public class Oppgaveplukker {
             oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
         }
 
-        gsakFasade.leggTilbakeOppgave(oppgaveId);
+        oppgaveFasade.leggTilbakeOppgave(oppgaveId);
         log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
     }
 

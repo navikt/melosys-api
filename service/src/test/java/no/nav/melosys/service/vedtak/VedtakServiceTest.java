@@ -23,7 +23,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -67,8 +66,6 @@ public class VedtakServiceTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    private GsakFasade gsakFasade;
-    @Mock
     private TpsFasade tpsFasade;
     @Mock
     private VedtakKontrollService vedtakKontrollService;
@@ -87,7 +84,7 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, tpsFasade, vedtakKontrollService, registeropplysningerService, medlFasade);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, tpsFasade, vedtakKontrollService, registeropplysningerService, medlFasade);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -261,9 +258,9 @@ public class VedtakServiceTest {
         ArgumentCaptor<Oppgave> oppgaveArgumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
         verify(behandlingService).hentBehandling(behandlingID);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
-        verify(gsakFasade).opprettOppgave(oppgaveArgumentCaptor.capture());
+        verify(oppgaveService).opprettOppgave(oppgaveArgumentCaptor.capture());
         verify(medlFasade).avvisPeriode(eq(behandlingsresultat.getLovvalgsperioder().iterator().next().getMedlPeriodeID()), eq(StatusaarsakMedl.AVVIST));
-        verifyNoMoreInteractions(gsakFasade, behandlingService);
+        verifyNoMoreInteractions(oppgaveService, behandlingService);
 
         assertThat(oppgaveArgumentCaptor.getValue().getTilordnetRessurs()).isEqualTo("Z990007");
         assertThat(oppgaveArgumentCaptor.getValue().getAktørId()).isEqualTo("1234567890123");

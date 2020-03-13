@@ -19,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -52,7 +51,6 @@ public class VedtakService {
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
-    private final GsakFasade gsakFasade;
     private final TpsFasade tpsFasade;
     private final VedtakKontrollService vedtakKontrollService;
     private final RegisteropplysningerService registeropplysningerService;
@@ -63,7 +61,6 @@ public class VedtakService {
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
                          FagsakService fagsakService,
-                         GsakFasade gsakFasade,
                          TpsFasade tpsFasade,
                          VedtakKontrollService vedtakKontrollService,
                          RegisteropplysningerService registeropplysningerService,
@@ -74,7 +71,6 @@ public class VedtakService {
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
-        this.gsakFasade = gsakFasade;
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
         this.vedtakKontrollService = vedtakKontrollService;
@@ -216,6 +212,6 @@ public class VedtakService {
             .setTilordnetRessurs(saksbehandler)
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .build();
-        gsakFasade.opprettOppgave(oppgave);
+        oppgaveService.opprettOppgave(oppgave);
     }
 }
