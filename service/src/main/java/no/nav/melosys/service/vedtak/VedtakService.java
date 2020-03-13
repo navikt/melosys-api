@@ -89,6 +89,7 @@ public class VedtakService {
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        validerBehandlingstypeFattVedtak(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
@@ -106,7 +107,7 @@ public class VedtakService {
                         .medlemskapsopplysninger().build())
                     .build());
 
-            validerFattVedtak(behandlingID, vedtakstype);
+            kontrollerFattVedtak(behandlingID, vedtakstype);
         }
 
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
@@ -126,7 +127,13 @@ public class VedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
+    private void validerBehandlingstypeFattVedtak(Behandling behandling) throws FunksjonellException {
+        if (!behandling.kanResultereIVedtak()) {
+            throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstype " + behandling.getType().getBeskrivelse());
+        }
+    }
+
+    private void kontrollerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
         Collection<Kontroll_begrunnelser> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID, vedtakstype);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
