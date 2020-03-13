@@ -45,7 +45,7 @@ public class OppgaveTjeneste {
     }
 
     @PostMapping("/plukk")
-    @ApiOperation(value = "Plukker fra neste oppgave fra Oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
+    @ApiOperation(value = "Plukker neste oppgave fra Oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
     public ResponseEntity plukkOppgave(@RequestBody PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
 
