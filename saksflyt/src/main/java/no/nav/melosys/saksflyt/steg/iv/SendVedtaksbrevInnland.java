@@ -79,7 +79,11 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(prosessinstans, behandling, resultat, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(IV_SEND_SED);
+            if (behandling.norgeErUtpekt()) {
+                prosessinstans.setSteg(IV_SEND_GODKJENT_UTPEKING);
+            } else {
+                prosessinstans.setSteg(IV_SEND_SED);
+            }
         } else {
             log.warn("Vedtaksbrev kan ikke sendes for behandling {} i "
                     + "prosessinstansen {}.",
@@ -167,7 +171,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         }
     }
 
-    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) throws TekniskException {
+    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) {
         return !avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty();
     }
 

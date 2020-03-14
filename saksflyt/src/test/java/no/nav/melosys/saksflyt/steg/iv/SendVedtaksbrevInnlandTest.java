@@ -349,6 +349,19 @@ public class SendVedtaksbrevInnlandTest {
     }
 
     @Test
+    public void utførSteg_innvilgelses13_1ANorgeUtpekt_vedtakOgKopiTilSkattSendesNesteStegSendSvarSed() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
+        prosessinstans.getBehandling().setType(Behandlingstyper.BESLUTNING_LOVVALG_NORGE);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(Mottaker.av(BRUKER)), anyLong(), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(SKATT)), anyLong(), any());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_GODKJENT_UTPEKING);
+    }
+
+    @Test
     public void utførSteg_utenlandsForetak_A1SendesTilSkatteoppkreverUtland() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());

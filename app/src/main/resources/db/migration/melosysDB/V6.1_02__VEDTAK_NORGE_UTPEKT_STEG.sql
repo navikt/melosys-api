@@ -1,0 +1,1 @@
+INSERT INTO PROSESS_STEG (KODE, NAVN) VALUES ('IV_SEND_GODKJENT_UTPEKING', 'Send A012 for godkjent utpeking av Norge');
