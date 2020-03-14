@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;

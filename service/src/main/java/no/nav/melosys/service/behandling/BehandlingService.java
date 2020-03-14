@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
@@ -113,7 +113,7 @@ public class BehandlingService {
     private boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
         return (behandlingsstatus == Behandlingsstatus.UNDER_BEHANDLING)
             || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART)
-            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL) 
+            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL)
             || (behandlingsstatus == Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
     }
 
