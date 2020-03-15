@@ -3,10 +3,7 @@ package no.nav.melosys.service.behandling;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.Period;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -214,6 +211,11 @@ public class BehandlingService {
     public Behandling hentBehandlingUtenSaksopplysninger(long behandlingId) throws IkkeFunnetException {
         return behandlingRepository.findById(behandlingId)
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<Behandling> hentBehandlingerMedstatus(Behandlingsstatus behandlingsstatus) {
+        return behandlingRepository.findAllByStatus(behandlingsstatus);
     }
 
     public void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {
