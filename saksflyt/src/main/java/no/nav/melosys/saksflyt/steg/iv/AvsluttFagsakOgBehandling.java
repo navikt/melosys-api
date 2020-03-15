@@ -1,14 +1,13 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +28,11 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AvsluttFagsakOgBehandling.class);
 
-    private final OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling;
+    private final FagsakService fagsakService;
 
     @Autowired
-    public AvsluttFagsakOgBehandling(OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling) {
-        this.oppdaterFagsakOgBehandling = oppdaterFagsakOgBehandling;
+    public AvsluttFagsakOgBehandling(FagsakService fagsakService) {
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -45,8 +44,8 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = prosessinstans.getBehandling();
-        oppdaterFagsakOgBehandling.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.LOVVALG_AVKLART, Behandlingsstatus.AVSLUTTET);
+        Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
 
         prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
     }

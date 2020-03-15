@@ -1,14 +1,13 @@
 package no.nav.melosys.saksflyt.steg.hs;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +26,11 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.HS_SEND_BREV;
 public class HenleggSak extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(HenleggSak.class);
 
-    private final OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling;
+    private final FagsakService fagsakService;
 
     @Autowired
-    public HenleggSak(OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling) {
-        this.oppdaterFagsakOgBehandling = oppdaterFagsakOgBehandling;
+    public HenleggSak(FagsakService fagsakService) {
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -43,8 +42,8 @@ public class HenleggSak extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = prosessinstans.getBehandling();
-        oppdaterFagsakOgBehandling.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.HENLAGT, Behandlingsstatus.AVSLUTTET);
+        Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.HENLAGT);
 
         log.info("Satt sak til henlagt for prosessinstans {}", prosessinstans.getId());
         prosessinstans.setSteg(HS_SEND_BREV);
