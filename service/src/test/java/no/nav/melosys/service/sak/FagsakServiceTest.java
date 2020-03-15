@@ -313,6 +313,7 @@ public class FagsakServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(123L);
         behandling.setType(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV);
+        fagsak.setBehandlinger(List.of(behandling));
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
 
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
@@ -322,9 +323,12 @@ public class FagsakServiceTest {
     @Test
     public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeVurderTrygdetid_blirAvsluttet() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-123");
         Behandling behandling = new Behandling();
         behandling.setId(123L);
         behandling.setType(Behandlingstyper.VURDER_TRYGDETID);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        fagsak.setBehandlinger(List.of(behandling));
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
 
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.AVSLUTTET);
@@ -345,7 +349,7 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void leggTilFjernAktørerForMyndighet() {
+    public void leggTilFjernAktørerForMyndighet() throws IkkeFunnetException {
         String saksnummer = "1234";
         Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
         when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(eksisterendeFagsak);
@@ -362,7 +366,7 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void oppdaterMyndigheter_harBruker_fjernerIkkeBruker() {
+    public void oppdaterMyndigheter_harBruker_fjernerIkkeBruker() throws IkkeFunnetException {
         String saksnummer = "1234";
         Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
         when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(eksisterendeFagsak);
@@ -389,12 +393,14 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void avsluttFagsakOgBehandling() throws IkkeFunnetException {
+    public void avsluttFagsakOgBehandling() throws IkkeFunnetException, TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        fagsak.setBehandlinger(List.of(behandling));
 
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, behandling);
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
         verify(fagsakRepo).save(eq(fagsak));
         verify(behandlingService).avsluttBehandling(eq(behandling.getId()));

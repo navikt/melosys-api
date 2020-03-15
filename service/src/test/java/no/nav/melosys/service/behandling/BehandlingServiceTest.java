@@ -125,7 +125,7 @@ public class BehandlingServiceTest {
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
 
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Behandling " + behandlingID + " finnes ikke.");
+        expectedException.expectMessage("Finner ikke behandling med id " + behandlingID);
 
         behandlingService.knyttMedlemsperioder(behandlingID, periodeIder);
     }

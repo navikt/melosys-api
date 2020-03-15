@@ -65,8 +65,7 @@ public class BehandlingService {
      */
     @Transactional(rollbackFor = MelosysException.class)
     public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) throws FunksjonellException {
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
@@ -87,8 +86,7 @@ public class BehandlingService {
      *  eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
      */
     public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
 
         if (behandling.getStatus() == Behandlingsstatus.VURDER_DOKUMENT && !erLovligNesteStatusEtterDokumentVurdering(status)) {
             throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
@@ -196,8 +194,7 @@ public class BehandlingService {
     }
 
     public void avsluttBehandling(long behandlingId) throws IkkeFunnetException {
-        Behandling behandling = behandlingRepository.findById(behandlingId)
-            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();

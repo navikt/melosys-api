@@ -43,9 +43,7 @@ public class OppdaterSakOgBehandlingAvsluttet extends SakOgBehandlingStegBehande
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
 
-        fagsakService.avsluttFagsakOgBehandling(
-            prosessinstans.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART, prosessinstans.getBehandling()
-        );
+        fagsakService.avsluttFagsakOgBehandling(prosessinstans.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
         sakOgBehandlingAvsluttet(saksnummer, behandlingId, aktørId);
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }

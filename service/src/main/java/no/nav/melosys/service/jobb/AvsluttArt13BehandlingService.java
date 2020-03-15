@@ -37,7 +37,7 @@ public class AvsluttArt13BehandlingService {
     @Transactional(rollbackFor = MelosysException.class)
     public void avsluttBehandling(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.LOVVALG_AVKLART, behandling);
+        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.LOVVALG_AVKLART);
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();

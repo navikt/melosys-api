@@ -1,10 +1,10 @@
 package no.nav.melosys.saksflyt.steg.hs;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;

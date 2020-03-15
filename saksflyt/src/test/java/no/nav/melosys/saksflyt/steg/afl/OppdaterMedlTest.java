@@ -73,7 +73,7 @@ public class OppdaterMedlTest {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "123");
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART), eq(behandling));
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART));
         verify(medlPeriodeService).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         verify(medlFasade).opprettPeriodeUnderAvklaring(eq("123"), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
     }

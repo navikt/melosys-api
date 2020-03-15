@@ -70,7 +70,7 @@ public class OppdaterSakOgBehandlingAvsluttetTest {
         oppdaterSakOgBehandlingAvsluttet.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(behandling.getFagsak()), eq(Saksstatuser.LOVVALG_AVKLART), eq(behandling));
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(behandling.getFagsak()), eq(Saksstatuser.LOVVALG_AVKLART));
         verify(sakOgBehandlingFasade).sendBehandlingAvsluttet(any());
         verify(tpsService, never()).hentAktørIdForIdent(anyString());
         verify(behandlingService, never()).hentBehandling(anyLong());

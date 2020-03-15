@@ -97,7 +97,7 @@ public class AvsluttArt13BehandlingTest {
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
         avsluttArt13BehandlingJobb.avsluttBehandlingArt13();
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART), eq(behandling));
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART));
         verify(medlFasade).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.SED));
     }
 
@@ -107,7 +107,7 @@ public class AvsluttArt13BehandlingTest {
         behandlingsresultat.setEndretDato(månederOgDagerSiden(2, 1));
 
         avsluttArt13BehandlingJobb.avsluttBehandlingArt13();
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART), eq(behandling));
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART));
         verify(medlFasade).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.SED));
     }
 

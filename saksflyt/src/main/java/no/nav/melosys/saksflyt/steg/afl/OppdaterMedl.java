@@ -54,7 +54,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
         SedDokument sedDokument = saksopplysningerService.hentSedOpplysninger(prosessinstans.getBehandling().getId());
         Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART, prosessinstans.getBehandling());
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
 
         if (lovvalgsperioder.isEmpty()) {
             lovvalgsperioder = lovvalgsperiodeService.lagreLovvalgsperioder(
