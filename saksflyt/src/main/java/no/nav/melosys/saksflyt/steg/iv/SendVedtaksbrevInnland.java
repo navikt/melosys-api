@@ -167,7 +167,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         }
     }
 
-    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) throws TekniskException {
+    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) {
         return !avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty();
     }
 

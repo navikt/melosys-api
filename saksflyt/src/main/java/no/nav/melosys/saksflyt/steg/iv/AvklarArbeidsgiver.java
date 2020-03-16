@@ -67,7 +67,6 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
     // Ved forkortet periode har allerede arbeidsgiver blitt avklart
     private static boolean arbeidsgiverAvklares(ProsessType prosessType, Behandlingsresultat resultat) {
         return resultat.getType() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL ||
-            (prosessType != IVERKSETT_VEDTAK_FORKORT_PERIODE &&
-            !resultat.hentValidertLovvalgsperiode().erArtikkel13());
+            (prosessType != IVERKSETT_VEDTAK_FORKORT_PERIODE && !resultat.hentValidertLovvalgsperiode().erArtikkel13());
     }
 }

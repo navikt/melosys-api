@@ -38,7 +38,9 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -81,6 +83,9 @@ public class VedtakServiceTest {
     private Behandling behandling = new Behandling();
     private Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private Behandling replikertBehandling = new Behandling();
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -234,6 +239,16 @@ public class VedtakServiceTest {
 
         assertThat(forventetException).isNotNull();
         assertThat(forventetException.getFeilkoder()).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
+    }
+
+    @Test
+    public void fattVedtak_feilBehandlingstype_kasterException() throws MelosysException {
+
+        behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Kan ikke fatte vedtak ved behandlingstype ");
+
+        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
     }
 
     @Test

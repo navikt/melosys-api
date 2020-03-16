@@ -191,6 +191,14 @@ public class Behandling extends RegistreringsInfo {
         return type != null && erBehandlingAvSøknad(type.getKode());
     }
 
+    public boolean norgeErUtpekt() {
+        return type == Behandlingstyper.BESLUTNING_LOVVALG_NORGE;
+    }
+
+    public boolean kanResultereIVedtak() {
+        return erBehandlingAvSøknad() || norgeErUtpekt();
+    }
+
     public static boolean erBehandlingAvSøknad(String behandlingstypeKode) {
         return Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(behandlingstypeKode)
             || Behandlingstyper.ENDRET_PERIODE.getKode().equalsIgnoreCase(behandlingstypeKode)

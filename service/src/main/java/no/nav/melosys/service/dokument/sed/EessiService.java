@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.sed;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -110,10 +111,6 @@ public class EessiService {
         }
     }
 
-    public boolean erGyldigInstitusjonForLand(String bucType, String landkode, String mottakerInstitusjon) throws MelosysException {
-        return hentEessiMottakerinstitusjoner(bucType, landkode).stream().anyMatch(l -> l.getId().equals(mottakerInstitusjon));
-    }
-
     public boolean landErEessiReady(String bucType, String landkode) throws MelosysException {
         return !hentEessiMottakerinstitusjoner(bucType, landkode).isEmpty();
     }
@@ -157,15 +154,28 @@ public class EessiService {
     }
 
     public void sendAnmodningUnntakSvar(long behandlingId) throws MelosysException {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
+        sendSedPåEksisterendeBehandling(behandlingId, MedlemsperiodeType.ANMODNINGSPERIODE, this::hentSedTypeForAnmodningUnntakSvar);
+
+    }
+
+    public void sendGodkjenningArbeidFlereLand(long behandlingID) throws MelosysException {
+        log.info("Sender svar på A003 for behandling {}", behandlingID);
+        sendSedPåEksisterendeBehandling(behandlingID, MedlemsperiodeType.LOVVALGSPERIODE, br -> SedType.A012);
+    }
+
+    private void sendSedPåEksisterendeBehandling(long behandlingID,
+                                                 MedlemsperiodeType medlemsperiodeType,
+                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer) throws MelosysException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
 
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.ANMODNINGSPERIODE);
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
         String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
 
-        log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
-        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, hentSedTypeForAnmodningUnntakSvar(behandlingsresultat));
+        log.info("Sender svar på anmodning om unntak for behandling {}", behandlingID);
+        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }
 
     @Transactional(readOnly = true)
@@ -190,7 +200,7 @@ public class EessiService {
         return hentSedTypeForAnmodningUnntakSvar(behandlingsresultatService.hentBehandlingsresultat(behandlingID));
     }
 
-    private static SedType hentSedTypeForAnmodningUnntakSvar(Behandlingsresultat behandlingsresultat) {
+    private SedType hentSedTypeForAnmodningUnntakSvar(Behandlingsresultat behandlingsresultat) {
         Anmodningsperiodesvartyper anmodningsperiodeSvarType =
             behandlingsresultat.hentValidertAnmodningsperiode().getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType();
 
