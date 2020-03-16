@@ -1,4 +1,4 @@
-package no.nav.melosys.service.jobb;
+package no.nav.melosys.service.behandling.jobb;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;

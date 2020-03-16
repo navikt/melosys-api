@@ -1,4 +1,4 @@
-package no.nav.melosys.service.jobb;
+package no.nav.melosys.service.behandling.jobb;
 
 import java.time.Instant;
 import java.time.LocalDate;
