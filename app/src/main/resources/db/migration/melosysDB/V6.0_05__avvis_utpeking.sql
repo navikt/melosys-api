@@ -1,1 +1,0 @@
-INSERT INTO PROSESS_STEG (KODE, NAVN) VALUES ('UL_SVAR_SEND_SED', 'Send SED A004 til alle arbeidsland');
