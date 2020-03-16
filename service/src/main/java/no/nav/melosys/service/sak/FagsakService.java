@@ -338,8 +338,7 @@ public class FagsakService {
         behandlingService.avsluttBehandling(fagsak.getAktivBehandling().getId());
     }
 
-    public void oppdaterFagsakOgBehandlingStatuser(String saksnummer, Saksstatuser saksstatus, Behandlingsstatus behandlingsstatus) throws FunksjonellException, TekniskException {
-        Fagsak fagsak = hentFagsak(saksnummer);
+    public void oppdaterFagsakOgBehandlingStatuser(Fagsak fagsak, Saksstatuser saksstatus, Behandlingsstatus behandlingsstatus) throws FunksjonellException, TekniskException {
         oppdaterStatus(fagsak, saksstatus);
         behandlingService.oppdaterStatus(fagsak.getAktivBehandling().getId(), behandlingsstatus);
     }
