@@ -17,23 +17,22 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UtpekAnnetLandSendUtland extends AbstraktSendUtland {
 
-    private final EessiService eessiService;
     private final JoarkFasade joarkFasade;
     private final TpsFasade tpsFasade;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
-    protected UtpekAnnetLandSendUtland(BehandlingsresultatService behandlingsresultatService, EessiService eessiService,
-                                       JoarkFasade joarkFasade, LandvelgerService landvelgerService,
-                                       TpsFasade tpsFasade, UtenlandskMyndighetService utenlandskMyndighetService) {
-        super(eessiService, behandlingsresultatService, landvelgerService);
-        this.eessiService = eessiService;
+    protected UtpekAnnetLandSendUtland(BehandlingsresultatService behandlingsresultatService,
+                                       EessiService eessiService,
+                                       JoarkFasade joarkFasade,
+                                       TpsFasade tpsFasade,
+                                       UtenlandskMyndighetService utenlandskMyndighetService) {
+        super(eessiService, behandlingsresultatService);
         this.joarkFasade = joarkFasade;
         this.tpsFasade = tpsFasade;
         this.utenlandskMyndighetService = utenlandskMyndighetService;

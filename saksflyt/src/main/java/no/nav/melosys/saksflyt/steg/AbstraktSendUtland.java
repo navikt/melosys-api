@@ -11,7 +11,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -19,16 +18,13 @@ import org.springframework.util.CollectionUtils;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 
 public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
-    private final EessiService eessiService;
+    protected final EessiService eessiService;
     protected final BehandlingsresultatService behandlingsresultatService;
-    private final LandvelgerService landvelgerService;
 
     protected AbstraktSendUtland(EessiService eessiService,
-                                 BehandlingsresultatService behandlingsresultatService,
-                                 LandvelgerService landvelgerService) {
+                                 BehandlingsresultatService behandlingsresultatService) {
         this.eessiService = eessiService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.landvelgerService = landvelgerService;
     }
 
     protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans) throws MelosysException {

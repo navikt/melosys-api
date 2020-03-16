@@ -17,7 +17,6 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +36,7 @@ import static org.mockito.Mockito.*;
 public class UtpekAnnetLandSendUtlandTest {
 
     @Mock
-    BehandlingsresultatService behandlingsresultatService;
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private EessiService eessiService;
     @Mock
@@ -45,17 +44,13 @@ public class UtpekAnnetLandSendUtlandTest {
     @Mock
     private TpsFasade tpsFasade;
     @Mock
-    LandvelgerService landvelgerService;
-    @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
     private UtpekAnnetLandSendUtland utpekAnnetLandSendUtland;
-
-    private List<Landkoder> trygdemyndighetsland = List.of(Landkoder.SE);
 
     @Before
     public void settOpp() throws MelosysException {
         utpekAnnetLandSendUtland = spy(new UtpekAnnetLandSendUtland(behandlingsresultatService, eessiService,
-            joarkFasade, landvelgerService, tpsFasade, utenlandskMyndighetService));
+            joarkFasade, tpsFasade, utenlandskMyndighetService));
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.landkode = Landkoder.SE;

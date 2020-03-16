@@ -22,11 +22,9 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
@@ -51,8 +49,6 @@ public class SendUtlandTest {
     @Mock
     private BrevBestiller brevBestiller;
     @Mock
-    private LandvelgerService landvelgerService;
-    @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
 
     private SendUtland sendUtland;
@@ -65,13 +61,13 @@ public class SendUtlandTest {
     private static final String MOTTAKER_INSTITSJON = "SE:123";
 
     @Before
-    public void setUp() throws MelosysException {
+    public void setUp() {
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setId(BEHANDLING_ID);
         prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
 
-        sendUtland = new SendUtland(eessiService, brevBestiller, behandlingService, behandlingsresultatService, landvelgerService, anmodningsperiodeService);
+        sendUtland = new SendUtland(eessiService, brevBestiller, behandlingService, behandlingsresultatService, anmodningsperiodeService);
     }
 
     @Test
