@@ -79,11 +79,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(prosessinstans, behandling, resultat, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
-            if (behandling.norgeErUtpekt()) {
-                prosessinstans.setSteg(IV_SEND_GODKJENT_UTPEKING);
-            } else {
-                prosessinstans.setSteg(IV_SEND_SED);
-            }
+            prosessinstans.setSteg(IV_SEND_SED);
         } else {
             log.warn("Vedtaksbrev kan ikke sendes for behandling {} i "
                     + "prosessinstansen {}.",

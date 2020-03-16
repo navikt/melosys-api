@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.vs;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -9,18 +8,15 @@ import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
@@ -44,8 +40,6 @@ public class VideresendSoknadTest {
     @Mock
     private EessiService eessiService;
     @Mock
-    private LandvelgerService landvelgerService;
-    @Mock
     private TpsFasade tpsFasade;
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
@@ -62,8 +56,8 @@ public class VideresendSoknadTest {
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @Before
-    public void setup() throws IkkeFunnetException {
-        videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, landvelgerService, tpsFasade, utenlandskMyndighetService, joarkFasade, fagsakService);
+    public void setup() {
+        videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, tpsFasade, utenlandskMyndighetService, joarkFasade, fagsakService);
     }
 
     @Test

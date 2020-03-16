@@ -19,7 +19,6 @@ import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +48,8 @@ public class SendUtland extends AbstraktSendUtland {
                       BrevBestiller brevBestiller,
                       BehandlingService behandlingService,
                       BehandlingsresultatService behandlingsresultatService,
-                      LandvelgerService landvelgerService, AnmodningsperiodeService anmodningsperiodeService) {
-        super(eessiService, behandlingsresultatService, landvelgerService);
+                      AnmodningsperiodeService anmodningsperiodeService) {
+        super(eessiService, behandlingsresultatService);
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
         this.anmodningsperiodeService = anmodningsperiodeService;

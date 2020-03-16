@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -16,7 +17,7 @@ import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.LandvelgerService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,16 +31,18 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_
 public class SendVedtakUtland extends AbstraktSendUtland {
     private BehandlingService behandlingService;
     private BrevBestiller brevBestiller;
+    private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
     public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
-                            LandvelgerService landvelgerService) {
-        super(eessiService, behandlingsresultatService, landvelgerService);
+                            SaksopplysningerService saksopplysningerService) {
+        super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
+        this.saksopplysningerService = saksopplysningerService;
     }
 
     @Override
@@ -50,13 +53,29 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-        super.sendUtland(avklarBucType(prosessinstans.getBehandling()), prosessinstans);
+        Behandling behandling = prosessinstans.getBehandling();
+        if (behandling.norgeErUtpekt()) {
+            sendA012Sed(behandling.getId());
+        } else {
+            super.sendUtland(avklarBucType(behandling), prosessinstans);
+        }
+
         if (erArtikkel11(prosessinstans)) {
             prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
         } else {
             prosessinstans.setSteg(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
         }
 
+    }
+
+    private void sendA012Sed(long behandlingID) throws MelosysException {
+        SedDokument sedDokument = saksopplysningerService.hentSedOpplysninger(behandlingID);
+
+        if (sedDokument.getErElektronisk()) {
+            eessiService.sendGodkjenningArbeidFlereLand(behandlingID);
+        } else {
+            throw new UnsupportedOperationException("Sending av brev-A012 er ikke implementert");
+        }
     }
 
     private Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
