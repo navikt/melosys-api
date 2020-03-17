@@ -57,9 +57,9 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .put(ANMODNING_OM_UNNTAK_HOVEDREGEL, "ae0110")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, "ae0235")
+            .put(SOEKNAD_ARBEID_FLERE_LAND, "ae0242")
+            .put(SOEKNAD_ARBEID_NORGE_BOSATT_ANNET_LAND, "ae0243")
             // FIXME: Mangler behandlingstype i kodeverk
-            .put(SOEKNAD_ARBEID_FLERE_LAND, "FIXME #1")
-            .put(SOEKNAD_ARBEID_NORGE_BOSATT_ANNET_LAND, "FIXME #2")
             .put(ØVRIGE_SED, "ukjent")
             .put(VURDER_TRYGDETID, "ae0236")
             .build();
