@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.ul.svar;
+package no.nav.melosys.saksflyt.steg.afl.svar;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UtpekLandAvvisTest {
+public class SendAvslagTest {
 
     @Mock
     private BehandlingService behandlingService;
@@ -41,13 +41,13 @@ public class UtpekLandAvvisTest {
     private SedDataBygger sedDataBygger;
     @Mock
     private SedDataGrunnlagFactory sedDataGrunnlagFactory;
-    private UtpekLandAvvis utpekLandAvvis;
+    private SendAvslag sendAvslag;
 
     private Behandling behandling;
 
     @Before
     public void settOpp() throws FunksjonellException, TekniskException {
-        utpekLandAvvis = new UtpekLandAvvis(
+        sendAvslag = new SendAvslag(
             behandlingService, behandlingsresultatService, eessiConsumer,
             sedDataBygger, sedDataGrunnlagFactory
         );
@@ -78,7 +78,7 @@ public class UtpekLandAvvisTest {
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, utpekingAvvis);
 
-        utpekLandAvvis.utfør(prosessinstans);
+        sendAvslag.utfør(prosessinstans);
 
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), any());
     }

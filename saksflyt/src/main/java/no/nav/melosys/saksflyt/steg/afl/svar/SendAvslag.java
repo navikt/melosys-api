@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.ul.svar;
+package no.nav.melosys.saksflyt.steg.afl.svar;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -20,8 +20,10 @@ import no.nav.melosys.service.dokument.sed.SedDataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class UtpekLandAvvis extends AbstraktStegBehandler {
+@Component("AFLSvarSendAvslag")
+public class SendAvslag extends AbstraktStegBehandler {
 
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -30,9 +32,9 @@ public class UtpekLandAvvis extends AbstraktStegBehandler {
     private final SedDataGrunnlagFactory sedDataGrunnlagFactory;
 
     @Autowired
-    public UtpekLandAvvis(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                          EessiConsumer eessiConsumer, SedDataBygger sedDataBygger,
-                          SedDataGrunnlagFactory sedDataGrunnlagFactory) {
+    public SendAvslag(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+                      EessiConsumer eessiConsumer, SedDataBygger sedDataBygger,
+                      SedDataGrunnlagFactory sedDataGrunnlagFactory) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiConsumer = eessiConsumer;
@@ -42,7 +44,7 @@ public class UtpekLandAvvis extends AbstraktStegBehandler {
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.AFL_SVAR_SEND_SED;
+        return ProsessSteg.AFL_SVAR_SEND_AVSLAG;
     }
 
     @Override

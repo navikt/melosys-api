@@ -130,7 +130,7 @@ public enum ProsessSteg implements Kodeverk {
     AFL_OPPDATER_MEDL("AFL_OPPDATER_MEDL", "Setter status i MEDL"),
 
     //Svar på utpeking av land
-    AFL_SVAR_SEND_SED("AFL_SVAR_SEND_SED", "Send SED A004 til alle arbeidsland"),
+    AFL_SVAR_SEND_AVSLAG("AFL_SVAR_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),
 
     //Unntak medlemskap
     REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
