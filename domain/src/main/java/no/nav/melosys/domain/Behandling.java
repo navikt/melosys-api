@@ -50,6 +50,9 @@ public class Behandling extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
 
+    @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Behandlingsnotat> behandlingsnotater = new HashSet<>(1);
+
     @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Behandlingsgrunnlag behandlingsgrunnlag;
 
@@ -143,6 +146,14 @@ public class Behandling extends RegistreringsInfo {
 
     public void setOpprinneligBehandling(Behandling opprinneligBehandling) {
         this.opprinneligBehandling = opprinneligBehandling;
+    }
+
+    public Set<Behandlingsnotat> getBehandlingsnotater() {
+        return behandlingsnotater;
+    }
+
+    public void setBehandlingsnotater(Set<Behandlingsnotat> behandlingsnotater) {
+        this.behandlingsnotater = behandlingsnotater;
     }
 
     public Behandlingsgrunnlag getBehandlingsgrunnlag() {
