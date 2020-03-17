@@ -8,17 +8,20 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TilgangService {
-    private BehandlingService behandlingService;
-    private Pep pep;
+    private final FagsakService fagsakService;
+    private final BehandlingService behandlingService;
+    private final Pep pep;
 
     @Autowired
-    public TilgangService(BehandlingService behandlingService, Pep pep) {
+    public TilgangService(FagsakService fagsakService, BehandlingService behandlingService, Pep pep) {
+        this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.pep = pep;
     }
@@ -46,6 +49,10 @@ public class TilgangService {
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }
+    }
+
+    public void sjekkSak(String saksnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        sjekkSak(fagsakService.hentFagsak(saksnummer));
     }
 
     // Fagsak

@@ -9,9 +9,11 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
 import org.junit.Before;
@@ -20,8 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,17 +32,20 @@ public class TilgangServiceTest {
 
     @Mock
     private Pep pep;
-
-    private XacmlResponse abacResponse;
-
+    @Mock
+    private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
 
+    private XacmlResponse abacResponse;
+
+
     private Fagsak fagsakMocked;
     private Behandling behandlingMocked;
+    private final String saksnummer = "MEL-111";
 
     @Before
-    public void setUp() throws TekniskException {
+    public void setUp() throws TekniskException, IkkeFunnetException {
         AbacContext abacContext = mock(AbacContext.class);
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
 
@@ -54,10 +58,11 @@ public class TilgangServiceTest {
 
         fagsakMocked = mock(Fagsak.class);
         behandlingMocked = mock(Behandling.class);
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakMocked);
         when(fagsakMocked.hentBruker()).thenReturn(new Aktoer());
         when(behandlingMocked.getFagsak()).thenReturn(fagsakMocked);
 
-        tilgangService = new TilgangService(behandlingService, pep);
+        tilgangService = new TilgangService(fagsakService, behandlingService, pep);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
@@ -97,14 +102,14 @@ public class TilgangServiceTest {
     }
 
     @Test
-    public void testFagsakOk() throws SikkerhetsbegrensningException, TekniskException {
+    public void testFagsakOk() throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
-        tilgangService.sjekkSak(fagsakMocked);
+        tilgangService.sjekkSak(saksnummer);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, TekniskException {
+    public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        tilgangService.sjekkSak(fagsakMocked);
+        tilgangService.sjekkSak(saksnummer);
     }
 }
