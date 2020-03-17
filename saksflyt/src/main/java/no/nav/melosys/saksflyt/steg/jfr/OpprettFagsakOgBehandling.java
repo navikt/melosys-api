@@ -11,7 +11,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.slf4j.Logger;

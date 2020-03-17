@@ -14,8 +14,8 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.stereotype.Component;
 
 @Component

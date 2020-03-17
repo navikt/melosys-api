@@ -9,7 +9,7 @@ import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.beans.factory.annotation.Autowired;

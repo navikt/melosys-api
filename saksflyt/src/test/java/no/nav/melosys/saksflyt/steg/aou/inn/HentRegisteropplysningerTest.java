@@ -14,7 +14,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.junit.Before;

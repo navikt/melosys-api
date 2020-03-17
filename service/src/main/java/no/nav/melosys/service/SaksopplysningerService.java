@@ -17,6 +17,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

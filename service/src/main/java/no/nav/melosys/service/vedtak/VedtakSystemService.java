@@ -2,8 +2,8 @@ package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;

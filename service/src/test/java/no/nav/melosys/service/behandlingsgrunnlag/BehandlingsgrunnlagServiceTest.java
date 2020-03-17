@@ -13,7 +13,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

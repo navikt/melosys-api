@@ -22,9 +22,9 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -73,7 +73,7 @@ public class FagsakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException, FunksjonellException {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        Fagsak fagsak = hentFagsak(saksnummer);
         if (fagsak.getBehandlinger().isEmpty()) {
             throw new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen tilknyttede behandlinger.");
         }
@@ -181,8 +181,8 @@ public class FagsakService {
     // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.
     // Oppdaterer IKKE de som allerede finnes i database
     @Transactional
-    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) throws IkkeFunnetException {
+        Fagsak fagsak = hentFagsak(saksnummer);
         fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
             && aktoer.getRolle() == Aktoersroller.MYNDIGHET);
 
@@ -195,8 +195,8 @@ public class FagsakService {
     }
 
     @Transactional
-    public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+    public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) throws IkkeFunnetException {
+        Fagsak fagsak = hentFagsak(saksnummer);
 
         Aktoer aktør = lagAktør(fagsak, aktørsrolle, ID);
         fagsak.getAktører().add(aktør);
@@ -319,6 +319,7 @@ public class FagsakService {
     }
 
     //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
+    @Transactional(rollbackFor = MelosysException.class)
     public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException, TekniskException {
         Behandlingstyper behandlingstype = behandling.getType();
         if (behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
@@ -328,14 +329,23 @@ public class FagsakService {
         }
 
         Saksstatuser saksstatus = behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
-        avsluttFagsakOgBehandling(fagsak, saksstatus, behandling);
+        avsluttFagsakOgBehandling(fagsak, saksstatus);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus, Behandling behandling) throws IkkeFunnetException {
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) throws IkkeFunnetException, TekniskException {
+        oppdaterStatus(fagsak, saksstatus);
+        behandlingService.avsluttBehandling(fagsak.getAktivBehandling().getId());
+    }
+
+    public void oppdaterFagsakOgBehandlingStatuser(Fagsak fagsak, Saksstatuser saksstatus, Behandlingsstatus behandlingsstatus) throws FunksjonellException, TekniskException {
+        oppdaterStatus(fagsak, saksstatus);
+        behandlingService.oppdaterStatus(fagsak.getAktivBehandling().getId(), behandlingsstatus);
+    }
+
+    private void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
-        behandlingService.avsluttBehandling(behandling.getId());
     }
 
     @Transactional(rollbackFor = MelosysException.class)

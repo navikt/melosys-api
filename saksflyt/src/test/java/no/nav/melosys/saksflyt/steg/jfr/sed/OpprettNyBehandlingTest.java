@@ -13,7 +13,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;

@@ -1,12 +1,9 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.Period;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -68,8 +65,7 @@ public class BehandlingService {
      */
     @Transactional(rollbackFor = MelosysException.class)
     public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) throws FunksjonellException {
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
@@ -90,8 +86,7 @@ public class BehandlingService {
      *  eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
      */
     public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
 
         if (behandling.getStatus() == Behandlingsstatus.VURDER_DOKUMENT && !erLovligNesteStatusEtterDokumentVurdering(status)) {
             throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
@@ -113,7 +108,7 @@ public class BehandlingService {
     private boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
         return (behandlingsstatus == Behandlingsstatus.UNDER_BEHANDLING)
             || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART)
-            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL) 
+            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL)
             || (behandlingsstatus == Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
     }
 
@@ -199,8 +194,7 @@ public class BehandlingService {
     }
 
     public void avsluttBehandling(long behandlingId) throws IkkeFunnetException {
-        Behandling behandling = behandlingRepository.findById(behandlingId)
-            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();
@@ -214,6 +208,11 @@ public class BehandlingService {
     public Behandling hentBehandlingUtenSaksopplysninger(long behandlingId) throws IkkeFunnetException {
         return behandlingRepository.findById(behandlingId)
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<Behandling> hentBehandlingerMedstatus(Behandlingsstatus behandlingsstatus) {
+        return behandlingRepository.findAllByStatus(behandlingsstatus);
     }
 
     public void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {

@@ -24,7 +24,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import no.nav.melosys.service.sak.FagsakService;

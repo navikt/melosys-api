@@ -12,7 +12,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

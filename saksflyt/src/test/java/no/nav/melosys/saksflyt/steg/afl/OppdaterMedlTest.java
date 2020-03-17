@@ -4,7 +4,7 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
@@ -12,8 +12,8 @@ import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
-import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,14 +38,14 @@ public class OppdaterMedlTest {
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
-    private FagsakService fagsakService;
+    private BehandlingService behandlingService;
 
     private Behandling behandling;
     private Fagsak fagsak;
 
     @Before
     public void setup() throws MelosysException {
-        oppdaterMedl = new OppdaterMedl(medlFasade, medlPeriodeService, lovvalgsperiodeService, saksopplysningerService, fagsakService);
+        oppdaterMedl = new OppdaterMedl(medlFasade, medlPeriodeService, lovvalgsperiodeService, saksopplysningerService, behandlingService);
 
         SedDokument sedDokument = new SedDokument();
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -57,8 +57,8 @@ public class OppdaterMedlTest {
         behandling = new Behandling();
         behandling.getSaksopplysninger().add(saksopplysning);
         behandling.setFagsak(fagsak);
+        behandling.setId(1122L);
 
-        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
         when(medlFasade.opprettPeriodeUnderAvklaring(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED))).thenReturn(234L);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -73,7 +73,7 @@ public class OppdaterMedlTest {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "123");
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART), eq(behandling));
+        verify(behandlingService).oppdaterStatus(eq(behandling.getId()), eq(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING));
         verify(medlPeriodeService).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         verify(medlFasade).opprettPeriodeUnderAvklaring(eq("123"), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
     }

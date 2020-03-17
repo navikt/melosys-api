@@ -16,7 +16,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;

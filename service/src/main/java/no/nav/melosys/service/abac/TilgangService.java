@@ -7,7 +7,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
