@@ -66,7 +66,7 @@ public class EessiServiceTest {
 
     @Before
     public void setup() throws Exception {
-        eessiService = new EessiService("true", sedDataBygger, dokumentdataGrunnlagFactory,
+        eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory,
             eessiConsumer, behandlingService, behandlingsresultatService);
 
         behandling = new Behandling();
