@@ -30,13 +30,4 @@ class LdapInnlogging {
             throw new IntegrasjonException("Klarte ikke å koble til LDAP på URL " + ldap.getUrl());
         }
     }
-
-    static String getRequiredProperty(String navn) throws TekniskException {
-        String verdi = System.getProperty(navn);
-        if (verdi == null || verdi.isEmpty()) {
-            throw new TekniskException("Klarte ikke koble til LDAP da påkrevd system property " + navn + " ikke er satt");
-        }
-        return verdi;
-
-    }
 }

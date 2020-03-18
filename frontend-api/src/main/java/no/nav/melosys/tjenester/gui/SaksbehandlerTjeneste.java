@@ -4,15 +4,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.freg.abac.core.annotation.Abac;
 import no.nav.freg.abac.core.dto.response.Decision;
+import no.nav.melosys.domain.MelosysBruker;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.ldap.LdapBruker;
-import no.nav.melosys.integrasjon.ldap.LdapBrukeroppslag;
+import no.nav.melosys.service.ldap.LdapService;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.InnloggetBrukerDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,14 +26,10 @@ import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class SaksbehandlerTjeneste {
 
-    private final String melosysAdGruppe;
+    private final LdapService ldapService;
 
-    private final LdapBrukeroppslag ldapBrukeroppslag;
-
-    public SaksbehandlerTjeneste(LdapBrukeroppslag ldapBrukeroppslag,
-                                 @Value("${melosys.security.melosys_ad_group}") String melosysAdGruppe) {
-        this.ldapBrukeroppslag = ldapBrukeroppslag;
-        this.melosysAdGruppe = melosysAdGruppe;
+    public SaksbehandlerTjeneste(LdapService ldapService) {
+        this.ldapService = ldapService;
     }
 
     @GetMapping
@@ -45,22 +39,12 @@ public class SaksbehandlerTjeneste {
         notes = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging."),
         response = InnloggetBrukerDto.class)
     public InnloggetBrukerDto innloggetBruker() throws TekniskException, SikkerhetsbegrensningException {
-        String ident = SubjectHandler.getInstance().getUserID();
+        MelosysBruker bruker = ldapService.hentBrukerinformasjon();
 
-        LdapBruker ldapBruker;
-        ldapBruker = ldapBrukeroppslag.hentBrukerinformasjon(ident);
-
-        if (ldapBruker != null && !brukerErMedlemAvMelosysGruppe(ldapBruker)) {
+        if (!ldapService.harTilgangTilMelosys(bruker)) {
             throw new SikkerhetsbegrensningException("Brukeren er ikke medlem av riktig AD-gruppe");
         }
 
-        String navn = ldapBruker != null ? ldapBruker.getDisplayName() : "FEIL";
-
-        return new InnloggetBrukerDto(ident, navn);
-    }
-
-    private boolean brukerErMedlemAvMelosysGruppe(LdapBruker ldapBruker) {
-        return ldapBruker.getGroups().stream()
-            .anyMatch(group -> group.equalsIgnoreCase(melosysAdGruppe));
+        return new InnloggetBrukerDto(bruker.getIdent(), bruker.getNavn());
     }
 }

@@ -18,9 +18,11 @@ import javax.naming.ldap.LdapName;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+import static no.nav.melosys.integrasjon.ldap.LdapInnlogging.lagLdapContext;
+
+@Component
 public class LdapBrukeroppslag {
 
     private final LdapContext context;
@@ -30,7 +32,7 @@ public class LdapBrukeroppslag {
 
     @Autowired
     public LdapBrukeroppslag(LdapCredentials credentials) throws TekniskException {
-        this(LdapInnlogging.lagLdapContext(credentials), lagLdapSearchBase(credentials.getUserbasedn()));
+        this(lagLdapContext(credentials), lagLdapSearchBase(credentials.getUserbasedn()));
     }
 
     LdapBrukeroppslag(LdapContext context, LdapName searcBase) {
