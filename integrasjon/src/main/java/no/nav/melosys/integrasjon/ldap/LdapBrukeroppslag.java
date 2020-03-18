@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.naming.InvalidNameException;
 import javax.naming.LimitExceededException;
 import javax.naming.NamingEnumeration;
@@ -18,7 +17,10 @@ import javax.naming.ldap.LdapName;
 
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class LdapBrukeroppslag {
 
     private final LdapContext context;
@@ -26,9 +28,9 @@ public class LdapBrukeroppslag {
 
     private static final Pattern IDENT_PATTERN = Pattern.compile("^\\p{LD}+$");
 
-    public LdapBrukeroppslag() throws TekniskException {
-        context = LdapInnlogging.lagLdapContext();
-        searchBase = lagLdapSearchBase();
+    @Autowired
+    public LdapBrukeroppslag(LdapCredentials credentials) throws TekniskException {
+        this(LdapInnlogging.lagLdapContext(credentials), lagLdapSearchBase(credentials.getUserbasedn()));
     }
 
     LdapBrukeroppslag(LdapContext context, LdapName searcBase) {
@@ -69,7 +71,7 @@ public class LdapBrukeroppslag {
         }
     }
 
-    protected String getDisplayName(SearchResult result) throws TekniskException {
+    String getDisplayName(SearchResult result) throws TekniskException {
         String attributeName = "displayName";
         Attribute displayName = find(result, attributeName);
         try {
@@ -100,7 +102,7 @@ public class LdapBrukeroppslag {
      *
      * @return CN-value av alle grupper brukere er <strong>direkte</strong> medlem av
      */
-    protected Collection<String> getMemberOf(SearchResult result) throws IntegrasjonException {
+    Collection<String> getMemberOf(SearchResult result) throws IntegrasjonException {
         String attributeName = "memberOf";
         List<String> groups = new ArrayList<>();
 
@@ -127,8 +129,7 @@ public class LdapBrukeroppslag {
         return attribute;
     }
 
-    private LdapName lagLdapSearchBase() throws TekniskException {
-        String userBaseDn = LdapInnlogging.getRequiredProperty("ldap.user.basedn");
+    private static LdapName lagLdapSearchBase(String userBaseDn) throws TekniskException {
         try {
             return new LdapName(userBaseDn);
         } catch (InvalidNameException e) {

@@ -9,25 +9,25 @@ import javax.naming.ldap.LdapContext;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 
-public class LdapInnlogging {
+class LdapInnlogging {
 
     private LdapInnlogging() {
     }
 
-    public static LdapContext lagLdapContext() throws TekniskException {
-        String url = getRequiredProperty("ldap.url");
-        String user = getRequiredProperty("ldap.username") + "@" + getRequiredProperty("ldap.domain");
+    static LdapContext lagLdapContext(LdapCredentials ldap) throws TekniskException {
+
+        String user = ldap.getUsername() + "@" + ldap.getDomain();
 
         Hashtable<String, Object> environment = new Hashtable<>(); //NOSONAR //metodeparameter krever Hashtable
         environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         environment.put(Context.SECURITY_AUTHENTICATION, "simple");
-        environment.put(Context.SECURITY_CREDENTIALS, getRequiredProperty("ldap.password"));
+        environment.put(Context.SECURITY_CREDENTIALS, ldap.getPassword());
         environment.put(Context.SECURITY_PRINCIPAL, user);
-        environment.put(Context.PROVIDER_URL, url);
+        environment.put(Context.PROVIDER_URL, ldap.getUrl());
         try {
             return new InitialLdapContext(environment, null);
         } catch (NamingException e) {
-            throw new IntegrasjonException("Klarte ikke å koble til LDAP på URL " + url);
+            throw new IntegrasjonException("Klarte ikke å koble til LDAP på URL " + ldap.getUrl());
         }
     }
 

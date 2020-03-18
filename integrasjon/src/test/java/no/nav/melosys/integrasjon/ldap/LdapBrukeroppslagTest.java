@@ -12,6 +12,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
+
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import org.junit.Rule;
@@ -27,8 +28,8 @@ public class LdapBrukeroppslagTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    LdapContext context = Mockito.mock(LdapContext.class);
-    LdapName baseSearch = new LdapName("ou=ServiceAccounts,dc=test,dc=local");
+    private LdapContext context = Mockito.mock(LdapContext.class);
+    private LdapName baseSearch = new LdapName("ou=ServiceAccounts,dc=test,dc=local");
 
     public LdapBrukeroppslagTest() throws InvalidNameException {
     }

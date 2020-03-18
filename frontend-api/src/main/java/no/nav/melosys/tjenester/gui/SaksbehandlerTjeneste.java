@@ -28,8 +28,15 @@ import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class SaksbehandlerTjeneste {
 
-    @Value("${melosys.security.melosys_ad_group}")
-    private String MELOSYS_AD_GRUPPE;
+    private final String melosysAdGruppe;
+
+    private final LdapBrukeroppslag ldapBrukeroppslag;
+
+    public SaksbehandlerTjeneste(LdapBrukeroppslag ldapBrukeroppslag,
+                                 @Value("${melosys.security.melosys_ad_group}") String melosysAdGruppe) {
+        this.ldapBrukeroppslag = ldapBrukeroppslag;
+        this.melosysAdGruppe = melosysAdGruppe;
+    }
 
     @GetMapping
     @Abac(bias = Decision.DENY, actions = @Abac.Attr(key = ACTION_ID, value = PepImpl.READ))
@@ -41,7 +48,7 @@ public class SaksbehandlerTjeneste {
         String ident = SubjectHandler.getInstance().getUserID();
 
         LdapBruker ldapBruker;
-        ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
+        ldapBruker = ldapBrukeroppslag.hentBrukerinformasjon(ident);
 
         if (ldapBruker != null && !brukerErMedlemAvMelosysGruppe(ldapBruker)) {
             throw new SikkerhetsbegrensningException("Brukeren er ikke medlem av riktig AD-gruppe");
@@ -54,6 +61,6 @@ public class SaksbehandlerTjeneste {
 
     private boolean brukerErMedlemAvMelosysGruppe(LdapBruker ldapBruker) {
         return ldapBruker.getGroups().stream()
-            .anyMatch(group -> group.equalsIgnoreCase(MELOSYS_AD_GRUPPE));
+            .anyMatch(group -> group.equalsIgnoreCase(melosysAdGruppe));
     }
 }
