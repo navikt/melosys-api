@@ -8,6 +8,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("AnmodningUnntakMottakOpprettOppgave")
@@ -16,7 +17,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     private final OppgaveService oppgaveService;
 
     @Autowired
-    public OpprettOppgave(OppgaveService oppgaveService) {
+    public OpprettOppgave(@Qualifier("system") OppgaveService oppgaveService) {
         this.oppgaveService = oppgaveService;
     }
 

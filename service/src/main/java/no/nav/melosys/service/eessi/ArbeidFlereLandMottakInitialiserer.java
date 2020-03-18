@@ -17,6 +17,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 //A003
@@ -27,7 +28,9 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
 
-    public ArbeidFlereLandMottakInitialiserer(FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
+    public ArbeidFlereLandMottakInitialiserer(FagsakService fagsakService,
+                                              BehandlingService behandlingService,
+                                              @Qualifier("system") OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
