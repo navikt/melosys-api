@@ -11,7 +11,6 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -25,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 public class UtpekingService {
@@ -95,7 +95,9 @@ public class UtpekingService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws IkkeFunnetException {
+    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException {
+        validerAvslagUtpeking(utpekingAvvis);
+
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
         behandlingService.lagre(behandling);
@@ -109,6 +111,15 @@ public class UtpekingService {
         }
         if (utpekingsperioder.size() != 1) {
             throw new FunksjonellException("Flere utpekingsperioder er ikke støttet ved utpeking av et annet land");
+        }
+    }
+
+    private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) throws FunksjonellException {
+        if (StringUtils.isEmpty(utpekingAvvis.getBegrunnelse())) {
+            throw new FunksjonellException("Du må oppgi en begrunnelse for å kunne avslå en utpeking");
+        }
+        if (utpekingAvvis.isEtterspørInformasjon() == null) {
+            throw new FunksjonellException("Du må oppgi om forespørsel om mer informasjon vil bli sendt");
         }
     }
 }

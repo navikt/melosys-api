@@ -3,8 +3,7 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 import java.io.IOException;
 
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -37,7 +36,7 @@ public class UtpekingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void avvisUtpeking() throws IOException, IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void avvisUtpeking() throws IOException, FunksjonellException, TekniskException {
 
         UtpekingAvvisDto utpekingAvvisDto = new UtpekingAvvisDto();
         utpekingAvvisDto.setFritekst("test");

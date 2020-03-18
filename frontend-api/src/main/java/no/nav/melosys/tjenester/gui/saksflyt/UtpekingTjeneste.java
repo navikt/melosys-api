@@ -1,8 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -32,7 +31,7 @@ public class UtpekingTjeneste {
     }
 
     @PostMapping("{behandlingID}/avvis")
-    public ResponseEntity avvisUtpeking(@PathVariable("behandlingID") Long behandlingId, @RequestBody UtpekingAvvisDto utpekingAvvisDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public ResponseEntity avvisUtpeking(@PathVariable("behandlingID") Long behandlingId, @RequestBody UtpekingAvvisDto utpekingAvvisDto) throws FunksjonellException, TekniskException {
         tilgangService.sjekkTilgang(behandlingId);
         utpekingService.avvisUtpeking(behandlingId, utpekingAvvisDto.tilDomene());
         return ResponseEntity.noContent().build();

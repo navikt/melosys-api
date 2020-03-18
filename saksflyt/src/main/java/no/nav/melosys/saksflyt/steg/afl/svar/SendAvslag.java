@@ -1,45 +1,25 @@
 package no.nav.melosys.saksflyt.steg.afl.svar;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.MedlemsperiodeType;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.eessi.EessiConsumer;
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.dto.UtpekingAvvisDto;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.SedDataGrunnlagFactory;
-import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
-import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_OPPDATER_MEDL;
 
 @Component("AFLSvarSendAvslag")
 public class SendAvslag extends AbstraktStegBehandler {
 
-    private final BehandlingService behandlingService;
-    private final BehandlingsresultatService behandlingsresultatService;
-    private final EessiConsumer eessiConsumer;
-    private final SedDataBygger sedDataBygger;
-    private final SedDataGrunnlagFactory sedDataGrunnlagFactory;
+    private final EessiService eessiService;
 
     @Autowired
-    public SendAvslag(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                      EessiConsumer eessiConsumer, SedDataBygger sedDataBygger,
-                      SedDataGrunnlagFactory sedDataGrunnlagFactory) {
-        this.behandlingService = behandlingService;
-        this.behandlingsresultatService = behandlingsresultatService;
-        this.eessiConsumer = eessiConsumer;
-        this.sedDataBygger = sedDataBygger;
-        this.sedDataGrunnlagFactory = sedDataGrunnlagFactory;
+    public SendAvslag(EessiService eessiService) {
+        this.eessiService = eessiService;
     }
 
     @Override
@@ -49,21 +29,11 @@ public class SendAvslag extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        Behandling behandling = prosessinstans.getBehandling();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        SedDataGrunnlag dataGrunnlag = sedDataGrunnlagFactory.av(behandling);
-
-        String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
+        long behandlingId = prosessinstans.getBehandling().getId();
         UtpekingAvvis utpekingAvvis = prosessinstans.getData(ProsessDataKey.UTPEKING_AVVIS, UtpekingAvvis.class);
 
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
-        sedDataDto.setYtterligereInformasjon(utpekingAvvis.getFritekst());
-        sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
-            utpekingAvvis.getNyttLovvalgsland(),
-            utpekingAvvis.getBegrunnelse(),
-            utpekingAvvis.isEtterspørInformasjon()
-        ));
+        eessiService.sendAvslagUtpekingSvar(behandlingId, utpekingAvvis);
 
-        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.A004);
+        prosessinstans.setSteg(AFL_OPPDATER_MEDL);
     }
 }

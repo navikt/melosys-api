@@ -13,6 +13,7 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -24,6 +25,7 @@ import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.UtpekingAvvisDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -163,6 +165,23 @@ public class EessiService {
 
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingID);
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
+    }
+
+    public void sendAvslagUtpekingSvar(long behandlingId, UtpekingAvvis utpekingAvvis) throws MelosysException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
+
+        String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
+
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+        sedDataDto.setYtterligereInformasjon(utpekingAvvis.getFritekst());
+        sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
+            utpekingAvvis.getNyttLovvalgsland(),
+            utpekingAvvis.getBegrunnelse(),
+            utpekingAvvis.isEtterspørInformasjon()
+        ));
+        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.A004);
     }
 
     @Transactional(readOnly = true)

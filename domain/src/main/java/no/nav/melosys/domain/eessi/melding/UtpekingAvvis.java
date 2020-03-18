@@ -3,7 +3,7 @@ package no.nav.melosys.domain.eessi.melding;
 public class UtpekingAvvis {
 
     private String begrunnelse;
-    private boolean etterspørInformasjon;
+    private Boolean etterspørInformasjon;
     private String nyttLovvalgsland;
     private String fritekst;
 
@@ -26,11 +26,11 @@ public class UtpekingAvvis {
         this.begrunnelse = begrunnelse;
     }
 
-    public boolean isEtterspørInformasjon() {
+    public Boolean isEtterspørInformasjon() {
         return etterspørInformasjon;
     }
 
-    public void setEtterspørInformasjon(boolean etterspørInformasjon) {
+    public void setEtterspørInformasjon(Boolean etterspørInformasjon) {
         this.etterspørInformasjon = etterspørInformasjon;
     }
 

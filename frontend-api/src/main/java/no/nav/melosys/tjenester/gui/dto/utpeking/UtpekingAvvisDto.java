@@ -7,7 +7,7 @@ public class UtpekingAvvisDto {
     private String fritekst;
     private String nyttLovvalgsland;
     private String begrunnelseUtenlandskMyndighet;
-    private boolean vilSendeAnmodningOmMerInformasjon;
+    private Boolean vilSendeAnmodningOmMerInformasjon;
 
     public UtpekingAvvis tilDomene() {
         return new UtpekingAvvis(
@@ -42,11 +42,11 @@ public class UtpekingAvvisDto {
         this.begrunnelseUtenlandskMyndighet = begrunnelseUtenlandskMyndighet;
     }
 
-    public boolean isVilSendeAnmodningOmMerInformasjon() {
+    public Boolean isVilSendeAnmodningOmMerInformasjon() {
         return vilSendeAnmodningOmMerInformasjon;
     }
 
-    public void setVilSendeAnmodningOmMerInformasjon(boolean vilSendeAnmodningOmMerInformasjon) {
+    public void setVilSendeAnmodningOmMerInformasjon(Boolean vilSendeAnmodningOmMerInformasjon) {
         this.vilSendeAnmodningOmMerInformasjon = vilSendeAnmodningOmMerInformasjon;
     }
 }

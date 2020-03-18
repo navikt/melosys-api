@@ -14,8 +14,9 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.dokument.sed.SedDataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.junit.Before;
@@ -24,6 +25,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_OPPDATER_MEDL;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,25 +35,27 @@ import static org.mockito.Mockito.when;
 public class SendAvslagTest {
 
     @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private EessiConsumer eessiConsumer;
-    @Mock
     private SedDataBygger sedDataBygger;
     @Mock
     private SedDataGrunnlagFactory sedDataGrunnlagFactory;
-    private SendAvslag sendAvslag;
+    @Mock
+    private EessiConsumer eessiConsumer;
+    @Mock
+    private BehandlingService behandlingService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
 
+    private SendAvslag sendAvslag;
+    private EessiService eessiService;
     private Behandling behandling;
 
     @Before
     public void settOpp() throws FunksjonellException, TekniskException {
-        sendAvslag = new SendAvslag(
-            behandlingService, behandlingsresultatService, eessiConsumer,
-            sedDataBygger, sedDataGrunnlagFactory
+        eessiService = new EessiService(
+            sedDataBygger, sedDataGrunnlagFactory,
+            eessiConsumer, behandlingService, behandlingsresultatService
         );
+        sendAvslag = new SendAvslag(eessiService);
 
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now()));
@@ -65,21 +70,22 @@ public class SendAvslagTest {
         behandling.setSaksopplysninger(Set.of(saksopplysning));
 
         when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
+        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
     }
 
     @Test
     public void utfør() throws MelosysException {
-        UtpekingAvvis utpekingAvvis = new UtpekingAvvis(
-            "begrunnelse", true,
-            "DK", "fritekst"
-        );
-
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, utpekingAvvis);
+        prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, new UtpekingAvvis(
+            "begrunnelse", true,
+            "DK", "fritekst"
+        ));
 
         sendAvslag.utfør(prosessinstans);
 
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), any());
+
+        assertThat(prosessinstans.getSteg()).isEqualTo(AFL_OPPDATER_MEDL);
     }
 }
