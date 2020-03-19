@@ -1,17 +1,19 @@
 package no.nav.melosys.integrasjon.ldap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
 
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ldap.core.ContextMapper;
-import org.springframework.ldap.core.DirContextAdapter;
+import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.stereotype.Component;
 
@@ -29,9 +31,9 @@ public class LdapBrukeroppslag {
         this.ldapTemplate = ldapTemplate;
     }
 
-    public LdapBruker hentBrukerinformasjon(String ident) throws TekniskException {
+    public Optional<LdapBruker> finnBrukerinformasjon(String ident) throws TekniskException {
         validerIdent(ident);
-        return ldapTemplate.searchForObject(query().where("cn").is(ident), new LdapBrukerMapper());
+        return ldapTemplate.search(query().where("cn").is(ident), new LdapBrukerMapper()).stream().findFirst();
     }
 
     private void validerIdent(String ident) throws TekniskException {
@@ -44,23 +46,34 @@ public class LdapBrukeroppslag {
         }
     }
 
-    static class LdapBrukerMapper implements ContextMapper<LdapBruker> {
+    static class LdapBrukerMapper implements AttributesMapper<LdapBruker> {
 
-        public LdapBruker mapFromContext(Object ctx) throws NamingException {
-            DirContextAdapter context = (DirContextAdapter) ctx;
-            String navn = context.getAttributes().get("displayName").get().toString();
+        private static final String DISPLAY_NAME = "displayName";
+        private static final String MEMBER_OF = "memberOf";
+
+        @Override
+        public LdapBruker mapFromAttributes(Attributes attributes) throws NamingException {
+            return new LdapBruker(
+                hentDisplayName(attributes),
+                hentMemberOf(attributes)
+            );
+        }
+
+        private String hentDisplayName(Attributes attributes) throws NamingException {
+            return attributes.get(DISPLAY_NAME).get().toString();
+        }
+
+        private Collection<String> hentMemberOf(Attributes attributes) throws NamingException {
             List<String> grupper = new ArrayList<>();
-            Attribute memberOf = context.getAttributes().get("memberOf");
+            Attribute memberOf = attributes.get(MEMBER_OF);
 
             NamingEnumeration<?> all = memberOf.getAll();
             while (all.hasMoreElements()) {
                 Object group = all.nextElement();
-                String dnValue = group.toString();
-                String cnValue = LdapUtils.filterDNtoCNvalue(dnValue);
-                grupper.add(cnValue);
+                grupper.add(LdapUtils.filterDNtoCNvalue(group.toString()));
             }
 
-            return new LdapBruker(navn, grupper);
+            return grupper;
         }
     }
 }

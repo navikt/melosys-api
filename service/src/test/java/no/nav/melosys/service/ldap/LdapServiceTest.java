@@ -1,7 +1,9 @@
 package no.nav.melosys.service.ldap;
 
 import java.util.Collections;
+import java.util.Optional;
 
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ldap.LdapBruker;
 import no.nav.melosys.integrasjon.ldap.LdapBrukeroppslag;
@@ -35,16 +37,16 @@ public class LdapServiceTest {
     }
 
     @Test
-    public void harTilgangTilMelosys_harKorrektAdGruppe_harTilgang() throws TekniskException {
-        when(brukeroppslag.hentBrukerinformasjon(eq(ident)))
-            .thenReturn(new LdapBruker("navn", Collections.singleton(melosysAdGruppe)));
+    public void harTilgangTilMelosys_harKorrektAdGruppe_harTilgang() throws TekniskException, IkkeFunnetException {
+        when(brukeroppslag.finnBrukerinformasjon(eq(ident)))
+            .thenReturn(Optional.of(new LdapBruker("navn", Collections.singleton(melosysAdGruppe))));
         assertThat(ldapService.harTilgangTilMelosys()).isTrue();
     }
 
     @Test
-    public void harTilgangTilMelosys_harIkkeKorrektAdGruppe_harTilgang() throws TekniskException {
-        when(brukeroppslag.hentBrukerinformasjon(eq(ident)))
-            .thenReturn(new LdapBruker("navn", Collections.emptyList()));
+    public void harTilgangTilMelosys_harIkkeKorrektAdGruppe_harTilgang() throws TekniskException, IkkeFunnetException {
+        when(brukeroppslag.finnBrukerinformasjon(eq(ident)))
+            .thenReturn(Optional.of(new LdapBruker("navn", Collections.emptyList())));
         assertThat(ldapService.harTilgangTilMelosys()).isFalse();
     }
 }
