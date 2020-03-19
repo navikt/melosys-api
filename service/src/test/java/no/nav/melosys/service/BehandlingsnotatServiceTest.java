@@ -12,6 +12,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsnotatRepository;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,6 +55,7 @@ public class BehandlingsnotatServiceTest {
 
         fagsak = new Fagsak();
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
+        SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test
@@ -103,6 +106,7 @@ public class BehandlingsnotatServiceTest {
         Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
         behandlingsnotat.setId(notatID);
         behandlingsnotat.setBehandling(behandling);
+        behandlingsnotat.setRegistrertAv("Z");
 
         when(behandlingsnotatRepository.findById(eq(notatID))).thenReturn(Optional.of(behandlingsnotat));
 
@@ -110,6 +114,23 @@ public class BehandlingsnotatServiceTest {
         expectedException.expectMessage(" kan ikke oppdateres, da den tilhører en behandling som er avsluttet");
 
         behandlingsnotatService.oppdaterNotat(notatID, "Et skummelt notat.");
+    }
+
+    @Test
+    public void oppdaterNotat_behandlingSaksbehandlerIkkeTilgang_kasterException() throws FunksjonellException {
+        final long notatID = 111L;
+        Behandling behandling = lagBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING);
+        Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
+        behandlingsnotat.setId(notatID);
+        behandlingsnotat.setBehandling(behandling);
+        behandlingsnotat.setRegistrertAv("Z-ukjent");
+
+        when(behandlingsnotatRepository.findById(eq(notatID))).thenReturn(Optional.of(behandlingsnotat));
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Et notat kan ikke endret av andre!");
+
+        behandlingsnotatService.oppdaterNotat(notatID, "Et enda skumlere notat.");
     }
 
     private Behandling lagBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus) {

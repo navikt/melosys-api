@@ -13,13 +13,13 @@ public class BehandlingnotatGetDto {
     private final Instant registrertDato;
     private final String saksbehandlerNavn;
 
-    public BehandlingnotatGetDto(Behandlingsnotat behandlingsnotat) {
+    public BehandlingnotatGetDto(Behandlingsnotat behandlingsnotat, boolean redigerbar) {
         this.notatID = behandlingsnotat.getId();
         this.tekst = behandlingsnotat.getTekst();
-        this.redigerbar = behandlingsnotat.erRedigerbar();
         this.endretDato = behandlingsnotat.getEndretDato();
         this.registrertDato = behandlingsnotat.getRegistrertDato();
         this.saksbehandlerNavn = behandlingsnotat.getRegistrertAv();
+        this.redigerbar = redigerbar;
     }
 
     public long getNotatID() {
