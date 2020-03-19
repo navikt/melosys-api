@@ -1,148 +1,89 @@
 package no.nav.melosys.integrasjon.ldap;
 
-import java.util.Collections;
 import java.util.List;
-import javax.naming.InvalidNameException;
-import javax.naming.LimitExceededException;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.naming.ldap.LdapContext;
-import javax.naming.ldap.LdapName;
 
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentMatchers;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.ldap.core.ContextMapper;
+import org.springframework.ldap.core.DirContextAdapter;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.query.LdapQuery;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class LdapBrukeroppslagTest {
+
+    @Mock
+    private LdapTemplate ldapTemplate;
+
+    private LdapBrukeroppslag ldapBrukeroppslag;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private LdapContext context = Mockito.mock(LdapContext.class);
-    private LdapName baseSearch = new LdapName("ou=ServiceAccounts,dc=test,dc=local");
+    private String ident = "Z00000";
 
-    public LdapBrukeroppslagTest() throws InvalidNameException {
+    @Before
+    public void setup() {
+        ldapBrukeroppslag = new LdapBrukeroppslag(ldapTemplate);
     }
 
     @Test
-    public void skal_liste_ut_brukernavn_når_det_er_i_resultatet() throws Exception {
-        BasicAttributes attributes = new BasicAttributes();
-        attributes.put("displayName", "Lars Saksbehandler");
-        attributes.put("cn", "L999999");
-        attributes.put(new BasicAttribute("memberOf"));
-        SearchResult resultat = new SearchResult("CN=L999999,OU=ApplAccounts", null, attributes);
-
-        LdapBrukeroppslag ldap = new LdapBrukeroppslag(context, baseSearch);
-        assertThat(ldap.getDisplayName(resultat)).isEqualTo("Lars Saksbehandler");
+    public void hentBrukerinformasjon_gyldigIdent_brukerReturnert() throws TekniskException {
+        LdapBruker ldapBruker = new LdapBruker("navn", List.of("en", "to"));
+        when(ldapTemplate.searchForObject(any(LdapQuery.class), any(ContextMapper.class))).thenReturn(ldapBruker);
+        assertThat(ldapBrukeroppslag.hentBrukerinformasjon(ident)).isEqualTo(ldapBruker);
     }
 
     @Test
-    public void skal_liste_ut_gruppene_når_det_er_i_resultatet() throws Exception {
-        BasicAttributes attributes = new BasicAttributes();
-        attributes.put("displayName", "Lars Saksbehandler");
-        attributes.put("cn", "L999999");
-        BasicAttribute memberOf = new BasicAttribute("memberOf");
-        memberOf.add("CN=myGroup,OU=ApplGroups");
-        memberOf.add("CN=ourGroup,OU=ApplGroups");
-        attributes.put(memberOf);
-        SearchResult resultat = new SearchResult("CN=L999999,OU=ApplAccounts", null, attributes);
-
-        LdapBrukeroppslag ldap = new LdapBrukeroppslag(null, null);
-        assertThat(ldap.getMemberOf(resultat)).contains("myGroup", "ourGroup");
-    }
-
-    @Test
-    public void skal_gi_exception_når_søket_gir_ingen_treff() throws Exception {
-        expectedException.expect(IntegrasjonException.class);
-        expectedException.expectMessage("Fikk ingen treff på søk mot LDAP etter ident L999999");
-
-        SearchMock heleResultatet = new SearchMock(Collections.emptyList());
-        Mockito.when(context.search(ArgumentMatchers.eq(baseSearch), ArgumentMatchers.eq("(cn=L999999)"), ArgumentMatchers.any(SearchControls.class))).thenReturn(heleResultatet);
-
-        LdapBrukeroppslag ldap = new LdapBrukeroppslag(context, baseSearch);
-        ldap.hentBrukerinformasjon("L999999");
-    }
-
-
-    @Test
-    public void skal_gi_exception_når_søket_gir_to_treff() throws Exception {
-        expectedException.expect(IntegrasjonException.class);
-        expectedException.expectMessage("Forventet ett unikt resultat på søk mot LDAP etter ident L999999, men fikk flere treff");
-
-        Mockito.when(context.search(ArgumentMatchers.eq(baseSearch), ArgumentMatchers.eq("(cn=L999999)"), ArgumentMatchers.any(SearchControls.class))).thenThrow(new LimitExceededException("This is a test"));
-
-        LdapBrukeroppslag ldap = new LdapBrukeroppslag(context, baseSearch);
-        ldap.hentBrukerinformasjon("L999999");
-    }
-
-    @Test
-    public void skal_gi_exception_når_svaret_mangler_forventet_attibutt() throws Exception {
-        expectedException.expect(IntegrasjonException.class);
-        expectedException.expectMessage("Resultat fra LDAP manglet påkrevet attributtnavn displayName");
-
-        BasicAttributes attributes = new BasicAttributes();
-        attributes.put("cn", "L999999");
-        SearchResult resultat = new SearchResult("CN=L999999,OU=ApplAccounts", null, attributes);
-        SearchMock heleResultatet = new SearchMock(Collections.singletonList(resultat));
-        Mockito.when(context.search(ArgumentMatchers.eq(baseSearch), ArgumentMatchers.eq("(cn=L999999)"), ArgumentMatchers.any(SearchControls.class))).thenReturn(heleResultatet);
-
-        LdapBrukeroppslag ldap = new LdapBrukeroppslag(context, baseSearch);
-        ldap.hentBrukerinformasjon("L999999");
-    }
-
-    @Test
-    public void skal_gi_exception_når_det_søkes_med_spesialtegn() throws Exception {
+    public void hentBrukerinformasjon_identTomString_kasterException() throws TekniskException {
         expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("Mulig LDAP-injection forsøk. Søkte med ugyldig ident 'L999999) or (cn=A*'");
+        expectedException.expectMessage("Kan ikke slå opp brukernavn uten å ha ident");
 
-        LdapBrukeroppslag ldap = new LdapBrukeroppslag(context, baseSearch);
-        ldap.hentBrukerinformasjon("L999999) or (cn=A*");
-
+        ldapBrukeroppslag.hentBrukerinformasjon("");
     }
 
-    private static class SearchMock implements NamingEnumeration<SearchResult> {
+    @Test
+    public void hentBrukerinformasjon_ugyldigIdent_kasterException() throws TekniskException {
+        expectedException.expect(TekniskException.class);
+        expectedException.expectMessage("Mulig LDAP-injection forsøk.");
 
-        private int index = 0;
-        private List<SearchResult> resultList;
+        ldapBrukeroppslag.hentBrukerinformasjon("cn=killLDAP");
+    }
 
-        SearchMock(List<SearchResult> resultList) {
-            this.resultList = resultList;
-        }
+    @Test
+    public void mapFromContext_inneholderBrukerMedGrupper_verifiserNavnOgBrukerBlirParset() throws Exception {
+        final String navnBruker = "Lars Saksbehandler";
+        final List<String> grupper = List.of("CN=myGroup,OU=ApplGroups", "CN=ourGroup,OU=ApplGroups");
 
-        @Override
-        public SearchResult next() throws NamingException {
-            throw new IllegalArgumentException("Test---not implemented");
-        }
+        DirContextAdapter context = Mockito.mock(DirContextAdapter.class);
 
-        @Override
-        public boolean hasMore() throws NamingException {
-            throw new IllegalArgumentException("Test---not implemented");
-        }
+        BasicAttributes attributes = new BasicAttributes();
+        attributes.put("displayName", navnBruker);
+        attributes.put("cn", "L999999");
 
-        @Override
-        public void close() throws NamingException {
+        BasicAttribute memberOf = new BasicAttribute("memberOf");
+        grupper.forEach(memberOf::add);
+        attributes.put(memberOf);
 
-        }
+        when(context.getAttributes()).thenReturn(attributes);
 
-        @Override
-        public boolean hasMoreElements() {
-            return index < resultList.size();
-        }
-
-        @Override
-        public SearchResult nextElement() {
-            return resultList.get(index++);
-        }
+        LdapBrukeroppslag.LdapBrukerMapper mapper = new LdapBrukeroppslag.LdapBrukerMapper();
+        LdapBruker ldapBruker = mapper.mapFromContext(context);
+        assertThat(ldapBruker.getDisplayName()).isEqualTo(navnBruker);
+        assertThat(ldapBruker.getGroups()).isEqualTo(List.of("myGroup", "ourGroup"));
     }
 }
 

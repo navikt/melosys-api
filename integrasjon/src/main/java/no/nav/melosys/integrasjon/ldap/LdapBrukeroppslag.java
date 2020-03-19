@@ -1,53 +1,40 @@
 package no.nav.melosys.integrasjon.ldap;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.naming.InvalidNameException;
-import javax.naming.LimitExceededException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.naming.ldap.LdapContext;
-import javax.naming.ldap.LdapName;
 
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ldap.core.ContextMapper;
+import org.springframework.ldap.core.DirContextAdapter;
+import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.integrasjon.ldap.LdapInnlogging.lagLdapContext;
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
 @Component
 public class LdapBrukeroppslag {
 
-    private final LdapContext context;
-    private final LdapName searchBase;
+    private final LdapTemplate ldapTemplate;
 
     private static final Pattern IDENT_PATTERN = Pattern.compile("^\\p{LD}+$");
 
     @Autowired
-    public LdapBrukeroppslag(LdapCredentials credentials) throws TekniskException {
-        this(lagLdapContext(credentials), lagLdapSearchBase(credentials.getUserbasedn()));
-    }
-
-    LdapBrukeroppslag(LdapContext context, LdapName searcBase) {
-        this.context = context;
-        this.searchBase = searcBase;
+    public LdapBrukeroppslag(LdapTemplate ldapTemplate) {
+        this.ldapTemplate = ldapTemplate;
     }
 
     public LdapBruker hentBrukerinformasjon(String ident) throws TekniskException {
-        SearchResult result = ldapSearch(ident);
-        String displayName = getDisplayName(result);
-        Collection<String> groups = getMemberOf(result);
-        return new LdapBruker(displayName, groups);
+        validerIdent(ident);
+        return ldapTemplate.searchForObject(query().where("cn").is(ident), new LdapBrukerMapper());
     }
 
-    private SearchResult ldapSearch(String ident) throws TekniskException {
+    private void validerIdent(String ident) throws TekniskException {
         if (ident == null || ident.isEmpty()) {
             throw new TekniskException("Kan ikke slå opp brukernavn uten å ha ident");
         }
@@ -55,87 +42,25 @@ public class LdapBrukeroppslag {
         if (!matcher.matches()) {
             throw new TekniskException("Mulig LDAP-injection forsøk. Søkte med ugyldig ident '" + ident + "'");
         }
-
-        SearchControls controls = new SearchControls();
-        controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        controls.setCountLimit(1);
-        String søkestreng = String.format("(cn=%s)", ident);
-        try {
-            NamingEnumeration<SearchResult> result = context.search(searchBase, søkestreng, controls);
-            if (result.hasMoreElements()) {
-                return result.nextElement();
-            }
-            throw new IntegrasjonException("Fikk ingen treff på søk mot LDAP etter ident " + ident);
-        } catch (LimitExceededException lee) {
-            throw new IntegrasjonException("Forventet ett unikt resultat på søk mot LDAP etter ident " + ident + ", men fikk flere treff", lee);
-        } catch (NamingException e) {
-            throw new IntegrasjonException("Uventet feil ved LDAP-søk " + søkestreng, e);
-        }
     }
 
-    String getDisplayName(SearchResult result) throws TekniskException {
-        String attributeName = "displayName";
-        Attribute displayName = find(result, attributeName);
-        try {
-            return displayName.get().toString();
-        } catch (NamingException e) {
-            throw new TekniskException("Kunne ikke hente ut attributtverdi " + attributeName + " fra " + displayName);
-        }
-    }
+    static class LdapBrukerMapper implements ContextMapper<LdapBruker> {
 
-    /**
-     * <BLOCKQUOTE>
-     * <p>The memberOf attribute is a multi-valued attribute that contains groups of which the user is a direct member, except for the primary group, which is represented by the primaryGroupId. Group membership is dependent on the domain controller (DC) from which this attribute is retrieved:</p>
-     * <ul>
-     * <li>At a DC for the domain that contains the user, memberOf for the user is complete with respect to membership for groups in that domain; however, memberOf does not contain the user's membership in domain local and global groups in other domains.</li>
-     * <li>•At a GC server, memberOf for the user is complete with respect to all universal group memberships.</li>
-     * </ul>
-     * <p>
-     * If both conditions are true for the DC, both sets of data are contained in memberOf.</p>
-     * <p>
-     * Be aware that this attribute lists the groups that contain the user in their member attribute—it does not contain the recursive list of nested predecessors. For example, if user O is a member of group C and group B and group B were nested in group A, the memberOf attribute of user O would list group C and group B, but not group A.</p>
-     * <p>
-     * This attribute is not stored—it is a computed back-link attribute</p>
-     * </BLOCKQUOTE>
-     * Source: <a href="https://msdn.microsoft.com/en-us/library/ms677943.aspx">MSDN > ... > Using Active Directory Domain Services > Managing Users > User Object Attributes</a>
-     * <p></p>
-     * <p>
-     * OBS! Nøstede grupper vil <strong>ikke</strong> ligge i memberOf</p>
-     *
-     * @return CN-value av alle grupper brukere er <strong>direkte</strong> medlem av
-     */
-    Collection<String> getMemberOf(SearchResult result) throws IntegrasjonException {
-        String attributeName = "memberOf";
-        List<String> groups = new ArrayList<>();
+        public LdapBruker mapFromContext(Object ctx) throws NamingException {
+            DirContextAdapter context = (DirContextAdapter) ctx;
+            String navn = context.getAttributes().get("displayName").get().toString();
+            List<String> grupper = new ArrayList<>();
+            Attribute memberOf = context.getAttributes().get("memberOf");
 
-        Attribute memberOf = find(result, attributeName);
-        try {
             NamingEnumeration<?> all = memberOf.getAll();
             while (all.hasMoreElements()) {
                 Object group = all.nextElement();
                 String dnValue = group.toString();
                 String cnValue = LdapUtils.filterDNtoCNvalue(dnValue);
-                groups.add(cnValue);
+                grupper.add(cnValue);
             }
-        } catch (NamingException e) {
-            throw new IntegrasjonException("Kunne ikke hente ut attributtverdi " + attributeName + " fra " + memberOf);
-        }
-        return groups;
-    }
 
-    private Attribute find(SearchResult element, String attributeName) throws IntegrasjonException {
-        Attribute attribute = element.getAttributes().get(attributeName);
-        if (attribute == null) {
-            throw new IntegrasjonException("Resultat fra LDAP manglet påkrevet attributtnavn " + attributeName);
-        }
-        return attribute;
-    }
-
-    private static LdapName lagLdapSearchBase(String userBaseDn) throws TekniskException {
-        try {
-            return new LdapName(userBaseDn);
-        } catch (InvalidNameException e) {
-            throw new IntegrasjonException("Kunne ikke definere base-søk mot LDAP " + userBaseDn);
+            return new LdapBruker(navn, grupper);
         }
     }
 }

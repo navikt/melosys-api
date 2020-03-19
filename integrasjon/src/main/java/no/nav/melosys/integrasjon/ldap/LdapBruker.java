@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.ldap;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class LdapBruker {
     private final String displayName;
@@ -17,5 +18,19 @@ public class LdapBruker {
 
     public Collection<String> getGroups() {
         return groups;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LdapBruker that = (LdapBruker) o;
+        return Objects.equals(displayName, that.displayName) &&
+            Objects.equals(groups, that.groups);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(displayName, groups);
     }
 }
