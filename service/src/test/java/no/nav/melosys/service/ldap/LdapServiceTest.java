@@ -17,7 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LdapServiceTest {
@@ -48,5 +48,16 @@ public class LdapServiceTest {
         when(brukeroppslag.finnBrukerinformasjon(eq(ident)))
             .thenReturn(Optional.of(new LdapBruker("navn", Collections.emptyList())));
         assertThat(ldapService.harTilgangTilMelosys()).isFalse();
+    }
+
+    @Test
+    public void finnNavnForIdent_brukerEksistererKallerToGanger_returnerNavnLdapSkalKunKallesEnGang() throws TekniskException {
+        LdapBruker ldapBruker = new LdapBruker("navnesen navn", Collections.emptyList());
+        when(brukeroppslag.finnBrukerinformasjon(eq(ident))).thenReturn(Optional.of(ldapBruker));
+
+        assertThat(ldapService.finnNavnForIdent(ident)).isPresent().get().isEqualTo(ldapBruker.getDisplayName());
+        assertThat(ldapService.finnNavnForIdent(ident)).isPresent().get().isEqualTo(ldapBruker.getDisplayName());
+
+        verify(brukeroppslag, times(1)).finnBrukerinformasjon(eq(ident));
     }
 }

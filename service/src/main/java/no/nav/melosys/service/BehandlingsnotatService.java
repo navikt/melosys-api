@@ -56,7 +56,7 @@ public class BehandlingsnotatService {
         if (!behandlingsnotat.erRedigerbar()) {
             throw new FunksjonellException("Notat med id " + notatID + " kan ikke oppdateres, da den tilhører en behandling som er avsluttet");
         } else if (!brukerKanRedigereNotat(behandlingsnotat)) {
-            throw new FunksjonellException("Et notat kan ikke endret av andre!");
+            throw new FunksjonellException("Et notat kan ikke endres av andre!");
         }
 
         behandlingsnotat.setTekst(tekst);

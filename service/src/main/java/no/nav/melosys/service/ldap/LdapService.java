@@ -1,5 +1,7 @@
 package no.nav.melosys.service.ldap;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import no.nav.melosys.domain.MelosysBruker;
@@ -15,6 +17,8 @@ public class LdapService {
 
     private final LdapBrukeroppslag brukeroppslag;
     private final String melosysAdGruppe;
+
+    private final Map<String, String> identTilNavnCache = new HashMap<>();
 
     public LdapService(LdapBrukeroppslag brukeroppslag, @Value("${melosys.security.melosys_ad_group}") String melosysAdGruppe) {
         this.brukeroppslag = brukeroppslag;
@@ -41,5 +45,16 @@ public class LdapService {
     private Optional<MelosysBruker> finnBrukerinformasjon(String ident) throws TekniskException {
         return brukeroppslag.finnBrukerinformasjon(ident)
             .map(l -> new MelosysBruker(ident, l.getDisplayName(), l.getGroups()));
+    }
+
+    public Optional<String> finnNavnForIdent(String ident) throws TekniskException {
+        if (identTilNavnCache.containsKey(ident)) {
+            return Optional.of(identTilNavnCache.get(ident));
+        }
+
+        Optional<String> navnForIdent = finnBrukerinformasjon(ident).map(MelosysBruker::getNavn);
+        navnForIdent.ifPresent(navn -> identTilNavnCache.put(ident, navn));
+        return navnForIdent;
+
     }
 }

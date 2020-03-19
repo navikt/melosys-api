@@ -128,7 +128,7 @@ public class BehandlingsnotatServiceTest {
         when(behandlingsnotatRepository.findById(eq(notatID))).thenReturn(Optional.of(behandlingsnotat));
 
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Et notat kan ikke endret av andre!");
+        expectedException.expectMessage("Et notat kan ikke endres av andre!");
 
         behandlingsnotatService.oppdaterNotat(notatID, "Et enda skumlere notat.");
     }

@@ -12,9 +12,12 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsnotatService;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.tjenester.gui.dto.BehandlingnotatGetDto;
+import no.nav.melosys.service.ldap.LdapService;
+import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatGetDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto;
 import no.nav.security.token.support.core.api.Protected;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,24 +30,28 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsnotatTjeneste {
 
+    private static final Logger log = LoggerFactory.getLogger(BehandlingsnotatTjeneste.class);
+
     private final BehandlingsnotatService behandlingsnotatService;
+    private final LdapService ldapService;
     private final TilgangService tilgangService;
 
-    public BehandlingsnotatTjeneste(BehandlingsnotatService behandlingsnotatService, TilgangService tilgangService) {
+    public BehandlingsnotatTjeneste(BehandlingsnotatService behandlingsnotatService, LdapService ldapService, TilgangService tilgangService) {
         this.behandlingsnotatService = behandlingsnotatService;
+        this.ldapService = ldapService;
         this.tilgangService = tilgangService;
     }
 
     @GetMapping("/{saksnummer}/notat")
     @ApiOperation(value = "Henter alle notater knyttet til behandlinger i for fagsaken",
-        response = BehandlingnotatGetDto.class,
+        response = BehandlingsnotatGetDto.class,
         responseContainer = "List")
     public ResponseEntity hentBehandlingsnotaterForFagsak(@PathVariable("saksnummer") String saksnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgangService.sjekkSak(saksnummer);
 
-        Collection<BehandlingnotatGetDto> notater = behandlingsnotatService.hentNotatForFagsak(saksnummer)
+        Collection<BehandlingsnotatGetDto> notater = behandlingsnotatService.hentNotatForFagsak(saksnummer)
             .stream()
-            .map(b -> new BehandlingnotatGetDto(b, behandlingsnotatService.kanRedigereNotat(b)))
+            .map(this::lagBehandlingsnotatGetDto)
             .collect(Collectors.toList());
 
         return ResponseEntity.ok(notater);
@@ -52,26 +59,43 @@ public class BehandlingsnotatTjeneste {
 
     @PostMapping("/{saksnummer}/notat")
     @ApiOperation(value = "Oppretter et nytt notat på fagsaken sin aktive behandling",
-        response = BehandlingnotatGetDto.class)
+        response = BehandlingsnotatGetDto.class)
     public ResponseEntity opprettBehandlingsnotatForFagsak(@PathVariable("saksnummer") String saksnummer,
                                                            @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) throws FunksjonellException, TekniskException {
         tilgangService.sjekkSak(saksnummer);
         Behandlingsnotat behandlingsnotat = behandlingsnotatService.opprettNotat(saksnummer, behandlingsnotatPostDto.getTekst());
         return ResponseEntity.ok(
-            new BehandlingnotatGetDto(behandlingsnotat, behandlingsnotatService.kanRedigereNotat(behandlingsnotat))
+            lagBehandlingsnotatGetDto(behandlingsnotat)
         );
     }
 
     @PutMapping("/{saksnummer}/notat/{notatID}")
     @ApiOperation(value = "Oppdaterer tekst på et notat",
-        response = BehandlingnotatGetDto.class)
+        response = BehandlingsnotatGetDto.class)
     public ResponseEntity oppdaterBehandlingsnotat(@PathVariable("saksnummer") String saksnummer,
                                                    @PathVariable("notatID") Long notatID,
                                                    @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) throws FunksjonellException, TekniskException {
         tilgangService.sjekkSak(saksnummer);
-        Behandlingsnotat behandlingsnotat = behandlingsnotatService.oppdaterNotat(notatID, behandlingsnotatPostDto.getTekst());
         return ResponseEntity.ok(
-            new BehandlingnotatGetDto(behandlingsnotat, behandlingsnotatService.kanRedigereNotat(behandlingsnotat))
+            lagBehandlingsnotatGetDto(behandlingsnotatService.oppdaterNotat(notatID, behandlingsnotatPostDto.getTekst()))
         );
+    }
+
+    private BehandlingsnotatGetDto lagBehandlingsnotatGetDto(Behandlingsnotat behandlingsnotat) {
+        return new BehandlingsnotatGetDto(
+            behandlingsnotat,
+            behandlingsnotatService.kanRedigereNotat(behandlingsnotat),
+            navnEllerIdent(behandlingsnotat.getRegistrertAv()),
+            navnEllerIdent(behandlingsnotat.getEndretAv())
+        );
+    }
+
+    private String navnEllerIdent(String ident) {
+        try {
+            return ldapService.finnNavnForIdent(ident).orElse(ident);
+        } catch (TekniskException e) {
+            log.warn("Feil ved henting av navn for ident", e);
+            return ident;
+        }
     }
 }
