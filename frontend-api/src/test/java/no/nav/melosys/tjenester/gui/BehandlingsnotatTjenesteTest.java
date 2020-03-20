@@ -16,7 +16,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsnotatService;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.service.ldap.LdapService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatGetDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto;
 import org.junit.Before;
@@ -45,7 +45,7 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private BehandlingsnotatService behandlingsnotatService;
     @Mock
-    private LdapService ldapService;
+    private SaksbehandlerService saksbehandlerService;
     @Mock
     private TilgangService tilgangService;
 
@@ -53,8 +53,8 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setup() throws TekniskException {
-        behandlingsnotatTjeneste = new BehandlingsnotatTjeneste(behandlingsnotatService, ldapService, tilgangService);
-        when(ldapService.finnNavnForIdent(eq(saksbehandler))).thenReturn(Optional.of(saksbehandlerNavn));
+        behandlingsnotatTjeneste = new BehandlingsnotatTjeneste(behandlingsnotatService, saksbehandlerService, tilgangService);
+        when(saksbehandlerService.finnNavnForIdent(eq(saksbehandler))).thenReturn(Optional.of(saksbehandlerNavn));
     }
 
     @Test

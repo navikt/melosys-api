@@ -12,7 +12,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsnotatService;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.service.ldap.LdapService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatGetDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -33,12 +33,12 @@ public class BehandlingsnotatTjeneste {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsnotatTjeneste.class);
 
     private final BehandlingsnotatService behandlingsnotatService;
-    private final LdapService ldapService;
+    private final SaksbehandlerService saksbehandlerService;
     private final TilgangService tilgangService;
 
-    public BehandlingsnotatTjeneste(BehandlingsnotatService behandlingsnotatService, LdapService ldapService, TilgangService tilgangService) {
+    public BehandlingsnotatTjeneste(BehandlingsnotatService behandlingsnotatService, SaksbehandlerService saksbehandlerService, TilgangService tilgangService) {
         this.behandlingsnotatService = behandlingsnotatService;
-        this.ldapService = ldapService;
+        this.saksbehandlerService = saksbehandlerService;
         this.tilgangService = tilgangService;
     }
 
@@ -91,7 +91,7 @@ public class BehandlingsnotatTjeneste {
 
     private String navnEllerIdent(String ident) {
         try {
-            return ldapService.finnNavnForIdent(ident).orElse(ident);
+            return saksbehandlerService.finnNavnForIdent(ident).orElse(ident);
         } catch (TekniskException e) {
             log.warn("Feil ved henting av navn for ident", e);
             return ident;

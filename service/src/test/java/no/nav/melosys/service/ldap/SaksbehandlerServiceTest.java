@@ -6,7 +6,7 @@ import java.util.Optional;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ldap.LdapBruker;
-import no.nav.melosys.integrasjon.ldap.LdapBrukeroppslag;
+import no.nav.melosys.integrasjon.ldap.LdapService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.Before;
@@ -20,19 +20,19 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LdapServiceTest {
+public class SaksbehandlerServiceTest {
 
     @Mock
-    private LdapBrukeroppslag brukeroppslag;
+    private LdapService brukeroppslag;
 
     private final String melosysAdGruppe = "MELOSY123";
     private final String ident = "Z990007";
 
-    private LdapService ldapService;
+    private SaksbehandlerService saksbehandlerService;
 
     @Before
     public void setup() {
-        ldapService = new LdapService(brukeroppslag, melosysAdGruppe);
+        saksbehandlerService = new SaksbehandlerService(brukeroppslag, melosysAdGruppe);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
@@ -40,14 +40,14 @@ public class LdapServiceTest {
     public void harTilgangTilMelosys_harKorrektAdGruppe_harTilgang() throws TekniskException, IkkeFunnetException {
         when(brukeroppslag.finnBrukerinformasjon(eq(ident)))
             .thenReturn(Optional.of(new LdapBruker("navn", Collections.singleton(melosysAdGruppe))));
-        assertThat(ldapService.harTilgangTilMelosys()).isTrue();
+        assertThat(saksbehandlerService.harTilgangTilMelosys()).isTrue();
     }
 
     @Test
     public void harTilgangTilMelosys_harIkkeKorrektAdGruppe_harTilgang() throws TekniskException, IkkeFunnetException {
         when(brukeroppslag.finnBrukerinformasjon(eq(ident)))
             .thenReturn(Optional.of(new LdapBruker("navn", Collections.emptyList())));
-        assertThat(ldapService.harTilgangTilMelosys()).isFalse();
+        assertThat(saksbehandlerService.harTilgangTilMelosys()).isFalse();
     }
 
     @Test
@@ -55,8 +55,8 @@ public class LdapServiceTest {
         LdapBruker ldapBruker = new LdapBruker("navnesen navn", Collections.emptyList());
         when(brukeroppslag.finnBrukerinformasjon(eq(ident))).thenReturn(Optional.of(ldapBruker));
 
-        assertThat(ldapService.finnNavnForIdent(ident)).isPresent().get().isEqualTo(ldapBruker.getDisplayName());
-        assertThat(ldapService.finnNavnForIdent(ident)).isPresent().get().isEqualTo(ldapBruker.getDisplayName());
+        assertThat(saksbehandlerService.finnNavnForIdent(ident)).isPresent().get().isEqualTo(ldapBruker.getDisplayName());
+        assertThat(saksbehandlerService.finnNavnForIdent(ident)).isPresent().get().isEqualTo(ldapBruker.getDisplayName());
 
         verify(brukeroppslag, times(1)).finnBrukerinformasjon(eq(ident));
     }

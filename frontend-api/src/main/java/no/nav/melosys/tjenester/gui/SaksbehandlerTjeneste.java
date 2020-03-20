@@ -4,11 +4,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.freg.abac.core.annotation.Abac;
 import no.nav.freg.abac.core.dto.response.Decision;
-import no.nav.melosys.domain.MelosysBruker;
+import no.nav.melosys.domain.Saksbehandler;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.ldap.LdapService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
 import no.nav.melosys.tjenester.gui.dto.InnloggetBrukerDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -27,10 +27,10 @@ import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class SaksbehandlerTjeneste {
 
-    private final LdapService ldapService;
+    private final SaksbehandlerService saksbehandlerService;
 
-    public SaksbehandlerTjeneste(LdapService ldapService) {
-        this.ldapService = ldapService;
+    public SaksbehandlerTjeneste(SaksbehandlerService saksbehandlerService) {
+        this.saksbehandlerService = saksbehandlerService;
     }
 
     @GetMapping
@@ -40,12 +40,12 @@ public class SaksbehandlerTjeneste {
         notes = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging."),
         response = InnloggetBrukerDto.class)
     public InnloggetBrukerDto innloggetBruker() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
-        MelosysBruker bruker = ldapService.hentBrukerinformasjon();
+        Saksbehandler saksbehandler = saksbehandlerService.hentBrukerinformasjon();
 
-        if (!ldapService.harTilgangTilMelosys(bruker)) {
+        if (!saksbehandlerService.harTilgangTilMelosys(saksbehandler)) {
             throw new SikkerhetsbegrensningException("Brukeren er ikke medlem av riktig AD-gruppe");
         }
 
-        return new InnloggetBrukerDto(bruker.getIdent(), bruker.getNavn());
+        return new InnloggetBrukerDto(saksbehandler.getIdent(), saksbehandler.getNavn());
     }
 }

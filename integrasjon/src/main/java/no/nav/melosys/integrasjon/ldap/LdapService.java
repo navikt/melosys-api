@@ -1,17 +1,19 @@
 package no.nav.melosys.integrasjon.ldap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.naming.InvalidNameException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 
 import no.nav.melosys.exception.TekniskException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
@@ -20,14 +22,16 @@ import org.springframework.stereotype.Component;
 import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
 @Component
-public class LdapBrukeroppslag {
+public class LdapService {
+
+    private static final Logger log = LoggerFactory.getLogger(LdapService.class);
 
     private final LdapTemplate ldapTemplate;
 
     private static final Pattern IDENT_PATTERN = Pattern.compile("^\\p{LD}+$");
 
     @Autowired
-    public LdapBrukeroppslag(LdapTemplate ldapTemplate) {
+    public LdapService(LdapTemplate ldapTemplate) {
         this.ldapTemplate = ldapTemplate;
     }
 
@@ -70,10 +74,28 @@ public class LdapBrukeroppslag {
             NamingEnumeration<?> all = memberOf.getAll();
             while (all.hasMoreElements()) {
                 Object group = all.nextElement();
-                grupper.add(LdapUtils.filterDNtoCNvalue(group.toString()));
+                grupper.add(filterDNtoCNvalue(group.toString()));
             }
 
             return grupper;
+        }
+
+        private String filterDNtoCNvalue(String value) {
+            if(value.toLowerCase(Locale.ROOT).contains("cn=")) {
+                try {
+                    LdapName ldapname = new LdapName(value); //NOSONAR, only used locally
+                    for (Rdn rdn : ldapname.getRdns()) {
+                        if ("CN".equalsIgnoreCase(rdn.getType())) {
+                            String cn = rdn.getValue().toString();
+                            log.debug("uid on DN form. Filtered from {} to {}", value, cn); //NOSONAR trusted source, validated SAML-token or LDAP memberOf
+                            return cn;
+                        }
+                    }
+                } catch (InvalidNameException e) { //NOSONAR
+                    log.debug("value not on DN form. Skipping filter. {}", e.getExplanation()); //NOSONAR trusted source
+                }
+            }
+            return value;
         }
     }
 }

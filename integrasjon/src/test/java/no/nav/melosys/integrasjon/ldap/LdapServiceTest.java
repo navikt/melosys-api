@@ -22,26 +22,26 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LdapBrukeroppslagTest {
+public class LdapServiceTest {
 
     @Mock
     private LdapTemplate ldapTemplate;
 
-    private LdapBrukeroppslag ldapBrukeroppslag;
+    private LdapService ldapService;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {
-        ldapBrukeroppslag = new LdapBrukeroppslag(ldapTemplate);
+        ldapService = new LdapService(ldapTemplate);
     }
 
     @Test
     public void hentBrukerinformasjon_gyldigIdent_brukerReturnert() throws TekniskException {
         LdapBruker ldapBruker = new LdapBruker("navn", List.of("en", "to"));
         when(ldapTemplate.search(any(LdapQuery.class), any(AttributesMapper.class))).thenReturn(List.of(ldapBruker));
-        Optional<LdapBruker> res = ldapBrukeroppslag.finnBrukerinformasjon("Z123123");
+        Optional<LdapBruker> res = ldapService.finnBrukerinformasjon("Z123123");
         assertThat(res).isPresent().get().isEqualTo(ldapBruker);
     }
 
@@ -50,7 +50,7 @@ public class LdapBrukeroppslagTest {
         expectedException.expect(TekniskException.class);
         expectedException.expectMessage("Kan ikke slå opp brukernavn uten å ha ident");
 
-        ldapBrukeroppslag.finnBrukerinformasjon("");
+        ldapService.finnBrukerinformasjon("");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class LdapBrukeroppslagTest {
         expectedException.expect(TekniskException.class);
         expectedException.expectMessage("Mulig LDAP-injection forsøk.");
 
-        ldapBrukeroppslag.finnBrukerinformasjon("cn=killLDAP");
+        ldapService.finnBrukerinformasjon("cn=killLDAP");
     }
 
     @Test
@@ -74,7 +74,7 @@ public class LdapBrukeroppslagTest {
         grupper.forEach(memberOf::add);
         attributes.put(memberOf);
 
-        LdapBrukeroppslag.LdapBrukerMapper mapper = new LdapBrukeroppslag.LdapBrukerMapper();
+        LdapService.LdapBrukerMapper mapper = new LdapService.LdapBrukerMapper();
         LdapBruker ldapBruker = mapper.mapFromAttributes(attributes);
         assertThat(ldapBruker.getDisplayName()).isEqualTo(navnBruker);
         assertThat(ldapBruker.getGroups()).isEqualTo(List.of("myGroup", "ourGroup"));

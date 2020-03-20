@@ -2,13 +2,13 @@ package no.nav.melosys.domain;
 
 import java.util.Collection;
 
-public class MelosysBruker {
+public class Saksbehandler {
 
     private final String ident;
     private final String navn;
     private final Collection<String> grupper;
 
-    public MelosysBruker(String ident, String navn, Collection<String> grupper) {
+    public Saksbehandler(String ident, String navn, Collection<String> grupper) {
         this.ident = ident;
         this.navn = navn;
         this.grupper = grupper;
