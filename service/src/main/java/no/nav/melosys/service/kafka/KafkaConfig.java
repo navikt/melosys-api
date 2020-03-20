@@ -22,30 +22,36 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 @Configuration
 @EnableKafka
 public class KafkaConfig {
-
-    private final String kafkaGroupId;
-
-    public KafkaConfig(@Value("${kafka.groupid}") String kafkaGroupId) {
-        this.kafkaGroupId = kafkaGroupId;
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MelosysEessiMelding>> eessiMeldingListenerContainerFactory(
+        KafkaProperties kafkaProperties, @Value("${kafka.groupid.eessi}") String groupId
+    ) {
+        return kafkaListenerContainerFactory(MelosysEessiMelding.class, kafkaProperties, groupId);
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MelosysEessiMelding>> eessiMeldingListenerContainerFactory(
-        KafkaProperties kafkaProperties, ErrorHandlingDeserializer2<MelosysEessiMelding> errorHandlingDeserializer) {
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> soknadMottattContainerFactory(
+        KafkaProperties kafkaProperties, @Value("${kafka.groupid.soknad-mottak}") String groupId
+    ) {
+        return kafkaListenerContainerFactory(SoknadMottatt.class, kafkaProperties, groupId);
+    }
+
+    public <T> ConcurrentKafkaListenerContainerFactory<String, T> kafkaListenerContainerFactory(
+        Class<T> containerType, KafkaProperties kafkaProperties, String groupId) {
 
         Map<String, Object> props = kafkaProperties.buildConsumerProperties();
-        props.putAll(consumerConfig());
-        DefaultKafkaConsumerFactory<String, MelosysEessiMelding> defaultKafkaConsumerFactory = new DefaultKafkaConsumerFactory<>(
-            props, new StringDeserializer(), errorHandlingDeserializer);
-        ConcurrentKafkaListenerContainerFactory<String, MelosysEessiMelding> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        props.putAll(consumerConfig(groupId));
+        DefaultKafkaConsumerFactory<String, T> defaultKafkaConsumerFactory = new DefaultKafkaConsumerFactory<>(
+            props, new StringDeserializer(), valueDeserializer(containerType));
+        ConcurrentKafkaListenerContainerFactory<String, T> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(defaultKafkaConsumerFactory);
 
         return factory;
     }
 
-    private Map<String, Object> consumerConfig() {
+    private Map<String, Object> consumerConfig(String groupId) {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 15000);
@@ -55,10 +61,9 @@ public class KafkaConfig {
 
         return props;
     }
-    
-    @Bean
-    public ErrorHandlingDeserializer2<MelosysEessiMelding> valueDeserializer(JsonDeserializer<MelosysEessiMelding> jsonDeserializer) {
-        return new ErrorHandlingDeserializer2<>(jsonDeserializer);
+
+    private <T> ErrorHandlingDeserializer2<T> valueDeserializer(Class<T> targetType) {
+        return new ErrorHandlingDeserializer2<>(new JsonDeserializer<>(targetType, false));
     }
 
     @Bean
