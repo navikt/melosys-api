@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -14,6 +15,7 @@ import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +30,14 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private final MedlPeriodeService medlPeriodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final SaksopplysningerService saksopplysningerService;
+    private final BehandlingService behandlingService;
 
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService, SaksopplysningerService saksopplysningerService) {
+    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService, SaksopplysningerService saksopplysningerService, BehandlingService behandlingService) {
         this.medlFasade = medlFasade;
         this.medlPeriodeService = medlPeriodeService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.saksopplysningerService = saksopplysningerService;
+        this.behandlingService = behandlingService;
     }
 
     @Override
@@ -48,6 +52,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
         SedDokument sedDokument = saksopplysningerService.hentSedOpplysninger(prosessinstans.getBehandling().getId());
+        behandlingService.oppdaterStatus(prosessinstans.getBehandling().getId(), Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
 
         if (lovvalgsperioder.isEmpty()) {
             lovvalgsperioder = lovvalgsperiodeService.lagreLovvalgsperioder(

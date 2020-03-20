@@ -4,7 +4,7 @@ import java.util.Collection;
 
 public class ValideringException extends MelosysException {
 
-    private Collection<String> feilkoder;
+    private final Collection<String> feilkoder;
 
     public ValideringException(String message, Collection<String> feilkoder) {
         super(message);

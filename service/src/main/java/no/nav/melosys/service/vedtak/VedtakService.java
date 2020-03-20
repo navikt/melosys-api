@@ -1,8 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -20,14 +18,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.exception.*;
+import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
@@ -55,27 +51,31 @@ public class VedtakService {
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
-    private final GsakFasade gsakFasade;
     private final TpsFasade tpsFasade;
     private final VedtakKontrollService vedtakKontrollService;
     private final RegisteropplysningerService registeropplysningerService;
+    private final MedlFasade medlFasade;
 
     @Autowired
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
-                         FagsakService fagsakService, GsakFasade gsakFasade, TpsFasade tpsFasade, VedtakKontrollService vedtakKontrollService, RegisteropplysningerService registeropplysningerService) {
+                         FagsakService fagsakService,
+                         TpsFasade tpsFasade,
+                         VedtakKontrollService vedtakKontrollService,
+                         RegisteropplysningerService registeropplysningerService,
+                         MedlFasade medlFasade) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
-        this.gsakFasade = gsakFasade;
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
         this.vedtakKontrollService = vedtakKontrollService;
         this.registeropplysningerService = registeropplysningerService;
+        this.medlFasade = medlFasade;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -89,6 +89,7 @@ public class VedtakService {
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        validerBehandlingstypeFattVedtak(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
@@ -106,7 +107,7 @@ public class VedtakService {
                         .medlemskapsopplysninger().build())
                     .build());
 
-            validerFattVedtak(behandlingID, vedtakstype);
+            kontrollerFattVedtak(behandlingID, vedtakstype);
         }
 
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
@@ -126,7 +127,13 @@ public class VedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
+    private void validerBehandlingstypeFattVedtak(Behandling behandling) throws FunksjonellException {
+        if (!behandling.kanResultereIVedtak()) {
+            throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstype " + behandling.getType().getBeskrivelse());
+        }
+    }
+
+    private void kontrollerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
         Collection<Kontroll_begrunnelser> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID, vedtakstype);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
@@ -175,9 +182,22 @@ public class VedtakService {
         eksisterendeBehandling.getFagsak().setStatus(Saksstatuser.OPPRETTET);
         fagsakService.lagre(eksisterendeBehandling.getFagsak());
 
+        avsluttTidligereMedlPeriode(eksisterendeBehandling.getId());
         opprettRevurderingsoppgave(eksisterendeBehandling, nyBehandling, SubjectHandler.getInstance().getUserID());
 
         return nyBehandling.getId();
+    }
+
+    private void avsluttTidligereMedlPeriode(long behandlingID) throws IkkeFunnetException, SikkerhetsbegrensningException {
+        Optional<Long> medlPeriodeID = behandlingsresultatService.hentBehandlingsresultat(behandlingID).getLovvalgsperioder()
+            .stream()
+            .map(Lovvalgsperiode::getMedlPeriodeID)
+            .filter(Objects::nonNull)
+            .findFirst();
+
+        if (medlPeriodeID.isPresent()) {
+            medlFasade.avvisPeriode(medlPeriodeID.get(), StatusaarsakMedl.AVVIST);
+        }
     }
 
     private void validerBehandlingForRevurdering(Behandling eksisterendeBehandling) throws FunksjonellException {
@@ -199,6 +219,6 @@ public class VedtakService {
             .setTilordnetRessurs(saksbehandler)
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .build();
-        gsakFasade.opprettOppgave(oppgave);
+        oppgaveService.opprettOppgave(oppgave);
     }
 }

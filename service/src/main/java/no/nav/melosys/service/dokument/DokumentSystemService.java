@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;

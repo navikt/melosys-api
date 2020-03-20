@@ -4,9 +4,10 @@ import java.time.Instant;
 import java.util.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import org.assertj.core.util.Sets;
 import org.junit.Test;
@@ -62,7 +63,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void getSistOppdaterteBehandling_medEnBehandling() {
+    public void getSistOppdaterteBehandling_medEnBehandling() throws FunksjonellException {
         Fagsak fagsak = new Fagsak();
 
         Behandling behandling = new Behandling();
@@ -73,7 +74,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void getSistOppdaterteBehandling_medTreBehandlinger() {
+    public void getSistOppdaterteBehandling_medTreBehandlinger() throws FunksjonellException {
         Fagsak fagsak = new Fagsak();
 
         Behandling sistOppdaterteBehandling = new Behandling();
@@ -94,8 +95,8 @@ public class FagsakTest {
         assertThat(fagsak.getSistOppdaterteBehandling()).isEqualTo(sistOppdaterteBehandling);
     }
 
-    @Test
-    public void getSistOppdaterteBehandling_ingenBehandlinger() {
+    @Test(expected = FunksjonellException.class)
+    public void getSistOppdaterteBehandling_ingenBehandlinger_kasterException() throws FunksjonellException {
         assertThat(new Fagsak().getSistOppdaterteBehandling()).isNull();
     }
 

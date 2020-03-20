@@ -1,6 +1,8 @@
 package no.nav.melosys.service.kontroll;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
 public final class PeriodeKontroller {
@@ -17,19 +19,23 @@ public final class PeriodeKontroller {
     }
 
     public static boolean periodeOver24Mnd(LocalDate fom, LocalDate tom) {
-        return tom != null && ChronoUnit.MONTHS.between(fom, tom) >= 24L;
+        return tom != null && ChronoUnit.MONTHS.between(fom, tom) >= 24;
     }
 
     public static boolean periodeOver5År(LocalDate fom, LocalDate tom) {
-        return tom != null && ChronoUnit.YEARS.between(fom, tom) >= 5L;
+        return tom != null && ChronoUnit.YEARS.between(fom, tom) >= 5;
     }
 
-    public static boolean datoEldreEnn3År(LocalDate fom) {
-        return fom.isBefore(LocalDate.now().minusYears(3L));
+    public static boolean datoEldreEnn3År(LocalDate dato) {
+        return dato.isBefore(LocalDate.now().minusYears(3));
+    }
+
+    public static boolean datoEldreEnn2Mnd(Instant instant) {
+        return tilLocalDate(instant).isBefore(LocalDate.now().minusMonths(2));
     }
 
     public static boolean datoOver1ÅrFremITid(LocalDate fom) {
-        return fom.isAfter(LocalDate.now().plusYears(1L));
+        return fom.isAfter(LocalDate.now().plusYears(1));
     }
 
     public static boolean periodeErLik(LocalDate fom1, LocalDate tom1, LocalDate fom2, LocalDate tom2) {
@@ -69,5 +75,9 @@ public final class PeriodeKontroller {
 
     private static boolean åpenPeriodeOverlapper(LocalDate fom, LocalDate tom, LocalDate åpenPeriode) {
         return fom.isAfter(åpenPeriode) && tom.isAfter(åpenPeriode);
+    }
+
+    private static LocalDate tilLocalDate(Instant instant) {
+        return LocalDate.ofInstant(instant, ZoneId.systemDefault());
     }
 }

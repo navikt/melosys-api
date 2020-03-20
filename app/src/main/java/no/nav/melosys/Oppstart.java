@@ -14,13 +14,6 @@ public interface Oppstart {
         list.add("systemuser.username");
         list.add("systemuser.password");
 
-        // Til LDAP
-        list.add("ldap.url");
-        list.add("ldap.username");
-        list.add("ldap.domain");
-        list.add("ldap.password");
-        list.add("ldap.user.basedn");
-
         list.forEach(this::loadProperty);
     }
 

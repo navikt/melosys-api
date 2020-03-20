@@ -18,9 +18,9 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +167,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         }
     }
 
-    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) throws TekniskException {
+    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) {
         return !avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty();
     }
 

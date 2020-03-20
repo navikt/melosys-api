@@ -1,9 +1,9 @@
 package no.nav.melosys.service.oppgave;
 
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,10 +15,10 @@ public class OppgaveSystemService extends OppgaveService {
 
     public OppgaveSystemService(BehandlingService behandlingService,
                                 FagsakService fagsakService,
-                                @Qualifier("system") GsakFasade gsakFasade,
+                                @Qualifier("system") OppgaveFasade oppgaveFasade,
                                 SaksopplysningerService saksopplysningerService,
                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
                                 @Qualifier("system") TpsFasade tpsFasade) {
-        super(behandlingService, fagsakService, gsakFasade, saksopplysningerService, behandlingsgrunnlagService, tpsFasade);
+        super(behandlingService, fagsakService, oppgaveFasade, saksopplysningerService, behandlingsgrunnlagService, tpsFasade);
     }
 }

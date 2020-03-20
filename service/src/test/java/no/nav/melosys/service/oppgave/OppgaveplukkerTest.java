@@ -22,9 +22,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import no.nav.melosys.service.sak.FagsakService;
@@ -47,7 +47,7 @@ public class OppgaveplukkerTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
-    private GsakFasade gsakFasade;
+    private OppgaveFasade oppgaveFasade;
 
     @Mock
     private OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
@@ -55,6 +55,8 @@ public class OppgaveplukkerTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private OppgaveService oppgaveService;
 
 
     private Oppgaveplukker oppgaveplukker;
@@ -65,7 +67,7 @@ public class OppgaveplukkerTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService);
+        this.oppgaveplukker = new Oppgaveplukker(oppgaveFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService, oppgaveService);
 
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
@@ -84,7 +86,7 @@ public class OppgaveplukkerTest {
         oppgaver.add(opprettOppgave("3", Oppgavetyper.JFR, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123"));
         oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 5), LocalDate.now(), "MEL-1234"));
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Sakstyper.EU_EOS.getKode(), Behandlingstyper.SOEKNAD.getKode());
 
@@ -113,7 +115,7 @@ public class OppgaveplukkerTest {
         oppgaver.add(opprettOppgave("3", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123"));
         oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now().plusDays(1L), "MEL-1234"));
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Sakstyper.EU_EOS.getKode(), Behandlingstyper.SOEKNAD.getKode());
 
@@ -139,7 +141,7 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1"));
         oppgaver.add(opprettOppgave("2", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Sakstyper.EU_EOS.getKode(), Behandlingstyper.SOEKNAD.getKode());
 
@@ -179,7 +181,7 @@ public class OppgaveplukkerTest {
 
         when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -211,7 +213,7 @@ public class OppgaveplukkerTest {
 
         when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -233,7 +235,7 @@ public class OppgaveplukkerTest {
         final String saksbehandlerID = "test";
         final String begrunnelse = "Oppgaven er kjedelig";
 
-        when(gsakFasade.hentOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
@@ -260,7 +262,7 @@ public class OppgaveplukkerTest {
         oppgaveBuilder.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
 
-        when(gsakFasade.hentOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(oppgaveBuilder.build());
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
         tilbakelegging.setBehandlingID(BEHANDLING_ID);
@@ -279,7 +281,7 @@ public class OppgaveplukkerTest {
 
         ArgumentCaptor<Behandlingstema> captor = ArgumentCaptor.forClass(Behandlingstema.class);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(Behandlingstyper.class), captor.capture())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(Behandlingstyper.class), captor.capture())).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Sakstyper.EU_EOS.getKode(), Behandlingstyper.SOEKNAD.getKode());
 
@@ -296,7 +298,7 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        verify(gsakFasade, times(2)).finnUtildelteOppgaverEtterFrist(anySet(), any(), any());
+        verify(oppgaveFasade, times(2)).finnUtildelteOppgaverEtterFrist(anySet(), any(), any());
 
         assertThat(oppgave.isPresent()).isTrue();
         assertThat(captor.getValue()).isEqualTo(Behandlingstema.EU_EOS);
@@ -307,7 +309,7 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Sakstyper.EU_EOS.getKode(), Behandlingstyper.SOEKNAD.getKode());
 
@@ -333,7 +335,7 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), any(), any())).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Sakstyper.EU_EOS.getKode(), Behandlingstyper.SOEKNAD.getKode());
 
@@ -359,7 +361,7 @@ public class OppgaveplukkerTest {
 
         ArgumentCaptor<Behandlingstema> captor = ArgumentCaptor.forClass(Behandlingstema.class);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), eq(null), captor.capture())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), eq(null), captor.capture())).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Sakstyper.EU_EOS.getKode(), Behandlingstyper.ENDRET_PERIODE.getKode());
 
@@ -376,8 +378,8 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        verify(gsakFasade).finnUtildelteOppgaverEtterFrist(anySet(), any(Behandlingstyper.class), any());
-        verify(gsakFasade).finnUtildelteOppgaverEtterFrist(anySet(), eq(null), any());
+        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(anySet(), any(Behandlingstyper.class), any());
+        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(anySet(), eq(null), any());
 
         assertThat(oppgave.isPresent()).isTrue();
         assertThat(captor.getValue()).isEqualTo(Behandlingstema.EU_EOS_GAMMEL_KODE);
@@ -391,7 +393,7 @@ public class OppgaveplukkerTest {
         ArgumentCaptor<Behandlingstema> captor = ArgumentCaptor.forClass(Behandlingstema.class);
         ArgumentCaptor<Behandling> behandlingCaptor = ArgumentCaptor.forClass(Behandling.class);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anySet(), eq(null), captor.capture())).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anySet(), eq(null), captor.capture())).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Sakstyper.EU_EOS.getKode(), Behandlingstyper.SOEKNAD.getKode());
 
@@ -408,8 +410,8 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        verify(gsakFasade).finnUtildelteOppgaverEtterFrist(anySet(), any(Behandlingstyper.class), any());
-        verify(gsakFasade).finnUtildelteOppgaverEtterFrist(anySet(), eq(null), any());
+        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(anySet(), any(Behandlingstyper.class), any());
+        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(anySet(), eq(null), any());
         verify(behandlingService).lagre(behandlingCaptor.capture());
 
         assertThat(oppgave.isPresent()).isTrue();

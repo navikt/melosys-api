@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Metrics;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandlingsmaate;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.SvarAnmodningUnntak;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
@@ -18,9 +20,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.metrics.MetrikkerNavn.*;
+import static no.nav.melosys.metrics.MetrikkerNavn.SVAR_AOU;
+import static no.nav.melosys.metrics.MetrikkerNavn.TAG_RESULTAT;
 
 @Component
 public class OppdaterBehandling extends AbstraktStegBehandler {

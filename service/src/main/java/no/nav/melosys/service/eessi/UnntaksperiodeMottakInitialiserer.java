@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.sak.FagsakService;
@@ -32,7 +33,7 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
     }
 
     @Override
-    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) {
+    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException {
 
         if (gsakSaksnummer == null) {
             return RutingResultat.NY_SAK;

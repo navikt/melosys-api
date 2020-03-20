@@ -45,7 +45,7 @@ public class OppgaveTjeneste {
     }
 
     @PostMapping("/plukk")
-    @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
+    @ApiOperation(value = "Plukker neste oppgave fra Oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
     public ResponseEntity plukkOppgave(@RequestBody PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
 
@@ -60,7 +60,7 @@ public class OppgaveTjeneste {
                 dto.setSaksnummer(oppgave.getSaksnummer());
             }
 
-            Behandling behandling = oppgaveService.hentAktivBehandling(oppgave.getSaksnummer());
+            Behandling behandling = oppgaveService.hentSistAktiveBehandling(oppgave.getSaksnummer());
             dto.setBehandlingID(behandling.getId());
             dto.setBehandlingstype(behandling.getType().getKode());
             dto.setJournalpostID(oppgave.getJournalpostId());
