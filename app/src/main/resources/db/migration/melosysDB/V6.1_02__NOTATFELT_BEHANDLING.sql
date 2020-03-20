@@ -11,4 +11,4 @@ CREATE TABLE BEHANDLINGSNOTAT
     CONSTRAINT fk_behandlingsnotat_behandling FOREIGN KEY (behandling_id) REFERENCES BEHANDLING
 );
 
-
+CREATE INDEX idx_behnotat_behandling ON BEHANDLINGSNOTAT(behandling_id);

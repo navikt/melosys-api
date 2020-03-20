@@ -13,9 +13,8 @@ public class BehandlingsnotatGetDto {
     private final String behandlingstypeKode;
     private final boolean redigerbar; //
     private final String registrertAvNavn;
-    private final String sistEndretAvNavn;
 
-    public BehandlingsnotatGetDto(Behandlingsnotat behandlingsnotat, boolean redigerbar, String registrertAvNavn, String sistEndretAvNavn) {
+    public BehandlingsnotatGetDto(Behandlingsnotat behandlingsnotat, boolean redigerbar, String registrertAvNavn) {
         this.notatId = behandlingsnotat.getId();
         this.tekst = behandlingsnotat.getTekst();
         this.endretDato = behandlingsnotat.getEndretDato();
@@ -24,7 +23,6 @@ public class BehandlingsnotatGetDto {
 
         this.redigerbar = redigerbar;
         this.registrertAvNavn = registrertAvNavn;
-        this.sistEndretAvNavn = sistEndretAvNavn;
     }
 
     public long getNotatId() {
@@ -53,9 +51,5 @@ public class BehandlingsnotatGetDto {
 
     public String getRegistrertAvNavn() {
         return registrertAvNavn;
-    }
-
-    public String getSistEndretAvNavn() {
-        return sistEndretAvNavn;
     }
 }

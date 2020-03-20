@@ -43,7 +43,7 @@ public class BehandlingsnotatTjeneste {
     }
 
     @GetMapping("/{saksnummer}/notat")
-    @ApiOperation(value = "Henter alle notater knyttet til behandlinger i for fagsaken",
+    @ApiOperation(value = "Henter alle notater knyttet til behandlinger for fagsaken",
         response = BehandlingsnotatGetDto.class,
         responseContainer = "List")
     public ResponseEntity hentBehandlingsnotaterForFagsak(@PathVariable("saksnummer") String saksnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -85,8 +85,7 @@ public class BehandlingsnotatTjeneste {
         return new BehandlingsnotatGetDto(
             behandlingsnotat,
             behandlingsnotatService.kanRedigereNotat(behandlingsnotat),
-            navnEllerIdent(behandlingsnotat.getRegistrertAv()),
-            navnEllerIdent(behandlingsnotat.getEndretAv())
+            navnEllerIdent(behandlingsnotat.getRegistrertAv())
         );
     }
 
