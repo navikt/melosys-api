@@ -42,7 +42,7 @@ public class BehandlingsnotatTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @GetMapping("/{saksnummer}/notat")
+    @GetMapping("/{saksnummer}/notater")
     @ApiOperation(value = "Henter alle notater knyttet til behandlinger for fagsaken",
         response = BehandlingsnotatGetDto.class,
         responseContainer = "List")
@@ -57,7 +57,7 @@ public class BehandlingsnotatTjeneste {
         return ResponseEntity.ok(notater);
     }
 
-    @PostMapping("/{saksnummer}/notat")
+    @PostMapping("/{saksnummer}/notater")
     @ApiOperation(value = "Oppretter et nytt notat på fagsaken sin aktive behandling",
         response = BehandlingsnotatGetDto.class)
     public ResponseEntity opprettBehandlingsnotatForFagsak(@PathVariable("saksnummer") String saksnummer,
@@ -69,7 +69,7 @@ public class BehandlingsnotatTjeneste {
         );
     }
 
-    @PutMapping("/{saksnummer}/notat/{notatID}")
+    @PutMapping("/{saksnummer}/notater/{notatID}")
     @ApiOperation(value = "Oppdaterer tekst på et notat",
         response = BehandlingsnotatGetDto.class)
     public ResponseEntity oppdaterBehandlingsnotat(@PathVariable("saksnummer") String saksnummer,
