@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -9,12 +8,12 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.DatabindContext;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
+import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.nav.melosys.domain.eessi.SedType;
 
-public class SedGrunnlagTypeResolver implements TypeIdResolver {
+public class SedGrunnlagTypeResolver extends TypeIdResolverBase {
 
     private static final Class<? extends SedGrunnlagDto> DEFAULT_CLASS = SedGrunnlagDto.class;
     private static final List<String> SED_TYPES_STRING = Arrays.stream(SedType.values()).map(SedType::name).collect(Collectors.toList());
@@ -46,7 +45,7 @@ public class SedGrunnlagTypeResolver implements TypeIdResolver {
     }
 
     @Override
-    public JavaType typeFromId(DatabindContext databindContext, String s) throws IOException {
+    public JavaType typeFromId(DatabindContext databindContext, String s) {
         Class<?> type;
         if (SED_TYPES_STRING.contains(s) && SED_GRUNNLAG_TYPER.containsKey(SedType.valueOf(s))) {
             type = SED_GRUNNLAG_TYPER.get(SedType.valueOf(s));

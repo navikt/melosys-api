@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.util.HashSet;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.exception.*;
@@ -49,7 +48,7 @@ public class BehandlingsgrunnlagTjeneste {
     }
 
     private BehandlingsgrunnlagTilleggsData hentTilleggsData(Behandlingsgrunnlag behandlingsgrunnlag) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        if (behandlingsgrunnlag.getType() == BehandlingsGrunnlagType.SED && behandlingsgrunnlag.getBehandlingsgrunnlagdata() instanceof SedGrunnlag) {
+        if (behandlingsgrunnlag.erSedGrunnlag()) {
             SedGrunnlag sedGrunnlag = (SedGrunnlag) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
             if (!sedGrunnlag.norskeArbeidsgivere.isEmpty()) {
                 return new BehandlingsgrunnlagTilleggsData(new HashSet<>(sedGrunnlag.norskeArbeidsgivere));

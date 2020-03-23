@@ -114,4 +114,8 @@ public class Behandlingsgrunnlag {
     public void setBehandlingsgrunnlagdata(BehandlingsgrunnlagData behandlingsgrunnlagdata) {
         this.behandlingsgrunnlagdata = behandlingsgrunnlagdata;
     }
+
+    public boolean erSedGrunnlag() {
+        return this.type == BehandlingsGrunnlagType.SED && behandlingsgrunnlagdata instanceof SedGrunnlag;
+    }
 }
