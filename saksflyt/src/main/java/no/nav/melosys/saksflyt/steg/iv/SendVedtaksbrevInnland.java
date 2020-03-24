@@ -4,7 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -78,6 +78,8 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(prosessinstans, behandling, resultat, saksbehandler);
+            sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
+            sendA1tilSkattOppkreverUtland(prosessinstans, behandling, resultat, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
@@ -88,7 +90,10 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         }
     }
 
-    private void sendAvslagsbrev(Prosessinstans prosessinstans, Behandling behandling, Behandlingsresultattyper behandlingsresultatType, String saksbehandler)
+    private void sendAvslagsbrev(Prosessinstans prosessinstans,
+                                 Behandling behandling,
+                                 Behandlingsresultattyper behandlingsresultatType,
+                                 String saksbehandler)
         throws FunksjonellException, TekniskException {
         Produserbaredokumenter avslagTypeBruker = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
             ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
@@ -125,7 +130,10 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         }
     }
 
-    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans, Behandling behandling, Behandlingsresultat resultat, String saksbehandler)
+    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans,
+                                      Behandling behandling,
+                                      Behandlingsresultat resultat,
+                                      String saksbehandler)
         throws FunksjonellException, TekniskException {
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
@@ -138,8 +146,24 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
             .medFritekst(hentBegrunnelseFritekst(prosessinstans))
             .build();
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
+    }
 
+    private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler)
+        throws FunksjonellException, TekniskException {
+        final Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
+        // Saker med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
+        if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
+            && !lovvalgsperiode.erArtikkel13()
+            && !lovvalgsperiode.erArtikkel11_4()) {
+            brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
+        }
+    }
 
+    private void sendA1tilSkattOppkreverUtland(Prosessinstans prosessinstans,
+                                               Behandling behandling,
+                                               Behandlingsresultat resultat,
+                                               String saksbehandler)
+        throws FunksjonellException, TekniskException {
         final boolean erArtikkel13 = resultat.hentValidertLovvalgsperiode().erArtikkel13();
         if (erArtikkel13) {
             if (!behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.isEmpty()) {
@@ -151,11 +175,6 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
                 brevBestiller.bestill(a1SkatteoppkreverUtland);
             }
         } else {
-            // Saker for art. 13 eller med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
-            Fagsak fagsak = behandling.getFagsak();
-            if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-                brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
-            }
             if (harValgteUtenlandskeVirksomheter(behandling)) {
                 Brevbestilling a1SkatteoppkreverUtland = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
                     .medAvsender(saksbehandler)
@@ -167,7 +186,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         }
     }
 
-    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) throws TekniskException {
+    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) {
         return !avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty();
     }
 
