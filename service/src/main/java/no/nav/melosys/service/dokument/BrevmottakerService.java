@@ -8,6 +8,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -149,18 +150,26 @@ public class BrevmottakerService {
             return Collections.singletonList(mottaker.getAktør());
         } else {
             // Utenlandsk myndighet
-            Map<UtenlandskMyndighet, Aktoer> utenlandskMyndighetAktoerMap = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
+            Map<UtenlandskMyndighet, Aktoer> utenlandskMyndighetAktoerMap
+                = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
 
-            if (produserbartDokument == ATTEST_A1 && behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode().erArtikkel12_1()) {
+            if (produserbartDokument == ATTEST_A1 && kanReservereMotA1(behandling)) {
                 return utenlandskMyndighetAktoerMap.entrySet()
-                        .stream()
-                        .filter(e -> myndighetØnskerInnvilgelsesbrev(e.getKey()))
-                        .map(Map.Entry::getValue)
-                        .collect(Collectors.toList());
+                    .stream()
+                    .filter(e -> myndighetØnskerInnvilgelsesbrev(e.getKey()))
+                    .map(Map.Entry::getValue)
+                    .collect(Collectors.toList());
             } else {
                 return new ArrayList<>(utenlandskMyndighetAktoerMap.values());
             }
         }
+    }
+
+    private boolean kanReservereMotA1(Behandling behandling) throws IkkeFunnetException {
+        Lovvalgsperiode lovvalgsperiode =
+            behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode();
+        return lovvalgsperiode.erArtikkel12() || lovvalgsperiode.erArtikkel11_4()
+            || lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B;
     }
 
     private boolean myndighetØnskerInnvilgelsesbrev(UtenlandskMyndighet utenlandskMyndighet) {
