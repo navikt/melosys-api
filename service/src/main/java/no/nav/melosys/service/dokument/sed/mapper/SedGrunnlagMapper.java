@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.*;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.eessi.dto.*;
@@ -29,12 +28,12 @@ public class SedGrunnlagMapper {
         sedGrunnlag.periode = tilPeriode(sedGrunnlagDto.getLovvalgsperioder());
         sedGrunnlag.ytterligereInformasjon = sedGrunnlagDto.getYtterligereInformasjon();
 
-        if (sedGrunnlagDto.getSedType() == SedType.A003 && sedGrunnlagDto instanceof SedGrunnlagA003Dto) {
+        if (sedGrunnlagDto.erA003()) {
             SedGrunnlagA003Dto sedGrunnlagA003Dto = (SedGrunnlagA003Dto) sedGrunnlagDto;
             sedGrunnlag.overgangsregelbestemmelser = mapOvergangsregelbestemmelser(sedGrunnlagA003Dto.getOvergangsregelbestemmelser());
             sedGrunnlag.juridiskArbeidsgiverNorge = mapJuridiskArbeidsgiver(sedGrunnlagA003Dto);
             sedGrunnlag.norskeArbeidsgivere = sedGrunnlagA003Dto.getNorskeArbeidsgivendeVirksomheter().stream()
-                .map(Virksomhet::tilOrganisasjonDokument).collect(Collectors.toList());
+                .map(Virksomhet::tilOrganisasjon).collect(Collectors.toList());
         }
 
         return sedGrunnlag;

@@ -1,11 +1,7 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
+import no.nav.melosys.domain.eessi.Organisasjon;
 
 public class Virksomhet {
 
@@ -35,14 +31,14 @@ public class Virksomhet {
         return foretakUtland;
     }
 
-    public OrganisasjonDokument tilOrganisasjonDokument() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.organisasjonDetaljer = new OrganisasjonsDetaljer();
-        organisasjonDokument.organisasjonDetaljer.navn = new ArrayList<>();
-        organisasjonDokument.organisasjonDetaljer.orgnummer = orgnr;
-        organisasjonDokument.organisasjonDetaljer.postadresse = List.of(adresse.tilSemistrukturertAdresse());
-        organisasjonDokument.navn = List.of(navn);
-        return organisasjonDokument;
+    public Organisasjon tilOrganisasjon() {
+        Organisasjon organisasjon = new Organisasjon();
+
+        organisasjon.setOrgnr(orgnr);
+        organisasjon.setNavn(navn);
+        organisasjon.setAdresse(adresse.tilStrukturertAdresse());
+
+        return organisasjon;
     }
 
     public String getNavn() {

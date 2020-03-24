@@ -19,6 +19,10 @@ public class SedGrunnlagDto {
     private List<Lovvalgsperiode> lovvalgsperioder = new ArrayList<>();
     private String ytterligereInformasjon;
 
+    public boolean erA003() {
+        return getSedType() == SedType.A003 && this instanceof SedGrunnlagA003Dto;
+    }
+
     public List<Ident> getUtenlandskIdent() {
         return utenlandskIdent;
     }
