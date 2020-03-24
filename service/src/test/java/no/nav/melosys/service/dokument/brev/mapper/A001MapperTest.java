@@ -6,6 +6,8 @@ import java.util.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import no.nav.dok.melosysbrev._000115.ArbeidsstedType;
+import no.nav.dok.melosysbrev._000115.SEDA001;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
 import no.nav.dok.melosysbrev._000116.ObjectFactory;
@@ -179,6 +181,17 @@ public class A001MapperTest {
         assertThat(xml).isNotNull();
     }
 
+    @Test
+    public void mapSEDA001_forventIkkeFysiskArbeidssted() throws TekniskException {
+        brevData.arbeidssteder = Collections.emptyList();
+        SEDA001 sedA001 = mapper.mapSEDA001(brevData);
+
+        assertThat(sedA001).isNotNull();
+        assertThat(sedA001.getArbeidsstedListe().getArbeidssted()).hasSize(1);
+        assertThat(sedA001.getArbeidsstedListe().getArbeidssted())
+            .extracting(ArbeidsstedType::getIkkeFysiskArbeidssted)
+            .containsExactly("true");
+    }
 
     private String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, BrevData brevData) throws JAXBException, SAXException, TekniskException {
         final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";

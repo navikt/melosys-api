@@ -24,6 +24,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
+import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
@@ -179,6 +180,10 @@ class A001Mapper {
     }
 
     private ArbeidsstedListeType mapArbeidsstedliste(List<Arbeidssted> arbeidssteder) {
+        if (CollectionUtils.isEmpty(arbeidssteder)) {
+            return lagTomArbeidsstedListeType();
+        }
+
         ArbeidsstedListeType arbeidsstedListe = new ArbeidsstedListeType();
         for (Arbeidssted arbeidssted : arbeidssteder) {
 
@@ -191,6 +196,22 @@ class A001Mapper {
             }
             arbeidsstedListe.getArbeidssted().add(arbeidsstedBrev);
         }
+        return arbeidsstedListe;
+    }
+
+    private ArbeidsstedListeType lagTomArbeidsstedListeType() {
+        ArbeidsstedListeType arbeidsstedListe = new ArbeidsstedListeType();
+        ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
+
+        arbeidsstedBrev.setIkkeFysiskArbeidssted("true");
+        arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.ORDINAER);
+        arbeidsstedBrev.setNavn(" ");
+        arbeidsstedListe.getArbeidssted().add(arbeidsstedBrev);
+
+        AdresseType3 adresseBrev = new AdresseType3();
+        adresseBrev.setLand(" ");
+        arbeidsstedBrev.setAdresse(adresseBrev);
+
         return arbeidsstedListe;
     }
 
