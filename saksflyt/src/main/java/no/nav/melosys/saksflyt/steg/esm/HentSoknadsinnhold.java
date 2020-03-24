@@ -7,7 +7,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,13 +15,13 @@ public class HentSoknadsinnhold extends AbstraktStegBehandler {
     private final SoknadMottakConsumer soknadMottakConsumer;
 
     @Autowired
-    public HentSoknadsinnhold(@Qualifier("system") SoknadMottakConsumer soknadMottakConsumer) {
+    public HentSoknadsinnhold(SoknadMottakConsumer soknadMottakConsumer) {
         this.soknadMottakConsumer = soknadMottakConsumer;
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.SOKNAD_MOTTAK_HENT_SOKNADSINNHOLD;
+        return ProsessSteg.MSA_HENT_INNHOLD;
     }
 
     @Override

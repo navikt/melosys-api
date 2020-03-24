@@ -24,14 +24,14 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 public class KafkaConfig {
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MelosysEessiMelding>> eessiMeldingListenerContainerFactory(
-        KafkaProperties kafkaProperties, @Value("${kafka.groupid.eessi}") String groupId
+        KafkaProperties kafkaProperties, @Value("${kafka.eessi.groupid}") String groupId
     ) {
         return kafkaListenerContainerFactory(MelosysEessiMelding.class, kafkaProperties, groupId);
     }
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SoknadMottatt>> soknadMottattContainerFactory(
-        KafkaProperties kafkaProperties, @Value("${kafka.groupid.soknad-mottak}") String groupId
+        KafkaProperties kafkaProperties, @Value("${kafka.soknad-mottak.groupid}") String groupId
     ) {
         return kafkaListenerContainerFactory(SoknadMottatt.class, kafkaProperties, groupId);
     }

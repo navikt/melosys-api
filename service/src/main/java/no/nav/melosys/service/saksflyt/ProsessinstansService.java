@@ -340,8 +340,8 @@ public class ProsessinstansService {
     @Transactional
     public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.MOTTAK_SOKNAD)
-            .medSteg(ProsessSteg.SOKNAD_MOTTAK_HENT_SOKNADSINNHOLD)
+            .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
+            .medSteg(ProsessSteg.MSA_HENT_INNHOLD)
             .build();
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadMottatt.getSoknadID());
 

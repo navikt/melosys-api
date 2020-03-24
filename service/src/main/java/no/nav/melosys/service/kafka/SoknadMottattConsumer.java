@@ -17,7 +17,7 @@ public class SoknadMottattConsumer {
         this.prosessinstansService = prosessinstansService;
     }
 
-    @KafkaListener(clientIdPrefix = "melosys-soknad-mottak-consumer", topics = "${kafka.topic.soknad-mottak}",
+    @KafkaListener(clientIdPrefix = "melosys-soknad-mottak-consumer", topics = "${kafka.soknad-mottak.topic}",
         containerFactory = "soknadMottattContainerFactory")
     public void mottaMelding(ConsumerRecord<String, SoknadMottatt> consumerRecord) {
         SoknadMottatt melding = consumerRecord.value();
@@ -26,7 +26,8 @@ public class SoknadMottattConsumer {
         try {
             prosessinstansService.opprettProsessinstansSøknadMottatt(melding);
         } catch (Exception e) {
-            log.error("Feil ved mottak av søknad fra altinn! ConsumerRecord.key: {}", consumerRecord.key(), e);
+            log.error("Feil ved mottak av søknad fra altinn! SoknadID: {} ConsumerRecord.key: {}",
+                consumerRecord.value().getSoknadID(), consumerRecord.key(), e);
         }
     }
 }
