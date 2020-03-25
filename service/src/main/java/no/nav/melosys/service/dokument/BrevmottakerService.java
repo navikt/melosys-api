@@ -156,7 +156,7 @@ public class BrevmottakerService {
             if (produserbartDokument == ATTEST_A1 && kanReservereMotA1(behandling)) {
                 return utenlandskMyndighetAktoerMap.entrySet()
                     .stream()
-                    .filter(e -> myndighetØnskerInnvilgelsesbrev(e.getKey()))
+                    .filter(e -> myndighetØnskerA1(e.getKey()))
                     .map(Map.Entry::getValue)
                     .collect(Collectors.toList());
             } else {
@@ -172,7 +172,7 @@ public class BrevmottakerService {
             || lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B;
     }
 
-    private boolean myndighetØnskerInnvilgelsesbrev(UtenlandskMyndighet utenlandskMyndighet) {
+    private boolean myndighetØnskerA1(UtenlandskMyndighet utenlandskMyndighet) {
         return utenlandskMyndighet
                 .preferanser
                 .stream()
