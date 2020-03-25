@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -20,8 +19,7 @@ public class SoknadMottakConsumerProducer {
     }
 
     @Bean
-    @Primary
-    public SoknadMottakConsumer soknadMottakSystemConsumer(SystemContextClientRequestInterceptor interceptor) {
+    public SoknadMottakConsumer soknadMottakConsumer(SystemContextClientRequestInterceptor interceptor) {
         RestTemplate restTemplate = new RestTemplateBuilder().rootUri(url).build();
         restTemplate.setInterceptors(Collections.singletonList(interceptor));
         return new SoknadMottakConsumerImpl(restTemplate);
