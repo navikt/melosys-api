@@ -106,8 +106,8 @@ public class AvklartefaktaServiceTest {
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
 
-        Yrkesgrupper yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
-        assertThat(yrkesgruppeType).isEqualTo(Yrkesgrupper.ORDINAER);
+        Optional<Yrkesgrupper> yrkesgruppeType = avklartefaktaService.finnYrkesGruppe(1L);
+        assertThat(yrkesgruppeType).isPresent().get().isEqualTo(Yrkesgrupper.ORDINAER);
     }
 
     @Test
@@ -117,8 +117,8 @@ public class AvklartefaktaServiceTest {
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
 
-        Yrkesgrupper yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
-        assertThat(yrkesgruppeType).isEqualTo(Yrkesgrupper.FLYENDE_PERSONELL);
+        Optional<Yrkesgrupper> yrkesgruppeType = avklartefaktaService.finnYrkesGruppe(1L);
+        assertThat(yrkesgruppeType).isPresent().get().isEqualTo(Yrkesgrupper.FLYENDE_PERSONELL);
     }
 
     @Test
@@ -128,8 +128,8 @@ public class AvklartefaktaServiceTest {
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        Yrkesgrupper yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
-        assertThat(yrkesgruppeType).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP);
+        Optional<Yrkesgrupper> yrkesgruppeType = avklartefaktaService.finnYrkesGruppe(1L);
+        assertThat(yrkesgruppeType).isPresent().get().isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP);
     }
 
     @Test(expected = TekniskException.class)
@@ -139,7 +139,7 @@ public class AvklartefaktaServiceTest {
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        avklartefaktaService.hentYrkesGruppe(1L);
+        avklartefaktaService.finnYrkesGruppe(1L);
     }
 
     @Test
@@ -169,7 +169,7 @@ public class AvklartefaktaServiceTest {
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
-        assertThat(maritimType.get()).isEqualTo(Maritimtyper.SOKKEL);
+        assertThat(maritimType).isPresent().get().isEqualTo(Maritimtyper.SOKKEL);
     }
 
     @Test
@@ -180,7 +180,7 @@ public class AvklartefaktaServiceTest {
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
-        assertThat(maritimType.get()).isEqualTo(Maritimtyper.SKIP);
+        assertThat(maritimType).isPresent().get().isEqualTo(Maritimtyper.SKIP);
     }
 
     public static Set<Avklartefakta> lagAlleMaritimeAvklartefakta(String navn, String maritimType, String landkode) {
