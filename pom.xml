@@ -66,6 +66,7 @@
         <hikaricp.version>3.3.0</hikaricp.version>
         <ibmmq.version>9.0.5.0</ibmmq.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
+        <json-smart.version>2.3</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
         <junit.version>4.12</junit.version>
         <micrometer-jvm-extras.version>0.1.4</micrometer-jvm-extras.version>
@@ -223,6 +224,11 @@
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logstash.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.minidev</groupId>
+                <artifactId>json-smart</artifactId>
+                <version>${json-smart.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
