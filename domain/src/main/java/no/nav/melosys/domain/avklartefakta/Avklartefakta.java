@@ -17,7 +17,7 @@ public class Avklartefakta {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "beh_resultat_id")
+    @JoinColumn(name="beh_resultat_id")
     private Behandlingsresultat behandlingsresultat;
 
     @Enumerated(EnumType.STRING)
@@ -118,15 +118,14 @@ public class Avklartefakta {
         }
         Avklartefakta that = (Avklartefakta) o;
         return Objects.equals(this.behandlingsresultat, that.getBehandlingsresultat()) &&
-            Objects.equals(this.type, that.getType()) &&
-            Objects.equals(this.subjekt, that.getSubjekt()) &&
-            Objects.equals(this.fakta, that.getFakta()) &&
-            Objects.equals(this.referanse, that.getReferanse());
+               Objects.equals(this.type, that.getType()) &&
+               Objects.equals(this.subjekt, that.getSubjekt()) &&
+               Objects.equals(this.referanse, that.getReferanse());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandlingsresultat, type, subjekt, fakta, referanse);
+        return Objects.hash(behandlingsresultat, type, subjekt, referanse);
     }
 
 }
