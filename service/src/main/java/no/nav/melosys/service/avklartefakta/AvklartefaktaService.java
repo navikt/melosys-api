@@ -55,7 +55,7 @@ public class AvklartefaktaService {
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.ARBEIDSLAND);
 
         return avklarteArbeidsland.stream()
-            .map(af -> Landkoder.valueOf(af.getFakta()))
+            .map(af -> Landkoder.valueOf(af.getSubjekt()))
             .collect(Collectors.toSet());
     }
 
