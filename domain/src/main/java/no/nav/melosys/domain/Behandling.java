@@ -211,12 +211,21 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public static boolean erBehandlingAvSøknad(String behandlingstypeKode) {
-        return Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(behandlingstypeKode)
+        return erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstypeKode)
+            || erBehandlingAvSøknadArbeidIFlereLand(behandlingstypeKode)
             || Behandlingstyper.ENDRET_PERIODE.getKode().equalsIgnoreCase(behandlingstypeKode)
-            || Behandlingstyper.NY_VURDERING.getKode().equalsIgnoreCase(behandlingstypeKode)
-            || Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstypeKode)
-            || Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstypeKode);
+            || Behandlingstyper.NY_VURDERING.getKode().equalsIgnoreCase(behandlingstypeKode);
     }
+
+    public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstypeKode) {
+        return Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(behandlingstypeKode)
+            || Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstypeKode);
+    }
+
+    public static boolean erBehandlingAvSøknadArbeidIFlereLand(String behandlingstypeKode) {
+        return Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstypeKode);
+    }
+
     public boolean isAktiv() {
         return status != Behandlingsstatus.AVSLUTTET;
     }
