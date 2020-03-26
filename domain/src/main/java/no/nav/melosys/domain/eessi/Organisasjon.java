@@ -6,7 +6,8 @@ public class Organisasjon {
 
     private String orgnr;
     private String navn;
-    private StrukturertAdresse adresse;
+    private StrukturertAdresse postadresse;
+    private StrukturertAdresse forretningsadresse;
 
     public String getOrgnr() {
         return orgnr;
@@ -24,11 +25,19 @@ public class Organisasjon {
         this.navn = navn;
     }
 
-    public StrukturertAdresse getAdresse() {
-        return adresse;
+    public StrukturertAdresse getPostadresse() {
+        return postadresse;
     }
 
-    public void setAdresse(StrukturertAdresse adresse) {
-        this.adresse = adresse;
+    public void setPostadresse(StrukturertAdresse postadresse) {
+        this.postadresse = postadresse;
+    }
+
+    public StrukturertAdresse getForretningsadresse() {
+        return forretningsadresse;
+    }
+
+    public void setForretningsadresse(StrukturertAdresse forretningsadresse) {
+        this.forretningsadresse = forretningsadresse;
     }
 }

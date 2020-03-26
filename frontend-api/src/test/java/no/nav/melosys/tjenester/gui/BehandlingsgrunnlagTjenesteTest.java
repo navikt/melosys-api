@@ -1,23 +1,29 @@
 package no.nav.melosys.tjenester.gui;
 
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
+import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.SedGrunnlagDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -97,6 +103,27 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
         ResponseEntity responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
+
+        String json = objectMapperMedKodeverkServiceStub().writeValueAsString(responseEntity.getBody());
+        valider(json, "behandlingsgrunnlag-schema.json", log);
+    }
+
+    @Test
+    public void hentBehandlingsgrunnlag_erSedGrunnlag_validerSchema() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.SED);
+
+        SedGrunnlag sedGrunnlag = random.nextObject(SedGrunnlag.class);
+        sedGrunnlag.overgangsregelbestemmelser = List.of(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A, Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B);
+        sedGrunnlag.ytterligereInformasjon = "fritekst";
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(sedGrunnlag);
+
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
+
+        ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(1);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat((responseEntity.getBody()).getData()).isInstanceOf(SedGrunnlagDto.class);
 
         String json = objectMapperMedKodeverkServiceStub().writeValueAsString(responseEntity.getBody());
         valider(json, "behandlingsgrunnlag-schema.json", log);

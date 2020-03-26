@@ -36,7 +36,12 @@ public class Virksomhet {
 
         organisasjon.setOrgnr(orgnr);
         organisasjon.setNavn(navn);
-        organisasjon.setAdresse(adresse.tilStrukturertAdresse());
+
+        if (adresse.getAdressetype() == Adressetype.POSTADRESSE) {
+            organisasjon.setPostadresse(adresse.tilStrukturertAdresse());
+        } else {
+            organisasjon.setForretningsadresse(adresse.tilStrukturertAdresse());
+        }
 
         return organisasjon;
     }
