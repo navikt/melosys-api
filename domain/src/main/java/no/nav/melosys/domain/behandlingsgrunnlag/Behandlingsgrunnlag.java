@@ -4,6 +4,7 @@ import java.time.Instant;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.jpa.BehandlingsgrunnlagListener;
 
 @Entity
@@ -113,6 +114,10 @@ public class Behandlingsgrunnlag {
 
     public void setBehandlingsgrunnlagdata(BehandlingsgrunnlagData behandlingsgrunnlagdata) {
         this.behandlingsgrunnlagdata = behandlingsgrunnlagdata;
+    }
+
+    public boolean erSøknad() {
+        return this.type == BehandlingsGrunnlagType.SØKNAD && behandlingsgrunnlagdata instanceof SoeknadDokument;
     }
 
     public boolean erSedGrunnlag() {

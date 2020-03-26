@@ -23,7 +23,7 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
-import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.SedGrunnlagDto;
+import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.data.SedGrunnlagDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -84,7 +84,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
-        ResponseEntity responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);
+        ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
 
@@ -100,7 +100,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
-        ResponseEntity responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);
+        ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
 

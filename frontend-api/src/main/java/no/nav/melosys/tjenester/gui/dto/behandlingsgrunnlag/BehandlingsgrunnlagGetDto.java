@@ -2,13 +2,16 @@ package no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsgrunnlagTilleggsData;
+import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.data.BehandlingsgrunnlagDataDto;
+import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.data.SedGrunnlagDto;
+import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.data.SoeknadDokumentDto;
 
 public class BehandlingsgrunnlagGetDto {
 
-    private final BehandlingsgrunnlagData data;
+    private final BehandlingsgrunnlagDataDto data;
     private final BehandlingsGrunnlagType type;
     private final BehandlingsgrunnlagTilleggsData tilleggsData;
 
@@ -16,21 +19,23 @@ public class BehandlingsgrunnlagGetDto {
         this(hentBehandlingsgrunnlagData(behandlingsgrunnlag), behandlingsgrunnlag.getType(), tilleggsData);
     }
 
-    private static BehandlingsgrunnlagData hentBehandlingsgrunnlagData(Behandlingsgrunnlag behandlingsgrunnlag) {
-        if (behandlingsgrunnlag.erSedGrunnlag()) {
+    private static BehandlingsgrunnlagDataDto  hentBehandlingsgrunnlagData(Behandlingsgrunnlag behandlingsgrunnlag) {
+        if (behandlingsgrunnlag.erSøknad()) {
+            return new SoeknadDokumentDto((SoeknadDokument) behandlingsgrunnlag.getBehandlingsgrunnlagdata());
+        } else if (behandlingsgrunnlag.erSedGrunnlag()) {
             return new SedGrunnlagDto((SedGrunnlag) behandlingsgrunnlag.getBehandlingsgrunnlagdata());
         }
 
-        return behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        return new BehandlingsgrunnlagDataDto(behandlingsgrunnlag.getBehandlingsgrunnlagdata());
     }
 
-    private BehandlingsgrunnlagGetDto(BehandlingsgrunnlagData data, BehandlingsGrunnlagType type, BehandlingsgrunnlagTilleggsData tilleggsData) {
+    private BehandlingsgrunnlagGetDto(BehandlingsgrunnlagDataDto data, BehandlingsGrunnlagType type, BehandlingsgrunnlagTilleggsData tilleggsData) {
         this.data = data;
         this.type = type;
         this.tilleggsData = tilleggsData;
     }
 
-    public BehandlingsgrunnlagData getData() {
+    public BehandlingsgrunnlagDataDto getData() {
         return data;
     }
 
