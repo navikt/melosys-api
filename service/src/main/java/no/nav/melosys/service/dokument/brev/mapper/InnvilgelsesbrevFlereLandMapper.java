@@ -45,8 +45,15 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
     private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelseFlereLand brevdata) throws TekniskException {
         Fag fag = new Fag();
-        fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
-        // FIXME fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
+        if (behandling.erBehandlingAvSøknad()) {
+            fag.setBehandlingstype(BehandlingstypeKode.SOEKNAD);
+        } else if (behandling.norgeErUtpekt()) {
+            fag.setBehandlingstype(BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE);
+        } else if (behandling.erKlage()) {
+            fag.setBehandlingstype(BehandlingstypeKode.KLAGE);
+        } else {
+            fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
+        }
 
         // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
         int antallArbeidsgivere = brevdata.arbeidsgivere.size();
@@ -67,7 +74,11 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         fag.setArbeidslandListe(mapArbeidslandListe(brevdata.alleArbeidsland));
 
         fag.setBostedsland(brevdata.bostedsland);
-        fag.setTrygdemyndighetsland(" "); //TODO: Kun når Norge er utpekt. XSD må tillate EmptyString
+        if (behandling.norgeErUtpekt()) {
+            fag.setTrygdemyndighetsland(resultat.getFastsattAvLand().getBeskrivelse());
+        } else {
+            fag.setTrygdemyndighetsland(" ");
+        }
 
         // Virksomhetsland er arbeidsland for selvstendig næringsdrivende
         int antallVirksomhetsland = brevdata.alleArbeidsland.size();
@@ -105,7 +116,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         }
 
         if (resultat.getVedtakMetadata() != null) {
-            // FIXME fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
+            fag.setVedtaksType(tilVedtaksTypeKode(resultat.getVedtakMetadata().getVedtakstype()));
         }
 
         fag.setFritekst(brevdata.fritekst);
