@@ -202,6 +202,10 @@ public class Behandling extends RegistreringsInfo {
         return type != null && erBehandlingAvSøknad(type.getKode());
     }
 
+    public boolean erKlage() {
+        return type == Behandlingstyper.KLAGE;
+    }
+
     public boolean norgeErUtpekt() {
         return type == Behandlingstyper.BESLUTNING_LOVVALG_NORGE;
     }
