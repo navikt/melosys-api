@@ -30,7 +30,11 @@ public class SedDataDto {
 
     private List<String> mottakerIder;
 
+    private String ytterligereInformasjon;
+
     private SvarAnmodningUnntakDto svarAnmodningUnntak;
+
+    private UtpekingAvvisDto utpekingAvvis;
 
     public List<Ident> getUtenlandskIdent() {
         return utenlandskIdent;
@@ -136,11 +140,27 @@ public class SedDataDto {
         this.mottakerIder = mottakerIder;
     }
 
+    public String getYtterligereInformasjon() {
+        return ytterligereInformasjon;
+    }
+
+    public void setYtterligereInformasjon(String ytterligereInformasjon) {
+        this.ytterligereInformasjon = ytterligereInformasjon;
+    }
+
     public SvarAnmodningUnntakDto getSvarAnmodningUnntak() {
         return svarAnmodningUnntak;
     }
 
     public void setSvarAnmodningUnntak(SvarAnmodningUnntakDto svarAnmodningUnntak) {
         this.svarAnmodningUnntak = svarAnmodningUnntak;
+    }
+
+    public UtpekingAvvisDto getUtpekingAvvis() {
+        return utpekingAvvis;
+    }
+
+    public void setUtpekingAvvis(UtpekingAvvisDto utpekingAvvis) {
+        this.utpekingAvvis = utpekingAvvis;
     }
 }
