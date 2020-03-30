@@ -1,3 +1,1 @@
 INSERT INTO BEHANDLING_STATUS (KODE, NAVN) VALUES ('MIDLERTIDIG_LOVVALGSBESLUTNING', 'Midlertidig lovvalgsbeslutning (artikkel 13)');
-INSERT INTO BEHANDLING_STATUS (KODE, NAVN) VALUES ('UTPEKING_SENDT', 'Utpeking av et annet land er sendt');
-INSERT INTO BEHANDLING_STATUS (KODE, NAVN) VALUES ('SVAR_UTPEKING_MOTTATT', 'Mottatt svar på utpeking av et annet land');
