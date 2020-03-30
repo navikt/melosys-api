@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.eessi.Organisasjon;
+import no.nav.melosys.domain.eessi.SedOrganisasjon;
 
 public class Virksomhet {
 
@@ -31,10 +31,10 @@ public class Virksomhet {
         return foretakUtland;
     }
 
-    public Organisasjon tilOrganisasjon() {
-        Organisasjon organisasjon = new Organisasjon();
+    public SedOrganisasjon tilOrganisasjon() {
+        SedOrganisasjon organisasjon = new SedOrganisasjon();
 
-        organisasjon.setOrgnr(orgnr);
+        organisasjon.setOrgnummer(orgnr);
         organisasjon.setNavn(navn);
 
         if (adresse.getAdressetype() == Adressetype.POSTADRESSE) {

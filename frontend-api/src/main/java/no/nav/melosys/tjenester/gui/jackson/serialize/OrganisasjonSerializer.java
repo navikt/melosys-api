@@ -7,47 +7,37 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.Organisasjon;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
 import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
 import org.apache.commons.lang3.StringUtils;
 
-public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> {
+public class OrganisasjonSerializer extends StdSerializer<Organisasjon> {
 
     private final transient KodeverkService kodeverkService;
 
     public OrganisasjonSerializer(KodeverkService kodeverkService) {
-        super(OrganisasjonDokument.class);
+        super(Organisasjon.class);
         this.kodeverkService = kodeverkService;
     }
 
     @Override
-    public void serialize(OrganisasjonDokument organisasjon, JsonGenerator generator, SerializerProvider provider) throws IOException {
+    public void serialize(Organisasjon organisasjon, JsonGenerator generator, SerializerProvider provider) throws IOException {
         OrganisasjonDto organisasjonDto = new OrganisasjonDto();
 
         organisasjonDto.setOrgnr(organisasjon.getOrgnummer());
-        organisasjonDto.setNavn(organisasjon.lagSammenslåttNavn());
+        organisasjonDto.setNavn(organisasjon.getNavn());
         organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
         if (StringUtils.isNotEmpty(organisasjon.getEnhetstype())) {
             organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
         }
 
-        OrganisasjonsDetaljer detaljer = organisasjon.getOrganisasjonDetaljer();
-        if (detaljer != null) {
-            StrukturertAdresse forretningsadresse = detaljer.hentStrukturertForretningsadresse();
-            organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresse));
+        organisasjonDto.setForretningsadresse(tilAdresseDto(organisasjon.getForretningsadresse()));
+        organisasjonDto.setPostadresse(tilAdresseDto(organisasjon.getPostadresse()));
 
-            StrukturertAdresse postadresse = detaljer.hentStrukturertPostadresse();
-            organisasjonDto.setPostadresse(tilAdresseDto(postadresse));
-        }
-        else {
-            organisasjonDto.setForretningsadresse(tilAdresseDto(null));
-            organisasjonDto.setPostadresse(tilAdresseDto(null));
-        }
         generator.writeObject(organisasjonDto);
     }
 
@@ -68,6 +58,6 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         dto.setPoststed(poststed);
         dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.landkode, LocalDate.now()));
 
-        return  dto;
+        return dto;
     }
 }

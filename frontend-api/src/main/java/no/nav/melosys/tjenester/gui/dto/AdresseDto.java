@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-
 public class AdresseDto {
 
     private GateadresseDto gateadresse;
@@ -11,19 +9,6 @@ public class AdresseDto {
     private String poststed;
 
     private String land;
-
-    public AdresseDto() {
-    }
-
-    public AdresseDto(StrukturertAdresse strukturertAdresse) {
-        land = strukturertAdresse.landkode;
-        postnr = strukturertAdresse.postnummer;
-        poststed = strukturertAdresse.poststed;
-
-        GateadresseDto gateadresseDto = new GateadresseDto();
-        gateadresseDto.setGatenavn(strukturertAdresse.gatenavn);
-        gateadresse = gateadresseDto;
-    }
 
     public GateadresseDto getGateadresse() {
         return gateadresse;

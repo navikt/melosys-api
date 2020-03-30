@@ -120,7 +120,7 @@ public class Behandlingsgrunnlag {
         return this.type == BehandlingsGrunnlagType.SØKNAD && behandlingsgrunnlagdata instanceof SoeknadDokument;
     }
 
-    public boolean erSedGrunnlag() {
+    public boolean erSed() {
         return this.type == BehandlingsGrunnlagType.SED && behandlingsgrunnlagdata instanceof SedGrunnlag;
     }
 }

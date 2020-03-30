@@ -5,14 +5,16 @@ import java.util.List;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import no.nav.melosys.domain.Organisasjon;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 // N.B. Denne klassen serialiseres i OrganisasjonSerializer
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OrganisasjonDokument implements SaksopplysningDokument {
+public class OrganisasjonDokument implements SaksopplysningDokument, Organisasjon {
 
     private String orgnummer;
 
@@ -29,6 +31,7 @@ public class OrganisasjonDokument implements SaksopplysningDokument {
     
     public String enhetstype; //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
 
+    @Override
     public String getOrgnummer() {
         return orgnummer;
     }
@@ -37,8 +40,19 @@ public class OrganisasjonDokument implements SaksopplysningDokument {
         this.orgnummer = orgnummer;
     }
 
-    public List<String> getNavn() {
-        return navn;
+    @Override
+    public String getNavn() {
+        return lagSammenslåttNavn();
+    }
+
+    @Override
+    public StrukturertAdresse getForretningsadresse() {
+        return organisasjonDetaljer.hentStrukturertForretningsadresse();
+    }
+
+    @Override
+    public StrukturertAdresse getPostadresse() {
+        return organisasjonDetaljer.hentStrukturertPostadresse();
     }
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
@@ -66,6 +80,7 @@ public class OrganisasjonDokument implements SaksopplysningDokument {
         this.sektorkode = sektorkode;
     }
 
+    @Override
     public LocalDate getOppstartsdato() {
         return oppstartsdato;
     }
@@ -74,6 +89,7 @@ public class OrganisasjonDokument implements SaksopplysningDokument {
         this.oppstartsdato = oppstartsdato;
     }
 
+    @Override
     public String getEnhetstype() {
         return enhetstype;
     }

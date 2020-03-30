@@ -23,7 +23,6 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
-import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.data.SedGrunnlagDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -123,7 +122,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
         ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(1);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
-        assertThat((responseEntity.getBody()).getData()).isInstanceOf(SedGrunnlagDto.class);
+        assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
 
         String json = objectMapperMedKodeverkServiceStub().writeValueAsString(responseEntity.getBody());
         valider(json, "behandlingsgrunnlag-schema.json", log);

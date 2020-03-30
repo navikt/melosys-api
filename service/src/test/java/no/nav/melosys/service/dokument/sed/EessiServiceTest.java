@@ -1,16 +1,12 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucInformasjon;
@@ -46,7 +42,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -494,34 +489,12 @@ public class EessiServiceTest {
     }
 
     @Test
-    public void hentSedGrunnlag() throws MelosysException, IOException, URISyntaxException {
-        when(eessiConsumer.hentSedGrunnlag(anyString(), anyString())).thenReturn(lagSedGrunnlag());
+    public void hentSedGrunnlag() throws MelosysException {
+        when(eessiConsumer.hentSedGrunnlag(anyString(), anyString())).thenReturn(new EasyRandom().nextObject(SedGrunnlagDto.class));
 
-        BehandlingsgrunnlagData behandlingsgrunnlagData = eessiService.hentSedGrunnlag("123", "abc");
+        SedGrunnlag sedGrunnlag = eessiService.hentSedGrunnlag("123", "abc");
 
-        assertThat(behandlingsgrunnlagData).isNotNull();
-        assertThat(behandlingsgrunnlagData).isInstanceOf(SedGrunnlag.class);
-
-        assertThat(behandlingsgrunnlagData.bosted)
-            .extracting("oppgittAdresse")
-            .extracting("landkode", "postnummer", "poststed")
-            .containsExactly("BE", "Testpostkode", "Testby");
-
-        assertThat(behandlingsgrunnlagData.personOpplysninger.utenlandskIdent)
-            .extracting("ident", "landkode")
-            .containsExactly(tuple("15225345345", "BG"));
-
-        assertThat(behandlingsgrunnlagData.arbeidUtland)
-            .extracting("foretakNavn", "foretakOrgnr")
-            .containsExactlyInAnyOrder(
-                tuple("Testarbeidsstednavn", null),
-                tuple("Testarbeidsstednavn2", null)
-            );
-    }
-
-    private SedGrunnlagDto lagSedGrunnlag() throws IOException, URISyntaxException {
-        URI uri = Objects.requireNonNull(getClass().getClassLoader().getResource("sedGrunnlag.json")).toURI();
-        String json = new String(Files.readAllBytes(Paths.get(uri)));
-        return new ObjectMapper().readValue(json, SedGrunnlagDto.class);
+        assertThat(sedGrunnlag).isNotNull();
+        assertThat(sedGrunnlag).isInstanceOf(SedGrunnlag.class);
     }
 }
