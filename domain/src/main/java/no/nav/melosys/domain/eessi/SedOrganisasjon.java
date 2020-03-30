@@ -2,20 +2,14 @@ package no.nav.melosys.domain.eessi;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Organisasjon;
+import no.nav.melosys.domain.AbstraktOrganisasjon;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 
-public class SedOrganisasjon implements Organisasjon {
+public class SedOrganisasjon extends AbstraktOrganisasjon {
 
-    private String orgnummer;
     private String navn;
     private StrukturertAdresse postadresse;
     private StrukturertAdresse forretningsadresse;
-
-    @Override
-    public String getOrgnummer() {
-        return orgnummer;
-    }
 
     public void setOrgnummer(String orgnummer) {
         this.orgnummer = orgnummer;
@@ -36,25 +30,23 @@ public class SedOrganisasjon implements Organisasjon {
     }
 
     @Override
-    public LocalDate getOppstartsdato() {
-        return null;
-    }
-
-    @Override
-    public String getEnhetstype() {
-        return null;
-    }
-
-    public void setPostadresse(StrukturertAdresse postadresse) {
-        this.postadresse = postadresse;
-    }
-
-    @Override
     public StrukturertAdresse getForretningsadresse() {
         return forretningsadresse;
     }
 
     public void setForretningsadresse(StrukturertAdresse forretningsadresse) {
         this.forretningsadresse = forretningsadresse;
+    }
+
+    public void setPostadresse(StrukturertAdresse postadresse) {
+        this.postadresse = postadresse;
+    }
+
+    public LocalDate getOppstartsdato() {
+        return oppstartsdato;
+    }
+
+    public String getEnhetstype() {
+        return enhetstype;
     }
 }

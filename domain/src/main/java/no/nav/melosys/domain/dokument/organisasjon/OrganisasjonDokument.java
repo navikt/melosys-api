@@ -5,18 +5,14 @@ import java.util.List;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import no.nav.melosys.domain.Organisasjon;
+import no.nav.melosys.domain.AbstraktOrganisasjon;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
-// N.B. Denne klassen serialiseres i OrganisasjonSerializer
-
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OrganisasjonDokument implements SaksopplysningDokument, Organisasjon {
-
-    private String orgnummer;
+public class OrganisasjonDokument  extends AbstraktOrganisasjon implements SaksopplysningDokument {
 
     @XmlElementWrapper(name="navn")
     @XmlElement(name="navnelinje")
@@ -28,13 +24,6 @@ public class OrganisasjonDokument implements SaksopplysningDokument, Organisasjo
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     public LocalDate oppstartsdato;
-    
-    public String enhetstype; //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
-
-    @Override
-    public String getOrgnummer() {
-        return orgnummer;
-    }
 
     public void setOrgnummer(String orgnummer) {
         this.orgnummer = orgnummer;
@@ -47,11 +36,15 @@ public class OrganisasjonDokument implements SaksopplysningDokument, Organisasjo
 
     @Override
     public StrukturertAdresse getForretningsadresse() {
+        if (organisasjonDetaljer == null) return null;
+
         return organisasjonDetaljer.hentStrukturertForretningsadresse();
     }
 
     @Override
     public StrukturertAdresse getPostadresse() {
+        if (organisasjonDetaljer == null) return null;
+
         return organisasjonDetaljer.hentStrukturertPostadresse();
     }
 
@@ -80,18 +73,8 @@ public class OrganisasjonDokument implements SaksopplysningDokument, Organisasjo
         this.sektorkode = sektorkode;
     }
 
-    @Override
-    public LocalDate getOppstartsdato() {
-        return oppstartsdato;
-    }
-
     public void setOppstartsdato(LocalDate oppstartsdato) {
         this.oppstartsdato = oppstartsdato;
-    }
-
-    @Override
-    public String getEnhetstype() {
-        return enhetstype;
     }
 
     public void setEnhetstype(String enhetstype) {
