@@ -145,6 +145,9 @@ public enum ProsessSteg implements Kodeverk {
     REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET("REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET", "Oppdaterer status på sak i sob til avsluttet"),
     REG_UNNTAK_PERIODE_IKKE_GODKJENT("REG_UNNTAK_PERIODE_IKKE_GODKJENT", "Unntaksperiode avvist av saksbehandler"),
 
+    // Mottak av søknad
+    MSA_HENT_INNHOLD("MSA_HENT_INNHOLD", "Hent og lagre søknad fra melosys-soknad-mottak"),
+
     FERDIG("FERDIG", "Prosessen er ferdig");
 
 

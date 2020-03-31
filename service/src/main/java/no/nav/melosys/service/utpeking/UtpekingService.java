@@ -78,7 +78,7 @@ public class UtpekingService {
         long behandlingID = fagsak.getAktivBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
-        behandling.setStatus(Behandlingsstatus.UTPEKING_SENDT);
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
             behandling.getFagsak().getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
 

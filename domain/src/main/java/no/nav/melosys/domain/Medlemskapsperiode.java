@@ -10,7 +10,6 @@ import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestem
 
 
 public interface Medlemskapsperiode extends ErPeriode {
-
     LovvalgBestemmelse getBestemmelse();
 
     Landkoder getLovvalgsland();
@@ -19,13 +18,14 @@ public interface Medlemskapsperiode extends ErPeriode {
 
     Trygdedekninger getDekning();
 
-    default boolean erArtikkel12_1() {
-        return getBestemmelse() == FO_883_2004_ART12_1;
+    default boolean erArtikkel12() {
+        return getBestemmelse() == FO_883_2004_ART12_1 || getBestemmelse() == FO_883_2004_ART12_2;
     }
 
     default boolean erArtikkel13() {
         return getBestemmelse() == FO_883_2004_ART13_1A
-            || getBestemmelse() == FO_883_2004_ART13_1B1 || getBestemmelse() == FO_883_2004_ART13_1B2 || getBestemmelse() == FO_883_2004_ART13_1B3 || getBestemmelse() == FO_883_2004_ART13_1B4
+            || getBestemmelse() == FO_883_2004_ART13_1B1 || getBestemmelse() == FO_883_2004_ART13_1B2
+            || getBestemmelse() == FO_883_2004_ART13_1B3 || getBestemmelse() == FO_883_2004_ART13_1B4
             || getBestemmelse() == FO_883_2004_ART13_2A || getBestemmelse() == FO_883_2004_ART13_2B
             || getBestemmelse() == FO_883_2004_ART13_3
             || getBestemmelse() == FO_883_2004_ART13_4;
@@ -34,20 +34,27 @@ public interface Medlemskapsperiode extends ErPeriode {
     default boolean erArtikkel11() {
         return getBestemmelse() == FO_883_2004_ART11_1
             || getBestemmelse() == FO_883_2004_ART11_3A
-            || getBestemmelse()== FO_883_2004_ART11_3B
-            || getBestemmelse()== FO_883_2004_ART11_3C
-            || getBestemmelse()== FO_883_2004_ART11_3E
-            || getBestemmelse()== FO_883_2004_ART11_4_2
-            || getBestemmelse()== FO_883_2004_ART11_2
-            || getBestemmelse()== FO_883_2004_ART11_4_1
-            || getBestemmelse()== FO_883_2004_ART11_5;
+            || getBestemmelse() == FO_883_2004_ART11_3B
+            || getBestemmelse() == FO_883_2004_ART11_3C
+            || getBestemmelse() == FO_883_2004_ART11_3E
+            || getBestemmelse() == FO_883_2004_ART11_4_2
+            || getTilleggsbestemmelse() == FO_883_2004_ART11_2
+            || getTilleggsbestemmelse() == FO_883_2004_ART11_4_1
+            || getTilleggsbestemmelse() == FO_883_2004_ART11_5;
+    }
+
+    default boolean erArtikkel11_4() {
+        return getBestemmelse() == FO_883_2004_ART11_4_2
+            || getTilleggsbestemmelse() == FO_883_2004_ART11_4_1;
     }
 
     default boolean harGyldigBestemmelse() {
-        return getBestemmelse()== FO_883_2004_ART11_3A || getBestemmelse()== FO_883_2004_ART11_3B || getBestemmelse()== FO_883_2004_ART11_4_2
-            || getBestemmelse()== FO_883_2004_ART12_1 || getBestemmelse()== FO_883_2004_ART12_2 || getBestemmelse()== FO_883_2004_ART16_1
-            || getBestemmelse()== FO_883_2004_ART13_1A
-            || getBestemmelse()== FO_883_2004_ART13_1B1 || getBestemmelse()== FO_883_2004_ART13_1B2 || getBestemmelse()== FO_883_2004_ART13_1B3 || getBestemmelse()== FO_883_2004_ART13_1B4
+        return getBestemmelse() == FO_883_2004_ART11_3A
+            || getBestemmelse() == FO_883_2004_ART11_3B || getBestemmelse() == FO_883_2004_ART11_4_2
+            || getBestemmelse() == FO_883_2004_ART12_1 || getBestemmelse() == FO_883_2004_ART12_2
+            || getBestemmelse() == FO_883_2004_ART16_1 || getBestemmelse() == FO_883_2004_ART13_1A
+            || getBestemmelse() == FO_883_2004_ART13_1B1 || getBestemmelse() == FO_883_2004_ART13_1B2
+            || getBestemmelse() == FO_883_2004_ART13_1B3 || getBestemmelse() == FO_883_2004_ART13_1B4
             || getBestemmelse() == FO_883_2004_ART13_2A || getBestemmelse() == FO_883_2004_ART13_2B;
     }
 }

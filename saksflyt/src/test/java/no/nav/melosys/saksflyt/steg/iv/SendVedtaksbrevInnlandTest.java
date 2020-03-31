@@ -64,6 +64,7 @@ public class SendVedtaksbrevInnlandTest {
     private static final long ART12_1_AVSLÅTT_BEHANDLINGSID = 49L;
     private static final long BEHANDLINGSID_MANGLENDE_OPPL = 50L;
     private static final long ART13_1A_INNVILGET_BEHANDLINGSID = 51L;
+    private static final long ART11_4_INNVILGET_BEHANDLINGSID = 52L;
 
     private static DokumentSystemService dokService;
     private static AvklarteVirksomheterService avklarteVirksomheterService;
@@ -118,7 +119,8 @@ public class SendVedtaksbrevInnlandTest {
             ART12_1_AVSLÅTT_BEHANDLINGSID,
             ART12_2_INNVILGET_BEHANDLINGSID,
             BEHANDLINGSID_MANGLENDE_OPPL,
-            ART13_1A_INNVILGET_BEHANDLINGSID);
+            ART13_1A_INNVILGET_BEHANDLINGSID,
+            ART11_4_INNVILGET_BEHANDLINGSID);
         when(behandlingService.hentBehandling(longThat(behandlingReferanser::contains))).thenReturn(behandling);
         return behandlingService;
     }
@@ -170,6 +172,9 @@ public class SendVedtaksbrevInnlandTest {
 
         Behandlingsresultat innvilgetResultat12_2 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2));
         when(behandlingsresultatService.hentBehandlingsresultat(ART12_2_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat12_2);
+
+        Behandlingsresultat innvilgetResultat11_4 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2));
+        when(behandlingsresultatService.hentBehandlingsresultat(ART11_4_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat11_4);
 
         Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE)).thenReturn(norskLovvalgUtenInnvilgetBestemmelse);
@@ -323,17 +328,18 @@ public class SendVedtaksbrevInnlandTest {
 
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottaker.av(SKATT)), anyLong(), any());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
     @Test
-    public final void utførStegPåInnvilgelsesBrevBestemtAv12_1_vedtakSendIkkeA1() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
-        prosessinstans.getBehandling().getFagsak().hentMyndigheter().iterator().next().setInstitusjonId("CZ:1e1");
+    public final void utførSteg_innvilgelses11_4_senderIkkeOrienteringTilArbeidsgiver() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART11_4_INNVILGET_BEHANDLINGSID);
 
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
 
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
+        verify(dokService, never()).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
