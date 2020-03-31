@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -17,6 +18,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
@@ -67,6 +69,10 @@ public class ManuellSedBehandlingInitialiserer {
                 oppdaterOppgavePrioritet(fagsak.getSaksnummer());
             }
 
+            if (behandling.erAvsluttet() && SedType.X001 != sedType) {
+                opprettBehandlingsoppgave(fagsak.getSaksnummer(), prosessinstans);
+            }
+
             prosessinstans.setBehandling(behandling);
             prosessinstans.setType(ProsessType.MOTTAK_SED_JOURNALFØRING);
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
@@ -78,6 +84,18 @@ public class ManuellSedBehandlingInitialiserer {
         if (oppgave.isPresent()) {
             log.info("Setter prioritet til HØY for oppgave {}", oppgave.get().getOppgaveId());
             oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().prioritet(PrioritetType.HOY.name()).build());
+        }
+    }
+
+    private void opprettBehandlingsoppgave(String saksnummer, Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
+        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer);
+        if (oppgave.isEmpty()) {
+            Oppgave nyOppgave = OppgaveFactory.lagBehandlingsOppgaveForType(Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND)
+                .setTilordnetRessurs(prosessinstans.hentSaksbehandlerHvisTilordnes())
+                .setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID))
+                .setSaksnummer(saksnummer)
+                .build();
+            oppgaveService.opprettOppgave(nyOppgave);
         }
     }
 }

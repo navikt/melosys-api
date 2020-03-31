@@ -92,6 +92,19 @@ public class ManuellSedBehandlingInitialisererTest {
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
     }
 
+    @Test
+    public void bestemManuellBehandling_behandlingAvsluttetOgSkalBehandleSED_opprettOppgave() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
+        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A004);
+
+        Fagsak fagsak = hentFagsak();
+        fagsak.getAktivBehandling().setStatus(Behandlingsstatus.AVSLUTTET);
+        when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
+        manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
+        verify(oppgaveService).opprettOppgave(any(Oppgave.class));
+    }
+
     private MelosysEessiMelding hentMelosysEessiMelding(SedType sedType) {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setSedType(sedType.name());
