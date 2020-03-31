@@ -3,17 +3,14 @@ package no.nav.melosys.domain.dokument.organisasjon;
 import java.time.LocalDate;
 import java.util.List;
 import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.nav.melosys.domain.AbstraktOrganisasjon;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OrganisasjonDokument  extends AbstraktOrganisasjon implements SaksopplysningDokument {
-
     @XmlElementWrapper(name="navn")
     @XmlElement(name="navnelinje")
     public List<String> navn;
@@ -21,9 +18,6 @@ public class OrganisasjonDokument  extends AbstraktOrganisasjon implements Sakso
     public OrganisasjonsDetaljer organisasjonDetaljer;
 
     public String sektorkode; //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
-
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    public LocalDate oppstartsdato;
 
     public void setOrgnummer(String orgnummer) {
         this.orgnummer = orgnummer;
