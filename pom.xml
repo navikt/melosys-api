@@ -37,8 +37,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.22-93</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.6</melosys.internt.kodeverk.version>
+        <melosys.jsonschema.version>1.35.27-100</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.11</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -66,6 +66,7 @@
         <hikaricp.version>3.3.0</hikaricp.version>
         <ibmmq.version>9.0.5.0</ibmmq.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
+        <json-smart.version>2.3</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
         <junit.version>4.12</junit.version>
         <micrometer-jvm-extras.version>0.1.4</micrometer-jvm-extras.version>
@@ -78,6 +79,7 @@
         <restFixture.version>4.4</restFixture.version>
         <slf4j.version>1.7.25</slf4j.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
+        <spring-ldap.version>2.3.1.RELEASE</spring-ldap.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <failsafe.version>2.22.0</failsafe.version>
@@ -222,6 +224,11 @@
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logstash.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.minidev</groupId>
+                <artifactId>json-smart</artifactId>
+                <version>${json-smart.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -458,6 +465,11 @@
                 <groupId>org.springframework.kafka</groupId>
                 <artifactId>spring-kafka</artifactId>
                 <version>${spring-kafka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ldap</groupId>
+                <artifactId>spring-ldap-core</artifactId>
+                <version>${spring-ldap.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.security</groupId>

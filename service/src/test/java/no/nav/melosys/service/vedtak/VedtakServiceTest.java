@@ -23,12 +23,11 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
@@ -39,7 +38,9 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -67,8 +68,6 @@ public class VedtakServiceTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    private GsakFasade gsakFasade;
-    @Mock
     private TpsFasade tpsFasade;
     @Mock
     private VedtakKontrollService vedtakKontrollService;
@@ -85,9 +84,12 @@ public class VedtakServiceTest {
     private Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private Behandling replikertBehandling = new Behandling();
 
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, gsakFasade, tpsFasade, vedtakKontrollService, registeropplysningerService, medlFasade);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, tpsFasade, vedtakKontrollService, registeropplysningerService, medlFasade);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -240,6 +242,16 @@ public class VedtakServiceTest {
     }
 
     @Test
+    public void fattVedtak_feilBehandlingstype_kasterException() throws MelosysException {
+
+        behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Kan ikke fatte vedtak ved behandlingstype ");
+
+        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+    }
+
+    @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
@@ -261,9 +273,9 @@ public class VedtakServiceTest {
         ArgumentCaptor<Oppgave> oppgaveArgumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
         verify(behandlingService).hentBehandling(behandlingID);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
-        verify(gsakFasade).opprettOppgave(oppgaveArgumentCaptor.capture());
+        verify(oppgaveService).opprettOppgave(oppgaveArgumentCaptor.capture());
         verify(medlFasade).avvisPeriode(eq(behandlingsresultat.getLovvalgsperioder().iterator().next().getMedlPeriodeID()), eq(StatusaarsakMedl.AVVIST));
-        verifyNoMoreInteractions(gsakFasade, behandlingService);
+        verifyNoMoreInteractions(oppgaveService, behandlingService);
 
         assertThat(oppgaveArgumentCaptor.getValue().getTilordnetRessurs()).isEqualTo("Z990007");
         assertThat(oppgaveArgumentCaptor.getValue().getAktørId()).isEqualTo("1234567890123");

@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -18,7 +17,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.AutomatiskSedBehandlingInitialiserer;
 import no.nav.melosys.service.eessi.ManuellSedBehandlingInitialiserer;
 import no.nav.melosys.service.eessi.RutingResultat;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,11 +128,8 @@ public class SedMottakRuting extends AbstraktStegBehandler {
 
     private AutomatiskSedBehandlingInitialiserer hentInitialisererForSed(MelosysEessiMelding melosysEessiMelding) {
         SedType sedType = SedType.valueOf(melosysEessiMelding.getSedType());
-        Landkoder lovvalgsland = StringUtils.isNotEmpty(melosysEessiMelding.getLovvalgsland())
-            ? Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()) : null;
-
         return automatiskSedBehandlingInitialiserere.stream()
-            .filter(initialiserer -> initialiserer.gjelderSedType(sedType, lovvalgsland)).findFirst()
+            .filter(initialiserer -> initialiserer.gjelderSedType(sedType)).findFirst()
             .orElse(null);
     }
 }

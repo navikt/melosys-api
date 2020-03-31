@@ -29,27 +29,28 @@ public final class OppgaveFactory {
             .setPrioritet(PrioritetType.NORM);
     }
 
-    public static OppgaveParametere hentOppgaveParametere(Behandlingstyper behandlingstype) {
+    private static OppgaveParametere hentOppgaveParametere(Behandlingstyper behandlingstype) {
         switch (behandlingstype) {
             case SOEKNAD:
             case SOEKNAD_IKKE_YRKESAKTIV:
+            case SOEKNAD_ARBEID_FLERE_LAND:
+            case SOEKNAD_ARBEID_NORGE_BOSATT_ANNET_LAND:
+            case NY_VURDERING:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30), Behandlingstema.EU_EOS);
             case ENDRET_PERIODE:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.VUR, fristDager(1), Behandlingstema.EU_EOS);
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
             case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
                 return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2), Behandlingstema.EU_EOS);
-            case UTL_MYND_UTPEKT_NORGE:
+            case BESLUTNING_LOVVALG_NORGE:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(4), Behandlingstema.EU_EOS);
-            case UTL_MYND_UTPEKT_SEG_SELV:
+            case BESLUTNING_LOVVALG_ANNET_LAND:
                 return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4), Behandlingstema.EU_EOS);
             case ANMODNING_OM_UNNTAK_HOVEDREGEL:
             case ØVRIGE_SED:
                 return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8), Behandlingstema.EU_EOS);
             case VURDER_TRYGDETID:
                 return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(8), Behandlingstema.EU_EOS);
-            case NY_VURDERING:
-                return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30), Behandlingstema.EU_EOS);
             case KLAGE:
             case ANKE:
             default:
@@ -66,10 +67,10 @@ public final class OppgaveFactory {
     }
 
     public static class OppgaveParametere {
-        public Tema tema;
-        public Oppgavetyper oppgavetype;
-        public LocalDate fristFerdigstillelse;
-        public Behandlingstema behandlingstema;
+        final Tema tema;
+        final Oppgavetyper oppgavetype;
+        final LocalDate fristFerdigstillelse;
+        final Behandlingstema behandlingstema;
 
         OppgaveParametere(Tema tema, Oppgavetyper oppgavetype, LocalDate fristFerdigstillelse, Behandlingstema behandlingstema) {
             this.tema = tema;

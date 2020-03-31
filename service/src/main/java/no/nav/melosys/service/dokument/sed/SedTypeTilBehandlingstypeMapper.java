@@ -47,6 +47,6 @@ final class SedTypeTilBehandlingstypeMapper {
 
     private static Behandlingstyper behandlingstypeForA003(String lovvalgsland) {
         return Landkoder.NO.getKode().equalsIgnoreCase(lovvalgsland)
-            ? Behandlingstyper.UTL_MYND_UTPEKT_NORGE : Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV;
+            ? Behandlingstyper.BESLUTNING_LOVVALG_NORGE : Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 }

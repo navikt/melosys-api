@@ -15,7 +15,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
@@ -132,7 +132,7 @@ public class DokumentService {
         if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
             prosessinstansService.opprettProsessinstansMangelbrev(behandling, mottaker, brevdata);
         } else if (produserbartDokument == MELDING_FORVENTET_SAKSBEHANDLINGSTID) {
-            prosessinstansService.opprettProsessinstansForvaltningsmelding(behandling);            
+            prosessinstansService.opprettProsessinstansForvaltningsmelding(behandling);
         } else {
             throw new FunksjonellException("Produserbaredokumenter " + produserbartDokument + " er ikke støttet.");
         }

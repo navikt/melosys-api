@@ -19,17 +19,18 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
+import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
@@ -37,11 +38,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppgaveServiceTest {
@@ -50,7 +50,7 @@ public class OppgaveServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private GsakFasade gsakFasade;
+    private OppgaveFasade oppgaveFasade;
     @Mock
     private TpsFasade tpsFasade;
     @Mock
@@ -60,88 +60,109 @@ public class OppgaveServiceTest {
 
     private OppgaveService oppgaveService;
 
+    private final String saksnummer = "MEL-12345";
+
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
         this.oppgaveService = new OppgaveService(
                 behandlingService,
                 fagsakService,
-                gsakFasade,
+            oppgaveFasade,
                 saksopplysningerService,
             behandlingsgrunnlagService, tpsFasade);
 
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgaveBuilder.setTilordnetRessurs("Z998877");
-        oppgaveBuilder.setSaksnummer("MEL-12345");
+        oppgaveBuilder.setSaksnummer(saksnummer);
 
-        when(gsakFasade.hentOppgaveMedSaksnummer(anyString())).
-            thenAnswer((Answer<Oppgave>) invocation -> {
-                String string = invocation.getArgument(0);
-                if (string.equals("MEL-12345")) {
-                    return oppgaveBuilder.build();
-                } else {
-                    throw new TekniskException("Finner ingen oppgave for fagsak " + string);
-                }
-            });
+        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgaveBuilder.build()));
     }
 
     @Test
     public void hentOppgaverMedAnsvarlig() throws MelosysException {
+        final String behOppgID = "1";
+        final String jfrOppgID = "2";
 
-        Collection<Oppgave> oppgaver = new HashSet<>();
+
+        final String tilordnetRessurs = "Z2222";
         Oppgave.Builder oppgave1 = new Oppgave.Builder();
-        oppgave1.setOppgaveId("1");
+        oppgave1.setOppgaveId(behOppgID);
         oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgave1.setPrioritet(PrioritetType.HOY);
-        oppgave1.setSaksnummer("MEL-12345");
-        oppgave1.setTilordnetRessurs("12345678901");
-        oppgave1.setAktørId("aktørid");
-        oppgaver.add(oppgave1.build());
+        oppgave1.setSaksnummer(saksnummer);
 
-        when(gsakFasade.finnOppgaveListeMedAnsvarlig(anyString())).
-                thenAnswer((Answer<Collection<Oppgave>>) invocation -> {
-                    String string = invocation.getArgument(0);//AnsvarligID
-                    return (string.equals("12345678901")) ? oppgaver : new HashSet<>();
-                });
+        Oppgave.Builder oppgave2 = new Oppgave.Builder();
+        oppgave2.setOppgaveId(jfrOppgID);
+        oppgave2.setOppgavetype(Oppgavetyper.JFR);
+
+        Set<Oppgave> oppgaver = Set.of(oppgave1.build(), oppgave2.build());
+
+        when(oppgaveFasade.finnOppgaveListeMedAnsvarlig(eq(tilordnetRessurs))).thenReturn(oppgaver);
 
         when(saksopplysningerService.harAktivOppfrisking(anyLong())).thenReturn(true);
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setStatus(Saksstatuser.OPPRETTET);
-        List<Behandling> behandlinger = new ArrayList<>();
-        behandlinger.add(lagBehandling());
-        fagsak.setBehandlinger(behandlinger);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
+        Behandling behandling = lagBehandling();
+        fagsak.setBehandlinger(List.of(behandling));
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
         when(fagsakService.hentFagsak(any(String.class))).thenReturn(fagsak);
         when(saksopplysningerService.finnPersonOpplysninger(anyLong())).thenReturn(Optional.of(lagPersonDokument()));
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(eq(behandling.getId()))).thenReturn(lagBehandlingsgrunnlag());
 
-        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
-        assertThat(mineSaker.size()).isEqualTo(1);
-        BehandlingsoppgaveDto oppgave = (BehandlingsoppgaveDto) mineSaker.get(0);
-        assertThat(oppgave.getOppgaveID()).isEqualTo("1");
-        assertThat(oppgave.getFnr()).isEqualTo("fnr");
-        assertThat(oppgave.getSammensattNavn()).isEqualTo("sammensattNavn");
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
 
-        BehandlingDto behandlingDto = oppgave.getBehandling();
-        assertThat(behandlingDto.isErUnderOppdatering()).isEqualTo(true);
-        assertThat(behandlingDto.getRegistrertDato()).isEqualTo(Instant.ofEpochMilli(111L));
-        assertThat(behandlingDto.getEndretDato()).isEqualTo(Instant.ofEpochMilli(222L));
-        assertThat(behandlingDto.getSvarFrist()).isEqualTo(Instant.ofEpochMilli(333L));
+        assertThat(mineSaker.size()).isEqualTo(2);
 
-        mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
-        assertThat(mineSaker.size()).isEqualTo(0);
+        OppgaveDto behOppg = mineSaker.stream()
+            .filter(o -> o.getOppgaveID().equals(behOppgID))
+            .findFirst()
+            .get();
+
+        assertThat(behOppg).isInstanceOf(BehandlingsoppgaveDto.class);
+        assertThat(((BehandlingsoppgaveDto) behOppg).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
+
+        OppgaveDto jfrOppg = mineSaker.stream()
+            .filter(o -> o.getOppgaveID().equals(jfrOppgID))
+            .findFirst()
+            .get();
+
+        assertThat(jfrOppg).isInstanceOf(JournalfoeringsoppgaveDto.class);
     }
 
     @Test
-    public void hentOppgaveForFagsaksnummer_modOppgaveSomFinnes_forventOppgave() throws MelosysException {
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12345");
+    public void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() throws MelosysException {
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
         assertThat(oppgave.erBehandling()).isEqualTo(true);
     }
 
     @Test(expected = TekniskException.class)
     public void hentOppgaveForFagsaksnummer_medOppgaveSomIkkeFinnes_forventException() throws MelosysException {
         oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12346");
+    }
+
+    @Test
+    public void opprettBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setSaksnummer("MEL-11111");
+
+        oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", "Z99999");
+        verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
+    }
+
+    @Test
+    public void opprettBehandlingsoppgave_oppgaveEksisterer_oppgaveBlirIkkeOpprettet() throws FunksjonellException, TekniskException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setSaksnummer(saksnummer);
+
+        oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", "Z99999");
+        verify(oppgaveFasade, never()).opprettOppgave(any());
     }
 
     private static Behandling lagBehandling() {
@@ -153,16 +174,13 @@ public class OppgaveServiceTest {
         saksopplysninger.add(personOpplysning);
 
         Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setId(1L);
         behandling.setRegistrertDato(Instant.ofEpochMilli(111L));
         behandling.setEndretDato(Instant.ofEpochMilli(222L));
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setDokumentasjonSvarfristDato(Instant.ofEpochMilli(333L));
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
-
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(lagSoeknadDokument());
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
         return behandling;
     }
@@ -172,6 +190,12 @@ public class OppgaveServiceTest {
         personDokument.fnr = "fnr";
         personDokument.sammensattNavn = "sammensattNavn";
         return personDokument;
+    }
+
+    private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(lagSoeknadDokument());
+        return behandlingsgrunnlag;
     }
 
     private static SoeknadDokument lagSoeknadDokument() {

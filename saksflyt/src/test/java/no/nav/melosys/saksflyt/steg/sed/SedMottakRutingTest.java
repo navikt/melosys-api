@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -40,7 +40,7 @@ public class SedMottakRutingTest {
     @Before
     public void setUp() throws MelosysException {
         sedMottakRuting = new SedMottakRuting(Collections.singleton(automatiskSedBehandlingInitialiserer), manuellSedBehandlingInitialiserer, eessiService);
-        when(automatiskSedBehandlingInitialiserer.gjelderSedType(any(), any())).thenReturn(true);
+        when(automatiskSedBehandlingInitialiserer.gjelderSedType(any())).thenReturn(true);
         when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(1L));
     }
 

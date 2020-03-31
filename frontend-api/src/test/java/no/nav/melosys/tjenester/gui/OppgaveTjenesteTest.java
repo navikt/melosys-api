@@ -79,7 +79,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setId(1L);
-        when(oppgaveService.hentAktivBehandling(anyString())).thenReturn(behandling);
+        when(oppgaveService.hentSistAktiveBehandling(anyString())).thenReturn(behandling);
 
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 

@@ -2,7 +2,9 @@ package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -35,7 +37,7 @@ public class AvsluttFagsakOgBehandlingTest {
     private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(behandlingsresultatRepository, fagsakService);
         when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
     }
@@ -56,7 +58,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
 
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(behandling.getFagsak()), eq(Saksstatuser.LOVVALG_AVKLART), eq(behandling));
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(behandling.getFagsak()), eq(Saksstatuser.LOVVALG_AVKLART));
         verify(behandlingsresultatRepository).findById(1L);
         verify(behandlingsresultatRepository).save(any(Behandlingsresultat.class));
 

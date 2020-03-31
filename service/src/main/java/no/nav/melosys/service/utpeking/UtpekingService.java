@@ -12,8 +12,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -76,7 +76,7 @@ public class UtpekingService {
         long behandlingID = fagsak.getAktivBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
-        behandling.setStatus(Behandlingsstatus.UTPEKING_SENDT);
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
             behandling.getFagsak().getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
 

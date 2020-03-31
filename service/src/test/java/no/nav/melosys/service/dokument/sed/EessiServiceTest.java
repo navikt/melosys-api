@@ -22,8 +22,8 @@ import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
@@ -66,7 +66,7 @@ public class EessiServiceTest {
 
     @Before
     public void setup() throws Exception {
-        eessiService = new EessiService("true", sedDataBygger, dokumentdataGrunnlagFactory,
+        eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory,
             eessiConsumer, behandlingService, behandlingsresultatService);
 
         behandling = new Behandling();
@@ -122,22 +122,6 @@ public class EessiServiceTest {
         verify(eessiConsumer).hentMottakerinstitusjoner(anyString(), anyString());
         assertThat(mottakerinstitusjoner).hasSize(2);
         assertThat(mottakerinstitusjoner).hasOnlyElementsOfType(Institusjon.class);
-    }
-
-    @Test
-    public void erGyldigInstitusjonForLand_mottakerInstitusjonFinnesIRespons_returnerTrue() throws MelosysException {
-        final String mottakerInstitusjon = "SE:1";
-        List<Institusjon> institusjoner = new ArrayList<>();
-        institusjoner.add(new Institusjon(mottakerInstitusjon, "Navn 1", "SE"));
-        institusjoner.add(new Institusjon("SE:2", "Navn 2", "SE"));
-        institusjoner.add(new Institusjon("SE:3", "Navn 1", "SE"));
-
-        when(eessiConsumer.hentMottakerinstitusjoner(eq(BucType.LA_BUC_01.name()), eq("SE")))
-            .thenReturn(institusjoner);
-
-        assertThat(eessiService.erGyldigInstitusjonForLand(BucType.LA_BUC_01.name(), "SE", mottakerInstitusjon))
-            .isTrue();
-
     }
 
     @Test
@@ -267,6 +251,24 @@ public class EessiServiceTest {
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
         verify(dokumentdataGrunnlagFactory).av(any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A002));
+    }
+
+    @Test
+    public void sendGodkjenningArbeidFlereLand() throws MelosysException {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        saksopplysning.setDokument(new SedDokument());
+        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        eessiService.sendGodkjenningArbeidFlereLand(1L);
+
+        verify(behandlingService).hentBehandling(eq(1L));
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.LOVVALGSPERIODE));
+        verify(dokumentdataGrunnlagFactory).av(any());
+        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A012));
     }
 
     @Test

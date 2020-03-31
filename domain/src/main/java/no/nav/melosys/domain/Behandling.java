@@ -50,6 +50,9 @@ public class Behandling extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
 
+    @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Behandlingsnotat> behandlingsnotater = new HashSet<>(1);
+
     @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Behandlingsgrunnlag behandlingsgrunnlag;
 
@@ -145,6 +148,14 @@ public class Behandling extends RegistreringsInfo {
         this.opprinneligBehandling = opprinneligBehandling;
     }
 
+    public Set<Behandlingsnotat> getBehandlingsnotater() {
+        return behandlingsnotater;
+    }
+
+    public void setBehandlingsnotater(Set<Behandlingsnotat> behandlingsnotater) {
+        this.behandlingsnotater = behandlingsnotater;
+    }
+
     public Behandlingsgrunnlag getBehandlingsgrunnlag() {
         return behandlingsgrunnlag;
     }
@@ -177,7 +188,8 @@ public class Behandling extends RegistreringsInfo {
     public boolean erRedigerbar() {
         return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK
                     || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && type != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV)
-                    || status == Behandlingsstatus.AVSLUTTET);
+                    || status == Behandlingsstatus.AVSLUTTET
+                    || status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
     }
 
     public boolean erVenterForDokumentasjon() {
@@ -186,11 +198,36 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
 
-    public boolean harSøknad() {
-        return type == Behandlingstyper.SOEKNAD
-            || type == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
-            || type == Behandlingstyper.ENDRET_PERIODE
-            || type == Behandlingstyper.NY_VURDERING;
+    public boolean erBehandlingAvSøknad() {
+        return type != null && erBehandlingAvSøknad(type.getKode());
+    }
+
+    public boolean erKlage() {
+        return type == Behandlingstyper.KLAGE;
+    }
+
+    public boolean norgeErUtpekt() {
+        return type == Behandlingstyper.BESLUTNING_LOVVALG_NORGE;
+    }
+
+    public boolean kanResultereIVedtak() {
+        return erBehandlingAvSøknad() || norgeErUtpekt();
+    }
+
+    public static boolean erBehandlingAvSøknad(String behandlingstypeKode) {
+        return erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstypeKode)
+            || erBehandlingAvSøknadArbeidIFlereLand(behandlingstypeKode)
+            || Behandlingstyper.ENDRET_PERIODE.getKode().equalsIgnoreCase(behandlingstypeKode)
+            || Behandlingstyper.NY_VURDERING.getKode().equalsIgnoreCase(behandlingstypeKode);
+    }
+
+    public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstypeKode) {
+        return Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(behandlingstypeKode)
+            || Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstypeKode);
+    }
+
+    public static boolean erBehandlingAvSøknadArbeidIFlereLand(String behandlingstypeKode) {
+        return Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstypeKode);
     }
 
     public boolean isAktiv() {

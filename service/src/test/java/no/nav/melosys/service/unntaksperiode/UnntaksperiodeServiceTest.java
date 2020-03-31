@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
@@ -67,12 +67,6 @@ public class UnntaksperiodeServiceTest {
         verify(oppgaveService).ferdigstillOppgave(any());
     }
 
-    public void behandlingUnderAvklaring_behandlingsstatusOppdateres() throws FunksjonellException, TekniskException {
-        unntaksperiodeService.behandlingUnderAvklaring(1L);
-        verify(prosessinstansService).opprettProsessinstansUnntaksperiodeUnderAvklaring(any(Behandling.class));
-        verify(behandlingService).oppdaterStatus(anyLong(), Behandlingsstatus.AVVENT_DOK_UTL);
-    }
-
     @Test
     public void ikkeGodkjennPeriode_medBegrunnelser_ingenFeil() throws Exception {
         Set<String> begrunnelser = new HashSet<>();
@@ -97,11 +91,5 @@ public class UnntaksperiodeServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Begrunnelse " + Ikke_godkjent_begrunnelser.ANNET + " krever fritekst!");
         unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null);
-    }
-
-    private Behandling hentBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(new Fagsak());
-        return behandling;
     }
 }

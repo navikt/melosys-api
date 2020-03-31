@@ -28,6 +28,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
+import no.nav.melosys.service.kafka.SoknadMottatt;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
 
@@ -205,8 +207,7 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto) throws FunksjonellException {
-        if (opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD
-            && opprettSakDto.behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+        if (!erBehandlingAvSøknad(opprettSakDto.behandlingstype.getKode())) {
             throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
                 + " på bakgrunn av journalførte dokumenter er ikke støttet.");
         }
@@ -276,15 +277,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUnntaksperiodeUnderAvklaring(Behandling behandling) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.REGISTRERING_UNNTAK)
-            .medSteg(ProsessSteg.REG_UNNTAK_UNDER_AVKLARING)
-            .medBehandling(behandling)
-            .build();
-        lagre(prosessinstans);
-    }
-
     public void opprettProsessinstansForvaltningsmelding(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.FORVALTNINGSMELDING_SEND);
@@ -336,11 +328,22 @@ public class ProsessinstansService {
     public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, List<String> mottakerinstitusjoner) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEK_LAND)
-            .medSteg(ProsessSteg.UL_SEND_ORIENTERINGSBREV)
+            .medSteg(ProsessSteg.UL_OPPDATER_MEDL)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerinstitusjoner)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
+
+        lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
+            .medSteg(ProsessSteg.MSA_HENT_INNHOLD)
+            .build();
+        prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadMottatt.getSoknadID());
 
         lagre(prosessinstans);
     }

@@ -5,12 +5,11 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
@@ -49,14 +48,6 @@ public class UnntaksperiodeService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void behandlingUnderAvklaring(long behandlingID) throws FunksjonellException, TekniskException {
-        Behandling behandling = hentOgValiderBehandling(behandlingID);
-        validerBehandling(behandling);
-        prosessinstansService.opprettProsessinstansUnntaksperiodeUnderAvklaring(behandling);
-        behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.AVVENT_DOK_UTL);
-    }
-
     private Set<Ikke_godkjent_begrunnelser> tilIkkeGodkjentBegrunnelser(Set<String> begrunnelser) {
         Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = new HashSet<>();
         for (String b : begrunnelser) {
@@ -76,10 +67,10 @@ public class UnntaksperiodeService {
 
         if (behandlingstype != REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
             && behandlingstype != REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
-            && behandlingstype != UTL_MYND_UTPEKT_SEG_SELV) {
+            && behandlingstype != BESLUTNING_LOVVALG_ANNET_LAND) {
             throw new FunksjonellException(
                 String.format("Behandling er ikke av type %s, %s eller %s", REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-                    REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, UTL_MYND_UTPEKT_SEG_SELV)
+                    REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND)
             );
         } else if (behandling.erAvsluttet()) {
             throw new FunksjonellException("Behandlingen er avsluttet");

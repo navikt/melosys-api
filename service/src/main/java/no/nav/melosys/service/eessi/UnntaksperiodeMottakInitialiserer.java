@@ -2,15 +2,16 @@ package no.nav.melosys.service.eessi;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.sak.FagsakService;
@@ -32,7 +33,7 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
     }
 
     @Override
-    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) {
+    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException {
 
         if (gsakSaksnummer == null) {
             return RutingResultat.NY_SAK;
@@ -55,9 +56,8 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
     }
 
     @Override
-    public boolean gjelderSedType(SedType sedType, Landkoder lovvalgsland) {
-        return (sedType == SedType.A003 && lovvalgsland != Landkoder.NO)
-            || sedType == SedType.A009
+    public boolean gjelderSedType(SedType sedType) {
+        return sedType == SedType.A009
             || sedType == SedType.A010;
     }
 
@@ -77,7 +77,7 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
         } else if (sedType == SedType.A010) {
             return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
         } else if (sedType == SedType.A003) {
-            return Behandlingstyper.UTL_MYND_UTPEKT_SEG_SELV;
+            return Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND;
         }
 
         throw new IllegalArgumentException("UnntaksperiodeMottakInitialiserer støtter ikke sedtype " + sedType);

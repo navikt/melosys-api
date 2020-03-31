@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucInformasjonDto;
@@ -77,7 +77,7 @@ public class EessiTjeneste {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
 
-        log.info("Henter tilknyttede bucer for gsak {}", gsakSaksnummer);
+        log.info("Henter tilknyttede bucer for sakID {}", gsakSaksnummer);
         BucerTilknyttetBehandlingDto bucerDto = new BucerTilknyttetBehandlingDto(
             eessiService.hentTilknyttedeBucer(gsakSaksnummer, statuser).stream()
                 .map(BucInformasjonDto::av).collect(Collectors.toList())

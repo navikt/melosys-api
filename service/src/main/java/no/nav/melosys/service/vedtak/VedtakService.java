@@ -19,12 +19,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
@@ -52,7 +51,6 @@ public class VedtakService {
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
-    private final GsakFasade gsakFasade;
     private final TpsFasade tpsFasade;
     private final VedtakKontrollService vedtakKontrollService;
     private final RegisteropplysningerService registeropplysningerService;
@@ -63,7 +61,6 @@ public class VedtakService {
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
                          FagsakService fagsakService,
-                         GsakFasade gsakFasade,
                          TpsFasade tpsFasade,
                          VedtakKontrollService vedtakKontrollService,
                          RegisteropplysningerService registeropplysningerService,
@@ -74,7 +71,6 @@ public class VedtakService {
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
-        this.gsakFasade = gsakFasade;
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
         this.vedtakKontrollService = vedtakKontrollService;
@@ -93,6 +89,7 @@ public class VedtakService {
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        validerBehandlingstypeFattVedtak(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
@@ -110,7 +107,7 @@ public class VedtakService {
                         .medlemskapsopplysninger().build())
                     .build());
 
-            validerFattVedtak(behandlingID, vedtakstype);
+            kontrollerFattVedtak(behandlingID, vedtakstype);
         }
 
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
@@ -130,7 +127,13 @@ public class VedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
+    private void validerBehandlingstypeFattVedtak(Behandling behandling) throws FunksjonellException {
+        if (!behandling.kanResultereIVedtak()) {
+            throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstype " + behandling.getType().getBeskrivelse());
+        }
+    }
+
+    private void kontrollerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
         Collection<Kontroll_begrunnelser> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID, vedtakstype);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
@@ -216,6 +219,6 @@ public class VedtakService {
             .setTilordnetRessurs(saksbehandler)
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .build();
-        gsakFasade.opprettOppgave(oppgave);
+        oppgaveService.opprettOppgave(oppgave);
     }
 }

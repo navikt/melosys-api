@@ -48,7 +48,9 @@ class A1Mapper {
 
         a1.setLovvalgsperiode(mapLovvalgsperiode(resultat.hentValidertLovvalgsperiode()));
 
-        a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));
+        if (brevData.yrkesgruppe != null) {
+            a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));
+        }
 
         a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.hovedvirksomhet));
 

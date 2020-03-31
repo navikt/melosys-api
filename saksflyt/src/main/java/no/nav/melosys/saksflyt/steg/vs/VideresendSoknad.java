@@ -23,9 +23,8 @@ import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
-import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.dokument.LandvelgerService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +48,6 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
     private static final Logger log = LoggerFactory.getLogger(VideresendSoknad.class);
 
-    private final EessiService eessiService;
     private final TpsFasade tpsFasade;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
@@ -58,13 +56,11 @@ public class VideresendSoknad extends AbstraktSendUtland {
     @Autowired
     protected VideresendSoknad(@Qualifier("system") EessiService eessiService,
                                BehandlingsresultatService behandlingsresultatService,
-                               LandvelgerService landvelgerService,
                                TpsFasade tpsFasade,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                @Qualifier("system") JoarkFasade joarkFasade,
                                FagsakService fagsakService) {
-        super(eessiService, behandlingsresultatService, landvelgerService);
-        this.eessiService = eessiService;
+        super(eessiService, behandlingsresultatService);
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
         this.utenlandskMyndighetService = utenlandskMyndighetService;

@@ -138,7 +138,9 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
     }
 
     private void validerBehandlingstype(Behandlingstyper behandlingstype) throws FunksjonellException {
-        if (behandlingstype != Behandlingstyper.SOEKNAD && behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+        if (behandlingstype != Behandlingstyper.SOEKNAD &&
+            behandlingstype != Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND &&
+            behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
             throw new FunksjonellException("Behandlingstype er ikke av type søknad!");
         }
     }

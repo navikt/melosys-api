@@ -88,6 +88,11 @@ public class MedlService implements MedlFasade {
         return opprettPeriode(fnr, periodeMedBestemmelse, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
     }
 
+    @Override
+    public Long opprettPeriodeForeløpig(String fnr, Medlemskapsperiode periodeMedBestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        return opprettPeriode(fnr, periodeMedBestemmelse, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
+    }
+
     Long opprettPeriode(String fnr, Medlemskapsperiode periodeMedBestemmelse, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         try {
             OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, periodeMedBestemmelse, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);

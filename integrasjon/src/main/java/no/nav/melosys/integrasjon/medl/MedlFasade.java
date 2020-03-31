@@ -15,6 +15,8 @@ public interface MedlFasade {
 
     Long opprettPeriodeUnderAvklaring(String fnr, Medlemskapsperiode periodeMedBestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 
+    Long opprettPeriodeForeløpig(String fnr, Medlemskapsperiode periodeMedBestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
+
     void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws FunksjonellException, TekniskException;
 
     void avvisPeriode(Long medlPeriodeID, StatusaarsakMedl årsak) throws SikkerhetsbegrensningException, IkkeFunnetException;

@@ -2,18 +2,19 @@ package no.nav.melosys.saksflyt.steg.jfr.sed;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.sak.SakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,13 @@ public class OpprettJournalfoeringsOppgave extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettJournalfoeringsOppgave.class);
 
-    private final GsakFasade gsakFasade;
+    private final OppgaveService oppgaveService;
+    private final SakService sakService;
 
     @Autowired
-    public OpprettJournalfoeringsOppgave(@Qualifier("system") GsakFasade gsakFasade) {
-        this.gsakFasade = gsakFasade;
+    public OpprettJournalfoeringsOppgave(@Qualifier("system") OppgaveService oppgaveService, SakService sakService) {
+        this.oppgaveService = oppgaveService;
+        this.sakService = sakService;
     }
 
     @Override
@@ -52,7 +55,7 @@ public class OpprettJournalfoeringsOppgave extends AbstraktStegBehandler {
             .setFristFerdigstillelse(LocalDate.now().plusDays(7))
             .build();
 
-        String oppgaveID = gsakFasade.opprettOppgave(oppgave);
+        String oppgaveID = oppgaveService.opprettOppgave(oppgave);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Journalføringsoppgave opprettet med ID {}", oppgaveID);
@@ -61,7 +64,7 @@ public class OpprettJournalfoeringsOppgave extends AbstraktStegBehandler {
     private Tema avklarTema(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         if (harGsakSaksnummer(prosessinstans)) {
             Long gsakSaksnummer = prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
-            return gsakFasade.hentTemaFraSak(gsakSaksnummer);
+            return sakService.hentTemaFraSak(gsakSaksnummer);
         }
 
         return Tema.MED;

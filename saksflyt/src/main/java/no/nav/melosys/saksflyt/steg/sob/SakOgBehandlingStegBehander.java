@@ -13,7 +13,7 @@ import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingService;
 
 import static no.nav.melosys.domain.Tema.MED;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;

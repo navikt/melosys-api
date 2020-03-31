@@ -15,9 +15,9 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +32,15 @@ public class ManuellSedBehandlingInitialiserer {
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
-    private final GsakFasade gsakFasade;
+    private final OppgaveService oppgaveService;
 
     @Autowired
-    public ManuellSedBehandlingInitialiserer(FagsakService fagsakService, BehandlingService behandlingService, @Qualifier("system") GsakFasade gsakFasade) {
+    public ManuellSedBehandlingInitialiserer(FagsakService fagsakService,
+                                             BehandlingService behandlingService,
+                                             @Qualifier("system") OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        this.gsakFasade = gsakFasade;
+        this.oppgaveService = oppgaveService;
     }
 
     /**
@@ -72,10 +74,10 @@ public class ManuellSedBehandlingInitialiserer {
     }
 
     private void oppdaterOppgavePrioritet(String saksnummer) throws FunksjonellException, TekniskException {
-        Optional<Oppgave> oppgave = gsakFasade.finnOppgaverMedSaksnummer(saksnummer).stream().findFirst();
+        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer);
         if (oppgave.isPresent()) {
             log.info("Setter prioritet til HØY for oppgave {}", oppgave.get().getOppgaveId());
-            gsakFasade.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().prioritet(PrioritetType.HOY.name()).build());
+            oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().prioritet(PrioritetType.HOY.name()).build());
         }
     }
 }

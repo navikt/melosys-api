@@ -7,19 +7,17 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.OppgaveOppdatering;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
@@ -36,15 +34,17 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
 
     private final FagsakService fagsakService;
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final GsakFasade gsakFasade;
+    private final OppgaveService oppgaveService;
 
     private static final String MOTTATT_SED_BESKRIVELSE = "Mottatt svar på A001: SED %s";
 
     @Autowired
-    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService, AnmodningsperiodeService anmodningsperiodeService, @Qualifier("system") GsakFasade gsakFasade) {
+    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService,
+                                            AnmodningsperiodeService anmodningsperiodeService,
+                                            @Qualifier("system") OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.gsakFasade = gsakFasade;
+        this.oppgaveService = oppgaveService;
     }
 
     @Override
@@ -77,11 +77,11 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        Optional<Oppgave> oppgave = gsakFasade.finnOppgaverMedSaksnummer(behandling.getFagsak().getSaksnummer()).stream().findFirst();
+        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         if (oppgave.isEmpty()) {
             opprettOppgave(behandling, sedType);
         } else {
-            gsakFasade.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().beskrivelse(lagMottattSedBeskrivelse(sedType)).build());
+            oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().beskrivelse(lagMottattSedBeskrivelse(sedType)).build());
         }
     }
 
@@ -91,11 +91,10 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
         Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
             .setAktørId(aktørID)
             .setJournalpostId(behandling.getInitierendeJournalpostId())
-            .setPrioritet(PrioritetType.NORM)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
             .setBeskrivelse(lagMottattSedBeskrivelse(sedType));
 
-        String oppgaveID = gsakFasade.opprettOppgave(oppgaveBuilder.build());
+        String oppgaveID = oppgaveService.opprettOppgave(oppgaveBuilder.build());
         log.info("Opprettet behandlingsoppgave med id {} for behandling {}", oppgaveID, behandling.getId());
     }
 
@@ -104,7 +103,7 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
     }
 
     @Override
-    public boolean gjelderSedType(SedType sedType, Landkoder lovvalgsland) {
+    public boolean gjelderSedType(SedType sedType) {
         return sedType == SedType.A011
             || sedType == SedType.A002;
     }

@@ -12,7 +12,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -203,7 +202,7 @@ public class FagsakTjeneste {
     }
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
-        if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+        if (behandling.erBehandlingAvSøknad()) {
             behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
                 .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
                     behandlingOversiktDto.setLand(hentSøknadsland(grunnlagData));
