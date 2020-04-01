@@ -105,7 +105,7 @@ public class EessiConsumerImpl implements EessiConsumer {
     public MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) throws MelosysException {
         return exchange(String.format("/journalpost/%s/eessimelding", journalpostID), HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<MelosysEessiMelding>(){
-        });
+            });
     }
 
     @Override
@@ -118,7 +118,7 @@ public class EessiConsumerImpl implements EessiConsumer {
     public List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
         return exchange(String.format("/sak?rinaSaksnummer=%s", rinaSaksnummer), HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SaksrelasjonDto>>() {
-        });
+            });
     }
 
     @Override
@@ -135,9 +135,16 @@ public class EessiConsumerImpl implements EessiConsumer {
 
         List<BucinfoDto> bucinfoDtoList = exchange(uri, HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucinfoDto>>() {
-        });
+            });
 
         return bucinfoDtoList.stream().map(BucinfoDto::tilDomene).collect(Collectors.toList());
+    }
+
+    @Override
+    public SedGrunnlagDto hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) throws MelosysException {
+        return exchange(String.format("/buc/%s/sed/%s/grunnlag", rinaSaksnummer, rinaDokumentID), HttpMethod.GET,
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<SedGrunnlagDto>() {
+            });
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {

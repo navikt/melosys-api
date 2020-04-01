@@ -37,8 +37,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.27-100</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.11</melosys.internt.kodeverk.version>
+        <melosys.jsonschema.version>1.35.29-103</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.16</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -79,7 +79,6 @@
         <restFixture.version>4.4</restFixture.version>
         <slf4j.version>1.7.25</slf4j.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
-        <spring-ldap.version>2.3.1.RELEASE</spring-ldap.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <failsafe.version>2.22.0</failsafe.version>
@@ -465,11 +464,6 @@
                 <groupId>org.springframework.kafka</groupId>
                 <artifactId>spring-kafka</artifactId>
                 <version>${spring-kafka.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.ldap</groupId>
-                <artifactId>spring-ldap-core</artifactId>
-                <version>${spring-ldap.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.security</groupId>

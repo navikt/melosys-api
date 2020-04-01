@@ -31,15 +31,21 @@ public class BehandlingsgrunnlagTjeneste {
     }
 
     @GetMapping("/{behandlingID}")
-    public ResponseEntity hentBehandlingsgrunnlag(@PathVariable(value = "behandlingID") long behandlingID) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public ResponseEntity<BehandlingsgrunnlagGetDto> hentBehandlingsgrunnlag(
+        @PathVariable(value = "behandlingID") long behandlingID
+    ) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+
         tilgangService.sjekkTilgang(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
         return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag, hentTilleggsData(behandlingsgrunnlag.getBehandlingsgrunnlagdata())));
     }
 
     @PostMapping("/{behandlingID}")
-    public ResponseEntity oppdaterBehandlingsgrunnlag(@PathVariable(value = "behandlingID") long behandlingID,
-                                                      @RequestBody BehandlingsgrunnlagPostDto behandlingsgrunnlagPostDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<BehandlingsgrunnlagGetDto> oppdaterBehandlingsgrunnlag(
+        @PathVariable(value = "behandlingID") long behandlingID,
+        @RequestBody BehandlingsgrunnlagPostDto behandlingsgrunnlagPostDto
+    ) throws FunksjonellException, TekniskException {
+
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagPostDto.getData());
         return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag, hentTilleggsData(behandlingsgrunnlag.getBehandlingsgrunnlagdata())));

@@ -3,20 +3,12 @@ package no.nav.melosys.integrasjon.eessi.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class SedDataDto {
-    //Søknaddok.
-    private List<Ident> utenlandskIdent = new ArrayList<>(1);
-
+public class SedDataDto extends SedGrunnlagDto {
     //Persondok.
     private List<FamilieMedlem> familieMedlem = new ArrayList<>();
     private Bruker bruker;
 
     //Andre medlemsvariabler
-    private Adresse bostedsadresse;
-    private List<Virksomhet> arbeidsgivendeVirksomheter = new ArrayList<>();
-    private List<Virksomhet> selvstendigeVirksomheter = new ArrayList<>();
-    private List<Arbeidssted> arbeidssteder = new ArrayList<>();
     private List<Virksomhet> utenlandskeVirksomheter = new ArrayList<>();
 
     //Videresending av søknad
@@ -25,24 +17,13 @@ public class SedDataDto {
     private Long gsakSaksnummer;
 
     //Lovvalg
-    private List<Lovvalgsperiode> lovvalgsperioder = new ArrayList<>();
     private List<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();
 
     private List<String> mottakerIder;
 
-    private String ytterligereInformasjon;
-
     private SvarAnmodningUnntakDto svarAnmodningUnntak;
 
     private UtpekingAvvisDto utpekingAvvis;
-
-    public List<Ident> getUtenlandskIdent() {
-        return utenlandskIdent;
-    }
-
-    public void setUtenlandskIdent(List<Ident> utenlandskIdent) {
-        this.utenlandskIdent = utenlandskIdent;
-    }
 
     public List<FamilieMedlem> getFamilieMedlem() {
         return familieMedlem;
@@ -60,38 +41,6 @@ public class SedDataDto {
         this.bruker = bruker;
     }
 
-    public Adresse getBostedsadresse() {
-        return bostedsadresse;
-    }
-
-    public void setBostedsadresse(Adresse bostedsadresse) {
-        this.bostedsadresse = bostedsadresse;
-    }
-
-    public List<Virksomhet> getArbeidsgivendeVirksomheter() {
-        return arbeidsgivendeVirksomheter;
-    }
-
-    public void setArbeidsgivendeVirksomheter(List<Virksomhet> arbeidsgivendeVirksomheter) {
-        this.arbeidsgivendeVirksomheter = arbeidsgivendeVirksomheter;
-    }
-
-    public List<Virksomhet> getSelvstendigeVirksomheter() {
-        return selvstendigeVirksomheter;
-    }
-
-    public void setSelvstendigeVirksomheter(List<Virksomhet> selvstendigeVirksomheter) {
-        this.selvstendigeVirksomheter = selvstendigeVirksomheter;
-    }
-
-    public List<Arbeidssted> getArbeidssteder() {
-        return arbeidssteder;
-    }
-
-    public void setArbeidssteder(List<Arbeidssted> arbeidssteder) {
-        this.arbeidssteder = arbeidssteder;
-    }
-
     public List<Virksomhet> getUtenlandskeVirksomheter() {
         return utenlandskeVirksomheter;
     }
@@ -106,14 +55,6 @@ public class SedDataDto {
 
     public void setAvklartBostedsland(String avklartBostedsland) {
         this.avklartBostedsland = avklartBostedsland;
-    }
-
-    public List<Lovvalgsperiode> getLovvalgsperioder() {
-        return lovvalgsperioder;
-    }
-
-    public void setLovvalgsperioder(List<Lovvalgsperiode> lovvalgsperioder) {
-        this.lovvalgsperioder = lovvalgsperioder;
     }
 
     public Long getGsakSaksnummer() {
@@ -138,14 +79,6 @@ public class SedDataDto {
 
     public void setMottakerIder(List<String> mottakerIder) {
         this.mottakerIder = mottakerIder;
-    }
-
-    public String getYtterligereInformasjon() {
-        return ytterligereInformasjon;
-    }
-
-    public void setYtterligereInformasjon(String ytterligereInformasjon) {
-        this.ytterligereInformasjon = ytterligereInformasjon;
     }
 
     public SvarAnmodningUnntakDto getSvarAnmodningUnntak() {
