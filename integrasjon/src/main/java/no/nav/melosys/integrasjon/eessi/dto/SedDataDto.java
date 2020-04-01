@@ -25,14 +25,6 @@ public class SedDataDto extends SedGrunnlagDto {
 
     private UtpekingAvvisDto utpekingAvvis;
 
-    public List<Ident> getUtenlandskIdent() {
-        return utenlandskIdent;
-    }
-
-    public void setUtenlandskIdent(List<Ident> utenlandskIdent) {
-        this.utenlandskIdent = utenlandskIdent;
-    }
-
     public List<FamilieMedlem> getFamilieMedlem() {
         return familieMedlem;
     }
