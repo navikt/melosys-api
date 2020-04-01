@@ -2,6 +2,7 @@ package no.nav.melosys.service.journalforing;
 
 import java.util.Optional;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -216,9 +217,19 @@ public class JournalfoeringService {
         if (journalfoeringDto.getFagsak().getLand().contains(null)) {
             throw new FunksjonellException("Et søknadsland er null!");
         }
-        if (journalfoeringDto.getFagsak().getLand().size() > 1) { // Melosys støtter bare ett land i Leveranse 1.
-            throw new FunksjonellException("Kun ett land er støttet i denne versjonen av Melosys");
+        validerAntallLand(journalfoeringDto);
+    }
+
+    private void validerAntallLand(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+        String behandlingstypeKode = journalfoeringDto.getBehandlingstypeKode();
+        int antallLand = journalfoeringDto.getFagsak().getLand().size();
+
+        if (Behandling.erBehandlingAvSøknadArbeidIFlereLand(behandlingstypeKode) && antallLand < 2) {
+            throw new FunksjonellException("Det er påkrevd med to eller flere land for behandlingstype " + behandlingstypeKode);
+        } else if (Behandling.erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstypeKode) && antallLand != 1) {
+            throw new FunksjonellException("Kun ett søknadsland er tillatt for behandlingstype " + behandlingstypeKode);
         }
+
     }
 
     private void validerBehandleAnmodningOmUnntakFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {

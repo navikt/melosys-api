@@ -23,6 +23,16 @@ public class SedDataDto extends SedGrunnlagDto {
 
     private SvarAnmodningUnntakDto svarAnmodningUnntak;
 
+    private UtpekingAvvisDto utpekingAvvis;
+
+    public List<Ident> getUtenlandskIdent() {
+        return utenlandskIdent;
+    }
+
+    public void setUtenlandskIdent(List<Ident> utenlandskIdent) {
+        this.utenlandskIdent = utenlandskIdent;
+    }
+
     public List<FamilieMedlem> getFamilieMedlem() {
         return familieMedlem;
     }
@@ -85,5 +95,13 @@ public class SedDataDto extends SedGrunnlagDto {
 
     public void setSvarAnmodningUnntak(SvarAnmodningUnntakDto svarAnmodningUnntak) {
         this.svarAnmodningUnntak = svarAnmodningUnntak;
+    }
+
+    public UtpekingAvvisDto getUtpekingAvvis() {
+        return utpekingAvvis;
+    }
+
+    public void setUtpekingAvvis(UtpekingAvvisDto utpekingAvvis) {
+        this.utpekingAvvis = utpekingAvvis;
     }
 }

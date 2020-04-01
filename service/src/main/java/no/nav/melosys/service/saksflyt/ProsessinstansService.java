@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -28,6 +29,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
+import no.nav.melosys.service.kafka.SoknadMottatt;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -332,6 +334,28 @@ public class ProsessinstansService {
             .medEessiMottakere(mottakerinstitusjoner)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
+
+        lagre(prosessinstans);
+    }
+
+    @Transactional
+    public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
+            .medSteg(ProsessSteg.MSA_HENT_INNHOLD)
+            .build();
+        prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadMottatt.getSoknadID());
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansAvvisUtpeking(Behandling behandling, UtpekingAvvis utpekingAvvis) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.ARBEID_FLERE_LAND)
+            .medSteg(ProsessSteg.AFL_SVAR_SEND_AVSLAG)
+            .medBehandling(behandling)
+            .build();
+        prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, utpekingAvvis);
 
         lagre(prosessinstans);
     }

@@ -7,8 +7,8 @@ public enum ProsessDataKey {
 
     AKTØR_ID("aktoerID"),
     ARBEIDSGIVER("arbeidsgiver"),
-    ARKIV_ID("arkivId"),
     ARKIVSYSTEM("arkivsystem"),
+    ARKIV_ID("arkivId"),
     AVSENDER_ID("avsenderID"),
     AVSENDER_LAND("avsenderLand"),
     AVSENDER_NAVN("avsenderNavn"),
@@ -35,8 +35,9 @@ public enum ProsessDataKey {
     LOVVALGSLAND("lovvalgsland"),
     MOTTAKER("mottaker"),
     MOTTATT_DATO("mottattDato"),
-    OPPHOLDSLAND("oppholdsland"),
+    MOTTATT_SOKNAD_ID("mottattSoknadID"),
     OPPGAVE_ID("oppgaveID"),
+    OPPHOLDSLAND("oppholdsland"),
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
     REPRESENTANT_REPRESENTERER("representantRepresenterer"),
@@ -52,6 +53,7 @@ public enum ProsessDataKey {
     TEMA("tema"),
     UNNTAK_FRA_LOVVALGSBESTEMMELSE("unntakFraLovvalgsbestemmelse"),
     UNNTAK_FRA_LOVVALGSLAND("unntakFraLovvalgsland"),
+    UTPEKING_AVVIS("utpekingAvvis"),
     UTPEKT_LAND("utpektLand"),
     VEDTAKSTYPE("vedtakstype");
 

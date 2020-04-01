@@ -74,14 +74,12 @@ public class AvklartefaktaService {
                 .collect(Collectors.toSet());
     }
 
-    public Yrkesgrupper hentYrkesGruppe(long behandlingsid) throws TekniskException {
-        Optional<Avklartefakta> avklartefaktaOpt =
-                avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.YRKESGRUPPE);
+    public Optional<Yrkesgrupper> finnYrkesGruppe(long behandlingsid) throws TekniskException {
+        final var avklartYrkesgruppeType = avklarteFaktaRepository
+            .findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.YRKESGRUPPE)
+            .map(Avklartefakta::getFakta).map(AvklartYrkesgruppeType::valueOf).orElse(null);
 
-        Avklartefakta avklartefakta = avklartefaktaOpt.orElseThrow(() -> new TekniskException("Finner ingen avklartefakta for YRKESGRUPPE"));
-        AvklartYrkesgruppeType aktivitetType = AvklartYrkesgruppeType.valueOf(avklartefakta.getFakta());
-
-        return aktivitetType.tilYrkesgruppeType();
+        return (avklartYrkesgruppeType == null) ? Optional.empty() : Optional.of(avklartYrkesgruppeType.tilYrkesgruppeType());
     }
 
     public Set<Landkoder> hentLandkoderMedMarginaltArbeid(long behandlingsid) {

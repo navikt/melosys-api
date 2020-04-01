@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 public class UtpekingService {
@@ -76,7 +78,7 @@ public class UtpekingService {
         long behandlingID = fagsak.getAktivBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
-        behandling.setStatus(Behandlingsstatus.UTPEKING_SENDT);
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
             behandling.getFagsak().getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
 
@@ -93,12 +95,31 @@ public class UtpekingService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
+    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException {
+        validerAvslagUtpeking(utpekingAvvis);
+
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
+        behandlingService.lagre(behandling);
+
+        prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, utpekingAvvis);
+    }
+
     void validerUtpekingsperioder(List<Utpekingsperiode> utpekingsperioder) throws MelosysException {
         if (CollectionUtils.isEmpty(utpekingsperioder)) {
             throw new FunksjonellException("Du må velge en utpekingsperiode for å kunne utpeke et annet land");
         }
         if (utpekingsperioder.size() != 1) {
             throw new FunksjonellException("Flere utpekingsperioder er ikke støttet ved utpeking av et annet land");
+        }
+    }
+
+    private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) throws FunksjonellException {
+        if (StringUtils.isEmpty(utpekingAvvis.getBegrunnelse())) {
+            throw new FunksjonellException("Du må oppgi en begrunnelse for å kunne avslå en utpeking");
+        }
+        if (utpekingAvvis.isEtterspørInformasjon() == null) {
+            throw new FunksjonellException("Du må oppgi om forespørsel om mer informasjon vil bli sendt");
         }
     }
 }
