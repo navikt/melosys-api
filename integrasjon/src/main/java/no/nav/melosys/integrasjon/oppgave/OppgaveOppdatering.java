@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Behandlingstema;
 
 public class OppgaveOppdatering {
     private final Oppgavetyper oppgavetype;
@@ -21,7 +21,7 @@ public class OppgaveOppdatering {
     private final String status;
     private final LocalDate fristFerdigstillelse;
 
-    OppgaveOppdatering(OppgaveOppdateringBuilder builder) {
+    private OppgaveOppdatering(OppgaveOppdateringBuilder builder) {
         this.oppgavetype = builder.oppgavetype;
         this.tema = builder.tema;
         this.behandlingstema = builder.behandlingstema;

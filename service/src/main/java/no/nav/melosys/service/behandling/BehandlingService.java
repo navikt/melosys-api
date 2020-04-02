@@ -11,6 +11,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -117,7 +118,12 @@ public class BehandlingService {
      * - Oppretter tom behandlingsresultat.
      */
     @Transactional
-    public Behandling nyBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId) {
+    public Behandling nyBehandling(Fagsak fagsak,
+                                   Behandlingsstatus behandlingsstatus,
+                                   Behandlingstyper behandlingstype,
+                                   Behandlingstema behandlingstema,
+                                   String initierendeJournalpostId,
+                                   String initierendeDokumentId) {
         Instant nå = Instant.now();
 
         Behandling behandling = new Behandling();
@@ -127,6 +133,7 @@ public class BehandlingService {
 
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
+        behandling.setTema(behandlingstema);
         behandling.setInitierendeJournalpostId(initierendeJournalpostId);
         behandling.setInitierendeDokumentId(initierendeDokumentId);
         behandlingRepository.save(behandling);

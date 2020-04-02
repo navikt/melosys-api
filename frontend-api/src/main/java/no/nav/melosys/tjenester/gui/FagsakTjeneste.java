@@ -76,10 +76,10 @@ public class FagsakTjeneste {
     @PostMapping("/opprett")
     @ApiOperation(value = "Oppretter en sak med tilhørende behandling.")
     public ResponseEntity opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
-        if (opprettSakDto.brukerID == null) {
+        if (opprettSakDto.getBrukerID() == null) {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }
-        tilgangService.sjekkFnr(opprettSakDto.brukerID);
+        tilgangService.sjekkFnr(opprettSakDto.getBrukerID());
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
         return ResponseEntity.ok().build();
     }
@@ -194,6 +194,7 @@ public class FagsakTjeneste {
             behandlingOversiktDto.setBehandlingID(behandling.getId());
             behandlingOversiktDto.setBehandlingsstatus(behandling.getStatus());
             behandlingOversiktDto.setBehandlingstype(behandling.getType());
+            behandlingOversiktDto.setBehandlingstema(behandling.getTema());
             behandlingOversiktDto.setOpprettetDato(behandling.getRegistrertDato());
 
             setPeriodeOpplysninger(behandling, behandlingOversiktDto);

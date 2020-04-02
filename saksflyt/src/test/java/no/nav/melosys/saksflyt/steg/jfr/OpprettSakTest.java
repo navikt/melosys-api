@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -36,22 +36,22 @@ public class OpprettSakTest {
 
     @Test
     public void utfoerSteg() throws FunksjonellException, TekniskException {
-        Behandlingstyper behandlingstyper = Behandlingstyper.SOEKNAD;
+        Behandlingstema behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER;
         String saksnummer = "MEL-009";
         String aktørID = "1000104568393";
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstyper);
-        when(sakService.opprettSak(anyString(), eq(behandlingstyper), anyString())).thenReturn(123L);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+        when(sakService.opprettSak(anyString(), eq(behandlingstema), anyString())).thenReturn(123L);
 
         Fagsak fagsak = new Fagsak();
         when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
 
         agent.utførSteg(prosessinstans);
 
-        verify(sakService, times(1)).opprettSak(saksnummer, behandlingstyper, aktørID);
+        verify(sakService, times(1)).opprettSak(saksnummer, behandlingstema, aktørID);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
         assertThat(fagsak.getGsakSaksnummer()).isNotNull();
     }

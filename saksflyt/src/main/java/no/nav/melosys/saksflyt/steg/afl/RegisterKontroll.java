@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.afl;
 import java.util.Set;
 
 import no.nav.melosys.domain.Kontrollresultat;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
@@ -31,12 +31,12 @@ public class RegisterKontroll extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         final long behandlingID = prosessinstans.getBehandling().getId();
-        final Behandlingstyper behandlingstype = prosessinstans.getBehandling().getType();
+        final Behandlingstema behandlingstema = prosessinstans.getBehandling().getTema();
         kontrollresultatService.utførKontrollerOgRegistrerFeil(behandlingID);
 
         Set<Kontrollresultat> kontrollresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID).getKontrollresultater();
 
-        if (behandlingstype == Behandlingstyper.BESLUTNING_LOVVALG_NORGE || !kontrollresultat.isEmpty()) {
+        if (behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE || !kontrollresultat.isEmpty()) {
             prosessinstans.setSteg(ProsessSteg.AFL_OPPRETT_OPPGAVE);
         } else {
             prosessinstans.setSteg(ProsessSteg.AFL_OPPDATER_MEDL);

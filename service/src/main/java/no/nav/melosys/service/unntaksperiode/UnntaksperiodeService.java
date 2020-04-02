@@ -5,7 +5,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 
 @Service
 public class UnntaksperiodeService {
@@ -63,7 +63,7 @@ public class UnntaksperiodeService {
     }
 
     private void validerBehandling(Behandling behandling) throws FunksjonellException {
-        Behandlingstyper behandlingstype = behandling.getType();
+        Behandlingstema behandlingstype = behandling.getTema();
 
         if (behandlingstype != REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
             && behandlingstype != REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE

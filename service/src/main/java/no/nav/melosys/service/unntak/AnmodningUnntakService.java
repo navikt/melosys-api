@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -70,15 +70,15 @@ public class AnmodningUnntakService {
     @Transactional(rollbackFor = MelosysException.class)
     public void anmodningOmUnntakSvar(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        validerBehandlingstypeUnntak(behandling);
+        validerBehandlingstemaUnntak(behandling);
         validerSvar(behandling);
         prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private static void validerBehandlingstypeUnntak(Behandling behandling) throws FunksjonellException {
-        if (behandling.getType() != Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
-            throw new FunksjonellException("Behandling er ikke av type ANMODNING_OM_UNNTAK_HOVEDREGEL");
+    private static void validerBehandlingstemaUnntak(Behandling behandling) throws FunksjonellException {
+        if (behandling.getTema() != Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
+            throw new FunksjonellException("Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL");
         } else if (behandling.getStatus() == Behandlingsstatus.AVSLUTTET) {
             throw new FunksjonellException("Behandlingen er avsluttet");
         }

@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -53,12 +54,12 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         Long gsakSaksnummer = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
-        Behandlingstyper behandlingsType = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
+        Behandlingstema behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
 
         if (gsakSaksnummer == null) {
             throw new TekniskException("Gsaksaksnummer kan ikke være null");
-        } else if (behandlingsType == null) {
+        } else if (behandlingstema == null) {
             throw new TekniskException("Behandlingstype kan ikke være null");
         }
 
@@ -67,7 +68,7 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
                 gsakSaksnummer + ", men finner ingen fagsak!"));
 
         avsluttTidligereBehandling(fagsak);
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, behandlingsType,
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema,
             prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
 
         fagsak.setStatus(Saksstatuser.OPPRETTET);

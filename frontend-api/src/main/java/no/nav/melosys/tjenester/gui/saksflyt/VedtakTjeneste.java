@@ -51,11 +51,8 @@ public class VedtakTjeneste {
         if (endreVedtakDto.getBegrunnelseKode() == null) {
             throw new FunksjonellException("BegrunnelseKode mangler.");
         }
-        if (endreVedtakDto.getBehandlingstype() == null) {
-            throw new FunksjonellException("Behandlingstype mangler.");
-        }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getBehandlingstype(), endreVedtakDto.getFritekst());
+        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst());
         return ResponseEntity.ok().build();
     }
 

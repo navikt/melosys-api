@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
@@ -29,6 +30,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.kafka.SoknadMottatt;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -69,9 +71,6 @@ public class ProsessinstansService {
         prosessinstans.setType(type);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
 
-        if (StringUtils.isNotEmpty(journalfoeringDto.getBehandlingstypeKode())) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()));
-        }
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getHoveddokument().getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
@@ -208,21 +207,22 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto) throws FunksjonellException {
-        if (!erBehandlingAvSøknad(opprettSakDto.behandlingstype.getKode())) {
-            throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.behandlingstype
+        if (!erBehandlingAvSøknad(opprettSakDto.getBehandlingstema().getKode())) {
+            throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.getBehandlingstema()
                 + " på bakgrunn av journalførte dokumenter er ikke støttet.");
         }
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.OPPRETT_NY_SAK)
             .medSteg(ProsessSteg.JFR_AKTØR_ID)
             .build();
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.behandlingstype);
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.brukerID);
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.oppgaveID);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
-        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.soknadDto.periode);
-        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.soknadDto.land);
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.skalTilordnes);
+        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
+        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
         lagre(prosessinstans);
     }
 
@@ -309,8 +309,9 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansGenerellSedBehandling(JournalfoeringDto journalfoeringDto) {
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.SED_GENERELL_SAK, journalfoeringDto);
+    public void opprettProsessinstansGenerellSedBehandling(JournalfoeringOpprettDto journalfoeringOpprettDto) {
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.SED_GENERELL_SAK, journalfoeringOpprettDto);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringOpprettDto.getBehandlingstemaKode()));
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
         lagre(prosessinstans);
     }

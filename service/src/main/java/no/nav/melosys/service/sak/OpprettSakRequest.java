@@ -2,6 +2,7 @@ package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class OpprettSakRequest {
@@ -11,6 +12,7 @@ public class OpprettSakRequest {
     private String representantKontaktperson;
     private Representerer representantRepresenterer;
     private Behandlingstyper behandlingstype;
+    private Behandlingstema behandlingstema;
     private String initierendeJournalpostId;
     private String initierendeDokumentId;
     private Sakstyper sakstype;
@@ -22,6 +24,7 @@ public class OpprettSakRequest {
         this.representantKontaktperson = builder.representantKontaktperson;
         this.representantRepresenterer = builder.representantRepresenterer;
         this.behandlingstype = builder.behandlingstype;
+        this.behandlingstema = builder.behandlingstema;
         this.initierendeJournalpostId = builder.initierendeJournalpostId;
         this.initierendeDokumentId = builder.initierendeDokumentId;
         this.sakstype = builder.sakstype;
@@ -51,6 +54,10 @@ public class OpprettSakRequest {
         return behandlingstype;
     }
 
+    public Behandlingstema getBehandlingstema() {
+        return behandlingstema;
+    }
+
     public String getInitierendeJournalpostId() {
         return initierendeJournalpostId;
     }
@@ -70,6 +77,7 @@ public class OpprettSakRequest {
         private String representantKontaktperson;
         private Representerer representantRepresenterer;
         private Behandlingstyper behandlingstype;
+        private Behandlingstema behandlingstema;
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
         private Sakstyper sakstype;
@@ -101,6 +109,11 @@ public class OpprettSakRequest {
 
         public Builder medBehandlingstype(Behandlingstyper behandlingstype) {
             this.behandlingstype = behandlingstype;
+            return this;
+        }
+
+        public Builder medBehandlingstema(Behandlingstema behandlingstema) {
+            this.behandlingstema = behandlingstema;
             return this;
         }
 

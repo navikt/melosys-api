@@ -5,21 +5,21 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 
 final class SedTypeTilBehandlingstypeMapper {
 
     private SedTypeTilBehandlingstypeMapper() {
     }
 
-    static Optional<Behandlingstyper> finnBehandlingstypeForSedType(String sedType, String lovvalgsland) {
+    static Optional<Behandlingstema> finnBehandlingstypeForSedType(String sedType, String lovvalgsland) {
         SedType sedTypeEnum = finnSedType(sedType);
 
         if (sedTypeEnum == null) {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(finnBehandlingstype(sedTypeEnum, lovvalgsland));
+        return Optional.ofNullable(finnBehandlingstema(sedTypeEnum, lovvalgsland));
     }
 
     private static SedType finnSedType(String sedType) {
@@ -30,23 +30,23 @@ final class SedTypeTilBehandlingstypeMapper {
             .findFirst().orElse(null);
     }
 
-    private static Behandlingstyper finnBehandlingstype(SedType sedType, String lovvalgsland) {
+    private static Behandlingstema finnBehandlingstema(SedType sedType, String lovvalgsland) {
         switch (sedType) {
             case A001:
-                return Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL;
+                return Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL;
             case A003:
                 return behandlingstypeForA003(lovvalgsland);
             case A009:
-                return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+                return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
             case A010:
-                return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
+                return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
             default:
                 return null;
         }
     }
 
-    private static Behandlingstyper behandlingstypeForA003(String lovvalgsland) {
+    private static Behandlingstema behandlingstypeForA003(String lovvalgsland) {
         return Landkoder.NO.getKode().equalsIgnoreCase(lovvalgsland)
-            ? Behandlingstyper.BESLUTNING_LOVVALG_NORGE : Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND;
+            ? Behandlingstema.BESLUTNING_LOVVALG_NORGE : Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 }

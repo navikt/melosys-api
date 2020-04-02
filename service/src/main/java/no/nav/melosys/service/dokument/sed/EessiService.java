@@ -16,7 +16,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -122,7 +122,7 @@ public class EessiService {
         return finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID).isPresent();
     }
 
-    public Optional<Behandlingstyper> finnBehandlingstypeForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
+    public Optional<Behandlingstema> finnBehandlingstypeForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = hentSedTilknyttetJournalpost(journalpostID);
         String sedType = melosysEessiMelding.getSedType();
         String lovvalgsland = melosysEessiMelding.getLovvalgsland();

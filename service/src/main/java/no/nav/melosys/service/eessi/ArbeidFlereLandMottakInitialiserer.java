@@ -8,7 +8,7 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -70,10 +70,10 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
     }
 
     @Override
-    public Behandlingstyper hentBehandlingstype(MelosysEessiMelding melosysEessiMelding) {
+    public Behandlingstema hentBehandlingstema(MelosysEessiMelding melosysEessiMelding) {
         return Landkoder.NO.getKode().equals(melosysEessiMelding.getLovvalgsland())
-            ? Behandlingstyper.BESLUTNING_LOVVALG_NORGE
-            : Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND;
+            ? Behandlingstema.BESLUTNING_LOVVALG_NORGE
+            : Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 
     @Override

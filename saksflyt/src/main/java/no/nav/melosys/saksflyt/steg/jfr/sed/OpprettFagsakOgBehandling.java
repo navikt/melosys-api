@@ -1,8 +1,10 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -46,11 +48,12 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             throw new TekniskException("Prosessinstans er av type " + prosessinstans.getType());
         }
 
-        Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
+        Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(prosessinstans.getData(AKTØR_ID))
-            .medBehandlingstype(behandlingstype)
+            .medBehandlingstype(Behandlingstyper.SED)
+            .medBehandlingstema(behandlingstema)
             .medInitierendeJournalpostId(prosessinstans.getData(JOURNALPOST_ID))
             .medInitierendeDokumentId(prosessinstans.getData(DOKUMENT_ID))
             .medSakstype(Sakstyper.EU_EOS)

@@ -2,18 +2,16 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
-import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -61,19 +59,14 @@ public class Oppgaveplukker {
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         validerPlukkOppgave(plukkDto);
 
-        Behandlingstema behandlingstema = hentBehandlingstema(plukkDto.getSakstype());
-        Behandlingstyper behandlingstype = KodeverkUtils.dekod(Behandlingstyper.class, plukkDto.getBehandlingstype());
-        Set<Oppgavetyper> oppgavetyper = Collections.singleton(OppgaveFactory.hentOppgavetype(behandlingstype));
-
-        List<Oppgave> ufordelteOppgaver = oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgavetyper, behandlingstype, behandlingstema);
-        ufordelteOppgaver.addAll(hentOppgaverGammeltBehandlingstema(oppgavetyper, behandlingstype));
+        Behandlingstema behandlingstema = Behandlingstema.valueOf(plukkDto.getBehandlingstema());
+        List<Oppgave> ufordelteOppgaver = oppgaveFasade.finnUtildelteOppgaverEtterFrist(behandlingstema);
 
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
 
         if (valg.isPresent()) {
-            // Tildeler oppgaven
             oppdaterBehandlingsstatus(valg.get().getSaksnummer());
             oppgaveService.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
         }
@@ -87,26 +80,6 @@ public class Oppgaveplukker {
             behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
             behandlingService.lagre(behandling);
         }
-    }
-
-    private Collection<Oppgave> hentOppgaverGammeltBehandlingstema(Set<Oppgavetyper> oppgavetyper, Behandlingstyper behandlingstype) throws FunksjonellException, TekniskException {
-        if (oppgavetyper.contains(Oppgavetyper.BEH_SAK_MK) && behandlingstype == Behandlingstyper.SOEKNAD) {
-            return hentOppgaverGammeltBehandlingstema(Oppgavetyper.BEH_SAK_MK);
-        } else if (oppgavetyper.contains(Oppgavetyper.VUR) && behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
-            return hentOppgaverGammeltBehandlingstema(Oppgavetyper.VUR);
-        } else {
-            return Collections.emptySet();
-        }
-    }
-
-    private Collection<Oppgave> hentOppgaverGammeltBehandlingstema(Oppgavetyper oppgavetype) throws FunksjonellException, TekniskException {
-        //Byttet behandlingstema-kode for EU/EØS 4.10.2019. Må fortsatt kunne plukke med gammelt tema
-        return oppgaveFasade.finnUtildelteOppgaverEtterFrist(Collections.singleton(oppgavetype),
-            null, Behandlingstema.EU_EOS_GAMMEL_KODE);
-    }
-
-    private static Behandlingstema hentBehandlingstema(String sakstype) throws IkkeFunnetException {
-        return Behandlingstema.valueOf(KodeverkUtils.dekod(Sakstyper.class, sakstype).name());
     }
 
     private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException, FunksjonellException {
@@ -175,11 +148,8 @@ public class Oppgaveplukker {
     }
 
     private static void validerPlukkOppgave(PlukkOppgaveInnDto plukkDto) throws FunksjonellException {
-        if (StringUtils.isEmpty(plukkDto.getSakstype())) {
-            throw new FunksjonellException("Sakstype er påkrevd");
-        }
-        if (StringUtils.isEmpty(plukkDto.getBehandlingstype())) {
-            throw new FunksjonellException("Behandlingstype er påkrevd");
+        if (StringUtils.isEmpty(plukkDto.getBehandlingstema())) {
+            throw new FunksjonellException("Behandlingstema er påkrevd");
         }
     }
 }

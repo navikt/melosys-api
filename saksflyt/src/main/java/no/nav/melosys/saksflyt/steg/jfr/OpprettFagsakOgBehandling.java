@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -65,21 +66,29 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
+        Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
             Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
+            Behandling sistOppdaterteBehandling = fagsak.getSistOppdaterteBehandling();
+            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, sistOppdaterteBehandling.getTema(), initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setBehandling(behandling);
 
             prosessinstans.setSteg(STATUS_BEH_OPPR);
             log.info("Opprettet behandling {} for prosessinstans {}", behandling.getId(), prosessinstans.getId());
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK || prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
-            OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID(aktørId).medArbeidsgiver(arbeidsgiver)
-                .medRepresentant(representant).medRepresentantKontaktperson(representantKontakperson)
+            OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
+                .medAktørID(aktørId)
+                .medArbeidsgiver(arbeidsgiver)
+                .medRepresentant(representant)
+                .medRepresentantKontaktperson(representantKontakperson)
                 .medRepresentantRepresenterer(representantRepresenterer)
-                .medBehandlingstype(behandlingstype).medInitierendeJournalpostId(initierendeJournalpostId)
-                .medInitierendeDokumentId(initierendeDokumentId).build();
+                .medBehandlingstema(behandlingstema)
+                .medBehandlingstype(behandlingstype)
+                .medInitierendeJournalpostId(initierendeJournalpostId)
+                .medInitierendeDokumentId(initierendeDokumentId)
+                .build();
             Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
             prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
             prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));

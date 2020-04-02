@@ -1,0 +1,63 @@
+-- OPPRETT behandling_tema TABELL
+CREATE TABLE behandling_tema
+(
+    kode VARCHAR2(99) NOT NULL,
+    navn VARCHAR2(99) NOT NULL,
+    CONSTRAINT pk_behandling_tema PRIMARY KEY (kode)
+);
+
+ALTER TABLE BEHANDLING ADD beh_tema VARCHAR2(40);
+ALTER TABLE BEHANDLING ADD CONSTRAINT fk_behandling_tema FOREIGN KEY (behandlingstema) REFERENCES behandling_tema;
+
+-- LEGG INN behandling_tema VERDIER
+INSERT INTO behandling_tema (kode, navn) VALUES ('UTSENDT_ARBEIDSTAKER', 'Utsendt arbeidstaker');
+INSERT INTO behandling_tema (kode, navn) VALUES ('UTSENDT_SELVSTENDIG', 'Utsendt selvstendig næringsdrivende');
+INSERT INTO behandling_tema (kode, navn) VALUES ('ARBEID_ETT_LAND_ØVRIG', 'Øvrig arbeid og næring');
+INSERT INTO behandling_tema (kode, navn) VALUES ('IKKE_YRKESAKTIV', 'Ikke yrkesaktiv');
+INSERT INTO behandling_tema (kode, navn) VALUES ('ARBEID_FLERE_LAND', 'Arbeid i flere land');
+INSERT INTO behandling_tema (kode, navn) VALUES ('ARBEID_NORGE_BOSATT_ANNET_LAND', 'Arbeid i Norge - bosatt i et annet land');
+INSERT INTO behandling_tema (kode, navn) VALUES ('REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING', 'Registrering av unntak fra norsk trygd – utstasjonerte (A009)');
+INSERT INTO behandling_tema (kode, navn) VALUES ('REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE', 'Registrering av unntak fra norsk trygd – øvrige (A010)');
+INSERT INTO behandling_tema (kode, navn) VALUES ('BESLUTNING_LOVVALG_NORGE', 'Norge er utpekt (A003)');
+INSERT INTO behandling_tema (kode, navn) VALUES ('BESLUTNING_LOVVALG_ANNET_LAND', 'Utenlandsk myndighet har utpekt et annet land enn Norge (A003)');
+INSERT INTO behandling_tema (kode, navn) VALUES ('ANMODNING_OM_UNNTAK_HOVEDREGEL', 'Behandling av en mottatt anmodning om unntak hovedregel (A001)');
+INSERT INTO behandling_tema (kode, navn) VALUES ('ØVRIGE_SED', 'Behandling av alle øvrige SED');
+INSERT INTO behandling_tema (kode, navn) VALUES ('TRYGDETID', 'Forespørsel om trygdetid');
+
+INSERT INTO behandling_type (kode, navn) VALUES ('SED', 'SED');
+
+-- KONVERTER EKSISTERENDE RADER
+UPDATE BEHANDLING b SET beh_tema = 'UTSENDT_SELVSTENDIG', beh_type = 'SOEKNAD' WHERE beh_type = 'SOEKNAD' AND (select LOVVALG_BESTEMMELSE FROM LOVVALG_PERIODE l WHERE b.ID = l.BEH_RESULTAT_ID AND ROWNUM = 1) = 'FO_883_2004_ART12_2';
+UPDATE BEHANDLING SET beh_tema = 'UTSENDT_ARBEIDSTAKER', beh_type = 'SOEKNAD' WHERE beh_type = 'SOEKNAD';
+
+UPDATE BEHANDLING b SET beh_tema = 'UTSENDT_SELVSTENDIG', beh_type = 'NY_VURDERING' WHERE beh_type = 'NY_VURDERING' AND (select LOVVALG_BESTEMMELSE FROM LOVVALG_PERIODE l WHERE b.ID = l.BEH_RESULTAT_ID AND ROWNUM = 1) = 'FO_883_2004_ART12_2';
+UPDATE BEHANDLING SET beh_tema = 'UTSENDT_ARBEIDSTAKER', beh_type = 'NY_VURDERING' WHERE beh_type = 'NY_VURDERING';
+
+UPDATE BEHANDLING b SET beh_tema = 'UTSENDT_SELVSTENDIG', beh_type = 'ENDRET_PERIODE' WHERE beh_type = 'ENDRET_PERIODE' AND (select LOVVALG_BESTEMMELSE FROM LOVVALG_PERIODE l WHERE b.ID = l.BEH_RESULTAT_ID AND ROWNUM = 1) = 'FO_883_2004_ART12_2';
+UPDATE BEHANDLING SET beh_tema = 'UTSENDT_ARBEIDSTAKER', beh_type = 'ENDRET_PERIODE' WHERE beh_type = 'ENDRET_PERIODE';
+-- TODO: OVERNEVNTE MÅ TESTES GODT!
+UPDATE BEHANDLING SET beh_tema = 'IKKE_YRKESAKTIV', beh_type = 'SOEKNAD' WHERE beh_type = 'SOEKNAD_IKKE_YRKESAKTIV';
+UPDATE BEHANDLING SET beh_tema = 'ARBEID_FLERE_LAND', beh_type = 'SOEKNAD' WHERE beh_type = 'SOEKNAD_ARBEID_FLERE_LAND';
+UPDATE BEHANDLING SET beh_tema = 'ARBEID_NORGE_BOSATT_ANNET_LAND', beh_type = 'SOEKNAD' WHERE beh_type = 'SOEKNAD_ARBEID_NORGE_BOSATT_ANNET_LAND';
+UPDATE BEHANDLING SET beh_tema = 'REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING', beh_type = 'SED' WHERE beh_type = 'REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING';
+UPDATE BEHANDLING SET beh_tema = 'REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE', beh_type = 'SED' WHERE beh_type = 'REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE';
+UPDATE BEHANDLING SET beh_tema = 'BESLUTNING_LOVVALG_NORGE', beh_type = 'SED' WHERE beh_type = 'BESLUTNING_LOVVALG_NORGE';
+UPDATE BEHANDLING SET beh_tema = 'BESLUTNING_LOVVALG_ANNET_LAND', beh_type = 'SED' WHERE beh_type = 'BESLUTNING_LOVVALG_ANNET_LAND';
+UPDATE BEHANDLING SET beh_tema = 'ANMODNING_OM_UNNTAK_HOVEDREGEL', beh_type = 'SED' WHERE beh_type = 'ANMODNING_OM_UNNTAK_HOVEDREGEL';
+UPDATE BEHANDLING SET beh_tema = 'ØVRIGE_SED', beh_type = 'SED' WHERE beh_type = 'ØVRIGE_SED';
+UPDATE BEHANDLING SET beh_tema = 'TRYGDETID', beh_type = 'SED' WHERE beh_type = 'VURDER_TRYGDETID';
+
+-- SLETT TYPER SOM ER FLYTTET TIL TEMA
+DELETE FROM behandling_type WHERE kode = 'REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING';
+DELETE FROM behandling_type WHERE kode = 'REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE';
+DELETE FROM behandling_type WHERE kode = 'VURDER_TRYGDETID';
+DELETE FROM behandling_type WHERE kode = 'SOEKNAD_IKKE_YRKESAKTIV';
+DELETE FROM behandling_type WHERE kode = 'BESLUTNING_LOVVALG_NORGE';
+DELETE FROM behandling_type WHERE kode = 'BESLUTNING_LOVVALG_ANNET_LAND';
+DELETE FROM behandling_type WHERE kode = 'SOEKNAD_ARBEID_FLERE_LAND';
+DELETE FROM behandling_type WHERE kode = 'SOEKNAD_ARBEID_NORGE_BOSATT_ANNET_LAND';
+DELETE FROM behandling_type WHERE kode = 'ANMODNING_OM_UNNTAK_HOVEDREGEL';
+DELETE FROM behandling_type WHERE kode = 'ØVRIGE_SED';
+
+-- SETT CONTRAINT OG VALIDER beh_tema IKKE NULL
+ALTER TABLE BEHANDLING MODIFY beh_tema NOT NULL VALIDATE;

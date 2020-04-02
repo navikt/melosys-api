@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -46,7 +46,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     private static final String OPPGAVER_PLUKK_SCHEMA = "oppgaver-plukk-schema.json";
     private static final String OPPGAVER_PLUKK_POST_SCHEMA = "oppgaver-plukk-post-schema.json";
 
-    private OppgaveTjeneste tjeneste;
+    private OppgaveTjeneste oppgaveTjeneste;
     @Mock
     private Oppgaveplukker oppgaveplukker;
     @Mock
@@ -54,7 +54,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        tjeneste = new OppgaveTjeneste(oppgaveplukker, oppgaveService);
+        oppgaveTjeneste = new OppgaveTjeneste(oppgaveplukker, oppgaveService);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
@@ -68,7 +68,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         }
 
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
-        ResponseEntity response = tjeneste.mineOppgaver();
+        ResponseEntity response = oppgaveTjeneste.mineOppgaver();
 
         OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getBody();
         valider(oppgaveOversikt, OPPGAVER_OVERSIKT_SCHEMA, logger);
@@ -78,16 +78,14 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     public void plukkOppgave() throws FunksjonellException, TekniskException, IOException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setId(1L);
         when(oppgaveService.hentSistAktiveBehandling(anyString())).thenReturn(behandling);
 
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
-        String sakstype = Sakstyper.EU_EOS.getKode();
-        innData.setSakstype(sakstype);
-
-        String behandlingstype = Behandlingstyper.SOEKNAD.getKode();
-        innData.setBehandlingstype(behandlingstype);
+        String behandlingstema = behandling.getTema().getKode();
+        innData.setBehandlingstema(behandlingstema);
 
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId("1");
@@ -101,7 +99,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
         valider(innData, OPPGAVER_PLUKK_POST_SCHEMA, logger);
 
-        ResponseEntity response = tjeneste.plukkOppgave(innData);
+        ResponseEntity response = oppgaveTjeneste.plukkOppgave(innData);
 
         assertThat(response.getBody()).isExactlyInstanceOf(PlukketOppgaveDto.class);
 
@@ -116,7 +114,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
         when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
 
-        validerArray((List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>)tjeneste.søkOppgaverMedBrukerID("").getBody(), OPPGAVER_SOK_SCHEMA, logger);
+        validerArray((List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>) oppgaveTjeneste.søkOppgaverMedBrukerID("").getBody(), OPPGAVER_SOK_SCHEMA, logger);
     }
 
     @Test

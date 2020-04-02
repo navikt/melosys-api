@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -46,7 +45,7 @@ public class JournalfoeringTjeneste {
 
         if (journalpost.mottaksKanalErEessi()) {
             journalføringService.finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID)
-                .ifPresent(b -> journalpostDto.setBehandlingsInformasjon(new BehandlingsInformasjon(Sakstyper.EU_EOS, b)));
+                .ifPresent(behandlingstema -> journalpostDto.setBehandlingsInformasjon(new BehandlingsInformasjon(behandlingstema)));
         }
         return ResponseEntity.ok(journalpostDto);
     }

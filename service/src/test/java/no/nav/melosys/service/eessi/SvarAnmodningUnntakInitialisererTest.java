@@ -7,7 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -53,7 +53,7 @@ public class SvarAnmodningUnntakInitialisererTest {
     @Test
     public void finnSakOgBestemRuting_anmodningsperiodeUtenSvarFinnes_verifiserKorrektResultat() throws Exception {
 
-        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingstyper.SOEKNAD, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(new Anmodningsperiode()));
         Prosessinstans prosessinstans = hentProsessinstans();
         RutingResultat resultat = svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
@@ -68,7 +68,7 @@ public class SvarAnmodningUnntakInitialisererTest {
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
 
-        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingstyper.SOEKNAD, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)));
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
         Prosessinstans prosessinstans = hentProsessinstans();
         RutingResultat resultat = svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
@@ -79,7 +79,7 @@ public class SvarAnmodningUnntakInitialisererTest {
 
     @Test
     public void finnSakOgBestemRuting_behandlingstypeSøknadIkkeYrkesaktiv_oppgaveOppdateres() throws Exception {
-        Fagsak fagsak = hentFagsak(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        Fagsak fagsak = hentFagsak(Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
         Prosessinstans prosessinstans = hentProsessinstans();
         when(oppgaveService.finnOppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
@@ -94,7 +94,7 @@ public class SvarAnmodningUnntakInitialisererTest {
     @Test(expected = FunksjonellException.class)
     public void finnSakOgBestemRuting_ingenAnmodningsperiode_forventException() throws Exception {
 
-        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingstyper.SOEKNAD, Behandlingsstatus.FORELOEPIG_LOVVALG)));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak(Behandlingstema.UTSENDT_SELVSTENDIG, Behandlingsstatus.FORELOEPIG_LOVVALG)));
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
         Prosessinstans prosessinstans = hentProsessinstans();
         svarAnmodningUnntakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
@@ -113,10 +113,10 @@ public class SvarAnmodningUnntakInitialisererTest {
         assertThat(svarAnmodningUnntakInitialiserer.hentAktuellProsessType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_SVAR);
     }
 
-    private Fagsak hentFagsak(Behandlingstyper behandlingstype, Behandlingsstatus behandlingsstatus) {
+    private Fagsak hentFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
-        behandling.setType(behandlingstype);
+        behandling.setTema(behandlingstema);
         behandling.setStatus(behandlingsstatus);
         behandling.setId(123L);
         behandling.setFagsak(fagsak);

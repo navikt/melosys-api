@@ -9,6 +9,7 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
@@ -93,7 +94,7 @@ public class AvsluttArt13BehandlingTest {
 
     @Test
     public void avsluttBehandlingArt13_norgeUtpekt2Mnd1DagSidenVedtak_behandlingBlirAvlsuttet() throws FunksjonellException, TekniskException {
-        behandling.setType(Behandlingstyper.BESLUTNING_LOVVALG_NORGE);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
         avsluttArt13BehandlingJobb.avsluttBehandlingArt13();
@@ -103,7 +104,7 @@ public class AvsluttArt13BehandlingTest {
 
     @Test
     public void avsluttBehandlingArt13_annetLandUtpekt2Mnd1DagSidenEndretDato_behandlingBlirAvlsuttet() throws FunksjonellException, TekniskException {
-        behandling.setType(Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         behandlingsresultat.setEndretDato(månederOgDagerSiden(2, 1));
 
         avsluttArt13BehandlingJobb.avsluttBehandlingArt13();
