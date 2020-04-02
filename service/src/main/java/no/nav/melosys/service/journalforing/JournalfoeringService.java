@@ -146,11 +146,16 @@ public class JournalfoeringService {
     @Transactional(rollbackFor = MelosysException.class)
     public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
         String saksnummer = journalfoeringDto.getSaksnummer();
+        Behandlingstyper behandlingstype =  StringUtils.isNotEmpty(journalfoeringDto.getBehandlingstypeKode())
+            ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
+
         log.info("{} knytter journalpost {} til sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
         valider(journalfoeringDto);
         if (StringUtils.isEmpty(journalfoeringDto.getSaksnummer())) {
             throw new FunksjonellException("Saksnummer mangler");
+        } else if (behandlingstype != null && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
+            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
         }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);

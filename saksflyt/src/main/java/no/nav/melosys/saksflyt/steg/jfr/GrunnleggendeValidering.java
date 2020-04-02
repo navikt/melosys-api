@@ -111,7 +111,6 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
     }
 
     private void validerBehandlingstema(Behandlingstema behandlingstema) throws FunksjonellException {
-
         if (!Behandling.erBehandlingAvSøknad(behandlingstema)) {
             throw new FunksjonellException("Behandlingstema gjelder ikke en søknad!");
         }

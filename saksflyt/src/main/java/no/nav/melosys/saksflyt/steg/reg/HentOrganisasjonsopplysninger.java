@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -16,9 +18,9 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.behandling.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +38,15 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentOrganisasjonsopplysninger.class);
 
-    private final BehandlingRepository behandlingRepo;
+    private final BehandlingService behandlingService;
     private final SaksopplysningRepository saksopplysningRepo;
     private final EregFasade eregFasade;
 
     @Autowired
-    public HentOrganisasjonsopplysninger(BehandlingRepository behandlingRepo, SaksopplysningRepository saksopplysningRepo, @Qualifier("system")EregFasade eregFasade) {
-        this.behandlingRepo = behandlingRepo;
+    public HentOrganisasjonsopplysninger(BehandlingService behandlingService, SaksopplysningRepository saksopplysningRepo, @Qualifier("system")EregFasade eregFasade) {
+        this.behandlingService = behandlingService;
         this.saksopplysningRepo = saksopplysningRepo;
         this.eregFasade = eregFasade;
-        log.info("HentOrganisasjonsopplysninger initialisert");
     }
 
     @Override
@@ -57,7 +58,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = behandlingRepo.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Set<String> orgnumre = new HashSet<>();
 
         Optional<SaksopplysningDokument> arbeidsforholdDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.ARBFORH);
