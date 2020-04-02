@@ -21,6 +21,7 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -69,7 +70,6 @@ public class ManuellSedBehandlingInitialisererTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
-        verify(oppgaveService, never()).finnOppgaveMedFagsaksnummer(any());
     }
 
     @Test
@@ -101,8 +101,14 @@ public class ManuellSedBehandlingInitialisererTest {
         Fagsak fagsak = hentFagsak();
         fagsak.getAktivBehandling().setStatus(Behandlingsstatus.AVSLUTTET);
         when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
+
         manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
-        verify(oppgaveService).opprettOppgave(any(Oppgave.class));
+
+        ArgumentCaptor<Oppgave> oppgaveCaptor = ArgumentCaptor.forClass(Oppgave.class);
+        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue())
+            .hasFieldOrPropertyWithValue("saksnummer", SAKSNUMMER)
+            .hasFieldOrPropertyWithValue("beskrivelse", "Mottatt SED A004");
     }
 
     private MelosysEessiMelding hentMelosysEessiMelding(SedType sedType) {

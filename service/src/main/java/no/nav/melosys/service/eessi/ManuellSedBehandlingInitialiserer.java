@@ -65,12 +65,14 @@ public class ManuellSedBehandlingInitialiserer {
                 behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
             }
 
-            if (SedType.X009 == sedType) {
-                oppdaterOppgavePrioritet(fagsak.getSaksnummer());
+            Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(fagsak.getSaksnummer());
+
+            if (oppgave.isPresent() && SedType.X009 == sedType) {
+                oppdaterOppgavePrioritet(oppgave.get());
             }
 
-            if (behandling.erAvsluttet() && SedType.X001 != sedType) {
-                opprettBehandlingsoppgave(fagsak.getSaksnummer(), prosessinstans);
+            if (oppgave.isEmpty() && SedType.X001 != sedType) {
+                opprettBehandlingsoppgave(fagsak.getSaksnummer(), prosessinstans, sedType);
             }
 
             prosessinstans.setBehandling(behandling);
@@ -79,23 +81,22 @@ public class ManuellSedBehandlingInitialiserer {
         }
     }
 
-    private void oppdaterOppgavePrioritet(String saksnummer) throws FunksjonellException, TekniskException {
-        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer);
-        if (oppgave.isPresent()) {
-            log.info("Setter prioritet til HØY for oppgave {}", oppgave.get().getOppgaveId());
-            oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().prioritet(PrioritetType.HOY.name()).build());
-        }
+    private void oppdaterOppgavePrioritet(Oppgave oppgave) throws FunksjonellException, TekniskException {
+        log.info("Setter prioritet til HØY for oppgave {}", oppgave.getOppgaveId());
+        oppgaveService.oppdaterOppgave(oppgave.getOppgaveId(),
+            OppgaveOppdatering.builder()
+                .prioritet(PrioritetType.HOY.name())
+                .beskrivelse("PURRING SEDX009")
+                .build()
+        );
     }
 
-    private void opprettBehandlingsoppgave(String saksnummer, Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer);
-        if (oppgave.isEmpty()) {
-            Oppgave nyOppgave = OppgaveFactory.lagBehandlingsOppgaveForType(Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND)
-                .setTilordnetRessurs(prosessinstans.hentSaksbehandlerHvisTilordnes())
-                .setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID))
-                .setSaksnummer(saksnummer)
-                .build();
-            oppgaveService.opprettOppgave(nyOppgave);
-        }
+    private void opprettBehandlingsoppgave(String saksnummer, Prosessinstans prosessinstans, SedType sedType) throws FunksjonellException, TekniskException {
+        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND)
+            .setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID))
+            .setSaksnummer(saksnummer)
+            .setBeskrivelse("Mottatt SED " + sedType)
+            .build();
+        oppgaveService.opprettOppgave(oppgave);
     }
 }
