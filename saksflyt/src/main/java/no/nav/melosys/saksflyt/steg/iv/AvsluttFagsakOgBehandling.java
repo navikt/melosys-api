@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -54,9 +53,8 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService
             .hentBehandlingsresultat(prosessinstans.getBehandling().getId());
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
 
-        if (behandlingsresultat.erInnvilgelse() && lovvalgsperiode.erArtikkel13()) {
+        if (behandlingsresultat.erInnvilgelse() && behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel13()) {
             long behandlingID = prosessinstans.getBehandling().getId();
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
