@@ -284,7 +284,7 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void opprettProsessinstansGodkjennUnntaksperiode() {
-        service.opprettProsessinstansGodkjennUnntaksperiode(new Behandling());
+        service.opprettProsessinstansGodkjennUnntaksperiode(new Behandling(), false);
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans prosessinstans = piCaptor.getValue();

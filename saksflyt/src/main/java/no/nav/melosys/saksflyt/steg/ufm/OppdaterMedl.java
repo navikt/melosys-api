@@ -72,7 +72,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             log.info("Lovvalgsperiode for behandling {} satt til endelig i Medl", behandlingId);
         }
 
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 
     private Long opprettOgLagrePeriode(long behandlingId, Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder, boolean erEndelig) throws TekniskException, FunksjonellException {

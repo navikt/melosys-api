@@ -53,17 +53,17 @@ public class UnntaksperiodeServiceTest {
     @Test(expected = FunksjonellException.class)
     public void godkjennPeriode_behandlingAvsluttet_forventException() throws FunksjonellException, TekniskException {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        unntaksperiodeService.godkjennPeriode(1L);
+        unntaksperiodeService.godkjennPeriode(1L,  false);
     }
 
     @Test(expected = FunksjonellException.class)
     public void godkjennPeriode_feilBehandlingstype_forventException() throws FunksjonellException, TekniskException {
         behandling.setType(Behandlingstyper.SOEKNAD);
-        unntaksperiodeService.godkjennPeriode(1L);
+        unntaksperiodeService.godkjennPeriode(1L, false);
     }
 
     public void godkjennPeriode_korrektStatusOgType_verifiserKall() throws FunksjonellException, TekniskException {
-        unntaksperiodeService.godkjennPeriode(1L);
+        unntaksperiodeService.godkjennPeriode(1L, false);
         verify(oppgaveService).ferdigstillOppgave(any());
     }
 
