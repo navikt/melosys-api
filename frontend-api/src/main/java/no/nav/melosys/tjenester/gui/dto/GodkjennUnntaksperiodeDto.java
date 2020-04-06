@@ -1,10 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 public class GodkjennUnntaksperiodeDto {
-    private boolean varsleUtland;
-
-    public GodkjennUnntaksperiodeDto() {
-    }
+    private final boolean varsleUtland;
 
     public GodkjennUnntaksperiodeDto(boolean varsleUtland) {
         this.varsleUtland = varsleUtland;
@@ -12,9 +9,5 @@ public class GodkjennUnntaksperiodeDto {
 
     public boolean isVarsleUtland() {
         return varsleUtland;
-    }
-
-    public void setVarsleUtland(boolean varsleUtland) {
-        this.varsleUtland = varsleUtland;
     }
 }

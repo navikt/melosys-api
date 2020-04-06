@@ -34,7 +34,7 @@ public class VarsleUtland extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
         boolean varsleUtland = prosessinstans.getData(ProsessDataKey.VARSLE_UTLAND, Boolean.class);
 
-        if (behandling.annetLandErUtpekt() && varsleUtland) {
+        if (behandling.erUtpekingAvAnnetLand() && varsleUtland) {
             if (saksopplysningerService.hentSedOpplysninger(behandling.getId()).getErElektronisk()) {
                 eessiService.sendGodkjenningArbeidFlereLand(behandling.getId());
             } else {
