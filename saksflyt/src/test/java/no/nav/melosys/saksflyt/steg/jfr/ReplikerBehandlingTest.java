@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.ArrayList;
 
@@ -48,6 +47,7 @@ public class ReplikerBehandlingTest {
         fagsak.setBehandlinger(new ArrayList<>());
         p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, "MelTest-1");
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         doReturn(fagsak).when(fagsakService).hentFagsak("MelTest-1");
 
     }
@@ -60,12 +60,14 @@ public class ReplikerBehandlingTest {
     }
 
     @Test
-    public void utfør_eksisterendeInaktivBehandling_settStegOpprettOppgave() throws FunksjonellException, TekniskException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    public void utfør_eksisterendeInaktivBehandling_settStegOpprettOppgave() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setRegistrertDato(Instant.now());
         fagsak.getBehandlinger().add(behandling);
         Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setFagsak(fagsak);
         replikertBehandling.setId(11L);
         doReturn(replikertBehandling).when(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling,  Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
 

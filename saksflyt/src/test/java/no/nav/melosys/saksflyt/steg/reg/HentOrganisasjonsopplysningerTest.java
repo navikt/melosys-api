@@ -23,7 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,8 +49,10 @@ public class HentOrganisasjonsopplysningerTest {
 
     @Test
     public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        final Long behandlingID = 111L;
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
+        p.getBehandling().setId(behandlingID);
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -66,10 +69,10 @@ public class HentOrganisasjonsopplysningerTest {
 
         p.getBehandling().setSaksopplysninger(saksopplysninger);
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(p.getBehandling());
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(p.getBehandling());
         when(eregFasade.hentOrganisasjon(eq(orgnr1))).thenReturn(new Saksopplysning());
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(saksopplysningRepository).save(any(Saksopplysning.class));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_MEDL_OPPL);
