@@ -48,7 +48,7 @@ public class OpprettBehandlingsgrunnlagTest {
 
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer("123");
-        melosysEessiMelding.setDokumentId("abc");
+        melosysEessiMelding.setSedId("abc");
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         when(eessiService.hentSedGrunnlag(anyString(), anyString())).thenReturn(new SedGrunnlag());
 
