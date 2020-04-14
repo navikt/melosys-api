@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.OppgaveBehandlingstema;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
@@ -44,6 +43,9 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
     private static final String NY_VURDERING_BEHANDLINGTYPEKODE = "ae0240";
     private static final String ENDRET_PERIODE_BEHANDLINGSTYPEKODE = "ae0052";
+
+    private static final String EUEOS_BEHANDLINGSTEMAKODE = "ab0424";
+    private static final String EUEOS_BEHANDLINGSTEMAKODE_GAMMEL = "ab0390";
 
 
     private static final ImmutableBiMap<no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema, String> BEHANDLINGSTYPE_FELLESKODE_MAP =
@@ -88,7 +90,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medBehandlingsType(hentFellesKode(behandlingstema))
-            .medBehandlingstema(OppgaveBehandlingstema.EU_EOS.getKode())
+            .medBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE)
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
@@ -99,19 +101,19 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         if (erBehandlingstypeUtsending(behandlingstema)) {
 
             oppgaver.addAll(oppgaveConsumer.hentOppgaveListe(
-                searchRequestBuilder.medBehandlingstema(OppgaveBehandlingstema.EU_EOS_GAMMEL_KODE.getKode()).build()
+                searchRequestBuilder.medBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE_GAMMEL).build()
             ));
 
             oppgaver.addAll(oppgaveConsumer.hentOppgaveListe(
                 searchRequestBuilder
-                    .medBehandlingstema(OppgaveBehandlingstema.EU_EOS.getKode())
+                    .medBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE)
                     .medBehandlingsType(NY_VURDERING_BEHANDLINGTYPEKODE)
                     .build()
             ));
 
             oppgaver.addAll(oppgaveConsumer.hentOppgaveListe(
                 searchRequestBuilder
-                    .medBehandlingstema(OppgaveBehandlingstema.EU_EOS.getKode())
+                    .medBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE)
                     .medBehandlingsType(ENDRET_PERIODE_BEHANDLINGSTYPEKODE)
                     .build()
             ));
@@ -139,7 +141,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstema()));
         }
         if (oppgave.getBehandlingstema() != null) {
-            oppgaveDto.setBehandlingstema(OppgaveBehandlingstema.EU_EOS.getKode());
+            oppgaveDto.setBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE);
             //oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode()); todo: mapping til nytt kodeverk når det kommer..
         }
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());

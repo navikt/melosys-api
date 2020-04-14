@@ -6,9 +6,9 @@ import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import no.nav.dok.melosysbrev._000083.*;
 import no.nav.dok.melosysbrev._000083.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000083.ObjectFactory;
+import no.nav.dok.melosysbrev._000083.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
@@ -45,15 +45,8 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
     private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelseFlereLand brevdata) throws TekniskException {
         Fag fag = new Fag();
-        if (behandling.erBehandlingAvSøknad()) {
-            fag.setBehandlingstype(BehandlingstypeKode.SOEKNAD);
-        } else if (behandling.norgeErUtpekt()) {
-            fag.setBehandlingstype(BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE);
-        } else if (behandling.erKlage()) {
-            fag.setBehandlingstype(BehandlingstypeKode.KLAGE);
-        } else {
-            fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
-        }
+
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
 
         // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
         int antallArbeidsgivere = brevdata.arbeidsgivere.size();

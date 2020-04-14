@@ -50,16 +50,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
     private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevdata) throws TekniskException {
         Fag fag = new Fag();
 
-        if (behandling.erBehandlingAvSøknad()) {
-            fag.setBehandlingstype(BehandlingstypeKode.SOEKNAD);
-        } else if (behandling.norgeErUtpekt()) {
-            fag.setBehandlingstype(BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE);
-        } else if (behandling.erKlage()) {
-            fag.setBehandlingstype(BehandlingstypeKode.KLAGE);
-        } else {
-            fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
-        }
-
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
         AvklartVirksomhet hovedvirksomhet = brevdata.hovedvirksomhet;

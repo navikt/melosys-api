@@ -273,7 +273,7 @@ public class JournalfoeringService {
         }
     }
 
-    public Optional<Behandlingstema> finnBehandlingstypeForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
+    public Optional<Behandlingstema> finnBehandlingstemaForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
         return eessiService.finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID);
     }
 }

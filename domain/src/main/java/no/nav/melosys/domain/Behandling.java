@@ -215,6 +215,14 @@ public class Behandling extends RegistreringsInfo {
         return tema != null && erBehandlingAvSøknad(tema.getKode());
     }
 
+    public boolean erNyVurdering() {
+        return type == Behandlingstyper.NY_VURDERING;
+    }
+
+    public boolean erEndretPeriode() {
+        return type == Behandlingstyper.ENDRET_PERIODE;
+    }
+
     public boolean erKlage() {
         return type == Behandlingstyper.KLAGE;
     }

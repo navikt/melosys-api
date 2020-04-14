@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.OppgaveBehandlingstema;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.Konstanter;
@@ -65,7 +64,7 @@ public final class OppgaveFasadeImplTest {
         OpprettOppgaveDto opprettOppgaveDto = captor.getValue();
 
         assertThat(opprettOppgaveDto.getOppgavetype()).isEqualTo(Oppgavetyper.VUR.getKode());
-        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo(OppgaveBehandlingstema.EU_EOS.getKode());
+        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo("ab0424");
         assertThat(opprettOppgaveDto.getFristFerdigstillelse()).isNotNull();
     }
 
