@@ -9,11 +9,9 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +23,14 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlPeriodeService medlPeriodeService;
-    private final MedlFasade medlFasade;
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public OppdaterMedl(MedlPeriodeService medlPeriodeService, MedlFasade medlFasade, BehandlingService behandlingService) {
+    public OppdaterMedl(MedlPeriodeService medlPeriodeService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
         this.medlPeriodeService = medlPeriodeService;
-        this.medlFasade = medlFasade;
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Override
@@ -45,12 +43,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
 
-        Lovvalgsperiode lovvalgsperiode = medlPeriodeService.hentLovvalgsperiode(behandling);
+        Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode();
         if (lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET) {
-            medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.SED);
+            medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, true);
             log.info("Lovvalgsperiode for behandling {} satt til endelig i Medl", behandling.getId());
         } else {
-            medlFasade.avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
+            medlPeriodeService.avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
             log.info("Lovvalgsperiode for behandling {} satt til avvist i Medl", behandling.getId());
         }
 

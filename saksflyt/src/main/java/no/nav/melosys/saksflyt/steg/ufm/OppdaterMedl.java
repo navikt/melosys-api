@@ -11,8 +11,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -27,14 +25,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
-    private final MedlFasade medlFasade;
     private final MedlPeriodeService medlPeriodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final BehandlingService behandlingService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
-        this.medlFasade = medlFasade;
+    public OppdaterMedl(MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
         this.medlPeriodeService = medlPeriodeService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.behandlingService = behandlingService;
@@ -61,28 +57,25 @@ public class OppdaterMedl extends AbstraktStegBehandler {
                 behandlingId, Collections.singletonList(sedDokument.opprettInnvilgetLovvalgsperiode())
             );
             Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
-            Long medlId = opprettOgLagrePeriode(behandlingId, behandling, lagretLovvalgsperiode, !lovvalgsperiode.erArtikkel13());
-            log.info("Lovvalgsperiode opprettet for behandling {} med medlId {}", behandlingId, medlId);
+            opprettOgLagrePeriode(behandling, lagretLovvalgsperiode, !lovvalgsperiode.erArtikkel13());
         } else if (lovvalgsperioder.iterator().next().getMedlPeriodeID() == null) {
-            Long medlId = opprettOgLagrePeriode(behandlingId, behandling, lovvalgsperioder, true);
-            log.info("Lovvalgsperiode for behandling {} opprettet og lagret i Medl med medlId {}", behandlingId, medlId);
+            opprettOgLagrePeriode(behandling, lovvalgsperioder, true);
         } else {
             Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
-            medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.SED);
+            medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, true);
             log.info("Lovvalgsperiode for behandling {} satt til endelig i Medl", behandlingId);
         }
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 
-    private Long opprettOgLagrePeriode(long behandlingId, Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder, boolean erEndelig) throws TekniskException, FunksjonellException {
+    private void opprettOgLagrePeriode(Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder, boolean erEndelig) throws TekniskException, FunksjonellException {
         String ident = SaksopplysningerUtils.hentPersonDokument(behandling).fnr;
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
-        Long medlId = erEndelig
-            ? medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED)
-            : medlFasade.opprettPeriodeForeløpig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
-        medlPeriodeService.lagreMedlPeriodeId(medlId, lovvalgsperiode, behandlingId);
-
-        return medlId;
+        if (erEndelig) {
+            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), true, ident);
+        } else {
+            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), true, ident);
+        }
     }
 }

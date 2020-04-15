@@ -23,14 +23,13 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -74,7 +73,7 @@ public class VedtakServiceTest {
     @Mock
     private RegisteropplysningerService registeropplysningerService;
     @Mock
-    private MedlFasade medlFasade;
+    private MedlPeriodeService medlPeriodeService;
 
     private VedtakService vedtakService;
 
@@ -89,7 +88,7 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, tpsFasade, vedtakKontrollService, registeropplysningerService, medlFasade);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, tpsFasade, vedtakKontrollService, registeropplysningerService, medlPeriodeService);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -274,7 +273,7 @@ public class VedtakServiceTest {
         verify(behandlingService).hentBehandling(behandlingID);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
         verify(oppgaveService).opprettOppgave(oppgaveArgumentCaptor.capture());
-        verify(medlFasade).avvisPeriode(eq(behandlingsresultat.getLovvalgsperioder().iterator().next().getMedlPeriodeID()), eq(StatusaarsakMedl.AVVIST));
+        verify(medlPeriodeService).avvisPeriode(eq(behandlingsresultat.getLovvalgsperioder().iterator().next().getMedlPeriodeID()));
         verifyNoMoreInteractions(oppgaveService, behandlingService);
 
         assertThat(oppgaveArgumentCaptor.getValue().getTilordnetRessurs()).isEqualTo("Z990007");

@@ -19,14 +19,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
@@ -54,7 +53,7 @@ public class VedtakService {
     private final TpsFasade tpsFasade;
     private final VedtakKontrollService vedtakKontrollService;
     private final RegisteropplysningerService registeropplysningerService;
-    private final MedlFasade medlFasade;
+    private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
@@ -63,8 +62,7 @@ public class VedtakService {
                          FagsakService fagsakService,
                          TpsFasade tpsFasade,
                          VedtakKontrollService vedtakKontrollService,
-                         RegisteropplysningerService registeropplysningerService,
-                         MedlFasade medlFasade) {
+                         RegisteropplysningerService registeropplysningerService, MedlPeriodeService medlPeriodeService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -75,7 +73,7 @@ public class VedtakService {
         this.tpsFasade = tpsFasade;
         this.vedtakKontrollService = vedtakKontrollService;
         this.registeropplysningerService = registeropplysningerService;
-        this.medlFasade = medlFasade;
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -196,7 +194,7 @@ public class VedtakService {
             .findFirst();
 
         if (medlPeriodeID.isPresent()) {
-            medlFasade.avvisPeriode(medlPeriodeID.get(), StatusaarsakMedl.AVVIST);
+            medlPeriodeService.avvisPeriode(medlPeriodeID.get());
         }
     }
 

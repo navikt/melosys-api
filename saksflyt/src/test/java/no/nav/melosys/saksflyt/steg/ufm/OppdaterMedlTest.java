@@ -15,8 +15,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -35,8 +33,6 @@ import static org.mockito.Mockito.when;
 public class OppdaterMedlTest {
 
     @Mock
-    private MedlFasade medlFasade;
-    @Mock
     private MedlPeriodeService medlPeriodeService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
@@ -49,7 +45,7 @@ public class OppdaterMedlTest {
 
     @Before
     public void setUp() throws Exception {
-        oppdaterMedl = new OppdaterMedl(medlFasade, medlPeriodeService, lovvalgsperiodeService, behandlingService);
+        oppdaterMedl = new OppdaterMedl(medlPeriodeService, lovvalgsperiodeService, behandlingService);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
     }
 
@@ -65,9 +61,8 @@ public class OppdaterMedlTest {
 
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(medlPeriodeService).opprettPeriodeEndelig(any(Lovvalgsperiode.class), eq(12L), eq(true), eq("123"));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
-        verify(medlPeriodeService).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 
@@ -84,9 +79,8 @@ public class OppdaterMedlTest {
 
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(medlFasade).opprettPeriodeForeløpig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(medlPeriodeService).opprettPeriodeForeløpig(any(Lovvalgsperiode.class), eq(12L), eq(true), eq("123"));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
-        verify(medlPeriodeService).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 
@@ -103,7 +97,7 @@ public class OppdaterMedlTest {
 
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(medlFasade).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(true));
         verify(lovvalgsperiodeService).hentLovvalgsperioder(eq(12L));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
@@ -120,8 +114,7 @@ public class OppdaterMedlTest {
 
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
-        verify(medlPeriodeService).lagreMedlPeriodeId(anyLong(), any(Lovvalgsperiode.class), anyLong());
+        verify(medlPeriodeService).opprettPeriodeEndelig(any(Lovvalgsperiode.class), eq(12L), eq(true), eq("123"));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 

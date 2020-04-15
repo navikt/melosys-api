@@ -1,13 +1,11 @@
 package no.nav.melosys.saksflyt.steg.ul;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +20,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
-    private final MedlFasade medlFasade;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService) {
-        this.medlFasade = medlFasade;
+    public OppdaterMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+        this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
     }
 
@@ -39,13 +37,10 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        Behandling behandling = prosessinstans.getBehandling();
+        Long behandlingID = prosessinstans.getBehandling().getId();
 
-        String fnr = medlPeriodeService.hentFnr(behandling);
-        Lovvalgsperiode lovvalgsperiode = medlPeriodeService.hentLovvalgsperiode(behandling);
-
-        Long medlPeriodeID = medlFasade.opprettPeriodeForeløpig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-        medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
+        Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertLovvalgsperiode();
+        medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandlingID, false, null);
 
         prosessinstans.setSteg(UL_SEND_ORIENTERINGSBREV);
     }

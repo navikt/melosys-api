@@ -17,12 +17,12 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ public class RegisteropplysningerService {
             .build());
 
     private final TpsFasade tpsFasade;
-    private final MedlFasade medlFasade;
+    private final MedlPeriodeService medlPeriodeService;
     private final EregFasade eregFasade;
     private final AaregFasade aaregFasade;
     private final BehandlingService behandlingService;
@@ -68,8 +68,7 @@ public class RegisteropplysningerService {
 
     @Autowired
     public RegisteropplysningerService(@Qualifier("system") TpsFasade tpsFasade,
-                                       MedlFasade medlFasade,
-                                       @Qualifier("system") EregFasade eregFasade,
+                                       MedlPeriodeService medlPeriodeService, @Qualifier("system") EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
                                        SakOgBehandlingFasade sakOgBehandlingFasade,
@@ -80,7 +79,7 @@ public class RegisteropplysningerService {
                                        @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr
     ) {
         this.tpsFasade = tpsFasade;
-        this.medlFasade = medlFasade;
+        this.medlPeriodeService = medlPeriodeService;
         this.eregFasade = eregFasade;
         this.aaregFasade = aaregFasade;
         this.behandlingService = behandlingService;
@@ -165,7 +164,7 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        Saksopplysning saksopplysning = medlFasade.hentPeriodeListe(registeropplysningerRequest.getFnr(), fom.minusYears(medlemskaphistorikkAntallÅr), tom);
+        Saksopplysning saksopplysning = medlPeriodeService.hentPeriodeListe(registeropplysningerRequest.getFnr(), fom.minusYears(medlemskaphistorikkAntallÅr), tom);
         return List.of(saksopplysning);
     }
 
