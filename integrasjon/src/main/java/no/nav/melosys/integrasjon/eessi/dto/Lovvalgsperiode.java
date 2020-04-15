@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
 
 public class Lovvalgsperiode {
 
@@ -28,6 +29,10 @@ public class Lovvalgsperiode {
     private String unntaksBegrunnelse;
 
     private Bestemmelse unntakFraBestemmelse;
+
+    public Periode tilPeriode() {
+        return new Periode(fom, tom);
+    }
 
     public String getLovvalgsland() {
         return lovvalgsland;

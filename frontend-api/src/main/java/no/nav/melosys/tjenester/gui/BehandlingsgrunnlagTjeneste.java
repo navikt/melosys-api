@@ -4,7 +4,7 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsgrunnlagTilleggsData;
@@ -31,15 +31,21 @@ public class BehandlingsgrunnlagTjeneste {
     }
 
     @GetMapping("/{behandlingID}")
-    public ResponseEntity hentBehandlingsgrunnlag(@PathVariable(value = "behandlingID") long behandlingID) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public ResponseEntity<BehandlingsgrunnlagGetDto> hentBehandlingsgrunnlag(
+        @PathVariable(value = "behandlingID") long behandlingID
+    ) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+
         tilgangService.sjekkTilgang(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
         return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag, hentTilleggsData(behandlingsgrunnlag.getBehandlingsgrunnlagdata())));
     }
 
     @PostMapping("/{behandlingID}")
-    public ResponseEntity oppdaterBehandlingsgrunnlag(@PathVariable(value = "behandlingID") long behandlingID,
-                                                      @RequestBody BehandlingsgrunnlagPostDto behandlingsgrunnlagPostDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<BehandlingsgrunnlagGetDto> oppdaterBehandlingsgrunnlag(
+        @PathVariable(value = "behandlingID") long behandlingID,
+        @RequestBody BehandlingsgrunnlagPostDto behandlingsgrunnlagPostDto
+    ) throws FunksjonellException, TekniskException {
+
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagPostDto.getData());
         return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag, hentTilleggsData(behandlingsgrunnlag.getBehandlingsgrunnlagdata())));

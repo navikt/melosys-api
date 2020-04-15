@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.afl;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -9,6 +9,8 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.dokument.sed.EessiService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,10 +18,12 @@ public class OpprettBehandlingsgrunnlag extends AbstraktStegBehandler {
 
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final OpprettSedDokumentFelles opprettSedDokumentFelles;
+    private final EessiService eessiService;
 
-    public OpprettBehandlingsgrunnlag(BehandlingsgrunnlagService behandlingsgrunnlagService, OpprettSedDokumentFelles opprettSedDokumentFelles) {
+    public OpprettBehandlingsgrunnlag(BehandlingsgrunnlagService behandlingsgrunnlagService, OpprettSedDokumentFelles opprettSedDokumentFelles, @Qualifier("system") EessiService eessiService) {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.opprettSedDokumentFelles = opprettSedDokumentFelles;
+        this.eessiService = eessiService;
     }
 
     @Override
@@ -33,8 +37,8 @@ public class OpprettBehandlingsgrunnlag extends AbstraktStegBehandler {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         opprettSedDokumentFelles.opprettSedSaksopplysning(melosysEessiMelding, prosessinstans.getBehandling());
 
-        //TODO: hent behandlingsgrunnlag fra melosys-eessi
-        behandlingsgrunnlagService.opprettBehandlingsgrunnlag(prosessinstans.getBehandling().getId(), new BehandlingsgrunnlagData());
+        SedGrunnlag sedGrunnlag = eessiService.hentSedGrunnlag(melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getSedId());
+        behandlingsgrunnlagService.opprettSedGrunnlag(prosessinstans.getBehandling().getId(), sedGrunnlag);
         prosessinstans.setSteg(ProsessSteg.AFL_REGISTERKONTROLL);
     }
 }

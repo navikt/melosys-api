@@ -8,6 +8,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_OPPDATER_MEDL;
@@ -18,7 +19,7 @@ public class SendAvslag extends AbstraktStegBehandler {
     private final EessiService eessiService;
 
     @Autowired
-    public SendAvslag(EessiService eessiService) {
+    public SendAvslag(@Qualifier("system") EessiService eessiService) {
         this.eessiService = eessiService;
     }
 

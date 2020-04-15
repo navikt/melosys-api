@@ -15,14 +15,25 @@
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-config</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-domain</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>frontend-api</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>saksflyt</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>sikkerhet</artifactId>
         </dependency>
 
         <dependency>
@@ -32,6 +43,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -44,10 +56,12 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

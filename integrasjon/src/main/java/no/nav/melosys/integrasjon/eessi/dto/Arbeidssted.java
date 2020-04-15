@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 
 public class Arbeidssted {
 
@@ -7,6 +8,15 @@ public class Arbeidssted {
     private Adresse adresse;
     private boolean fysisk;
     private String hjemmebase;
+
+    public ArbeidUtland tilArbeidUtland() {
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+
+        arbeidUtland.adresse = adresse.tilStrukturertAdresse();
+        arbeidUtland.foretakNavn = navn;
+
+        return arbeidUtland;
+    }
 
     public String getNavn() {
         return navn;

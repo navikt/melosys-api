@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BehandlingsgrunnlagService {
 
+    private static final String VERSJON_SED_GRUNNLAG = "1";
     private static final String VERSJON_SOEKNAD_GRUNNLAG = "1.2";
     private static final String VERSJON_GENERELT_GRUNNLAG = "1";
 
@@ -34,6 +36,11 @@ public class BehandlingsgrunnlagService {
     public Behandlingsgrunnlag hentBehandlingsgrunnlag(long behandlingID) throws IkkeFunnetException {
         return behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
+    }
+
+    public Behandlingsgrunnlag opprettSedGrunnlag(long behandlingID,
+                                                  SedGrunnlag sedGrunnlag) throws FunksjonellException {
+        return opprettBehandlingsgrunnlag(behandlingID, sedGrunnlag, BehandlingsGrunnlagType.SED, VERSJON_SED_GRUNNLAG);
     }
 
     public Behandlingsgrunnlag opprettSøknadGrunnlag(long behandlingID,

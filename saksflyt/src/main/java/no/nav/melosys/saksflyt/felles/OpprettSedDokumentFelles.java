@@ -16,8 +16,8 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
 import no.nav.melosys.repository.SaksopplysningRepository;
-import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +61,7 @@ public class OpprettSedDokumentFelles {
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgslandKode(Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()));
         sedDokument.setLovvalgBestemmelse(
-            LovvalgTilBestemmelseDtoMapper.mapBestemmelseVerdiTilMelosysLovvalgBestemmelse(melosysEessiMelding.getArtikkel())
+            Bestemmelse.fraBestemmelseString(melosysEessiMelding.getArtikkel()).tilMelosysBestemmelse()
         );
         if (melosysEessiMelding.getAnmodningUnntak() != null) {
             sedDokument.setUnntakFraLovvalgslandKode(hentUnntakFraLovvalgsland(melosysEessiMelding));
@@ -89,7 +89,7 @@ public class OpprettSedDokumentFelles {
             return null;
         }
 
-        return LovvalgTilBestemmelseDtoMapper.mapBestemmelseVerdiTilMelosysLovvalgBestemmelse(unntakFraLovvalgsbestemmelse);
+        return Bestemmelse.fraBestemmelseString(unntakFraLovvalgsbestemmelse).tilMelosysBestemmelse();
     }
 
     private static Landkoder hentUnntakFraLovvalgsland(MelosysEessiMelding melosysEessiMelding) {
