@@ -57,7 +57,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             //.put(ANKE, "ae0046")
             //.put(KLAGE, "ae0058")
             .put(BESLUTNING_LOVVALG_NORGE, "ae0112")
-            //.put(NY_VURDERING, "ae0240")
             .put(BESLUTNING_LOVVALG_ANNET_LAND, "ae0113")
             .put(ANMODNING_OM_UNNTAK_HOVEDREGEL, "ae0110")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")

@@ -274,6 +274,6 @@ public class JournalfoeringService {
     }
 
     public Optional<Behandlingstema> finnBehandlingstemaForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
-        return eessiService.finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID);
+        return eessiService.finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID);
     }
 }

@@ -7,12 +7,12 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 
-final class SedTypeTilBehandlingstypeMapper {
+final class SedTypeTilBehandlingstemaMapper {
 
-    private SedTypeTilBehandlingstypeMapper() {
+    private SedTypeTilBehandlingstemaMapper() {
     }
 
-    static Optional<Behandlingstema> finnBehandlingstypeForSedType(String sedType, String lovvalgsland) {
+    static Optional<Behandlingstema> finnBehandlingstemaForSedType(String sedType, String lovvalgsland) {
         SedType sedTypeEnum = finnSedType(sedType);
 
         if (sedTypeEnum == null) {
@@ -35,7 +35,7 @@ final class SedTypeTilBehandlingstypeMapper {
             case A001:
                 return Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL;
             case A003:
-                return behandlingstypeForA003(lovvalgsland);
+                return behandlingstemaForA003(lovvalgsland);
             case A009:
                 return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
             case A010:
@@ -45,7 +45,7 @@ final class SedTypeTilBehandlingstypeMapper {
         }
     }
 
-    private static Behandlingstema behandlingstypeForA003(String lovvalgsland) {
+    private static Behandlingstema behandlingstemaForA003(String lovvalgsland) {
         return Landkoder.NO.getKode().equalsIgnoreCase(lovvalgsland)
             ? Behandlingstema.BESLUTNING_LOVVALG_NORGE : Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
