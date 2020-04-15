@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kafka;
+package no.nav.melosys.service.soknad;
 
 import java.time.ZonedDateTime;
 

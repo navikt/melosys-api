@@ -8,7 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.KontrollresultatService;
+import no.nav.melosys.service.kontroll.KontrollresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Component;
 

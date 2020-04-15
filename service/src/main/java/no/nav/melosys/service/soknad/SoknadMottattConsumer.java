@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kafka;
+package no.nav.melosys.service.soknad;
 
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
