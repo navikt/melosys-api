@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kafka;
+package no.nav.melosys.service.eessi.kafka;
 
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
