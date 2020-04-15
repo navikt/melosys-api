@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -95,11 +96,13 @@ public class VedtakServiceTest {
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandlingsresultat.setId(behandlingID);
 
         replikertBehandling.setId(2L);
         replikertBehandling.setStatus(Behandlingsstatus.OPPRETTET);
         replikertBehandling.setType(Behandlingstyper.NY_VURDERING);
+        replikertBehandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
@@ -243,9 +246,9 @@ public class VedtakServiceTest {
     @Test
     public void fattVedtak_feilBehandlingstype_kasterException() throws MelosysException {
 
-        behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Kan ikke fatte vedtak ved behandlingstype ");
+        expectedException.expectMessage("Kan ikke fatte vedtak ved behandlingstema ");
 
         vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
     }
@@ -257,7 +260,7 @@ public class VedtakServiceTest {
         myndighet.setInstitusjonId("SE:SE001");
         behandling.getFagsak().setAktører(Set.of(myndighet));
 
-        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, Behandlingstyper.ENDRET_PERIODE, "FRITEKST");
+        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST");
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), any());

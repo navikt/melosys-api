@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 
@@ -13,49 +13,60 @@ public final class OppgaveFactory {
 
     private OppgaveFactory() {}
 
-    static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
-        return hentOppgaveParametere(behandlingstype).oppgavetype;
+    static Oppgavetyper hentOppgavetype(Behandlingstema behandlingstema) {
+        return hentOppgaveParametere(behandlingstema).oppgavetype;
     }
 
-    public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstyper behandlingstype) {
-        OppgaveParametere parametere = hentOppgaveParametere(behandlingstype);
+    public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        OppgaveParametere parametere = hentOppgaveParametere(behandlingstema);
+
+        if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
+            parametere.fristFerdigstillelse = fristDager(1);
+            parametere.oppgavetype = Oppgavetyper.VUR;
+        }
 
         return new Oppgave.Builder()
             .setBehandlingstype(behandlingstype)
+            .setBehandlingstema(behandlingstema)
             .setTema(parametere.tema)
             .setOppgavetype(parametere.oppgavetype)
             .setFristFerdigstillelse(parametere.fristFerdigstillelse)
-            .setBehandlingstema(parametere.behandlingstema)
             .setPrioritet(PrioritetType.NORM);
     }
 
-    private static OppgaveParametere hentOppgaveParametere(Behandlingstyper behandlingstype) {
-        switch (behandlingstype) {
-            case SOEKNAD:
-            case SOEKNAD_IKKE_YRKESAKTIV:
-            case SOEKNAD_ARBEID_FLERE_LAND:
-            case SOEKNAD_ARBEID_NORGE_BOSATT_ANNET_LAND:
-            case NY_VURDERING:
-                return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30), Behandlingstema.EU_EOS);
-            case ENDRET_PERIODE:
-                return new OppgaveParametere(Tema.MED, Oppgavetyper.VUR, fristDager(1), Behandlingstema.EU_EOS);
+    private static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
+
+        OppgaveParametere oppgaveParametere;
+
+        switch (behandlingstema) {
+            case UTSENDT_ARBEIDSTAKER:
+            case UTSENDT_SELVSTENDIG:
+            case ARBEID_FLERE_LAND:
+            case ARBEID_NORGE_BOSATT_ANNET_LAND:
+                oppgaveParametere = new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+                break;
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
             case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
-                return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2), Behandlingstema.EU_EOS);
+                oppgaveParametere = new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
+                break;
             case BESLUTNING_LOVVALG_NORGE:
-                return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(4), Behandlingstema.EU_EOS);
+                oppgaveParametere = new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(4));
+                break;
             case BESLUTNING_LOVVALG_ANNET_LAND:
-                return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4), Behandlingstema.EU_EOS);
+                oppgaveParametere = new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4));
+                break;
             case ANMODNING_OM_UNNTAK_HOVEDREGEL:
             case ØVRIGE_SED:
-                return new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8), Behandlingstema.EU_EOS);
-            case VURDER_TRYGDETID:
-                return new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(8), Behandlingstema.EU_EOS);
-            case KLAGE:
-            case ANKE:
+                oppgaveParametere =  new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
+                break;
+            case TRYGDETID:
+                oppgaveParametere = new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
+                break;
             default:
-                throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstype  " + behandlingstype);
+                throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
         }
+
+        return oppgaveParametere;
     }
 
     private static LocalDate fristUker(int uker) {
@@ -68,15 +79,13 @@ public final class OppgaveFactory {
 
     public static class OppgaveParametere {
         final Tema tema;
-        final Oppgavetyper oppgavetype;
-        final LocalDate fristFerdigstillelse;
-        final Behandlingstema behandlingstema;
+        Oppgavetyper oppgavetype;
+        LocalDate fristFerdigstillelse;
 
-        OppgaveParametere(Tema tema, Oppgavetyper oppgavetype, LocalDate fristFerdigstillelse, Behandlingstema behandlingstema) {
+        OppgaveParametere(Tema tema, Oppgavetyper oppgavetype, LocalDate fristFerdigstillelse) {
             this.tema = tema;
             this.oppgavetype = oppgavetype;
             this.fristFerdigstillelse = fristFerdigstillelse;
-            this.behandlingstema = behandlingstema;
         }
     }
 }

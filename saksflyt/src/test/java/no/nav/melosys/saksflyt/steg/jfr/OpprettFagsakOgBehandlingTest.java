@@ -1,11 +1,14 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 
 import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -108,6 +111,11 @@ public class OpprettFagsakOgBehandlingTest {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
 
+        Behandling sistOppdaterteBehandling = new Behandling();
+        sistOppdaterteBehandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        sistOppdaterteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        sistOppdaterteBehandling.setEndretDato(Instant.now());
+
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
@@ -117,12 +125,13 @@ public class OpprettFagsakOgBehandlingTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
+        fagsak.setBehandlinger(List.of(sistOppdaterteBehandling));
         when(fagsakService.hentFagsak("MELTEST-333")).thenReturn(fagsak);
-        when(behandlingService.nyBehandling(eq(fagsak), any(), any(), anyString(), anyString())).thenReturn(new Behandling());
+        when(behandlingService.nyBehandling(eq(fagsak), any(), any(), any(), anyString(), anyString())).thenReturn(new Behandling());
 
         agent.utførSteg(p);
 
-        verify(behandlingService).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstyper.SOEKNAD, initierendeJournalpostId, initierendeDokumentId);
+        verify(behandlingService).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstyper.SOEKNAD, sistOppdaterteBehandling.getTema(), initierendeJournalpostId, initierendeDokumentId);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
     }

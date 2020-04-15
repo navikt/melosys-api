@@ -3,12 +3,14 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.Instant;
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class BehandlingOppsummeringDto {
 
     private Behandlingsstatus behandlingsstatus;
     private Behandlingstyper behandlingstype;
+    private Behandlingstema behandlingstema;
     private Instant registrertDato;
     private Instant endretDato;
     private Instant sisteOpplysningerHentetDato;
@@ -27,6 +29,14 @@ public class BehandlingOppsummeringDto {
 
     public void setBehandlingstype(Behandlingstyper behandlingstype) {
         this.behandlingstype = behandlingstype;
+    }
+
+    public Behandlingstema getBehandlingstema() {
+        return behandlingstema;
+    }
+
+    public void setBehandlingstema(Behandlingstema behandlingstema) {
+        this.behandlingstema = behandlingstema;
     }
 
     public Instant getRegistrertDato() {

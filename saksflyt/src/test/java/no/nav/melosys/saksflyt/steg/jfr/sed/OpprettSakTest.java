@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr.sed;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
@@ -39,7 +39,7 @@ public class OpprettSakTest {
     public void utfør() throws MelosysException {
 
         String saksnummer = "saksnr";
-        Behandlingstyper behandlingstype = Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+        Behandlingstema behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER;
         String aktørID = "aktør";
         Long gsakSaksnummer = 12233L;
 
@@ -47,7 +47,7 @@ public class OpprettSakTest {
         fagsak.setSaksnummer(saksnummer);
 
         Behandling behandling = new Behandling();
-        behandling.setType(behandlingstype);
+        behandling.setTema(behandlingstema);
         behandling.setFagsak(fagsak);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -62,7 +62,7 @@ public class OpprettSakTest {
 
         verify(sakService).opprettSak(
             eq(saksnummer),
-            eq(behandlingstype),
+            eq(behandlingstema),
             eq(aktørID)
         );
 

@@ -6,8 +6,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 
-public class JournalfoeringDto {
-    private String behandlingstypeKode;
+public abstract class JournalfoeringDto {
     private String journalpostID;
     private String oppgaveID;
     private String brukerID;
@@ -19,14 +18,6 @@ public class JournalfoeringDto {
     private boolean skalTilordnes;
     private Boolean ikkeSendForvaltingsmelding;
     private LocalDate mottattDato;
-
-    public String getBehandlingstypeKode() {
-        return behandlingstypeKode;
-    }
-
-    public void setBehandlingstypeKode(String behandlingstypeKode) {
-        this.behandlingstypeKode = behandlingstypeKode;
-    }
 
     public String getJournalpostID() {
         return journalpostID;

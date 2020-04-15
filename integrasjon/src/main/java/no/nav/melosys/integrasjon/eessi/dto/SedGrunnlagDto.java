@@ -18,7 +18,7 @@ import org.springframework.util.CollectionUtils;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "sedType", visible = true)
 @JsonTypeIdResolver(SedGrunnlagTypeResolver.class)
 public class SedGrunnlagDto {
-    private SedType sedType;
+    private String sedType;
     private List<Ident> utenlandskIdent = new ArrayList<>();
     private Adresse bostedsadresse;
     private List<Virksomhet> arbeidsgivendeVirksomheter = new ArrayList<>();
@@ -28,7 +28,7 @@ public class SedGrunnlagDto {
     private String ytterligereInformasjon;
 
     public boolean erA003() {
-        return getSedType() == SedType.A003 && this instanceof SedGrunnlagA003Dto;
+        return SedType.A003.name().equalsIgnoreCase(getSedType()) && this instanceof SedGrunnlagA003Dto;
     }
 
     public List<Ident> getUtenlandskIdent() {
@@ -87,7 +87,7 @@ public class SedGrunnlagDto {
         this.ytterligereInformasjon = ytterligereInformasjon;
     }
 
-    public SedType getSedType() {
+    public String getSedType() {
         return sedType;
     }
 

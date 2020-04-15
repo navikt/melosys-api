@@ -8,6 +8,7 @@ import java.util.Objects;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public final class Oppgave {
@@ -53,28 +54,6 @@ public final class Oppgave {
         private String status;
 
         public Builder() {
-        }
-
-        public Builder(Oppgave copy) {
-            this.aktørId = copy.getAktørId();
-            this.behandlingstema = copy.getBehandlingstema();
-            this.behandlingstype = copy.getBehandlingstype();
-            this.beskrivelse = copy.getBeskrivelse();
-            this.behandlesAvApplikasjon = copy.getBehandlesAvApplikasjon();
-            this.opprettetTidspunkt = copy.getOpprettetTidspunkt();
-            this.fristFerdigstillelse = copy.getFristFerdigstillelse();
-            this.journalpostId = copy.getJournalpostId();
-            this.oppgaveId = copy.getOppgaveId();
-            this.oppgavetype = copy.getOppgavetype();
-            this.prioritet = copy.getPrioritet();
-            this.saksnummer = copy.getSaksnummer();
-            this.tema = copy.getTema();
-            this.temagruppe = copy.getTemagruppe();
-            this.tilordnetRessurs = copy.getTilordnetRessurs();
-            this.tildeltEnhetsnr = copy.getTildeltEnhetsnr();
-            this.versjon = copy.getVersjon();
-            this.aktivDato = copy.getAktivDato();
-            this.status = copy.getStatus();
         }
 
         public Builder setOppgaveId(String oppgaveId) {

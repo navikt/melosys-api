@@ -3,7 +3,8 @@ package no.nav.melosys.saksflyt.steg.reg;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -44,8 +45,6 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
     public HentArbeidsforholdopplysninger(AaregFasade aaregFasade, SaksopplysningRepository saksopplysningRepo) {
         this.aaregFasade = aaregFasade;
         this.saksopplysningRepo = saksopplysningRepo;
-        log.info("HentArbeidsforholdopplysninger initialisert");
-
     }
 
     @Override

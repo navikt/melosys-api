@@ -3,6 +3,8 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
@@ -65,6 +67,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     public void journalføringTilordneSchemaValidering() throws IOException, JSONException {
         JournalfoeringTilordneDto journalfoeringDto = random.nextObject(JournalfoeringTilordneDto.class);
         journalfoeringDto.setBrukerID(SAMPLE_FNR);
+        journalfoeringDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
         valider(journalfoeringDto, JOURNALFOERING_TILORDNE_SCHEMA, log);
     }
 
@@ -72,6 +75,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     public void journalføringOpprettSchemaValidering() throws IOException, JSONException {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalfoeringDto.setBrukerID(SAMPLE_FNR);
+        journalfoeringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
         journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalfoeringDto.setRepresentantID(SAMPLE_ORGNR);
         valider(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);
@@ -81,6 +85,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     public void journalføringOpprettSchemaValideringMedRepresentantIDNull() throws IOException, JSONException {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalfoeringDto.setBrukerID(SAMPLE_FNR);
+        journalfoeringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
         journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNR);
         journalfoeringDto.setRepresentantID(null);
         valider(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA, log);

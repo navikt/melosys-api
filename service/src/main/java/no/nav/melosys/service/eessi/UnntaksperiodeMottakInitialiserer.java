@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -62,8 +62,8 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
     }
 
     @Override
-    public Behandlingstyper hentBehandlingstype(MelosysEessiMelding melosysEessiMelding) {
-        return hentBehandlingstypeForSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
+    public Behandlingstema hentBehandlingstema(MelosysEessiMelding melosysEessiMelding) {
+        return hentBehandlingstemaForSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
     }
 
     @Override
@@ -71,13 +71,13 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
         return ProsessType.REGISTRERING_UNNTAK;
     }
 
-    private Behandlingstyper hentBehandlingstypeForSedType(SedType sedType) {
+    private Behandlingstema hentBehandlingstemaForSedType(SedType sedType) {
         if (sedType == SedType.A009) {
-            return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+            return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         } else if (sedType == SedType.A010) {
-            return Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
+            return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
         } else if (sedType == SedType.A003) {
-            return Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND;
+            return Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
         }
 
         throw new IllegalArgumentException("UnntaksperiodeMottakInitialiserer støtter ikke sedtype " + sedType);

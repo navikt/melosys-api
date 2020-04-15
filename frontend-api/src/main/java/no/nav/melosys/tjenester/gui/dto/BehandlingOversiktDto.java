@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
@@ -12,6 +13,7 @@ public class BehandlingOversiktDto {
     private Long behandlingID;
     private Behandlingsstatus behandlingsstatus;
     private Behandlingstyper behandlingstype;
+    private Behandlingstema behandlingstema;
     private PeriodeDto periode;
     private List<String> land;
     private Instant opprettetDato;
@@ -38,6 +40,14 @@ public class BehandlingOversiktDto {
 
     public void setBehandlingstype(Behandlingstyper behandlingstype) {
         this.behandlingstype = behandlingstype;
+    }
+
+    public Behandlingstema getBehandlingstema() {
+        return behandlingstema;
+    }
+
+    public void setBehandlingstema(Behandlingstema behandlingstema) {
+        this.behandlingstema = behandlingstema;
     }
 
     public PeriodeDto getPeriode() {

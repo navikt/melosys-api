@@ -10,6 +10,7 @@ import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,7 +20,7 @@ public class OpprettBehandlingsgrunnlag extends AbstraktStegBehandler {
     private final OpprettSedDokumentFelles opprettSedDokumentFelles;
     private final EessiService eessiService;
 
-    public OpprettBehandlingsgrunnlag(BehandlingsgrunnlagService behandlingsgrunnlagService, OpprettSedDokumentFelles opprettSedDokumentFelles, EessiService eessiService) {
+    public OpprettBehandlingsgrunnlag(BehandlingsgrunnlagService behandlingsgrunnlagService, OpprettSedDokumentFelles opprettSedDokumentFelles, @Qualifier("system") EessiService eessiService) {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.opprettSedDokumentFelles = opprettSedDokumentFelles;
         this.eessiService = eessiService;
@@ -36,7 +37,7 @@ public class OpprettBehandlingsgrunnlag extends AbstraktStegBehandler {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         opprettSedDokumentFelles.opprettSedSaksopplysning(melosysEessiMelding, prosessinstans.getBehandling());
 
-        SedGrunnlag sedGrunnlag = eessiService.hentSedGrunnlag(melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getDokumentId());
+        SedGrunnlag sedGrunnlag = eessiService.hentSedGrunnlag(melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getSedId());
         behandlingsgrunnlagService.opprettSedGrunnlag(prosessinstans.getBehandling().getId(), sedGrunnlag);
         prosessinstans.setSteg(ProsessSteg.AFL_REGISTERKONTROLL);
     }

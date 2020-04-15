@@ -6,7 +6,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import no.nav.security.token.support.core.api.Protected;

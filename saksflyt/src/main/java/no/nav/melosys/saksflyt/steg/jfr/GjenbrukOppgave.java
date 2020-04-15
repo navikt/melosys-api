@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.Optional;
 
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -43,11 +44,12 @@ public class GjenbrukOppgave extends AbstraktStegBehandler {
         final String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         final String aktørID = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         final Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
+        final Behandlingstema behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
         final boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
 
         final Oppgave gjenbruktOppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
 
-        final Oppgave nyOppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstype)
+        final Oppgave nyOppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstema, behandlingstype)
             .setSaksnummer(saksnummer)
             .setTilordnetRessurs(skalTilordnes ? prosessinstans.getData(SAKSBEHANDLER) : null)
             .setAktørId(aktørID)

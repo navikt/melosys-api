@@ -63,6 +63,7 @@ public class OppgaveTjeneste {
             Behandling behandling = oppgaveService.hentSistAktiveBehandling(oppgave.getSaksnummer());
             dto.setBehandlingID(behandling.getId());
             dto.setBehandlingstype(behandling.getType().getKode());
+            dto.setBehandlingstema(behandling.getTema().getKode());
             dto.setJournalpostID(oppgave.getJournalpostId());
 
             return ResponseEntity.ok(dto);
@@ -81,7 +82,7 @@ public class OppgaveTjeneste {
 
     @GetMapping("/oversikt")
     @ApiOperation(
-        value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.",
+        value = "Henter alle oppgaver som er tildelt innlogget saksbehandler.",
         response = OppgaveOversiktDto.class)
     public ResponseEntity mineOppgaver() throws TekniskException, FunksjonellException {
         String ident = SubjectHandler.getInstance().getUserID();

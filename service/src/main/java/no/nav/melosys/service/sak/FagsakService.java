@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -123,35 +124,31 @@ public class FagsakService {
     @Transactional(rollbackFor = MelosysException.class)
     public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
         validerOpprettSakDto(opprettSakDto);
-        final Oppgave oppgave = validerOppgave(opprettSakDto.oppgaveID);
+        final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         prosessinstansService.opprettProsessinstansNySak(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) throws FunksjonellException {
         boolean feilet = false;
         StringBuilder feilmeldingBuilder = new StringBuilder();
-        if (opprettSakDto.sakstype == null) {
+        if (opprettSakDto.getBehandlingstema() == null) {
             feilet = true;
-            feilmeldingBuilder.append("sakstype, ");
-        }
-        if (opprettSakDto.behandlingstype == null) {
-            feilet = true;
-            feilmeldingBuilder.append("behandlingstype, ");
+            feilmeldingBuilder.append("behandlingstema, ");
         }
         if (feilet) {
             throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en ny sak.").toString());
         }
-        if (erBehandlingAvSøknad(opprettSakDto.behandlingstype.getKode())) {
-            final SøknadDto soknadDto = opprettSakDto.soknadDto;
+        if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema().getKode())) {
+            final SøknadDto soknadDto = opprettSakDto.getSoknadDto();
             if (soknadDto == null) {
                 throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
             }
-            PeriodeDto periodeDto = soknadDto.periode;
+            PeriodeDto periodeDto = soknadDto.getPeriode();
             if (periodeDto.getFom() == null) {
                 feilet = true;
                 feilmeldingBuilder.append("søknadsperiodes fra og med dato, ");
             }
-            if (soknadDto.land == null || soknadDto.land.isEmpty()) {
+            if (soknadDto.getLand() == null || soknadDto.getLand().isEmpty()) {
                 feilet = true;
                 feilmeldingBuilder.append("land, ");
             }
@@ -283,9 +280,10 @@ public class FagsakService {
         }
 
         Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();
+        Behandlingstema behandlingstema = opprettSakRequest.getBehandlingstema();
         String initierendeJournalpostId = opprettSakRequest.getInitierendeJournalpostId();
         String initierendeDokumentId = opprettSakRequest.getInitierendeDokumentId();
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema, initierendeJournalpostId, initierendeDokumentId);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
         sakerOpprettet.increment();
@@ -321,14 +319,14 @@ public class FagsakService {
     //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
     @Transactional(rollbackFor = MelosysException.class)
     public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException, TekniskException {
-        Behandlingstyper behandlingstype = behandling.getType();
-        if (behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
-            && behandlingstype != Behandlingstyper.ØVRIGE_SED
-            && behandlingstype != Behandlingstyper.VURDER_TRYGDETID) {
-            throw new FunksjonellException("Behandlingstype " + behandlingstype + " kan ikke avsluttes manuelt");
+        Behandlingstema behandlingstema = behandling.getTema();
+        if (behandlingstema != Behandlingstema.IKKE_YRKESAKTIV
+            && behandlingstema != Behandlingstema.ØVRIGE_SED
+            && behandlingstema != Behandlingstema.TRYGDETID) {
+            throw new FunksjonellException("Behandlingstema " + behandlingstema + " kan ikke avsluttes manuelt");
         }
 
-        Saksstatuser saksstatus = behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
+        Saksstatuser saksstatus = behandlingstema == Behandlingstema.IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
         avsluttFagsakOgBehandling(fagsak, saksstatus);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }

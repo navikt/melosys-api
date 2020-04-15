@@ -4,7 +4,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -36,17 +37,16 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(HentInntektopplysninger.class);
 
     private final InntektFasade inntektFasade;
-
     private final SaksopplysningRepository saksopplysningRepo;
-
-    @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}")
-    private Integer inntektshistorikkAntallMåneder;
+    private final Integer inntektshistorikkAntallMåneder;
 
     @Autowired
-    public HentInntektopplysninger(InntektFasade inntektFasade, SaksopplysningRepository saksopplysningRepo) {
+    public HentInntektopplysninger(InntektFasade inntektFasade,
+                                   SaksopplysningRepository saksopplysningRepo,
+                                   @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}") Integer inntektshistorikkAntallMåneder) {
         this.inntektFasade = inntektFasade;
         this.saksopplysningRepo = saksopplysningRepo;
-        log.info("HentInntektopplysninger initialisert");
+        this.inntektshistorikkAntallMåneder = inntektshistorikkAntallMåneder;
     }
 
     @Override

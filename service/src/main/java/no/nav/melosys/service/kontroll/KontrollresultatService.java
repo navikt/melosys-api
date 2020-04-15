@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.kontroll;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -45,7 +46,8 @@ public class OpprettFagsakOgBehandlingTest {
     public void setup() throws FunksjonellException, TekniskException {
         opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService, tpsFasade, sakService);
 
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, "321");
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "1234");
@@ -54,13 +56,13 @@ public class OpprettFagsakOgBehandlingTest {
 
         Behandling aktivBehandling = new Behandling();
         aktivBehandling.setStatus(Behandlingsstatus.OPPRETTET);
-        aktivBehandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        aktivBehandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         Fagsak fagsak = new Fagsak();
         fagsak.setBehandlinger(Collections.singletonList(aktivBehandling));
         fagsak.setSaksnummer("MEL-111");
         when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
 
-        when(sakService.opprettSak(anyString(), any(Behandlingstyper.class), anyString())).thenReturn(1234L);
+        when(sakService.opprettSak(anyString(), any(Behandlingstema.class), anyString())).thenReturn(1234L);
     }
 
     @Test
@@ -71,7 +73,7 @@ public class OpprettFagsakOgBehandlingTest {
 
         verify(fagsakService).nyFagsakOgBehandling(any(OpprettSakRequest.class));
         verify(tpsFasade, never()).hentAktørIdForIdent(anyString());
-        verify(sakService).opprettSak(eq("MEL-111"), eq(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL), eq("111"));
+        verify(sakService).opprettSak(eq("MEL-111"), eq(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL), eq("111"));
         verify(fagsakService).lagre(any(Fagsak.class));
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo("MEL-111");
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST);
@@ -84,7 +86,7 @@ public class OpprettFagsakOgBehandlingTest {
 
         verify(fagsakService).nyFagsakOgBehandling(any(OpprettSakRequest.class));
         verify(tpsFasade).hentAktørIdForIdent(anyString());
-        verify(sakService).opprettSak(eq("MEL-111"), eq(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL), eq("111"));
+        verify(sakService).opprettSak(eq("MEL-111"), eq(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL), eq("111"));
         verify(fagsakService).lagre(any(Fagsak.class));
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo("MEL-111");
         assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isEqualTo("111");
