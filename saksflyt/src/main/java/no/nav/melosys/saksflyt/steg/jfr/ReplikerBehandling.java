@@ -10,9 +10,9 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +33,12 @@ public class ReplikerBehandling extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(ReplikerBehandling.class);
 
-    private FagsakRepository fagsakRepository;
+    private FagsakService fagsakService;
     private BehandlingService behandlingService;
 
     @Autowired
-    public ReplikerBehandling(FagsakRepository fagsakRepository, BehandlingService behandlingService) {
-        this.fagsakRepository = fagsakRepository;
+    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService) {
+        this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         log.info("ReplikerBehandling initialisert");
     }
@@ -53,18 +53,24 @@ public class ReplikerBehandling extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
         Behandling behandling;
-        if (fagsak.getTidligsteInaktiveBehandling() != null) {
-            behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(fagsak.getTidligsteInaktiveBehandling(), Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
-        } else {
+
+        if (fagsak.getTidligsteInaktiveBehandling() == null) {
             throw new FunksjonellException("Finner ingen avsluttet behandling på fagsak " + fagsak.getSaksnummer());
         }
+
+        behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
+            fagsak.getTidligsteInaktiveBehandling(),
+            Behandlingsstatus.OPPRETTET,
+            prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)
+        );
+
         prosessinstans.setBehandling(behandling);
 
         fagsak.setStatus(Saksstatuser.OPPRETTET);
-        fagsakRepository.save(fagsak);
+        fagsakService.lagre(fagsak);
 
         prosessinstans.setSteg(GSAK_OPPRETT_OPPGAVE);
         log.info("Prosessinstans {} har replikert behandling for {}", prosessinstans.getId(), saksnummer);

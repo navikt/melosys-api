@@ -32,7 +32,7 @@ public class OpprettSak extends AbstraktStegBehandler {
 
         Long gsakSaksnummer = sakService.opprettSak(
             fagsak.getSaksnummer(),
-            prosessinstans.getBehandling().getType(),
+            prosessinstans.getBehandling().getTema(),
             prosessinstans.getData(ProsessDataKey.AKTØR_ID)
         );
 

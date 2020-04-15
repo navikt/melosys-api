@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Qualifier("system")
-public class OppgaveSystemFasadeImpl extends OppgaveFasadeImpl implements OppgaveFasade {
+public class OppgaveSystemFasadeImpl extends OppgaveFasadeImpl {
 
     @Autowired
     public OppgaveSystemFasadeImpl(@Qualifier("system")OppgaveConsumer oppgaveConsumer) {

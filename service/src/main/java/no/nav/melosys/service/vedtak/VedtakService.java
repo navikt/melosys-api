@@ -129,7 +129,7 @@ public class VedtakService {
 
     private void validerBehandlingstypeFattVedtak(Behandling behandling) throws FunksjonellException {
         if (!behandling.kanResultereIVedtak()) {
-            throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstype " + behandling.getType().getBeskrivelse());
+            throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstema " + behandling.getTema().getBeskrivelse());
         }
     }
 
@@ -158,12 +158,9 @@ public class VedtakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void endreVedtak(Long behandlingID, Endretperiode endretperiode, Behandlingstyper behandlingstype, String fritekst) throws FunksjonellException, TekniskException {
+    public void endreVedtak(Long behandlingID, Endretperiode endretperiode, String fritekst) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
-
-        behandling.setType(behandlingstype);
-        behandlingService.lagre(behandling);
 
         prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
@@ -212,7 +209,7 @@ public class VedtakService {
 
     private void opprettRevurderingsoppgave(Behandling eksisterendeBehandling, Behandling nyBehandling, String saksbehandler)
         throws TekniskException, FunksjonellException {
-        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(Behandlingstyper.NY_VURDERING)
+        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(nyBehandling.getTema(), Behandlingstyper.NY_VURDERING)
             .setAktørId(eksisterendeBehandling.getFagsak().hentBruker().getAktørId())
             .setSaksnummer(eksisterendeBehandling.getFagsak().getSaksnummer())
             .setJournalpostId(nyBehandling.getInitierendeJournalpostId())

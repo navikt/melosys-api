@@ -101,6 +101,7 @@ public class BehandlingTjeneste {
         BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
+        behandlingOppsummeringDto.setBehandlingstema(behandling.getTema());
         behandlingOppsummeringDto.setEndretDato(behandling.getEndretDato());
         behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());

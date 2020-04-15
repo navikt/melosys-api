@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -53,8 +53,8 @@ public class AnmodningUnntakMottakInitialiserer implements AutomatiskSedBehandli
     }
 
     @Override
-    public Behandlingstyper hentBehandlingstype(MelosysEessiMelding melosysEessiMelding) {
-        return Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL;
+    public Behandlingstema hentBehandlingstema(MelosysEessiMelding melosysEessiMelding) {
+        return Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL;
     }
 
     @Override

@@ -44,7 +44,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private VedtakMetadata vedtakMetadata;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "utfall_registrering_unntak")
     private Utfallregistreringunntak utfallRegistreringUnntak;
@@ -264,8 +264,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
             throw new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id);
         }
         if (lovvalgsperioder.size() > 1) {
-            throw new UnsupportedOperationException("Flere enn en"
-                + " lovvalgsperiode er ikke støttet i første leveranse");
+            throw new UnsupportedOperationException("Flere enn en lovvalgsperiode er ikke støttet");
         }
         return lovvalgsperioder.iterator().next();
     }
@@ -275,8 +274,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
             throw new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id);
         }
         if (anmodningsperioder.size() > 1) {
-            throw new UnsupportedOperationException("Flere enn en"
-                + " anmodningsperiode er ikke støttet i første leveranse");
+            throw new UnsupportedOperationException("Flere enn en anmodningsperiode er ikke støttet");
         }
         return anmodningsperioder.iterator().next();
     }

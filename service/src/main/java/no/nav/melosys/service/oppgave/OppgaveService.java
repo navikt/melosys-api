@@ -123,7 +123,7 @@ public class OppgaveService {
         Optional<Oppgave> eksisterendeOppgave = finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
+            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
                 .setAktørId(aktørID)
@@ -223,6 +223,7 @@ public class OppgaveService {
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setBehandlingsstatus(behandling.getStatus());
         behandlingDto.setBehandlingstype(behandling.getType());
+        behandlingDto.setBehandlingstema(behandling.getTema());
         behandlingDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingDto.setEndretDato(behandling.getEndretDato());
         behandlingDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());

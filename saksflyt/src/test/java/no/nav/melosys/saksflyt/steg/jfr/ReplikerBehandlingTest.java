@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.ArrayList;
 
@@ -12,9 +11,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,20 +34,21 @@ public class ReplikerBehandlingTest {
     private ReplikerBehandling agent;
     private Prosessinstans p;
     private Fagsak fagsak;
-    private FagsakRepository fagsakRepository;
+    private FagsakService fagsakService;
     private BehandlingService behandlingService;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IkkeFunnetException {
         behandlingService = mock(BehandlingService.class);
-        fagsakRepository = mock(FagsakRepository.class);
-        agent = new ReplikerBehandling(fagsakRepository, behandlingService);
+        fagsakService = mock(FagsakService.class);
+        agent = new ReplikerBehandling(fagsakService, behandlingService);
         fagsak = new Fagsak();
         fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
         fagsak.setBehandlinger(new ArrayList<>());
         p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, "MelTest-1");
-        doReturn(fagsak).when(fagsakRepository).findBySaksnummer("MelTest-1");
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
+        doReturn(fagsak).when(fagsakService).hentFagsak("MelTest-1");
 
     }
 
@@ -59,18 +60,20 @@ public class ReplikerBehandlingTest {
     }
 
     @Test
-    public void utfør_eksisterendeInaktivBehandling_settStegOpprettOppgave() throws FunksjonellException, TekniskException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    public void utfør_eksisterendeInaktivBehandling_settStegOpprettOppgave() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setRegistrertDato(Instant.now());
         fagsak.getBehandlinger().add(behandling);
         Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setFagsak(fagsak);
         replikertBehandling.setId(11L);
         doReturn(replikertBehandling).when(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling,  Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
 
         agent.utfør(p);
 
-        verify(fagsakRepository).save(fagsak);
+        verify(fagsakService).lagre(fagsak);
         assertThat(fagsak.getStatus()).isEqualTo(OPPRETTET);
         assertThat(p.getSteg()).isEqualTo(GSAK_OPPRETT_OPPGAVE);
         assertThat(p.getBehandling()).isEqualTo(replikertBehandling);

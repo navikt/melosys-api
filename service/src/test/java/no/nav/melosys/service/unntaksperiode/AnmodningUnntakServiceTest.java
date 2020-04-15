@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -81,7 +81,7 @@ public class AnmodningUnntakServiceTest {
     @Test
     public void anmodningOmUnntakSvar_validert_forventMetodekall() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
-        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
@@ -101,14 +101,14 @@ public class AnmodningUnntakServiceTest {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Behandling er ikke av type ANMODNING_OM_UNNTAK_HOVEDREGEL");
+        expectedException.expectMessage("Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL");
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
     }
 
     @Test
     public void anmodningOmUnntakSvar_behandlingErAvsluttet_forventException() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
-        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
@@ -121,7 +121,7 @@ public class AnmodningUnntakServiceTest {
     @Test
     public void anmodningOmUnntakSvar_behandlingHarIngenAnmodningsperiodeSvar_forventException() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
-        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
@@ -133,7 +133,7 @@ public class AnmodningUnntakServiceTest {
     @Test
     public void anmodningOmUnntakSvar_behandlingHarIngenLovvalgsperiode_forventException() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
-        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
@@ -148,7 +148,7 @@ public class AnmodningUnntakServiceTest {
     @Test
     public void anmodningOmUnntakSvar_avslagForLangFritekst_forventException() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
-        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
 
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();

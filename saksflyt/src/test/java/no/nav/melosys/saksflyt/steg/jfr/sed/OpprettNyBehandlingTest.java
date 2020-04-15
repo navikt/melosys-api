@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -75,13 +76,13 @@ public class OpprettNyBehandlingTest {
     @Test
     public void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() throws MelosysException {
         final long gsakSaksnummer = 123L;
-        final Behandlingstyper behandlingstype = Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+        final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         final String journalpostID = "jp123";
         final String dokumentID = "dok123";
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, dokumentID);
 
@@ -98,7 +99,7 @@ public class OpprettNyBehandlingTest {
 
         when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer))
             .thenReturn(Optional.of(fagsak));
-        when(behandlingService.nyBehandling(any(), any(), any(), any(),any())).thenReturn(new Behandling());
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(),any())).thenReturn(new Behandling());
         when(oppgaveFasade.finnOppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
             .thenReturn(Optional.of(oppgave));
 
@@ -107,7 +108,7 @@ public class OpprettNyBehandlingTest {
         verify(oppgaveFasade).ferdigstillOppgave(eq(oppgave.getOppgaveId()));
         verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
         verify(behandlingService).nyBehandling(
-            eq(fagsak), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(behandlingstype), eq(journalpostID), eq(dokumentID)
+            eq(fagsak), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(Behandlingstyper.SED) ,eq(behandlingstema), eq(journalpostID), eq(dokumentID)
         );
         assertThat(prosessinstans.getBehandling()).isNotNull();
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);

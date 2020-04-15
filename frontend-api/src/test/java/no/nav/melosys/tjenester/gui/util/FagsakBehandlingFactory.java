@@ -15,6 +15,7 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class FagsakBehandlingFactory {
@@ -27,6 +28,7 @@ public class FagsakBehandlingFactory {
         Behandling b1 = new Behandling();
         b1.setId(1L);
         b1.setType(Behandlingstyper.SOEKNAD);
+        b1.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         b1.setRegistrertDato(Instant.parse("2019-01-10T10:37:30.00Z"));
         b1.setEndretDato(Instant.parse("2019-01-12T10:37:30.00Z"));
         b1.setStatus(behandlingsstatusFørst);

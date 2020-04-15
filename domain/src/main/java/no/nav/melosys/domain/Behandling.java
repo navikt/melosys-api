@@ -8,6 +8,7 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -31,6 +32,10 @@ public class Behandling extends RegistreringsInfo {
     @Enumerated(EnumType.STRING)
     @Column(name = "beh_type", nullable = false, updatable = false)
     private Behandlingstyper type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "beh_tema", nullable = false, updatable = false)
+    private Behandlingstema tema;
 
     @Column(name = "siste_opplysninger_hentet_dato")
     private Instant sisteOpplysningerHentetDato;
@@ -90,6 +95,14 @@ public class Behandling extends RegistreringsInfo {
 
     public void setType(Behandlingstyper type) {
         this.type = type;
+    }
+
+    public Behandlingstema getTema() {
+        return tema;
+    }
+
+    public void setTema(Behandlingstema tema) {
+        this.tema = tema;
     }
 
     public Set<Saksopplysning> getSaksopplysninger() {
@@ -187,7 +200,7 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean erRedigerbar() {
         return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK
-                    || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && type != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV)
+                    || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != Behandlingstema.IKKE_YRKESAKTIV)
                     || status == Behandlingsstatus.AVSLUTTET
                     || status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
     }
@@ -199,7 +212,15 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean erBehandlingAvSøknad() {
-        return type != null && erBehandlingAvSøknad(type.getKode());
+        return tema != null && erBehandlingAvSøknad(tema.getKode());
+    }
+
+    public boolean erNyVurdering() {
+        return type == Behandlingstyper.NY_VURDERING;
+    }
+
+    public boolean erEndretPeriode() {
+        return type == Behandlingstyper.ENDRET_PERIODE;
     }
 
     public boolean erKlage() {
@@ -207,27 +228,36 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean norgeErUtpekt() {
-        return type == Behandlingstyper.BESLUTNING_LOVVALG_NORGE;
+        return tema == Behandlingstema.BESLUTNING_LOVVALG_NORGE;
     }
 
     public boolean kanResultereIVedtak() {
         return erBehandlingAvSøknad() || norgeErUtpekt();
     }
 
-    public static boolean erBehandlingAvSøknad(String behandlingstypeKode) {
-        return erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstypeKode)
-            || erBehandlingAvSøknadArbeidIFlereLand(behandlingstypeKode)
-            || Behandlingstyper.ENDRET_PERIODE.getKode().equalsIgnoreCase(behandlingstypeKode)
-            || Behandlingstyper.NY_VURDERING.getKode().equalsIgnoreCase(behandlingstypeKode);
+    public boolean erUtsending() {
+        return tema == Behandlingstema.UTSENDT_ARBEIDSTAKER || tema == Behandlingstema.UTSENDT_SELVSTENDIG;
     }
 
-    public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstypeKode) {
-        return Behandlingstyper.SOEKNAD.getKode().equalsIgnoreCase(behandlingstypeKode)
-            || Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstypeKode);
+    public static boolean erBehandlingAvSøknad(Behandlingstema behandlingstema) {
+        return erBehandlingAvSøknad(behandlingstema.getKode());
     }
 
-    public static boolean erBehandlingAvSøknadArbeidIFlereLand(String behandlingstypeKode) {
-        return Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstypeKode);
+    public static boolean erBehandlingAvSøknad(String behandlingstemaKode) {
+        return erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode)
+            || erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)
+            || Behandlingstema.ARBEID_ETT_LAND_ØVRIG.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
+    }
+
+    public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {
+        return Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.UTSENDT_SELVSTENDIG.getKode().equalsIgnoreCase(behandlingstemaKode);
+    }
+
+    public static boolean erBehandlingAvSøknadArbeidIFlereLand(String behandlingstemaKode) {
+        return Behandlingstema.ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     public boolean isAktiv() {

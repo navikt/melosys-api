@@ -11,6 +11,7 @@ public class BehandlingsnotatGetDto {
     private final Instant endretDato;
     private final Instant registrertDato;
     private final String behandlingstypeKode;
+    private final String behandlingstemaKode;
     private final boolean redigerbar; //
     private final String registrertAvNavn;
 
@@ -20,6 +21,7 @@ public class BehandlingsnotatGetDto {
         this.endretDato = behandlingsnotat.getEndretDato();
         this.registrertDato = behandlingsnotat.getRegistrertDato();
         this.behandlingstypeKode = behandlingsnotat.getBehandling().getType().getKode();
+        this.behandlingstemaKode = behandlingsnotat.getBehandling().getTema().getKode();
 
         this.redigerbar = redigerbar;
         this.registrertAvNavn = registrertAvNavn;
@@ -43,6 +45,10 @@ public class BehandlingsnotatGetDto {
 
     public String getBehandlingstypeKode() {
         return behandlingstypeKode;
+    }
+
+    public String getBehandlingstemaKode() {
+        return behandlingstemaKode;
     }
 
     public boolean isRedigerbar() {

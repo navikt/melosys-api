@@ -52,7 +52,7 @@ public class MangelbrevMapper implements BrevDataMapper {
             throw new TekniskException(e);
         }
         fag.setManglendeOpplysninger(manglendeOpplysningerType);
-        // Obs: Kan ikke utledes for behandling som ikke initieres av SED, og må registreres i journalføringen
+
         AvsenderType avsenderType = new AvsenderType();
         avsenderType.setRolle(RolleKode.BRUKER);
         fag.setAvsender(avsenderType);
