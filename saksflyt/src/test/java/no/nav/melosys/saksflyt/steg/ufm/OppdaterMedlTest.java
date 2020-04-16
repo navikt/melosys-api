@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -21,13 +22,14 @@ import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
@@ -38,6 +40,8 @@ public class OppdaterMedlTest {
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private BehandlingService behandlingService;
+    @Captor
+    private ArgumentCaptor<Behandling> behandlingCaptor;
 
     private OppdaterMedl oppdaterMedl;
 
@@ -63,6 +67,7 @@ public class OppdaterMedlTest {
 
         verify(medlPeriodeService).opprettPeriodeEndelig(any(Lovvalgsperiode.class), eq(12L), eq(true), eq("123"));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
+        verify(behandlingService, never()).lagre(any(Behandling.class));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 
@@ -81,6 +86,8 @@ public class OppdaterMedlTest {
 
         verify(medlPeriodeService).opprettPeriodeForeløpig(any(Lovvalgsperiode.class), eq(12L), eq(true), eq("123"));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
+        verify(behandlingService).lagre(behandlingCaptor.capture());
+        assertThat(behandlingCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 
@@ -99,6 +106,7 @@ public class OppdaterMedlTest {
 
         verify(medlPeriodeService).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(true));
         verify(lovvalgsperiodeService).hentLovvalgsperioder(eq(12L));
+        verify(behandlingService, never()).lagre(any(Behandling.class));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 

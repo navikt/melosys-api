@@ -232,7 +232,7 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean erUtpekingAvAnnetLand() {
-        return type == Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND;
+        return tema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 
     public boolean kanResultereIVedtak() {

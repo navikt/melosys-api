@@ -6,6 +6,7 @@ import java.util.Collections;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -57,9 +58,9 @@ public class OppdaterMedl extends AbstraktStegBehandler {
                 behandlingId, Collections.singletonList(sedDokument.opprettInnvilgetLovvalgsperiode())
             );
             Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
-            opprettOgLagrePeriode(behandling, lagretLovvalgsperiode, !lovvalgsperiode.erArtikkel13());
+            opprettPeriode(behandling, lagretLovvalgsperiode, !lovvalgsperiode.erArtikkel13());
         } else if (lovvalgsperioder.iterator().next().getMedlPeriodeID() == null) {
-            opprettOgLagrePeriode(behandling, lovvalgsperioder, true);
+            opprettPeriode(behandling, lovvalgsperioder, true);
         } else {
             Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
             medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, true);
@@ -69,13 +70,17 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 
-    private void opprettOgLagrePeriode(Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder, boolean erEndelig) throws TekniskException, FunksjonellException {
+    private void opprettPeriode(Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder, boolean erEndelig) throws TekniskException, FunksjonellException {
         String ident = SaksopplysningerUtils.hentPersonDokument(behandling).fnr;
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
         if (erEndelig) {
             medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), true, ident);
         } else {
             medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), true, ident);
+            if (lovvalgsperiode.erArtikkel13()) {
+                behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+                behandlingService.lagre(behandling);
+            }
         }
     }
 }

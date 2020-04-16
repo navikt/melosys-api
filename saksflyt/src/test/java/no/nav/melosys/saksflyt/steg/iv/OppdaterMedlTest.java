@@ -147,7 +147,7 @@ public class OppdaterMedlTest {
 
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(medlPeriodeService).opprettPeriodeForeløpig(eq(lovvalgsperiode), eq(1L), eq(false));
+        verify(medlPeriodeService).opprettPeriodeForeløpig(eq(lovvalgsperiode), eq(1L), eq(true));
         assertThat(prosessinstans.getSteg()).isEqualTo(IV_SEND_BREV);
     }
 }

@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.ufm;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -68,7 +68,7 @@ public class VarsleUtlandTest {
     @Test
     public void varsleUtland_utlandIkkeUtpekt_forventIngenSedSendt() throws MelosysException {
         Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.getBehandling().setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        prosessinstans.getBehandling().setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 
         varsleUtland.utfør(prosessinstans);
 
@@ -80,7 +80,7 @@ public class VarsleUtlandTest {
     private static Prosessinstans lagProsessinstans() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(Behandlingstyper.BESLUTNING_LOVVALG_ANNET_LAND);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, true);
