@@ -4,8 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,20 +38,10 @@ public class SaksopplysningTjeneste {
         @ApiResponse(code = 404, message = "Behandling ikke funnet"),
         @ApiResponse(code = 500, message = "Uventet teknisk Feil")
     })
-    public ResponseEntity oppfriskSaksopplysning(@PathVariable("behandlingID") long id) throws IkkeFunnetException, TekniskException {
+    public ResponseEntity oppfriskSaksopplysning(@PathVariable("behandlingID") long id) throws MelosysException {
         saksopplysningerService.oppfriskSaksopplysning(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping("oppfriskning/{behandlingID}/status")
-    @ApiOperation(value = "Status på oppfrisking av behandling ", notes = ("Returnerer status (Progress/Done) på oppfrisking av behandling"))
-    public ResponseEntity hentOppfriskingStatusForBehandling(@PathVariable("behandlingID") long behandlingID) {
-        String status;
-        if (saksopplysningerService.harAktivOppfrisking(behandlingID)) {
-            status = "\"PROGRESS\"";
-        } else {
-            status = "\"DONE\"";
-        }
-        return ResponseEntity.ok(status);
-    }
+    // FIXME: oppfriskning/{behandlingID}/status fjernes fra JSON-schema
 }

@@ -115,10 +115,6 @@ public class ProsessinstansService {
         return journalfoeringDto.isIkkeSendForvaltingsmelding() != null && !journalfoeringDto.isIkkeSendForvaltingsmelding();
     }
 
-    public boolean erUnderOppfriskning(Long behandlingID) {
-        return prosessinstansRepo.findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(ProsessType.OPPFRISKNING, behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG).isPresent();
-    }
-
     public boolean harAktivProsessinstans(Long behandlingID) {
         return prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG).isPresent();
     }

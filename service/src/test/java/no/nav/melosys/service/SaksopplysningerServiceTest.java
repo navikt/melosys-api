@@ -5,16 +5,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +39,8 @@ public class SaksopplysningerServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
+    private RegisteropplysningerService registeropplysningerService;
+    @Mock
     private SaksopplysningRepository saksopplysningRepository;
 
     private SaksopplysningerService saksopplysningerService;
@@ -44,11 +48,11 @@ public class SaksopplysningerServiceTest {
     @Before
     public void setUp() {
         saksopplysningerService = new SaksopplysningerService(tpsFasade, prosessinstansService,
-            behandlingRepo, behandlingsresultatService, saksopplysningRepository);
+            behandlingRepo, behandlingsresultatService, registeropplysningerService, saksopplysningRepository);
     }
 
     @Test
-    public void oppfriskSaksopplysning() throws IkkeFunnetException, TekniskException {
+    public void oppfriskSaksopplysning() throws MelosysException {
 
         final String aktørID = "123";
         final String brukerID = "322211";
@@ -75,7 +79,11 @@ public class SaksopplysningerServiceTest {
         soeknadDokument.arbeidUtland = new ArrayList<>();
         soeknadDokument.arbeidUtland.add(arbeidUtland);
 
-        soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+        soeknadDokument.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
         behandling.setSaksopplysninger(saksopplysninger);
 
@@ -86,6 +94,6 @@ public class SaksopplysningerServiceTest {
         saksopplysningerService.oppfriskSaksopplysning(13L);
 
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
-        verify(prosessinstansService).opprettProsessinstansOppfriskning(eq(behandling), eq(aktørID), eq(brukerID));
+        verify(registeropplysningerService).hentOgLagreOpplysninger(any(RegisteropplysningerRequest.class));
     }
 }

@@ -43,6 +43,7 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
         behandling.setSisteOpplysningerHentetDato(Instant.now());
         behandlingRepository.save(behandling);
 
+        // FIXME: Fjern sjekk og prosesstype, og endre navn på klasse eller flytt resterende kode
         if (prosessinstans.getType() == ProsessType.OPPFRISKNING) {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
             log.info("Oppfrisking av saksopplysninger er ferdig for prosessinstans {} og behandlingID {}.", prosessinstans.getId(), behandling.getId());
