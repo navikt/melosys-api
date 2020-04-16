@@ -7,6 +7,8 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -17,6 +19,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
@@ -57,14 +60,20 @@ public class ManuellSedBehandlingInitialiserer {
 
         } else {
             Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer.get());
-            Behandling behandling = fagsak.getAktivBehandling() != null ? fagsak.getAktivBehandling() : fagsak.getSistOppdaterteBehandling();
+            Behandling behandling = fagsak.hentSistAktiveBehandling();
 
             if (behandling.erAktiv()) {
                 behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
             }
 
-            if (SedType.X009 == sedType) {
-                oppdaterOppgavePrioritet(fagsak.getSaksnummer());
+            Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(fagsak.getSaksnummer());
+
+            if (oppgave.isPresent() && SedType.X009 == sedType) {
+                oppdaterOppgavePrioritet(oppgave.get());
+            }
+
+            if (oppgave.isEmpty() && SedType.X001 != sedType) {
+                opprettBehandlingsoppgave(fagsak.getSaksnummer(), prosessinstans, sedType, behandling);
             }
 
             prosessinstans.setBehandling(behandling);
@@ -73,11 +82,22 @@ public class ManuellSedBehandlingInitialiserer {
         }
     }
 
-    private void oppdaterOppgavePrioritet(String saksnummer) throws FunksjonellException, TekniskException {
-        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer);
-        if (oppgave.isPresent()) {
-            log.info("Setter prioritet til HØY for oppgave {}", oppgave.get().getOppgaveId());
-            oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().prioritet(PrioritetType.HOY.name()).build());
-        }
+    private void oppdaterOppgavePrioritet(Oppgave oppgave) throws FunksjonellException, TekniskException {
+        log.info("Setter prioritet til HØY for oppgave {}", oppgave.getOppgaveId());
+        oppgaveService.oppdaterOppgave(oppgave.getOppgaveId(),
+            OppgaveOppdatering.builder()
+                .prioritet(PrioritetType.HOY.name())
+                .beskrivelse("PURRING SEDX009")
+                .build()
+        );
+    }
+
+    private void opprettBehandlingsoppgave(String saksnummer, Prosessinstans prosessinstans, SedType sedType, Behandling behandling) throws FunksjonellException, TekniskException {
+        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+            .setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID))
+            .setSaksnummer(saksnummer)
+            .setBeskrivelse("Mottatt SED " + sedType)
+            .build();
+        oppgaveService.opprettOppgave(oppgave);
     }
 }
