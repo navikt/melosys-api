@@ -7,6 +7,8 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -121,6 +123,8 @@ public class ManuellSedBehandlingInitialisererTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setTema(Behandlingstema.ØVRIGE_SED);
+        behandling.setType(Behandlingstyper.SOEKNAD);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(SAKSNUMMER);

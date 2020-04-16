@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -59,7 +60,7 @@ public class ManuellSedBehandlingInitialiserer {
 
         } else {
             Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer.get());
-            Behandling behandling = fagsak.getAktivBehandling() != null ? fagsak.getAktivBehandling() : fagsak.getSistOppdaterteBehandling();
+            Behandling behandling = fagsak.hentSistAktiveBehandling();
 
             if (behandling.erAktiv()) {
                 behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
@@ -72,7 +73,7 @@ public class ManuellSedBehandlingInitialiserer {
             }
 
             if (oppgave.isEmpty() && SedType.X001 != sedType) {
-                opprettBehandlingsoppgave(fagsak.getSaksnummer(), prosessinstans, sedType);
+                opprettBehandlingsoppgave(fagsak.getSaksnummer(), prosessinstans, sedType, behandling);
             }
 
             prosessinstans.setBehandling(behandling);
@@ -91,8 +92,8 @@ public class ManuellSedBehandlingInitialiserer {
         );
     }
 
-    private void opprettBehandlingsoppgave(String saksnummer, Prosessinstans prosessinstans, SedType sedType) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(Behandlingstyper.SOEKNAD_ARBEID_FLERE_LAND)
+    private void opprettBehandlingsoppgave(String saksnummer, Prosessinstans prosessinstans, SedType sedType, Behandling behandling) throws FunksjonellException, TekniskException {
+        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
             .setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID))
             .setSaksnummer(saksnummer)
             .setBeskrivelse("Mottatt SED " + sedType)
