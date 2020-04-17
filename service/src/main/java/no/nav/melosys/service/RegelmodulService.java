@@ -4,9 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
@@ -24,10 +27,15 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.felles.RestClientLoggingFilter;
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
+import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
+import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.repository.BehandlingRepository;
 import org.glassfish.jersey.client.ClientConfig;
@@ -41,6 +49,8 @@ import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 /**
  * Service som kaller regelmodulen.
@@ -57,9 +67,12 @@ public class RegelmodulService {
     private final DocumentBuilderFactory documentBuilderFactory;
     private final String regelmodulUrl;
     private final TransformerFactory transformerFactory;
+    private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
-    public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl, BehandlingRepository repository) throws ParserConfigurationException {
+    public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl,
+                             BehandlingRepository repository,
+                             SaksopplysningerService saksopplysningerService) throws ParserConfigurationException {
         this.regelmodulUrl = regelmodulUrl;
         this.behandlingRepo = repository;
         this.transformerFactory = TransformerFactory.newInstance();
@@ -67,6 +80,7 @@ public class RegelmodulService {
         transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        this.saksopplysningerService = saksopplysningerService;
     }
 
     /**
@@ -165,6 +179,26 @@ public class RegelmodulService {
         return node;
     }
 
+    public boolean kvalifisererForEf883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode) throws FunksjonellException {
+        Land statsborgerskap = null;
+        if (periode.getFom().isBefore(LocalDate.now())) {
+            statsborgerskap = avgjørStatsborgerskapPåStartDato(
+                saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
+        } else {
+            statsborgerskap = saksopplysningerService.hentPersonOpplysninger(behandlingID).statsborgerskap;
+        }
+        VurderInngangsvilkaarReply res = vurderInngangsvilkår(statsborgerskap, tilIso3(søknadsland.landkoder), periode);
+
+        List<Feilmelding> feilmeldinger = res.feilmeldinger.stream()
+            .filter(feilmelding -> feilmelding.kategori.alvorlighetsgrad == Alvorlighetsgrad.FEIL)
+            .collect(Collectors.toList());
+
+        if (!feilmeldinger.isEmpty()) {
+            throw new FunksjonellException("Vurdering av inngangsvilkår feilet.");
+        }
+        return Boolean.TRUE.equals(res.kvalifisererForEf883_2004);
+     }
+
     /**
      * Kaller regelmodulen for å kjøre inngangsvilkårsvurdering
      *
@@ -203,5 +237,26 @@ public class RegelmodulService {
 
         format.append("</oppholdUtland></soeknadDokument></FastsettLovvalgRequest>");
         return String.format(format.toString(), statsborgerskap, fom, tom);
+    }
+
+    public static Land avgjørStatsborgerskapPåStartDato(List<StatsborgerskapPeriode> statsborgerskapListe, LocalDate startDato) {
+        if (statsborgerskapListe.isEmpty()) {
+            return null;
+        }
+        List<StatsborgerskapPeriode> gyldigeStasborgerskap = statsborgerskapListe.stream()
+            .filter(p -> p.getPeriode().inkluderer(startDato))
+            .collect(Collectors.toList());
+        if (gyldigeStasborgerskap.isEmpty()) {
+            return null;
+        } else if (gyldigeStasborgerskap.size() == 1) {
+            return gyldigeStasborgerskap.get(0).statsborgerskap;
+        } else {
+            // Hvis det finnes flere kilder for samme dato så ønsker vi å se bort fra det som kommer fra Skattedirektoratet
+            // pga. dårlig datakvalitet. Vi filterer også ukjent statsborgerskap siden det ikke hjelper å vurdere inngangsvilkår.
+            return gyldigeStasborgerskap.stream().filter(p -> !p.erFraSkattedirektoratet())
+                .filter(p -> !p.statsborgerskap.erUkjent())
+                .max(Comparator.comparing(p -> p.endringstidspunkt))
+                .map(p -> p.statsborgerskap).orElse(null);
+        }
     }
 }

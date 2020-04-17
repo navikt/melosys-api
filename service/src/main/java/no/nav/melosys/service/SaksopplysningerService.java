@@ -3,6 +3,7 @@ package no.nav.melosys.service;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -22,6 +24,7 @@ import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +43,8 @@ public class SaksopplysningerService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final RegisteropplysningerService registeropplysningerService;
     private final SaksopplysningRepository saksopplysningRepo;
-
+    private final RegelmodulService regelmodulService;
+    private final FagsakService fagsakService;
 
     @Autowired
     public SaksopplysningerService(TpsFasade tpsFasade,
@@ -48,13 +52,17 @@ public class SaksopplysningerService {
                                    BehandlingRepository behandlingRepository,
                                    BehandlingsresultatService behandlingsresultatService,
                                    RegisteropplysningerService registeropplysningerService,
-                                   SaksopplysningRepository saksopplysningRepo) {
+                                   SaksopplysningRepository saksopplysningRepo,
+                                   RegelmodulService regelmodulService,
+                                   FagsakService fagsakService) {
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.registeropplysningerService = registeropplysningerService;
         this.saksopplysningRepo = saksopplysningRepo;
+        this.regelmodulService = regelmodulService;
+        this.fagsakService = fagsakService;
     }
 
     public Optional<PersonDokument> finnPersonOpplysninger(long behandlingID) {
@@ -116,13 +124,12 @@ public class SaksopplysningerService {
             .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                 .personopplysninger()
                 .personhistorikkopplysninger()
-                // FIXME?: Oppfrisking i saksflyt tester inngangsvilkår for å avgjøre statsborgerskap og sakstype
                 .arbeidsforholdopplysninger()
                 .inntektsopplysninger()
                 .organisasjonsopplysninger()
                 .medlemskapsopplysninger()
                 .sakOgBehandlingopplysninger()
-                .utbetalingsopplysninger() // Ble ikke hentet i gammel oppfriskningsflyt
+                .utbetalingsopplysninger()
                 .build())
             .fnr(brukerID)
             .fom(grunnlagPeriode.getFom())
@@ -131,5 +138,10 @@ public class SaksopplysningerService {
 
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+
+        Fagsak fagsak = behandling.getFagsak();
+        fagsak.setType(regelmodulService.kvalifisererForEf883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagPeriode)
+            ? Sakstyper.EU_EOS : Sakstyper.UKJENT);
+        fagsakService.lagre(fagsak);
     }
 }

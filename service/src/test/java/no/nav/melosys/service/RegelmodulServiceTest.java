@@ -23,22 +23,28 @@ import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.repository.BehandlingRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("resource")
+@RunWith(MockitoJUnitRunner.class)
 public class RegelmodulServiceTest {
 
+    @Mock
     private BehandlingRepository behandlingRepository;
+    @Mock
+    private SaksopplysningerService saksopplysningerService;
 
     private RegelmodulService regelmodulService;
 
     @Before
     public void setUp() throws ParserConfigurationException {
-        behandlingRepository = Mockito.mock(BehandlingRepository.class);
-        regelmodulService = new RegelmodulService("", behandlingRepository);
+        regelmodulService = new RegelmodulService("", behandlingRepository, saksopplysningerService);
     }
 
     @Test

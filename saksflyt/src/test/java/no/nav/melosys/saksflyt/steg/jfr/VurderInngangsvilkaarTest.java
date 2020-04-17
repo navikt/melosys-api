@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.dokument.felles.Land.*;
+import static no.nav.melosys.service.RegelmodulService.avgjørStatsborgerskapPåStartDato;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -157,7 +158,7 @@ public class VurderInngangsvilkaarTest {
 
     @Test
     public void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
-        Land stastborgerskap = agent.avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);
+        Land stastborgerskap = avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);
         assertNull(stastborgerskap);
     }
 
@@ -172,7 +173,7 @@ public class VurderInngangsvilkaarTest {
         p2.statsborgerskap = av(UKJENT);
         p2.periode = new Periode(LocalDate.of(2018, 4, 1), LocalDate.of(2018, 5, 2));
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = agent.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2019, 2, 1));
+        Land stastborgerskap = avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2019, 2, 1));
         assertNull(stastborgerskap);
     }
 
@@ -187,7 +188,7 @@ public class VurderInngangsvilkaarTest {
         p2.statsborgerskap = av(UKJENT);
         p2.periode = new Periode(LocalDate.of(2018, 4, 1), null);
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = agent.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
+        Land stastborgerskap = avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
         assertThat(stastborgerskap).isEqualTo(av(BELGIA));
     }
 
@@ -204,7 +205,7 @@ public class VurderInngangsvilkaarTest {
         p2.periode = new Periode(LocalDate.of(2017, 4, 1), null);
         p2.endretAv = "SKD";
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = agent.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
+        Land stastborgerskap = avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
         assertThat(stastborgerskap).isEqualTo(av(BELGIA));
     }
 
@@ -223,7 +224,7 @@ public class VurderInngangsvilkaarTest {
         p2.endretAv = "NAV";
         p2.endringstidspunkt = LocalDateTime.now().minusYears(2);
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = agent.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
+        Land stastborgerskap = avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
         assertThat(stastborgerskap).isEqualTo(av(BELGIA));
     }
 
@@ -242,7 +243,7 @@ public class VurderInngangsvilkaarTest {
         p2.endretAv = "NAV";
         p2.endringstidspunkt = LocalDateTime.now().minusYears(2);
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = agent.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
+        Land stastborgerskap = avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
         assertThat(stastborgerskap).isEqualTo(av(SVERIGE));
     }
 

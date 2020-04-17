@@ -17,6 +17,7 @@ import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,13 +43,18 @@ public class SaksopplysningerServiceTest {
     private RegisteropplysningerService registeropplysningerService;
     @Mock
     private SaksopplysningRepository saksopplysningRepository;
+    @Mock
+    private RegelmodulService regelmodulService;
+    @Mock
+    private FagsakService fagsakService;
 
     private SaksopplysningerService saksopplysningerService;
 
     @Before
     public void setUp() {
         saksopplysningerService = new SaksopplysningerService(tpsFasade, prosessinstansService,
-            behandlingRepo, behandlingsresultatService, registeropplysningerService, saksopplysningRepository);
+            behandlingRepo, behandlingsresultatService, registeropplysningerService,
+            saksopplysningRepository, regelmodulService, fagsakService);
     }
 
     @Test
