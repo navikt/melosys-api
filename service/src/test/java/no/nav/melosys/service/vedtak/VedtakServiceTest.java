@@ -24,8 +24,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -34,7 +32,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
@@ -43,12 +40,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -67,15 +62,11 @@ public class VedtakServiceTest {
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
-    private FagsakService fagsakService;
-    @Mock
     private TpsFasade tpsFasade;
     @Mock
     private VedtakKontrollService vedtakKontrollService;
     @Mock
     private RegisteropplysningerService registeropplysningerService;
-    @Mock
-    private MedlFasade medlFasade;
 
     private VedtakService vedtakService;
 
@@ -90,7 +81,8 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, tpsFasade, vedtakKontrollService, registeropplysningerService, medlFasade);
+        vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
+            eessiService, landvelgerService, tpsFasade, vedtakKontrollService, registeropplysningerService);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -121,9 +113,6 @@ public class VedtakServiceTest {
 
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(Behandling.class), any(Behandlingsstatus.class), any(Behandlingstyper.class)))
-            .thenReturn(replikertBehandling);
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("123");
@@ -266,46 +255,5 @@ public class VedtakServiceTest {
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), any());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
-    }
-
-    @Test
-    public void revurderVedtak_fungerer() throws Exception {
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        vedtakService.revurderVedtak(behandlingID);
-
-        ArgumentCaptor<Oppgave> oppgaveArgumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
-        verify(behandlingService).hentBehandling(behandlingID);
-        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.NY_VURDERING);
-        verify(oppgaveService).opprettOppgave(oppgaveArgumentCaptor.capture());
-        verify(medlFasade).avvisPeriode(eq(behandlingsresultat.getLovvalgsperioder().iterator().next().getMedlPeriodeID()), eq(StatusaarsakMedl.AVVIST));
-        verifyNoMoreInteractions(oppgaveService, behandlingService);
-
-        assertThat(oppgaveArgumentCaptor.getValue().getTilordnetRessurs()).isEqualTo("Z990007");
-        assertThat(oppgaveArgumentCaptor.getValue().getAktørId()).isEqualTo("1234567890123");
-        assertThat(oppgaveArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.NY_VURDERING);
-    }
-
-    @Test
-    public void revurderVedtak_aktivBehandling_kasterException() throws Exception {
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-
-        try {
-            vedtakService.revurderVedtak(behandlingID);
-            fail();
-        } catch (FunksjonellException e) {
-            assertThat(e.getMessage()).contains("aktiv");
-        }
-    }
-
-    @Test
-    public void revurderVedtak_forkortetPeriodeVedtak_kasterException() throws Exception {
-        behandling.setType(Behandlingstyper.ENDRET_PERIODE);
-
-        try {
-            vedtakService.revurderVedtak(behandlingID);
-            fail();
-        } catch (FunksjonellException e) {
-            assertThat(e.getMessage()).contains("forkortet");
-        }
     }
 }

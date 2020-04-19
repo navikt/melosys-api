@@ -75,6 +75,10 @@ public class Anmodningsperiode implements Medlemskapsperiode {
         this.dekning = dekning;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

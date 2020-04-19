@@ -228,6 +228,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         }
     }
 
+    public boolean erArtikkel16MedSendtAnmodningOmUnntak() {
+        return anmodningsperioder.stream().anyMatch(Anmodningsperiode::erSendtUtland);
+    }
+
     public boolean erArt16EtterUtlandMedRegistrertSvar() {
         if (anmodningsperioder.isEmpty()) {
             return false;
