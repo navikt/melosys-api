@@ -55,7 +55,7 @@ public class UtpekingsperiodeDto {
         return new UtpekingsperiodeDto(
             new PeriodeDto(utpekingsperiode.getFom(), utpekingsperiode.getTom()),
             utpekingsperiode.getLovvalgsbestemmelse().name(),
-            utpekingsperiode.getTilleggsbestemmelse().name(),
+            utpekingsperiode.getTilleggsbestemmelse() != null ? utpekingsperiode.getTilleggsbestemmelse().name() : null,
             utpekingsperiode.getLovvalgsland().name()
         );
     }
