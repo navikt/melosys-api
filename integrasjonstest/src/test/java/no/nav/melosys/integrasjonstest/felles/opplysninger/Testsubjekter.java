@@ -1,6 +1,10 @@
 package no.nav.melosys.integrasjonstest.felles.opplysninger;
 
-public class Testsubjekter {
+public final class Testsubjekter {
+    private Testsubjekter() {
+        throw new IllegalStateException("Utility class")
+    }
+
     public static final String HELFO_ORGNR = "986965610";
     public static final String SKATTEETATEN_ORGNR = "974761076";
 

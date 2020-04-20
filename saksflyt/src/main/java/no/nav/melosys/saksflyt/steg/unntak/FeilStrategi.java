@@ -34,10 +34,6 @@ public class FeilStrategi {
             først(opprettHendelse("Funksjonell feil")).
                 så(settTilFeilet())
         );
-        res.put(FUNKSJONELL_FEIL,
-            først(opprettHendelse("Funksjonell feil")).
-                så(settTilFeilet())
-        );
         res.put(INGEN_TILGANG,
             først(opprettHendelse("Ingen tilgang")).
                 så(settTilFeilet())

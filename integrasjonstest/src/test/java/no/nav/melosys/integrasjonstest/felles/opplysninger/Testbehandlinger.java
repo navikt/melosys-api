@@ -1,6 +1,10 @@
 package no.nav.melosys.integrasjonstest.felles.opplysninger;
 
-public class Testbehandlinger {
+public final class Testbehandlinger {
+    private Testbehandlinger() {
+        throw new IllegalStateException("Utility class")
+    }
+
     public static final long TOM_BEHANDLING_MARITIMT_ARBEID_OG_OPPGITT_ADRESSE = 1L;
     public static final long TOM_BEHANDLING = 2L;
     public static final long UTFYLT_BEHANDLING_ART12 = 3L;

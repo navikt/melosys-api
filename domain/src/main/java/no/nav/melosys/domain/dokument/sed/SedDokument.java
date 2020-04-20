@@ -153,20 +153,20 @@ public class SedDokument implements SaksopplysningDokument {
     }
 
     public Lovvalgsperiode opprettInnvilgetLovvalgsperiode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(getLovvalgBestemmelse());
-        lovvalgsperiode.setFom(getLovvalgsperiode().getFom());
-        lovvalgsperiode.setTom(getLovvalgsperiode().getTom());
-        lovvalgsperiode.setLovvalgsland(getLovvalgslandKode());
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        Lovvalgsperiode nyLovvalgsperiode = new Lovvalgsperiode();
+        nyLovvalgsperiode.setBestemmelse(getLovvalgBestemmelse());
+        nyLovvalgsperiode.setFom(getLovvalgsperiode().getFom());
+        nyLovvalgsperiode.setTom(getLovvalgsperiode().getTom());
+        nyLovvalgsperiode.setLovvalgsland(getLovvalgslandKode());
+        nyLovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         if (Landkoder.NO != lovvalgslandKode) {
-            lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
-            lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
+            nyLovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
+            nyLovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
         } else {
-            lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
-            lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
+            nyLovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
+            nyLovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
         }
 
-        return lovvalgsperiode;
+        return nyLovvalgsperiode;
     }
 }
