@@ -222,24 +222,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOppfriskning(Behandling behandling, String aktørID, String brukerID) {
-        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        Prosessinstans nyprosessinstans = new Prosessinstans();
-        nyprosessinstans.setBehandling(behandling);
-        nyprosessinstans.setType(ProsessType.OPPFRISKNING);
-
-        nyprosessinstans.setData(ProsessDataKey.SAKSNUMMER, behandling.getFagsak().getSaksnummer());
-        nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
-        nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
-
-        nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(grunnlagData));
-        nyprosessinstans.setData(ProsessDataKey.SØKNADSLAND, hentSøknadsland(grunnlagData));
-
-        nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
-
-        lagre(nyprosessinstans);
-    }
-
     public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode, String fritekst) {
         Prosessinstans nyprosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)

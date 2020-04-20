@@ -19,14 +19,14 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
  * Oppdaterer behandling med siste opplysninger hentet dato.
  */
 @Component
-public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
+public class VurderGjenbrukOppgave extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppfriskSaksopplysninger.class);
+    private static final Logger log = LoggerFactory.getLogger(VurderGjenbrukOppgave.class);
 
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public OppfriskSaksopplysninger(BehandlingRepository behandlingRepository) {
+    public VurderGjenbrukOppgave(BehandlingRepository behandlingRepository) {
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -43,12 +43,7 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
         behandling.setSisteOpplysningerHentetDato(Instant.now());
         behandlingRepository.save(behandling);
 
-        // FIXME: Fjern sjekk og prosesstype, og endre navn på klasse eller flytt resterende kode
-        if (prosessinstans.getType() == ProsessType.OPPFRISKNING) {
-            prosessinstans.setSteg(ProsessSteg.FERDIG);
-            log.info("Oppfrisking av saksopplysninger er ferdig for prosessinstans {} og behandlingID {}.", prosessinstans.getId(), behandling.getId());
-            return;
-        } else if (prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
+        if (prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
             prosessinstans.setSteg(GJENBRUK_OPPGAVE);
         } else {
             prosessinstans.setSteg(GSAK_OPPRETT_OPPGAVE);
