@@ -42,10 +42,12 @@ public class SedOrganisasjon extends AbstraktOrganisasjon {
         this.postadresse = postadresse;
     }
 
+    @Override
     public LocalDate getOppstartsdato() {
         return oppstartsdato;
     }
 
+    @Override
     public String getEnhetstype() {
         return enhetstype;
     }

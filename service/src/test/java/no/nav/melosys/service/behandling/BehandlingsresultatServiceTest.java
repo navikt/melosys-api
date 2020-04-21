@@ -2,10 +2,7 @@ package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -99,6 +96,9 @@ public class BehandlingsresultatServiceTest {
         Lovvalgsperiode lovvalgsperiode = opprettLovvalgsperiode();
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
+        Anmodningsperiode anmodningsperiode = opprettAnmodningsperiode();
+        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
+
         BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = opprettBehandlingsresultatBegrunnelse();
         behandlingsresultat.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelse);
 
@@ -122,6 +122,12 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getId() == null);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
+
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getId() == null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getAnmodningsperiodeSvar() == null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> !a.erSendtUtland());
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
 
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
@@ -178,6 +184,16 @@ public class BehandlingsresultatServiceTest {
         lovvalgsperiode.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
         return lovvalgsperiode;
+    }
+
+    private Anmodningsperiode opprettAnmodningsperiode() {
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setId(32L);
+        anmodningsperiode.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
+        anmodningsperiode.setSendtUtland(true);
+        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
+        anmodningsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
+        return anmodningsperiode;
     }
 
     private Avklartefakta opprettAvklartefakta() {

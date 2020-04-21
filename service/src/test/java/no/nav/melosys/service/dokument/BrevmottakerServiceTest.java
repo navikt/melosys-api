@@ -134,14 +134,14 @@ public class BrevmottakerServiceTest {
     @Test
     public void avklarMottakere_art12_1_CZerReservertFraA1_forventerIngenAktør() throws FunksjonellException, TekniskException {
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(MYNDIGHET), behandling);
-        assertThat(myndigheter.isEmpty());
+        assertThat(myndigheter).isEmpty();
     }
 
     @Test
     public void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerIngenAktør() throws FunksjonellException, TekniskException {
         behandlingsresultat.hentValidertLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(MYNDIGHET), behandling);
-        assertThat(myndigheter.isEmpty());
+        assertThat(myndigheter).isEmpty();
     }
 
     @Test

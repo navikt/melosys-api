@@ -6,10 +6,8 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
-import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -24,11 +22,10 @@ public class VedtakSystemService extends VedtakService {
                                ProsessinstansService prosessinstansService,
                                @Qualifier("system") EessiService eessiService,
                                LandvelgerService landvelgerService,
-                               FagsakService fagsakService,
                                TpsFasade tpsFasade,
                                VedtakKontrollService vedtakKontrollService,
-                               RegisteropplysningerService registeropplysningerService,
-                               MedlPeriodeService medlPeriodeService) {
-        super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, eessiService, landvelgerService, fagsakService, tpsFasade, vedtakKontrollService, registeropplysningerService, medlPeriodeService);
+                               RegisteropplysningerService registeropplysningerService) {
+        super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
+            eessiService, landvelgerService, tpsFasade, vedtakKontrollService, registeropplysningerService);
     }
 }

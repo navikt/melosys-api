@@ -18,6 +18,8 @@ public interface Medlemskapsperiode extends ErPeriode {
 
     Trygdedekninger getDekning();
 
+    Long getMedlPeriodeID();
+
     default boolean erArtikkel12() {
         return getBestemmelse() == FO_883_2004_ART12_1 || getBestemmelse() == FO_883_2004_ART12_2;
     }
@@ -55,6 +57,7 @@ public interface Medlemskapsperiode extends ErPeriode {
             || getBestemmelse() == FO_883_2004_ART16_1 || getBestemmelse() == FO_883_2004_ART13_1A
             || getBestemmelse() == FO_883_2004_ART13_1B1 || getBestemmelse() == FO_883_2004_ART13_1B2
             || getBestemmelse() == FO_883_2004_ART13_1B3 || getBestemmelse() == FO_883_2004_ART13_1B4
-            || getBestemmelse() == FO_883_2004_ART13_2A || getBestemmelse() == FO_883_2004_ART13_2B;
+            || getBestemmelse() == FO_883_2004_ART13_2A || getBestemmelse() == FO_883_2004_ART13_2B
+            || getBestemmelse() == FO_883_2004_ART13_3 || getBestemmelse() == FO_883_2004_ART13_4;
     }
 }

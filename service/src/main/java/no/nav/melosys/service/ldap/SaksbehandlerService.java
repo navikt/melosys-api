@@ -1,16 +1,16 @@
 package no.nav.melosys.service.ldap;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import no.nav.melosys.domain.Saksbehandler;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ldap.LdapService;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class SaksbehandlerService {
@@ -35,7 +35,7 @@ public class SaksbehandlerService {
     }
 
     public Saksbehandler hentBrukerinformasjon() throws TekniskException, IkkeFunnetException {
-        return hentBrukerinformasjon(SpringSubjectHandler.getInstance().getUserID());
+        return hentBrukerinformasjon(SubjectHandler.getInstance().getUserID());
     }
 
     private Saksbehandler hentBrukerinformasjon(String ident) throws TekniskException, IkkeFunnetException {

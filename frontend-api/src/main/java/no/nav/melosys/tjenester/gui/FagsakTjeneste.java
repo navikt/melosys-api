@@ -153,6 +153,18 @@ public class FagsakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+    @ApiOperation(value = "Korrigerer eller omgjør et vedtak eller en anmodning til utenlandsk myndighet " +
+        "for en sak ved å opprette en ny behandling basert på den siste endrede behandling")
+    @PostMapping("/{saksnummer}/revurder")
+    public ResponseEntity revurderSisteBehandling(@PathVariable("saksnummer") String saksnummer) throws FunksjonellException, TekniskException {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        tilgangService.sjekkSak(fagsak);
+
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(fagsak);
+        return ResponseEntity.ok(new RevurderingOpprettetDto(behandlingID));
+    }
+
+
     private FagsakDto tilFagsakDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
         fagsakDto.setSaksnummer(fagsak.getSaksnummer());

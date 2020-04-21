@@ -113,15 +113,6 @@ public class Fagsak extends RegistreringsInfo {
         return hentAktørMedRolleTypeBruker();
     }
 
-    public List<Landkoder> hentMyndighetLandkoder() throws TekniskException {
-        List<Landkoder> landkoder = new ArrayList<>();
-        for (var myndighet : hentMyndigheter()) {
-            landkoder.add(myndighet.hentMyndighetLandkode());
-        }
-
-        return landkoder;
-    }
-
     public List<Aktoer> hentMyndigheter() {
         return hentAktørerMedRolleType(MYNDIGHET);
     }

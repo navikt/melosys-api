@@ -5,6 +5,10 @@ import no.nav.melosys.domain.Behandling;
 
 final class BehandlingstypeKodeMapper {
 
+    private BehandlingstypeKodeMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     static BehandlingstypeKode hentBehandlingstypeKode(Behandling behandling) {
 
         if (behandling.erBehandlingAvSøknad()) {
