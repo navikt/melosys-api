@@ -130,11 +130,15 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean erAktiv() {
-        return !erAvsluttet();
+        return !erAvsluttet() && !erMidlertidigLovvalgsbeslutning();
     }
 
     public boolean erAvsluttet() {
         return status == Behandlingsstatus.AVSLUTTET;
+    }
+
+    public boolean erMidlertidigLovvalgsbeslutning() {
+        return status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING;
     }
 
     public String getInitierendeJournalpostId() {
