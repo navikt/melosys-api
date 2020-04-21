@@ -78,13 +78,11 @@ public class BehandlingsresultatService {
         behandlingsresultatsreplika.setAnmodningsperioder(new HashSet<>());
         for (Anmodningsperiode anmodningsperiodeOrig : behandlingsresultat.getAnmodningsperioder()) {
             Anmodningsperiode anmodningsperiodereplika = (Anmodningsperiode) BeanUtils.cloneBean(anmodningsperiodeOrig);
+            anmodningsperiodereplika.setId(null);
             anmodningsperiodereplika.setBehandlingsresultat(behandlingsresultatsreplika);
             anmodningsperiodereplika.setMedlPeriodeID(null);
-            if (anmodningsperiodeOrig.getAnmodningsperiodeSvar() != null) {
-                AnmodningsperiodeSvar anmodningsperiodeSvarReplika = (AnmodningsperiodeSvar) BeanUtils.cloneBean(anmodningsperiodeOrig.getAnmodningsperiodeSvar());
-                anmodningsperiodeSvarReplika.setAnmodningsperiode(anmodningsperiodereplika);
-                anmodningsperiodereplika.setAnmodningsperiodeSvar(anmodningsperiodeSvarReplika);
-            }
+            anmodningsperiodereplika.setSendtUtland(false);
+            anmodningsperiodereplika.setAnmodningsperiodeSvar(null);
             behandlingsresultatsreplika.getAnmodningsperioder().add(anmodningsperiodereplika);
         }
     }
