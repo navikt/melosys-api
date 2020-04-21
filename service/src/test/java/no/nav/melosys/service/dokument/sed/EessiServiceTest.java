@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.common.collect.Sets;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -22,12 +23,10 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
-import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedGrunnlagDto;
+import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
@@ -37,6 +36,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -64,6 +65,9 @@ public class EessiServiceTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Captor
+    private ArgumentCaptor<SedDataDto> sedDataDtoCaptor;
 
     private EasyRandom easyRandom = new EasyRandom();
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
@@ -287,6 +291,28 @@ public class EessiServiceTest {
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).genererSedPdf(any(), any());
         assertThat(pdf).isEqualTo(PDF);
+    }
+
+    @Test
+    public void genererSedForhåndsvisning_medSedPdfData_verifiserSedDataDtoPreutfylt() throws MelosysException {
+        final byte[] PDF = "pdf".getBytes();
+        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
+
+        SedPdfData sedPdfData = new SedPdfData();
+        sedPdfData.setEtterspørInformasjon(null);
+        sedPdfData.setNyttLovvalgsland("SE");
+        byte[] pdf = eessiService.genererSedPdf(1L, SedType.A001, sedPdfData);
+
+        verify(behandlingService).hentBehandling(eq(1L));
+        verify(dokumentdataGrunnlagFactory).av(any());
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
+        verify(eessiConsumer).genererSedPdf(sedDataDtoCaptor.capture(), any());
+        assertThat(pdf).isEqualTo(PDF);
+
+        SedDataDto sedDataDto = sedDataDtoCaptor.getValue();
+        assertThat(sedDataDto.getUtpekingAvvis()).isNotNull()
+            .extracting(UtpekingAvvisDto::getNyttLovvalgsland)
+            .isEqualTo(sedPdfData.getNyttLovvalgsland());
     }
 
     @Test

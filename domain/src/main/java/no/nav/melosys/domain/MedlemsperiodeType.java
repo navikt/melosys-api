@@ -9,11 +9,11 @@ public enum MedlemsperiodeType {
 
     public static MedlemsperiodeType fraBucType(BucType bucType) {
         if (bucType == BucType.LA_BUC_01) {
-            return MedlemsperiodeType.ANMODNINGSPERIODE;
+            return ANMODNINGSPERIODE;
         } else if (bucType == BucType.LA_BUC_02 || bucType == BucType.LA_BUC_04 || bucType == BucType.LA_BUC_05) {
-            return MedlemsperiodeType.LOVVALGSPERIODE;
+            return LOVVALGSPERIODE;
         }
 
-        return MedlemsperiodeType.INGEN;
+        return INGEN;
     }
 }

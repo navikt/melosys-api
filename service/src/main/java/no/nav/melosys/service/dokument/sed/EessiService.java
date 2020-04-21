@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.sed;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -29,6 +30,7 @@ import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.integrasjon.eessi.dto.UtpekingAvvisDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import org.slf4j.Logger;
@@ -50,7 +52,8 @@ public class EessiService {
     private final BehandlingsresultatService behandlingsresultatService;
 
     public EessiService(SedDataBygger sedDataBygger,
-                        SedDataGrunnlagFactory dataGrunnlagFactory, EessiConsumer eessiConsumer,
+                        SedDataGrunnlagFactory dataGrunnlagFactory,
+                        EessiConsumer eessiConsumer,
                         BehandlingService behandlingService,
                         BehandlingsresultatService behandlingsresultatService) {
         this.sedDataBygger = sedDataBygger;
@@ -187,6 +190,11 @@ public class EessiService {
 
     @Transactional(readOnly = true)
     public byte[] genererSedPdf(long behandlingID, SedType sedType) throws MelosysException {
+        return genererSedPdf(behandlingID, sedType, null);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] genererSedPdf(long behandlingID, SedType sedType, @Nullable SedPdfData sedPdfData) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -199,6 +207,10 @@ public class EessiService {
         }
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+
+        if (sedPdfData != null) {
+            sedPdfData.utfyllSedDataDto(sedDataDto);
+        }
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
         return eessiConsumer.genererSedPdf(sedDataDto, sedType);
     }
