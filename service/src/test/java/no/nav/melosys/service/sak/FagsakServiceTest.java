@@ -18,13 +18,12 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.jeasy.random.EasyRandom;
@@ -62,7 +61,7 @@ public class FagsakServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private MedlFasade medlFasade;
+    private MedlPeriodeService medlPeriodeService;
 
     private FagsakService fagsakService;
 
@@ -76,7 +75,7 @@ public class FagsakServiceTest {
     @Before
     public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService,
-            tps, prosessinstansService, behandlingsresultatService, medlFasade);
+            tps, prosessinstansService, behandlingsresultatService, medlPeriodeService);
     }
 
     @Test
@@ -520,7 +519,7 @@ public class FagsakServiceTest {
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(fagsak);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(eq(sistOppdaterteBehandling), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.NY_VURDERING));
-        verify(medlFasade).avvisPeriode(eq(anmodningsperiode.getMedlPeriodeID()), eq(StatusaarsakMedl.AVVIST));
+        verify(medlPeriodeService).avvisPeriode(eq(anmodningsperiode.getMedlPeriodeID()));
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
 
