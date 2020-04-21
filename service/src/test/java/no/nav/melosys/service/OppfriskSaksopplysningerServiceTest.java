@@ -13,12 +13,10 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,31 +28,27 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SaksopplysningerServiceTest {
-    @Mock
-    private TpsFasade tpsFasade;
-    @Mock
-    private ProsessinstansService prosessinstansService;
+public class OppfriskSaksopplysningerServiceTest {
     @Mock
     private BehandlingRepository behandlingRepo;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private RegisteropplysningerService registeropplysningerService;
-    @Mock
-    private SaksopplysningRepository saksopplysningRepository;
+    private FagsakService fagsakService;
     @Mock
     private RegelmodulService regelmodulService;
     @Mock
-    private FagsakService fagsakService;
+    private RegisteropplysningerService registeropplysningerService;
+    @Mock
+    private TpsFasade tpsFasade;
 
-    private SaksopplysningerService saksopplysningerService;
+    private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
     @Before
     public void setUp() {
-        saksopplysningerService = new SaksopplysningerService(tpsFasade, prosessinstansService,
-            behandlingRepo, behandlingsresultatService, registeropplysningerService,
-            saksopplysningRepository, regelmodulService, fagsakService);
+        oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
+            behandlingRepo, behandlingsresultatService, fagsakService,
+            regelmodulService, registeropplysningerService, tpsFasade);
     }
 
     @Test
@@ -93,11 +87,10 @@ public class SaksopplysningerServiceTest {
 
         behandling.setSaksopplysninger(saksopplysninger);
 
-        when(prosessinstansService.harAktivProsessinstans(anyLong())).thenReturn(false);
         when(behandlingRepo.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(brukerID);
 
-        saksopplysningerService.oppfriskSaksopplysning(13L);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(13L);
 
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
         verify(registeropplysningerService).hentOgLagreOpplysninger(any(RegisteropplysningerRequest.class));

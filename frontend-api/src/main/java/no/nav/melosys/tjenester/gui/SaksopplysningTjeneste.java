@@ -5,11 +5,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.OppfriskSaksopplysningerService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,11 +23,11 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class SaksopplysningTjeneste {
 
-    private final SaksopplysningerService saksopplysningerService;
+    private final OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
     @Autowired
-    public SaksopplysningTjeneste(SaksopplysningerService saksopplysningerService) {
-        this.saksopplysningerService = saksopplysningerService;
+    public SaksopplysningTjeneste(OppfriskSaksopplysningerService oppfriskSaksopplysningerService) {
+        this.oppfriskSaksopplysningerService = oppfriskSaksopplysningerService;
     }
 
     @GetMapping("oppfriskning/{behandlingID}")
@@ -38,10 +37,8 @@ public class SaksopplysningTjeneste {
         @ApiResponse(code = 404, message = "Behandling ikke funnet"),
         @ApiResponse(code = 500, message = "Uventet teknisk Feil")
     })
-    public ResponseEntity oppfriskSaksopplysning(@PathVariable("behandlingID") long id) throws MelosysException {
-        saksopplysningerService.oppfriskSaksopplysning(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public ResponseEntity oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID) throws MelosysException {
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID);
+        return ResponseEntity.noContent().build();
     }
-
-    // FIXME: oppfriskning/{behandlingID}/status fjernes fra JSON-schema
 }
