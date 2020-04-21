@@ -62,7 +62,8 @@ public class VedtakService {
                          FagsakService fagsakService,
                          TpsFasade tpsFasade,
                          VedtakKontrollService vedtakKontrollService,
-                         RegisteropplysningerService registeropplysningerService, MedlPeriodeService medlPeriodeService) {
+                         RegisteropplysningerService registeropplysningerService,
+                         MedlPeriodeService medlPeriodeService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;

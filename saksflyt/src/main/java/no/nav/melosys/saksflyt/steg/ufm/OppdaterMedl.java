@@ -77,10 +77,8 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), true, ident);
         } else {
             medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), true, ident);
-            if (lovvalgsperiode.erArtikkel13()) {
-                behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-                behandlingService.lagre(behandling);
-            }
+            behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+            behandlingService.lagre(behandling);
         }
     }
 }
