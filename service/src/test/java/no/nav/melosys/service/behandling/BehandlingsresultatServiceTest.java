@@ -2,15 +2,18 @@ package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -96,14 +99,14 @@ public class BehandlingsresultatServiceTest {
         Lovvalgsperiode lovvalgsperiode = opprettLovvalgsperiode();
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
-        Anmodningsperiode anmodningsperiode = opprettAnmodningsperiode();
-        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
-
         BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = opprettBehandlingsresultatBegrunnelse();
         behandlingsresultat.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelse);
 
         Kontrollresultat kontrollresultat = opprettKontrollresultat();
         behandlingsresultat.getKontrollresultater().add(kontrollresultat);
+
+        Anmodningsperiode anmodningsperiode = opprettAnmodningsperiode();
+        behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
 
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
@@ -120,10 +123,16 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getVedtakMetadata()).isNull();
 
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getId() == null);
+        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(a -> a.getFom() != null);
+        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(a -> a.getTom() != null);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
 
-        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getId() == null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(l -> l.getId() == null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getFom() != null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getTom() != null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getLovvalgsland() == Landkoder.SE);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
         assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getAnmodningsperiodeSvar() == null);
         assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> !a.erSendtUtland());
         assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
@@ -183,12 +192,21 @@ public class BehandlingsresultatServiceTest {
         lovvalgsperiode.setId(32L);
         lovvalgsperiode.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(LocalDate.now().plusMonths(2));
         return lovvalgsperiode;
     }
 
     private Anmodningsperiode opprettAnmodningsperiode() {
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setId(32L);
+        anmodningsperiode.setFom(LocalDate.now());
+        anmodningsperiode.setTom(LocalDate.now().plusYears(1L));
+        anmodningsperiode.setLovvalgsland(Landkoder.SE);
+        anmodningsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
+        anmodningsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        anmodningsperiode.setUnntakFraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        anmodningsperiode.setTilleggsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1);
         anmodningsperiode.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
         anmodningsperiode.setSendtUtland(true);
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
