@@ -22,8 +22,6 @@ import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -40,8 +38,6 @@ public class OppdaterMedlTest {
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private BehandlingService behandlingService;
-    @Captor
-    private ArgumentCaptor<Behandling> behandlingCaptor;
 
     private OppdaterMedl oppdaterMedl;
 
@@ -86,8 +82,7 @@ public class OppdaterMedlTest {
 
         verify(medlPeriodeService).opprettPeriodeForeløpig(any(Lovvalgsperiode.class), eq(12L), eq(true), eq("123"));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
-        verify(behandlingService).lagre(behandlingCaptor.capture());
-        assertThat(behandlingCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        verify(behandlingService).oppdaterStatus(eq(12L), eq(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VARSLE_UTLAND);
     }
 
