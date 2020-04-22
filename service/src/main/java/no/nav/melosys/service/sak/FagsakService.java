@@ -361,6 +361,7 @@ public class FagsakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
+    @Transactional(rollbackFor = MelosysException.class)
     public long opprettNyVurderingBehandling(Fagsak fagsak) throws FunksjonellException, TekniskException {
         Behandling behandling = fagsak.hentSistAktiveBehandling();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
