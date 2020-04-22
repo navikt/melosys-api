@@ -157,10 +157,9 @@ public class FagsakTjeneste {
         "for en sak ved å opprette en ny behandling basert på den siste endrede behandling")
     @PostMapping("/{saksnummer}/revurder")
     public ResponseEntity revurderSisteBehandling(@PathVariable("saksnummer") String saksnummer) throws FunksjonellException, TekniskException {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(fagsak);
+        tilgangService.sjekkSak(saksnummer);
 
-        long behandlingID = fagsakService.opprettNyVurderingBehandling(fagsak);
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         return ResponseEntity.ok(new RevurderingOpprettetDto(behandlingID));
     }
 
