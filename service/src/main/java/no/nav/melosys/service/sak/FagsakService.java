@@ -377,6 +377,11 @@ public class FagsakService {
         }
 
         Behandling replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, behandlingstype);
+
+        if (!behandling.erAvsluttet()) {
+            behandlingService.avsluttBehandling(behandling.getId());
+        }
+
         oppdaterStatus(fagsak, Saksstatuser.OPPRETTET);
         oppgaveService.opprettBehandlingsoppgave(
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBruker().getAktørId(), SubjectHandler.getInstance().getUserID()

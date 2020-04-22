@@ -486,9 +486,10 @@ public class FagsakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(behandlingsresultat);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
 
-        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+        long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(eq(behandling), eq(Behandlingsstatus.OPPRETTET), eq(behandling.getType()));
-        assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
+        verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
+        assertThat(replikertBehandlingID).isEqualTo(replikertBehandling.getId());
     }
 
     @Test
