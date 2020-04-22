@@ -33,9 +33,9 @@ public class UnntaksperiodeService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void godkjennPeriode(long behandlingID) throws FunksjonellException, TekniskException {
+    public void godkjennPeriode(long behandlingID, boolean varsleUtland) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
-        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(behandling);
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(behandling, varsleUtland);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 

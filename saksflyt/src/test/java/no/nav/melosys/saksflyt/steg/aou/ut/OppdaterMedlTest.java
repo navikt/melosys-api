@@ -16,11 +16,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.AnmodningsperiodeRepository;
-import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
@@ -35,28 +30,21 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
-    private OppdaterMedl agent;
+    private OppdaterMedl oppdaterMedl;
 
-    @Mock
-    private MedlFasade medlFasade;
-    @Mock
-    private TpsFasade tpsFasade;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private LovvalgsperiodeRepository lovvalgsperiodeRepository;
-    @Mock
-    private AnmodningsperiodeRepository anmodningsperiodeRepository;
+    private MedlPeriodeService medlPeriodeService;
 
-    private Prosessinstans p;
+    private Prosessinstans prosessinstans;
     private Behandlingsresultat behandlingsresultat;
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        MedlPeriodeService medlPeriodeService = new MedlPeriodeService(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
-        agent = new OppdaterMedl(medlFasade, medlPeriodeService);
+        oppdaterMedl = new OppdaterMedl(behandlingsresultatService, medlPeriodeService);
 
-        p = new Prosessinstans();
+        prosessinstans = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("TEST-MEDL");
         HashSet<Aktoer> aktører = new HashSet<>();
@@ -81,36 +69,30 @@ public class OppdaterMedlTest {
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        p.setBehandling(behandling);
-        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
-        p.setType(ProsessType.ANMODNING_OM_UNNTAK);
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.getBehandling().setType(Behandlingstyper.SOEKNAD);
+        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
     }
 
     @Test
     public void sjekkNestSteg() {
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_BREV);
-    }
-
-    @Test
-    public void lagreMedlPeriodeId() {
-        agent.utførSteg(p);
-        verify(anmodningsperiodeRepository).save(any(Anmodningsperiode.class));
+        oppdaterMedl.utførSteg(prosessinstans);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_BREV);
     }
 
     @Test
     public void utførStegNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        agent.utførSteg(p);
-        verify(medlFasade).opprettPeriodeUnderAvklaring(any(), any(), eq(KildedokumenttypeMedl.HENV_SOKNAD));
+        oppdaterMedl.utførSteg(prosessinstans);
+        verify(medlPeriodeService).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), eq(false));
     }
 
     @Test
     public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() {
         behandlingsresultat.setAnmodningsperioder(new HashSet<>());
 
-        agent.utførSteg(p);
-        assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());
+        oppdaterMedl.utførSteg(prosessinstans);
+        assertEquals(ProsessSteg.FEILET_MASKINELT, prosessinstans.getSteg());
     }
 }

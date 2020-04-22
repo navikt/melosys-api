@@ -257,12 +257,14 @@ public class ProsessinstansService {
         lagre(nyprosessinstans);
     }
 
-    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling) {
+    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.REGISTRERING_UNNTAK)
             .medSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL)
             .build();
+
+        prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, varsleUtland);
         lagre(prosessinstans);
     }
 

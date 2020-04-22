@@ -231,6 +231,10 @@ public class Behandling extends RegistreringsInfo {
         return tema == Behandlingstema.BESLUTNING_LOVVALG_NORGE;
     }
 
+    public boolean erUtpekingAvAnnetLand() {
+        return tema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
+    }
+
     public boolean kanResultereIVedtak() {
         return erBehandlingAvSøknad() || norgeErUtpekt();
     }

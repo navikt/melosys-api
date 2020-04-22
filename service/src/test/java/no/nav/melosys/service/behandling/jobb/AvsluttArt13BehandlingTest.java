@@ -15,10 +15,9 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +38,7 @@ public class AvsluttArt13BehandlingTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private MedlFasade medlFasade;
+    private MedlPeriodeService medlPeriodeService;
 
     private AvsluttArt13BehandlingJobb avsluttArt13BehandlingJobb;
     private AvsluttArt13BehandlingService avsluttArt13BehandlingService;
@@ -54,7 +53,7 @@ public class AvsluttArt13BehandlingTest {
 
     @Before
     public void setup() throws IkkeFunnetException {
-        avsluttArt13BehandlingService = spy(new AvsluttArt13BehandlingService(behandlingService, fagsakService, behandlingsresultatService, medlFasade));
+        avsluttArt13BehandlingService = spy(new AvsluttArt13BehandlingService(behandlingService, fagsakService, behandlingsresultatService, medlPeriodeService));
         avsluttArt13BehandlingJobb = new AvsluttArt13BehandlingJobb(behandlingService, behandlingsresultatService, avsluttArt13BehandlingService);
 
         behandling.setId(behandlingID);
@@ -99,7 +98,7 @@ public class AvsluttArt13BehandlingTest {
 
         avsluttArt13BehandlingJobb.avsluttBehandlingArt13();
         verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART));
-        verify(medlFasade).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.SED));
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(true));
     }
 
     @Test
@@ -109,7 +108,7 @@ public class AvsluttArt13BehandlingTest {
 
         avsluttArt13BehandlingJobb.avsluttBehandlingArt13();
         verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART));
-        verify(medlFasade).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.SED));
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(true));
     }
 
     private Instant månederOgDagerSiden(long mnd, long dager) {
