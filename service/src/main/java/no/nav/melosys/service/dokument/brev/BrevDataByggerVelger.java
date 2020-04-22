@@ -1,9 +1,11 @@
 package no.nav.melosys.service.dokument.brev;
 
+import no.nav.melosys.domain.jpa.SaksopplysningListener;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -18,33 +20,36 @@ import org.springframework.stereotype.Component;
 public class BrevDataByggerVelger {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final AvklartefaktaService avklartefaktaService;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final VilkaarsresultatRepository vilkaarsresultatRepository;
-    private final VilkaarsresultatService vilkaarsresultatService;
     private final JoarkService joarkService;
     private final LandvelgerService landvelgerService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final SaksopplysningerService saksopplysningerService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final UtpekingService utpekingService;
+    private final VilkaarsresultatRepository vilkaarsresultatRepository;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     @Autowired
     public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
                                 AvklartefaktaService avklartefaktaService,
-                                LovvalgsperiodeService lovvalgsperiodeService,
-                                UtenlandskMyndighetService utenlandskMyndighetService,
-                                VilkaarsresultatRepository vilkaarsresultatRepository,
-                                VilkaarsresultatService vilkaarsresultatService,
                                 JoarkService joarkService,
                                 LandvelgerService landvelgerService,
-                                UtpekingService utpekingService) {
+                                LovvalgsperiodeService lovvalgsperiodeService,
+                                SaksopplysningerService saksopplysningerService,
+                                UtenlandskMyndighetService utenlandskMyndighetService,
+                                UtpekingService utpekingService,
+                                VilkaarsresultatRepository vilkaarsresultatRepository,
+                                VilkaarsresultatService vilkaarsresultatService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.utenlandskMyndighetService = utenlandskMyndighetService;
-        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
-        this.vilkaarsresultatService = vilkaarsresultatService;
         this.joarkService = joarkService;
         this.landvelgerService = landvelgerService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.saksopplysningerService = saksopplysningerService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.utpekingService = utpekingService;
+        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     // For brevbygging i saksflyt
@@ -123,6 +128,7 @@ public class BrevDataByggerVelger {
         return new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
             landvelgerService,
             lovvalgsperiodeService,
+            saksopplysningerService,
             brevbestillingDto,
             brevbyggerA1);
     }
