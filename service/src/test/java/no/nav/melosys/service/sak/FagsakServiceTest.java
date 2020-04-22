@@ -412,10 +412,12 @@ public class FagsakServiceTest {
         behandling.setEndretDato(Instant.now());
         fagsak.setBehandlinger(List.of(behandling));
 
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
 
-        fagsakService.opprettNyVurderingBehandling(fagsak);
+        fagsakService.opprettNyVurderingBehandling(saksnummer);
     }
 
     @Test
@@ -428,12 +430,13 @@ public class FagsakServiceTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.setBehandlinger(List.of(behandling));
 
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(new Behandlingsresultat());
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Kan ikke revurdere en aktiv behandling");
 
-        fagsakService.opprettNyVurderingBehandling(fagsak);
+        fagsakService.opprettNyVurderingBehandling(saksnummer);
     }
 
     @Test
@@ -451,12 +454,13 @@ public class FagsakServiceTest {
         anmodningsperiode.setSendtUtland(false);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
 
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(behandlingsresultat);
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Kan ikke revurdere en aktiv behandling");
 
-        fagsakService.opprettNyVurderingBehandling(fagsak);
+        fagsakService.opprettNyVurderingBehandling(saksnummer);
     }
 
     @Test
@@ -478,10 +482,11 @@ public class FagsakServiceTest {
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
 
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(behandlingsresultat);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
 
-        long behandlingID = fagsakService.opprettNyVurderingBehandling(fagsak);
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(eq(behandling), eq(Behandlingsstatus.OPPRETTET), eq(behandling.getType()));
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
@@ -514,10 +519,11 @@ public class FagsakServiceTest {
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
 
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(sistOppdaterteBehandling.getId()))).thenReturn(behandlingsresultat);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
 
-        long behandlingID = fagsakService.opprettNyVurderingBehandling(fagsak);
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         verify(behandlingService).replikerBehandlingOgBehandlingsresultat(eq(sistOppdaterteBehandling), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.NY_VURDERING));
         verify(medlPeriodeService).avvisPeriode(eq(anmodningsperiode.getMedlPeriodeID()));
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
