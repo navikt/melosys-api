@@ -80,6 +80,7 @@ public class BehandlingsresultatService {
             Anmodningsperiode anmodningsperiodereplika = (Anmodningsperiode) BeanUtils.cloneBean(anmodningsperiodeOrig);
             anmodningsperiodereplika.setId(null);
             anmodningsperiodereplika.setBehandlingsresultat(behandlingsresultatsreplika);
+            anmodningsperiodereplika.setId(null);
             anmodningsperiodereplika.setMedlPeriodeID(null);
             anmodningsperiodereplika.setSendtUtland(false);
             anmodningsperiodereplika.setAnmodningsperiodeSvar(null);
