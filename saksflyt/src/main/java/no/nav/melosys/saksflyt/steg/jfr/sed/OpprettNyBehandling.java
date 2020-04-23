@@ -13,7 +13,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
@@ -81,7 +80,7 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
     }
 
-    private void avsluttTidligereBehandling(Fagsak fagsak) throws TekniskException, IkkeFunnetException {
+    private void avsluttTidligereBehandling(Fagsak fagsak) throws TekniskException, FunksjonellException {
         Behandling aktivBehandling = fagsak.getAktivBehandling();
 
         if (aktivBehandling != null) {

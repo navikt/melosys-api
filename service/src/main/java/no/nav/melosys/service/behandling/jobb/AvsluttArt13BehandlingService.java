@@ -48,7 +48,7 @@ public class AvsluttArt13BehandlingService {
     }
 
     private void avsluttBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException, TekniskException {
-        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), behandling, Saksstatuser.LOVVALG_AVKLART);
 
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
 
@@ -68,9 +68,17 @@ public class AvsluttArt13BehandlingService {
         }
     }
 
-    private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        return behandling.kanResultereIVedtak()
-            ? datoEldreEnn2Mnd(behandlingsresultat.getVedtakMetadata().getVedtaksdato())
-            : datoEldreEnn2Mnd(behandlingsresultat.getEndretDato());
+    private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+        if (behandling.kanResultereIVedtak()) {
+
+            if (!behandlingsresultat.harVedtak()) {
+                throw new FunksjonellException("Behandling " + behandling.getId() +
+                    " har ikke et vedtak og status kan da ikke settes til AVSLUTTET");
+            }
+
+            return datoEldreEnn2Mnd(behandlingsresultat.getVedtakMetadata().getVedtaksdato());
+        }
+
+        return datoEldreEnn2Mnd(behandlingsresultat.getEndretDato());
     }
 }

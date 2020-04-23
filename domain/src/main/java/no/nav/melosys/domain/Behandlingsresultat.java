@@ -294,4 +294,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
             || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
     }
+
+    public boolean harVedtak() {
+        return vedtakMetadata != null;
+    }
 }

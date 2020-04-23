@@ -99,8 +99,18 @@ public class AvsluttArt13BehandlingServiceTest {
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART));
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
         verify(medlFasade).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.SED));
+    }
+
+    @Test
+    public void avsluttBehandlingArt13_norgeUtpektVedtakIkkeLagret_kasterException() throws FunksjonellException, TekniskException {
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        behandlingsresultat.setVedtakMetadata(null);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("har ikke et vedtak og status kan da ikke settes til AVSLUTTET");
+        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
     }
 
     @Test
@@ -109,7 +119,7 @@ public class AvsluttArt13BehandlingServiceTest {
         behandlingsresultat.setEndretDato(månederOgDagerSiden(2, 1));
 
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART));
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
         verify(medlFasade).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.SED));
     }
 

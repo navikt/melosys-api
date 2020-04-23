@@ -302,10 +302,12 @@ public class FagsakServiceTest {
     @Test
     public void avsluttFagsakOgBehandlingValiderBehandlingstema_behtemaIkkeYrkesaktiv_blirAvsluttet() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-123");
         Behandling behandling = new Behandling();
         behandling.setId(123L);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
+        behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(List.of(behandling));
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
 
@@ -322,6 +324,7 @@ public class FagsakServiceTest {
         behandling.setType(Behandlingstyper.SED);
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(List.of(behandling));
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
 
@@ -388,17 +391,36 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void avsluttFagsakOgBehandling() throws IkkeFunnetException, TekniskException {
+    public void avsluttFagsakOgBehandling_erAktiv_blirAvsluttet() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-123");
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(List.of(behandling));
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
         verify(fagsakRepo).save(eq(fagsak));
         verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
+    }
+
+    @Test
+    public void avsluttFagsakOgBehandling_behandlingTilhørerAnnenFagsak_kasterException() throws FunksjonellException {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-99");
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setSaksnummer("MEL-0");
+
+        expectedException.expectMessage("tilhører ikke fagsak");
+        expectedException.expect(FunksjonellException.class);
+
+        fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
     }
 
     @Test
