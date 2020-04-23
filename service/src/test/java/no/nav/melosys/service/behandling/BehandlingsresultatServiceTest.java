@@ -237,7 +237,7 @@ public class BehandlingsresultatServiceTest {
     }
 
     private Anmodningsperiode opprettAnmodningsperiode() {
-        return new Anmodningsperiode(
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(
             LocalDate.now(),
             LocalDate.now().plusMonths(2),
             Landkoder.SE,
@@ -247,6 +247,8 @@ public class BehandlingsresultatServiceTest {
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
             Trygdedekninger.UTEN_DEKNING
         );
+        anmodningsperiode.setId(1L);
+        return anmodningsperiode;
     }
 
     private Behandlingsresultat opprettBehandlingsresultatMedData(Behandling tidligsteInaktiveBehandling) {
