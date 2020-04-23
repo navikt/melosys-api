@@ -72,8 +72,8 @@ public class UnntaksperiodeService {
                 String.format("Behandling er ikke av type %s, %s eller %s", REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND)
             );
-        } else if (behandling.erAvsluttet()) {
-            throw new FunksjonellException("Behandlingen er avsluttet");
+        } else if (behandling.erInaktiv()) {
+            throw new FunksjonellException("Behandlingen er inaktiv");
         }
     }
 

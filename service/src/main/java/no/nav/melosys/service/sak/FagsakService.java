@@ -370,7 +370,7 @@ public class FagsakService {
         validerOpprettNyVurdering(behandling, behandlingsresultat);
 
         Behandlingstyper behandlingstype;
-        if (behandling.erAvsluttet()) {
+        if (behandling.erInaktiv()) {
             behandlingstype = Behandlingstyper.NY_VURDERING;
         } else {
             behandlingstype = behandling.getType();
