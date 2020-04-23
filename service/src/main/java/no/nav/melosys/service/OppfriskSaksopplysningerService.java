@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -60,16 +61,7 @@ public class OppfriskSaksopplysningerService {
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
-            .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                .personopplysninger()
-                .personhistorikkopplysninger()
-                .arbeidsforholdopplysninger()
-                .inntektsopplysninger()
-                .organisasjonsopplysninger()
-                .medlemskapsopplysninger()
-                .sakOgBehandlingopplysninger()
-                .utbetalingsopplysninger()
-                .build())
+            .saksopplysningTyper(utledSaksopplysningTyper(behandling.getTema()))
             .fnr(brukerID)
             .fom(grunnlagPeriode.getFom())
             .tom(grunnlagPeriode.getTom())
@@ -83,6 +75,64 @@ public class OppfriskSaksopplysningerService {
             fagsak.setType(regelmodulService.kvalifisererForEf883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagPeriode)
                 ? Sakstyper.EU_EOS : Sakstyper.UKJENT);
             fagsakService.lagre(fagsak);
+        }
+    }
+
+    private RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) throws TekniskException {
+        switch (behandlingstema) {
+            case UTSENDT_ARBEIDSTAKER:
+            case UTSENDT_SELVSTENDIG:
+            case ARBEID_FLERE_LAND:
+            case IKKE_YRKESAKTIV:
+            case ARBEID_ETT_LAND_ØVRIG:
+            case ARBEID_NORGE_BOSATT_ANNET_LAND:
+                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .personopplysninger()
+                    .personhistorikkopplysninger()
+                    .arbeidsforholdopplysninger()
+                    .inntektsopplysninger()
+                    .medlemskapsopplysninger()
+                    .organisasjonsopplysninger()
+                    .sakOgBehandlingopplysninger()
+                    .build();
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
+                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .personopplysninger()
+                    .personhistorikkopplysninger()
+                    .inntektsopplysninger()
+                    .medlemskapsopplysninger()
+                    .utbetalingsopplysninger()
+                    .build();
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
+                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .personopplysninger()
+                    .personhistorikkopplysninger()
+                    .arbeidsforholdopplysninger()
+                    .inntektsopplysninger()
+                    .medlemskapsopplysninger()
+                    .organisasjonsopplysninger()
+                    .utbetalingsopplysninger()
+                    .build();
+            case BESLUTNING_LOVVALG_NORGE:
+            case BESLUTNING_LOVVALG_ANNET_LAND:
+                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .personopplysninger()
+                    .personhistorikkopplysninger()
+                    .arbeidsforholdopplysninger()
+                    .inntektsopplysninger()
+                    .medlemskapsopplysninger()
+                    .organisasjonsopplysninger()
+                    .sakOgBehandlingopplysninger()
+                    .utbetalingsopplysninger()
+                    .build();
+            case ØVRIGE_SED:
+            case TRYGDETID:
+                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .personopplysninger()
+                    .build();
+            default:
+                throw new TekniskException("Ugyldig behandlingstema " + behandlingstema + " for oppfrisking av registeropplysninger");
         }
     }
 }

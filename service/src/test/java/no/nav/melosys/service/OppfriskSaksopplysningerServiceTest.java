@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -66,6 +67,7 @@ public class OppfriskSaksopplysningerServiceTest {
         aktører.add(aktør);
         fagsak.setAktører(aktører);
         behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
 
