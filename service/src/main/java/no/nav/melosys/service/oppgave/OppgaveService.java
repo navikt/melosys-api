@@ -118,7 +118,7 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
-    public void opprettBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) throws FunksjonellException, TekniskException {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) throws FunksjonellException, TekniskException {
 
         Optional<Oppgave> eksisterendeOppgave = finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
@@ -132,6 +132,9 @@ public class OppgaveService {
 
             String oppgaveID = oppgaveFasade.opprettOppgave(oppgave);
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
+        } else if (tilordnetRessurs != null && !tilordnetRessurs.equals(eksisterendeOppgave.get().getTilordnetRessurs())) {
+            log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling {}", behandling.getId());
+            tildelOppgave(eksisterendeOppgave.get().getOppgaveId(), tilordnetRessurs);
         }
     }
 

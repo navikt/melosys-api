@@ -383,7 +383,7 @@ public class FagsakService {
         }
 
         oppdaterStatus(fagsak, Saksstatuser.OPPRETTET);
-        oppgaveService.opprettBehandlingsoppgave(
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBruker().getAktørId(), SubjectHandler.getInstance().getUserID()
         );
         avsluttTidligereMedlPeriode(behandlingsresultat);

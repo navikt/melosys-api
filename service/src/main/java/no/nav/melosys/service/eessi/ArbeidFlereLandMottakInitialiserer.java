@@ -51,7 +51,7 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
 
         Behandling behandling = fagsak.get().getAktivBehandling();
         if (behandling == null || behandling.getStatus() == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) {
-            oppgaveService.opprettBehandlingsoppgave(
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
                 fagsak.get().getSistOppdaterteBehandling(),
                 prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID),
                 prosessinstans.getData(ProsessDataKey.AKTØR_ID),
