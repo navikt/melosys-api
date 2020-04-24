@@ -132,6 +132,8 @@ public class OppgaveService {
 
             String oppgaveID = oppgaveFasade.opprettOppgave(oppgave);
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
+        } else if (tilordnetRessurs != null && !tilordnetRessurs.equals(eksisterendeOppgave.get().getTilordnetRessurs())) {
+            tildelOppgave(eksisterendeOppgave.get().getOppgaveId(), tilordnetRessurs);
         }
     }
 

@@ -26,6 +26,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -61,6 +62,7 @@ public class OppgaveServiceTest {
 
     private OppgaveService oppgaveService;
 
+    private Oppgave oppgave;
     private final String saksnummer = "MEL-12345";
 
     @Before
@@ -76,8 +78,9 @@ public class OppgaveServiceTest {
         oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgaveBuilder.setTilordnetRessurs("Z998877");
         oppgaveBuilder.setSaksnummer(saksnummer);
+        oppgave = oppgaveBuilder.build();
 
-        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgaveBuilder.build()));
+        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
     }
 
     @Test
@@ -157,6 +160,19 @@ public class OppgaveServiceTest {
     }
 
     @Test
+    public void opprettBehandlingsoppgave_oppgaveEksistererSaksbehandlerErTilordnet_oppgaveBlirIkkeOpprettetEllerOppdatert() throws FunksjonellException, TekniskException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setSaksnummer(saksnummer);
+
+        oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
+        verify(oppgaveFasade, never()).opprettOppgave(any());
+        verify(oppgaveFasade, never()).oppdaterOppgave(any(), any());
+    }
+
+    @Test
     public void opprettBehandlingsoppgave_oppgaveEksisterer_oppgaveBlirIkkeOpprettet() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
@@ -164,8 +180,9 @@ public class OppgaveServiceTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
 
-        oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", "Z99999");
+        oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", "Z123-nei");
         verify(oppgaveFasade, never()).opprettOppgave(any());
+        verify(oppgaveFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), any(OppgaveOppdatering.class));
     }
 
     private static Behandling lagBehandling() {
