@@ -45,21 +45,6 @@ public class RegelmodulService {
         this.regelmodulFasade = regelmodulFasade;
     }
 
-    /**
-     * Kall til regelmodulen med opplysninger knyttet til behandlingen med ID {@code behandlingID}.
-     *
-     * @param behandlingID Database ID til den behandlingen som brukes for å konstruere requesten til regelmodulen.
-     */
-    FastsettLovvalgReply fastsettLovvalg(long behandlingID) {
-        Behandling behandling = behandlingRepo.findWithSaksopplysningerById(behandlingID);
-        if (behandling == null) {
-            // Ikke funnet
-            return null;
-        }
-
-        return regelmodulFasade.fastsettLovvalg(behandling.getSaksopplysninger());
-    }
-
     public boolean kvalifisererForEf883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode) throws FunksjonellException {
         Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, periode);
         VurderInngangsvilkaarReply res = vurderInngangsvilkår(statsborgerskap, tilIso3(søknadsland.landkoder), periode);

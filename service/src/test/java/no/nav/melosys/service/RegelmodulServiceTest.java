@@ -43,14 +43,6 @@ public class RegelmodulServiceTest {
     }
 
     @Test
-    public void fastsettLovvalg_behandlingIkkeFunnet() {
-        when(behandlingRepository.findWithSaksopplysningerById(0L)).thenReturn(null);
-
-        FastsettLovvalgReply fastsettLovvalgReply = regelmodulService.fastsettLovvalg(0L);
-        assertThat(fastsettLovvalgReply).isNull();
-    }
-
-    @Test
     public void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
         Land stastborgerskap = regelmodulService.avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);
         assertNull(stastborgerskap);
