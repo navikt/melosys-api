@@ -65,7 +65,7 @@ public class OpprettOppgaveTest {
 
         agent.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(SEND_FORVALTNINGSMELDING);
     }
 
@@ -76,7 +76,7 @@ public class OpprettOppgaveTest {
 
         agent.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);
     }
 
@@ -88,7 +88,7 @@ public class OpprettOppgaveTest {
 
         agent.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);
     }
 
@@ -103,7 +103,7 @@ public class OpprettOppgaveTest {
 
         agent.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), eq(saksbehandler));
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), eq(saksbehandler));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class OpprettOppgaveTest {
 
         agent.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);
     }
 

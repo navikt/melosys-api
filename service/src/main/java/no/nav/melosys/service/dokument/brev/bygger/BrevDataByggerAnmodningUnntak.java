@@ -30,7 +30,7 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
         BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak(saksbehandler);
         long behandlingID = dataGrunnlag.getBehandling().getId();
         if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {
-            throw new TekniskException("Ingen eller flere enn én norsk eller utenlandsk virksomhet oppgitt for avslag eller ART16.1");
+            throw new FunksjonellException("Ingen eller flere enn én norsk eller utenlandsk virksomhet oppgitt for avslag eller art 16.1");
         }
 
         brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();

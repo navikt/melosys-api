@@ -75,6 +75,6 @@ public class ArbeidFlereLandMottakInitialisererTest {
 
         RutingResultat rutingResultat = arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(new Prosessinstans(), gsakSaksnummer);
         assertThat(rutingResultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);
-        verify(oppgaveService).opprettBehandlingsoppgave(eq(behandling), any(), any(), any());
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any());
     }
 }
