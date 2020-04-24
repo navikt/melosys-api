@@ -4,7 +4,6 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
-import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.repository.BehandlingRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +21,6 @@ import java.util.List;
 import static no.nav.melosys.domain.dokument.felles.Land.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.when;
 
 @SuppressWarnings("resource")
 @RunWith(MockitoJUnitRunner.class)
@@ -39,7 +37,7 @@ public class RegelmodulServiceTest {
 
     @Before
     public void setUp() throws ParserConfigurationException {
-        regelmodulService = new RegelmodulService(behandlingRepository, saksopplysningerService, regelmodulFasade);
+        regelmodulService = new RegelmodulService(saksopplysningerService, regelmodulFasade);
     }
 
     @Test

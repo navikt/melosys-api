@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
@@ -14,10 +13,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
-import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
-import no.nav.melosys.repository.BehandlingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +29,12 @@ import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 public class RegelmodulService {
     private static final Logger log = LoggerFactory.getLogger(RegelmodulService.class);
 
-    private final BehandlingRepository behandlingRepo;
     private final SaksopplysningerService saksopplysningerService;
     private final RegelmodulFasade regelmodulFasade;
 
     @Autowired
-    public RegelmodulService(BehandlingRepository repository,
-                             SaksopplysningerService saksopplysningerService,
+    public RegelmodulService(SaksopplysningerService saksopplysningerService,
                              RegelmodulFasade regelmodulFasade) {
-        this.behandlingRepo = repository;
         this.saksopplysningerService = saksopplysningerService;
         this.regelmodulFasade = regelmodulFasade;
     }

@@ -51,8 +51,7 @@ public class VurderInngangsvilkaarTest {
 
     @Before
     public void setUp() {
-        regelmodulService = new RegelmodulService(
-            mock(BehandlingRepository.class), saksopplysningerService, mock(RegelmodulFasade.class));
+        regelmodulService = new RegelmodulService(saksopplysningerService, mock(RegelmodulFasade.class));
         agent = new VurderInngangsvilkaar(regelmodulService, fagsakRepository);
 
         Fagsak fagsak = new Fagsak();
