@@ -53,7 +53,7 @@ public class VurderInngangsvilkaarTest {
     public void setUp() {
         regelmodulService = new RegelmodulService(
             mock(BehandlingRepository.class), saksopplysningerService, mock(RegelmodulFasade.class));
-        agent = new VurderInngangsvilkaar(regelmodulService, fagsakRepository, saksopplysningerService);
+        agent = new VurderInngangsvilkaar(regelmodulService, fagsakRepository);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);

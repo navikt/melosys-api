@@ -17,7 +17,6 @@ import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.RegelmodulService;
-import no.nav.melosys.service.SaksopplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +37,12 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
     private final RegelmodulService regelmodulService;
     private final FagsakRepository fagsakRepository;
-    private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
     public VurderInngangsvilkaar(RegelmodulService regelmodulService,
-                                 FagsakRepository fagsakRepository,
-                                 SaksopplysningerService saksopplysningerService) {
+                                 FagsakRepository fagsakRepository) {
         this.regelmodulService = regelmodulService;
         this.fagsakRepository = fagsakRepository;
-        this.saksopplysningerService = saksopplysningerService;
-        log.debug("InngangsvilkaarAgent initialisert");
     }
 
     @Override
