@@ -80,15 +80,16 @@ public class InnvilgelsesbrevMapperTest {
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
+        brevdataInnvilgelse.erTuristskip = true;
         brevdataInnvilgelse.hovedvirksomhet = virksomhet;
         brevdataInnvilgelse.arbeidsland = "Sverige";
-        brevdataInnvilgelse.anmodningsperiodesvar = Optional.of(lagAnmodningsperiodeSvarInnvilgelse());
+        brevdataInnvilgelse.setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse());
         brevdataInnvilgelse.trygdemyndighetsland = "Sverige";
 
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
-        assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
+        assertThat(resultat).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 
     private static Behandlingsresultat lagBehandlingsresultat() {

@@ -81,10 +81,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             fag.setArbeidPåSokkel(JA);
         }
 
-        brevdata.anmodningsperiodesvar.map(AnmodningsperiodeSvar::getBegrunnelseFritekst)
+        brevdata.getAnmodningsperiodesvar().map(AnmodningsperiodeSvar::getBegrunnelseFritekst)
             .ifPresent(fag::setBegrunnelseFritekst);
 
-        brevdata.anmodningsperiodesvar
+        brevdata.getAnmodningsperiodesvar()
             .map(AnmodningsperiodeSvar::getAnmodningsperiodeSvarType)
             .map(Anmodningsperiodesvartyper::getKode)
             .map(AnmodningsPeriodeSvarTypeKode::valueOf)
@@ -106,6 +106,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
+
+        if (brevdata.erTuristskip) {
+            fag.setVilkår(VilkaarKode.FTRL_2_12_UNNTAK_TURISTSKIP);
+        }
 
         Set<VilkaarBegrunnelse> art122Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_2);
         fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));

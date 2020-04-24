@@ -53,6 +53,11 @@ public class VilkaarsresultatService {
     }
 
     @Transactional(readOnly = true)
+    public boolean oppfyllerVilkaar(long behandlingID, Vilkaar vilkaar) {
+        return vilkaarsresultatRepo.existsByBehandlingsresultatIdAndVilkaarAndOppfyltTrue(behandlingID, vilkaar);
+    }
+
+    @Transactional(readOnly = true)
     public boolean harVilkaarForArtikkel12(long behandlingID) {
         Optional<Vilkaarsresultat> art121Vilkaar = finnVilkaarsresultat(behandlingID, FO_883_2004_ART12_1);
         Optional<Vilkaarsresultat> art122Vilkaar = finnVilkaarsresultat(behandlingID, FO_883_2004_ART12_2);
