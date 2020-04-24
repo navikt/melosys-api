@@ -119,6 +119,17 @@ public class BehandlingServiceTest {
     }
 
     @Test
+    public void oppdaterStatus_statusErAlleredeVurderDokument_ingentingSkjer() throws FunksjonellException, TekniskException {
+        long behandlingID = 11L;
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+        verify(behandlingRepo, never()).save(any());
+    }
+
+    @Test
     public void knyttMedlemsperioder_ingenBehandling() throws FunksjonellException {
         long behandlingID = 11L;
         List<Long> periodeIder = Arrays.asList(2L, 3L);
