@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
@@ -60,13 +61,7 @@ public class RegelmodulService {
     }
 
     public boolean kvalifisererForEf883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode) throws FunksjonellException {
-        Land statsborgerskap = null;
-        if (periode.getFom().isBefore(LocalDate.now())) {
-            statsborgerskap = avgjørStatsborgerskapPåStartDato(
-                saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
-        } else {
-            statsborgerskap = saksopplysningerService.hentPersonOpplysninger(behandlingID).statsborgerskap;
-        }
+        Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, periode);
         VurderInngangsvilkaarReply res = vurderInngangsvilkår(statsborgerskap, tilIso3(søknadsland.landkoder), periode);
 
         List<Feilmelding> feilmeldinger = res.feilmeldinger.stream()
@@ -88,7 +83,18 @@ public class RegelmodulService {
         return regelmodulFasade.vurderInngangsvilkår(brukersStatsborgerskap, søknadsland, søknadsperiode);
     }
 
-    public static Land avgjørStatsborgerskapPåStartDato(List<StatsborgerskapPeriode> statsborgerskapListe, LocalDate startDato) {
+    public Land hentStatsborgerskapForPerioden(long behandlingID, Periode periode) throws IkkeFunnetException {
+        // Hent statsborgerskap fra saksopplysningene...
+        // Ved søknad tilbake i tid brukes historisk statsborgerskap
+        if (periode.getFom().isBefore(LocalDate.now())) {
+            return avgjørStatsborgerskapPåStartDato(
+                saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
+        } else {
+            return saksopplysningerService.hentPersonOpplysninger(behandlingID).statsborgerskap;
+        }
+    }
+
+    public Land avgjørStatsborgerskapPåStartDato(List<StatsborgerskapPeriode> statsborgerskapListe, LocalDate startDato) {
         if (statsborgerskapListe.isEmpty()) {
             return null;
         }

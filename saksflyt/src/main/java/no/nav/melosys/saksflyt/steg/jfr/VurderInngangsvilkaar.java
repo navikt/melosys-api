@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.Fagsak;
@@ -26,8 +25,6 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 import static no.nav.melosys.saksflyt.feil.Feilkategori.FUNKSJONELL_FEIL;
-import static no.nav.melosys.service.RegelmodulService.avgjørStatsborgerskapPåStartDato;
-
 
 /**
  * Kaller regelmodulen for å vurdere inngangsvilkår. Setter type på fagsak basert på resultatet.
@@ -64,22 +61,8 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingID = prosessinstans.getBehandling().getId();
 
-        // Hent statsborgerskap fra saksopplysningene...
-        // Ved søknad tilbake i tid brukes historisk statsborgerskap
-        boolean brukHistoriskStatsborgerskap = false;
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
-
-        if (periode.getFom().isBefore(LocalDate.now())) {
-            brukHistoriskStatsborgerskap = true;
-        }
-
-        Land statsborgerskap;
-        if (brukHistoriskStatsborgerskap) {
-            statsborgerskap = avgjørStatsborgerskapPåStartDato(
-                saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
-        } else {
-            statsborgerskap = saksopplysningerService.hentPersonOpplysninger(behandlingID).statsborgerskap;
-        }
+        Land statsborgerskap = regelmodulService.hentStatsborgerskapForPerioden(behandlingID, periode);
 
         if (statsborgerskap == null) {
             log.error("Funksjonell feil for prosessinstans {}: Kunne ikke hente brukers statsborgerskap fra saksopplysningene.", prosessinstans.getId());
