@@ -201,8 +201,12 @@ public class BehandlingService {
         return replikertBehandlingsgrunnlag;
     }
 
-    public void avsluttBehandling(long behandlingId) throws IkkeFunnetException {
+    public void avsluttBehandling(long behandlingId) throws FunksjonellException {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+        if (behandling.erAvsluttet()) {
+            throw new FunksjonellException("Behandling " + behandlingId + " er allerede avsluttet!");
+        }
+
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
         behandlingerAvsluttet.increment();

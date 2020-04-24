@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.service.kontroll.PeriodeKontroller.datoEldreEnn2Mnd;
+
 @Service
 public class AvsluttArt13BehandlingService {
 
@@ -34,19 +36,48 @@ public class AvsluttArt13BehandlingService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void avsluttBehandling(long behandlingID) throws FunksjonellException, TekniskException {
+    public void avsluttBehandlingHvisToMndPassert(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        validerErArtikkel13(behandlingsresultat);
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if (toMndHarPassertSidenSaksbehandling(behandling, behandlingsresultat)) {
+            avsluttBehandling(behandling, behandlingsresultat);
+        }
+    }
+
+    private void avsluttBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException, TekniskException {
+        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), behandling, Saksstatuser.LOVVALG_AVKLART);
+
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
 
         if (lovvalgsperiode.getMedlPeriodeID() == null) {
-            throw new FunksjonellException("Behandling "+ behandling.getId()
+            throw new FunksjonellException("Behandling " + behandling.getId()
                 + " har en lovvalgsperiode som ikke er registrert i medl. Kan ikke avslutte art13 behandling automatisk");
         }
 
         medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
         log.info("Behandling {} avsluttet og satt til endelig i Medl", behandling.getId());
+    }
+
+    private void validerErArtikkel13(Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+        if (!behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel13()) {
+            throw new FunksjonellException("Behandling skal ikke avsluttes automatisk da den er av bestemmelse"
+                + behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse());
+        }
+    }
+
+    private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+        if (behandling.kanResultereIVedtak()) {
+
+            if (!behandlingsresultat.harVedtak()) {
+                throw new FunksjonellException("Behandling " + behandling.getId() +
+                    " har ikke et vedtak og status kan da ikke settes til AVSLUTTET");
+            }
+
+            return datoEldreEnn2Mnd(behandlingsresultat.getVedtakMetadata().getVedtaksdato());
+        }
+
+        return datoEldreEnn2Mnd(behandlingsresultat.getEndretDato());
     }
 }

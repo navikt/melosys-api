@@ -199,7 +199,7 @@ public class Behandling extends RegistreringsInfo {
         return erAvsluttet() || erMidlertidigLovvalgsbeslutning();
     }
 
-    private boolean erAvsluttet() {
+    public boolean erAvsluttet() {
         return status == Behandlingsstatus.AVSLUTTET;
     }
 

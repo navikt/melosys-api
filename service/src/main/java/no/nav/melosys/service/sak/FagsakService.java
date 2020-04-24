@@ -331,14 +331,17 @@ public class FagsakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) throws IkkeFunnetException, TekniskException {
-        oppdaterStatus(fagsak, saksstatus);
-        behandlingService.avsluttBehandling(fagsak.getAktivBehandling().getId());
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) throws FunksjonellException, TekniskException {
+        avsluttFagsakOgBehandling(fagsak, fagsak.getAktivBehandling(), saksstatus);
     }
 
-    public void oppdaterFagsakOgBehandlingStatuser(Fagsak fagsak, Saksstatuser saksstatus, Behandlingsstatus behandlingsstatus) throws FunksjonellException, TekniskException {
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Behandling behandling, Saksstatuser saksstatus) throws FunksjonellException {
+
+        if (!behandling.getFagsak().getSaksnummer().equals(fagsak.getSaksnummer())) {
+            throw new FunksjonellException("Behandling " + behandling.getId() + " tilhører ikke fagsak " + fagsak.getSaksnummer());
+        }
         oppdaterStatus(fagsak, saksstatus);
-        behandlingService.oppdaterStatus(fagsak.getAktivBehandling().getId(), behandlingsstatus);
+        behandlingService.avsluttBehandling(behandling.getId());
     }
 
     private void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
