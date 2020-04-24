@@ -25,7 +25,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        oppgaveService.opprettBehandlingsoppgave(
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             prosessinstans.getBehandling(),
             prosessinstans.hentJournalpostID(),
             prosessinstans.getData(ProsessDataKey.AKTØR_ID),

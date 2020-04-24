@@ -41,7 +41,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         validerSakstype(prosessinstans.getBehandling().getFagsak().getType());
-        oppgaveService.opprettBehandlingsoppgave(
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             prosessinstans.getBehandling(),
             prosessinstans.hentJournalpostID(),
             prosessinstans.getData(ProsessDataKey.AKTØR_ID),

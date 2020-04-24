@@ -38,6 +38,8 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -61,6 +63,9 @@ public class OppgaveServiceTest {
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     private OppgaveService oppgaveService;
+
+    @Captor
+    private ArgumentCaptor<OppgaveOppdatering> oppgaveOppdateringCaptor;
 
     private Oppgave oppgave;
     private final String saksnummer = "MEL-12345";
@@ -148,41 +153,43 @@ public class OppgaveServiceTest {
     }
 
     @Test
-    public void opprettBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+    public void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
 
-        oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", "Z99999");
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
     }
 
     @Test
-    public void opprettBehandlingsoppgave_oppgaveEksistererSaksbehandlerErTilordnet_oppgaveBlirIkkeOpprettetEllerOppdatert() throws FunksjonellException, TekniskException {
+    public void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererSaksbehandlerErTilordnet_oppgaveBlirIkkeOpprettetEllerOppdatert() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
 
-        oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
         verify(oppgaveFasade, never()).opprettOppgave(any());
         verify(oppgaveFasade, never()).oppdaterOppgave(any(), any());
     }
 
     @Test
-    public void opprettBehandlingsoppgave_oppgaveEksisterer_oppgaveBlirIkkeOpprettet() throws FunksjonellException, TekniskException {
+    public void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererTilordnetAnnenRessurs_oppdaterTilordnetRessurs() throws FunksjonellException, TekniskException {
+        final String tilordnetRessurs = "Z12332123";
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
 
-        oppgaveService.opprettBehandlingsoppgave(behandling, "222", "333", "Z123-nei");
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs);
         verify(oppgaveFasade, never()).opprettOppgave(any());
-        verify(oppgaveFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), any(OppgaveOppdatering.class));
+        verify(oppgaveFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveOppdateringCaptor.capture());
+        assertThat(oppgaveOppdateringCaptor.getValue().getTilordnetRessurs()).isEqualTo(tilordnetRessurs);
     }
 
     private static Behandling lagBehandling() {
