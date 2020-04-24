@@ -13,9 +13,9 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +34,7 @@ public class UnntaksperiodeIkkeGodkjentTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
     @Mock
-    private MedlFasade medlFasade;
+    private MedlPeriodeService medlPeriodeService;
 
     private UnntaksperiodeIkkeGodkjent unntaksperiodeIkkeGodkjent;
 
@@ -43,7 +43,7 @@ public class UnntaksperiodeIkkeGodkjentTest {
 
     @Before
     public void setup() {
-        unntaksperiodeIkkeGodkjent = new UnntaksperiodeIkkeGodkjent(behandlingRepository, behandlingsresultatRepository, medlFasade);
+        unntaksperiodeIkkeGodkjent = new UnntaksperiodeIkkeGodkjent(behandlingRepository, behandlingsresultatRepository, medlPeriodeService);
 
         behandlingsresultat.getLovvalgsperioder().add(new Lovvalgsperiode());
         when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));

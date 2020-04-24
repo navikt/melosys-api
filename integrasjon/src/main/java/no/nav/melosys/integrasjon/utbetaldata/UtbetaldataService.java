@@ -114,7 +114,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
             periode.setFom(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
             periode.setTom(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
         } catch (DatatypeConfigurationException e) {
-            throw new TekniskException(e);
+            throw new TekniskException("Kan ikke opprette periode mot utbetaltjeneste", e);
         }
 
         return periode;

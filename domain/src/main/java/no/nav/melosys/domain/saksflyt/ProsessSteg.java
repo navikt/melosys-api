@@ -140,6 +140,7 @@ public enum ProsessSteg implements Kodeverk {
     REG_UNNTAK_REGISTERKONTROLL("REG_UNNTAK_REGISTERKONTROLL", "Validerer informasjon om en unntaksperiode"),
     REG_UNNTAK_BESTEM_BEHANDLINGSMAATE("REG_UNNTAK_BESTEM_BEHANDLINGSMAATE", "Bestem om søknad skal registreres automatisk eller behandles manuelt"),
     REG_UNNTAK_OPPDATER_MEDL("REG_UNNTAK_OPPDATER_MEDL", "Sett periode endelig i MEDL"),
+    REG_UNNTAK_VARSLE_UTLAND("REG_UNNTAK_VARSLE_UTLAND", "Varsler utland om godkjent unntaksperiode"),
     REG_UNNTAK_OPPRETT_OPPGAVE("REG_UNNTAK_OPPRETT_OPPGAVE","Opprett oppgave for manuell behandling"),
     REG_UNNTAK_AVSLUTT_BEHANDLING("REG_UNNTAK_AVSLUTT_BEHANDLING", "Avslutt behandling"),
     REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET("REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET", "Oppdaterer status på sak i sob til avsluttet"),

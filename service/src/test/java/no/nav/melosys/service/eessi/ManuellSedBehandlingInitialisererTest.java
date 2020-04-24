@@ -95,6 +95,26 @@ public class ManuellSedBehandlingInitialisererTest {
     }
 
     @Test
+    public void bestemManuellBehandling_A012SaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning_ikkeOppdaterStatusEllerOppgave() throws FunksjonellException, TekniskException {
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
+        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A012);
+
+        Fagsak fagsak = hentFagsak();
+        fagsak.getSistOppdaterteBehandling().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+
+        when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
+        manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SED_JOURNALFØRING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+        assertThat(prosessinstans.getBehandling()).isNotNull();
+        verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
+        verify(oppgaveService, never()).finnOppgaveMedFagsaksnummer(any());
+        verify(oppgaveService, never()).oppdaterOppgave(any(), any());
+    }
+
+    @Test
     public void bestemManuellBehandling_behandlingAvsluttetOgSkalBehandleSED_opprettOppgave() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
@@ -107,6 +127,7 @@ public class ManuellSedBehandlingInitialisererTest {
         manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
 
         ArgumentCaptor<Oppgave> oppgaveCaptor = ArgumentCaptor.forClass(Oppgave.class);
+        verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue())
             .hasFieldOrPropertyWithValue("saksnummer", SAKSNUMMER)
@@ -129,6 +150,7 @@ public class ManuellSedBehandlingInitialisererTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(SAKSNUMMER);
         fagsak.getBehandlinger().add(behandling);
+        behandling.setFagsak(fagsak);
         return fagsak;
     }
 }

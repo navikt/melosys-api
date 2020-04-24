@@ -129,14 +129,6 @@ public class Behandling extends RegistreringsInfo {
         this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato;
     }
 
-    public boolean erAktiv() {
-        return !erAvsluttet();
-    }
-
-    public boolean erAvsluttet() {
-        return status == Behandlingsstatus.AVSLUTTET;
-    }
-
     public String getInitierendeJournalpostId() {
         return initierendeJournalpostId;
     }
@@ -198,11 +190,27 @@ public class Behandling extends RegistreringsInfo {
         return Objects.hash(registrertDato, fagsak);
     }
 
+
+    public boolean erAktiv() {
+        return !erInaktiv();
+    }
+
+    public boolean erInaktiv() {
+        return erAvsluttet() || erMidlertidigLovvalgsbeslutning();
+    }
+
+    private boolean erAvsluttet() {
+        return status == Behandlingsstatus.AVSLUTTET;
+    }
+
+    private boolean erMidlertidigLovvalgsbeslutning() {
+        return status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING;
+    }
+
     public boolean erRedigerbar() {
         return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK
-                    || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != Behandlingstema.IKKE_YRKESAKTIV)
-                    || status == Behandlingsstatus.AVSLUTTET
-                    || status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+            || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != Behandlingstema.IKKE_YRKESAKTIV)
+            || erInaktiv());
     }
 
     public boolean erVenterForDokumentasjon() {
@@ -229,6 +237,10 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean norgeErUtpekt() {
         return tema == Behandlingstema.BESLUTNING_LOVVALG_NORGE;
+    }
+
+    public boolean erUtpekingAvAnnetLand() {
+        return tema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 
     public boolean kanResultereIVedtak() {
@@ -258,10 +270,6 @@ public class Behandling extends RegistreringsInfo {
 
     public static boolean erBehandlingAvSøknadArbeidIFlereLand(String behandlingstemaKode) {
         return Behandlingstema.ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
-    }
-
-    public boolean isAktiv() {
-        return status != Behandlingsstatus.AVSLUTTET;
     }
 
     @Override

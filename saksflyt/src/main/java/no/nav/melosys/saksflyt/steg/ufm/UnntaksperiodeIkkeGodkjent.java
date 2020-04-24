@@ -3,7 +3,10 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -13,11 +16,10 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,12 +31,12 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
 
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-    private final MedlFasade medlFasade;
+    private final MedlPeriodeService medlPeriodeService;
 
-    public UnntaksperiodeIkkeGodkjent(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, MedlFasade medlFasade) {
+    public UnntaksperiodeIkkeGodkjent(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, MedlPeriodeService medlPeriodeService) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.medlFasade = medlFasade;
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
@@ -74,7 +76,7 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (!lovvalgsperioder.isEmpty()) {
-            medlFasade.avvisPeriode(lovvalgsperioder.iterator().next().getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
+            medlPeriodeService.avvisPeriode(lovvalgsperioder.iterator().next().getMedlPeriodeID());
         }
 
         log.info("Unntaksperiode avvist i medl og behandling avsluttet for fagsak {}", prosessinstans.getBehandling().getFagsak().getSaksnummer());

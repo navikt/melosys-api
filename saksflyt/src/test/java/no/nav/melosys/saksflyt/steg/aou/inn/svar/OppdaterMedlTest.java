@@ -10,10 +10,8 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +31,7 @@ public class OppdaterMedlTest {
     @Mock
     private MedlPeriodeService medlPeriodeService;
     @Mock
-    private MedlFasade medlFasade;
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private BehandlingService behandlingService;
 
@@ -40,7 +39,7 @@ public class OppdaterMedlTest {
 
     @Before
     public void setup() throws IkkeFunnetException {
-        oppdaterMedl = new OppdaterMedl(medlPeriodeService, medlFasade, behandlingService);
+        oppdaterMedl = new OppdaterMedl(medlPeriodeService, behandlingService, behandlingsresultatService);
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
     }
@@ -49,14 +48,15 @@ public class OppdaterMedlTest {
     public void utfør_lovvalgsperiodeInnvilget() throws FunksjonellException, TekniskException {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        when(medlPeriodeService.hentLovvalgsperiode(any(Behandling.class))).thenReturn(lovvalgsperiode);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(lagBehandling());
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(medlPeriodeService).hentLovvalgsperiode(any(Behandling.class));
-        verify(medlFasade).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(true));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_SEND_SED);
     }
 
@@ -65,14 +65,15 @@ public class OppdaterMedlTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         lovvalgsperiode.setMedlPeriodeID(1L);
-        when(medlPeriodeService.hentLovvalgsperiode(any(Behandling.class))).thenReturn(lovvalgsperiode);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(lagBehandling());
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(medlPeriodeService).hentLovvalgsperiode(any(Behandling.class));
-        verify(medlFasade).avvisPeriode(anyLong(), eq(StatusaarsakMedl.AVVIST));
+        verify(medlPeriodeService).avvisPeriode(eq(1L));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_SEND_SED);
     }
 
@@ -81,7 +82,9 @@ public class OppdaterMedlTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         lovvalgsperiode.setMedlPeriodeID(1L);
-        when(medlPeriodeService.hentLovvalgsperiode(any(Behandling.class))).thenReturn(lovvalgsperiode);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         Behandling behandling = lagBehandling();
         ((SedDokument) behandling.getSaksopplysninger().iterator().next().getDokument()).setErElektronisk(false);
@@ -92,8 +95,7 @@ public class OppdaterMedlTest {
 
         oppdaterMedl.utfør(prosessinstans);
 
-        verify(medlPeriodeService).hentLovvalgsperiode(any(Behandling.class));
-        verify(medlFasade).avvisPeriode(anyLong(), eq(StatusaarsakMedl.AVVIST));
+        verify(medlPeriodeService).avvisPeriode(eq(1L));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_OPPRETT_JOURNALPOST);
     }
 

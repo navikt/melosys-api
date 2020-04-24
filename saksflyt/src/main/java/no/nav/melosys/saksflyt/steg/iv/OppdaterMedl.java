@@ -8,10 +8,8 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,14 +31,13 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
-    private final MedlFasade medlFasade;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService) {
-        this.medlFasade = medlFasade;
+    public OppdaterMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+        this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
-        log.info("IverksetteVedtakOppdaterMEDL initialisert");
     }
 
     @Override
@@ -53,19 +50,14 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = prosessinstans.getBehandling();
 
-        String fnr = medlPeriodeService.hentFnr(behandling);
-        Lovvalgsperiode lovvalgsperiode = medlPeriodeService.hentLovvalgsperiode(behandling);
-
-        Behandlingsresultat behandlingsresultat = medlPeriodeService.hentBehandlingsresultat(behandling);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
         if (lovvalgsperiode.getMedlPeriodeID() != null) {
             oppdaterEksisterendeMedlPeriode(lovvalgsperiode);
         } else if (behandlingsresultat.erInnvilgelseFlereLand()) {
-            KildedokumenttypeMedl kildedokumenttypeMedl = behandling.erBehandlingAvSøknad() ? KildedokumenttypeMedl.HENV_SOKNAD : KildedokumenttypeMedl.SED;
-            Long medlPeriodeID = medlFasade.opprettPeriodeForeløpig(fnr, lovvalgsperiode, kildedokumenttypeMedl);
-            medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
+            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), !behandling.erBehandlingAvSøknad());
         } else if (behandlingsresultat.erInnvilgelse()) {
-            Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-            medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
+            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), false);
         } else if (lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT) {
             log.debug("Behandling {}: MEDL oppdateres ikke i forbindelse med avslag.", behandling.getId());
         } else {
@@ -78,9 +70,9 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     private void oppdaterEksisterendeMedlPeriode(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
         if (lovvalgsperiode.erInnvilget()) {
-            medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+            medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, false);
         } else if (lovvalgsperiode.erAvslått()) {
-            medlFasade.avvisPeriode(lovvalgsperiode.getMedlPeriodeID(), StatusaarsakMedl.AVVIST);
+            medlPeriodeService.avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
         } else {
             throw new FunksjonellException("Kan ikke oppdatere medlperiode: Lovvalgsperiode med ID " + lovvalgsperiode.getId() +
                 " har en medlperiodeID, men er verken innvilget eller avslått.");

@@ -5,6 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -26,8 +27,6 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final VilkaarsresultatService vilkaarsresultatService;
-
-    private BrevDataGrunnlag dataGrunnlag;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landvelgerService,
@@ -62,15 +61,12 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
 
     @Override
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
-        this.dataGrunnlag = dataGrunnlag;
         long behandlingID = dataGrunnlag.getBehandling().getId();
 
         // Bruker skal ha A1 som vedlegg - Arbeidsgiver skal ikke
-        BrevDataInnvilgelse brevdata;
+        BrevDataInnvilgelse brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
         if (brevbyggerA1 != null) {
-            brevdata = lagInnvilgelseBrevdataMedA1(saksbehandler);
-        } else {
-            brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
+            brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         }
 
         brevdata.personNavn = dataGrunnlag.getPerson().sammensattNavn;
@@ -92,20 +88,16 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandlingID);
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
 
-        brevdata.anmodningsperiodesvar = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
+        brevdata.setAnmodningsperiodesvar(anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream()
             .filter(Anmodningsperiode::erSendtUtland)
             .findFirst()
-            .map(Anmodningsperiode::getAnmodningsperiodeSvar);
+            .map(Anmodningsperiode::getAnmodningsperiodeSvar)
+            .orElse(null));
 
         brevdata.erArt16UtenArt12 = vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID);
+        brevdata.erTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingID, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP);
 
-        return brevdata;
-    }
-
-    private BrevDataInnvilgelse lagInnvilgelseBrevdataMedA1(String saksbehandler) throws FunksjonellException, TekniskException {
-        BrevDataInnvilgelse brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
-        brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         return brevdata;
     }
 }

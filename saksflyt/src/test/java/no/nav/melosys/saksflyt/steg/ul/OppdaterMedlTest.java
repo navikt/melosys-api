@@ -45,7 +45,7 @@ public class OppdaterMedlTest {
         medlPeriodeService = new MedlPeriodeService(
             mock(TpsFasade.class), medlFasade, behandlingsresultatService,
             lovvalgsperiodeRepository, mock(AnmodningsperiodeRepository.class));
-        oppdaterMedl = new OppdaterMedl(medlFasade, medlPeriodeService);
+        oppdaterMedl = new OppdaterMedl(behandlingsresultatService, medlPeriodeService);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-0");

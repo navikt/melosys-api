@@ -7,10 +7,9 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +26,13 @@ public class AvsluttArt13BehandlingService {
     private final BehandlingService behandlingService;
     private final FagsakService fagsakService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final MedlFasade medlFasade;
+    private final MedlPeriodeService medlPeriodeService;
 
-    public AvsluttArt13BehandlingService(BehandlingService behandlingService, FagsakService fagsakService, BehandlingsresultatService behandlingsresultatService, MedlFasade medlFasade) {
+    public AvsluttArt13BehandlingService(BehandlingService behandlingService, FagsakService fagsakService, BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.medlFasade = medlFasade;
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -57,7 +56,7 @@ public class AvsluttArt13BehandlingService {
                 + " har en lovvalgsperiode som ikke er registrert i medl. Kan ikke avslutte art13 behandling automatisk");
         }
 
-        medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, behandling.erBehandlingAvSøknad() ? KildedokumenttypeMedl.HENV_SOKNAD : KildedokumenttypeMedl.SED);
+        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
         log.info("Behandling {} avsluttet og satt til endelig i Medl", behandling.getId());
     }
 

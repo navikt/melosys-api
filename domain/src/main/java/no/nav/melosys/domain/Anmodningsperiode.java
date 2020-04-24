@@ -75,12 +75,12 @@ public class Anmodningsperiode implements Medlemskapsperiode {
         this.dekning = dekning;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Behandlingsresultat getBehandlingsresultat() {
@@ -96,21 +96,41 @@ public class Anmodningsperiode implements Medlemskapsperiode {
         return fom;
     }
 
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
+    }
+
     @Override
     public LocalDate getTom() {
         return tom;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
     }
 
     public Landkoder getLovvalgsland() {
         return lovvalgsland;
     }
 
+    public void setLovvalgsland(Landkoder lovvalgsland) {
+        this.lovvalgsland = lovvalgsland;
+    }
+
     public LovvalgBestemmelse getBestemmelse() {
         return bestemmelse;
     }
 
+    public void setBestemmelse(LovvalgBestemmelse bestemmelse) {
+        this.bestemmelse = bestemmelse;
+    }
+
     public LovvalgBestemmelse getTilleggsbestemmelse() {
         return tilleggsbestemmelse;
+    }
+
+    public void setTilleggsbestemmelse(LovvalgBestemmelse tilleggsbestemmelse) {
+        this.tilleggsbestemmelse = tilleggsbestemmelse;
     }
 
     public Landkoder getUnntakFraLovvalgsland() {
