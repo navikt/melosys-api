@@ -56,6 +56,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             //.put(ENDRET_PERIODE, "ae0052")
             //.put(ANKE, "ae0046")
             //.put(KLAGE, "ae0058")
+            //.put(ARBEID_ETT_LAND_ØVRIG, "FIXME")
             .put(BESLUTNING_LOVVALG_NORGE, "ae0112")
             .put(BESLUTNING_LOVVALG_ANNET_LAND, "ae0113")
             .put(ANMODNING_OM_UNNTAK_HOVEDREGEL, "ae0110")
