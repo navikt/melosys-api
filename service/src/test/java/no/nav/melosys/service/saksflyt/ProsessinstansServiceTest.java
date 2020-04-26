@@ -158,6 +158,22 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
+    public void opprettProsessinstansVideresendSøknad() {
+        settInnloggetSaksbehandler();
+
+        Behandling behandling = new Behandling();
+        service.opprettProsessinstansVideresendSoknad(behandling, Collections.emptyList());
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.VIDERESEND_SOKNAD);
+        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.VS_OPPDATER_RESULTAT);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, List.class)).isNull();
+        assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
+    }
+
+    @Test
     public void opprettProsessinstansOppfriskning() {
         Behandling behandling = lagBehandling();
 

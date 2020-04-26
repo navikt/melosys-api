@@ -344,24 +344,9 @@ public class FagsakService {
         behandlingService.avsluttBehandling(behandling.getId());
     }
 
-    private void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
+    protected void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
-    }
-
-    @Transactional(rollbackFor = MelosysException.class)
-    public void henleggOgVideresend(String saksnummer, String mottakerinstitusjon) throws FunksjonellException, TekniskException {
-        Fagsak fagsak = hentFagsak(saksnummer);
-
-        long behandlingId = fagsak.getAktivBehandling().getId();
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
-        log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingId);
-
-        fagsak.setStatus(Saksstatuser.VIDERESENDT);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-
-        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, mottakerinstitusjon);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     @Transactional(rollbackFor = MelosysException.class)

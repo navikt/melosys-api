@@ -31,8 +31,8 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
-import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -318,12 +318,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansVideresendSoknad(Behandling behandling, String mottakerinstitusjon) {
+    public void opprettProsessinstansVideresendSoknad(Behandling behandling, List<String> mottakerInstitusjoner) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
-            .medEessiMottakere(List.of(mottakerinstitusjon))
+            .medEessiMottakere(mottakerInstitusjoner)
             .build();
 
         lagre(prosessinstans);
