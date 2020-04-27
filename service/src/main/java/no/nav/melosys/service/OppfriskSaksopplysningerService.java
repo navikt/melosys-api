@@ -5,14 +5,13 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -32,6 +31,7 @@ public class OppfriskSaksopplysningerService {
     private final FagsakService fagsakService;
     private final KontrollresultatService kontrollresultatService;
     private final RegelmodulService regelmodulService;
+    private final RegisteropplysningerFactory registeropplysningerFactory;
     private final RegisteropplysningerService registeropplysningerService;
     private final TpsFasade tpsFasade;
 
@@ -40,6 +40,7 @@ public class OppfriskSaksopplysningerService {
                                            FagsakService fagsakService,
                                            KontrollresultatService kontrollresultatService,
                                            RegelmodulService regelmodulService,
+                                           RegisteropplysningerFactory registeropplysningerFactory,
                                            RegisteropplysningerService registeropplysningerService,
                                            TpsFasade tpsFasade) {
         this.behandlingService = behandlingService;
@@ -47,6 +48,7 @@ public class OppfriskSaksopplysningerService {
         this.fagsakService = fagsakService;
         this.kontrollresultatService = kontrollresultatService;
         this.regelmodulService = regelmodulService;
+        this.registeropplysningerFactory = registeropplysningerFactory;
         this.registeropplysningerService = registeropplysningerService;
         this.tpsFasade = tpsFasade;
     }
@@ -74,7 +76,7 @@ public class OppfriskSaksopplysningerService {
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
-            .saksopplysningTyper(utledSaksopplysningTyper(behandling.getTema()))
+            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(behandling.getTema()))
             .fnr(brukerID)
             .fom(fom)
             .tom(tom)
@@ -92,64 +94,6 @@ public class OppfriskSaksopplysningerService {
             fagsak.setType(regelmodulService.kvalifisererForEf883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode)
                 ? Sakstyper.EU_EOS : Sakstyper.UKJENT);
             fagsakService.lagre(fagsak);
-        }
-    }
-
-    private RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) throws TekniskException {
-        switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER:
-            case UTSENDT_SELVSTENDIG:
-            case ARBEID_FLERE_LAND:
-            case IKKE_YRKESAKTIV:
-            case ARBEID_ETT_LAND_ØVRIG:
-            case ARBEID_NORGE_BOSATT_ANNET_LAND:
-                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .personopplysninger()
-                    .personhistorikkopplysninger()
-                    .arbeidsforholdopplysninger()
-                    .inntektsopplysninger()
-                    .medlemskapsopplysninger()
-                    .organisasjonsopplysninger()
-                    .sakOgBehandlingopplysninger()
-                    .build();
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
-                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .personopplysninger()
-                    .personhistorikkopplysninger()
-                    .inntektsopplysninger()
-                    .medlemskapsopplysninger()
-                    .utbetalingsopplysninger()
-                    .build();
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .personopplysninger()
-                    .personhistorikkopplysninger()
-                    .arbeidsforholdopplysninger()
-                    .inntektsopplysninger()
-                    .medlemskapsopplysninger()
-                    .organisasjonsopplysninger()
-                    .utbetalingsopplysninger()
-                    .build();
-            case BESLUTNING_LOVVALG_NORGE:
-            case BESLUTNING_LOVVALG_ANNET_LAND:
-                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .personopplysninger()
-                    .personhistorikkopplysninger()
-                    .arbeidsforholdopplysninger()
-                    .inntektsopplysninger()
-                    .medlemskapsopplysninger()
-                    .organisasjonsopplysninger()
-                    .sakOgBehandlingopplysninger()
-                    .utbetalingsopplysninger()
-                    .build();
-            case ØVRIGE_SED:
-            case TRYGDETID:
-                return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .personopplysninger()
-                    .build();
-            default:
-                throw new TekniskException("Ugyldig behandlingstema " + behandlingstema + " for oppfrisking av registeropplysninger");
         }
     }
 }

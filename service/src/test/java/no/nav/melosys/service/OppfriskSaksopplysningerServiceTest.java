@@ -16,6 +16,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -53,8 +54,8 @@ public class OppfriskSaksopplysningerServiceTest {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             behandlingService, behandlingsresultatService,
             fagsakService, kontrollresultatService,
-            regelmodulService, registeropplysningerService,
-            tpsFasade);
+            regelmodulService, new RegisteropplysningerFactory(),
+            registeropplysningerService, tpsFasade);
     }
 
     @Test

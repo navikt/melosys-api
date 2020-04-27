@@ -15,6 +15,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.junit.Before;
@@ -48,7 +49,7 @@ public class HentRegisteropplysningerTest {
 
     @Before
     public void setUp() throws Exception {
-        hentRegisteropplysninger = new HentRegisteropplysninger(behandlingService, tpsFasade, registeropplysningerService);
+        hentRegisteropplysninger = new HentRegisteropplysninger(behandlingService, tpsFasade, new RegisteropplysningerFactory(), registeropplysningerService);
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);

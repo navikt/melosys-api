@@ -6,6 +6,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.stereotype.Component;
@@ -13,9 +14,12 @@ import org.springframework.stereotype.Component;
 @Component("AFLHentRegisteropplysninger")
 public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
+    private final RegisteropplysningerFactory registeropplysningerFactory;
     private final RegisteropplysningerService registeropplysningerService;
 
-    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService) {
+    public HentRegisteropplysninger(RegisteropplysningerFactory registeropplysningerFactory,
+                                    RegisteropplysningerService registeropplysningerService) {
+        this.registeropplysningerFactory = registeropplysningerFactory;
         this.registeropplysningerService = registeropplysningerService;
     }
 
@@ -33,16 +37,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .personopplysninger()
-                    .medlemskapsopplysninger()
-                    .inntektsopplysninger()
-                    .utbetalingsopplysninger()
-                    .arbeidsforholdopplysninger()
-                    .organisasjonsopplysninger()
-                    .sakOgBehandlingopplysninger()
-                    .personhistorikkopplysninger()
-                    .build())
+                .saksopplysningTyper(registeropplysningerFactory.hentSaksopplysningTyperForBeslutningOmLovvalg())
                 .fom(melosysEessiMelding.getPeriode().getFom())
                 .tom(melosysEessiMelding.getPeriode().getTom())
                 .fnr(fnr)

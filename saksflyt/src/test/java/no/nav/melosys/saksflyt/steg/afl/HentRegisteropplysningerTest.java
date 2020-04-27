@@ -10,6 +10,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.junit.Before;
@@ -36,7 +37,7 @@ public class HentRegisteropplysningerTest {
 
     @Before
     public void setup() {
-        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService);
+        hentRegisteropplysninger = new HentRegisteropplysninger(new RegisteropplysningerFactory(), registeropplysningerService);
     }
 
     @Test
