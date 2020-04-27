@@ -223,6 +223,10 @@ public class Behandling extends RegistreringsInfo {
         return tema != null && erBehandlingAvSøknad(tema.getKode());
     }
 
+    public boolean erBehandlingAvSed() {
+        return tema != null && erBehandlingAvSed(tema.getKode());
+    }
+
     public boolean erNyVurdering() {
         return type == Behandlingstyper.NY_VURDERING;
     }
@@ -270,6 +274,14 @@ public class Behandling extends RegistreringsInfo {
 
     public static boolean erBehandlingAvSøknadArbeidIFlereLand(String behandlingstemaKode) {
         return Behandlingstema.ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
+    }
+
+    private static boolean erBehandlingAvSed(String behandlingstemaKode) {
+        return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.BESLUTNING_LOVVALG_NORGE.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     @Override

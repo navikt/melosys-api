@@ -10,8 +10,9 @@ import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.KontrollresultatService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -26,22 +27,25 @@ import java.time.LocalDate;
 public class OppfriskSaksopplysningerService {
     private static final Logger log = LoggerFactory.getLogger(OppfriskSaksopplysningerService.class);
 
-    private final BehandlingRepository behandlingRepo;
+    private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final FagsakService fagsakService;
+    private final KontrollresultatService kontrollresultatService;
     private final RegelmodulService regelmodulService;
     private final RegisteropplysningerService registeropplysningerService;
     private final TpsFasade tpsFasade;
 
-    public OppfriskSaksopplysningerService(BehandlingRepository behandlingRepo,
+    public OppfriskSaksopplysningerService(BehandlingService behandlingService,
                                            BehandlingsresultatService behandlingsresultatService,
                                            FagsakService fagsakService,
+                                           KontrollresultatService kontrollresultatService,
                                            RegelmodulService regelmodulService,
                                            RegisteropplysningerService registeropplysningerService,
                                            TpsFasade tpsFasade) {
-        this.behandlingRepo = behandlingRepo;
+        this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.fagsakService = fagsakService;
+        this.kontrollresultatService = kontrollresultatService;
         this.regelmodulService = regelmodulService;
         this.registeropplysningerService = registeropplysningerService;
         this.tpsFasade = tpsFasade;
@@ -51,23 +55,18 @@ public class OppfriskSaksopplysningerService {
     public void oppfriskSaksopplysning(long behandlingID) throws MelosysException {
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
 
-        Behandling behandling = behandlingRepo.findWithSaksopplysningerById(behandlingID);
-        if (behandling == null) {
-            throw new TekniskException("Behandling ikke funnet med behandlingID" + behandlingID);
-        }
-
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         String aktørID = behandling.getFagsak().hentBruker().getAktørId();
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
 
         BehandlingsgrunnlagData grunnlagData = null;
         LocalDate fom = null, tom = null;
 
-        if (harBehandlingsgrunnlagSøknad(behandling.getTema())) {
+        if (behandling.erBehandlingAvSøknad()) {
             grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
             fom = grunnlagData.periode.getFom();
             tom = grunnlagData.periode.getTom();
-        }
-        if (harSedOpplysninger(behandling.getTema())) {
+        } else if (behandling.erBehandlingAvSed()) {
             SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
             fom = sedDokument.getLovvalgsperiode().getFom();
             tom = sedDokument.getLovvalgsperiode().getTom();
@@ -84,29 +83,16 @@ public class OppfriskSaksopplysningerService {
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
+        if (behandling.erBehandlingAvSed()) {
+            kontrollresultatService.utførKontrollerOgRegistrerFeil(behandlingID);
+        }
+
         Fagsak fagsak = behandling.getFagsak();
         if (grunnlagData != null && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
             fagsak.setType(regelmodulService.kvalifisererForEf883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode)
                 ? Sakstyper.EU_EOS : Sakstyper.UKJENT);
             fagsakService.lagre(fagsak);
         }
-    }
-
-    private boolean harBehandlingsgrunnlagSøknad(Behandlingstema tema) {
-        return tema == Behandlingstema.UTSENDT_ARBEIDSTAKER
-            || tema == Behandlingstema.UTSENDT_SELVSTENDIG
-            || tema == Behandlingstema.ARBEID_FLERE_LAND
-            || tema == Behandlingstema.IKKE_YRKESAKTIV
-            || tema == Behandlingstema.ARBEID_ETT_LAND_ØVRIG
-            || tema == Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND;
-    }
-
-    private boolean harSedOpplysninger(Behandlingstema tema) {
-        return tema == Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
-            || tema == Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
-            || tema == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-            || tema == Behandlingstema.BESLUTNING_LOVVALG_NORGE
-            || tema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 
     private RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) throws TekniskException {

@@ -13,8 +13,9 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.KontrollresultatService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -31,11 +32,13 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class OppfriskSaksopplysningerServiceTest {
     @Mock
-    private BehandlingRepository behandlingRepo;
+    private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private FagsakService fagsakService;
+    @Mock
+    KontrollresultatService kontrollresultatService;
     @Mock
     private RegelmodulService regelmodulService;
     @Mock
@@ -48,8 +51,10 @@ public class OppfriskSaksopplysningerServiceTest {
     @Before
     public void setUp() {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
-            behandlingRepo, behandlingsresultatService, fagsakService,
-            regelmodulService, registeropplysningerService, tpsFasade);
+            behandlingService, behandlingsresultatService,
+            fagsakService, kontrollresultatService,
+            regelmodulService, registeropplysningerService,
+            tpsFasade);
     }
 
     @Test
@@ -89,7 +94,7 @@ public class OppfriskSaksopplysningerServiceTest {
 
         behandling.setSaksopplysninger(saksopplysninger);
 
-        when(behandlingRepo.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(brukerID);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(13L);
