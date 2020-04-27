@@ -2,12 +2,13 @@ package no.nav.melosys.service.registeropplysninger;
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.TekniskException;
-import org.springframework.stereotype.Service;
 
-@Service
+/**
+ * Setter saksopplysningtyper per behandlingstema, iht. https://confluence.adeo.no/display/TEESSI/Saksopplysninger+per+behandlingstema
+ */
 public class RegisteropplysningerFactory {
 
-    public RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) throws TekniskException {
+    public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) throws TekniskException {
         switch (behandlingstema) {
             case UTSENDT_ARBEIDSTAKER:
             case UTSENDT_SELVSTENDIG:
@@ -32,7 +33,7 @@ public class RegisteropplysningerFactory {
         }
     }
 
-    private RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvSøknad() {
+    private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvSøknad() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
             .personopplysninger()
             .personhistorikkopplysninger()
@@ -44,7 +45,7 @@ public class RegisteropplysningerFactory {
             .build();
     }
 
-    public RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForRegistreringAvUnntak() {
+    private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForRegistreringAvUnntak() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
             .personopplysninger()
             .personhistorikkopplysninger()
@@ -54,7 +55,7 @@ public class RegisteropplysningerFactory {
             .build();
     }
 
-    public RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForAnmodningOmUnntak() {
+    private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForAnmodningOmUnntak() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
             .personopplysninger()
             .personhistorikkopplysninger()
@@ -66,7 +67,7 @@ public class RegisteropplysningerFactory {
             .build();
     }
 
-    public RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBeslutningOmLovvalg() {
+    private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBeslutningOmLovvalg() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
             .personopplysninger()
             .personhistorikkopplysninger()
@@ -79,7 +80,7 @@ public class RegisteropplysningerFactory {
             .build();
     }
 
-    private RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid() {
+    private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
             .personopplysninger()
             .build();

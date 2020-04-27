@@ -10,27 +10,25 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
 @Component("UnntakFraMedlemskapHentRegisteropplysninger")
 public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
     private final BehandlingService behandlingService;
     private final TpsFasade tpsFasade;
-    private final RegisteropplysningerFactory registeropplysningerFactory;
     private final RegisteropplysningerService registeropplysningerService;
 
     @Autowired
     public HentRegisteropplysninger(BehandlingService behandlingService, TpsFasade tpsFasade,
-                                    RegisteropplysningerFactory registeropplysningerFactory,
                                     RegisteropplysningerService registeropplysningerService) {
         this.behandlingService = behandlingService;
         this.tpsFasade = tpsFasade;
-        this.registeropplysningerFactory = registeropplysningerFactory;
         this.registeropplysningerService = registeropplysningerService;
     }
 
@@ -51,7 +49,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(behandling.getId())
-                .saksopplysningTyper(registeropplysningerFactory.hentSaksopplysningTyperForRegistreringAvUnntak())
+                .saksopplysningTyper(utledSaksopplysningTyper(behandling.getTema()))
                 .fom(sedDokument.getLovvalgsperiode().getFom())
                 .tom(sedDokument.getLovvalgsperiode().getTom())
                 .fnr(fnr)

@@ -9,13 +9,13 @@ import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.junit.Before;
@@ -49,10 +49,11 @@ public class HentRegisteropplysningerTest {
 
     @Before
     public void setUp() throws Exception {
-        hentRegisteropplysninger = new HentRegisteropplysninger(behandlingService, tpsFasade, new RegisteropplysningerFactory(), registeropplysningerService);
+        hentRegisteropplysninger = new HentRegisteropplysninger(behandlingService, tpsFasade, registeropplysningerService);
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
         behandling.setSaksopplysninger(Set.of(lagSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(1))));
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);

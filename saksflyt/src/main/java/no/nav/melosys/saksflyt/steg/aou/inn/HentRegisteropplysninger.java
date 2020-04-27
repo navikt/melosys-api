@@ -10,25 +10,23 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
+
 @Component("AnmodningUnntakMottakHentRegisteropplysninger")
 public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
-    private final RegisteropplysningerFactory registeropplysningerFactory;
     private final RegisteropplysningerService registeropplysningerService;
     private final BehandlingService behandlingService;
     private final TpsFasade tpsFasade;
 
     @Autowired
-    public HentRegisteropplysninger(RegisteropplysningerFactory registeropplysningerFactory,
-                                    RegisteropplysningerService registeropplysningerService,
+    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService,
                                     BehandlingService behandlingService, TpsFasade tpsFasade) {
-        this.registeropplysningerFactory = registeropplysningerFactory;
         this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
         this.tpsFasade = tpsFasade;
@@ -51,7 +49,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(behandling.getId())
-                .saksopplysningTyper(registeropplysningerFactory.hentSaksopplysningTyperForAnmodningOmUnntak())
+                .saksopplysningTyper(utledSaksopplysningTyper(behandling.getTema()))
                 .fom(sedDokument.getLovvalgsperiode().getFom())
                 .tom(sedDokument.getLovvalgsperiode().getTom())
                 .fnr(fnr)

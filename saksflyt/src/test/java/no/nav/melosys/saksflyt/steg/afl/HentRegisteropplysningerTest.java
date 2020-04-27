@@ -6,11 +6,11 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Periode;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class HentRegisteropplysningerTest {
 
     @Before
     public void setup() {
-        hentRegisteropplysninger = new HentRegisteropplysninger(new RegisteropplysningerFactory(), registeropplysningerService);
+        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService);
     }
 
     @Test
@@ -51,6 +51,7 @@ public class HentRegisteropplysningerTest {
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, fnr);
