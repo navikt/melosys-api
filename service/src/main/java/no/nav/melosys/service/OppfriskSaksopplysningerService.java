@@ -11,7 +11,6 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -22,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
+import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
+
 @Service
 public class OppfriskSaksopplysningerService {
     private static final Logger log = LoggerFactory.getLogger(OppfriskSaksopplysningerService.class);
@@ -31,7 +32,6 @@ public class OppfriskSaksopplysningerService {
     private final FagsakService fagsakService;
     private final KontrollresultatService kontrollresultatService;
     private final RegelmodulService regelmodulService;
-    private final RegisteropplysningerFactory registeropplysningerFactory;
     private final RegisteropplysningerService registeropplysningerService;
     private final TpsFasade tpsFasade;
 
@@ -40,7 +40,6 @@ public class OppfriskSaksopplysningerService {
                                            FagsakService fagsakService,
                                            KontrollresultatService kontrollresultatService,
                                            RegelmodulService regelmodulService,
-                                           RegisteropplysningerFactory registeropplysningerFactory,
                                            RegisteropplysningerService registeropplysningerService,
                                            TpsFasade tpsFasade) {
         this.behandlingService = behandlingService;
@@ -48,7 +47,6 @@ public class OppfriskSaksopplysningerService {
         this.fagsakService = fagsakService;
         this.kontrollresultatService = kontrollresultatService;
         this.regelmodulService = regelmodulService;
-        this.registeropplysningerFactory = registeropplysningerFactory;
         this.registeropplysningerService = registeropplysningerService;
         this.tpsFasade = tpsFasade;
     }
@@ -76,7 +74,7 @@ public class OppfriskSaksopplysningerService {
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
-            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(behandling.getTema()))
+            .saksopplysningTyper(utledSaksopplysningTyper(behandling.getTema()))
             .fnr(brukerID)
             .fom(fom)
             .tom(tom)
