@@ -2,7 +2,6 @@ package no.nav.melosys.domain.dokument.sed;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -24,7 +23,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 public class SedDokument implements SaksopplysningDokument {
     private String rinaSaksnummer;
     private String rinaDokumentID;
-    private String avsenderID;
+    private Landkoder avsenderLandkode;
     private String fnr;
     private Periode lovvalgsperiode;
     @XmlJavaTypeAdapter(LovvalgBestemmelseXmlAdapter.class)
@@ -56,12 +55,12 @@ public class SedDokument implements SaksopplysningDokument {
         this.rinaDokumentID = rinaDokumentID;
     }
 
-    public String getAvsenderID() {
-        return avsenderID;
+    public Landkoder getAvsenderLandkode() {
+        return avsenderLandkode;
     }
 
-    public void setAvsenderID(String avsenderID) {
-        this.avsenderID = avsenderID;
+    public void setAvsenderLandkode(Landkoder avsenderLandkode) {
+        this.avsenderLandkode = avsenderLandkode;
     }
 
     public String getFnr() {
@@ -160,11 +159,6 @@ public class SedDokument implements SaksopplysningDokument {
 
     public void setErElektronisk(boolean erElektronisk) {
         this.erElektronisk = erElektronisk;
-    }
-
-    // AvsenderID har format <landkode ISO2>:<institusjonID>
-    public Optional<Landkoder> finnAvsenderLand() {
-        return Optional.ofNullable(getAvsenderID()).map(id -> Landkoder.valueOf(id.substring(0, 2)));
     }
 
     public Lovvalgsperiode opprettInnvilgetLovvalgsperiode() {

@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -80,7 +82,6 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
             prosessinstans.getData(ProsessDataKey.UNNTAK_FRA_LOVVALGSBESTEMMELSE));
 
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setAvsenderID(prosessinstans.getData(ProsessDataKey.AVSENDER_ID));
         sedDokument.setErElektronisk(false);
         sedDokument.setBucType(BucType.LA_BUC_01);
         sedDokument.setSedType(SedType.A001);

@@ -121,12 +121,12 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     public void lag_utpekingAnnetLand_setterTrydemyndighetsland() throws FunksjonellException, TekniskException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setAvsenderID("NO" + ":" + "xopjaf");
+        sedDokument.setAvsenderLandkode(Landkoder.DE);
         when(saksopplysningerService.hentSedOpplysninger(behandling.getId())).thenReturn(sedDokument);
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
-        assertThat(brevData.trydemyndighetsland).isEqualTo(Landkoder.NO);
+        assertThat(brevData.trydemyndighetsland).isEqualTo(Landkoder.DE);
     }
 
     @Test

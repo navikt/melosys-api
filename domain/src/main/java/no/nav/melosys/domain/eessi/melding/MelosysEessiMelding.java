@@ -5,7 +5,7 @@ import java.util.List;
 public class MelosysEessiMelding {
     private String sedId;
     private String rinaSaksnummer;
-    private String avsenderId;
+    private Avsender avsender;
     private String journalpostId;
     private String dokumentId;
     private Long gsakSaksnummer;
@@ -40,12 +40,12 @@ public class MelosysEessiMelding {
         this.rinaSaksnummer = rinaSaksnummer;
     }
 
-    public String getAvsenderId() {
-        return avsenderId;
+    public Avsender getAvsender() {
+        return avsender;
     }
 
-    public void setAvsenderId(String avsenderId) {
-        this.avsenderId = avsenderId;
+    public void setAvsender(Avsender avsender) {
+        this.avsender = avsender;
     }
 
     public String getJournalpostId() {
@@ -181,7 +181,7 @@ public class MelosysEessiMelding {
         return "MelosysEessiMelding{" +
             "sedId='" + sedId + '\'' +
             ", rinaSaksnummer='" + rinaSaksnummer + '\'' +
-            ", avsenderId='" + avsenderId + '\'' +
+            ", avsender='" + avsender + '\'' +
             ", journalpostId='" + journalpostId + '\'' +
             ", dokumentId='" + dokumentId + '\'' +
             ", gsakSaksnummer=" + gsakSaksnummer +

@@ -70,7 +70,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         );
 
         if (dataGrunnlag.getBehandling().norgeErUtpekt()) {
-            brevdata.trydemyndighetsland = saksopplysningerService.hentSedOpplysninger(behandlingID).finnAvsenderLand().orElseThrow();
+            brevdata.trydemyndighetsland = saksopplysningerService.hentSedOpplysninger(behandlingID).getAvsenderLandkode();
         }
 
         return brevdata;

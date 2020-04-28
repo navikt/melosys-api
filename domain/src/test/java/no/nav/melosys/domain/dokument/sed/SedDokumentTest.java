@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.dokument.sed;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -10,10 +9,8 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import org.jeasy.random.EasyRandom;
@@ -47,14 +44,5 @@ public class SedDokumentTest {
 
         final SaksopplysningDokument saksopplysningDokument = dokumentFactory.lagDokument(saksopplysning);
         assertThat(saksopplysningDokument).isEqualToComparingFieldByField(sedDokument);
-    }
-
-    @Test
-    public void finnAvsenderLand() {
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setAvsenderID("NO" + ":" + "xopjaf");
-
-        Optional<Landkoder> avsenderLand = sedDokument.finnAvsenderLand();
-        assertThat(avsenderLand).contains(Landkoder.NO);
     }
 }
