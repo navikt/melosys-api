@@ -108,8 +108,6 @@ public class OppgaveServiceTest {
 
         when(oppgaveFasade.finnOppgaveListeMedAnsvarlig(eq(tilordnetRessurs))).thenReturn(oppgaver);
 
-        when(saksopplysningerService.harAktivOppfrisking(anyLong())).thenReturn(true);
-
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
         fagsak.setType(Sakstyper.EU_EOS);

@@ -9,6 +9,7 @@ import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -52,6 +53,7 @@ public class HentRegisteropplysningerTest {
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
         behandling.setSaksopplysninger(Set.of(lagSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(1))));
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);

@@ -1,46 +1,26 @@
 package no.nav.melosys.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.integrasjon.felles.RestClientLoggingFilter;
-import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
-import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
+import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
+import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
+import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
-import no.nav.melosys.repository.BehandlingRepository;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.logging.LoggingFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
+
+import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 /**
  * Service som kaller regelmodulen.
@@ -48,160 +28,69 @@ import org.xml.sax.SAXException;
 @Service
 public class RegelmodulService {
     private static final Logger log = LoggerFactory.getLogger(RegelmodulService.class);
-    private static final String ARBEIDSFORHOLDDOKUMENTER = "arbeidsforholdDokumenter";
-    private static final String INNTEKTDOKUMENTER = "inntektDokumenter";
-    private static final String MEDLEMSKAPDOKUMENTER = "medlemskapDokumenter";
-    private static final String ORGANISASJONDOKUMENTER = "organisasjonDokumenter";
 
-    private final BehandlingRepository behandlingRepo;
-    private final DocumentBuilderFactory documentBuilderFactory;
-    private final String regelmodulUrl;
-    private final TransformerFactory transformerFactory;
+    private final SaksopplysningerService saksopplysningerService;
+    private final RegelmodulFasade regelmodulFasade;
 
     @Autowired
-    public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl, BehandlingRepository repository) throws ParserConfigurationException {
-        this.regelmodulUrl = regelmodulUrl;
-        this.behandlingRepo = repository;
-        this.transformerFactory = TransformerFactory.newInstance();
-        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-        this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    public RegelmodulService(SaksopplysningerService saksopplysningerService,
+                             RegelmodulFasade regelmodulFasade) {
+        this.saksopplysningerService = saksopplysningerService;
+        this.regelmodulFasade = regelmodulFasade;
     }
 
-    /**
-     * Kall til regelmodulen med opplysninger knyttet til behandlingen med ID {@code behandlingID}.
-     *
-     * @param behandlingID Database ID til den behandlingen som brukes for å konstruere requesten til regelmodulen.
-     */
-    FastsettLovvalgReply fastsettLovvalg(long behandlingID) {
-        Behandling behandling = behandlingRepo.findWithSaksopplysningerById(behandlingID);
-        if (behandling == null) {
-            // Ikke funnet
-            return null;
+    public boolean kvalifisererForEf883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode) throws FunksjonellException {
+        Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, periode);
+        VurderInngangsvilkaarReply res = vurderInngangsvilkår(statsborgerskap, tilIso3(søknadsland.landkoder), periode);
+
+        List<Feilmelding> feilmeldinger = res.feilmeldinger.stream()
+            .filter(feilmelding -> feilmelding.kategori.alvorlighetsgrad == Alvorlighetsgrad.FEIL)
+            .collect(Collectors.toList());
+
+        if (!feilmeldinger.isEmpty()) {
+            throw new FunksjonellException("Vurdering av inngangsvilkår feilet.");
         }
-
-        try {
-            String fastsettLovvalgRequest = lagRequest(behandling);
-
-            return ClientBuilder.newClient().target(regelmodulUrl)
-                .path("/fastsettLovvalg")
-                .request(LovvalgTjeneste.MEDIA_TYPE_CONSUMED)
-                .post(Entity.entity(fastsettLovvalgRequest, LovvalgTjeneste.MEDIA_TYPE_CONSUMED), FastsettLovvalgReply.class);
-
-        } catch (ParserConfigurationException | TransformerException | IOException | SAXException e) {
-            log.error("Uventet feil ved generering av inndata til Regelmodul", e);
-        }
-        return null;
-    }
-
-    /**
-     * Lager en request til regelmodulen for en gitt behandling.
-     */
-    private String lagRequest(Behandling behandling) throws ParserConfigurationException, TransformerException, IOException, SAXException {
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = documentBuilder.newDocument();
-
-        Element dokumenter = document.createElement("dokumenter");
-        Map<String, Element> dokumentnoder = new HashMap<>();
-        dokumentnoder.put(ARBEIDSFORHOLDDOKUMENTER, document.createElement(ARBEIDSFORHOLDDOKUMENTER));
-        dokumentnoder.put(INNTEKTDOKUMENTER, document.createElement(INNTEKTDOKUMENTER));
-        dokumentnoder.put(MEDLEMSKAPDOKUMENTER, document.createElement(MEDLEMSKAPDOKUMENTER));
-        dokumentnoder.put(ORGANISASJONDOKUMENTER, document.createElement(ORGANISASJONDOKUMENTER));
-
-        for (Saksopplysning saksopplysning : behandling.getSaksopplysninger()) {
-            SaksopplysningType type = saksopplysning.getType();
-            Element dokumentnode = xmlTilNode(saksopplysning.getInternXml(), documentBuilder, document);
-
-            switch (type) {
-                case ARBFORH:
-                    dokumentnoder.get(ARBEIDSFORHOLDDOKUMENTER).appendChild(dokumentnode);
-                    break;
-                case INNTK:
-                    dokumentnoder.get(INNTEKTDOKUMENTER).appendChild(dokumentnode);
-                    break;
-                case MEDL:
-                    dokumentnoder.get(MEDLEMSKAPDOKUMENTER).appendChild(dokumentnode);
-                    break;
-                case ORG:
-                    dokumentnoder.get(ORGANISASJONDOKUMENTER).appendChild(dokumentnode);
-                    break;
-                case PERSHIST:
-                    // Regelmodul skal bruke historisk statsborgerskap ved søknad tilbake i tid
-                    break;
-                case PERSOPL:
-                    dokumentnoder.put("personDokument", dokumentnode);
-                    break;
-                case SOB_SAK:
-                    // Brukes ikke av regelmodulen
-                    break;
-                default:
-                    throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
-            }
-        }
-
-        for (Element dokumentnode : dokumentnoder.values()) {
-            if (dokumentnode.hasChildNodes()) {
-                dokumenter.appendChild(dokumentnode);
-            }
-        }
-
-        if (dokumenter.hasChildNodes()) {
-            document.appendChild(dokumenter);
-        }
-
-        DOMSource source = new DOMSource(document);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        StreamResult result = new StreamResult(outputStream);
-
-        transformerFactory.newTransformer().transform(source, result);
-        return outputStream.toString();
-    }
-
-    private Element xmlTilNode(String xml, DocumentBuilder builder, Document document) throws IOException, SAXException {
-        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        Element node = builder.parse(inputStream).getDocumentElement();
-        document.adoptNode(node);
-        return node;
-    }
+        return Boolean.TRUE.equals(res.kvalifisererForEf883_2004);
+     }
 
     /**
      * Kaller regelmodulen for å kjøre inngangsvilkårsvurdering
      *
-     * @throws ProcessingException     Hvis request- eller reply-prosessering feiler, eller hvis IO-feil ved kommunikasjon med regelmodulen
-     * @throws WebApplicationException Hvis regelmodulen returnerer noe annet enn HTTP 2xx
+     * @throws RuntimeException Hvis request- eller reply-prosessering feiler, hvis IO-feil ved kommunikasjon med regelmodulen, eller hvis regelmodulen returnerer noe annet enn HTTP 2xx
      */
     public VurderInngangsvilkaarReply vurderInngangsvilkår(Land brukersStatsborgerskap, List<String> søknadsland, Periode søknadsperiode) {
-        Assert.notNull(brukersStatsborgerskap, "Tjenesten krever at brukersStatsborgerskap ikke er null");
-        Assert.notEmpty(søknadsland, "Tjenesten krever at søknadsland ikke er null eller tom");
-        Assert.notNull(søknadsperiode, "Tjenesten krever at søknadsperiode ikke er null");
-        Assert.notNull(søknadsperiode.getFom(), "Tjenesten krever at søknadsperiode har fom dato");
-
-        String req = lagXMLRequest(brukersStatsborgerskap.getKode(), søknadsperiode.getFom().toString(), søknadsperiode.getTom().toString(), søknadsland);
-
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY);
-        clientConfig.register(new RestClientLoggingFilter());
-
-        return ClientBuilder.newClient(clientConfig)
-            .target(regelmodulUrl)
-            .path("/inngangsvilkaar")
-            .request(LovvalgTjeneste.MEDIA_TYPE_CONSUMED)
-            .post(Entity.entity(req, LovvalgTjeneste.MEDIA_TYPE_CONSUMED), VurderInngangsvilkaarReply.class);
+        return regelmodulFasade.vurderInngangsvilkår(brukersStatsborgerskap, søknadsland, søknadsperiode);
     }
 
-    private String lagXMLRequest(String statsborgerskap, String fom, String tom, List<String> søknadsland) {
-        StringBuilder format = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
-            "<FastsettLovvalgRequest><personDokument xmlns:tps3=\"http://nav.no/tjeneste/virksomhet/person/v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
-            "<statsborgerskap><kode>%s</kode></statsborgerskap></personDokument><soeknadDokument><oppholdUtland><oppholdsPeriode><fom>%s</fom><tom>%s</tom></oppholdsPeriode>");
-
-        // Vi sender soknadsland som oppholdsland og søknadsperiode som oppholdsperiode
-        //  til regelmodulen inntil den er oppdatert med en nyere versjon av melosys
-        for (String land : søknadsland) {
-            format.append("<oppholdslandKoder>").append(land).append("</oppholdslandKoder>");
+    public Land hentStatsborgerskapForPerioden(long behandlingID, Periode periode) throws IkkeFunnetException {
+        // Hent statsborgerskap fra saksopplysningene...
+        // Ved søknad tilbake i tid brukes historisk statsborgerskap
+        if (periode.getFom().isBefore(LocalDate.now())) {
+            return avgjørStatsborgerskapPåStartDato(
+                saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
+        } else {
+            return saksopplysningerService.hentPersonOpplysninger(behandlingID).statsborgerskap;
         }
+    }
 
-        format.append("</oppholdUtland></soeknadDokument></FastsettLovvalgRequest>");
-        return String.format(format.toString(), statsborgerskap, fom, tom);
+    public Land avgjørStatsborgerskapPåStartDato(List<StatsborgerskapPeriode> statsborgerskapListe, LocalDate startDato) {
+        if (statsborgerskapListe.isEmpty()) {
+            return null;
+        }
+        List<StatsborgerskapPeriode> gyldigeStasborgerskap = statsborgerskapListe.stream()
+            .filter(p -> p.getPeriode().inkluderer(startDato))
+            .collect(Collectors.toList());
+        if (gyldigeStasborgerskap.isEmpty()) {
+            return null;
+        } else if (gyldigeStasborgerskap.size() == 1) {
+            return gyldigeStasborgerskap.get(0).statsborgerskap;
+        } else {
+            // Hvis det finnes flere kilder for samme dato så ønsker vi å se bort fra det som kommer fra Skattedirektoratet
+            // pga. dårlig datakvalitet. Vi filterer også ukjent statsborgerskap siden det ikke hjelper å vurdere inngangsvilkår.
+            return gyldigeStasborgerskap.stream().filter(p -> !p.erFraSkattedirektoratet())
+                .filter(p -> !p.statsborgerskap.erUkjent())
+                .max(Comparator.comparing(p -> p.endringstidspunkt))
+                .map(p -> p.statsborgerskap).orElse(null);
+        }
     }
 }
