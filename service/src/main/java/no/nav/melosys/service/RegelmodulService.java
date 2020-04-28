@@ -11,9 +11,9 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
-import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,30 +39,32 @@ public class RegelmodulService {
         this.regelmodulFasade = regelmodulFasade;
     }
 
-    public boolean kvalifisererForEf883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode) throws FunksjonellException {
-        Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, periode);
-        VurderInngangsvilkaarReply res = vurderInngangsvilkår(statsborgerskap, tilIso3(søknadsland.landkoder), periode);
+    public boolean kvalifisererForEf883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode)
+        throws FunksjonellException, TekniskException {
+        return Boolean.TRUE.equals(vurderInngangsvilkår(behandlingID, søknadsland.landkoder, periode).kvalifisererForEf883_2004);
+     }
 
-        List<Feilmelding> feilmeldinger = res.feilmeldinger.stream()
+    public VurderInngangsvilkaarReply vurderInngangsvilkår(long behandlingID, List<String> søknadsland, Periode søknadsperiode)
+        throws FunksjonellException, TekniskException {
+        Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
+        if (statsborgerskap == null) {
+            throw new FunksjonellException("Finner ingen informasjon om statsborgerskap");
+        }
+
+        VurderInngangsvilkaarReply res = regelmodulFasade.vurderInngangsvilkår(statsborgerskap, tilIso3(søknadsland), søknadsperiode);
+
+        List<String> feilmeldinger = res.feilmeldinger.stream()
             .filter(feilmelding -> feilmelding.kategori.alvorlighetsgrad == Alvorlighetsgrad.FEIL)
+            .map(feilmelding -> feilmelding.melding)
             .collect(Collectors.toList());
 
         if (!feilmeldinger.isEmpty()) {
-            throw new FunksjonellException("Vurdering av inngangsvilkår feilet.");
+            throw new FunksjonellException("Vurdering av inngangsvilkår feilet: " + String.join(System.lineSeparator(), feilmeldinger));
         }
-        return Boolean.TRUE.equals(res.kvalifisererForEf883_2004);
-     }
-
-    /**
-     * Kaller regelmodulen for å kjøre inngangsvilkårsvurdering
-     *
-     * @throws RuntimeException Hvis request- eller reply-prosessering feiler, hvis IO-feil ved kommunikasjon med regelmodulen, eller hvis regelmodulen returnerer noe annet enn HTTP 2xx
-     */
-    public VurderInngangsvilkaarReply vurderInngangsvilkår(Land brukersStatsborgerskap, List<String> søknadsland, Periode søknadsperiode) {
-        return regelmodulFasade.vurderInngangsvilkår(brukersStatsborgerskap, søknadsland, søknadsperiode);
+        return res;
     }
 
-    public Land hentStatsborgerskapForPerioden(long behandlingID, Periode periode) throws IkkeFunnetException {
+    Land hentStatsborgerskapForPerioden(long behandlingID, Periode periode) throws IkkeFunnetException {
         // Hent statsborgerskap fra saksopplysningene...
         // Ved søknad tilbake i tid brukes historisk statsborgerskap
         if (periode.getFom().isBefore(LocalDate.now())) {
@@ -73,7 +75,7 @@ public class RegelmodulService {
         }
     }
 
-    public Land avgjørStatsborgerskapPåStartDato(List<StatsborgerskapPeriode> statsborgerskapListe, LocalDate startDato) {
+    Land avgjørStatsborgerskapPåStartDato(List<StatsborgerskapPeriode> statsborgerskapListe, LocalDate startDato) {
         if (statsborgerskapListe.isEmpty()) {
             return null;
         }

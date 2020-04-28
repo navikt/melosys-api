@@ -3,26 +3,24 @@ package no.nav.melosys.saksflyt.steg.jfr;
 import java.util.List;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.RegelmodulService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 import static no.nav.melosys.saksflyt.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
@@ -36,13 +34,13 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
 
     private final RegelmodulService regelmodulService;
-    private final FagsakRepository fagsakRepository;
+    private final FagsakService fagsakService;
 
     @Autowired
     public VurderInngangsvilkaar(RegelmodulService regelmodulService,
-                                 FagsakRepository fagsakRepository) {
+                                 FagsakService fagsakService) {
         this.regelmodulService = regelmodulService;
-        this.fagsakRepository = fagsakRepository;
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -52,30 +50,14 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingID = prosessinstans.getBehandling().getId();
 
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
-        Land statsborgerskap = regelmodulService.hentStatsborgerskapForPerioden(behandlingID, periode);
-
-        if (statsborgerskap == null) {
-            log.error("Funksjonell feil for prosessinstans {}: Kunne ikke hente brukers statsborgerskap fra saksopplysningene.", prosessinstans.getId());
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Ingen informasjon om statsborgerskap", null);
-            return;
-        }
-
         // Kjør inngangsvilkår...
         List<String> søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
-        søknadsland = tilIso3(søknadsland);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Kaller regelmodul for prosessinstans {}", prosessinstans.getId());
-            log.debug("satsborgerskap: {}", statsborgerskap);
-            log.debug("søknadsland: {}", String.join(" ", søknadsland));
-            log.debug("periode: {}", periode);
-        }
-        VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, søknadsland, periode);
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(behandlingID, søknadsland, periode);
 
         // Legg på evt. feil og varsler...
         boolean detErMeldtFeil = false;
@@ -95,7 +77,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
 
         // Sett sakstype...
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(prosessinstans.getData(ProsessDataKey.SAKSNUMMER));
+        Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER));
         Sakstyper nyFagsakstype;
         if (Boolean.TRUE.equals(res.kvalifisererForEf883_2004)) {
             nyFagsakstype = Sakstyper.EU_EOS;
@@ -108,7 +90,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             return;
         }
         fagsak.setType(nyFagsakstype);
-        fagsakRepository.save(fagsak);
+        fagsakService.lagre(fagsak);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
         log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakstype, prosessinstans.getId());
