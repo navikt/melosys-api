@@ -60,7 +60,6 @@ begin
                 l_behandling_dvh.funksjonell_av                 := nvl(:new.endret_av, l_behandling.registrert_av);
                 l_behandling_dvh.behandlingsmaate               := :new.behandlingsmaate;
                 l_behandling_dvh.fastsatt_av_land               := :new.fastsatt_av_land;
-                l_behandling_dvh.henleggelse_grunn              := :new.henleggelse_grunn;
                 l_behandling_dvh.siste_opplysninger_hentet_dato := l_behandling.siste_opplysninger_hentet_dato;
                 l_behandling_dvh.dokumentasjon_svarfrist_dato   := l_behandling.dokumentasjon_svarfrist_dato;
                 l_behandling_dvh.initierende_journalpost_id     := l_behandling.initierende_journalpost_id;
@@ -75,7 +74,6 @@ begin
                 l_behandling_dvh.funksjonell_av                 := nvl(:old.endret_av, :old.registrert_av);
                 l_behandling_dvh.behandlingsmaate               := :old.behandlingsmaate;
                 l_behandling_dvh.fastsatt_av_land               := :old.fastsatt_av_land;
-                l_behandling_dvh.henleggelse_grunn              := :old.henleggelse_grunn;
 
         end case;
 
@@ -98,7 +96,6 @@ begin
         --
         behandlingsmaate,
         fastsatt_av_land,
-        henleggelse_grunn,
         siste_opplysninger_hentet_dato,
         dokumentasjon_svarfrist_dato,
         initierende_journalpost_id,
@@ -124,7 +121,6 @@ begin
         --
         l_behandling_dvh.behandlingsmaate,
         l_behandling_dvh.fastsatt_av_land,
-        l_behandling_dvh.henleggelse_grunn,
         l_behandling_dvh.siste_opplysninger_hentet_dato,
         l_behandling_dvh.dokumentasjon_svarfrist_dato,
         l_behandling_dvh.initierende_journalpost_id,
