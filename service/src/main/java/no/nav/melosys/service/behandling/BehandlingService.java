@@ -89,6 +89,10 @@ public class BehandlingService {
     public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException, TekniskException {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
 
+        if (behandling.getStatus() == status) {
+            return;
+        }
+
         if (behandling.getStatus() == Behandlingsstatus.VURDER_DOKUMENT && !erLovligNesteStatusEtterDokumentVurdering(status)) {
             throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
         } else if (!behandling.erAktiv()) {
