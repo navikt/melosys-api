@@ -32,9 +32,9 @@ public class VarsleUtland extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         Behandling behandling = prosessinstans.getBehandling();
-        boolean varsleUtland = prosessinstans.getData(ProsessDataKey.VARSLE_UTLAND, Boolean.class);
+        Boolean varsleUtland = prosessinstans.getData(ProsessDataKey.VARSLE_UTLAND, Boolean.class);
 
-        if (behandling.erUtpekingAvAnnetLand() && varsleUtland) {
+        if (behandling.erUtpekingAvAnnetLand() && Boolean.TRUE.equals(varsleUtland)) {
             if (saksopplysningerService.hentSedOpplysninger(behandling.getId()).getErElektronisk()) {
                 eessiService.sendGodkjenningArbeidFlereLand(behandling.getId());
             } else {

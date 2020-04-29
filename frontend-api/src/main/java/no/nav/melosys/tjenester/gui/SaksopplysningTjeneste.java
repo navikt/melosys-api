@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.OppfriskSaksopplysningerService;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -24,10 +25,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class SaksopplysningTjeneste {
 
     private final OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
+    private final TilgangService tilgangService;
 
     @Autowired
-    public SaksopplysningTjeneste(OppfriskSaksopplysningerService oppfriskSaksopplysningerService) {
+    public SaksopplysningTjeneste(OppfriskSaksopplysningerService oppfriskSaksopplysningerService, TilgangService tilgangService) {
         this.oppfriskSaksopplysningerService = oppfriskSaksopplysningerService;
+        this.tilgangService = tilgangService;
     }
 
     @GetMapping("oppfriskning/{behandlingID}")
@@ -38,6 +41,7 @@ public class SaksopplysningTjeneste {
         @ApiResponse(code = 500, message = "Uventet teknisk Feil")
     })
     public ResponseEntity oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID) throws MelosysException {
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID);
         return ResponseEntity.noContent().build();
     }

@@ -36,6 +36,7 @@ public class VarsleUtlandTest {
     @Test
     public void varsleUtland_skalVarslesOgRettBehandlingstype_forventSedSendt() throws MelosysException {
         Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, true);
         when(saksopplysningerService.hentSedOpplysninger(anyLong())).thenReturn(lagSedDokument(true));
 
         varsleUtland.utfør(prosessinstans);
@@ -48,6 +49,7 @@ public class VarsleUtlandTest {
     @Test(expected = UnsupportedOperationException.class)
     public void varsleUtland_sedDokumentIkkeElektronisk_forventException() throws MelosysException {
         Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, true);
         when(saksopplysningerService.hentSedOpplysninger(anyLong())).thenReturn(lagSedDokument(false));
 
         varsleUtland.utfør(prosessinstans);
@@ -83,7 +85,6 @@ public class VarsleUtlandTest {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, true);
         prosessinstans.setBehandling(behandling);
 
         return prosessinstans;
