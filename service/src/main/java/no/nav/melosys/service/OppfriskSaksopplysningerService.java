@@ -89,7 +89,7 @@ public class OppfriskSaksopplysningerService {
 
         Fagsak fagsak = behandling.getFagsak();
         if (grunnlagData != null && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
-            fagsak.setType(regelmodulService.kvalifisererForEf883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode)
+            fagsak.setType(regelmodulService.kvalifisererForEF_883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode)
                 ? Sakstyper.EU_EOS : Sakstyper.UKJENT);
             fagsakService.lagre(fagsak);
         }

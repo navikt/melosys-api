@@ -39,7 +39,7 @@ public class RegelmodulService {
         this.regelmodulFasade = regelmodulFasade;
     }
 
-    public boolean kvalifisererForEf883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode)
+    public boolean kvalifisererForEF_883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode)
         throws FunksjonellException, TekniskException {
         return Boolean.TRUE.equals(vurderInngangsvilkår(behandlingID, søknadsland.landkoder, periode).kvalifisererForEf883_2004);
      }
