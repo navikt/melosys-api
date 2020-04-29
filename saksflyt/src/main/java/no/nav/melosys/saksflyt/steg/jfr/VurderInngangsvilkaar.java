@@ -10,8 +10,6 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
-import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.RegelmodulService;
@@ -57,24 +55,8 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         // Kjør inngangsvilkår...
         List<String> søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+
         VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(behandlingID, søknadsland, periode);
-
-        // Legg på evt. feil og varsler...
-        boolean detErMeldtFeil = false;
-        for (Feilmelding melding : res.feilmeldinger) {
-            if (melding.kategori.alvorlighetsgrad == Alvorlighetsgrad.FEIL) {
-                detErMeldtFeil = true;
-            }
-            log.info("Kall til regelmodul for prosessinstans {} returnerte {}", prosessinstans.getId(), melding);
-            prosessinstans.leggTilHendelse(melding.kategori.name(), melding.melding);
-        }
-
-        // Håndter ev. feil...
-        if (detErMeldtFeil) {
-            log.info("Avbryter behandling av prosessinstans {} pga. feil", prosessinstans.getId());
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Uventet feil fra regelmodulen", null);
-            return;
-        }
 
         // Sett sakstype...
         Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER));
