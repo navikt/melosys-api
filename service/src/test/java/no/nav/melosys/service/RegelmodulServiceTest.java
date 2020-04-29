@@ -1,22 +1,20 @@
 package no.nav.melosys.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import static no.nav.melosys.domain.dokument.felles.Land.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,19 +23,18 @@ import static org.junit.Assert.assertNull;
 @SuppressWarnings("resource")
 @RunWith(MockitoJUnitRunner.class)
 public class RegelmodulServiceTest {
-
-    @Mock
-    private BehandlingRepository behandlingRepository;
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private RegelmodulFasade regelmodulFasade;
+    @Mock
+    private VilkaarsresultatService vilkaarsresultatService;
 
     private RegelmodulService regelmodulService;
 
     @Before
-    public void setUp() throws ParserConfigurationException {
-        regelmodulService = new RegelmodulService(saksopplysningerService, regelmodulFasade);
+    public void setUp() {
+        regelmodulService = new RegelmodulService(saksopplysningerService, regelmodulFasade, vilkaarsresultatService);
     }
 
     @Test

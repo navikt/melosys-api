@@ -9,12 +9,16 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,24 +35,41 @@ public class RegelmodulService {
 
     private final SaksopplysningerService saksopplysningerService;
     private final RegelmodulFasade regelmodulFasade;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     @Autowired
     public RegelmodulService(SaksopplysningerService saksopplysningerService,
-                             RegelmodulFasade regelmodulFasade) {
+                             RegelmodulFasade regelmodulFasade,
+                             VilkaarsresultatService vilkaarsresultatService) {
         this.saksopplysningerService = saksopplysningerService;
         this.regelmodulFasade = regelmodulFasade;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
-    public boolean kvalifisererForEF_883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode)
-        throws FunksjonellException, TekniskException {
-        return Boolean.TRUE.equals(vurderInngangsvilkår(behandlingID, søknadsland.landkoder, periode).kvalifisererForEf883_2004);
+    public boolean kvalifisererForEF_883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode) {
+        return vurderOgLagreInngangsvilkår(behandlingID, søknadsland.landkoder, periode);
      }
 
-    public VurderInngangsvilkaarReply vurderInngangsvilkår(long behandlingID, List<String> søknadsland, Periode søknadsperiode)
+    public boolean vurderOgLagreInngangsvilkår(long behandlingID, List<String> søknadsland, Periode søknadsperiode) {
+        boolean erEF_883_2004 = false;
+        Kodeverk begrunnelseKode = null;
+        try {
+            erEF_883_2004 = vurderInngangsvilkår(behandlingID, søknadsland, søknadsperiode);
+        } catch (IkkeFunnetException e) {
+            begrunnelseKode = Inngangsvilkaar.NORDISK_UTENFOR_EOS; // TODO erstattes med riktig kode
+        } catch (MelosysException e) {
+            begrunnelseKode = Inngangsvilkaar.TREDJELANDSBORGER; // TODO erstattes med riktig kode
+        }
+        log.info("Kall til regelmodul for behandling {} returnerte {}", behandlingID, erEF_883_2004);
+        // TODO lagring av vilkårsresultat kommer her.
+        return erEF_883_2004;
+    }
+
+    private boolean vurderInngangsvilkår(long behandlingID, List<String> søknadsland, Periode søknadsperiode)
         throws FunksjonellException, TekniskException {
         Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
         if (statsborgerskap == null) {
-            throw new FunksjonellException("Finner ingen informasjon om statsborgerskap");
+            throw new IkkeFunnetException("Finner ingen informasjon om statsborgerskap");
         }
 
         VurderInngangsvilkaarReply res = regelmodulFasade.vurderInngangsvilkår(statsborgerskap, tilIso3(søknadsland), søknadsperiode);
@@ -61,7 +82,7 @@ public class RegelmodulService {
         if (!feilmeldinger.isEmpty()) {
             throw new FunksjonellException("Vurdering av inngangsvilkår feilet: " + String.join(System.lineSeparator(), feilmeldinger));
         }
-        return res;
+        return res.kvalifisererForEf883_2004;
     }
 
     Land hentStatsborgerskapForPerioden(long behandlingID, Periode periode) throws IkkeFunnetException {

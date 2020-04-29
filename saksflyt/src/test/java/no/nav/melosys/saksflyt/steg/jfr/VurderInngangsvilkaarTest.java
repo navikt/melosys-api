@@ -14,14 +14,11 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.service.RegelmodulService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -37,9 +34,6 @@ public class VurderInngangsvilkaarTest {
     @Mock
     private FagsakService fagsakService;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     private VurderInngangsvilkaar agent;
 
     @Before
@@ -49,33 +43,13 @@ public class VurderInngangsvilkaarTest {
 
     @Test
     public void utfoerSteg_funker() throws FunksjonellException, TekniskException {
-        // Sett opp input...
         Prosessinstans p = lagProsessinstans();
-
-        // Sett opp regelmodulService til å alltid returnere EØS og ingen feil.
-        VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
-        res.feilmeldinger = Collections.emptyList();
-        res.kvalifisererForEf883_2004 = true;
-        when(regelmodulService.vurderInngangsvilkår(anyLong(), any(), any())).thenReturn(res);
+        when(regelmodulService.vurderOgLagreInngangsvilkår(anyLong(), any(), any())).thenReturn(true);
 
         agent.utfør(p);
 
         verify(fagsakService).oppdaterType(anyString(), eq(true));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ARBF_OPPL);
-    }
-
-    @Test
-    public void utfoerSteg_feiler() throws FunksjonellException, TekniskException {
-        Prosessinstans p = lagProsessinstans();
-        when(regelmodulService.vurderInngangsvilkår(anyLong(), any(), any()))
-            .thenThrow(new FunksjonellException("Finner ingen informasjon om statsborgerskap"));
-        expectedException.expect(FunksjonellException.class);
-
-        agent.utfør(p);
-
-        verify(fagsakService, never()).lagre(any(Fagsak.class));
-        assertThat(p.getBehandling().getFagsak().getType()).isNull();
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
     }
 
     public static Prosessinstans lagProsessinstans() {

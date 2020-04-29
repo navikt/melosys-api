@@ -2,13 +2,13 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.RegelmodulService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -43,19 +43,17 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingID = prosessinstans.getBehandling().getId();
 
         // Kjør inngangsvilkår...
-        List<String> søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
+        List<String> søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {});
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-
-        VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(behandlingID, søknadsland, periode);
+        boolean kvalifisererForEF_883_2004  = regelmodulService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
 
         // Sett sakstype...
-        fagsakService.oppdaterType(prosessinstans.getData(ProsessDataKey.SAKSNUMMER), res.kvalifisererForEf883_2004);
+        fagsakService.oppdaterType(prosessinstans.getData(ProsessDataKey.SAKSNUMMER), kvalifisererForEF_883_2004);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
     }
