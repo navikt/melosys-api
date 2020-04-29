@@ -6,11 +6,14 @@ import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -49,22 +52,69 @@ public class OppfriskSaksopplysningerServiceTest {
     private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IkkeFunnetException {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             behandlingService, behandlingsresultatService,
             fagsakService, kontrollresultatService,
             regelmodulService, registeropplysningerService,
             tpsFasade);
+
+        String brukerID = "322211";
+        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(brukerID);
     }
 
     @Test
     public void oppfriskSaksopplysning() throws MelosysException {
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
 
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(13L);
+
+        verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
+        verify(registeropplysningerService).hentOgLagreOpplysninger(any(RegisteropplysningerRequest.class));
+    }
+
+    @Test
+    public void oppfriskSaksopplysning_medSED_kallerKontroller() throws MelosysException {
+        final long behandlingID = 14L;
+        Behandling behandling = lagBehandling();
+        behandling.setId(behandlingID);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
+
+        behandling.getSaksopplysninger().add(lagSED());
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID);
+
+        verify(kontrollresultatService).utførKontrollerOgRegistrerFeil(eq(behandlingID));
+    }
+
+    @Test
+    public void oppfriskSaksopplysning_sakstypeUkjent_oppdaterTypeHvisVilkårEndres() throws MelosysException {
+        Behandling behandling = lagBehandling();
+        behandling.getFagsak().setType(Sakstyper.UKJENT);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(regelmodulService.kvalifisererForEF_883_2004(anyLong(), any(), any())).thenReturn(true);
+
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(15L);
+
+        verify(fagsakService).oppdaterType(eq(behandling.getFagsak()), eq(true));
+    }
+
+    private Saksopplysning lagSED() {
+        Saksopplysning sed = new Saksopplysning();
+        SedDokument sedDokument = new SedDokument();
+        sed.setType(SaksopplysningType.SEDOPPL);
+        sed.setDokument(sedDokument);
+        var periode = new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.MIN, LocalDate.MAX);
+        sedDokument.setLovvalgsperiode(periode);
+        return sed;
+    }
+
+    private static Behandling lagBehandling() {
         final String aktørID = "123";
-        final String brukerID = "322211";
-
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
         Aktoer aktør = new Aktoer();
         aktør.setAktørId(aktørID);
         aktør.setRolle(Aktoersroller.BRUKER);
@@ -93,13 +143,6 @@ public class OppfriskSaksopplysningerServiceTest {
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
         behandling.setSaksopplysninger(saksopplysninger);
-
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(brukerID);
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(13L);
-
-        verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
-        verify(registeropplysningerService).hentOgLagreOpplysninger(any(RegisteropplysningerRequest.class));
+        return behandling;
     }
 }
