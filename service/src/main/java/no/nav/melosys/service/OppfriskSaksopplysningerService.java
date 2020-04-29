@@ -60,7 +60,8 @@ public class OppfriskSaksopplysningerService {
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
 
         BehandlingsgrunnlagData grunnlagData = null;
-        LocalDate fom = null, tom = null;
+        LocalDate fom = null;
+        LocalDate tom = null;
 
         if (behandling.erBehandlingAvSøknad()) {
             grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
@@ -89,9 +90,8 @@ public class OppfriskSaksopplysningerService {
 
         Fagsak fagsak = behandling.getFagsak();
         if (grunnlagData != null && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
-            fagsak.setType(regelmodulService.kvalifisererForEF_883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode)
-                ? Sakstyper.EU_EOS : Sakstyper.UKJENT);
-            fagsakService.lagre(fagsak);
+            fagsakService.oppdaterType(fagsak,
+                regelmodulService.kvalifisererForEF_883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode));
         }
     }
 }

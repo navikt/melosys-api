@@ -9,12 +9,10 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.service.RegelmodulService;
@@ -25,7 +23,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -46,11 +43,8 @@ public class VurderInngangsvilkaarTest {
     private VurderInngangsvilkaar agent;
 
     @Before
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         agent = new VurderInngangsvilkaar(regelmodulService, fagsakService);
-
-        Fagsak fagsak = new Fagsak();
-        when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
     }
 
     @Test
@@ -66,9 +60,7 @@ public class VurderInngangsvilkaarTest {
 
         agent.utfør(p);
 
-        ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
-        verify(fagsakService).lagre(fagsakArgumentCaptor.capture());
-        assertThat(fagsakArgumentCaptor.getValue().getType()).isEqualTo(Sakstyper.EU_EOS);
+        verify(fagsakService).oppdaterType(anyString(), eq(true));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ARBF_OPPL);
     }
 
@@ -91,7 +83,9 @@ public class VurderInngangsvilkaarTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         p.setBehandling(behandling);
-        p.getBehandling().setFagsak(new Fagsak());
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MIN_SAK");
+        p.getBehandling().setFagsak(fagsak);
 
         Saksopplysning sopp = new Saksopplysning();
         sopp.setType(SaksopplysningType.PERSOPL);

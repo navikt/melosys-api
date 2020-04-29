@@ -2,9 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.List;
 
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -18,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.saksflyt.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
  * Kaller regelmodulen for å vurdere inngangsvilkår. Setter type på fagsak basert på resultatet.
@@ -59,22 +55,8 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(behandlingID, søknadsland, periode);
 
         // Sett sakstype...
-        Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER));
-        Sakstyper nyFagsakstype;
-        if (Boolean.TRUE.equals(res.kvalifisererForEf883_2004)) {
-            nyFagsakstype = Sakstyper.EU_EOS;
-        } else {
-            nyFagsakstype = Sakstyper.UKJENT;
-        }
-        if (fagsak.getType() != null && fagsak.getType() != nyFagsakstype && Sakstyper.UKJENT != fagsak.getType()) {
-            log.error("Avbryter behandling av prosessinstans {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakstype);
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakstype, null);
-            return;
-        }
-        fagsak.setType(nyFagsakstype);
-        fagsakService.lagre(fagsak);
+        fagsakService.oppdaterType(prosessinstans.getData(ProsessDataKey.SAKSNUMMER), res.kvalifisererForEf883_2004);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
-        log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakstype, prosessinstans.getId());
     }
 }
