@@ -12,13 +12,11 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.service.SaksopplysningerService;
-import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +49,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void vurderOgLagreInngangsvilkår() throws TekniskException, IkkeFunnetException {
+    public void vurderOgLagreInngangsvilkår() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
