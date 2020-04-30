@@ -14,7 +14,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.RegelmodulService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class VurderInngangsvilkaarTest {
     @Mock
-    private RegelmodulService regelmodulService;
+    private InngangsvilkaarService inngangsvilkaarService;
     @Mock
     private FagsakService fagsakService;
 
@@ -38,13 +38,13 @@ public class VurderInngangsvilkaarTest {
 
     @Before
     public void setUp() {
-        agent = new VurderInngangsvilkaar(regelmodulService, fagsakService);
+        agent = new VurderInngangsvilkaar(inngangsvilkaarService, fagsakService);
     }
 
     @Test
     public void utfoerSteg_funker() throws FunksjonellException, TekniskException {
         Prosessinstans p = lagProsessinstans();
-        when(regelmodulService.vurderOgLagreInngangsvilkår(anyLong(), any(), any())).thenReturn(true);
+        when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), any(), any())).thenReturn(true);
 
         agent.utfør(p);
 

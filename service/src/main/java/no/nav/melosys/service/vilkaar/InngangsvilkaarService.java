@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.vilkaar;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -18,7 +18,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.service.SaksopplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,17 +31,17 @@ import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
  * Service som kaller regelmodulen.
  */
 @Service
-public class RegelmodulService {
-    private static final Logger log = LoggerFactory.getLogger(RegelmodulService.class);
+public class InngangsvilkaarService {
+    private static final Logger log = LoggerFactory.getLogger(InngangsvilkaarService.class);
 
     private final SaksopplysningerService saksopplysningerService;
     private final RegelmodulFasade regelmodulFasade;
     private final VilkaarsresultatService vilkaarsresultatService;
 
     @Autowired
-    public RegelmodulService(SaksopplysningerService saksopplysningerService,
-                             RegelmodulFasade regelmodulFasade,
-                             VilkaarsresultatService vilkaarsresultatService) {
+    public InngangsvilkaarService(SaksopplysningerService saksopplysningerService,
+                                  RegelmodulFasade regelmodulFasade,
+                                  VilkaarsresultatService vilkaarsresultatService) {
         this.saksopplysningerService = saksopplysningerService;
         this.regelmodulFasade = regelmodulFasade;
         this.vilkaarsresultatService = vilkaarsresultatService;

@@ -9,7 +9,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.RegelmodulService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +26,13 @@ import org.springframework.stereotype.Component;
 public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
 
-    private final RegelmodulService regelmodulService;
+    private final InngangsvilkaarService inngangsvilkaarService;
     private final FagsakService fagsakService;
 
     @Autowired
-    public VurderInngangsvilkaar(RegelmodulService regelmodulService,
+    public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService,
                                  FagsakService fagsakService) {
-        this.regelmodulService = regelmodulService;
+        this.inngangsvilkaarService = inngangsvilkaarService;
         this.fagsakService = fagsakService;
     }
 
@@ -48,7 +48,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
         var søknadsland = Soeknadsland.av(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {}));
         var periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        boolean kvalifisererForEF_883_2004  = regelmodulService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
+        boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
 
         fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
 

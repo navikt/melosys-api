@@ -23,6 +23,7 @@ import no.nav.melosys.service.kontroll.KontrollresultatService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +45,7 @@ public class OppfriskSaksopplysningerServiceTest {
     @Mock
     KontrollresultatService kontrollresultatService;
     @Mock
-    private RegelmodulService regelmodulService;
+    private InngangsvilkaarService inngangsvilkaarService;
     @Mock
     private RegisteropplysningerService registeropplysningerService;
     @Mock
@@ -57,7 +58,7 @@ public class OppfriskSaksopplysningerServiceTest {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             behandlingService, behandlingsresultatService,
             fagsakService, kontrollresultatService,
-            regelmodulService, registeropplysningerService,
+            inngangsvilkaarService, registeropplysningerService,
             tpsFasade);
 
         String brukerID = "322211";
@@ -94,7 +95,7 @@ public class OppfriskSaksopplysningerServiceTest {
         Behandling behandling = lagBehandling();
         behandling.getFagsak().setType(Sakstyper.UKJENT);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(regelmodulService.vurderOgLagreInngangsvilkår(anyLong(), any(Soeknadsland.class), any(Periode.class))).thenReturn(true);
+        when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), any(Soeknadsland.class), any(Periode.class))).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(15L);
 

@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.vilkaar;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +16,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
+import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +35,7 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("resource")
 @RunWith(MockitoJUnitRunner.class)
-public class RegelmodulServiceTest {
+public class InngangsvilkaarServiceTest {
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
@@ -41,11 +43,11 @@ public class RegelmodulServiceTest {
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
 
-    private RegelmodulService regelmodulService;
+    private InngangsvilkaarService inngangsvilkaarService;
 
     @Before
     public void setUp() {
-        regelmodulService = new RegelmodulService(saksopplysningerService, regelmodulFasade, vilkaarsresultatService);
+        inngangsvilkaarService = new InngangsvilkaarService(saksopplysningerService, regelmodulFasade, vilkaarsresultatService);
     }
 
     @Test
@@ -60,7 +62,7 @@ public class RegelmodulServiceTest {
         res.kvalifisererForEf883_2004 = true;
         when(regelmodulFasade.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
 
-        regelmodulService.vurderOgLagreInngangsvilkår(1L, Soeknadsland.av(landkoder), periode);
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, Soeknadsland.av(landkoder), periode);
 
         verify(regelmodulFasade).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, null);
@@ -68,7 +70,7 @@ public class RegelmodulServiceTest {
 
     @Test
     public void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
-        Land stastborgerskap = regelmodulService.avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);
+        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);
         assertNull(stastborgerskap);
     }
 
@@ -83,7 +85,7 @@ public class RegelmodulServiceTest {
         p2.statsborgerskap = av(UKJENT);
         p2.periode = new Periode(LocalDate.of(2018, 4, 1), LocalDate.of(2018, 5, 2));
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = regelmodulService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2019, 2, 1));
+        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2019, 2, 1));
         assertNull(stastborgerskap);
     }
 
@@ -98,7 +100,7 @@ public class RegelmodulServiceTest {
         p2.statsborgerskap = av(UKJENT);
         p2.periode = new Periode(LocalDate.of(2018, 4, 1), null);
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = regelmodulService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
+        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
         assertThat(stastborgerskap).isEqualTo(av(BELGIA));
     }
 
@@ -115,7 +117,7 @@ public class RegelmodulServiceTest {
         p2.periode = new Periode(LocalDate.of(2017, 4, 1), null);
         p2.endretAv = "SKD";
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = regelmodulService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
+        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
         assertThat(stastborgerskap).isEqualTo(av(BELGIA));
     }
 
@@ -134,7 +136,7 @@ public class RegelmodulServiceTest {
         p2.endretAv = "NAV";
         p2.endringstidspunkt = LocalDateTime.now().minusYears(2);
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = regelmodulService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
+        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
         assertThat(stastborgerskap).isEqualTo(av(BELGIA));
     }
 
@@ -153,7 +155,7 @@ public class RegelmodulServiceTest {
         p2.endretAv = "NAV";
         p2.endringstidspunkt = LocalDateTime.now().minusYears(2);
         statsborgerskapPerioder.add(p2);
-        Land stastborgerskap = regelmodulService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
+        Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2018, 2, 1));
         assertThat(stastborgerskap).isEqualTo(av(SVERIGE));
     }
 }
