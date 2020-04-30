@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -93,7 +94,7 @@ public class OppfriskSaksopplysningerServiceTest {
         Behandling behandling = lagBehandling();
         behandling.getFagsak().setType(Sakstyper.UKJENT);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(regelmodulService.kvalifisererForEF_883_2004(anyLong(), any(), any())).thenReturn(true);
+        when(regelmodulService.vurderOgLagreInngangsvilkår(anyLong(), any(Soeknadsland.class), any(Periode.class))).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(15L);
 

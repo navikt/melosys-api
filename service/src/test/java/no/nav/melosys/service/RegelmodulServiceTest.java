@@ -3,12 +3,19 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
+import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
+import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,8 +24,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.dokument.felles.Land.*;
+import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("resource")
 @RunWith(MockitoJUnitRunner.class)
@@ -35,6 +46,24 @@ public class RegelmodulServiceTest {
     @Before
     public void setUp() {
         regelmodulService = new RegelmodulService(saksopplysningerService, regelmodulFasade, vilkaarsresultatService);
+    }
+
+    @Test
+    public void vurderOgLagreInngangsvilkår() throws TekniskException, IkkeFunnetException {
+        final List<String> landkoder = List.of("FR", "DK", "NO");
+        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.statsborgerskap = Land.av(FINLAND);
+        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
+        res.feilmeldinger = Collections.emptyList();
+        res.kvalifisererForEf883_2004 = true;
+        when(regelmodulFasade.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
+
+        regelmodulService.vurderOgLagreInngangsvilkår(1L, Soeknadsland.av(landkoder), periode);
+
+        verify(regelmodulFasade).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, null);
     }
 
     @Test

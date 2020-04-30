@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 /**
@@ -46,33 +47,32 @@ public class RegelmodulService {
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
-    public boolean kvalifisererForEF_883_2004(Long behandlingID, Soeknadsland søknadsland, Periode periode) {
-        return vurderOgLagreInngangsvilkår(behandlingID, søknadsland.landkoder, periode);
-     }
-
-    public boolean vurderOgLagreInngangsvilkår(long behandlingID, List<String> søknadsland, Periode søknadsperiode) {
+    public boolean vurderOgLagreInngangsvilkår(long behandlingID,
+                                               Soeknadsland søknadsland,
+                                               Periode søknadsperiode) throws IkkeFunnetException {
         boolean erEF_883_2004 = false;
         Kodeverk begrunnelseKode = null;
         try {
             erEF_883_2004 = vurderInngangsvilkår(behandlingID, søknadsland, søknadsperiode);
         } catch (IkkeFunnetException e) {
-            begrunnelseKode = Inngangsvilkaar.NORDISK_UTENFOR_EOS; // TODO erstattes med riktig kode
+            begrunnelseKode = Inngangsvilkaar.NORDISK_UTENFOR_EOS; // FIXME erstattes med kode om manglende statsborgerskap
         } catch (MelosysException e) {
-            begrunnelseKode = Inngangsvilkaar.TREDJELANDSBORGER; // TODO erstattes med riktig kode
+            begrunnelseKode = Inngangsvilkaar.TREDJELANDSBORGER; // FIXME erstattes med kode om teknisk feil
         }
         log.info("Kall til regelmodul for behandling {} returnerte {}", behandlingID, erEF_883_2004);
-        // TODO lagring av vilkårsresultat kommer her.
+        vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR, erEF_883_2004, begrunnelseKode);
         return erEF_883_2004;
     }
 
-    private boolean vurderInngangsvilkår(long behandlingID, List<String> søknadsland, Periode søknadsperiode)
+    private boolean vurderInngangsvilkår(long behandlingID, Soeknadsland søknadsland, Periode søknadsperiode)
         throws FunksjonellException, TekniskException {
         Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
         if (statsborgerskap == null) {
             throw new IkkeFunnetException("Finner ingen informasjon om statsborgerskap");
         }
 
-        VurderInngangsvilkaarReply res = regelmodulFasade.vurderInngangsvilkår(statsborgerskap, tilIso3(søknadsland), søknadsperiode);
+        var landkoderISO3 = tilIso3(søknadsland.landkoder);
+        VurderInngangsvilkaarReply res = regelmodulFasade.vurderInngangsvilkår(statsborgerskap, landkoderISO3, søknadsperiode);
 
         List<String> feilmeldinger = res.feilmeldinger.stream()
             .filter(feilmelding -> feilmelding.kategori.alvorlighetsgrad == Alvorlighetsgrad.FEIL)

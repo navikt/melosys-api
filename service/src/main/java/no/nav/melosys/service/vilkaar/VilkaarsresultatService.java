@@ -6,12 +6,16 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,14 +23,15 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 
 @Service
 public class VilkaarsresultatService {
+    private static final Logger log = LoggerFactory.getLogger(VilkaarsresultatService.class);
 
-    private final BehandlingsresultatRepository behandlingsresultatRepo;
-
+    private final BehandlingsresultatService behandlingsresultatService;
     private final VilkaarsresultatRepository vilkaarsresultatRepo;
 
     @Autowired
-    public VilkaarsresultatService(BehandlingsresultatRepository behandlingsresultatRepo, VilkaarsresultatRepository vilkaarsresultatRepo) {
-        this.behandlingsresultatRepo = behandlingsresultatRepo;
+    public VilkaarsresultatService(BehandlingsresultatService behandlingsresultatService,
+                                   VilkaarsresultatRepository vilkaarsresultatRepo) {
+        this.behandlingsresultatService = behandlingsresultatService;
         this.vilkaarsresultatRepo = vilkaarsresultatRepo;
     }
 
@@ -72,35 +77,55 @@ public class VilkaarsresultatService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Registrering av vilkår feilet fordi behandlingsresulat med ID " + behandlingID + " er ikke funnet."));
-
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
         vilkaarsresultatRepo.flush();
 
         for (VilkaarDto vilkaarDto :  vilkaarDtoer) {
-            Vilkaarsresultat vilkaarsresultat = lagNyVilkaarResultat(behandlingsresultat, vilkaarDto);
+            Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(behandlingsresultat,
+                Vilkaar.valueOf(vilkaarDto.getVilkaar()),
+                vilkaarDto.isOppfylt(),
+                vilkaarDto.getBegrunnelseKoder(),
+                vilkaarDto.getBegrunnelseFritekst());
             vilkaarsresultatRepo.save(vilkaarsresultat);
         }
     }
 
-    private Vilkaarsresultat lagNyVilkaarResultat(Behandlingsresultat behandlingsresultat, VilkaarDto vilkaarDto) {
+    @Transactional(rollbackFor = MelosysException.class)
+    public void oppdaterVilkaarsresultat(long behandlingID,
+                                         Vilkaar vilkaar,
+                                         boolean oppfylt,
+                                         @Nullable Kodeverk begrunnelseKode) throws IkkeFunnetException {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
+        vilkaarsresultatRepo.flush();
+        List<String> begrunnelseKoder = begrunnelseKode == null ? List.of() : List.of(begrunnelseKode.getKode());
+        vilkaarsresultatRepo.save(lagVilkaarsresultat(behandlingsresultat, vilkaar, oppfylt, begrunnelseKoder, null));
+    }
 
+    private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
+                                                 Vilkaar vilkaar,
+                                                 boolean oppfylt,
+                                                 List<String> begrunnelseKoder,
+                                                 String begrunnelseFritekst) {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-
-        Set<VilkaarBegrunnelse> nyeBegrunnelser = new HashSet<>();
-        for (String kode : vilkaarDto.getBegrunnelseKoder()) {
-            VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
-            begrunnelse.setVilkaarsresultat(vilkaarsresultat);
-            begrunnelse.setKode(kode);
-            nyeBegrunnelser.add(begrunnelse);
-        }
-        vilkaarsresultat.setBegrunnelser(nyeBegrunnelser);
-
-        vilkaarsresultat.setBegrunnelseFritekst(vilkaarDto.getBegrunnelseFritekst());
         vilkaarsresultat.setBehandlingsresultat(behandlingsresultat);
-        vilkaarsresultat.setVilkaar(Vilkaar.valueOf(vilkaarDto.getVilkaar()));
-        vilkaarsresultat.setOppfylt(vilkaarDto.isOppfylt());
+        vilkaarsresultat.setVilkaar(vilkaar);
+        vilkaarsresultat.setOppfylt(oppfylt);
+        if (!oppfylt) {
+            vilkaarsresultat.setBegrunnelser(begrunnelseKoder.stream().map(kode -> lagBegrunnelse(vilkaarsresultat, kode))
+                .collect(Collectors.toSet()));
+            vilkaarsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
+        } else {
+            log.warn("Begrunnelser trengs ikke for oppfylt {} i behandlingsresultat {}.", vilkaar, behandlingsresultat);
+        }
         return vilkaarsresultat;
+    }
+
+    private VilkaarBegrunnelse lagBegrunnelse(Vilkaarsresultat vilkaarsresultat, String begrunnelseKode) {
+        VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
+        begrunnelse.setVilkaarsresultat(vilkaarsresultat);
+        begrunnelse.setKode(begrunnelseKode);
+        return begrunnelse;
     }
 }

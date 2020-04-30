@@ -1,9 +1,8 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.List;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -47,8 +46,8 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingID = prosessinstans.getBehandling().getId();
 
-        List<String> søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {});
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        var søknadsland = Soeknadsland.av(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {}));
+        var periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
         boolean kvalifisererForEF_883_2004  = regelmodulService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
 
         fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);

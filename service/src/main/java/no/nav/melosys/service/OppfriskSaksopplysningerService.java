@@ -90,8 +90,8 @@ public class OppfriskSaksopplysningerService {
 
         Fagsak fagsak = behandling.getFagsak();
         if (grunnlagData != null && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
-            fagsakService.oppdaterType(fagsak,
-                regelmodulService.kvalifisererForEF_883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode));
+            boolean kvalifisererForEF_883_2004 = regelmodulService.vurderOgLagreInngangsvilkår(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode);
+            fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);
         }
     }
 }
