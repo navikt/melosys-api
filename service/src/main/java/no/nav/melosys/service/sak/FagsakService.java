@@ -360,12 +360,6 @@ public class FagsakService {
         log.info("Satt type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakstype);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void oppdaterType(String saksnummer, boolean kvalifisererForEF_883_2004) throws FunksjonellException {
-        Fagsak fagsak = hentFagsak(saksnummer);
-        oppdaterType(fagsak, kvalifisererForEF_883_2004);
-    }
-
     private void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);

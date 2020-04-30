@@ -47,13 +47,11 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingID = prosessinstans.getBehandling().getId();
 
-        // Kjør inngangsvilkår...
         List<String> søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {});
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
         boolean kvalifisererForEF_883_2004  = regelmodulService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
 
-        // Sett sakstype...
-        fagsakService.oppdaterType(prosessinstans.getData(ProsessDataKey.SAKSNUMMER), kvalifisererForEF_883_2004);
+        fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
     }

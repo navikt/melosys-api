@@ -48,7 +48,7 @@ public class VurderInngangsvilkaarTest {
 
         agent.utfør(p);
 
-        verify(fagsakService).oppdaterType(anyString(), eq(true));
+        verify(fagsakService).oppdaterType(eq(p.getBehandling().getFagsak()), eq(true));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ARBF_OPPL);
     }
 
