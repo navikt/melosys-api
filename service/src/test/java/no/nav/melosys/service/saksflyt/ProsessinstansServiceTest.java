@@ -155,7 +155,7 @@ public class ProsessinstansServiceTest {
         settInnloggetSaksbehandler();
 
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansVideresendSoknad(behandling, Collections.emptyList());
+        service.opprettProsessinstansVideresendSoknad(behandling, null);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 

@@ -86,7 +86,7 @@ public class VideresendSoknadServiceTest {
          videresendSoknadService.henleggOgVideresend(saksnummer, "");
 
          verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.VIDERESENDT);
-         verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling), eq(validerteMottakere));
+         verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling), eq(validerteMottakere.get(0)));
          verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(saksnummer));
     }
 

@@ -61,7 +61,7 @@ public class VideresendSoknadService {
             BucType.LA_BUC_03
         );
 
-        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, avklarteEessiMottakere);
+        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, avklarteEessiMottakere.stream().findFirst().orElse(null));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
