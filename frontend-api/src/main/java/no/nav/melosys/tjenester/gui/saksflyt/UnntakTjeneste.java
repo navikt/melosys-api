@@ -10,7 +10,6 @@ import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -35,7 +34,7 @@ public class UnntakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(value = "/{behandlingID}/godkjenn", produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/{behandlingID}/godkjenn")
     public ResponseEntity<Void> godkjennUnntaksperiode(
         @PathVariable("behandlingID") Long behandlingId,
         @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto
