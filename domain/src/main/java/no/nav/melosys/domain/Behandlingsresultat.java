@@ -298,4 +298,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean harVedtak() {
         return vedtakMetadata != null;
     }
+
+    @Override
+    public String toString() {
+        return "Behandlingsresultat{" +
+            "id=" + id +
+            ", type=" + type +
+            '}';
+    }
 }

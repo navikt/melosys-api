@@ -344,6 +344,22 @@ public class FagsakService {
         behandlingService.avsluttBehandling(behandling.getId());
     }
 
+    @Transactional(rollbackFor = MelosysException.class)
+    public void oppdaterType(Fagsak fagsak, boolean kvalifisererForEF_883_2004) throws FunksjonellException {
+        Sakstyper nyFagsakstype;
+        if (kvalifisererForEF_883_2004) {
+            nyFagsakstype = Sakstyper.EU_EOS;
+        } else {
+            nyFagsakstype = Sakstyper.UKJENT;
+        }
+        if (fagsak.getType() != null && Sakstyper.UKJENT != fagsak.getType() && fagsak.getType() != nyFagsakstype) {
+            throw new FunksjonellException("Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakstype);
+        }
+        fagsak.setType(nyFagsakstype);
+        lagre(fagsak);
+        log.info("Satt type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakstype);
+    }
+
     private void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
