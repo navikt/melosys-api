@@ -17,17 +17,17 @@ public class BestemmelseTilBucTypeTest {
 
     @Test
     public void fraBestemmelse_art11_LABUC05() {
-        assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)).isEqualTo(BucType.LA_BUC_04);
-        assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2)).isEqualTo(BucType.LA_BUC_04);
-    }
-
-    @Test
-    public void fraBestemmelse_art12_LABUC04() {
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B)).isEqualTo(BucType.LA_BUC_05);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C)).isEqualTo(BucType.LA_BUC_05);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E)).isEqualTo(BucType.LA_BUC_05);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2)).isEqualTo(BucType.LA_BUC_05);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART15)).isEqualTo(BucType.LA_BUC_05);
+    }
+
+    @Test
+    public void fraBestemmelse_art12_LABUC04() {
+        assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)).isEqualTo(BucType.LA_BUC_04);
+        assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2)).isEqualTo(BucType.LA_BUC_04);
     }
 
     @Test

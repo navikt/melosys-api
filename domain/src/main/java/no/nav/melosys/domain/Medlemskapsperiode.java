@@ -52,9 +52,8 @@ public interface Medlemskapsperiode extends ErPeriode {
     }
 
     default boolean harGyldigBestemmelse() {
-        return getBestemmelse() == FO_883_2004_ART11_3A
+        return erArtikkel12() || erArtikkel13() || getBestemmelse() == FO_883_2004_ART11_3A
             || getBestemmelse() == FO_883_2004_ART11_3B || getBestemmelse() == FO_883_2004_ART11_4_2
-            || getBestemmelse() == FO_883_2004_ART11_5 || getBestemmelse() == FO_883_2004_ART16_1
-            || erArtikkel12() || erArtikkel13();
+            || getBestemmelse() == FO_883_2004_ART11_5 || getBestemmelse() == FO_883_2004_ART16_1;
     }
 }
