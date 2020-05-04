@@ -7,7 +7,7 @@ import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.Before;
@@ -55,7 +55,7 @@ public class VilkaarsresultatServiceTest {
     }
 
     @Test
-    public void registrerVilkår() throws IkkeFunnetException {
+    public void registrerVilkår() throws FunksjonellException {
         long behandlingID = 1L;
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
@@ -70,5 +70,12 @@ public class VilkaarsresultatServiceTest {
         verify(vilkaarsresultatRepo).deleteByBehandlingsresultat(any());
         verify(vilkaarsresultatRepo).flush();
         verify(vilkaarsresultatRepo).save(any(Vilkaarsresultat.class));
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void registrer_inngangsvilkår_feiler() throws FunksjonellException {
+        VilkaarDto vilkaarDto = new VilkaarDto();
+        vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_INNGANGSVILKAAR.getKode());
+        vilkaarsresultatService.registrerVilkår(1L, Collections.singletonList(vilkaarDto));
     }
 }

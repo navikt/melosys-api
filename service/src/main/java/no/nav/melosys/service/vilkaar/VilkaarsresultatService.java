@@ -8,6 +8,7 @@ import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
@@ -76,7 +77,8 @@ public class VilkaarsresultatService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws IkkeFunnetException {
+    public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
+        validerVilkår(vilkaarDtoer);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
         vilkaarsresultatRepo.flush();
@@ -88,6 +90,14 @@ public class VilkaarsresultatService {
                 vilkaarDto.getBegrunnelseKoder(),
                 vilkaarDto.getBegrunnelseFritekst());
             vilkaarsresultatRepo.save(vilkaarsresultat);
+        }
+    }
+
+    private void validerVilkår(List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
+        boolean inngangsvilkårFinnes = vilkaarDtoer.stream().map(VilkaarDto::getVilkaar)
+            .anyMatch(s -> FO_883_2004_INNGANGSVILKAAR.toString().equalsIgnoreCase(s));
+        if (inngangsvilkårFinnes) {
+            throw new FunksjonellException("FO_883_2004_INNGANGSVILKAAR kan ikke overskrives. Backend er ansvarlig for inngangsvilkår.");
         }
     }
 

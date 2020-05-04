@@ -25,9 +25,6 @@ import org.springframework.stereotype.Service;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
-/**
- * Service som kaller regelmodulen.
- */
 @Service
 public class InngangsvilkaarService {
     private static final Logger log = LoggerFactory.getLogger(InngangsvilkaarService.class);
@@ -72,7 +69,9 @@ public class InngangsvilkaarService {
             .collect(Collectors.toList());
 
         if (!feilmeldinger.isEmpty()) {
-            log.error("Vurdering av inngangsvilkår feilet: {}", String.join(System.lineSeparator(), feilmeldinger));
+            if (log.isErrorEnabled()) {
+                log.error("Vurdering av inngangsvilkår feilet: {}", String.join(System.lineSeparator(), feilmeldinger));
+            }
             return new InngangsvilkaarVurdering(false, Inngangsvilkaar.TREDJELANDSBORGER); // FIXME erstattes med kode om teknisk feil)
         } else {
             return new InngangsvilkaarVurdering(res.kvalifisererForEf883_2004, null); // FIXME trenger vi en kode hvis kvalifisererForEf883_2004 == false?
