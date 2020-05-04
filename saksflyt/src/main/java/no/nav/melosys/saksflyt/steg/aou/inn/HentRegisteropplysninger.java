@@ -15,6 +15,8 @@ import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
+
 @Component("AnmodningUnntakMottakHentRegisteropplysninger")
 public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
@@ -23,7 +25,8 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
     private final TpsFasade tpsFasade;
 
     @Autowired
-    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService, BehandlingService behandlingService, TpsFasade tpsFasade) {
+    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService,
+                                    BehandlingService behandlingService, TpsFasade tpsFasade) {
         this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
         this.tpsFasade = tpsFasade;
@@ -46,15 +49,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(behandling.getId())
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .personopplysninger()
-                    .personhistorikkopplysninger()
-                    .medlemskapsopplysninger()
-                    .inntektsopplysninger()
-                    .utbetalingsopplysninger()
-                    .arbeidsforholdopplysninger()
-                    .organisasjonsopplysninger()
-                    .build())
+                .saksopplysningTyper(utledSaksopplysningTyper(behandling.getTema()))
                 .fom(sedDokument.getLovvalgsperiode().getFom())
                 .tom(sedDokument.getLovvalgsperiode().getTom())
                 .fnr(fnr)

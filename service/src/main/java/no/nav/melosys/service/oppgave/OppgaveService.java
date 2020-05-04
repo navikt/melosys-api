@@ -230,7 +230,8 @@ public class OppgaveService {
         behandlingDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingDto.setEndretDato(behandling.getEndretDato());
         behandlingDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
-        behandlingDto.setErUnderOppdatering(saksopplysningerService.harAktivOppfrisking(behandling.getId()));
+        // FIXME: Feltet og endepunktet fjernes fra JSON-schema
+        behandlingDto.setErUnderOppdatering(false);
         return behandlingDto;
     }
 
