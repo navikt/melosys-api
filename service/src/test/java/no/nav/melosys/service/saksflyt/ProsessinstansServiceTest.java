@@ -150,6 +150,22 @@ public class ProsessinstansServiceTest {
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
     }
 
+    @Test
+    public void opprettProsessinstansVideresendSøknad() {
+        settInnloggetSaksbehandler();
+
+        Behandling behandling = new Behandling();
+        service.opprettProsessinstansVideresendSoknad(behandling, null);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.VIDERESEND_SOKNAD);
+        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.VS_OPPDATER_RESULTAT);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, List.class)).isNull();
+        assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
+    }
+
     private Behandling lagBehandling() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("12354");

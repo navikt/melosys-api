@@ -6,10 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -106,6 +103,10 @@ public class LandvelgerService {
             .filter(Vilkaarsresultat::isOppfylt)
             .map(Vilkaarsresultat::getVilkaar)
             .collect(Collectors.toSet());
+    }
+
+    public Landkoder hentBostedsland(Behandling behandling) {
+        return hentBostedsland(behandling.getId(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
     }
 
     public Landkoder hentBostedsland(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
