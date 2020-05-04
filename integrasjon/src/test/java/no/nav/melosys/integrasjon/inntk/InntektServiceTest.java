@@ -10,8 +10,6 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektMock;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkUgyldigInput;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Uttrekksperiode;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 import org.junit.Before;
@@ -50,7 +48,7 @@ public class InntektServiceTest {
     }
 
     @Test
-    public void hentInntektListe_fomFørJan2015_henterInntektMedFomJan2015() throws FunksjonellException, IntegrasjonException, HentInntektListeBolkUgyldigInput, HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter {
+    public void hentInntektListe_fomFørJan2015_henterInntektMedFomJan2015() throws Exception {
         Saksopplysning saksopplysning = inntektService.hentInntektListe("99999999992", YearMonth.of(2014, 6), YearMonth.of(2017, 8));
         InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
         assertThat(dokument).isNotNull();

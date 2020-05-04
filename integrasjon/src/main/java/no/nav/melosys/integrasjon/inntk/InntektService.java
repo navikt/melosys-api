@@ -112,7 +112,7 @@ public class InntektService implements InntektFasade {
             if (tom.isBefore(JANUAR_2015)) {
                 throw new FunksjonellException("Kan ikke hente inntektsopplysninger da både fom og tom-dato er før " + JANUAR_2015);
             }
-            log.info("Periode har fom dato {} som inntektskomponent ikke støttet, henter inntekt med fom {}", fom, JANUAR_2015);
+            log.info("Periode har fom dato {} som inntektskomponent ikke støtter, henter inntekt med fom {}", fom, JANUAR_2015);
             fom = JANUAR_2015;
         }
 
