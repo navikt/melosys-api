@@ -14,6 +14,7 @@ import no.nav.melosys.service.kontroll.KontrollresultatService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class OppfriskSaksopplysningerService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final FagsakService fagsakService;
     private final KontrollresultatService kontrollresultatService;
-    private final RegelmodulService regelmodulService;
+    private final InngangsvilkaarService inngangsvilkaarService;
     private final RegisteropplysningerService registeropplysningerService;
     private final TpsFasade tpsFasade;
 
@@ -39,14 +40,14 @@ public class OppfriskSaksopplysningerService {
                                            BehandlingsresultatService behandlingsresultatService,
                                            FagsakService fagsakService,
                                            KontrollresultatService kontrollresultatService,
-                                           RegelmodulService regelmodulService,
+                                           InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
                                            TpsFasade tpsFasade) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.fagsakService = fagsakService;
         this.kontrollresultatService = kontrollresultatService;
-        this.regelmodulService = regelmodulService;
+        this.inngangsvilkaarService = inngangsvilkaarService;
         this.registeropplysningerService = registeropplysningerService;
         this.tpsFasade = tpsFasade;
     }
@@ -60,7 +61,8 @@ public class OppfriskSaksopplysningerService {
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
 
         BehandlingsgrunnlagData grunnlagData = null;
-        LocalDate fom = null, tom = null;
+        LocalDate fom = null;
+        LocalDate tom = null;
 
         if (behandling.erBehandlingAvSøknad()) {
             grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
@@ -89,9 +91,8 @@ public class OppfriskSaksopplysningerService {
 
         Fagsak fagsak = behandling.getFagsak();
         if (grunnlagData != null && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
-            fagsak.setType(regelmodulService.kvalifisererForEf883_2004(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode)
-                ? Sakstyper.EU_EOS : Sakstyper.UKJENT);
-            fagsakService.lagre(fagsak);
+            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode);
+            fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);
         }
     }
 }

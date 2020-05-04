@@ -1,27 +1,20 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.List;
-
-import no.nav.melosys.domain.Fagsak;
+import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
-import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
-import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.RegelmodulService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.saksflyt.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
  * Kaller regelmodulen for å vurdere inngangsvilkår. Setter type på fagsak basert på resultatet.
@@ -33,13 +26,13 @@ import static no.nav.melosys.saksflyt.feil.Feilkategori.FUNKSJONELL_FEIL;
 public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
 
-    private final RegelmodulService regelmodulService;
+    private final InngangsvilkaarService inngangsvilkaarService;
     private final FagsakService fagsakService;
 
     @Autowired
-    public VurderInngangsvilkaar(RegelmodulService regelmodulService,
+    public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService,
                                  FagsakService fagsakService) {
-        this.regelmodulService = regelmodulService;
+        this.inngangsvilkaarService = inngangsvilkaarService;
         this.fagsakService = fagsakService;
     }
 
@@ -49,50 +42,16 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingID = prosessinstans.getBehandling().getId();
 
-        // Kjør inngangsvilkår...
-        List<String> søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(behandlingID, søknadsland, periode);
+        var søknadsland = Soeknadsland.av(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {}));
+        var periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
 
-        // Legg på evt. feil og varsler...
-        boolean detErMeldtFeil = false;
-        for (Feilmelding melding : res.feilmeldinger) {
-            if (melding.kategori.alvorlighetsgrad == Alvorlighetsgrad.FEIL) {
-                detErMeldtFeil = true;
-            }
-            log.info("Kall til regelmodul for prosessinstans {} returnerte {}", prosessinstans.getId(), melding);
-            prosessinstans.leggTilHendelse(melding.kategori.name(), melding.melding);
-        }
-
-        // Håndter ev. feil...
-        if (detErMeldtFeil) {
-            log.info("Avbryter behandling av prosessinstans {} pga. feil", prosessinstans.getId());
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Uventet feil fra regelmodulen", null);
-            return;
-        }
-
-        // Sett sakstype...
-        Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER));
-        Sakstyper nyFagsakstype;
-        if (Boolean.TRUE.equals(res.kvalifisererForEf883_2004)) {
-            nyFagsakstype = Sakstyper.EU_EOS;
-        } else {
-            nyFagsakstype = Sakstyper.UKJENT;
-        }
-        if (fagsak.getType() != null && fagsak.getType() != nyFagsakstype && Sakstyper.UKJENT != fagsak.getType()) {
-            log.error("Avbryter behandling av prosessinstans {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakstype);
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakstype, null);
-            return;
-        }
-        fagsak.setType(nyFagsakstype);
-        fagsakService.lagre(fagsak);
+        fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
-        log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakstype, prosessinstans.getId());
     }
 }
