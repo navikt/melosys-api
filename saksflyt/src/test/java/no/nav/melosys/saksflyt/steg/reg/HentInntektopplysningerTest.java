@@ -4,13 +4,14 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.HashSet;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
@@ -42,7 +43,7 @@ public class HentInntektopplysningerTest {
     }
 
     @Test
-    public void utfoerSteg() throws IntegrasjonException, SikkerhetsbegrensningException {
+    public void utfoerSteg() throws IntegrasjonException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setSaksopplysninger(new HashSet<>());
@@ -64,7 +65,7 @@ public class HentInntektopplysningerTest {
     }
 
     @Test
-    public void utfoerSteg_fremtidigPeriode() throws IntegrasjonException, SikkerhetsbegrensningException {
+    public void utfoerSteg_fremtidigPeriode() throws IntegrasjonException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setSaksopplysninger(new HashSet<>());
