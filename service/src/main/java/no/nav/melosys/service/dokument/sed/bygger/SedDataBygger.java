@@ -241,6 +241,8 @@ public class SedDataBygger {
         } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(),
                 hentUnntaksBegrunnelse(behandlingsresultat)));
+        } else if (medlemsperiodeType == MedlemsperiodeType.UTPEKINGSPERIODE) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertUtpekingsperiode()));
         }
 
         return Collections.emptyList();
@@ -248,13 +250,12 @@ public class SedDataBygger {
 
     private static List<Lovvalgsperiode> lagLovvalgsperioderDtoHvisFinnes(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
 
-        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE && !behandlingsresultat.getLovvalgsperioder().isEmpty()) {
-            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.getLovvalgsperioder().iterator().next()));
-        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE && !behandlingsresultat.getAnmodningsperioder().isEmpty()) {
-            return Collections.singletonList(lagLovvalgsperiodeDto(
-                behandlingsresultat.getAnmodningsperioder().iterator().next(),
-                hentUnntaksBegrunnelse(behandlingsresultat)
-            ));
+        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE && behandlingsresultat.finnValidertLovvalgsperiode().isPresent()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
+        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE && behandlingsresultat.finnValidertAnmodningsperiode().isPresent()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(), hentUnntaksBegrunnelse(behandlingsresultat)));
+        } else if (medlemsperiodeType == MedlemsperiodeType.UTPEKINGSPERIODE && behandlingsresultat.finnValidertUtpekingsperiode().isPresent()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertUtpekingsperiode()));
         }
 
         return Collections.emptyList();
@@ -304,9 +305,6 @@ public class SedDataBygger {
     }
 
     private static String hentUnntaksBegrunnelse(Behandlingsresultat behandlingsresultat) {
-        if (behandlingsresultat == null) {
-            return null;
-        }
         Set<Vilkaarsresultat> vilkaarsresultater = behandlingsresultat.getVilkaarsresultater();
 
         return vilkaarsresultater == null ? null : vilkaarsresultater.stream()
