@@ -53,7 +53,7 @@ public class UtpekingsperiodeDto {
     public static UtpekingsperiodeDto av(Utpekingsperiode utpekingsperiode) {
         return new UtpekingsperiodeDto(
             new PeriodeDto(utpekingsperiode.getFom(), utpekingsperiode.getTom()),
-            utpekingsperiode.getLovvalgsbestemmelse().name(),
+            utpekingsperiode.getBestemmelse().name(),
             utpekingsperiode.getTilleggsbestemmelse() != null ? utpekingsperiode.getTilleggsbestemmelse().name() : null,
             utpekingsperiode.getLovvalgsland().name()
         );

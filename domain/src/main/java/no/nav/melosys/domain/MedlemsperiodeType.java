@@ -5,6 +5,7 @@ import no.nav.melosys.domain.eessi.BucType;
 public enum MedlemsperiodeType {
     LOVVALGSPERIODE,
     ANMODNINGSPERIODE,
+    UTPEKINGSPERIODE,
     INGEN;
 
     public static MedlemsperiodeType fraBucType(BucType bucType) {

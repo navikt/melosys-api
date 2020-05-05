@@ -36,7 +36,7 @@ public final class UtpekingAnnetLandMapper implements BrevDataMapper {
         Utpekingsperiode utpekingsperiode = brevDataUtpekingAnnetLand.utpekingsperiode;
 
         fag.setLovvalgsland(utpekingsperiode.getLovvalgsland().getBeskrivelse());
-        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(utpekingsperiode.getLovvalgsbestemmelse().getKode()));
+        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(utpekingsperiode.getBestemmelse().getKode()));
         if (utpekingsperiode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(utpekingsperiode.getTilleggsbestemmelse().getKode()));
         }
