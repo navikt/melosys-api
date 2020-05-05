@@ -14,6 +14,7 @@ import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XmlFormaterer;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektConsumer;
@@ -22,11 +23,16 @@ import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkUgyldig
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.*;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class InntektService implements InntektFasade {
+
+    private static final Logger log = LoggerFactory.getLogger(InntektService.class);
+
     private static final String INNTEKT_VERSJON = "3.2";
 
     private final InntektConsumer inntektConsumer;
@@ -39,6 +45,8 @@ public class InntektService implements InntektFasade {
     public static final String FORMAALSKODE = "Medlemskap";
     public static final String FORMAALSKODE_URI = "http://nav.no/kodeverk/Kode/Formaal/Medlemskap?v=5";
 
+    private static final YearMonth JANUAR_2015 = YearMonth.of(2015, 1);
+
     @Autowired
     public InntektService(InntektConsumer consumer, DokumentFactory dokumentFactory) {
         this.inntektConsumer = consumer;
@@ -49,33 +57,16 @@ public class InntektService implements InntektFasade {
 
     // Henter inntekter for én ident fra hentInntektListeBolk for å få opplysninger om frilansforhold (se MELOSYS-1453).
     @Override
-    public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws FunksjonellException, IntegrasjonException {
         HentInntektListeBolkRequest request = new HentInntektListeBolkRequest();
 
         PersonIdent personIdent = objectFactory.createPersonIdent();
         personIdent.setPersonIdent(personID);
         request.getIdentListe().add(personIdent);
 
-        Uttrekksperiode uttrekksperiode = objectFactory.createUttrekksperiode();
-        try {
-            uttrekksperiode.setMaanedFom(convertToXMLGregorianCalendar(fom));
-            uttrekksperiode.setMaanedTom(convertToXMLGregorianCalendar(tom));
-        } catch (DatatypeConfigurationException e) {
-            throw new IllegalStateException(e);
-        }
-        request.setUttrekksperiode(uttrekksperiode);
-
-        Ainntektsfilter ainntektsfilter = objectFactory.createAinntektsfilter();
-        ainntektsfilter.setValue(FILTER);
-        ainntektsfilter.setKodeRef(FILTER);
-        ainntektsfilter.setKodeverksRef(FILTER_URI);
-        request.setAinntektsfilter(ainntektsfilter);
-
-        Formaal formaal = objectFactory.createFormaal();
-        formaal.setValue(FORMAALSKODE);
-        formaal.setKodeRef(FORMAALSKODE);
-        formaal.setKodeverksRef(FORMAALSKODE_URI);
-        request.setFormaal(formaal);
+        request.setUttrekksperiode(lagUttrekksperiode(fom, tom));
+        request.setAinntektsfilter(lagAinntektsfilter());
+        request.setFormaal(lagFormaal());
 
         // Kall til Inntektskomponenten
         HentInntektListeBolkResponse response;
@@ -114,20 +105,57 @@ public class InntektService implements InntektFasade {
         return saksopplysning;
     }
 
+    private Uttrekksperiode lagUttrekksperiode(YearMonth fom, YearMonth tom) throws FunksjonellException {
+        Uttrekksperiode uttrekksperiode = objectFactory.createUttrekksperiode();
+
+        if (fom.isBefore(JANUAR_2015)) {
+            if (tom.isBefore(JANUAR_2015)) {
+                throw new FunksjonellException("Kan ikke hente inntektsopplysninger da både fom og tom-dato er før " + JANUAR_2015);
+            }
+            log.info("Periode har fom dato {} som inntektskomponent ikke støtter, henter inntekt med fom {}", fom, JANUAR_2015);
+            fom = JANUAR_2015;
+        }
+
+        try {
+            uttrekksperiode.setMaanedFom(convertToXMLGregorianCalendar(fom));
+            uttrekksperiode.setMaanedTom(convertToXMLGregorianCalendar(tom));
+        } catch (DatatypeConfigurationException e) {
+            throw new IllegalStateException(e);
+        }
+
+        return uttrekksperiode;
+    }
+
+    private Ainntektsfilter lagAinntektsfilter() {
+        Ainntektsfilter ainntektsfilter = objectFactory.createAinntektsfilter();
+        ainntektsfilter.setValue(FILTER);
+        ainntektsfilter.setKodeRef(FILTER);
+        ainntektsfilter.setKodeverksRef(FILTER_URI);
+        return ainntektsfilter;
+    }
+
+    private Formaal lagFormaal() {
+        Formaal formaal = objectFactory.createFormaal();
+        formaal.setValue(FORMAALSKODE);
+        formaal.setKodeRef(FORMAALSKODE);
+        formaal.setKodeverksRef(FORMAALSKODE_URI);
+        return formaal;
+    }
+
     private static XMLGregorianCalendar convertToXMLGregorianCalendar(YearMonth yearMonth) throws DatatypeConfigurationException {
         if (yearMonth == null) {
             return null;
         }
 
         return DatatypeFactory.newInstance().newXMLGregorianCalendar(
-                yearMonth.getYear(),
-                yearMonth.getMonthValue(),
-                DatatypeConstants.FIELD_UNDEFINED,
-                DatatypeConstants.FIELD_UNDEFINED,
-                DatatypeConstants.FIELD_UNDEFINED,
-                DatatypeConstants.FIELD_UNDEFINED,
-                DatatypeConstants.FIELD_UNDEFINED,
-                DatatypeConstants.FIELD_UNDEFINED
+            yearMonth.getYear(),
+            yearMonth.getMonthValue(),
+            DatatypeConstants.FIELD_UNDEFINED,
+            DatatypeConstants.FIELD_UNDEFINED,
+            DatatypeConstants.FIELD_UNDEFINED,
+            DatatypeConstants.FIELD_UNDEFINED,
+            DatatypeConstants.FIELD_UNDEFINED,
+            DatatypeConstants.FIELD_UNDEFINED
         );
     }
 }
