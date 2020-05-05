@@ -13,6 +13,7 @@ import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,8 @@ public class MedlPeriodeServiceTest {
     private LovvalgsperiodeRepository lovvalgsperiodeRepository;
     @Mock
     private AnmodningsperiodeRepository anmodningsperiodeRepository;
+    @Mock
+    private UtpekingsperiodeRepository utpekingsperiodeRepository;
 
     private MedlPeriodeService medlPeriodeService;
 
@@ -43,7 +46,7 @@ public class MedlPeriodeServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        medlPeriodeService = new MedlPeriodeService(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository);
+        medlPeriodeService = new MedlPeriodeService(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository, utpekingsperiodeRepository);
 
         when(medlFasade.opprettPeriodeForeløpig(anyString(), any(Medlemskapsperiode.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
         when(medlFasade.opprettPeriodeUnderAvklaring(anyString(), any(Medlemskapsperiode.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
@@ -59,18 +62,18 @@ public class MedlPeriodeServiceTest {
 
     @Test
     public void opprettPeriodeForeløpig() throws FunksjonellException, TekniskException {
-        medlPeriodeService.opprettPeriodeForeløpig(new Lovvalgsperiode(), 1L, true, FNR);
+        medlPeriodeService.opprettPeriodeForeløpig(new Utpekingsperiode(), 1L, true, FNR);
 
-        verify(medlFasade).opprettPeriodeForeløpig(eq(FNR), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
-        verify(lovvalgsperiodeRepository).save(any(Lovvalgsperiode.class));
+        verify(medlFasade).opprettPeriodeForeløpig(eq(FNR), any(Utpekingsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(utpekingsperiodeRepository).save(any(Utpekingsperiode.class));
     }
 
     @Test
     public void opprettPeriodeUnderAvklaring() throws FunksjonellException, TekniskException {
-        medlPeriodeService.opprettPeriodeUnderAvklaring(new Lovvalgsperiode(), 1L, false, FNR);
+        medlPeriodeService.opprettPeriodeUnderAvklaring(new Anmodningsperiode(), 1L, false, FNR);
 
-        verify(medlFasade).opprettPeriodeUnderAvklaring(eq(FNR), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.HENV_SOKNAD));
-        verify(lovvalgsperiodeRepository).save(any(Lovvalgsperiode.class));
+        verify(medlFasade).opprettPeriodeUnderAvklaring(eq(FNR), any(Anmodningsperiode.class), eq(KildedokumenttypeMedl.HENV_SOKNAD));
+        verify(anmodningsperiodeRepository).save(any(Anmodningsperiode.class));
     }
 
     @Test
