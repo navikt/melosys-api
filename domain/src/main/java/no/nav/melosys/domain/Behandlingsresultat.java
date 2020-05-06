@@ -277,7 +277,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return finnValidertLovvalgsperiode()
             .orElseThrow(() -> new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id));
     }
-    
+
     public Optional<Lovvalgsperiode> finnValidertLovvalgsperiode() {
         if (lovvalgsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en lovvalgsperiode er ikke støttet");
@@ -289,21 +289,21 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return finnValidertAnmodningsperiode()
             .orElseThrow(() -> new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id));
     }
-    
+
     public Optional<Anmodningsperiode> finnValidertAnmodningsperiode() {
         if (anmodningsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en anmodningsperiode er ikke støttet");
         }
         return anmodningsperioder.stream().findFirst();
     }
-    
+
     public Utpekingsperiode hentValidertUtpekingsperiode() {
         return finnValidertUtpekingsperiode()
             .orElseThrow(() -> new NoSuchElementException("Ingen utpekingsperioder finnes for behandlingsresultat " + id));
     }
-    
+
     public Optional<Utpekingsperiode> finnValidertUtpekingsperiode() {
-        if (anmodningsperioder.size() > 1) {
+        if (utpekingsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en utpekingsperiode er ikke støttet");
         }
         return utpekingsperioder.stream().findFirst();
