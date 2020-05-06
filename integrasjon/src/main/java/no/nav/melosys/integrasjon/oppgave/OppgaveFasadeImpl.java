@@ -56,14 +56,14 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             //.put(ENDRET_PERIODE, "ae0052")
             //.put(ANKE, "ae0046")
             //.put(KLAGE, "ae0058")
-            //.put(ARBEID_ETT_LAND_ØVRIG, "FIXME")
+            .put(ARBEID_ETT_LAND_ØVRIG, "ae0243")
             .put(BESLUTNING_LOVVALG_NORGE, "ae0112")
             .put(BESLUTNING_LOVVALG_ANNET_LAND, "ae0113")
             .put(ANMODNING_OM_UNNTAK_HOVEDREGEL, "ae0110")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, "ae0235")
             .put(ARBEID_FLERE_LAND, "ae0242")
-            .put(ARBEID_NORGE_BOSATT_ANNET_LAND, "ae0243")
+            //.put(ARBEID_NORGE_BOSATT_ANNET_LAND, "ukjent") fixme: usikkert om vil tas i bruk
             // FIXME: Mangler behandlingstype i kodeverk
             .put(ØVRIGE_SED, "ukjent")
             .put(TRYGDETID, "ae0236")
