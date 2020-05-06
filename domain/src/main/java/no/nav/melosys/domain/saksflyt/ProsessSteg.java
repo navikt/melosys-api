@@ -89,6 +89,7 @@ public enum ProsessSteg implements Kodeverk {
     UL_SEND_UTLAND("UL_SEND_UTLAND", "Send SED A003 eller brev til utenlandsk trygdemyndighet"),
     UL_DISTRIBUER_JOURNALPOST("UL_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),
     UL_OPPDATER_MEDL("UL_OPPDATER_MEDL", "Oppdatering av medlemskap"),
+    UL_OPPDATER_BEHANDLINGSRESULTAT("UL_OPPDATER_BEHANDLINGSRESULTAT", "Oppdater behandlingsresultat etter land er blitt utpekt"),
 
     //Henlegg sak
     HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.utpeking;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -105,7 +107,7 @@ public class UtpekingService {
         prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, utpekingAvvis);
     }
 
-    void validerUtpekingsperioder(List<Utpekingsperiode> utpekingsperioder) throws MelosysException {
+    private void validerUtpekingsperioder(List<Utpekingsperiode> utpekingsperioder) throws MelosysException {
         if (CollectionUtils.isEmpty(utpekingsperioder)) {
             throw new FunksjonellException("Du må velge en utpekingsperiode for å kunne utpeke et annet land");
         }
@@ -121,5 +123,18 @@ public class UtpekingService {
         if (utpekingAvvis.isEtterspørInformasjon() == null) {
             throw new FunksjonellException("Du må oppgi om forespørsel om mer informasjon vil bli sendt");
         }
+    }
+
+    @Transactional(rollbackFor = MelosysException.class)
+    public void oppdaterSendtUtland(Utpekingsperiode utpekingsperiode) throws FunksjonellException, TekniskException {
+
+        if (utpekingsperiode.getId() == null) {
+            throw new TekniskException("Forsøk på å oppdatere en ikke-persistert utpekingsperiode");
+        } else if (utpekingsperiode.getSendtUtland() != null) {
+            throw new FunksjonellException("Utpekingsperiode " + utpekingsperiode.getId() + " er allerede markert som sendtUtland");
+        }
+
+        utpekingsperiode.setSendtUtland(LocalDate.now());
+        utpekingsperiodeRepository.save(utpekingsperiode);
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ul;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -41,13 +42,14 @@ public class UtpekLandDistribuerJournalpostTest {
     public void utfør() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "12345");
+        prosessinstans.setBehandling(new Behandling());
 
         utpekLandDistribuerJournalpost.utfør(prosessinstans);
 
         ArgumentCaptor<StrukturertAdresse> captor = ArgumentCaptor.forClass(StrukturertAdresse.class);
         verify(doksysFasade).distribuerJournalpost(eq("12345"), captor.capture());
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.UL_OPPDATER_BEHANDLINGSRESULTAT);
 
         StrukturertAdresse strukturertAdresse = captor.getValue();
         assertThat(strukturertAdresse).isNotNull();
