@@ -20,6 +20,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,7 +33,7 @@ public class UtpekAnnetLandSendUtland extends AbstraktSendUtland {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     protected UtpekAnnetLandSendUtland(BehandlingsresultatService behandlingsresultatService,
-                                       EessiService eessiService,
+                                       @Qualifier("system") EessiService eessiService,
                                        JoarkFasade joarkFasade,
                                        TpsFasade tpsFasade,
                                        UtenlandskMyndighetService utenlandskMyndighetService) {
