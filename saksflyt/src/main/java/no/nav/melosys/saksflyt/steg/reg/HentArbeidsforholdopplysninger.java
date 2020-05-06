@@ -68,11 +68,9 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
             fom = periode.getFom().minusMonths(arbeidsforholdhistorikkAntallMåneder);
         }
 
-        LocalDate tom;
-        if (periode.getTom() == null || periode.getTom().isAfter(iDag)) {
+        LocalDate tom = periode.getTom() == null ? fom.plusYears(1) : periode.getTom();
+        if (tom.isAfter(iDag)) {
             tom = iDag;
-        } else {
-            tom = periode.getTom();
         }
 
         final Instant nå = Instant.now();

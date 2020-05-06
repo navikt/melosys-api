@@ -85,12 +85,7 @@ public class JournalfoeringServiceTest {
 
     @Test
     public void opprettSakOgJournalfør() throws MelosysException {
-        FagsakDto fagsakDto = new FagsakDto();
-        PeriodeDto periode = new PeriodeDto();
-        periode.setFom(LocalDate.MIN);
-        periode.setTom(LocalDate.MAX);
-        fagsakDto.setSoknadsperiode(periode);
-        fagsakDto.setLand(Collections.singletonList("DK"));
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK");
         opprettDto.setFagsak(fagsakDto);
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
             .thenReturn(new Prosessinstans());
@@ -103,15 +98,22 @@ public class JournalfoeringServiceTest {
 
     @Test(expected = FunksjonellException.class)
     public void opprettSakOgJournalfør_fomEtterTom_feiler() throws MelosysException {
-        FagsakDto fagsakDto = new FagsakDto();
-        PeriodeDto periode = new PeriodeDto();
-        periode.setFom(LocalDate.MAX);
-        periode.setTom(LocalDate.MIN);
-        fagsakDto.setSoknadsperiode(periode);
-        fagsakDto.setLand(Collections.singletonList("DK"));
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MAX, LocalDate.MIN, "DK");
         opprettDto.setFagsak(fagsakDto);
         journalfoeringService.opprettOgJournalfør(opprettDto);
+    }
 
+    @Test
+    public void opprettSakOgJournalfør_utenTom_gyldig() throws MelosysException {
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK");
+        opprettDto.setFagsak(fagsakDto);
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
+            .thenReturn(new Prosessinstans());
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+
+        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
     @Test(expected = FunksjonellException.class)
@@ -157,12 +159,7 @@ public class JournalfoeringServiceTest {
         anmodningOmUnntakDto.setUnntakFraLovvalgsland("DE");
         opprettDto.setAnmodningOmUnntak(anmodningOmUnntakDto);
 
-        FagsakDto fagsakDto = new FagsakDto();
-        PeriodeDto periode = new PeriodeDto();
-        periode.setFom(LocalDate.now());
-        periode.setTom(LocalDate.now().plusYears(1));
-        fagsakDto.setSoknadsperiode(periode);
-        fagsakDto.setLand(Collections.singletonList("NO"));
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.now(), LocalDate.now().plusYears(1), "NO");
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode());
 
@@ -244,5 +241,15 @@ public class JournalfoeringServiceTest {
         when(eessiService.støtterAutomatiskBehandling(eq(journalfoeringSedDto.getJournalpostID()))).thenReturn(true);
         journalfoeringService.journalførSed(journalfoeringSedDto);
         verify(prosessinstansService).opprettProsessinstansSedMottak(eq(journalfoeringSedDto.getJournalpostID()), eq(journalfoeringSedDto.getBrukerID()));
+    }
+
+    private FagsakDto lagFagsakDto(LocalDate fom, LocalDate tom, String land) {
+        FagsakDto fagsakDto = new FagsakDto();
+        PeriodeDto periode = new PeriodeDto();
+        periode.setFom(fom);
+        periode.setTom(tom);
+        fagsakDto.setSoknadsperiode(periode);
+        fagsakDto.setLand(Collections.singletonList("DK"));
+        return fagsakDto;
     }
 }

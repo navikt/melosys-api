@@ -67,11 +67,9 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
             fom = YearMonth.from(periode.getFom()).minusMonths(inntektshistorikkAntallMåneder);
         }
 
-        YearMonth tom;
-        if (periode.getTom().isAfter(iDag)) {
+        YearMonth tom = periode.getTom() == null ? fom.plusYears(1) : YearMonth.from(periode.getTom());
+        if (tom.isAfter(YearMonth.from(iDag))) {
             tom = YearMonth.from(iDag);
-        } else {
-            tom = YearMonth.from(periode.getTom());
         }
 
         final Instant nå = Instant.now();

@@ -87,4 +87,26 @@ public class HentInntektopplysningerTest {
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ORG_OPPL);
     }
 
+    @Test
+    public void utfoerSteg_åpenPeriode() throws IntegrasjonException, FunksjonellException {
+        Prosessinstans p = new Prosessinstans();
+        p.setBehandling(new Behandling());
+        p.getBehandling().setFagsak(new Fagsak());
+        p.getBehandling().setSaksopplysninger(new HashSet<>());
+
+        String brukerID = "99999999991";
+        Periode periode = new Periode(LocalDate.now().minusYears(2), null);
+
+        p.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        p.setData(ProsessDataKey.SØKNADSPERIODE, periode);
+        when(inntektFasade.hentInntektListe(any(), any(), any())).thenReturn(new Saksopplysning());
+
+        agent.utførSteg(p);
+
+        YearMonth forventetFom = YearMonth.now().minusYears(2).minusMonths(INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
+        YearMonth forventetTom = forventetFom.plusYears(1);
+
+        verify(inntektFasade).hentInntektListe(brukerID, forventetFom, forventetTom);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ORG_OPPL);
+    }
 }

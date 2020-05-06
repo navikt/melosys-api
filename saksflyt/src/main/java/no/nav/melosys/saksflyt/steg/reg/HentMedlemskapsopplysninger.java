@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_MEDL_OPPL;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_SOB_SAKER;
 
@@ -49,12 +51,14 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
         String fnr = tpsFasade.hentIdentForAktørId(aktørId);
 
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        LocalDate tom = periode.getTom() == null ? periode.getFom().plusYears(1) : periode.getTom();
+
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())
                 .fnr(fnr)
                 .fom(periode.getFom())
-                .tom(periode.getTom())
+                .tom(tom)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                     .medlemskapsopplysninger().build())
                 .build());

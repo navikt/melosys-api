@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -57,6 +58,9 @@ public class InngangsvilkaarService {
         Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
         if (statsborgerskap == null) {
             return new InngangsvilkaarVurdering(false, Inngangsvilkaar.MANGLER_STATSBORGERSKAP);
+        }
+        if (søknadsperiode.getTom() == null) {
+            søknadsperiode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusYears(1L));
         }
 
         var landkoderISO3 = tilIso3(søknadsland);

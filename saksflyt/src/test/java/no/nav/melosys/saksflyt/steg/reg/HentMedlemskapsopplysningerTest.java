@@ -11,6 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
@@ -48,17 +49,7 @@ public class HentMedlemskapsopplysningerTest {
     @Test
     public void utfoerSteg() throws MelosysException {
         final long behandlingID = 222L;
-        Behandling behandling = new Behandling();
-        behandling.setId(behandlingID);
-
-        Aktoer bruker = mock(Aktoer.class);
-        when(bruker.getAktørId()).thenReturn("321");
-        Fagsak fagsak = mock(Fagsak.class);
-        when(fagsak.hentBruker()).thenReturn(bruker);
-        behandling.setFagsak(fagsak);
-
-        Prosessinstans p = new Prosessinstans();
-        p.setBehandling(behandling);
+        Prosessinstans p = lagProsessinstans(behandlingID);
         Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1));
         p.setData(ProsessDataKey.SØKNADSPERIODE, periode);
 
@@ -74,4 +65,37 @@ public class HentMedlemskapsopplysningerTest {
         assertThat(p.getSteg()).isEqualTo(HENT_SOB_SAKER);
     }
 
+    @Test
+    public void utfoerSteg_åpenPeriode() throws MelosysException {
+        final long behandlingID = 222L;
+        Prosessinstans p = lagProsessinstans(behandlingID);
+        Periode periode = new Periode(LocalDate.now(), null);
+        p.setData(ProsessDataKey.SØKNADSPERIODE, periode);
+
+        hentMedlemskapsopplysninger.utførSteg(p);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(captor.capture());
+        RegisteropplysningerRequest registeropplysningerRequest = captor.getValue();
+        assertThat(captor.getValue().getBehandlingID()).isEqualTo(behandlingID);
+        assertThat(captor.getValue().getFom()).isEqualTo(periode.getFom());
+        assertThat(captor.getValue().getTom()).isEqualTo(periode.getFom().plusYears(1));
+        assertThat(registeropplysningerRequest.getOpplysningstyper()).containsExactly(SaksopplysningType.MEDL);
+
+        assertThat(p.getSteg()).isEqualTo(HENT_SOB_SAKER);
+    }
+
+    private Prosessinstans lagProsessinstans(long behandlingID) throws TekniskException {
+        Behandling behandling = new Behandling();
+        behandling.setId(behandlingID);
+
+        Aktoer bruker = mock(Aktoer.class);
+        when(bruker.getAktørId()).thenReturn("321");
+        Fagsak fagsak = mock(Fagsak.class);
+        when(fagsak.hentBruker()).thenReturn(bruker);
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans p = new Prosessinstans();
+        p.setBehandling(behandling);
+        return p;
+    }
 }
