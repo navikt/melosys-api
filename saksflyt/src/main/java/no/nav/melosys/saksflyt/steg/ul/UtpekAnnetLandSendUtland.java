@@ -18,10 +18,14 @@ import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UtpekAnnetLandSendUtland extends AbstraktSendUtland {
+
+    private static final Logger log = LoggerFactory.getLogger(UtpekAnnetLandSendUtland.class);
 
     private final JoarkFasade joarkFasade;
     private final TpsFasade tpsFasade;
@@ -45,12 +49,15 @@ public class UtpekAnnetLandSendUtland extends AbstraktSendUtland {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+        Behandling behandling = prosessinstans.getBehandling();
+        log.info("Sender A003 for utpeking til {}, i behandling {}", prosessinstans.getData(ProsessDataKey.UTPEKT_LAND), behandling.getId());
+
         SendUtlandStatus status = sendUtland(BucType.LA_BUC_02, prosessinstans);
 
         if (status == SendUtlandStatus.BREV_SENDT) {
             prosessinstans.setSteg(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
         } else {
-            prosessinstans.setSteg(ProsessSteg.FERDIG);
+            prosessinstans.setSteg(ProsessSteg.UL_OPPDATER_BEHANDLINGSRESULTAT);
         }
     }
 

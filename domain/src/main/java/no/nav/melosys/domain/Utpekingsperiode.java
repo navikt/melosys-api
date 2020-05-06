@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
@@ -110,5 +111,26 @@ public class Utpekingsperiode implements Medlemskapsperiode {
     @Transient
     public Trygdedekninger getDekning() {
         return Trygdedekninger.UTEN_DEKNING;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Utpekingsperiode that = (Utpekingsperiode) o;
+        return Objects.equals(id, that.id) &&
+            Objects.equals(behandlingsresultat, that.behandlingsresultat) &&
+            Objects.equals(fom, that.fom) &&
+            Objects.equals(tom, that.tom) &&
+            lovvalgsland == that.lovvalgsland &&
+            Objects.equals(bestemmelse, that.bestemmelse) &&
+            Objects.equals(tilleggsbestemmelse, that.tilleggsbestemmelse) &&
+            Objects.equals(medlPeriodeID, that.medlPeriodeID) &&
+            Objects.equals(sendtUtland, that.sendtUtland);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, behandlingsresultat, fom, tom, lovvalgsland, bestemmelse, tilleggsbestemmelse, medlPeriodeID, sendtUtland);
     }
 }

@@ -9,10 +9,14 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktDistribuerJournalpost;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UtpekLandDistribuerJournalpost extends AbstraktDistribuerJournalpost {
+
+    private static final Logger log = LoggerFactory.getLogger(UtpekAnnetLandSendUtland.class);
 
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
@@ -32,7 +36,9 @@ public class UtpekLandDistribuerJournalpost extends AbstraktDistribuerJournalpos
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
         UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(utpektLand);
+        log.info("Bestiller distribuering av journalpost {} for å sende A003 som brev i behandling {}",
+            journalpostId, prosessinstans.getBehandling().getId());
         bestillDistribuering(journalpostId, utenlandskMyndighet);
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
+        prosessinstans.setSteg(ProsessSteg.UL_OPPDATER_BEHANDLINGSRESULTAT);
     }
 }
