@@ -6,10 +6,11 @@ import javax.persistence.*;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 @Entity
 @Table(name = "utpekingsperiode")
-public class Utpekingsperiode implements ErPeriode {
+public class Utpekingsperiode implements Medlemskapsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,7 +31,7 @@ public class Utpekingsperiode implements ErPeriode {
 
     @Column(name = "lovvalgsbestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
-    private LovvalgBestemmelse lovvalgsbestemmelse;
+    private LovvalgBestemmelse bestemmelse;
 
     @Column(name = "tilleggsbestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
@@ -47,11 +48,11 @@ public class Utpekingsperiode implements ErPeriode {
     }
 
     public Utpekingsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland,
-                            LovvalgBestemmelse lovvalgsbestemmelse, LovvalgBestemmelse tilleggsbestemmelse) {
+                            LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse) {
         this.fom = fom;
         this.tom = tom;
         this.lovvalgsland = lovvalgsland;
-        this.lovvalgsbestemmelse = lovvalgsbestemmelse;
+        this.bestemmelse = bestemmelse;
         this.tilleggsbestemmelse = tilleggsbestemmelse;
     }
 
@@ -81,8 +82,8 @@ public class Utpekingsperiode implements ErPeriode {
         return lovvalgsland;
     }
 
-    public LovvalgBestemmelse getLovvalgsbestemmelse() {
-        return lovvalgsbestemmelse;
+    public LovvalgBestemmelse getBestemmelse() {
+        return bestemmelse;
     }
 
     public LovvalgBestemmelse getTilleggsbestemmelse() {
@@ -103,5 +104,11 @@ public class Utpekingsperiode implements ErPeriode {
 
     public void setSendtUtland(LocalDate sendtUtland) {
         this.sendtUtland = sendtUtland;
+    }
+
+    @Override
+    @Transient
+    public Trygdedekninger getDekning() {
+        return Trygdedekninger.UTEN_DEKNING;
     }
 }
