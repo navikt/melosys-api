@@ -125,8 +125,7 @@ public class InngangsvilkaarServiceTest {
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Inngangsvilkaar.TEKNISK_FEIL);
     }
-
-
+    
     @Test
     public void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
         Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);

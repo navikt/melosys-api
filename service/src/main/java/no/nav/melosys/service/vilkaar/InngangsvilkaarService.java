@@ -62,6 +62,9 @@ public class InngangsvilkaarService {
         if (søknadsperiode.getTom() == null) {
             søknadsperiode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusYears(1L));
         }
+        if (søknadsperiode.getTom() == null) {
+            søknadsperiode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusYears(1L));
+        }
 
         var landkoderISO3 = tilIso3(søknadsland);
         VurderInngangsvilkaarReply res = regelmodulFasade.vurderInngangsvilkår(statsborgerskap, landkoderISO3, søknadsperiode);
