@@ -3,19 +3,14 @@ package no.nav.melosys.domain.dokument.organisasjon;
 import java.time.LocalDate;
 import java.util.List;
 import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import no.nav.melosys.domain.AbstraktOrganisasjon;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
-
-// N.B. Denne klassen serialiseres i OrganisasjonSerializer
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OrganisasjonDokument implements SaksopplysningDokument {
-
-    private String orgnummer;
-
+public class OrganisasjonDokument  extends AbstraktOrganisasjon implements SaksopplysningDokument {
     @XmlElementWrapper(name="navn")
     @XmlElement(name="navnelinje")
     public List<String> navn;
@@ -24,21 +19,27 @@ public class OrganisasjonDokument implements SaksopplysningDokument {
 
     public String sektorkode; //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
 
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    public LocalDate oppstartsdato;
-    
-    public String enhetstype; //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
-
-    public String getOrgnummer() {
-        return orgnummer;
-    }
-
     public void setOrgnummer(String orgnummer) {
         this.orgnummer = orgnummer;
     }
 
-    public List<String> getNavn() {
-        return navn;
+    @Override
+    public String getNavn() {
+        return lagSammenslåttNavn();
+    }
+
+    @Override
+    public StrukturertAdresse getForretningsadresse() {
+        if (organisasjonDetaljer == null) return null;
+
+        return organisasjonDetaljer.hentStrukturertForretningsadresse();
+    }
+
+    @Override
+    public StrukturertAdresse getPostadresse() {
+        if (organisasjonDetaljer == null) return null;
+
+        return organisasjonDetaljer.hentStrukturertPostadresse();
     }
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
@@ -66,16 +67,8 @@ public class OrganisasjonDokument implements SaksopplysningDokument {
         this.sektorkode = sektorkode;
     }
 
-    public LocalDate getOppstartsdato() {
-        return oppstartsdato;
-    }
-
     public void setOppstartsdato(LocalDate oppstartsdato) {
         this.oppstartsdato = oppstartsdato;
-    }
-
-    public String getEnhetstype() {
-        return enhetstype;
     }
 
     public void setEnhetstype(String enhetstype) {

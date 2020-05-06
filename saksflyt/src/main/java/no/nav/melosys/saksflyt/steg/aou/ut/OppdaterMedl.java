@@ -1,14 +1,12 @@
 package no.nav.melosys.saksflyt.steg.aou.ut;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +29,13 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
-    private final MedlFasade medlFasade;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, MedlPeriodeService medlPeriodeService) {
+    public OppdaterMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+        this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
-        this.medlFasade = medlFasade;
-        log.info("AnmodningOmUnntakOppdaterMEDL initialisert");
     }
 
     @Override
@@ -49,12 +46,10 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        Behandling behandling = prosessinstans.getBehandling();
+        Long behandlingID = prosessinstans.getBehandling().getId();
 
-        String fnr = medlPeriodeService.hentFnr(behandling);
-        Anmodningsperiode anmodningsperiode = medlPeriodeService.hentAnmodningsperiode(behandling);
-        Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, anmodningsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
-        medlPeriodeService.lagreMedlPeriodeId(medlPeriodeID, anmodningsperiode, behandling.getId());
+        Anmodningsperiode anmodningsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertAnmodningsperiode();
+        medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandlingID, false);
 
         prosessinstans.setSteg(AOU_SEND_BREV);
     }

@@ -11,6 +11,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.SedGrunnlagDto;
 
 public interface EessiConsumer {
 
@@ -29,4 +30,6 @@ public interface EessiConsumer {
     List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException;
 
     byte[] genererSedPdf(SedDataDto sedDataDto, SedType sedType) throws MelosysException;
+
+    SedGrunnlagDto hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) throws MelosysException;
 }

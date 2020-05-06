@@ -24,7 +24,7 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;

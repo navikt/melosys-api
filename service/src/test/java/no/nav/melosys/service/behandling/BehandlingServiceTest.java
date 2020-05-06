@@ -7,6 +7,7 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -197,7 +198,7 @@ public class BehandlingServiceTest {
     public void nyBehandling() {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
-        Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, Behandlingstyper.SOEKNAD, initierendeJournalpostId, initierendeDokumentId);
+        Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, Behandlingstyper.SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER, initierendeJournalpostId, initierendeDokumentId);
         verify(behandlingRepo).save(any(Behandling.class));
         assertThat(behandling.getType()).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
@@ -282,7 +283,8 @@ public class BehandlingServiceTest {
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
 
         behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        behandling.setType(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
         behandling.setType(null);
 

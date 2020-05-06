@@ -9,17 +9,17 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class RegisteropplysningerServiceTest {
     @Mock
     private TpsFasade tpsFasade;
     @Mock
-    private MedlFasade medlFasade;
+    private MedlPeriodeService medlPeriodeService;
     @Mock
     private EregFasade eregFasade;
     @Mock
@@ -66,13 +66,13 @@ public class RegisteropplysningerServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        registeropplysningerService = new RegisteropplysningerService(tpsFasade, medlFasade, eregFasade, aaregFasade, behandlingService,
+        registeropplysningerService = new RegisteropplysningerService(tpsFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
             sakOgBehandlingFasade, inntektService, utbetaldataService, saksopplysningerService, arbeidsforholdhistorikkAntallMåneder, medlemskaphistorikkAntallÅr);
         when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
         when(tpsFasade.hentPersonMedAdresse(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.PERSOPL));
-        when(medlFasade.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
+        when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
         when(inntektService.hentInntektListe(anyString(), anyYearMonth(), anyYearMonth())).thenReturn(lagSaksopplysning(SaksopplysningType.INNTK));
         when(utbetaldataService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
         when(eregFasade.hentOrganisasjon(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.ORG));
@@ -109,7 +109,7 @@ public class RegisteropplysningerServiceTest {
 
         verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
         verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
-        verify(medlFasade).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
+        verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
         verify(tpsFasade).hentPersonMedAdresse(anyString());
@@ -159,7 +159,7 @@ public class RegisteropplysningerServiceTest {
         arbeidsforholdFørOrg.verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate());
         arbeidsforholdFørOrg.verify(eregFasade).hentOrganisasjon(anyString());
 
-        verify(medlFasade).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
+        verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
         verify(tpsFasade).hentPersonMedAdresse(anyString());
         verify(sakOgBehandlingFasade).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
@@ -221,13 +221,13 @@ public class RegisteropplysningerServiceTest {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
-        when(medlFasade.hentPeriodeListe(anyString(), any(), any())).thenReturn(saksopplysning);
+        when(medlPeriodeService.hentPeriodeListe(anyString(), any(), any())).thenReturn(saksopplysning);
 
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(fom, tom)
             .saksopplysningTyper(saksopplysningstyper().medlemskapsopplysninger().build())
             .build());
 
-        verify(medlFasade).hentPeriodeListe(anyString(), any(), any());
+        verify(medlPeriodeService).hentPeriodeListe(anyString(), any(), any());
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
@@ -333,7 +333,7 @@ public class RegisteropplysningerServiceTest {
     private Behandling hentBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(2L);
-        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
         return behandling;
     }

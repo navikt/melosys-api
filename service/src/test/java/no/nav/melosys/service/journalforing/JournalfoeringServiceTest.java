@@ -6,6 +6,7 @@ import java.util.Collections;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -64,9 +65,10 @@ public class JournalfoeringServiceTest {
         opprettDto.setBrukerID("setBrukerID");
         opprettDto.setHoveddokument(new DokumentDto("3333","setDokumenttittel"));
         opprettDto.setArbeidsgiverID("123456789");
-        opprettDto.setBehandlingstypeKode(Behandlingstyper.SOEKNAD.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
 
         tilordneDto = new JournalfoeringTilordneDto();
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
         tilordneDto.setJournalpostID("setJournalpostID");
         tilordneDto.setOppgaveID("setOppgaveID");
         tilordneDto.setAvsenderNavn("setAvsenderNavn");
@@ -120,7 +122,7 @@ public class JournalfoeringServiceTest {
 
     @Test(expected = FunksjonellException.class)
     public void opprettOgJournalfør_støtterAutomatiskBehandling_forventException() throws MelosysException {
-        opprettDto.setBehandlingstypeKode(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode());
         journalpost.setMottaksKanal("EESSI");
         when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.TRUE);
 
@@ -129,17 +131,17 @@ public class JournalfoeringServiceTest {
 
     @Test
     public void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_korrektBehandlingstype() throws MelosysException {
-        opprettDto.setBehandlingstypeKode(Behandlingstyper.VURDER_TRYGDETID.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.TRYGDETID.getKode());
         journalpost.setMottaksKanal("EESSI");
         when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.FALSE);
 
         journalfoeringService.opprettOgJournalfør(opprettDto);
-        verify(prosessinstansService).opprettProsessinstansGenerellSedBehandling(any(JournalfoeringDto.class));
+        verify(prosessinstansService).opprettProsessinstansGenerellSedBehandling(any(JournalfoeringOpprettDto.class));
     }
 
     @Test(expected = FunksjonellException.class)
     public void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_feilBehandlingstype() throws MelosysException {
-        opprettDto.setBehandlingstypeKode(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode());
         journalpost.setMottaksKanal("EESSI");
         when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.FALSE);
 
@@ -162,7 +164,7 @@ public class JournalfoeringServiceTest {
         fagsakDto.setSoknadsperiode(periode);
         fagsakDto.setLand(Collections.singletonList("NO"));
         opprettDto.setFagsak(fagsakDto);
-        opprettDto.setBehandlingstypeKode("ANMODNING_OM_UNNTAK_HOVEDREGEL");
+        opprettDto.setBehandlingstemaKode(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode());
 
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_AOU_BREV), any()))
             .thenReturn(new Prosessinstans());
@@ -177,7 +179,7 @@ public class JournalfoeringServiceTest {
 
     @Test
     public void opprettOgJournalfør_erVurderTrygdetid_prosessinstansOpprettet() throws MelosysException {
-        opprettDto.setBehandlingstypeKode(Behandlingstyper.VURDER_TRYGDETID.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.TRYGDETID.getKode());
         journalpost.setMottaksKanal("EESSI");
 
         journalfoeringService.opprettOgJournalfør(opprettDto);

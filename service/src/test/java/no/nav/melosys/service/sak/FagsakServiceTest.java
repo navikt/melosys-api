@@ -1,15 +1,10 @@
 package no.nav.melosys.service.sak;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -17,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -27,6 +23,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.jeasy.random.EasyRandom;
@@ -63,6 +60,8 @@ public class FagsakServiceTest {
     private ProsessinstansService prosessinstansService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private MedlPeriodeService medlPeriodeService;
 
     private FagsakService fagsakService;
 
@@ -76,7 +75,7 @@ public class FagsakServiceTest {
     @Before
     public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService,
-            tps, prosessinstansService, behandlingsresultatService);
+            tps, prosessinstansService, behandlingsresultatService, medlPeriodeService);
     }
 
     @Test
@@ -107,7 +106,7 @@ public class FagsakServiceTest {
     public void bestillNySakOgBehandling_oppretterProsess() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
-        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.oppgaveID))).thenReturn(oppgave);
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.getOppgaveID()))).thenReturn(oppgave);
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
         verify(prosessinstansService).opprettProsessinstansNySak(eq(oppgave.getJournalpostId()), eq(opprettSakDto));
     }
@@ -115,7 +114,7 @@ public class FagsakServiceTest {
     @Test
     public void bestillNySakOgBehandling_oppgaveIdMangler_feiler() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.oppgaveID = "";
+        opprettSakDto.setOppgaveID("");
         expectedException.expect(FunksjonellException.class);
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
     }
@@ -124,7 +123,7 @@ public class FagsakServiceTest {
     public void bestillNySakOgBehandling_utenJournalpostID_feiler() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(null).build();
-        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.oppgaveID))).thenReturn(oppgave);
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.getOppgaveID()))).thenReturn(oppgave);
         expectedException.expect(FunksjonellException.class);
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
     }
@@ -133,34 +132,25 @@ public class FagsakServiceTest {
     public void bestillNySakOgBehandling_oppgaveTypeUgyldig_feiler() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SED).build();
-        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.oppgaveID))).thenReturn(oppgave);
+        when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.getOppgaveID()))).thenReturn(oppgave);
         expectedException.expect(FunksjonellException.class);
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
     }
 
     @Test
-    public void validerOpprettSakDto_manglerSakstype_feiler() throws FunksjonellException {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.sakstype = null;
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("sakstype");
-        fagsakService.validerOpprettSakDto(opprettSakDto);
-    }
-
-    @Test
     public void validerOpprettSakDto_manglerBehandlingstype_feiler() throws FunksjonellException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.behandlingstype = null;
+        opprettSakDto.setBehandlingstema(null);
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("behandlingstype");
+        expectedException.expectMessage("behandlingstema");
         fagsakService.validerOpprettSakDto(opprettSakDto);
     }
 
     @Test
     public void validerOpprettSakDto_nullSøknad_feiler() throws FunksjonellException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
-        opprettSakDto.soknadDto = null;
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.setSoknadDto(null);
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("null");
         fagsakService.validerOpprettSakDto(opprettSakDto);
@@ -169,8 +159,8 @@ public class FagsakServiceTest {
     @Test
     public void validerOpprettSakDto_søknadUtenFom_feiler() throws FunksjonellException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
-        opprettSakDto.soknadDto.periode.setFom(null);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.getSoknadDto().getPeriode().setFom(null);
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("fra og med dato");
         fagsakService.validerOpprettSakDto(opprettSakDto);
@@ -179,8 +169,8 @@ public class FagsakServiceTest {
     @Test
     public void validerOpprettSakDto_søknadUtenLand_feiler() throws FunksjonellException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.behandlingstype = Behandlingstyper.SOEKNAD;
-        opprettSakDto.soknadDto.land.clear();
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.getSoknadDto().getLand().clear();
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("land");
         fagsakService.validerOpprettSakDto(opprettSakDto);
@@ -191,13 +181,14 @@ public class FagsakServiceTest {
         Behandling behandling = mock(Behandling.class);
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
-        doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), anyString(), anyString());
+        doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), any(), anyString(), anyString());
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("AKTOER_ID").medAktørID("123456789")
-            .medBehandlingstype(Behandlingstyper.SOEKNAD).medInitierendeJournalpostId(initierendeJournalpostId).medInitierendeDokumentId(initierendeDokumentId).build();
+            .medBehandlingstype(Behandlingstyper.SOEKNAD).medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medInitierendeJournalpostId(initierendeJournalpostId).medInitierendeDokumentId(initierendeDokumentId).build();
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         verify(fagsakRepo).save(any(Fagsak.class));
-        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.SOEKNAD), eq(initierendeJournalpostId), eq(initierendeDokumentId));
+        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.SOEKNAD), eq(Behandlingstema.UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
         assertThat(fagsak.getType()).isEqualTo(Sakstyper.UKJENT);
     }
@@ -308,11 +299,12 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeSoeknadIkkeYrkesaktiv_blirAvsluttet() throws FunksjonellException, TekniskException {
+    public void avsluttFagsakOgBehandlingValiderBehandlingstema_behtemaIkkeYrkesaktiv_blirAvsluttet() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
-        behandling.setType(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
         fagsak.setBehandlinger(List.of(behandling));
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
 
@@ -321,12 +313,13 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeVurderTrygdetid_blirAvsluttet() throws FunksjonellException, TekniskException {
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtemaTrygdetid_blirAvsluttet() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
         Behandling behandling = new Behandling();
         behandling.setId(123L);
-        behandling.setType(Behandlingstyper.VURDER_TRYGDETID);
+        behandling.setType(Behandlingstyper.SED);
+        behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.setBehandlinger(List.of(behandling));
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, behandling);
@@ -336,11 +329,12 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtypeSoeknad_kasterException() throws FunksjonellException, TekniskException {
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype_behtemaUtsendtArbeidstaker_kasterException() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
         behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("kan ikke avsluttes manuelt");
@@ -406,6 +400,136 @@ public class FagsakServiceTest {
         verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
     }
 
+    @Test
+    public void opprettNyVurderingBehandling_behandlingstypeEndretPeriode_kastException() throws FunksjonellException, TekniskException {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker(saksnummer);
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandling.setType(Behandlingstyper.ENDRET_PERIODE);
+        behandling.setEndretDato(Instant.now());
+        fagsak.setBehandlinger(List.of(behandling));
+
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
+
+        fagsakService.opprettNyVurderingBehandling(saksnummer);
+    }
+
+    @Test
+    public void opprettNyVurderingBehandling_behandlingErAktivIkkeArt16_kastException() throws FunksjonellException, TekniskException {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker(saksnummer);
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        fagsak.setBehandlinger(List.of(behandling));
+
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(new Behandlingsresultat());
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Kan ikke revurdere en aktiv behandling");
+
+        fagsakService.opprettNyVurderingBehandling(saksnummer);
+    }
+
+    @Test
+    public void opprettNyVurderingBehandling_behandlingErAktivErArt16AnmodningIkkeSendt_kastException() throws FunksjonellException, TekniskException {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker(saksnummer);
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        fagsak.setBehandlinger(List.of(behandling));
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setSendtUtland(false);
+        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
+
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(behandlingsresultat);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Kan ikke revurdere en aktiv behandling");
+
+        fagsakService.opprettNyVurderingBehandling(saksnummer);
+    }
+
+    @Test
+    public void opprettNyVurderingBehandling_behandlingErAktivErArt16AnmodningSendt_nyBehandlingOpprettet() throws FunksjonellException, TekniskException {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker(saksnummer);
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        fagsak.setBehandlinger(List.of(behandling));
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setSendtUtland(true);
+        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
+
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(2L);
+
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(behandlingsresultat);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
+
+        long replikertBehandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(eq(behandling), eq(Behandlingsstatus.OPPRETTET), eq(behandling.getType()));
+        verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
+        assertThat(replikertBehandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
+    @Test
+    public void opprettNyVurderingBehandling_toBehandlingerErAvsluttet_nyBehandlingOpprettetTypeNyVurderingReplikerFraSistOppdaterte() throws FunksjonellException, TekniskException {
+        final String saksnummer = "MEL-1";
+        Fagsak fagsak = lagFagsakMedBruker(saksnummer);
+
+        Behandling sistOppdaterteBehandling = new Behandling();
+        sistOppdaterteBehandling.setId(1L);
+        sistOppdaterteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        sistOppdaterteBehandling.setType(Behandlingstyper.SOEKNAD);
+        sistOppdaterteBehandling.setEndretDato(Instant.now());
+
+        Behandling senestOppdaterteBehandling = new Behandling();
+        senestOppdaterteBehandling.setId(9999L);
+        senestOppdaterteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        senestOppdaterteBehandling.setType(Behandlingstyper.SOEKNAD);
+        senestOppdaterteBehandling.setEndretDato(Instant.now().minusSeconds(3600L));
+
+        fagsak.setBehandlinger(List.of(sistOppdaterteBehandling, senestOppdaterteBehandling));
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setSendtUtland(true);
+        anmodningsperiode.setMedlPeriodeID(123L);
+        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
+
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(2L);
+
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(sistOppdaterteBehandling.getId()))).thenReturn(behandlingsresultat);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
+
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(eq(sistOppdaterteBehandling), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.NY_VURDERING));
+        verify(medlPeriodeService).avvisPeriode(eq(anmodningsperiode.getMedlPeriodeID()));
+        assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
+    }
+
     private Fagsak lagFagsakMedAktørforMyndighet(String saksnummer, String id) {
         Fagsak fagsak = lagFagsak(saksnummer);
 
@@ -414,6 +538,16 @@ public class FagsakServiceTest {
         aktoer.setFagsak(fagsak);
         aktoer.setRolle(Aktoersroller.MYNDIGHET);
         fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));
+        return fagsak;
+    }
+
+    private Fagsak lagFagsakMedBruker(String saksnummer) {
+        Fagsak fagsak = lagFagsak(saksnummer);
+
+        Aktoer aktoer = new Aktoer();
+        aktoer.setAktørId("12312");
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Set.of(aktoer));
         return fagsak;
     }
 

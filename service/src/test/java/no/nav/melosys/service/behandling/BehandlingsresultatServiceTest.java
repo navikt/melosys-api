@@ -3,10 +3,7 @@ package no.nav.melosys.service.behandling;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -131,6 +128,16 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
 
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(l -> l.getId() == null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getFom() != null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getTom() != null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getLovvalgsland() == Landkoder.SE);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getAnmodningsperiodeSvar() == null);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> !a.erSendtUtland());
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
+        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
+
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getFakta().equals("fakta"));
@@ -149,12 +156,6 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getBegrunnelse() == Kontroll_begrunnelser.FEIL_I_PERIODEN);
-
-        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(l -> l.getId() == null);
-        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getFom() != null);
-        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getTom() != null);
-        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getLovvalgsland() == Landkoder.SE);
-        assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
     }
 
     @Test
@@ -196,6 +197,23 @@ public class BehandlingsresultatServiceTest {
         return lovvalgsperiode;
     }
 
+    private Anmodningsperiode opprettAnmodningsperiode() {
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setId(32L);
+        anmodningsperiode.setFom(LocalDate.now());
+        anmodningsperiode.setTom(LocalDate.now().plusYears(1L));
+        anmodningsperiode.setLovvalgsland(Landkoder.SE);
+        anmodningsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
+        anmodningsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        anmodningsperiode.setUnntakFraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        anmodningsperiode.setTilleggsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1);
+        anmodningsperiode.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
+        anmodningsperiode.setSendtUtland(true);
+        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
+        anmodningsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
+        return anmodningsperiode;
+    }
+
     private Avklartefakta opprettAvklartefakta() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setId(32L);
@@ -234,21 +252,6 @@ public class BehandlingsresultatServiceTest {
         kontrollresultat.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
         kontrollresultat.setBegrunnelse(Kontroll_begrunnelser.FEIL_I_PERIODEN);
         return kontrollresultat;
-    }
-
-    private Anmodningsperiode opprettAnmodningsperiode() {
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(
-            LocalDate.now(),
-            LocalDate.now().plusMonths(2),
-            Landkoder.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1,
-            Landkoder.NO,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-            Trygdedekninger.UTEN_DEKNING
-        );
-        anmodningsperiode.setId(1L);
-        return anmodningsperiode;
     }
 
     private Behandlingsresultat opprettBehandlingsresultatMedData(Behandling tidligsteInaktiveBehandling) {

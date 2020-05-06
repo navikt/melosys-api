@@ -109,6 +109,7 @@ public class ArbeiderTraad implements Runnable {
             aktivProsessinstans = null;
         } finally {
             binge.fjernFraAktiveProsessinstanser(pi);
+            SaksflytSubjektHolder.reset();
         }
 
         if (pi.getSteg() != ProsessSteg.FERDIG && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {

@@ -2,14 +2,16 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.Collections;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -24,7 +27,7 @@ import static org.mockito.Mockito.*;
 public class SettVurderDokumentTest {
 
     @Mock
-    private FagsakRepository fagsakRepository;
+    private FagsakService fagsakService;
 
     @Mock
     private BehandlingRepository behandlingRepository;
@@ -39,8 +42,8 @@ public class SettVurderDokumentTest {
     private ArgumentCaptor<Behandling> behandlingArgumentCaptor;
 
     @Before
-    public void setUp() {
-        agent = new SettVurderDokument(fagsakRepository, behandlingRepository);
+    public void setUp() throws IkkeFunnetException {
+        agent = new SettVurderDokument(fagsakService, behandlingRepository);
 
         Fagsak fagsak = new Fagsak();
 
@@ -49,8 +52,8 @@ public class SettVurderDokumentTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         fagsakMedBehandling.setBehandlinger(Collections.singletonList(behandling));
 
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_UTEN_BEHANDLING)).thenReturn(fagsak);
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_MED_BEHANDLING)).thenReturn(fagsakMedBehandling);
+        when(fagsakService.hentFagsak(SAKSNUMMER_UTEN_BEHANDLING)).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(SAKSNUMMER_MED_BEHANDLING)).thenReturn(fagsakMedBehandling);
     }
 
     @Test

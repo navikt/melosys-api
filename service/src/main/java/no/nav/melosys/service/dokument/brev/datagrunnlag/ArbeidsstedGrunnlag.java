@@ -1,21 +1,20 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ArbeidsstedGrunnlag {
     private final Behandling behandling;
@@ -32,13 +31,13 @@ public class ArbeidsstedGrunnlag {
         this.avklartefaktaService = avklartefaktaService;
     }
 
-    public List<Arbeidssted> hentArbeidssteder() throws TekniskException {
+    public List<Arbeidssted> hentArbeidssteder() {
         List<Arbeidssted> arbeidssteder = hentFysiskearbeidssteder();
         arbeidssteder.addAll(hentMaritimeArbeidssteder());
         return arbeidssteder;
     }
 
-    private List<Arbeidssted> hentFysiskearbeidssteder() throws TekniskException {
+    private List<Arbeidssted> hentFysiskearbeidssteder() {
         List<Arbeidssted> fysiskeArbeidssteder = grunnlagData.arbeidUtland.stream()
             .map(au -> new FysiskArbeidssted(au.foretakNavn, au.foretakOrgnr, au.adresse))
             .collect(Collectors.toList());

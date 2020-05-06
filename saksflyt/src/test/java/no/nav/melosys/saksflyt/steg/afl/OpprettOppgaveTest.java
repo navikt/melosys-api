@@ -44,7 +44,7 @@ public class OpprettOppgaveTest {
 
         opprettOppgave.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 }

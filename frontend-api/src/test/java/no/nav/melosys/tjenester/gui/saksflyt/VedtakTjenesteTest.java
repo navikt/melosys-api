@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -93,11 +92,10 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
         endreVedtakDto.setBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
-        endreVedtakDto.setBehandlingstype(Behandlingstyper.ENDRET_PERIODE);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakService).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, Behandlingstyper.ENDRET_PERIODE, null);
+        verify(vedtakService).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, null);
 
         valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }

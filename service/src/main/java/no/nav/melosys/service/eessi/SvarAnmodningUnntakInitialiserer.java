@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -55,11 +55,11 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
         Optional<Anmodningsperiode> anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId())
             .stream().findFirst();
 
-        if (behandling.getType() == Behandlingstyper.SOEKNAD && anmodningsperiode.isEmpty()) {
+        if (behandling.erUtsending() && anmodningsperiode.isEmpty()) {
             throw new FunksjonellException(String.format(
                 "Mottatt SED %s på buctype %s - finner behandling %s for rinasak %s, men behandlingen har ingen anmodningsperiode",
                 melosysEessiMelding.getSedType(), melosysEessiMelding.getBucType(), behandling.getId(), melosysEessiMelding.getRinaSaksnummer()));
-        } else if (behandling.getType() == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV) {
+        } else if (behandling.getTema() == Behandlingstema.IKKE_YRKESAKTIV) {
             oppdaterBehandlingOgOppgave(behandling, melosysEessiMelding.getSedType());
             return RutingResultat.INGEN_BEHANDLING;
         }
@@ -88,7 +88,7 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
     private void opprettOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
         String aktørID = behandling.getFagsak().hentBruker().getAktørId();
 
-        Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
+        Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
             .setAktørId(aktørID)
             .setJournalpostId(behandling.getInitierendeJournalpostId())
             .setSaksnummer(behandling.getFagsak().getSaksnummer())

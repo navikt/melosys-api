@@ -5,6 +5,7 @@ import java.time.YearMonth;
 import java.util.HashSet;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -19,7 +20,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 public class HentInntektopplysningerTest {
 
     @Mock
-    InntektFasade inntektFasade;
+    private InntektFasade inntektFasade;
 
     private HentInntektopplysninger agent;
 
@@ -38,14 +38,14 @@ public class HentInntektopplysningerTest {
 
     @Before
     public void setUp() {
-        agent = new HentInntektopplysninger(inntektFasade, mock(SaksopplysningRepository.class));
-        ReflectionTestUtils.setField(agent, "inntektshistorikkAntallMåneder", INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
+        agent = new HentInntektopplysninger(inntektFasade, mock(SaksopplysningRepository.class), INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
     }
 
     @Test
     public void utfoerSteg() throws IntegrasjonException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
+        p.getBehandling().setFagsak(new Fagsak());
         p.getBehandling().setSaksopplysninger(new HashSet<>());
 
         String brukerID = "99999999991";
@@ -68,6 +68,7 @@ public class HentInntektopplysningerTest {
     public void utfoerSteg_fremtidigPeriode() throws IntegrasjonException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
+        p.getBehandling().setFagsak(new Fagsak());
         p.getBehandling().setSaksopplysninger(new HashSet<>());
 
         String brukerID = "99999999991";

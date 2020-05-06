@@ -177,9 +177,9 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     public final void opprettSak_sjekkerTilgangOgKallerService() throws Exception {
         FagsakTjeneste instans = lagFagsakTjeneste(null);
         OpprettSakDto dto = new OpprettSakDto();
-        dto.brukerID = "brukerID";
+        dto.setBrukerID("brukerID");
         instans.opprettFagsak(dto);
-        verify(tilgangService).sjekkFnr(eq(dto.brukerID));
+        verify(tilgangService).sjekkFnr(eq(dto.getBrukerID()));
         verify(fagsakService).bestillNySakOgBehandling(eq(dto));
     }
 

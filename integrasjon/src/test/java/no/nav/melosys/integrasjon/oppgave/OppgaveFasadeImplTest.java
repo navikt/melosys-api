@@ -2,18 +2,19 @@ package no.nav.melosys.integrasjon.oppgave;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
@@ -27,9 +28,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ØVRIGE_SED;
-import static no.nav.melosys.integrasjon.oppgave.OppgaveFasadeImpl.hentFellesKode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -57,7 +55,7 @@ public final class OppgaveFasadeImplTest {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.VUR)
             .setTema(Tema.MED)
-            .setBehandlingstema(Behandlingstema.EU_EOS)
+            .setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
             .setFristFerdigstillelse(LocalDate.now());
         oppgaveFasadeImpl.opprettOppgave(oppgaveBuilder.build());
 
@@ -66,7 +64,7 @@ public final class OppgaveFasadeImplTest {
         OpprettOppgaveDto opprettOppgaveDto = captor.getValue();
 
         assertThat(opprettOppgaveDto.getOppgavetype()).isEqualTo(Oppgavetyper.VUR.getKode());
-        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo(Behandlingstema.EU_EOS.getKode());
+        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo("ab0424");
         assertThat(opprettOppgaveDto.getFristFerdigstillelse()).isNotNull();
     }
 
@@ -126,107 +124,6 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    public void tildelOppgave_verifiserFelterSatt() throws FunksjonellException, TekniskException {
-        final String oppgaveID = "2222";
-        final String sakbehandler = "Z111111";
-        OppgaveDto oppgave = OppgaveFasadeImpl.oppgaveMappingDomainTilDto(lagOppgave());
-        oppgave.setBeskrivelse("test");
-        when(oppgaveConsumer.hentOppgave(eq(oppgaveID))).thenReturn(oppgave);
-
-        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
-            .tilordnetRessurs(sakbehandler)
-            .build();
-
-        oppgaveFasadeImpl.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
-        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoCaptor.capture());
-
-        OppgaveDto dto = oppgaveDtoCaptor.getValue();
-        assertThat(dto.getPrioritet()).isEqualTo(oppgave.getPrioritet());
-        assertThat(dto.getBeskrivelse()).isEqualTo(oppgave.getBeskrivelse());
-        assertThat(dto.getStatus()).isEqualTo(oppgave.getStatus());
-        assertThat(dto.getTilordnetRessurs()).isEqualTo(oppgaveOppdatering.getTilordnetRessurs());
-        assertThat(dto.getFristFerdigstillelse()).isEqualTo(oppgave.getFristFerdigstillelse());
-    }
-
-
-    @Test
-    public void oppdaterOppgave_alleFelterSattEksisterendeBeskrivelse_verifiserFelterSatt() throws FunksjonellException, TekniskException {
-        final String oppgaveID = "2222";
-        OppgaveDto oppgave = OppgaveFasadeImpl.oppgaveMappingDomainTilDto(lagOppgave());
-        oppgave.setBeskrivelse("test");
-        when(oppgaveConsumer.hentOppgave(eq(oppgaveID))).thenReturn(oppgave);
-        LocalDate nå = LocalDate.now();
-
-        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
-            .oppgavetype(Oppgavetyper.BEH_SAK_MK)
-            .tema(Tema.MED)
-            .behandlingstema(Behandlingstema.EU_EOS)
-            .behandlingstype(Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV)
-            .behandlesAvApplikasjon(Fagsystem.MELOSYS)
-            .saksnummer("MEL-123")
-            .prioritet(PrioritetType.HOY.name())
-            .beskrivelse("test")
-            .status("AAPEN")
-            .tilordnetRessurs("Meg123")
-            .fristFerdigstillelse(nå)
-            .build();
-
-        oppgaveFasadeImpl.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
-        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoCaptor.capture());
-
-        OppgaveDto dto = oppgaveDtoCaptor.getValue();
-        assertThat(dto.getOppgavetype()).isEqualTo(oppgaveOppdatering.getOppgavetype().getKode());
-        assertThat(dto.getTema()).isEqualTo(oppgaveOppdatering.getTema().getKode());
-        assertThat(dto.getBehandlingstema()).isEqualTo(oppgaveOppdatering.getBehandlingstema().getKode());
-        assertThat(dto.getBehandlingstype()).isEqualTo(hentFellesKode(oppgaveOppdatering.getBehandlingstype()));
-        assertThat(dto.getBehandlesAvApplikasjon()).isEqualTo(oppgaveOppdatering.getBehandlesAvApplikasjon().getKode());
-        assertThat(dto.getSaksreferanse()).isEqualTo(oppgaveOppdatering.getSaksnummer());
-        assertThat(dto.getPrioritet()).isEqualTo(oppgaveOppdatering.getPrioritet());
-        assertThat(dto.getBeskrivelse()).isEqualTo(oppgaveOppdatering.getBeskrivelse() + "\n" + oppgaveOppdatering.getBeskrivelse());
-        assertThat(dto.getStatus()).isEqualTo(oppgaveOppdatering.getStatus());
-        assertThat(dto.getTilordnetRessurs()).isEqualTo(oppgaveOppdatering.getTilordnetRessurs());
-        assertThat(dto.getFristFerdigstillelse()).isEqualTo(nå);
-    }
-
-    @Test
-    public void oppdaterOppgave_ingenFelterSattEksisterendeBeskrivelse_verifiserFelterSatt() throws FunksjonellException, TekniskException {
-        final String oppgaveID = "2222";
-        OppgaveDto oppgave = OppgaveFasadeImpl.oppgaveMappingDomainTilDto(lagOppgave());
-        oppgave.setBeskrivelse("test");
-        when(oppgaveConsumer.hentOppgave(eq(oppgaveID))).thenReturn(oppgave);
-
-        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder().build();
-        oppgaveFasadeImpl.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
-        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoCaptor.capture());
-
-        OppgaveDto dto = oppgaveDtoCaptor.getValue();
-        assertThat(dto.getPrioritet()).isEqualTo(oppgave.getPrioritet());
-        assertThat(dto.getBeskrivelse()).isEqualTo(oppgave.getBeskrivelse());
-        assertThat(dto.getStatus()).isEqualTo(oppgave.getStatus());
-        assertThat(dto.getTilordnetRessurs()).isEqualTo(oppgave.getTilordnetRessurs());
-        assertThat(dto.getFristFerdigstillelse()).isEqualTo(oppgave.getFristFerdigstillelse());
-    }
-
-    @Test
-    public void mapDtoTilDomainTilDto() {
-        Oppgave oppgave = lagOppgave();
-        OppgaveDto oppgaveDto = OppgaveFasadeImpl.oppgaveMappingDomainTilDto(oppgave);
-        assertThat(oppgaveDto).hasNoNullFieldsOrProperties();
-        Oppgave oppgaveMappetTilbake = OppgaveFasadeImpl.oppgaveMappingDtoTilDomain(oppgaveDto);
-        assertThat(oppgaveMappetTilbake).isEqualToComparingFieldByField(oppgave);
-    }
-
-    @Test
-    public void mapBehandlingstypeTilFelleskodeTilBehandlingstype() {
-        EnumSet<Behandlingstyper> behandlingstyper = EnumSet.complementOf(EnumSet.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED));
-
-        for (Behandlingstyper behandlingstype : behandlingstyper) {
-            Behandlingstyper mappetType = OppgaveFasadeImpl.hentBehandlingstyper(hentFellesKode(behandlingstype));
-            assertThat(mappetType).isEqualTo(behandlingstype);
-        }
-    }
-
-    @Test
     public void testMappingMellomDTOogDomainForOppgave() throws MelosysException {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setId("1234");
@@ -248,7 +145,7 @@ public final class OppgaveFasadeImplTest {
         oppgaveBuilder.setAktivDato(LocalDate.now());
         oppgaveBuilder.setAktørId("aktoer123");
         oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
-        oppgaveBuilder.setBehandlingstema(Behandlingstema.EU_EOS);
+        oppgaveBuilder.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         oppgaveBuilder.setBeskrivelse("bla bla");
         oppgaveBuilder.setOpprettetTidspunkt(ZonedDateTime.now());
         oppgaveBuilder.setFristFerdigstillelse(LocalDate.now().plusMonths(1L));

@@ -8,14 +8,16 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.MedlemsperiodeType;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -24,6 +26,7 @@ import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.UtpekingAvvisDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -117,14 +120,14 @@ public class EessiService {
     }
 
     public boolean støtterAutomatiskBehandling(String journalpostID) throws MelosysException {
-        return finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID).isPresent();
+        return finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID).isPresent();
     }
 
-    public Optional<Behandlingstyper> finnBehandlingstypeForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
+    public Optional<Behandlingstema> finnBehandlingstemaForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = hentSedTilknyttetJournalpost(journalpostID);
         String sedType = melosysEessiMelding.getSedType();
         String lovvalgsland = melosysEessiMelding.getLovvalgsland();
-        return SedTypeTilBehandlingstypeMapper.finnBehandlingstypeForSedType(sedType, lovvalgsland);
+        return SedTypeTilBehandlingstemaMapper.finnBehandlingstemaForSedType(sedType, lovvalgsland);
     }
 
     public MelosysEessiMelding hentSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
@@ -163,6 +166,23 @@ public class EessiService {
 
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingID);
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
+    }
+
+    public void sendAvslagUtpekingSvar(long behandlingId, UtpekingAvvis utpekingAvvis) throws MelosysException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
+
+        String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
+
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+        sedDataDto.setYtterligereInformasjon(utpekingAvvis.getFritekst());
+        sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
+            utpekingAvvis.getNyttLovvalgsland(),
+            utpekingAvvis.getBegrunnelse(),
+            utpekingAvvis.isEtterspørInformasjon()
+        ));
+        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.A004);
     }
 
     @Transactional(readOnly = true)
@@ -246,5 +266,9 @@ public class EessiService {
             throw new FunksjonellException("Kan kun velge en mottakerinstitusjon per land. Validerte mottakere: " + validerteMottakerinstitusjoner
                 + ". Valgte mottakere " + valgteMottakerinstitusjoner);
         }
+    }
+
+    public SedGrunnlag hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) throws MelosysException {
+        return eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID).tilDomene();
     }
 }

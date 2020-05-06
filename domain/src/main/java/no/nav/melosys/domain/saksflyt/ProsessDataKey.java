@@ -53,7 +53,9 @@ public enum ProsessDataKey {
     TEMA("tema"),
     UNNTAK_FRA_LOVVALGSBESTEMMELSE("unntakFraLovvalgsbestemmelse"),
     UNNTAK_FRA_LOVVALGSLAND("unntakFraLovvalgsland"),
+    UTPEKING_AVVIS("utpekingAvvis"),
     UTPEKT_LAND("utpektLand"),
+    VARSLE_UTLAND("varsleUtland"),
     VEDTAKSTYPE("vedtakstype");
 
     private String kode;

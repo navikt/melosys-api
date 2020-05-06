@@ -9,15 +9,16 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.FagsakRepository;
-import org.assertj.core.api.AssertionsForClassTypes;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,17 +37,17 @@ public class GrunnleggendeValideringTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
-    private FagsakRepository fagsakRepository;
+    private FagsakService fagsakService;
 
-    private GrunnleggendeValidering agent;
+    private GrunnleggendeValidering grunnleggendeValidering;
     private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
     private final static String SAKSNUMMER_MED_AKTIV_BEHANDLING = "MELTEST-2";
     private final static String SAKSNUMMER_MED_AKTIV_BEHANDLING_OG_INAKTIV_BEHANDLING = "MELTEST-3";
     private final static String SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING = "MELTEST-4";
 
     @Before
-    public void setUp() {
-        agent = new GrunnleggendeValidering(fagsakRepository);
+    public void setUp() throws IkkeFunnetException {
+        grunnleggendeValidering = new GrunnleggendeValidering(fagsakService);
 
         Fagsak fagsakUtenBehandlinger = new Fagsak();
         fagsakUtenBehandlinger.setBehandlinger(Collections.emptyList());
@@ -61,18 +62,21 @@ public class GrunnleggendeValideringTest {
         fagsakMedInaktivBehandling.setBehandlinger(Collections.singletonList(inaktivBehandling));
         fagsakMedInaktivOgAktivBehandling.setBehandlinger(Arrays.asList(aktivBehandling, inaktivBehandling));
 
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_UTEN_BEHANDLING)).thenReturn(fagsakUtenBehandlinger);
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_MED_AKTIV_BEHANDLING)).thenReturn(fagsakMedAktivBehandling);
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_MED_AKTIV_BEHANDLING_OG_INAKTIV_BEHANDLING)).thenReturn(fagsakMedInaktivOgAktivBehandling);
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING)).thenReturn(fagsakMedInaktivBehandling);
+        when(fagsakService.hentFagsak(SAKSNUMMER_UTEN_BEHANDLING)).thenReturn(fagsakUtenBehandlinger);
+        when(fagsakService.hentFagsak(SAKSNUMMER_MED_AKTIV_BEHANDLING)).thenReturn(fagsakMedAktivBehandling);
+        when(fagsakService.hentFagsak(SAKSNUMMER_MED_AKTIV_BEHANDLING_OG_INAKTIV_BEHANDLING)).thenReturn(fagsakMedInaktivOgAktivBehandling);
+        when(fagsakService.hentFagsak(SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING)).thenReturn(fagsakMedInaktivBehandling);
     }
 
     @Test
     public void utførSteg_ukjentProsess_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
-        agent.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+
+        expectedException.expect(TekniskException.class);
+        expectedException.expectMessage("ProsessType");
+
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
@@ -82,8 +86,9 @@ public class GrunnleggendeValideringTest {
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now().plusYears(1)));
         prosessinstans.setData(BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        prosessinstans.setData(BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.setData(lagProsessData_nySak());
-        agent.utfør(prosessinstans);
+        grunnleggendeValidering.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE);
     }
 
@@ -93,12 +98,12 @@ public class GrunnleggendeValideringTest {
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now().plusYears(1)));
-        prosessinstans.setData(BEHANDLINGSTYPE, Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        prosessinstans.setData(BEHANDLINGSTEMA, Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         prosessinstans.setData(lagProsessData_nySak());
 
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Behandlingstype er ikke av type søknad!");
-        agent.utfør(prosessinstans);
+        expectedException.expectMessage("gjelder ikke en søknad!");
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
@@ -109,7 +114,7 @@ public class GrunnleggendeValideringTest {
         prosessinstans.setData(lagProsessData_nySak());
 
         expectedException.expect(FunksjonellException.class);
-        agent.utfør(prosessinstans);
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
@@ -122,7 +127,7 @@ public class GrunnleggendeValideringTest {
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("etter");
-        agent.utfør(prosessinstans);
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
@@ -132,8 +137,11 @@ public class GrunnleggendeValideringTest {
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
         lagProsessData_knytt();
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, "");
-        agent.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Det finnes ingen fagsak med saksnummer");
+
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
@@ -144,8 +152,11 @@ public class GrunnleggendeValideringTest {
         Properties properties = lagProsessData_knytt();
         properties.remove(BRUKER_ID.getKode());
         prosessinstans.setData(properties);
-        agent.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Bruker id er ikke oppgitt");
+
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
@@ -156,8 +167,11 @@ public class GrunnleggendeValideringTest {
         Properties properties = lagProsessData_knytt();
         properties.remove(JOURNALPOST_ID.getKode());
         prosessinstans.setData(properties);
-        agent.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("journalpostID");
+
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
@@ -168,8 +182,11 @@ public class GrunnleggendeValideringTest {
         Properties properties = lagProsessData_knytt();
         properties.remove(HOVEDDOKUMENT_TITTEL.getKode());
         prosessinstans.setData(properties);
-        agent.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Mangler hoveddokument tittel");
+
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
@@ -180,8 +197,11 @@ public class GrunnleggendeValideringTest {
         Properties properties = lagProsessData_knytt();
         properties.remove(DOKUMENT_ID.getKode());
         prosessinstans.setData(properties);
-        agent.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("dokumentID");
+
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
@@ -192,53 +212,50 @@ public class GrunnleggendeValideringTest {
         Properties properties = lagProsessData_knytt();
         properties.remove(SAKSBEHANDLER.getKode());
         prosessinstans.setData(properties);
-        agent.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("saksbehandler");
+
+        grunnleggendeValidering.utfør(prosessinstans);
     }
 
     @Test
-    public void knyttTilFagsakMedEndretPeriodeMedUtenBehandlinger_feiler() {
+    public void knyttTilFagsakMedEndretPeriodeMedUtenBehandlinger_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        AssertionsForClassTypes.assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som mangler en inaktiv behandling");
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("mangler en inaktiv behandling");
+
+        grunnleggendeValidering.utfør(p);
     }
 
     @Test
-    public void knyttTilFagsakMedEndretPeriodeMedAktivBehandling_feiler() {
+    public void knyttTilFagsakMedEndretPeriodeMedAktivBehandling_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling");
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("har en aktiv behandling");
+
+        grunnleggendeValidering.utfør(p);
     }
 
     @Test
-    public void knyttTilFagsakMedEndretPeriodeMedInaktivOgMedAktivBehandling_feiler() {
+    public void knyttTilFagsakMedEndretPeriodeMedInaktivOgMedAktivBehandling_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING_OG_INAKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling");
-    }
 
-    @Test
-    public void knyttTilFagsakMedEndretPeriodeMedInaktivOgUtenAktivBehandling_steg_jfrOppdaterJournalpost() {
-        Prosessinstans p = new Prosessinstans();
-        p.setType(ProsessType.JFR_KNYTT);
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utførSteg(p);
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("har en aktiv behandling");
+
+        grunnleggendeValidering.utfør(p);
     }
 
     private static Properties lagProsessData_nySak() {
@@ -259,7 +276,7 @@ public class GrunnleggendeValideringTest {
         data.setProperty(ProsessDataKey.HOVEDDOKUMENT_TITTEL.getKode(), "tittel");
         data.setProperty(ProsessDataKey.DOKUMENT_ID.getKode(), "dokumentID");
         data.setProperty(ProsessDataKey.SAKSBEHANDLER.getKode(), "Z0099");
-        data.setProperty(ProsessDataKey.SAKSNUMMER.getKode(), "MEL-1234");
+        data.setProperty(ProsessDataKey.SAKSNUMMER.getKode(), SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING);
         return data;
     }
 }

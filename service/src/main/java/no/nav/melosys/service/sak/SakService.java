@@ -4,7 +4,7 @@ import java.util.EnumSet;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 
 @Service
 public class SakService {
@@ -23,11 +23,11 @@ public class SakService {
 
     private final SakConsumer sakConsumer;
 
-    private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_MED = EnumSet.of(
-        SOEKNAD, SOEKNAD_IKKE_YRKESAKTIV, SOEKNAD_ARBEID_FLERE_LAND,
-        SOEKNAD_ARBEID_NORGE_BOSATT_ANNET_LAND, VURDER_TRYGDETID, BESLUTNING_LOVVALG_NORGE);
+    private static final EnumSet<Behandlingstema> GYLDIGE_BEHANDLINGSTEMA_MED = EnumSet.of(
+        UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, IKKE_YRKESAKTIV, ARBEID_FLERE_LAND, ARBEID_NORGE_BOSATT_ANNET_LAND,
+        BESLUTNING_LOVVALG_NORGE, TRYGDETID, BESLUTNING_LOVVALG_NORGE);
 
-    private static final EnumSet<Behandlingstyper> GYLDIGE_BEHANDLINGSTYPER_UFM = EnumSet.of(
+    private static final EnumSet<Behandlingstema> GYLDIGE_BEHANDLINGSTEMA_UFM = EnumSet.of(
         REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
         ANMODNING_OM_UNNTAK_HOVEDREGEL, BESLUTNING_LOVVALG_ANNET_LAND);
 
@@ -35,15 +35,15 @@ public class SakService {
         this.sakConsumer = sakConsumer;
     }
 
-    public Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
+    public Long opprettSak(String saksnummer, Behandlingstema behandlingstema, String aktørId) throws FunksjonellException, TekniskException {
         SakDto sakDto = new SakDto();
 
-        if (GYLDIGE_BEHANDLINGSTYPER_MED.contains(behandlingstype)) {
+        if (GYLDIGE_BEHANDLINGSTEMA_MED.contains(behandlingstema)) {
             sakDto.setTema(Tema.MED.getKode());
-        } else if (GYLDIGE_BEHANDLINGSTYPER_UFM.contains(behandlingstype)) {
+        } else if (GYLDIGE_BEHANDLINGSTEMA_UFM.contains(behandlingstema)) {
             sakDto.setTema(Tema.UFM.getKode());
         } else {
-            throw new FunksjonellException("Behandlingtype " + behandlingstype.getBeskrivelse() + " er ikke støttet.");
+            throw new FunksjonellException("Behandlingstema " + behandlingstema.getBeskrivelse() + " er ikke støttet.");
         }
 
         sakDto.setAktørId(aktørId);

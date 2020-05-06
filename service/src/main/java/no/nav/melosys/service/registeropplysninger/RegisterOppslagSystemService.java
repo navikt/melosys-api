@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.registeropplysninger;
 
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;

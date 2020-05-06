@@ -3,31 +3,29 @@ package no.nav.melosys.service.sak;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RegistreringsInfo;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +49,7 @@ public class FagsakService {
     private final TpsFasade tpsFasade;
     private final ProsessinstansService prosessinstansService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final MedlPeriodeService medlPeriodeService;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
@@ -61,7 +60,8 @@ public class FagsakService {
                          @Lazy OppgaveService oppgaveService,
                          TpsFasade tpsFasade,
                          @Lazy ProsessinstansService prosessinstansService,
-                         BehandlingsresultatService behandlingsresultatService) {
+                         BehandlingsresultatService behandlingsresultatService,
+                         MedlPeriodeService medlPeriodeService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
@@ -69,6 +69,7 @@ public class FagsakService {
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -123,35 +124,31 @@ public class FagsakService {
     @Transactional(rollbackFor = MelosysException.class)
     public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
         validerOpprettSakDto(opprettSakDto);
-        final Oppgave oppgave = validerOppgave(opprettSakDto.oppgaveID);
+        final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         prosessinstansService.opprettProsessinstansNySak(oppgave.getJournalpostId(), opprettSakDto);
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) throws FunksjonellException {
         boolean feilet = false;
         StringBuilder feilmeldingBuilder = new StringBuilder();
-        if (opprettSakDto.sakstype == null) {
+        if (opprettSakDto.getBehandlingstema() == null) {
             feilet = true;
-            feilmeldingBuilder.append("sakstype, ");
-        }
-        if (opprettSakDto.behandlingstype == null) {
-            feilet = true;
-            feilmeldingBuilder.append("behandlingstype, ");
+            feilmeldingBuilder.append("behandlingstema, ");
         }
         if (feilet) {
             throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en ny sak.").toString());
         }
-        if (erBehandlingAvSøknad(opprettSakDto.behandlingstype.getKode())) {
-            final SøknadDto soknadDto = opprettSakDto.soknadDto;
+        if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema().getKode())) {
+            final SøknadDto soknadDto = opprettSakDto.getSoknadDto();
             if (soknadDto == null) {
                 throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
             }
-            PeriodeDto periodeDto = soknadDto.periode;
+            PeriodeDto periodeDto = soknadDto.getPeriode();
             if (periodeDto.getFom() == null) {
                 feilet = true;
                 feilmeldingBuilder.append("søknadsperiodes fra og med dato, ");
             }
-            if (soknadDto.land == null || soknadDto.land.isEmpty()) {
+            if (soknadDto.getLand() == null || soknadDto.getLand().isEmpty()) {
                 feilet = true;
                 feilmeldingBuilder.append("land, ");
             }
@@ -283,9 +280,10 @@ public class FagsakService {
         }
 
         Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();
+        Behandlingstema behandlingstema = opprettSakRequest.getBehandlingstema();
         String initierendeJournalpostId = opprettSakRequest.getInitierendeJournalpostId();
         String initierendeDokumentId = opprettSakRequest.getInitierendeDokumentId();
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema, initierendeJournalpostId, initierendeDokumentId);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
         sakerOpprettet.increment();
@@ -321,14 +319,14 @@ public class FagsakService {
     //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
     @Transactional(rollbackFor = MelosysException.class)
     public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException, TekniskException {
-        Behandlingstyper behandlingstype = behandling.getType();
-        if (behandlingstype != Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV
-            && behandlingstype != Behandlingstyper.ØVRIGE_SED
-            && behandlingstype != Behandlingstyper.VURDER_TRYGDETID) {
-            throw new FunksjonellException("Behandlingstype " + behandlingstype + " kan ikke avsluttes manuelt");
+        Behandlingstema behandlingstema = behandling.getTema();
+        if (behandlingstema != Behandlingstema.IKKE_YRKESAKTIV
+            && behandlingstema != Behandlingstema.ØVRIGE_SED
+            && behandlingstema != Behandlingstema.TRYGDETID) {
+            throw new FunksjonellException("Behandlingstema " + behandlingstema + " kan ikke avsluttes manuelt");
         }
 
-        Saksstatuser saksstatus = behandlingstype == Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
+        Saksstatuser saksstatus = behandlingstema == Behandlingstema.IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
         avsluttFagsakOgBehandling(fagsak, saksstatus);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
@@ -362,4 +360,56 @@ public class FagsakService {
         prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, mottakerinstitusjon);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
+
+    @Transactional(rollbackFor = MelosysException.class)
+    public long opprettNyVurderingBehandling(String saksnummer) throws FunksjonellException, TekniskException {
+        Fagsak fagsak = hentFagsak(saksnummer);
+        Behandling behandling = fagsak.hentSistAktiveBehandling();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+
+        validerOpprettNyVurdering(behandling, behandlingsresultat);
+
+        Behandlingstyper behandlingstype;
+        if (behandling.erAvsluttet()) {
+            behandlingstype = Behandlingstyper.NY_VURDERING;
+        } else {
+            behandlingstype = behandling.getType();
+        }
+
+        Behandling replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingsstatus.OPPRETTET, behandlingstype);
+
+        if (!behandling.erAvsluttet()) {
+            behandlingService.avsluttBehandling(behandling.getId());
+        }
+
+        oppdaterStatus(fagsak, Saksstatuser.OPPRETTET);
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
+            replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBruker().getAktørId(), SubjectHandler.getInstance().getUserID()
+        );
+        avsluttTidligereMedlPeriode(behandlingsresultat);
+        return replikertBehandling.getId();
+    }
+
+    private void validerOpprettNyVurdering(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+        if (behandling.erAktiv() && !behandlingsresultat.erArtikkel16MedSendtAnmodningOmUnntak()) {
+            throw new FunksjonellException("Kan ikke revurdere en aktiv behandling");
+        } else if (behandling.erEndretPeriode()) {
+            throw new FunksjonellException("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
+        }
+    }
+
+    private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException, SikkerhetsbegrensningException {
+        Collection<? extends Medlemskapsperiode> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
+        Collection<? extends Medlemskapsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
+
+        Optional<Long> medlPeriodeID = Stream.concat(anmodningsperioder.stream(), lovvalgsperioder.stream())
+            .map(Medlemskapsperiode::getMedlPeriodeID)
+            .filter(Objects::nonNull)
+            .findFirst();
+
+        if (medlPeriodeID.isPresent()) {
+            medlPeriodeService.avvisPeriode(medlPeriodeID.get());
+        }
+    }
+
 }

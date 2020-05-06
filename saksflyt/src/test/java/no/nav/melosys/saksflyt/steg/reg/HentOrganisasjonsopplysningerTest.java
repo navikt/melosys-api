@@ -3,7 +3,9 @@ package no.nav.melosys.saksflyt.steg.reg;
 import java.util.HashSet;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -12,8 +14,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,22 +35,24 @@ public class HentOrganisasjonsopplysningerTest {
     private EregFasade eregFasade;
 
     @Mock
-    private SaksopplysningRepository soppRepo;
+    private SaksopplysningRepository saksopplysningRepository;
 
     @Mock
-    private BehandlingRepository behRepo;
+    private BehandlingService behandlingService;
 
     private HentOrganisasjonsopplysninger agent;
 
     @Before
     public void setUp() {
-        agent = new HentOrganisasjonsopplysninger(behRepo, soppRepo, eregFasade);
+        agent = new HentOrganisasjonsopplysninger(behandlingService, saksopplysningRepository, eregFasade);
     }
 
     @Test
     public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        final Long behandlingID = 111L;
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
+        p.getBehandling().setId(behandlingID);
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -65,12 +69,12 @@ public class HentOrganisasjonsopplysningerTest {
 
         p.getBehandling().setSaksopplysninger(saksopplysninger);
 
-        when(behRepo.findWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(p.getBehandling());
         when(eregFasade.hentOrganisasjon(eq(orgnr1))).thenReturn(new Saksopplysning());
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
-        verify(soppRepo).save(any(Saksopplysning.class));
+        verify(saksopplysningRepository).save(any(Saksopplysning.class));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_MEDL_OPPL);
     }
 }

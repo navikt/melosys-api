@@ -12,6 +12,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.KontrollresultatService;
 import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
 import org.junit.Before;
 import org.junit.Test;

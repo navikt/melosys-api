@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.aou.inn;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -40,7 +40,7 @@ public class OpprettOppgaveTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("123");
         behandling.setFagsak(fagsak);
@@ -51,7 +51,7 @@ public class OpprettOppgaveTest {
 
         opprettOppgave.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 }

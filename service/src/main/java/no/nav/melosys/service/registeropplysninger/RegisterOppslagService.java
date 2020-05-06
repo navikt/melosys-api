@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.registeropplysninger;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -7,6 +7,8 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -21,6 +23,7 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -69,7 +72,6 @@ public class ManuellSedBehandlingInitialisererTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
-        verify(oppgaveService, never()).finnOppgaveMedFagsaksnummer(any());
     }
 
     @Test
@@ -92,6 +94,25 @@ public class ManuellSedBehandlingInitialisererTest {
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
     }
 
+    @Test
+    public void bestemManuellBehandling_behandlingAvsluttetOgSkalBehandleSED_opprettOppgave() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
+        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A004);
+
+        Fagsak fagsak = hentFagsak();
+        fagsak.getAktivBehandling().setStatus(Behandlingsstatus.AVSLUTTET);
+        when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
+
+        manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
+
+        ArgumentCaptor<Oppgave> oppgaveCaptor = ArgumentCaptor.forClass(Oppgave.class);
+        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue())
+            .hasFieldOrPropertyWithValue("saksnummer", SAKSNUMMER)
+            .hasFieldOrPropertyWithValue("beskrivelse", "Mottatt SED A004");
+    }
+
     private MelosysEessiMelding hentMelosysEessiMelding(SedType sedType) {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setSedType(sedType.name());
@@ -102,6 +123,8 @@ public class ManuellSedBehandlingInitialisererTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setTema(Behandlingstema.ØVRIGE_SED);
+        behandling.setType(Behandlingstyper.SOEKNAD);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(SAKSNUMMER);

@@ -9,9 +9,9 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +25,14 @@ public class SettVurderDokument extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SettVurderDokument.class);
 
-    private final FagsakRepository fagsakRepository;
+    private final FagsakService fagsakService;
 
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public SettVurderDokument(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
-        this.fagsakRepository = fagsakRepository;
+    public SettVurderDokument(FagsakService fagsakService, BehandlingRepository behandlingRepository) {
+        this.fagsakService = fagsakService;
         this.behandlingRepository = behandlingRepository;
-        log.info("SettVurderDokument initialisert");
     }
 
     @Override
@@ -47,7 +46,7 @@ public class SettVurderDokument extends AbstraktStegBehandler {
 
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
 
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         if (fagsak == null) {
             String feilmelding = "Det finnes ingen fagsak med saksnummer " + saksnummer;
             log.error(feilmelding);

@@ -9,7 +9,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.Bosted;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class BostedGrunnlagTest {
     }
 
     @Test
-    public void hentBostedsadresse_forventStrukturertAdresse() throws TekniskException {
+    public void hentBostedsadresse_forventStrukturertAdresse() throws FunksjonellException {
         soeknadDokument.bosted = new Bosted();
         soeknadDokument.bosted.oppgittAdresse = new StrukturertAdresse();
         soeknadDokument.bosted.oppgittAdresse.landkode = "SE";
@@ -41,13 +41,13 @@ public class BostedGrunnlagTest {
         assertThat(strukturertAdresse.landkode).isEqualTo("SE");
     }
 
-    @Test(expected = TekniskException.class)
-    public void hentBostedsadresse_ingenAdresse_forventException() throws TekniskException {
+    @Test(expected = FunksjonellException.class)
+    public void hentBostedsadresse_ingenAdresse_forventException() throws  FunksjonellException {
         bostedGrunnlag.hentBostedsadresse();
     }
 
     @Test
-    public void finnBostedsadresse_harBostedsadresse_forventBostedsadresse() throws TekniskException {
+    public void finnBostedsadresse_harBostedsadresse_forventBostedsadresse() {
         soeknadDokument.bosted = new Bosted();
         soeknadDokument.bosted.oppgittAdresse = new StrukturertAdresse();
         soeknadDokument.bosted.oppgittAdresse.landkode = "SE";
@@ -61,7 +61,7 @@ public class BostedGrunnlagTest {
     }
 
     @Test
-    public void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() throws TekniskException {
+    public void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() {
         personDokument.bostedsadresse = new no.nav.melosys.domain.dokument.person.Bostedsadresse();
         personDokument.bostedsadresse.setLand(new Land("SWE"));
         personDokument.bostedsadresse.setGateadresse(new Gateadresse());
@@ -75,13 +75,13 @@ public class BostedGrunnlagTest {
     }
 
     @Test
-    public void finnBostedsadresse_ingenAdresse_forventTomOptional() throws TekniskException {
+    public void finnBostedsadresse_ingenAdresse_forventTomOptional() {
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
         assertThat(strukturertAdresse.isPresent()).isFalse();
     }
 
     @Test
-    public void finnPostadresse_harPostadresse_forventPostadresse() throws TekniskException {
+    public void finnPostadresse_harPostadresse_forventPostadresse() {
         personDokument.postadresse = new UstrukturertAdresse();
         personDokument.postadresse.land = new Land("SWE");
         personDokument.postadresse.adresselinje1 = "gate";
@@ -94,7 +94,7 @@ public class BostedGrunnlagTest {
     }
 
     @Test
-    public void finnPostadresse_ingenAdresse_forventTomOptional() throws TekniskException {
+    public void finnPostadresse_ingenAdresse_forventTomOptional() {
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnPostadresse();
         assertThat(strukturertAdresse.isPresent()).isFalse();
     }

@@ -102,12 +102,12 @@ public class SedMottakRuting extends AbstraktStegBehandler {
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
 
         } else if (resultat == RutingResultat.NY_BEHANDLING) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, automatiskSedBehandlingInitialiserer.hentBehandlingstype(melosysEessiMelding));
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, automatiskSedBehandlingInitialiserer.hentBehandlingstema(melosysEessiMelding));
             prosessinstans.setType(automatiskSedBehandlingInitialiserer.hentAktuellProsessType());
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_NY_BEHANDLING);
 
         } else if (resultat == RutingResultat.NY_SAK) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, automatiskSedBehandlingInitialiserer.hentBehandlingstype(melosysEessiMelding));
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, automatiskSedBehandlingInitialiserer.hentBehandlingstema(melosysEessiMelding));
             prosessinstans.setType(automatiskSedBehandlingInitialiserer.hentAktuellProsessType());
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH);
 

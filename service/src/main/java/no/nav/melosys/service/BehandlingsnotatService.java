@@ -1,9 +1,5 @@
 package no.nav.melosys.service;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.exception.FunksjonellException;
@@ -11,9 +7,13 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsnotatRepository;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BehandlingsnotatService {
@@ -68,7 +68,7 @@ public class BehandlingsnotatService {
     }
 
     private boolean brukerKanRedigereNotat(Behandlingsnotat behandlingsnotat) {
-        String innloggetBruker = SpringSubjectHandler.getInstance().getUserID();
+        String innloggetBruker = SubjectHandler.getInstance().getUserID();
         return innloggetBruker.equals(behandlingsnotat.getRegistrertAv());
     }
 }

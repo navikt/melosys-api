@@ -1,0 +1,32 @@
+package no.nav.melosys.service.dokument.brev.mapper;
+
+import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import org.junit.Test;
+
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
+import static no.nav.melosys.service.dokument.brev.mapper.BehandlingstypeKodeMapper.hentBehandlingstypeKode;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class BehandlingstypeKodeMapperTest {
+
+    @Test
+    public void hentBehandlingstypeKode_mapKorrektBehandlingstype() {
+        assertThat(hentBehandlingstypeKode(behandling(SOEKNAD, UTSENDT_ARBEIDSTAKER))).isEqualTo(BehandlingstypeKode.SOEKNAD);
+        assertThat(hentBehandlingstypeKode(behandling(SOEKNAD, UTSENDT_SELVSTENDIG))).isEqualTo(BehandlingstypeKode.SOEKNAD);
+        assertThat(hentBehandlingstypeKode(behandling(ENDRET_PERIODE, UTSENDT_ARBEIDSTAKER))).isEqualTo(BehandlingstypeKode.ENDRET_PERIODE);
+        assertThat(hentBehandlingstypeKode(behandling(NY_VURDERING, UTSENDT_SELVSTENDIG))).isEqualTo(BehandlingstypeKode.NY_VURDERING);
+        assertThat(hentBehandlingstypeKode(behandling(KLAGE, UTSENDT_ARBEIDSTAKER))).isEqualTo(BehandlingstypeKode.KLAGE);
+        assertThat(hentBehandlingstypeKode(behandling(SED, BESLUTNING_LOVVALG_NORGE))).isEqualTo(BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE);
+    }
+
+    private Behandling behandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
+        Behandling behandling = new Behandling();
+        behandling.setTema(behandlingstema);
+        behandling.setType(behandlingstype);
+        return behandling;
+    }
+}

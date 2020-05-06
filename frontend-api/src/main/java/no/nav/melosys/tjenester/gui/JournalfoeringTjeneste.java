@@ -45,8 +45,8 @@ public class JournalfoeringTjeneste {
         JournalpostDto journalpostDto = JournalpostDto.av(journalpost);
 
         if (journalpost.mottaksKanalErEessi()) {
-            journalføringService.finnBehandlingstypeForSedTilknyttetJournalpost(journalpostID)
-                .ifPresent(b -> journalpostDto.setBehandlingsInformasjon(new BehandlingsInformasjon(Sakstyper.EU_EOS, b)));
+            journalføringService.finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID)
+                .ifPresent(behandlingstema -> journalpostDto.setBehandlingsInformasjon(new BehandlingsInformasjon(Sakstyper.EU_EOS, behandlingstema)));
         }
         return ResponseEntity.ok(journalpostDto);
     }

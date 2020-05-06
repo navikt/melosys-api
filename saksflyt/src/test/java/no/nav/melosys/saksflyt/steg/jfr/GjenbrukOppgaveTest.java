@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -50,7 +51,8 @@ public class GjenbrukOppgaveTest {
         assertThat(oppgaveCaptor.getValue()).hasFieldOrPropertyWithValue("saksnummer", saksnummer)
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
             .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
-            .hasFieldOrPropertyWithValue("behandlingstype", Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV)
+            .hasFieldOrPropertyWithValue("behandlingstema", Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .hasFieldOrPropertyWithValue("behandlingstype", Behandlingstyper.SOEKNAD)
             .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
             .hasFieldOrPropertyWithValue("aktørId", "123321");
     }
@@ -59,7 +61,8 @@ public class GjenbrukOppgaveTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, oppgaveID);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD_IKKE_YRKESAKTIV);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "Deg321");
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "123321");

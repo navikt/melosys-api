@@ -1,16 +1,19 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -22,6 +25,7 @@ import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.SedGrunnlagDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -439,7 +443,7 @@ public class EessiServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage(
             "Finner ingen gyldig mottakerinstitusjon for arbeidsland " + Landkoder.BE.getBeskrivelse() + System.lineSeparator() +
-            "Finner ingen gyldig mottakerinstitusjon for arbeidsland " + Landkoder.DE.getBeskrivelse());
+                "Finner ingen gyldig mottakerinstitusjon for arbeidsland " + Landkoder.DE.getBeskrivelse());
 
         eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
     }
@@ -468,7 +472,7 @@ public class EessiServiceTest {
         final List<Landkoder> land = List.of(Landkoder.SE, Landkoder.DK);
 
         when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), eq(Landkoder.SE.getKode())))
-            .thenReturn(List.of(new Institusjon("2","","")));
+            .thenReturn(List.of(new Institusjon("2", "", "")));
 
         assertThat(eessiService.landErEessiReady(bucType.name(), land)).isFalse();
     }
@@ -479,20 +483,18 @@ public class EessiServiceTest {
         final List<Landkoder> land = List.of(Landkoder.SE, Landkoder.DK);
 
         when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), any()))
-            .thenReturn(List.of(new Institusjon("2","","")));
+            .thenReturn(List.of(new Institusjon("2", "", "")));
 
         assertThat(eessiService.landErEessiReady(bucType.name(), land)).isTrue();
     }
 
-    private static Fagsak lagFagsak() {
-        Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.MYNDIGHET);
-        myndighet.setInstitusjonId(MOTTAKER_INSTITUSJON);
+    @Test
+    public void hentSedGrunnlag() throws MelosysException {
+        when(eessiConsumer.hentSedGrunnlag(anyString(), anyString())).thenReturn(new EasyRandom().nextObject(SedGrunnlagDto.class));
 
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(1L);
-        fagsak.setAktører(Set.of(myndighet));
+        SedGrunnlag sedGrunnlag = eessiService.hentSedGrunnlag("123", "abc");
 
-        return fagsak;
+        assertThat(sedGrunnlag).isNotNull();
+        assertThat(sedGrunnlag).isInstanceOf(SedGrunnlag.class);
     }
 }

@@ -5,11 +5,11 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
+import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -29,14 +29,17 @@ public class UnntakTjeneste {
     }
 
     @PostMapping("{behandlingID}/ikkegodkjenn")
-    public ResponseEntity ikkeGodkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @RequestBody VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<Void> ikkeGodkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @RequestBody VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException, TekniskException {
         unntaksperiodeService.ikkeGodkjennPeriode(behandlingId, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "/{behandlingID}/godkjenn", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity godkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId) throws FunksjonellException, TekniskException {
-        unntaksperiodeService.godkjennPeriode(behandlingId);
+    @PostMapping(value = "/{behandlingID}/godkjenn")
+    public ResponseEntity<Void> godkjennUnntaksperiode(
+        @PathVariable("behandlingID") Long behandlingId,
+        @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto
+    ) throws FunksjonellException, TekniskException {
+        unntaksperiodeService.godkjennPeriode(behandlingId, godkjennUnntaksperiodeDto.isVarsleUtland());
         return ResponseEntity.noContent().build();
     }
 }

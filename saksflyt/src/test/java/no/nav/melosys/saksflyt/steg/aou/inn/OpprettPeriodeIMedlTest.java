@@ -1,12 +1,15 @@
 package no.nav.melosys.saksflyt.steg.aou.inn;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,7 +27,7 @@ import static org.mockito.Mockito.when;
 public class OpprettPeriodeIMedlTest {
 
     @Mock
-    private MedlFasade medlFasade;
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
@@ -31,14 +35,15 @@ public class OpprettPeriodeIMedlTest {
 
     @Before
     public void setup() {
-        opprettPeriodeIMedl = new OpprettPeriodeIMedl(medlFasade, medlPeriodeService);
+        opprettPeriodeIMedl = new OpprettPeriodeIMedl(behandlingsresultatService, medlPeriodeService);
     }
 
     @Test
     public void utfør() throws FunksjonellException, TekniskException {
-        when(medlPeriodeService.hentAnmodningsperiode(any())).thenReturn(new Anmodningsperiode());
-        when(medlPeriodeService.hentFnr(any())).thenReturn("123");
-        when(medlFasade.opprettPeriodeUnderAvklaring(anyString(), any(), any())).thenReturn(987L);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = new Behandling();
@@ -47,10 +52,8 @@ public class OpprettPeriodeIMedlTest {
 
         opprettPeriodeIMedl.utfør(prosessinstans);
 
-        verify(medlPeriodeService).hentAnmodningsperiode(any());
-        verify(medlPeriodeService).hentFnr(any());
-        verify(medlFasade).opprettPeriodeUnderAvklaring(anyString(), any(), any());
-        verify(medlPeriodeService).lagreMedlPeriodeId(anyLong(), any(Anmodningsperiode.class), anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(eq(1L));
+        verify(medlPeriodeService).opprettPeriodeUnderAvklaring(eq(anmodningsperiode), anyLong(), eq(true));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_OPPGAVE);
     }
 }

@@ -60,20 +60,20 @@ public class AvklarteVirksomheterGrunnlag {
         return norskeSelvstendige;
     }
 
-    public List<AvklartVirksomhet> hentUtenlandskeVirksomheter() throws TekniskException {
+    public List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
         if (utenlandskeVirksomheter == null) {
             utenlandskeVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
         }
         return utenlandskeVirksomheter;
     }
 
-    public List<AvklartVirksomhet> hentUtenlandskeArbeidsgivere() throws TekniskException {
+    public List<AvklartVirksomhet> hentUtenlandskeArbeidsgivere() {
         return hentUtenlandskeVirksomheter().stream()
             .filter(AvklartVirksomhet::erArbeidsgiver)
             .collect(Collectors.toList());
     }
 
-    public List<AvklartVirksomhet> hentUtenlandskeSelvstendige() throws TekniskException {
+    public List<AvklartVirksomhet> hentUtenlandskeSelvstendige() {
         return hentUtenlandskeVirksomheter().stream()
             .filter(AvklartVirksomhet::erSelvstendigForetak)
             .collect(Collectors.toList());

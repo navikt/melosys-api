@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -46,24 +46,24 @@ public class UnntaksperiodeServiceTest {
     public void setUp() throws IkkeFunnetException {
         unntaksperiodeService = new UnntaksperiodeService(behandlingService, oppgaveService, prosessinstansService);
         behandling.setFagsak(new Fagsak());
-        behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
     }
 
     @Test(expected = FunksjonellException.class)
     public void godkjennPeriode_behandlingAvsluttet_forventException() throws FunksjonellException, TekniskException {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        unntaksperiodeService.godkjennPeriode(1L);
+        unntaksperiodeService.godkjennPeriode(1L,  false);
     }
 
     @Test(expected = FunksjonellException.class)
     public void godkjennPeriode_feilBehandlingstype_forventException() throws FunksjonellException, TekniskException {
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        unntaksperiodeService.godkjennPeriode(1L);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        unntaksperiodeService.godkjennPeriode(1L, false);
     }
 
     public void godkjennPeriode_korrektStatusOgType_verifiserKall() throws FunksjonellException, TekniskException {
-        unntaksperiodeService.godkjennPeriode(1L);
+        unntaksperiodeService.godkjennPeriode(1L, false);
         verify(oppgaveService).ferdigstillOppgave(any());
     }
 

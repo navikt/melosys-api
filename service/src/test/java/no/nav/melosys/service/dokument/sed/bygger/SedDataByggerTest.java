@@ -23,7 +23,7 @@ import no.nav.melosys.integrasjon.eessi.dto.Adressetype;
 import no.nav.melosys.integrasjon.eessi.dto.Arbeidssted;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;

@@ -118,12 +118,12 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
-    public void opprettBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) throws FunksjonellException, TekniskException {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) throws FunksjonellException, TekniskException {
 
         Optional<Oppgave> eksisterendeOppgave = finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getType())
+            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
                 .setAktørId(aktørID)
@@ -132,6 +132,9 @@ public class OppgaveService {
 
             String oppgaveID = oppgaveFasade.opprettOppgave(oppgave);
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
+        } else if (tilordnetRessurs != null && !tilordnetRessurs.equals(eksisterendeOppgave.get().getTilordnetRessurs())) {
+            log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling {}", behandling.getId());
+            tildelOppgave(eksisterendeOppgave.get().getOppgaveId(), tilordnetRessurs);
         }
     }
 
@@ -223,6 +226,7 @@ public class OppgaveService {
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setBehandlingsstatus(behandling.getStatus());
         behandlingDto.setBehandlingstype(behandling.getType());
+        behandlingDto.setBehandlingstema(behandling.getTema());
         behandlingDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingDto.setEndretDato(behandling.getEndretDato());
         behandlingDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());

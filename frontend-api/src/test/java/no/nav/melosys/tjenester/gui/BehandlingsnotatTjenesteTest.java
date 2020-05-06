@@ -9,6 +9,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -114,7 +115,8 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     private Behandlingsnotat lagBehandlingsnotat() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setType(Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        behandling.setType(Behandlingstyper.SED);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 
         Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
         behandlingsnotat.setTekst("hei");

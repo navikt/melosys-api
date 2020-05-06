@@ -23,7 +23,6 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidsst
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
-import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,8 +265,7 @@ public class SedDataBygger {
         Lovvalgsperiode lovvalgsperiodeDto = lagLovvalgsperiodeDto(anmodningsperiode);
 
         lovvalgsperiodeDto.setUnntakFraLovvalgsland(anmodningsperiode.getUnntakFraLovvalgsland().getKode());
-        lovvalgsperiodeDto.setUnntakFraBestemmelse(LovvalgTilBestemmelseDtoMapper
-            .mapMelosysLovvalgTilBestemmelseDto(anmodningsperiode.getUnntakFraBestemmelse()));
+        lovvalgsperiodeDto.setUnntakFraBestemmelse(Bestemmelse.fraMelosysBestemmelse(anmodningsperiode.getUnntakFraBestemmelse()));
         lovvalgsperiodeDto.setUnntaksBegrunnelse(unntaksBegrunnelse);
 
         return lovvalgsperiodeDto;
@@ -278,7 +276,7 @@ public class SedDataBygger {
         lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
         lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
         lovvalgsperiodeDto.setLovvalgsland(periodeMedBestemmelse.getLovvalgsland() != null ? periodeMedBestemmelse.getLovvalgsland().getKode() : null);
-        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(periodeMedBestemmelse.getBestemmelse()));
+        lovvalgsperiodeDto.setBestemmelse(Bestemmelse.fraMelosysBestemmelse(periodeMedBestemmelse.getBestemmelse()));
         return lovvalgsperiodeDto;
     }
 

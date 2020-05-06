@@ -1,7 +1,7 @@
 package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
@@ -39,7 +39,7 @@ public class SakServiceTest {
     @Test
     public void opprettSak_behandlingstypeSøknad_temaMed() throws FunksjonellException, TekniskException {
         final String saksnummer = "MEL-123";
-        final Behandlingstyper behandlingstyper = Behandlingstyper.SOEKNAD;
+        final Behandlingstema behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER;
         final String aktørID = "123123123";
         final Long sakID = 1111L;
 
@@ -47,7 +47,7 @@ public class SakServiceTest {
         sakDto.setId(sakID);
         when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
 
-        Long opprettetSakID = sakService.opprettSak(saksnummer, behandlingstyper, aktørID);
+        Long opprettetSakID = sakService.opprettSak(saksnummer, behandlingstema, aktørID);
 
         assertThat(opprettetSakID).isEqualTo(sakID);
         verify(sakConsumer).opprettSak(captor.capture());
@@ -59,7 +59,7 @@ public class SakServiceTest {
     @Test
     public void opprettSak_behandlingstypeRegistreringUnntak_temaUfm() throws FunksjonellException, TekniskException {
         final String saksnummer = "MEL-123";
-        final Behandlingstyper behandlingstyper = Behandlingstyper.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+        final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         final String aktørID = "123123123";
         final Long sakID = 1111L;
 
@@ -67,7 +67,7 @@ public class SakServiceTest {
         sakDto.setId(sakID);
         when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
 
-        Long opprettetSakID = sakService.opprettSak(saksnummer, behandlingstyper, aktørID);
+        Long opprettetSakID = sakService.opprettSak(saksnummer, behandlingstema, aktørID);
 
         assertThat(opprettetSakID).isEqualTo(sakID);
         verify(sakConsumer).opprettSak(captor.capture());
@@ -79,10 +79,10 @@ public class SakServiceTest {
     @Test(expected = FunksjonellException.class)
     public void opprettSak_behandlingstypeAnke_ankeIkkeStøttetKasterExcept() throws FunksjonellException, TekniskException {
         final String saksnummer = "MEL-123";
-        final Behandlingstyper behandlingstyper = Behandlingstyper.ANKE;
+        final Behandlingstema behandlingstema = Behandlingstema.ØVRIGE_SED;
         final String aktørID = "123123123";
 
-        sakService.opprettSak(saksnummer, behandlingstyper, aktørID);
+        sakService.opprettSak(saksnummer, behandlingstema, aktørID);
     }
 
     @Test

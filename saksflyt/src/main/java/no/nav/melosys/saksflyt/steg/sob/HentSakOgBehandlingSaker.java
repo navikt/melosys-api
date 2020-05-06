@@ -3,9 +3,9 @@ package no.nav.melosys.saksflyt.steg.sob;
 import java.time.Instant;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -39,7 +39,6 @@ public class HentSakOgBehandlingSaker extends AbstraktStegBehandler {
     public HentSakOgBehandlingSaker(SakOgBehandlingFasade sakOgBehandlingFasade, SaksopplysningRepository saksopplysningRepo) {
         this.sakOgBehandlingFasade = sakOgBehandlingFasade;
         this.saksopplysningRepo = saksopplysningRepo;
-        log.info("HentSakOgBehandlingSaker initialisert");
     }
 
     @Override

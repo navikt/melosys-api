@@ -36,17 +36,16 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(HentInntektopplysninger.class);
 
     private final InntektFasade inntektFasade;
-
     private final SaksopplysningRepository saksopplysningRepo;
-
-    @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}")
-    private Integer inntektshistorikkAntallMåneder;
+    private final Integer inntektshistorikkAntallMåneder;
 
     @Autowired
-    public HentInntektopplysninger(InntektFasade inntektFasade, SaksopplysningRepository saksopplysningRepo) {
+    public HentInntektopplysninger(InntektFasade inntektFasade,
+                                   SaksopplysningRepository saksopplysningRepo,
+                                   @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}") Integer inntektshistorikkAntallMåneder) {
         this.inntektFasade = inntektFasade;
         this.saksopplysningRepo = saksopplysningRepo;
-        log.info("HentInntektopplysninger initialisert");
+        this.inntektshistorikkAntallMåneder = inntektshistorikkAntallMåneder;
     }
 
     @Override

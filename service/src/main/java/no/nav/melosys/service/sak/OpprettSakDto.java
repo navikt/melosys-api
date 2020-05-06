@@ -1,13 +1,61 @@
 package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 
 public class OpprettSakDto {
-    public String brukerID;
-    public Sakstyper sakstype;
-    public Behandlingstyper behandlingstype;
-    public String oppgaveID;
-    public SøknadDto soknadDto;
-    public boolean skalTilordnes;
+    private String brukerID;
+    private Sakstyper sakstype;
+    private Behandlingstema behandlingstema;
+    private String oppgaveID;
+    private SøknadDto soknadDto;
+    private boolean skalTilordnes;
+
+    public String getBrukerID() {
+        return brukerID;
+    }
+
+    public void setBrukerID(String brukerID) {
+        this.brukerID = brukerID;
+    }
+
+    public Sakstyper getSakstype() {
+        return sakstype;
+    }
+
+    public void setSakstype(Sakstyper sakstype) {
+        this.sakstype = sakstype;
+    }
+
+    public Behandlingstema getBehandlingstema() {
+        return behandlingstema;
+    }
+
+    public void setBehandlingstema(Behandlingstema behandlingstema) {
+        this.behandlingstema = behandlingstema;
+    }
+
+    public String getOppgaveID() {
+        return oppgaveID;
+    }
+
+    public void setOppgaveID(String oppgaveID) {
+        this.oppgaveID = oppgaveID;
+    }
+
+    public SøknadDto getSoknadDto() {
+        return soknadDto;
+    }
+
+    public void setSoknadDto(SøknadDto soknadDto) {
+        this.soknadDto = soknadDto;
+    }
+
+    public boolean isSkalTilordnes() {
+        return skalTilordnes;
+    }
+
+    public void setSkalTilordnes(boolean skalTilordnes) {
+        this.skalTilordnes = skalTilordnes;
+    }
 }

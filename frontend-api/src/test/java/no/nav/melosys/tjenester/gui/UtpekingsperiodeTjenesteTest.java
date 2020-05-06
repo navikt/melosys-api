@@ -1,10 +1,12 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
 import no.nav.melosys.domain.Utpekingsperiode;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
@@ -84,8 +86,16 @@ public class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     private List<Utpekingsperiode> lagUtpekingsperioder() {
+        Utpekingsperiode utpekingsperiodeUtenTilleggsbestemmelse = new Utpekingsperiode(
+            LocalDate.now(),
+            LocalDate.now(),
+            Landkoder.SE,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
+            null
+        );
+
         return Arrays.asList(
-            random.nextObject(Utpekingsperiode.class),
+            utpekingsperiodeUtenTilleggsbestemmelse,
             random.nextObject(Utpekingsperiode.class),
             random.nextObject(Utpekingsperiode.class)
         );

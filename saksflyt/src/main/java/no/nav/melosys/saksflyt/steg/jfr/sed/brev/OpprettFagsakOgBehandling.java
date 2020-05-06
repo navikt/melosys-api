@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -61,7 +62,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(behandling);
 
-        long gsakSaksnummer = opprettGsakSak(fagsak, behandling.getType(), aktørId);
+        long gsakSaksnummer = opprettGsakSak(fagsak, behandling.getTema(), aktørId);
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
 
         lagreAvsender(
@@ -87,8 +88,8 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         return tpsFasade.hentAktørIdForIdent(brukerId);
     }
 
-    private long opprettGsakSak(Fagsak fagsak, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
-        Long gsakSaksnummer = sakService.opprettSak(fagsak.getSaksnummer(), behandlingstype, aktørId);
+    private long opprettGsakSak(Fagsak fagsak, Behandlingstema behandlingstema, String aktørId) throws FunksjonellException, TekniskException {
+        Long gsakSaksnummer = sakService.opprettSak(fagsak.getSaksnummer(), behandlingstema, aktørId);
         fagsak.setGsakSaksnummer(gsakSaksnummer);
         fagsakService.lagre(fagsak);
 
