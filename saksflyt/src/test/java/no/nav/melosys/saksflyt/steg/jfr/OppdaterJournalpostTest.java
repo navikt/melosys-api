@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -13,7 +13,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
-import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
     @Mock
     private JoarkFasade joarkFasade;
     @Mock
-    private FagsakRepository fagsakRepository;
+    private FagsakService fagsakService;
 
     private OppdaterJournalpost agent;
 
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.*;
 
     @Before
     public void setUp() {
-        agent = new OppdaterJournalpost(joarkFasade, fagsakRepository);
+        agent = new OppdaterJournalpost(joarkFasade, fagsakService);
     }
 
     @Test
@@ -80,7 +80,7 @@ import static org.mockito.Mockito.*;
         long gsakSaksnummer = 10L;
         String saksnummer = "saksnummer";
         fagsak.setGsakSaksnummer(gsakSaksnummer);
-        doReturn(fagsak).when(fagsakRepository).findBySaksnummer(saksnummer);
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
