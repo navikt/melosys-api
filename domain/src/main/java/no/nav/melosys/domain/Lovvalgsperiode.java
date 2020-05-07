@@ -225,4 +225,19 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
         lovvalgsperiode.setDekning(anmodningsperiode.getDekning());
         return lovvalgsperiode;
     }
+
+    public static Lovvalgsperiode av(Utpekingsperiode utpekingsperiode) {
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(utpekingsperiode.getFom());
+        lovvalgsperiode.setTom(utpekingsperiode.getTom());
+        lovvalgsperiode.setBestemmelse(utpekingsperiode.getBestemmelse());
+        lovvalgsperiode.setTilleggsbestemmelse(utpekingsperiode.getTilleggsbestemmelse());
+        lovvalgsperiode.setLovvalgsland(utpekingsperiode.getLovvalgsland());
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
+        lovvalgsperiode.setMedlPeriodeID(utpekingsperiode.getMedlPeriodeID());
+        return lovvalgsperiode;
+    }
 }
