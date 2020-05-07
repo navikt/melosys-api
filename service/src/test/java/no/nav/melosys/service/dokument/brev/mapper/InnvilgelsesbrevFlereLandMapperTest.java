@@ -44,17 +44,12 @@ public class InnvilgelsesbrevFlereLandMapperTest {
     @Test
     public void testSakstypeKode() throws Exception {
         List<String> koderSomIkkeErAktuelleForBrev = Collections.singletonList(
-            "UKJENT" // Vet ikke om det er aktuelt med brev for denne
+            "UKJENT" // Det er ikke aktuelt med brev for denne
         );
 
         hentAlleVerdierFraKodeverk(Sakstyper.class)
             .filter(k -> !koderSomIkkeErAktuelleForBrev.contains(k))
             .forEach(SakstypeKode::fromValue);
-    }
-
-    @Test
-    public void testEndretBegrunnelseKoder() throws Exception {
-        // FIXME hentAlleVerdierFraKodeverk(Endretperiode.class).forEach(EndretPeriodeBegrunnelseKode::fromValue);
     }
 
     @Test
@@ -68,7 +63,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         BrevDataInnvilgelseFlereLand brevdataInnvilgelse = lagBrevdataInnvilgelse();
 
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
-        assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
+        assertThat(resultat).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 
     private BrevDataInnvilgelseFlereLand lagBrevdataInnvilgelse() {
@@ -79,6 +74,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.arbeidsgivere = norskeVirksomheter;
         brevdataInnvilgelse.bostedsland = "Norge";
+        brevdataInnvilgelse.trydemyndighetsland = Landkoder.DE;
         brevdataInnvilgelse.alleArbeidsland = Collections.singletonList("Sverige");
         brevdataInnvilgelse.erMarginaltArbeid = true;
         brevdataInnvilgelse.erBegrensetPeriode = true;
@@ -92,7 +88,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.ORDINAER;
         brevdataA1.hovedvirksomhet = virksomheter.get(0);
-        ArrayList bivirksomheter = new ArrayList<>(virksomheter);
+        ArrayList<AvklartVirksomhet> bivirksomheter = new ArrayList<>(virksomheter);
         bivirksomheter.remove(0);
         brevdataA1.bivirksomheter = bivirksomheter;
 

@@ -67,8 +67,8 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         fag.setArbeidslandListe(mapArbeidslandListe(brevdata.alleArbeidsland));
 
         fag.setBostedsland(brevdata.bostedsland);
-        if (behandling.norgeErUtpekt()) {
-            fag.setTrygdemyndighetsland(resultat.getFastsattAvLand().getBeskrivelse());
+        if (brevdata.trydemyndighetsland != null) {
+            fag.setTrygdemyndighetsland(brevdata.trydemyndighetsland.getBeskrivelse());
         } else {
             fag.setTrygdemyndighetsland(" ");
         }

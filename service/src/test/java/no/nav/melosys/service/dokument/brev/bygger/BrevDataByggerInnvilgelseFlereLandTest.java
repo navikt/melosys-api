@@ -8,13 +8,16 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -37,28 +40,22 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataByggerInnvilgelseFlereLandTest {
-
     @Mock
     AvklartefaktaService avklartefaktaService;
-
     @Mock
     AvklarteVirksomheterService avklarteVirksomheterService;
-
-    @Mock
-    LovvalgsperiodeService lovvalgsperiodeService;
-
     @Mock
     LandvelgerService landvelgerService;
-
+    @Mock
+    LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    SaksopplysningerService saksopplysningerService;
     @Mock
     BrevDataByggerA1 brevDataByggerA1;
 
     private Behandling behandling;
-
-    @Mock
     private BrevbestillingDto brevbestillingDto;
-
-    private String saksbehandler = "saksbehandler";
+    private final String saksbehandler = "saksbehandler";
     private BrevDataBygger brevDataByggerInnvilgelse;
 
     @Before
@@ -69,6 +66,10 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
 
+        brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
+        brevbestillingDto.begrunnelseKode = "BEGRUNNELSEKODE";
+        brevbestillingDto.fritekst = "FRITEKST";
 
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
 
@@ -81,6 +82,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
             landvelgerService,
             lovvalgsperiodeService,
+            saksopplysningerService,
             brevbestillingDto,
             brevDataByggerA1);
     }
@@ -112,19 +114,25 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
         assertThat(brevData.avklartMaritimType).isNull();
+        assertThat(brevData.trydemyndighetsland).isNull();
+    }
+
+    @Test
+    public void lag_utpekingAnnetLand_setterTrydemyndighetsland() throws FunksjonellException, TekniskException {
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setAvsenderLandkode(Landkoder.DE);
+        when(saksopplysningerService.hentSedOpplysninger(behandling.getId())).thenReturn(sedDokument);
+
+        BrevDataGrunnlag brevdataressurser = lagBrevressurser();
+        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
+        assertThat(brevData.trydemyndighetsland).isEqualTo(Landkoder.DE);
     }
 
     @Test
     public void lag_innvilgelsesBrev_harBestillingsinformasjon() throws FunksjonellException, TekniskException {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
-        brevbestillingDto.begrunnelseKode = "BEGRUNNELSEKODE";
-        brevbestillingDto.fritekst = "FRITEKST";
-
-        BrevDataBygger brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService, landvelgerService, lovvalgsperiodeService, brevbestillingDto, brevDataByggerA1);
-
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler);
+
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }

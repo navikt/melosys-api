@@ -4,6 +4,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -27,18 +28,20 @@ public class BrevDataByggerVelgerTest {
 
     @Before
     public void setUp() {
-        AvklartefaktaService avklartefaktaService = mock(AvklartefaktaService.class);
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
-        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
-        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
-        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
-        VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
+        AvklartefaktaService avklartefaktaService = mock(AvklartefaktaService.class);
         JoarkService joarkService = mock(JoarkService.class);
         LandvelgerService landvelgerService = mock(LandvelgerService.class);
+        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
+        SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
+        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         UtpekingService utpekingService = mock(UtpekingService.class);
+        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
+        VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
 
-        brevDataByggerVelger = new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
-            utenlandskMyndighetService, vilkaarsresultatRepository, vilkaarsresultatService, joarkService, landvelgerService, utpekingService);
+        brevDataByggerVelger = new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
+            landvelgerService, lovvalgsperiodeService, saksopplysningerService,
+            utenlandskMyndighetService, utpekingService, vilkaarsresultatRepository, vilkaarsresultatService);
     }
 
     @Test

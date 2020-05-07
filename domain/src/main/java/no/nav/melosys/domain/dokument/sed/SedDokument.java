@@ -23,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 public class SedDokument implements SaksopplysningDokument {
     private String rinaSaksnummer;
     private String rinaDokumentID;
+    private Landkoder avsenderLandkode;
     private String fnr;
     private Periode lovvalgsperiode;
     @XmlJavaTypeAdapter(LovvalgBestemmelseXmlAdapter.class)
@@ -52,6 +53,14 @@ public class SedDokument implements SaksopplysningDokument {
 
     public void setRinaDokumentID(String rinaDokumentID) {
         this.rinaDokumentID = rinaDokumentID;
+    }
+
+    public Landkoder getAvsenderLandkode() {
+        return avsenderLandkode;
+    }
+
+    public void setAvsenderLandkode(Landkoder avsenderLandkode) {
+        this.avsenderLandkode = avsenderLandkode;
     }
 
     public String getFnr() {
