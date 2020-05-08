@@ -39,7 +39,7 @@ public class ValideringTest {
 
     @Test
     public void utfoerSteg_feilProsessType() {
-        p.setType(ProsessType.OPPFRISKNING);
+        p.setType(ProsessType.MOTTAK_SED);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }

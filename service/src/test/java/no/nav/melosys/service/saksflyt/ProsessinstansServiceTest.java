@@ -71,13 +71,6 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void erUnderOppfriskning() {
-        when(prosessinstansRepo.findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(eq(ProsessType.OPPFRISKNING), anyLong(), eq(ProsessSteg.FEILET_MASKINELT), eq(ProsessSteg.FERDIG)))
-            .thenReturn(Optional.of(new Prosessinstans()));
-        assertThat(service.erUnderOppfriskning(1L)).isTrue();
-    }
-
-    @Test
     public void harAktivProsessinstans() {
         when(prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(anyLong(), eq(ProsessSteg.FEILET_MASKINELT), eq(ProsessSteg.FERDIG)))
             .thenReturn(Optional.of(new Prosessinstans()));
@@ -158,18 +151,19 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansOppfriskning() {
-        Behandling behandling = lagBehandling();
+    public void opprettProsessinstansVideresendSøknad() {
+        settInnloggetSaksbehandler();
 
-        String aktørID = "aktørID";
-        String brukerID = "br";
-        service.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID);
+        Behandling behandling = new Behandling();
+        service.opprettProsessinstansVideresendSoknad(behandling, null);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPFRISKNING);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.VIDERESEND_SOKNAD);
+        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.VS_OPPDATER_RESULTAT);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, List.class)).isNull();
+        assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
     }
 
     private Behandling lagBehandling() {
@@ -283,7 +277,7 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void opprettProsessinstansGodkjennUnntaksperiode() {
-        service.opprettProsessinstansGodkjennUnntaksperiode(new Behandling());
+        service.opprettProsessinstansGodkjennUnntaksperiode(new Behandling(), false);
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans prosessinstans = piCaptor.getValue();

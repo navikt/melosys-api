@@ -20,6 +20,7 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.sak.VideresendSoknadService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
@@ -50,17 +51,19 @@ public class FagsakTjeneste {
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final TilgangService tilgangService;
     private final UtpekingService utpekingService;
+    private final VideresendSoknadService videresendSoknadService;
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService,
                           SaksopplysningerService saksopplysningerService,
                           BehandlingsgrunnlagService behandlingsgrunnlagService, TilgangService tilgangService,
-                          UtpekingService utpekingService) {
+                          UtpekingService utpekingService, VideresendSoknadService videresendSoknadService) {
         this.fagsakService = fagsakService;
         this.saksopplysningerService = saksopplysningerService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.tilgangService = tilgangService;
         this.utpekingService = utpekingService;
+        this.videresendSoknadService = videresendSoknadService;
     }
 
     @GetMapping("{saksnr}")
@@ -112,11 +115,11 @@ public class FagsakTjeneste {
 
     @PostMapping("{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
-    public ResponseEntity videresend(@PathVariable("saksnr") String saksnummer, @RequestBody VideresendDto videresendDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity videresend(@PathVariable("saksnr") String saksnummer, @RequestBody VideresendDto videresendDto) throws MelosysException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
 
-        fagsakService.henleggOgVideresend(saksnummer, videresendDto.getMottakerinstitusjon());
+        videresendSoknadService.henleggOgVideresend(saksnummer, videresendDto.getMottakerinstitusjon());
         return ResponseEntity.ok().build();
     }
 
@@ -157,10 +160,9 @@ public class FagsakTjeneste {
         "for en sak ved å opprette en ny behandling basert på den siste endrede behandling")
     @PostMapping("/{saksnummer}/revurder")
     public ResponseEntity revurderSisteBehandling(@PathVariable("saksnummer") String saksnummer) throws FunksjonellException, TekniskException {
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(fagsak);
+        tilgangService.sjekkSak(saksnummer);
 
-        long behandlingID = fagsakService.opprettNyVurderingBehandling(fagsak);
+        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         return ResponseEntity.ok(new RevurderingOpprettetDto(behandlingID));
     }
 

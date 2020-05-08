@@ -1,13 +1,4 @@
-package no.nav.melosys.service;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.ParserConfigurationException;
+package no.nav.melosys.integrasjon.regelmodul;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
@@ -20,35 +11,19 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
-import no.nav.melosys.repository.BehandlingRepository;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
-@SuppressWarnings("resource")
 public class RegelmodulServiceTest {
-
-    private BehandlingRepository behandlingRepository;
-
-    private RegelmodulService regelmodulService;
-
-    @Before
-    public void setUp() throws ParserConfigurationException {
-        behandlingRepository = Mockito.mock(BehandlingRepository.class);
-        regelmodulService = new RegelmodulService("", behandlingRepository);
-    }
-
-    @Test
-    public void fastsettLovvalg_behandlingIkkeFunnet() {
-        when(behandlingRepository.findWithSaksopplysningerById(0L)).thenReturn(null);
-
-        FastsettLovvalgReply fastsettLovvalgReply = regelmodulService.fastsettLovvalg(0L);
-        assertThat(fastsettLovvalgReply).isNull();
-    }
-
     @Test
     public void lagRequest() {
         Behandling behandling = new Behandling();

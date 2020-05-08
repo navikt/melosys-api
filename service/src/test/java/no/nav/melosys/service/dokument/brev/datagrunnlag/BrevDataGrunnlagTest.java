@@ -14,6 +14,7 @@ import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -75,15 +76,15 @@ public class BrevDataGrunnlagTest {
         return behandling;
     }
 
-    @Test(expected = TekniskException.class)
-    public void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws TekniskException {
+    @Test(expected = FunksjonellException.class)
+    public void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws FunksjonellException {
         person.bostedsadresse = new Bostedsadresse();
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
         dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
     }
 
     @Test
-    public void hentBostedsadresse_brukerBostedFraPersonDokument() throws TekniskException {
+    public void hentBostedsadresse_brukerBostedFraPersonDokument() throws FunksjonellException {
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
         assertThat(bostedsadresse.husnummer).isEqualTo("23");
@@ -93,7 +94,7 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() throws TekniskException {
+    public void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() throws FunksjonellException {
         StrukturertAdresse oppgittBosted = new StrukturertAdresse();
         oppgittBosted.gatenavn = "HerBorJegGata";
         oppgittBosted.husnummer = "123";
@@ -113,7 +114,7 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() throws TekniskException {
+    public void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
@@ -132,7 +133,7 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenForetak_girMaritimeArbeidssteder() throws TekniskException {
+    public void hentArbeidssteder_medMaritimtArbeidUtenForetak_girMaritimeArbeidssteder() {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         maritimtArbeidISøknad.foretakOrgnr = null;
         maritimtArbeidISøknad.foretakNavn = null;
@@ -152,7 +153,7 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() throws TekniskException {
+    public void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 

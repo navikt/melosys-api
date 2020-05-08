@@ -74,7 +74,7 @@ public class EessiService {
         Fagsak fagsak = behandling.getFagsak();
 
         SedDataGrunnlag datagrunnlag = dataGrunnlagFactory.av(behandling);
-        SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
+        SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));
         sedData.setMottakerIder(mottakerInstitusjoner);
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
@@ -92,7 +92,7 @@ public class EessiService {
     private String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId, byte[] vedlegg) throws MelosysException {
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));
         sedDataDto.setMottakerIder(mottakerId);
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
@@ -202,6 +202,8 @@ public class EessiService {
         MedlemsperiodeType medlemsperiodeType;
         if (sedType == SedType.A001) {
             medlemsperiodeType = MedlemsperiodeType.ANMODNINGSPERIODE;
+        } else if (sedType == SedType.A003 && behandlingsresultat.finnValidertUtpekingsperiode().isPresent()){
+            medlemsperiodeType = MedlemsperiodeType.UTPEKINGSPERIODE;
         } else {
             medlemsperiodeType = MedlemsperiodeType.LOVVALGSPERIODE;
         }

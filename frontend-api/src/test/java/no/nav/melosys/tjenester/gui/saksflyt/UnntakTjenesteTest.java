@@ -8,6 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
+import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,11 +17,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnntakTjenesteTest extends JsonSchemaTestParent {
-    private static final String UNNTAKSPERIODE_SCHEMA = "saksflyt-unntaksperioder-ikkegodkjenn-post-schema.json";
+    private static final String UNNTAKSPERIODE_GODKJENN_SCHEMA = "saksflyt-unntaksperioder-godkjenn-post-schema.json";
+    private static final String UNNTAKSPERIODE_IKKEGODKJENN_SCHEMA = "saksflyt-unntaksperioder-ikkegodkjenn-post-schema.json";
 
     @Mock
     private UnntaksperiodeService unntaksperiodeService;
@@ -33,9 +36,11 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void godkjennUnntaksperiode() throws FunksjonellException, TekniskException {
-        unntakTjeneste.godkjennUnntaksperiode(1L);
-        verify(unntaksperiodeService).godkjennPeriode(anyLong());
+    public void godkjennUnntaksperiode() throws FunksjonellException, TekniskException, IOException {
+        GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true);
+        unntakTjeneste.godkjennUnntaksperiode(1L, dto);
+        verify(unntaksperiodeService).godkjennPeriode(anyLong(), eq(true));
+        valider(dto, UNNTAKSPERIODE_GODKJENN_SCHEMA);
     }
 
     @Test
@@ -43,6 +48,6 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
         VurderUnntaksperiodeDto dto = new VurderUnntaksperiodeDto(
             Sets.newHashSet(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name()), null);
         unntakTjeneste.ikkeGodkjennUnntaksperiode(1L, dto);
-        valider(dto, UNNTAKSPERIODE_SCHEMA);
+        valider(dto, UNNTAKSPERIODE_IKKEGODKJENN_SCHEMA);
     }
 }

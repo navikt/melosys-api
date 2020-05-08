@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -13,11 +12,11 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
-import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +38,12 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterJournalpost.class);
 
     private final JoarkFasade joarkFasade;
-    private final FagsakRepository fagsakRepo;
+    private final FagsakService fagsakService;
 
     @Autowired
-    public OppdaterJournalpost(JoarkFasade joarkFasade, FagsakRepository fagsakRepo) {
+    public OppdaterJournalpost(JoarkFasade joarkFasade, FagsakService fagsakService) {
         this.joarkFasade = joarkFasade;
-        this.fagsakRepo = fagsakRepo;
+        this.fagsakService = fagsakService;
         log.info("OppdaterJournalpost initialisert");
     }
 
@@ -68,18 +67,12 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Long arkivSakID = null;
         if (prosessinstans.getType() == ProsessType.JFR_KNYTT || Behandlingstyper.ENDRET_PERIODE.equals(behandlingstype)) {
-            Fagsak sak = fagsakRepo.findBySaksnummer(prosessinstans.getData(SAKSNUMMER));
-            if (sak != null) {
-                arkivSakID = sak.getGsakSaksnummer();
-            }
+            arkivSakID = fagsakService.hentFagsak(prosessinstans.getData(SAKSNUMMER)).getGsakSaksnummer();
         } else {
             arkivSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
         }
         if (arkivSakID == null) {
-            String feilmelding = "Prosessinstansen er ikke knyttet til en nav-sak";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-            return;
+            throw new TekniskException("Prosessinstansen er ikke knyttet til en nav-sak");
         }
 
         String brukerID = prosessinstans.getData(BRUKER_ID);

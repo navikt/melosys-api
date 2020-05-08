@@ -78,10 +78,10 @@ public class IverksettVedtakValideringTest {
 
     @Test
     public void utfør_feilProsessType() throws FunksjonellException, TekniskException {
-        p.setType(ProsessType.OPPFRISKNING);
+        p.setType(ProsessType.MOTTAK_SED);
 
         expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("ProsessType " + ProsessType.OPPFRISKNING + " er ikke støttet.");
+        expectedException.expectMessage("ProsessType " + ProsessType.MOTTAK_SED + " er ikke støttet.");
 
         agent.utfør(p);
     }

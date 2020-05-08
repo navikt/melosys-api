@@ -62,6 +62,7 @@ public class EessiServiceTest {
     private EessiService eessiService;
 
     private Behandling behandling;
+    private Behandlingsresultat behandlingsresultat;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -70,7 +71,6 @@ public class EessiServiceTest {
     private ArgumentCaptor<SedDataDto> sedDataDtoCaptor;
 
     private EasyRandom easyRandom = new EasyRandom();
-    private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @Before
     public void setup() throws Exception {
@@ -83,7 +83,7 @@ public class EessiServiceTest {
         behandling.getFagsak().setSaksnummer("123");
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.SK);
@@ -99,13 +99,43 @@ public class EessiServiceTest {
 
         when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
+        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true))).thenReturn(new OpprettSedDto());
     }
 
     @Test
-    public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
-        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true))).thenReturn(new OpprettSedDto());
+    public void opprettOgSendSed_buc03_ingenMedlemsperiodeType() throws Exception {
         eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_03);
+        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.INGEN));
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_03), eq(true));
+    }
+
+    @Test
+    public void opprettOgSendSed_buc01_medlemsperiodeTypeAnmodningsperiode() throws Exception {
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_01);
+        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_01), eq(true));
+    }
+
+    @Test
+    public void opprettOgSendSed_buc02IngenUtpekingsperiode_medlemsperiodeTypeLovvalgsperiode() throws Exception {
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_02);
+        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.LOVVALGSPERIODE));
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_02), eq(true));
+    }
+
+    @Test
+    public void opprettOgSendSed_buc02MedUtpekingsperiode_medlemsperiodeTypeUtpekingsperiode() throws Exception {
+        behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_02);
+        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.UTPEKINGSPERIODE));
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_02), eq(true));
+    }
+
+    @Test
+    public void opprettOgSendSed_buc04_medlemsperiodeTypeLovvalgsperiode() throws Exception {
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_04);
+        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.LOVVALGSPERIODE));
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_04), eq(true));
     }
 
     @Test
@@ -280,15 +310,41 @@ public class EessiServiceTest {
     }
 
     @Test
-    public void genererSedForhåndsvisning_forventPdf() throws MelosysException {
+    public void genererSedPdf_sedA001_medlemsperiodeTypeAnmodningsperiode() throws MelosysException {
         final byte[] PDF = "pdf".getBytes();
         when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
 
         byte[] pdf = eessiService.genererSedPdf(1L, SedType.A001);
 
-        verify(behandlingService).hentBehandling(eq(1L));
-        verify(dokumentdataGrunnlagFactory).av(any());
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
+        verify(eessiConsumer).genererSedPdf(any(), any());
+        assertThat(pdf).isEqualTo(PDF);
+    }
+
+    @Test
+    public void genererSedPdf_sedA003MedUtpekingsperiode_medlemsperiodeTypeUtpekingsperiode() throws MelosysException {
+        final byte[] PDF = "pdf".getBytes();
+        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
+
+        behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
+
+        byte[] pdf = eessiService.genererSedPdf(1L, SedType.A003);
+
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.UTPEKINGSPERIODE));
+        verify(eessiConsumer).genererSedPdf(any(), any());
+        assertThat(pdf).isEqualTo(PDF);
+    }
+
+    @Test
+    public void genererSedPdf_sedA009_medlemsperiodeTypeLovvalgsperiode() throws MelosysException {
+        final byte[] PDF = "pdf".getBytes();
+        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
+
+        behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
+
+        byte[] pdf = eessiService.genererSedPdf(1L, SedType.A009);
+
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.LOVVALGSPERIODE));
         verify(eessiConsumer).genererSedPdf(any(), any());
         assertThat(pdf).isEqualTo(PDF);
     }
@@ -317,17 +373,8 @@ public class EessiServiceTest {
 
     @Test
     public void hentSedTypeForAnmodningUnntakSvar_forventA002() throws IkkeFunnetException {
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
-
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
-
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-
+        behandlingsresultat.hentValidertAnmodningsperiode()
+            .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
         SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(1L);
 
         assertThat(sedType).isEqualTo(SedType.A002);
@@ -335,17 +382,8 @@ public class EessiServiceTest {
 
     @Test
     public void hentSedTypeForAnmodningUnntakSvar_forventA011() throws IkkeFunnetException {
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
-
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-
+        behandlingsresultat.hentValidertAnmodningsperiode()
+            .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(1L);
 
         assertThat(sedType).isEqualTo(SedType.A011);

@@ -59,6 +59,7 @@ public class OpprettSedDokumentFelles {
 
     private static SedDokument opprettSedDokument(MelosysEessiMelding melosysEessiMelding) {
         SedDokument sedDokument = new SedDokument();
+        sedDokument.setAvsenderLandkode(Landkoder.valueOf(melosysEessiMelding.getAvsender().getLandkode()));
         sedDokument.setLovvalgslandKode(Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()));
         sedDokument.setLovvalgBestemmelse(
             Bestemmelse.fraBestemmelseString(melosysEessiMelding.getArtikkel()).tilMelosysBestemmelse()

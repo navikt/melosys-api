@@ -129,14 +129,6 @@ public class Behandling extends RegistreringsInfo {
         this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato;
     }
 
-    public boolean erAktiv() {
-        return !erAvsluttet();
-    }
-
-    public boolean erAvsluttet() {
-        return status == Behandlingsstatus.AVSLUTTET;
-    }
-
     public String getInitierendeJournalpostId() {
         return initierendeJournalpostId;
     }
@@ -198,11 +190,27 @@ public class Behandling extends RegistreringsInfo {
         return Objects.hash(registrertDato, fagsak);
     }
 
+
+    public boolean erAktiv() {
+        return !erInaktiv();
+    }
+
+    public boolean erInaktiv() {
+        return erAvsluttet() || erMidlertidigLovvalgsbeslutning();
+    }
+
+    public boolean erAvsluttet() {
+        return status == Behandlingsstatus.AVSLUTTET;
+    }
+
+    private boolean erMidlertidigLovvalgsbeslutning() {
+        return status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING;
+    }
+
     public boolean erRedigerbar() {
         return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK
-                    || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != Behandlingstema.IKKE_YRKESAKTIV)
-                    || status == Behandlingsstatus.AVSLUTTET
-                    || status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+            || (status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != Behandlingstema.IKKE_YRKESAKTIV)
+            || erInaktiv());
     }
 
     public boolean erVenterForDokumentasjon() {
@@ -213,6 +221,10 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean erBehandlingAvSøknad() {
         return tema != null && erBehandlingAvSøknad(tema.getKode());
+    }
+
+    public boolean erBehandlingAvSed() {
+        return tema != null && erBehandlingAvSed(tema.getKode());
     }
 
     public boolean erNyVurdering() {
@@ -229,6 +241,10 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean norgeErUtpekt() {
         return tema == Behandlingstema.BESLUTNING_LOVVALG_NORGE;
+    }
+
+    public boolean erUtpekingAvAnnetLand() {
+        return tema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 
     public boolean kanResultereIVedtak() {
@@ -260,8 +276,12 @@ public class Behandling extends RegistreringsInfo {
         return Behandlingstema.ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
-    public boolean isAktiv() {
-        return status != Behandlingsstatus.AVSLUTTET;
+    private static boolean erBehandlingAvSed(String behandlingstemaKode) {
+        return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.BESLUTNING_LOVVALG_NORGE.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     @Override

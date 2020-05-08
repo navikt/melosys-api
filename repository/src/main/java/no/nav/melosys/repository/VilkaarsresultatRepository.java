@@ -14,5 +14,7 @@ public interface VilkaarsresultatRepository extends JpaRepository<Vilkaarsresult
 
     Optional<Vilkaarsresultat> findByBehandlingsresultatIdAndVilkaar(long ID, Vilkaar vilkaar);
 
+    boolean existsByBehandlingsresultatIdAndVilkaarAndOppfyltTrue(long ID, Vilkaar vilkaar);
+
     void deleteByBehandlingsresultat(Behandlingsresultat behandlingsresultat);
 }

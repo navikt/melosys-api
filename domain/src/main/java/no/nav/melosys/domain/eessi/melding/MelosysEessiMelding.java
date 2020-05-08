@@ -5,6 +5,7 @@ import java.util.List;
 public class MelosysEessiMelding {
     private String sedId;
     private String rinaSaksnummer;
+    private Avsender avsender;
     private String journalpostId;
     private String dokumentId;
     private Long gsakSaksnummer;
@@ -37,6 +38,14 @@ public class MelosysEessiMelding {
 
     public void setRinaSaksnummer(String rinaSaksnummer) {
         this.rinaSaksnummer = rinaSaksnummer;
+    }
+
+    public Avsender getAvsender() {
+        return avsender;
+    }
+
+    public void setAvsender(Avsender avsender) {
+        this.avsender = avsender;
     }
 
     public String getJournalpostId() {
@@ -172,11 +181,11 @@ public class MelosysEessiMelding {
         return "MelosysEessiMelding{" +
             "sedId='" + sedId + '\'' +
             ", rinaSaksnummer='" + rinaSaksnummer + '\'' +
+            ", avsender='" + avsender + '\'' +
             ", journalpostId='" + journalpostId + '\'' +
             ", dokumentId='" + dokumentId + '\'' +
             ", gsakSaksnummer=" + gsakSaksnummer +
             ", aktoerId='" + aktoerId + '\'' +
-            ", statsborgerskap=" + statsborgerskap +
             ", periode=" + periode +
             ", lovvalgsland='" + lovvalgsland + '\'' +
             ", artikkel='" + artikkel + '\'' +
@@ -185,8 +194,6 @@ public class MelosysEessiMelding {
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
             ", bucType='" + bucType + '\'' +
             ", sedType='" + sedType + '\'' +
-            ", svarAnmodningUnntak=" + svarAnmodningUnntak +
-            ", anmodningUnntak=" + anmodningUnntak +
             '}';
     }
 }
