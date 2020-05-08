@@ -1,29 +1,14 @@
 package no.nav.melosys.saksflyt.steg.reg;
 
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,15 +22,11 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentOrganisasjonsopplysninger.class);
 
-    private final BehandlingService behandlingService;
-    private final SaksopplysningRepository saksopplysningRepo;
-    private final EregFasade eregFasade;
+    private final RegisteropplysningerService registeropplysningerService;
 
     @Autowired
-    public HentOrganisasjonsopplysninger(BehandlingService behandlingService, SaksopplysningRepository saksopplysningRepo, @Qualifier("system")EregFasade eregFasade) {
-        this.behandlingService = behandlingService;
-        this.saksopplysningRepo = saksopplysningRepo;
-        this.eregFasade = eregFasade;
+    public HentOrganisasjonsopplysninger(RegisteropplysningerService registeropplysningerService) {
+        this.registeropplysningerService = registeropplysningerService;
     }
 
     @Override
@@ -54,34 +35,17 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException, IntegrasjonException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        Set<String> orgnumre = new HashSet<>();
-
-        Optional<SaksopplysningDokument> arbeidsforholdDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.ARBFORH);
-        Optional<SaksopplysningDokument> inntektDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.INNTK);
-
-        arbeidsforholdDokument.ifPresent(dokument -> orgnumre.addAll(((ArbeidsforholdDokument)dokument).hentOrgnumre()));
-        inntektDokument.ifPresent(dokument -> orgnumre.addAll(((InntektDokument)dokument).hentOrgnumre()));
-
-        hentOgLagreOrganisasjoner(behandling, orgnumre);
+        registeropplysningerService.hentOgLagreOpplysninger(
+            RegisteropplysningerRequest.builder()
+                .behandlingID(prosessinstans.getBehandling().getId())
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .organisasjonsopplysninger().build())
+                .build());
 
         prosessinstans.setSteg(ProsessSteg.HENT_MEDL_OPPL);
         log.info("Hentet organisasjonsopplysninger for prosessinstans {}", prosessinstans.getId());
     }
-
-    private void hentOgLagreOrganisasjoner(Behandling behandling, Set<String> orgnumre) throws IkkeFunnetException, IntegrasjonException {
-
-        for (String orgnr : orgnumre) {
-            Instant nå = Instant.now();
-            Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnr);
-            saksopplysning.setBehandling(behandling);
-            saksopplysning.setRegistrertDato(nå);
-            saksopplysning.setEndretDato(nå);
-            saksopplysningRepo.save(saksopplysning);
-        }
-    }
-
 }

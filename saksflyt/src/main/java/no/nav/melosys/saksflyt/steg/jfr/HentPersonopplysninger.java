@@ -1,22 +1,16 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.time.Instant;
-
-import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
@@ -35,14 +29,11 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentPersonopplysninger.class);
 
-    private final SaksopplysningRepository saksopplysningRepo;
-
-    private final TpsFasade tpsFasade;
+    private final RegisteropplysningerService registeropplysningerService;
 
     @Autowired
-    public HentPersonopplysninger(SaksopplysningRepository saksopplysningRepo, @Qualifier("system")TpsFasade tpsFasade) {
-        this.saksopplysningRepo = saksopplysningRepo;
-        this.tpsFasade = tpsFasade;
+    public HentPersonopplysninger(RegisteropplysningerService registeropplysningerService) {
+        this.registeropplysningerService = registeropplysningerService;
         log.info("HentPersonopplysninger initialisert");
     }
 
@@ -52,25 +43,22 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
         Periode søknadsperiode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        Behandling behandling = prosessinstans.getBehandling();
-        Instant nå = Instant.now();
 
-        Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
-        saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(nå);
-        saksopplysning.setEndretDato(nå);
-        saksopplysningRepo.save(saksopplysning);
-
-        saksopplysning = tpsFasade.hentPersonhistorikk(brukerId, søknadsperiode.getFom());
-        saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(nå);
-        saksopplysning.setEndretDato(nå);
-        saksopplysningRepo.save(saksopplysning);
+        registeropplysningerService.hentOgLagreOpplysninger(
+            RegisteropplysningerRequest.builder()
+                .behandlingID(prosessinstans.getBehandling().getId())
+                .fnr(brukerId)
+                .fom(søknadsperiode.getFom())
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .personopplysninger()
+                    .personhistorikkopplysninger()
+                    .build())
+                .build());
 
         prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);
 
