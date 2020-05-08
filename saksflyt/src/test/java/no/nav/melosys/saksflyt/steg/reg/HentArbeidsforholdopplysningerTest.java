@@ -114,7 +114,7 @@ public class HentArbeidsforholdopplysningerTest {
         agent.utførSteg(p);
 
         LocalDate forventetFom = LocalDate.now().minusYears(2).minusMonths(ARBEIDSFORHOLD_HISTORIKK_ANTALL_MÅNEDER);
-        LocalDate forventetTom = forventetFom.plusYears(1);
+        LocalDate forventetTom = LocalDate.now().minusYears(1);
 
         verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(brukerID, forventetFom, forventetTom);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_INNT_OPPL);

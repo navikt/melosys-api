@@ -50,7 +50,6 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
         log.info("Henter inntektopplysninger for behandling {}", behandling);
 
-        // FIXME: Henter bl.a. 2 mnd tilbake i tid for ikke påbegynt periode i stedet for 6 og setter default tom til 2 år etter fom
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())

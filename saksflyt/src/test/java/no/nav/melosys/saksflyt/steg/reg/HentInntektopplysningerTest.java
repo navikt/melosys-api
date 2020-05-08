@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -23,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,11 +48,13 @@ public class HentInntektopplysningerTest {
     @Before
     public void setUp() throws FunksjonellException, IntegrasjonException {
         agent = new HentInntektopplysninger(registeropplysningerService);
+        ReflectionTestUtils.setField(registeropplysningerService, "inntektshistorikkAntallMåneder", INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
 
         behandling = new Behandling();
         behandling.setId(222L);
         behandling.setFagsak(new Fagsak());
         behandling.setSaksopplysninger(new HashSet<>());
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -111,8 +115,8 @@ public class HentInntektopplysningerTest {
 
         agent.utførSteg(p);
 
-        YearMonth forventetFom = YearMonth.now().minusYears(2).minusMonths(INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
-        YearMonth forventetTom = forventetFom.plusYears(1);
+        YearMonth forventetFom = YearMonth.from(periode.getFom()).minusMonths(INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
+        YearMonth forventetTom = YearMonth.from(periode.getFom()).plusYears(1);
 
         verify(inntektService).hentInntektListe(brukerID, forventetFom, forventetTom);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ORG_OPPL);

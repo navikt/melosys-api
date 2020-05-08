@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
 
 /**
@@ -45,13 +47,14 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
+        LocalDate tom = periode.getTom() == null ? periode.getFom().plusYears(1) : periode.getTom();
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())
                 .fnr(brukerId)
                 .fom(periode.getFom())
-                .tom(periode.getTom())
+                .tom(tom)
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                     .arbeidsforholdopplysninger().build())
                 .build());

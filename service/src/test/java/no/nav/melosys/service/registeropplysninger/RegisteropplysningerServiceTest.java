@@ -61,13 +61,16 @@ public class RegisteropplysningerServiceTest {
 
     private Integer arbeidsforholdhistorikkAntallMåneder = 6;
     private Integer medlemskaphistorikkAntallÅr = 5;
+    private Integer inntektshistorikkAntallMåneder = 6;
+
 
     private RegisteropplysningerService registeropplysningerService;
 
     @Before
     public void setUp() throws Exception {
         registeropplysningerService = new RegisteropplysningerService(tpsFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            sakOgBehandlingFasade, inntektService, utbetaldataService, saksopplysningerService, arbeidsforholdhistorikkAntallMåneder, medlemskaphistorikkAntallÅr);
+            sakOgBehandlingFasade, inntektService, utbetaldataService, saksopplysningerService,
+            arbeidsforholdhistorikkAntallMåneder, medlemskaphistorikkAntallÅr, inntektshistorikkAntallMåneder);
         when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));

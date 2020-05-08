@@ -65,6 +65,7 @@ public class RegisteropplysningerService {
     private final SaksopplysningerService saksopplysningerService;
     private final Integer arbeidsforholdhistorikkAntallMåneder;
     private final Integer medlemskaphistorikkAntallÅr;
+    private final Integer inntektshistorikkAntallMåneder;
 
     @Autowired
     public RegisteropplysningerService(@Qualifier("system") TpsFasade tpsFasade,
@@ -76,7 +77,8 @@ public class RegisteropplysningerService {
                                        UtbetaldataService utbetaldataService,
                                        SaksopplysningerService saksopplysningerService,
                                        @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}") Integer arbeidsforholdhistorikkAntallMåneder,
-                                       @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr
+                                       @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr,
+                                       @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}") Integer inntektshistorikkAntallMåneder
     ) {
         this.tpsFasade = tpsFasade;
         this.medlPeriodeService = medlPeriodeService;
@@ -89,6 +91,7 @@ public class RegisteropplysningerService {
         this.saksopplysningerService = saksopplysningerService;
         this.arbeidsforholdhistorikkAntallMåneder = arbeidsforholdhistorikkAntallMåneder;
         this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
+        this.inntektshistorikkAntallMåneder = inntektshistorikkAntallMåneder;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)
@@ -172,7 +175,7 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom);
+        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom, behandling.erBehandlingAvSøknad());
         Saksopplysning saksopplysning = inntektService.hentInntektListe(registeropplysningerRequest.getFnr(), periodeForYtelser.fom, periodeForYtelser.tom);
 
         return List.of(saksopplysning);
@@ -192,7 +195,7 @@ public class RegisteropplysningerService {
             fom = treÅrTilbake;
         }
 
-        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom);
+        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom, false);
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
 
         return List.of(saksopplysning);
@@ -227,23 +230,23 @@ public class RegisteropplysningerService {
         return List.of(saksopplysning);
     }
 
-    private static Periode hentPeriodeForYtelser(LocalDate fom, LocalDate tom) {
+    private Periode hentPeriodeForYtelser(LocalDate fom, LocalDate tom, boolean erBehandlingAvSøknad) {
 
         YearMonth fomMnd;
         YearMonth tomMnd;
 
         LocalDate nå = LocalDate.now();
         if (tom == null) {
-            fomMnd = YearMonth.from(fom);
-            tomMnd = YearMonth.from(fom.plusYears(2));
+            fomMnd = YearMonth.from(erBehandlingAvSøknad ? fom.minusMonths(inntektshistorikkAntallMåneder) : fom);
+            tomMnd = YearMonth.from(fom.plusYears(erBehandlingAvSøknad ? 1 : 2));
         } else if (fom.isBefore(nå) && tom.isAfter(nå)) { //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
-            fomMnd = YearMonth.from(fom.minusMonths(2L));
+            fomMnd = YearMonth.from(fom.minusMonths(erBehandlingAvSøknad ? inntektshistorikkAntallMåneder : 2L));
             tomMnd = YearMonth.from(tom);
         } else if (fom.isAfter(nå)) { //2. Periode ikke påbegynt. Inneværende mnd og 2 mnd tilbake
-            fomMnd = YearMonth.from(nå.minusMonths(2L));
+            fomMnd = YearMonth.from(nå.minusMonths(erBehandlingAvSøknad ? inntektshistorikkAntallMåneder : 2L));
             tomMnd = YearMonth.from(nå);
         } else { //3. Avsluttet: sjekker hele periode
-            fomMnd = YearMonth.from(fom);
+            fomMnd = YearMonth.from(erBehandlingAvSøknad ? fom.minusMonths(6L) : fom);
             tomMnd = YearMonth.from(tom);
         }
 
