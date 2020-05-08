@@ -17,6 +17,6 @@ public enum MedlemsperiodeType {
             return behandlingsresultat.finnValidertUtpekingsperiode().isPresent() ? UTPEKINGSPERIODE : LOVVALGSPERIODE;
         }
 
-        return MedlemsperiodeType.INGEN;
+        return INGEN;
     }
 }

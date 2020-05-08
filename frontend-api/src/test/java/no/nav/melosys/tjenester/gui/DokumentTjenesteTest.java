@@ -15,6 +15,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.DokumentVisningService;
+import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
 import org.junit.Before;
@@ -66,11 +67,13 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentSedForhåndsvisning() throws MelosysException {
+    public void hentSedForhåndsvisning() throws MelosysException, IOException {
         final byte[] MOCK_PDF = "bytes fra en pdf".getBytes();
-        when(eessiService.genererSedPdf(anyLong(), any())).thenReturn(MOCK_PDF);
+        when(eessiService.genererSedPdf(anyLong(), any(), any())).thenReturn(MOCK_PDF);
+        SedPdfData sedPdfData = new SedPdfData("tada", null, "DK", "neida");
 
-        ResponseEntity response = dokumentTjeneste.produserUtkastSed(1L, SedType.A001);
+        ResponseEntity response = dokumentTjeneste.produserUtkastSed(1L, SedType.A001, sedPdfData);
         assertThat(response.getBody()).isEqualTo(MOCK_PDF);
+        valider(sedPdfData, "dokumenter-pdf-utkast-sed-post-schema.json");
     }
 }
