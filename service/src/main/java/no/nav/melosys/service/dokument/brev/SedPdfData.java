@@ -6,25 +6,35 @@ import org.apache.commons.lang3.BooleanUtils;
 
 public class SedPdfData {
 
-    private String begrunnelse;
-    private Boolean etterspørInformasjon;
+    private String begrunnelseUtenlandskMyndighet;
+    private Boolean vilSendeAnmodningOmMerInformasjon;
     private String nyttLovvalgsland;
     private String fritekst;
 
-    public String getBegrunnelse() {
-        return begrunnelse;
+    public SedPdfData() {
     }
 
-    public void setBegrunnelse(String begrunnelse) {
-        this.begrunnelse = begrunnelse;
+    public SedPdfData(String begrunnelseUtenlandskMyndighet, Boolean vilSendeAnmodningOmMerInformasjon, String nyttLovvalgsland, String fritekst) {
+        this.begrunnelseUtenlandskMyndighet = begrunnelseUtenlandskMyndighet;
+        this.vilSendeAnmodningOmMerInformasjon = vilSendeAnmodningOmMerInformasjon;
+        this.nyttLovvalgsland = nyttLovvalgsland;
+        this.fritekst = fritekst;
     }
 
-    public Boolean isEtterspørInformasjon() {
-        return etterspørInformasjon;
+    public String getBegrunnelseUtenlandskMyndighet() {
+        return begrunnelseUtenlandskMyndighet;
     }
 
-    public void setEtterspørInformasjon(Boolean etterspørInformasjon) {
-        this.etterspørInformasjon = etterspørInformasjon;
+    public void setBegrunnelseUtenlandskMyndighet(String begrunnelseUtenlandskMyndighet) {
+        this.begrunnelseUtenlandskMyndighet = begrunnelseUtenlandskMyndighet;
+    }
+
+    public Boolean isVilSendeAnmodningOmMerInformasjon() {
+        return vilSendeAnmodningOmMerInformasjon;
+    }
+
+    public void setVilSendeAnmodningOmMerInformasjon(Boolean vilSendeAnmodningOmMerInformasjon) {
+        this.vilSendeAnmodningOmMerInformasjon = vilSendeAnmodningOmMerInformasjon;
     }
 
     public String getNyttLovvalgsland() {
@@ -48,7 +58,7 @@ public class SedPdfData {
 
         //OK å alltid sette denne. Blir ikke brukt med mindre A004-pdf skal produseres
         sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
-            nyttLovvalgsland, begrunnelse, BooleanUtils.toBooleanDefaultIfNull(etterspørInformasjon, false)
+            nyttLovvalgsland, begrunnelseUtenlandskMyndighet, BooleanUtils.toBooleanDefaultIfNull(vilSendeAnmodningOmMerInformasjon, false)
         ));
 
         sedDataDto.setYtterligereInformasjon(fritekst);

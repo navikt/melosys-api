@@ -355,7 +355,7 @@ public class EessiServiceTest {
         when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
 
         SedPdfData sedPdfData = new SedPdfData();
-        sedPdfData.setEtterspørInformasjon(null);
+        sedPdfData.setVilSendeAnmodningOmMerInformasjon(null);
         sedPdfData.setNyttLovvalgsland("SE");
         byte[] pdf = eessiService.genererSedPdf(1L, SedType.A001, sedPdfData);
 
