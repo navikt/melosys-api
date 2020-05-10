@@ -1,12 +1,16 @@
 package no.nav.melosys.service.behandling.jobb;
 
+import java.util.Collections;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -27,19 +31,24 @@ public class AvsluttArt13BehandlingService {
     private final FagsakService fagsakService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    public AvsluttArt13BehandlingService(BehandlingService behandlingService, FagsakService fagsakService, BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+    public AvsluttArt13BehandlingService(BehandlingService behandlingService,
+                                         FagsakService fagsakService,
+                                         BehandlingsresultatService behandlingsresultatService,
+                                         MedlPeriodeService medlPeriodeService,
+                                         LovvalgsperiodeService lovvalgsperiodeService) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
     public void avsluttBehandlingHvisToMndPassert(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        validerErArtikkel13(behandlingsresultat);
 
         if (toMndHarPassertSidenSaksbehandling(behandling, behandlingsresultat)) {
             avsluttBehandling(behandling, behandlingsresultat);
@@ -47,28 +56,26 @@ public class AvsluttArt13BehandlingService {
     }
 
     private void avsluttBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException, TekniskException {
-        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), behandling, Saksstatuser.LOVVALG_AVKLART);
 
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+        log.info("To måneder har passert siden saksbehandling for behandling {}. Forsøker å avslutte den", behandling.getId());
+        Lovvalgsperiode lovvalgsperiode = hentEllerLagLovvalgsperiode(behandlingsresultat);
 
-        if (lovvalgsperiode.getMedlPeriodeID() == null) {
+        if (!lovvalgsperiode.erArtikkel13()) {
+            throw new FunksjonellException("Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse"
+                + lovvalgsperiode.getBestemmelse());
+        } else if (lovvalgsperiode.getMedlPeriodeID() == null) {
             throw new FunksjonellException("Behandling " + behandling.getId()
-                + " har en lovvalgsperiode som ikke er registrert i medl. Kan ikke avslutte art13 behandling automatisk");
+                + " har en medlemskapsperiode som ikke er registrert i medl. Kan ikke avslutte art13 behandling automatisk");
         }
+
+        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), behandling, Saksstatuser.LOVVALG_AVKLART);
 
         medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
         log.info("Behandling {} avsluttet og satt til endelig i Medl", behandling.getId());
     }
 
-    private void validerErArtikkel13(Behandlingsresultat behandlingsresultat) throws FunksjonellException {
-        if (!behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel13()) {
-            throw new FunksjonellException("Behandling skal ikke avsluttes automatisk da den er av bestemmelse"
-                + behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse());
-        }
-    }
-
     private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
-        if (behandling.kanResultereIVedtak()) {
+        if (behandling.kanResultereIVedtak() && !behandlingsresultat.harUtpektAnnetLand()) {
 
             if (!behandlingsresultat.harVedtak()) {
                 throw new FunksjonellException("Behandling " + behandling.getId() +
@@ -79,5 +86,19 @@ public class AvsluttArt13BehandlingService {
         }
 
         return datoEldreEnn2Mnd(behandlingsresultat.getEndretDato());
+    }
+
+    private Lovvalgsperiode hentEllerLagLovvalgsperiode(Behandlingsresultat behandlingsresultat) {
+        if (behandlingsresultat.harUtpektAnnetLand()) {
+            return opprettLovvalgsperiode(behandlingsresultat.getId(), behandlingsresultat.hentValidertUtpekingsperiode());
+        } else {
+            return behandlingsresultat.hentValidertLovvalgsperiode();
+        }
+    }
+
+
+    private Lovvalgsperiode opprettLovvalgsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {
+        return lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(Lovvalgsperiode.av(utpekingsperiode)))
+            .stream().findFirst().orElseThrow(() -> new IllegalStateException("Feil ved lagring av lovvalgsperiode"));
     }
 }

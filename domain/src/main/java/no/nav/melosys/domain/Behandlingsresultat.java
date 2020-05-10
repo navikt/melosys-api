@@ -268,9 +268,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
             return hentValidertLovvalgsperiode();
         } else if (!anmodningsperioder.isEmpty()){
             return hentValidertAnmodningsperiode();
-        } else {
+        } else if (!utpekingsperioder.isEmpty()){
             return hentValidertUtpekingsperiode();
         }
+
+        throw new NoSuchElementException("Ingen medlemskapsperiode finnes for behandling " + id);
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
@@ -324,6 +326,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean harVedtak() {
         return vedtakMetadata != null;
     }
+
+    public boolean harUtpektAnnetLand() {
+        return finnValidertUtpekingsperiode().map(Utpekingsperiode::getSendtUtland).isPresent();
+    }
+
 
     @Override
     public String toString() {
