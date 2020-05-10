@@ -33,7 +33,11 @@ public class AvsluttArt13BehandlingService {
     private final MedlPeriodeService medlPeriodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    public AvsluttArt13BehandlingService(BehandlingService behandlingService, FagsakService fagsakService, BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService, LovvalgsperiodeService lovvalgsperiodeService) {
+    public AvsluttArt13BehandlingService(BehandlingService behandlingService,
+                                         FagsakService fagsakService,
+                                         BehandlingsresultatService behandlingsresultatService,
+                                         MedlPeriodeService medlPeriodeService,
+                                         LovvalgsperiodeService lovvalgsperiodeService) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;

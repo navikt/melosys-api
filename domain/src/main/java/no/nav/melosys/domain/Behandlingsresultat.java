@@ -328,7 +328,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean harUtpektAnnetLand() {
-        return behandling.erBehandlingAvSøknad() && !harVedtak() && finnValidertUtpekingsperiode().isPresent();
+        return finnValidertUtpekingsperiode().map(Utpekingsperiode::getSendtUtland).isPresent();
     }
 
 

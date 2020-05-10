@@ -147,6 +147,7 @@ public class AvsluttArt13BehandlingServiceTest {
 
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now().plusYears(1), Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, null);
         utpekingsperiode.setMedlPeriodeID(123L);
+        utpekingsperiode.setSendtUtland(LocalDate.now());
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
