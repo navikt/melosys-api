@@ -104,21 +104,22 @@ public class EessiServiceTest {
 
     @Test
     public void opprettOgSendSed_buc03_ingenMedlemsperiodeType() throws Exception {
-        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_03);
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_03, null, "fritekst");
         verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.INGEN));
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_03), eq(true));
+        verify(eessiConsumer).opprettBucOgSed(sedDataDtoCaptor.capture(), any(), eq(BucType.LA_BUC_03), eq(true));
+        assertThat(sedDataDtoCaptor.getValue().getYtterligereInformasjon()).isEqualTo("fritekst");
     }
 
     @Test
     public void opprettOgSendSed_buc01_medlemsperiodeTypeAnmodningsperiode() throws Exception {
-        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_01);
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_01, null, null);
         verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_01), eq(true));
     }
 
     @Test
     public void opprettOgSendSed_buc02IngenUtpekingsperiode_medlemsperiodeTypeLovvalgsperiode() throws Exception {
-        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_02);
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_02, null, null);
         verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.LOVVALGSPERIODE));
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_02), eq(true));
     }
@@ -126,14 +127,14 @@ public class EessiServiceTest {
     @Test
     public void opprettOgSendSed_buc02MedUtpekingsperiode_medlemsperiodeTypeUtpekingsperiode() throws Exception {
         behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
-        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_02);
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_02, null, null);
         verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.UTPEKINGSPERIODE));
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_02), eq(true));
     }
 
     @Test
     public void opprettOgSendSed_buc04_medlemsperiodeTypeLovvalgsperiode() throws Exception {
-        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_04);
+        eessiService.opprettOgSendSed(behandling.getId(), List.of("SE:123"), BucType.LA_BUC_04, null, null);
         verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(MedlemsperiodeType.LOVVALGSPERIODE));
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_04), eq(true));
     }

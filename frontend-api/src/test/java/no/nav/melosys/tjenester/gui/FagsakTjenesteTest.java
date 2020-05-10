@@ -350,6 +350,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         fagsakTjeneste.utpekLovvalgsland(fagsak.getSaksnummer(), utpekDto);
 
         verify(tilgangService).sjekkSak(fagsak);
-        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner());
+        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner(), utpekDto.getFritekstSed());
     }
 }

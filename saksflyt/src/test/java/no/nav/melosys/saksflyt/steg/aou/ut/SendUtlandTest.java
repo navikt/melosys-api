@@ -79,7 +79,7 @@ public class SendUtlandTest {
         sendUtland.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITSJON)), eq(BucType.LA_BUC_01), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITSJON)), eq(BucType.LA_BUC_01), isNull(), isNull());
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(BEHANDLING_ID));
     }
 
@@ -105,12 +105,13 @@ public class SendUtlandTest {
         prosessinstans.getBehandling().setId(2L);
         Instant nå = prosessinstans.getBehandling().getDokumentasjonSvarfristDato();
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
+        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "fritekst");
 
         sendUtland.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());
-        verify(eessiService, never()).opprettOgSendSed(anyLong(), any(), any());
+        verify(eessiService, never()).opprettOgSendSed(anyLong(), anyList(), eq(BucType.LA_BUC_01), isNull(), eq("fritekst"));
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(prosessinstans.getBehandling().getId()));
     }
 

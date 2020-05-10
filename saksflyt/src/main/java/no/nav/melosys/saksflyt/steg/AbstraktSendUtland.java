@@ -40,7 +40,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
             List<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {});
 
             if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
-                eessiService.opprettOgSendSed(behandlingID, mottakerinstitusjoner, bucType, vedlegg);
+                eessiService.opprettOgSendSed(behandlingID, mottakerinstitusjoner, bucType, vedlegg, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
                 sendUtlandStatus = SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);

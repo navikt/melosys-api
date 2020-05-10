@@ -151,7 +151,7 @@ public class FagsakTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
 
-        utpekingService.utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner());
+        utpekingService.utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner(), utpekDto.getFritekstSed());
 
         return ResponseEntity.noContent().build();
     }

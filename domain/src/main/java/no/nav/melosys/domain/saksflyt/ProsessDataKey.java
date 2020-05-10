@@ -56,7 +56,8 @@ public enum ProsessDataKey {
     UTPEKING_AVVIS("utpekingAvvis"),
     UTPEKT_LAND("utpektLand"),
     VARSLE_UTLAND("varsleUtland"),
-    VEDTAKSTYPE("vedtakstype");
+    VEDTAKSTYPE("vedtakstype"),
+    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
 
     private String kode;
 

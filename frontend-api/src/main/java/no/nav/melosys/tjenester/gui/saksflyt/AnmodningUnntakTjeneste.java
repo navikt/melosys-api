@@ -33,7 +33,7 @@ public class AnmodningUnntakTjeneste {
     @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
     public ResponseEntity anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID, @RequestBody AnmodningUnntakDto anmodningUnntakDto) throws MelosysException {
         tilgangService.sjekkTilgang(behandlingID);
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, anmodningUnntakDto.getMottakerinstitusjon());
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, anmodningUnntakDto.getMottakerinstitusjon(), anmodningUnntakDto.getFritekstSed());
         return ResponseEntity.ok().build();
     }
 
