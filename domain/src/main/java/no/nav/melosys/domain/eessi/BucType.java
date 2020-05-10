@@ -24,7 +24,9 @@ public enum BucType {
     H_BUC_07,
     H_BUC_08,
     H_BUC_09,
-    H_BUC_10;
+    H_BUC_10,
+
+    UB_BUC_01;
 
     public static BucType fraBestemmelse(LovvalgBestemmelse bestemmelse) {
         if (bestemmelse instanceof Lovvalgbestemmelser_883_2004) {
