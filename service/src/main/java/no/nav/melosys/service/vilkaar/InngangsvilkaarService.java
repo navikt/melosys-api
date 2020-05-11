@@ -57,7 +57,7 @@ public class InngangsvilkaarService {
         throws FunksjonellException, TekniskException {
         Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
         if (statsborgerskap == null) {
-            return new InngangsvilkaarVurdering(false, Inngangsvilkaar.NORDISK_UTENFOR_EOS); // FIXME erstattes med kode om manglende statsborgerskap
+            return new InngangsvilkaarVurdering(false, Inngangsvilkaar.MANGLER_STATSBORGERSKAP);
         }
 
         var landkoderISO3 = tilIso3(søknadsland.landkoder);
@@ -72,9 +72,10 @@ public class InngangsvilkaarService {
             if (log.isErrorEnabled()) {
                 log.error("Vurdering av inngangsvilkår feilet: {}", String.join(System.lineSeparator(), feilmeldinger));
             }
-            return new InngangsvilkaarVurdering(false, Inngangsvilkaar.TREDJELANDSBORGER); // FIXME erstattes med kode om teknisk feil)
+            return new InngangsvilkaarVurdering(false, Inngangsvilkaar.TEKNISK_FEIL);
         } else {
-            return new InngangsvilkaarVurdering(res.kvalifisererForEf883_2004, null); // FIXME trenger vi en kode hvis kvalifisererForEf883_2004 == false?
+            // Vurdering fra regelmodul gir ikke begrunnelser så langt.
+            return new InngangsvilkaarVurdering(res.kvalifisererForEf883_2004, null);
         }
     }
 
