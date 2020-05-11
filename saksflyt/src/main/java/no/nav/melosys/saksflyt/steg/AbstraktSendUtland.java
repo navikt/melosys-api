@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -37,10 +38,11 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         SendUtlandStatus sendUtlandStatus = SendUtlandStatus.IKKE_SENDT;
 
         if (skalSendesUtland(behandlingsresultat)) {
-            List<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {});
+            // TODO Endres til Set<String> når DB er tom for duplikater for å unngå IllegalArgumentException ved bruk av Set<String>
+            Collection<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Collection<String>>() {});
 
             if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
-                eessiService.opprettOgSendSed(behandlingID, mottakerinstitusjoner, bucType, vedlegg, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+                eessiService.opprettOgSendSed(behandlingID, mottakerinstitusjoner.stream().distinct().collect(Collectors.toList()), bucType, vedlegg, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
                 sendUtlandStatus = SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);

@@ -104,7 +104,7 @@ public class ProsessinstansServiceTest {
     public void opprettProsessinstansAnmodningOmUnntak() {
         final String mottakerInstitusjon = "SE:123";
         Behandling behandling = new Behandling();
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, List.of(mottakerInstitusjon), "FRITEKST_SED");
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, Set.of(mottakerInstitusjon), "FRITEKST_SED");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -122,7 +122,7 @@ public class ProsessinstansServiceTest {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         String mottakerInstitusjon = "DE:2332";
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", "FRITEKST_SED", List.of(mottakerInstitusjon), vedtakstype, "BEGRUNNELSE");
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon), vedtakstype, "BEGRUNNELSE");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 

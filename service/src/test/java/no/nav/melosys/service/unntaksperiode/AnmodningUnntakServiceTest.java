@@ -75,7 +75,7 @@ public class AnmodningUnntakServiceTest {
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed);
 
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anyList(), eq(fritekstSed));
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
 

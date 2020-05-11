@@ -2,7 +2,7 @@ package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
@@ -136,7 +136,7 @@ public class ProsessinstansService {
         logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler, prosessinstans.getId(), prosessinstans.getType());
     }
 
-    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, List<String> mottakerInstitusjon, String ytterligereInformasjonSed) {
+    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon, String ytterligereInformasjonSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medSteg(ProsessSteg.AOU_VALIDERING)
@@ -171,7 +171,7 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                                                     String fritekst, String fritekstSed, List<String> mottakerinstitusjoner,
+                                                     String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                                                      Vedtakstyper vedtakstype, String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
@@ -302,13 +302,13 @@ public class ProsessinstansService {
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
-            .medEessiMottakere(mottakerInstitusjoner != null ? List.of(mottakerInstitusjoner) : null)
+            .medEessiMottakere(mottakerInstitusjoner != null ? Set.of(mottakerInstitusjoner) : null)
             .build();
 
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, List<String> mottakerinstitusjoner, String ytterligereInformasjonSed) {
+    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, Set<String> mottakerinstitusjoner, String ytterligereInformasjonSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEK_LAND)
             .medSteg(ProsessSteg.UL_OPPDATER_MEDL)

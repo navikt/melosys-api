@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -397,7 +394,7 @@ public class EessiServiceTest {
 
         final String mottakerBelgia = "BE:12222";
         final String mottakerTyskland = "DE:4444";
-        final List<String> valgteMottakerInstitusjoner = List.of(mottakerBelgia, mottakerTyskland);
+        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia, mottakerTyskland);
 
         final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
         final Institusjon institusjonBelgia2 = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
@@ -410,7 +407,7 @@ public class EessiServiceTest {
         when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
             .thenReturn(List.of(institusjonTyskland1, institusjonTyskland2));
 
-        List<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
+        Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
         verify(eessiConsumer, times(2)).hentMottakerinstitusjoner(eq(bucType.name()), anyString());
         assertThat(avklarteMottakerInstitusjoner).isEqualTo(valgteMottakerInstitusjoner);
     }
@@ -422,7 +419,7 @@ public class EessiServiceTest {
 
         final String mottakerBelgia = "BE:12222";
         final String mottakerTyskland = "DE:4444";
-        final List<String> valgteMottakerInstitusjoner = List.of(mottakerBelgia, mottakerTyskland);
+        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia, mottakerTyskland);
 
         final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
         final Institusjon institusjonBelgia2 = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
@@ -432,7 +429,7 @@ public class EessiServiceTest {
         when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
             .thenReturn(Collections.emptyList());
 
-        List<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
+        Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
         verify(eessiConsumer, times(2)).hentMottakerinstitusjoner(eq(bucType.name()), anyString());
         assertThat(avklarteMottakerInstitusjoner).isEmpty();
     }
@@ -444,7 +441,7 @@ public class EessiServiceTest {
 
         final String mottakerBelgia = "BE:12222";
         final String mottakerTyskland = "DE:4444";
-        final List<String> valgteMottakerInstitusjoner = List.of(mottakerBelgia);
+        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia);
 
         final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
         final Institusjon institusjonBelgia2 = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
@@ -471,7 +468,7 @@ public class EessiServiceTest {
         final String mottakerBelgia = "BE:12222";
         final String mottakerBelgia2 = "BE:123131";
         final String mottakerTyskland = "DE:4444";
-        final List<String> valgteMottakerInstitusjoner = List.of(mottakerBelgia, mottakerBelgia2, mottakerTyskland);
+        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia, mottakerBelgia2, mottakerTyskland);
 
         final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
         final Institusjon institusjonBelgia2 = new Institusjon(mottakerBelgia2, null, Landkoder.BE.getKode());
@@ -495,7 +492,7 @@ public class EessiServiceTest {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
 
-        final List<String> valgteMottakerInstitusjoner = Collections.emptyList();
+        final Set<String> valgteMottakerInstitusjoner = Collections.emptySet();
 
         final Institusjon institusjonBelgia = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
         final Institusjon institusjonTyskland = new Institusjon("DE:9999", null, Landkoder.DE.getKode());
@@ -518,7 +515,7 @@ public class EessiServiceTest {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
 
-        final List<String> valgteMottakerInstitusjoner = Collections.emptyList();
+        final Set<String> valgteMottakerInstitusjoner = Collections.emptySet();
 
         final Institusjon institusjonBelgia = new Institusjon("BE:44444", null, Landkoder.BE.getKode());
 
@@ -527,7 +524,7 @@ public class EessiServiceTest {
         when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
             .thenReturn(Collections.emptyList());
 
-        List<String> avklarteMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
+        Set<String> avklarteMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
         assertThat(avklarteMottakere).isEmpty();
     }
 

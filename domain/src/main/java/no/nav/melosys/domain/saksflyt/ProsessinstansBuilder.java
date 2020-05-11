@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.saksflyt;
 
-import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +13,7 @@ public class ProsessinstansBuilder {
     private Object begrunnelser;
     private String begrunnelseFritekst;
     private String ytterligereInformasjonSed;
-    private List<String> eessiMottakere;
+    private Set<String> eessiMottakere;
 
     public ProsessinstansBuilder medType(ProsessType type) {
         this.type = type;
@@ -45,7 +45,7 @@ public class ProsessinstansBuilder {
         return this;
     }
 
-    public ProsessinstansBuilder medEessiMottakere(List<String> eessiMottakere) {
+    public ProsessinstansBuilder medEessiMottakere(Set<String> eessiMottakere) {
         this.eessiMottakere = eessiMottakere;
         return this;
     }

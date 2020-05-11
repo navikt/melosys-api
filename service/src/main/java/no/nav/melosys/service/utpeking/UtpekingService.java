@@ -3,6 +3,7 @@ package no.nav.melosys.service.utpeking;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -76,7 +77,7 @@ public class UtpekingService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void utpekLovvalgsland(Fagsak fagsak, List<String> mottakerinstitusjoner, String ytterligereInformasjonSed) throws MelosysException {
+    public void utpekLovvalgsland(Fagsak fagsak, Set<String> mottakerinstitusjoner, String ytterligereInformasjonSed) throws MelosysException {
         long behandlingID = fagsak.getAktivBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 

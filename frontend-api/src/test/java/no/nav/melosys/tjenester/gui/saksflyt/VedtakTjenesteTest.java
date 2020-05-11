@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -61,7 +61,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     public void fattVedtak_henleggelse_fungerer() throws MelosysException, IOException {
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtakDto.setMottakerinstitusjoner(List.of("SE:4343"));
+        fattVedtakDto.setMottakerinstitusjoner(Set.of("SE:4343"));
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
