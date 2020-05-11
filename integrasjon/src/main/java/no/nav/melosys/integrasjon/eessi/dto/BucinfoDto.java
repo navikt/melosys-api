@@ -2,8 +2,9 @@ package no.nav.melosys.integrasjon.eessi.dto;
 
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.eessi.BucInformasjon;
@@ -13,7 +14,7 @@ public class BucinfoDto {
     private String id;
     private String bucType;
     private Long opprettetDato;
-    private List<String> mottakerinstitusjoner = new ArrayList<>();
+    private Set<String> mottakerinstitusjoner = new HashSet<>();
     private List<SedinfoDto> seder;
 
     public BucinfoDto() {
@@ -73,11 +74,11 @@ public class BucinfoDto {
         this.opprettetDato = opprettetDato;
     }
 
-    public List<String> getMottakerinstitusjoner() {
+    public Set<String> getMottakerinstitusjoner() {
         return mottakerinstitusjoner;
     }
 
-    public void setMottakerinstitusjoner(List<String> mottakerinstitusjoner) {
+    public void setMottakerinstitusjoner(Set<String> mottakerinstitusjoner) {
         this.mottakerinstitusjoner = mottakerinstitusjoner;
     }
 
