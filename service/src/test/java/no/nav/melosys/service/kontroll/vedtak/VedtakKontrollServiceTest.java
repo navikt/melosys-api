@@ -108,7 +108,7 @@ public class VedtakKontrollServiceTest {
         personDokument.bostedsadresse = new Bostedsadresse();
 
         Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
-        assertThat(resultat).contains(Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
+        assertThat(resultat).contains(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
     }
 
 }

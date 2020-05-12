@@ -20,7 +20,7 @@ final class VedtakKontroller {
             BehandlingsgrunnlagData grunnlagData = kontrollData.getBehandlingsgrunnlagData();
             StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
             if (oppgittAdresse.erTom()) {
-                return Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND;
+                return Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE;
             }
         }
         return null;
