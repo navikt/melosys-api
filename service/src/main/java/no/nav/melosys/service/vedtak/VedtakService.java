@@ -83,7 +83,7 @@ public class VedtakService {
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         if (behandlingsresultat.erInnvilgelse()) {
-            validerInnvilgelse(behandlingID, vedtakstype, behandling, behandlingsresultat);
+            validerInnvilgelse(vedtakstype, behandling, behandlingsresultat);
         }
 
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandlingID, mottakerinstitusjoner, behandlingsresultat);
@@ -95,8 +95,7 @@ public class VedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerInnvilgelse(long behandlingID,
-                                    Vedtakstyper vedtakstype,
+    private void validerInnvilgelse(Vedtakstyper vedtakstype,
                                     Behandling behandling,
                                     Behandlingsresultat behandlingsresultat) throws MelosysException {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
@@ -104,7 +103,7 @@ public class VedtakService {
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
-                .behandlingID(behandlingID)
+                .behandlingID(behandling.getId())
                 .fnr(fnr)
                 .fom(lovvalgsperiode.getFom())
                 .tom(lovvalgsperiode.getTom())
@@ -112,7 +111,7 @@ public class VedtakService {
                     .medlemskapsopplysninger().build())
                 .build());
 
-        kontrollerFattVedtak(behandlingID, vedtakstype);
+        kontrollerFattVedtak(behandling.getId(), vedtakstype);
     }
 
     private List<String> validerOgAvklarMottakerInstitusjoner(long behandlingID,

@@ -21,7 +21,7 @@ final class VedtakKontrollData extends KontrollData {
         this.lovvalgsperiode = lovvalgsperiode;
     }
 
-    public BehandlingsgrunnlagData getBehandlingsgrunnlagData() {
+    BehandlingsgrunnlagData getBehandlingsgrunnlagData() {
         return behandlingsgrunnlagData;
     }
 
