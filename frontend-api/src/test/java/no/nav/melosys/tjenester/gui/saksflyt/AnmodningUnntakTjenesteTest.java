@@ -33,13 +33,15 @@ public class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
     public void anmodningOmUnntak_fungerer() throws Exception {
         final long behandlingID = 3;
         final String mottakerInstitusjon = "SE:321";
+        final String fritekstSed = "hei hei";
 
         AnmodningUnntakDto dto = new AnmodningUnntakDto();
         dto.setMottakerinstitusjon(mottakerInstitusjon);
+        dto.setFritekstSed(fritekstSed);
         anmodningUnntakTjeneste.anmodningOmUnntak(behandlingID, dto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(anmodningUnntakService).anmodningOmUnntak(eq(behandlingID), eq(mottakerInstitusjon));
+        verify(anmodningUnntakService).anmodningOmUnntak(eq(behandlingID), eq(mottakerInstitusjon), eq(fritekstSed));
 
         valider(dto, ANMODNING_UNNTAK_POST_SCHEMA);
     }

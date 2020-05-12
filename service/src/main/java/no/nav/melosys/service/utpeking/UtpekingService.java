@@ -76,7 +76,7 @@ public class UtpekingService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void utpekLovvalgsland(Fagsak fagsak, List<String> mottakerinstitusjoner) throws MelosysException {
+    public void utpekLovvalgsland(Fagsak fagsak, List<String> mottakerinstitusjoner, String ytterligereInformasjonSed) throws MelosysException {
         long behandlingID = fagsak.getAktivBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
@@ -93,7 +93,9 @@ public class UtpekingService {
             BucType.LA_BUC_02
         );
 
-        prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner);
+        prosessinstansService.opprettProsessinstansUtpekAnnetLand(
+            behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed
+        );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 

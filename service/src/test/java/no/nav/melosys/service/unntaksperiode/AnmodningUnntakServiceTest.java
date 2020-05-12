@@ -65,6 +65,7 @@ public class AnmodningUnntakServiceTest {
     public void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws MelosysException {
         final long behandlingID = 1L;
         final String mottakerInstitusjon = "SE:432";
+        final String fritekstSed = "friteksssst";
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
@@ -72,9 +73,9 @@ public class AnmodningUnntakServiceTest {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon);
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed);
 
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anyList());
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anyList(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
 

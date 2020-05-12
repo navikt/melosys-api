@@ -67,7 +67,7 @@ public class UtpekAnnetLandSendUtlandTest {
 
         utpekAnnetLandSendUtland.utfør(prosessinstans);
 
-        verify(eessiService).opprettOgSendSed(123L, List.of("SE:001", "SE:002"), LA_BUC_02, null);
+        verify(eessiService).opprettOgSendSed(123L, List.of("SE:001", "SE:002"), LA_BUC_02, null, null);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(UL_OPPDATER_BEHANDLINGSRESULTAT);
     }
