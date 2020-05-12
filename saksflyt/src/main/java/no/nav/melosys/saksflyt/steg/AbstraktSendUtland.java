@@ -1,8 +1,5 @@
 package no.nav.melosys.saksflyt.steg;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.eessi.BucType;
@@ -15,6 +12,9 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 
@@ -38,11 +38,10 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         SendUtlandStatus sendUtlandStatus = SendUtlandStatus.IKKE_SENDT;
 
         if (skalSendesUtland(behandlingsresultat)) {
-            // TODO Endres til Set<String> når DB er tom for duplikater for å unngå IllegalArgumentException ved bruk av Set<String>
-            Collection<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Collection<String>>() {});
+            Set<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>() {});
 
             if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
-                eessiService.opprettOgSendSed(behandlingID, mottakerinstitusjoner.stream().distinct().collect(Collectors.toList()), bucType, vedlegg, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+                eessiService.opprettOgSendSed(behandlingID, new ArrayList<>(mottakerinstitusjoner), bucType, vedlegg, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
                 sendUtlandStatus = SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);
