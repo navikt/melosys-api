@@ -47,16 +47,15 @@ public class VedtakService {
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
     private final TpsFasade tpsFasade;
-    private final VedtakKontrollService vedtakKontrollService;
     private final RegisteropplysningerService registeropplysningerService;
+    private final VedtakKontrollService vedtakKontrollService;
 
     @Autowired
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
-                         TpsFasade tpsFasade,
-                         VedtakKontrollService vedtakKontrollService,
-                         RegisteropplysningerService registeropplysningerService) {
+                         TpsFasade tpsFasade, RegisteropplysningerService registeropplysningerService,
+                         VedtakKontrollService vedtakKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -64,8 +63,8 @@ public class VedtakService {
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
         this.tpsFasade = tpsFasade;
-        this.vedtakKontrollService = vedtakKontrollService;
         this.registeropplysningerService = registeropplysningerService;
+        this.vedtakKontrollService = vedtakKontrollService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -84,22 +83,41 @@ public class VedtakService {
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         if (behandlingsresultat.erInnvilgelse()) {
-            Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-            String fnr = tpsFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
-
-            registeropplysningerService.hentOgLagreOpplysninger(
-                RegisteropplysningerRequest.builder()
-                    .behandlingID(behandlingID)
-                    .fnr(fnr)
-                    .fom(lovvalgsperiode.getFom())
-                    .tom(lovvalgsperiode.getTom())
-                    .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                        .medlemskapsopplysninger().build())
-                    .build());
-
-            kontrollerFattVedtak(behandlingID, vedtakstype);
+            validerInnvilgelse(behandlingID, vedtakstype, behandling, behandlingsresultat);
         }
 
+        mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandlingID, mottakerinstitusjoner, behandlingsresultat);
+
+        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
+        behandlingService.lagre(behandling);
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType,
+            fritekst, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    private void validerInnvilgelse(long behandlingID,
+                                    Vedtakstyper vedtakstype,
+                                    Behandling behandling,
+                                    Behandlingsresultat behandlingsresultat) throws MelosysException {
+        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+        String fnr = tpsFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
+
+        registeropplysningerService.hentOgLagreOpplysninger(
+            RegisteropplysningerRequest.builder()
+                .behandlingID(behandlingID)
+                .fnr(fnr)
+                .fom(lovvalgsperiode.getFom())
+                .tom(lovvalgsperiode.getTom())
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .medlemskapsopplysninger().build())
+                .build());
+
+        kontrollerFattVedtak(behandlingID, vedtakstype);
+    }
+
+    private List<String> validerOgAvklarMottakerInstitusjoner(long behandlingID,
+                                                              List<String> mottakerinstitusjoner,
+                                                              Behandlingsresultat behandlingsresultat) throws MelosysException {
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         if (skalSendesSed(behandlingsresultat, landkoder)) {
             mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
@@ -110,11 +128,7 @@ public class VedtakService {
         } else {
             mottakerinstitusjoner = Collections.emptyList();
         }
-
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        behandlingService.lagre(behandling);
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType, fritekst, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        return mottakerinstitusjoner;
     }
 
     private void validerBehandlingstypeFattVedtak(Behandling behandling) throws FunksjonellException {
