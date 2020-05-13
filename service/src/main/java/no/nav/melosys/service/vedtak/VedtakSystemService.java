@@ -23,9 +23,9 @@ public class VedtakSystemService extends VedtakService {
                                @Qualifier("system") EessiService eessiService,
                                LandvelgerService landvelgerService,
                                TpsFasade tpsFasade,
-                               VedtakKontrollService vedtakKontrollService,
-                               RegisteropplysningerService registeropplysningerService) {
+                               RegisteropplysningerService registeropplysningerService,
+                               VedtakKontrollService vedtakKontrollService) {
         super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, tpsFasade, vedtakKontrollService, registeropplysningerService);
+            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService);
     }
 }

@@ -79,4 +79,8 @@ public class PersonDokument implements SaksopplysningDokument {
             postadresse.erTom() &&
             midlertidigPostadresse.land == null;
     }
+
+    public boolean manglerBostedsadresse() {
+        return bostedsadresse.erTom();
+    }
 }

@@ -24,6 +24,7 @@ class VedtakKontrollFactory {
 
     private static Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> vedtakKontroller() {
         return Set.of(
+            VedtakKontroller::bostedsadresseForA1,
             VedtakKontroller::overlappendeMedlemsperiode,
             VedtakKontroller::periodeOver24Mnd
         );

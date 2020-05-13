@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -42,8 +44,11 @@ public class VedtakKontrollService {
         Lovvalgsperiode lovvalgsperiode,
         Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> kontroller
     ) throws TekniskException {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         MedlemskapDokument medlemskapDokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
-        VedtakKontrollData vedtakKontrollData = new VedtakKontrollData(medlemskapDokument, lovvalgsperiode);
+        PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
+        VedtakKontrollData vedtakKontrollData = new VedtakKontrollData(medlemskapDokument,
+            personDokument, behandlingsgrunnlagData, lovvalgsperiode);
         return kontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))
             .filter(Objects::nonNull)
