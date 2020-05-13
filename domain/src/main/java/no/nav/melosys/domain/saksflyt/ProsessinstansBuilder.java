@@ -12,6 +12,7 @@ public class ProsessinstansBuilder {
     private Behandling behandling;
     private Object begrunnelser;
     private String begrunnelseFritekst;
+    private String ytterligereInformasjonSed;
     private List<String> eessiMottakere;
 
     public ProsessinstansBuilder medType(ProsessType type) {
@@ -39,6 +40,11 @@ public class ProsessinstansBuilder {
         return this;
     }
 
+    public ProsessinstansBuilder medYtterligereinformasjonSed(String ytterligereInformasjonSed) {
+        this.ytterligereInformasjonSed = ytterligereInformasjonSed;
+        return this;
+    }
+
     public ProsessinstansBuilder medEessiMottakere(List<String> eessiMottakere) {
         this.eessiMottakere = eessiMottakere;
         return this;
@@ -55,6 +61,9 @@ public class ProsessinstansBuilder {
         }
         if (StringUtils.isNotEmpty(begrunnelseFritekst)) {
             pi.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
+        }
+        if (StringUtils.isNotEmpty(ytterligereInformasjonSed)) {
+            pi.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, ytterligereInformasjonSed);
         }
         if (!CollectionUtils.isEmpty(eessiMottakere)) {
             pi.setData(ProsessDataKey.EESSI_MOTTAKERE, eessiMottakere);

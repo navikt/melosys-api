@@ -135,11 +135,11 @@ public class VedtakServiceTest {
             .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));
 
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", mottakerinstitusjoner, vedtakstype, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", "FRITEKST_SED", mottakerinstitusjoner, vedtakstype, null);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq(mottakerinstitusjoner), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq("FRITEKST_SED"), eq(mottakerinstitusjoner), eq(vedtakstype), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 
@@ -155,11 +155,11 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", null, vedtakstype, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", "FRITEKST_SED", null, vedtakstype, null);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), anyList(), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq("FRITEKST_SED"), anyList(), eq(vedtakstype), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 
@@ -178,8 +178,8 @@ public class VedtakServiceTest {
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
         behandlingsresultat.setType(resultatType);
 
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST",null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq("FRITEKST"), anyList(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", "FRITEKST_SED", null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq("FRITEKST"), eq("FRITEKST_SED"), anyList(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
     @Test
@@ -189,10 +189,10 @@ public class VedtakServiceTest {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
         behandlingsresultat.setType(resultatType);
 
-        vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService)
-            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), anyList(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anyList(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
     @Test
@@ -203,9 +203,9 @@ public class VedtakServiceTest {
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         behandlingsresultat.setType(resultatType);
 
-        vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         verify(eessiService, never()).landErEessiReady(anyString(), anyString());
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), anyList(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anyList(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
     @Test
@@ -224,7 +224,7 @@ public class VedtakServiceTest {
 
         ValideringException forventetException = null;
         try {
-            vedtakService.fattVedtak(behandlingID, resultatType, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+            vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         } catch (ValideringException ex) {
             forventetException = ex;
         }
@@ -240,7 +240,7 @@ public class VedtakServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Kan ikke fatte vedtak ved behandlingstema ");
 
-        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
     }
 
     @Test
@@ -250,10 +250,10 @@ public class VedtakServiceTest {
         myndighet.setInstitusjonId("SE:SE001");
         behandling.getFagsak().setAktører(Set.of(myndighet));
 
-        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST");
+        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST", "FRITEKST_SED");
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), any());
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), eq("FRITEKST"), eq("FRITEKST_SED"));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }

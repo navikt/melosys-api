@@ -38,7 +38,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(),
+        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(), fattVedtakDto.getFritekstSed(),
             fattVedtakDto.getMottakerinstitusjoner(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
         return ResponseEntity.ok().build();
     }
@@ -51,7 +51,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("BegrunnelseKode mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst());
+        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
         return ResponseEntity.ok().build();
     }
 }

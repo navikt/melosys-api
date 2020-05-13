@@ -86,7 +86,7 @@ public class SendVedtakUtlandTest {
     public void utførSteg_artikkel12Suksessfull_statusErAvgiftsoppgave() throws Exception {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), isNull(), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
@@ -95,7 +95,7 @@ public class SendVedtakUtlandTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_02), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_02), isNull(), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
@@ -113,7 +113,7 @@ public class SendVedtakUtlandTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B);
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(null));
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), isNull(), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 
@@ -134,7 +134,7 @@ public class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans);
 
         ArgumentCaptor<List<String>> captor = ArgumentCaptor.forClass(List.class);
-        verify(eessiService).opprettOgSendSed(anyLong(), captor.capture(), any(), any());
+        verify(eessiService).opprettOgSendSed(anyLong(), captor.capture(), any(), any(), isNull());
 
         assertThat(captor.getValue()).containsExactly(MOTTAKER_INSTITUSJON);
     }
