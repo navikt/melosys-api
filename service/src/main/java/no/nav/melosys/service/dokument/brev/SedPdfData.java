@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.dto.UtpekingAvvisDto;
+import no.nav.melosys.domain.eessi.sed.SedDataDto;
+import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import org.apache.commons.lang3.BooleanUtils;
 
 public class SedPdfData {

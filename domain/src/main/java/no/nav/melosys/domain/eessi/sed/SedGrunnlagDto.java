@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.eessi.dto;
+package no.nav.melosys.domain.eessi.sed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +100,7 @@ public class SedGrunnlagDto {
         sedGrunnlag.foretakUtland = tilForetakUtland(arbeidsgivendeVirksomheter, selvstendigeVirksomheter);
         sedGrunnlag.periode = tilPeriode(lovvalgsperioder);
         sedGrunnlag.ytterligereInformasjon = ytterligereInformasjon;
+        sedGrunnlag.soeknadsland.landkoder = getLovvalgsperioder().stream().map(Lovvalgsperiode::getLovvalgsland).collect(Collectors.toList());
 
         if (erA003()) {
             SedGrunnlagA003Dto sedGrunnlagA003Dto = (SedGrunnlagA003Dto) this;

@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.eessi.dto;
+package no.nav.melosys.domain.eessi.sed;
 
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.eessi.SedOrganisasjon;
