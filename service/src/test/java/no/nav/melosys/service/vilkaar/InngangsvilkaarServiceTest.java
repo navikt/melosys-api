@@ -9,12 +9,17 @@ import java.util.List;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
+import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
+import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
+import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.service.SaksopplysningerService;
 import org.junit.Before;
@@ -65,6 +70,43 @@ public class InngangsvilkaarServiceTest {
         verify(regelmodulFasade).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, null);
     }
+
+    @Test
+    public void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() throws TekniskException, FunksjonellException {
+        final List<String> landkoder = List.of("FR", "DK", "NO");
+        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
+        final var personhistorikkDokument = new PersonhistorikkDokument();
+        personhistorikkDokument.statsborgerskapListe = Collections.emptyList();
+        when(saksopplysningerService.hentPersonhistorikk(anyLong())).thenReturn(personhistorikkDokument);
+
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, Soeknadsland.av(landkoder), periode);
+
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
+            false, Inngangsvilkaar.MANGLER_STATSBORGERSKAP);
+    }
+
+    @Test
+    public void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() throws TekniskException, FunksjonellException {
+        final List<String> landkoder = List.of("FR", "DK", "NO");
+        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.statsborgerskap = Land.av(FINLAND);
+        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
+        var feilmelding = new Feilmelding();
+        feilmelding.kategori = Kategori.TEKNISK_FEIL;
+        feilmelding.melding = "FEIL!!!";
+        res.feilmeldinger = Collections.singletonList(feilmelding);
+        res.kvalifisererForEf883_2004 = false;
+        when(regelmodulFasade.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
+
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, Soeknadsland.av(landkoder), periode);
+
+        verify(regelmodulFasade).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
+            false, Inngangsvilkaar.TEKNISK_FEIL);
+    }
+
 
     @Test
     public void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
