@@ -43,6 +43,7 @@ public final class OppgaveFactory {
             case UTSENDT_SELVSTENDIG:
             case ARBEID_FLERE_LAND:
             case ARBEID_NORGE_BOSATT_ANNET_LAND:
+            case IKKE_YRKESAKTIV:
                 oppgaveParametere = new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
                 break;
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
