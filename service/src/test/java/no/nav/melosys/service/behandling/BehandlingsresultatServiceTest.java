@@ -10,6 +10,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -25,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -185,6 +187,25 @@ public class BehandlingsresultatServiceTest {
         behandlingsresultatService.oppdaterBehandlingsMaate(1L, Behandlingsmaate.AUTOMATISERT);
         verify(behandlingsresultatRepo).save(behandlingsresultat);
         assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.AUTOMATISERT);
+    }
+
+    @Test
+    public void oppdaterUtfallRegistreringUnntak_ikkeSatt_lagres() throws FunksjonellException {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatRepo.findById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT);
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
+    }
+
+    @Test
+    public void oppdaterUtfallRegistreringUnntak_alleredeSatt_kasterException() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
+        when(behandlingsresultatRepo.findById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT))
+            .withMessageContaining("Utfall for registrering av unntak er allerede satt for behandlingsresultat");
+
     }
 
     private Lovvalgsperiode opprettLovvalgsperiode() {

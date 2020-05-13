@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -99,12 +100,16 @@ public class UtpekingService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
+    @Transactional(rollbackFor = MelosysException.class)
     public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException {
         validerAvslagUtpeking(utpekingAvvis);
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
         behandlingService.lagre(behandling);
+        if (behandling.erUtpekingAvAnnetLand()) {
+            behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+        }
 
         prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, utpekingAvvis);
     }

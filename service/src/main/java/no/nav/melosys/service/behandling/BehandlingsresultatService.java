@@ -7,6 +7,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -172,6 +173,16 @@ public class BehandlingsresultatService {
         }
 
         behandlingsresultat.setBehandlingsmåte(behandlingsmaate);
+        behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    public void oppdaterUtfallRegistreringUnntak(long behandlingID, Utfallregistreringunntak utfallRegistreringUnntak) throws FunksjonellException {
+        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        if (behandlingsresultat.getUtfallRegistreringUnntak() != null) {
+            throw new FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat " + behandlingID);
+        }
+
+        behandlingsresultat.setUtfallRegistreringUnntak(utfallRegistreringUnntak);
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 }
