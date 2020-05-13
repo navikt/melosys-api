@@ -57,7 +57,7 @@ public class BestemmelseTilBucTypeTest {
 
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("kan ikke mappes til en BucType!");
-        BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
+        BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET);
     }
 
 }
