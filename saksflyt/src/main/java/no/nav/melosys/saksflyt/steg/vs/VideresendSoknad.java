@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
@@ -19,6 +20,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.eessi.dto.VedleggDto;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -76,7 +78,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        SendUtlandStatus sendtStatus = sendUtland(BucType.LA_BUC_03, prosessinstans, hentSøknadDokument(prosessinstans.getBehandling()));
+        SendUtlandStatus sendtStatus = sendUtland(BucType.LA_BUC_03, prosessinstans, hentSøknadSomVedlegg(prosessinstans.getBehandling()));
 
         if (sendtStatus == SendUtlandStatus.SED_SENDT) {
             prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
@@ -87,17 +89,18 @@ public class VideresendSoknad extends AbstraktSendUtland {
         }
     }
 
-    private byte[] hentSøknadDokument(Behandling behandling) throws FunksjonellException {
-        String journalpostID = behandling.getInitierendeJournalpostId();
-        String dokumentID = behandling.getInitierendeDokumentId();
+    private VedleggDto hentSøknadSomVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
+        final String journalpostID = behandling.getInitierendeJournalpostId();
 
         if (StringUtils.isEmpty(journalpostID)) {
             throw new FunksjonellException("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");
-        } else if (StringUtils.isEmpty(dokumentID)) {
-            throw new FunksjonellException("DokumentID til behandling " + behandling.getId() + " finnes ikke!");
         }
 
-        return joarkFasade.hentDokument(journalpostID, dokumentID);
+        Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
+        String tittel = journalpost.getHoveddokument().getTittel();
+        byte[] pdf = joarkFasade.hentDokument(journalpostID, journalpost.getHoveddokument().getDokumentId());
+
+        return new VedleggDto(pdf, tittel);
     }
 
     @Override
@@ -129,7 +132,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
-        byte[] vedleggData = hentSøknadDokument(behandling);
+        byte[] vedleggData = hentSøknadSomVedlegg(behandling).getInnhold();
 
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setBrevkode(SedType.A008.name());

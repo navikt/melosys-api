@@ -19,6 +19,7 @@ import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
+import no.nav.melosys.integrasjon.eessi.dto.VedleggDto;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,7 +65,7 @@ public class EessiConsumerTest {
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andRespond(withSuccess("{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}", MediaType.APPLICATION_JSON));
 
-        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, "pdf".getBytes(), bucType, true);
+        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, new VedleggDto("pdf".getBytes(), "tittel"), bucType, true);
         assertThat(opprettSedDto.getRinaSaksnummer()).isEqualTo("12345");
     }
 

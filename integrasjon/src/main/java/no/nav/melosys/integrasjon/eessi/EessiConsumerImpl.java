@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.eessi;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,12 +17,8 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.eessi.dto.BucinfoDto;
-import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
-import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
+import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -44,7 +41,6 @@ public class EessiConsumerImpl implements EessiConsumer {
     private final ObjectMapper objectMapper;
 
     private static final String SEDDATA_FILNAVN = "sedData";
-    private static final String VEDLEGG_FILNAVN = "vedlegg";
 
     private static final String SEND_AUTOMATISK = "sendAutomatisk";
     private static final String STATUSER = "statuser";
@@ -55,7 +51,7 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, byte[] vedlegg, BucType bucType, boolean sendAutomatisk) throws MelosysException {
+    public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, @Nullable VedleggDto vedlegg, BucType bucType, boolean sendAutomatisk) throws MelosysException {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath(String.format("/buc/%s", bucType))
             .queryParam(SEND_AUTOMATISK, sendAutomatisk);
@@ -75,8 +71,11 @@ public class EessiConsumerImpl implements EessiConsumer {
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
         formData.add(SEDDATA_FILNAVN, lagByteArrayResource(sedData, SEDDATA_FILNAVN));
 
-        if (ArrayUtils.isNotEmpty(vedlegg)) {
-            formData.add(VEDLEGG_FILNAVN, lagByteArrayResource(vedlegg, VEDLEGG_FILNAVN));
+        if (vedlegg != null) {
+            if (!vedlegg.erGyldig()) {
+                throw new TekniskException("Vedlegget er ikke gyldig, kan ikke opprette buc " + bucType);
+            }
+            formData.add("vedlegg", lagByteArrayResource(vedlegg.getInnhold(), vedlegg.getTittel()));
         }
 
         return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(formData, httpHeaders),

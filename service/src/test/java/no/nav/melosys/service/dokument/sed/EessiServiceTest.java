@@ -146,7 +146,7 @@ public class EessiServiceTest {
         when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean())).thenReturn(opprettSedDto);
 
         eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, List.of("SE:001"));
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_01), eq(false));
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), isNull(), eq(BucType.LA_BUC_01), eq(false));
     }
 
     @Test

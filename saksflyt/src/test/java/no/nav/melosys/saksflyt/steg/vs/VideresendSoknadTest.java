@@ -12,7 +12,10 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.eessi.dto.VedleggDto;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -50,41 +53,34 @@ public class VideresendSoknadTest {
 
     private VideresendSoknad videresendSoknad;
 
+    private Behandling behandling = new Behandling();
+    private Journalpost journalpost = new Journalpost("123");
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @Before
-    public void setup() {
+    public void setup() throws SikkerhetsbegrensningException, IntegrasjonException {
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, tpsFasade, utenlandskMyndighetService, joarkFasade, fagsakService);
+
+        behandling.setId(1L);
+        behandling.setInitierendeJournalpostId("123");
+        journalpost.setHoveddokument(new ArkivDokument());
+        journalpost.getHoveddokument().setTittel("tittei på deg");
+        journalpost.getHoveddokument().setDokumentId("44444");
+
+        when(joarkFasade.hentJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(journalpost);
     }
 
     @Test
     public void utfør_journalpostIDFinnesIkke_forventFunksjonellException() throws MelosysException {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setInitierendeDokumentId("1");
-
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = opprettProsessinstans();
+        prosessinstans.getBehandling().setInitierendeJournalpostId(null);
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");
-        videresendSoknad.utfør(prosessinstans);
-    }
-
-    @Test
-    public void utfør_dokumentIDFinnesIkke_forventFunksjonellException() throws MelosysException {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setInitierendeJournalpostId("1");
-
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("DokumentID til behandling " + behandling.getId() + " finnes ikke!");
         videresendSoknad.utfør(prosessinstans);
     }
 
@@ -101,13 +97,14 @@ public class VideresendSoknadTest {
 
         byte[] vedlegg = new byte[10];
 
-        when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(behandling.getInitierendeDokumentId())))
+        when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(journalpost.getHoveddokument().getDokumentId())))
             .thenReturn(vedlegg);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         videresendSoknad.utfør(prosessinstans);
 
-        verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_03), eq(vedlegg), isNull());
+        verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_03),
+            eq(new VedleggDto(vedlegg, journalpost.getHoveddokument().getTittel())), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_STATUS_BEH_AVSL);
     }
 
@@ -117,14 +114,8 @@ public class VideresendSoknadTest {
         Behandling behandling = prosessinstans.getBehandling();
 
         byte[] vedlegg = new byte[10];
-        when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(behandling.getInitierendeDokumentId())))
+        when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(journalpost.getHoveddokument().getDokumentId())))
             .thenReturn(vedlegg);
-
-        ArkivDokument hoveddokument = new ArkivDokument();
-        hoveddokument.setTittel("Tittel");
-        Journalpost journalpost = new Journalpost("1");
-        journalpost.setHoveddokument(hoveddokument);
-        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         when(joarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("2");
 
@@ -142,11 +133,7 @@ public class VideresendSoknadTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.VS_DISTRIBUER_JOURNALPOST);
     }
 
-    private static Prosessinstans opprettProsessinstans() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setInitierendeJournalpostId("1");
-        behandling.setInitierendeDokumentId("1");
+    private Prosessinstans opprettProsessinstans() {
         behandling.setFagsak(lagFagsak());
 
         Prosessinstans prosessinstans = new Prosessinstans();
