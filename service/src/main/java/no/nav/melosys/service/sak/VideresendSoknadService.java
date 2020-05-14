@@ -2,6 +2,7 @@ package no.nav.melosys.service.sak;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -55,8 +56,8 @@ public class VideresendSoknadService {
         behandlingService.avsluttBehandling(behandlingId);
         fagsakService.oppdaterStatus(fagsak, Saksstatuser.VIDERESENDT);
 
-        final List<String> avklarteEessiMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
-            mottakerinstitusjon != null ? List.of(mottakerinstitusjon) : Collections.emptyList(),
+        final Set<String> avklarteEessiMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+            mottakerinstitusjon != null ? Set.of(mottakerinstitusjon) : Collections.emptySet(),
             List.of(bostedsland),
             BucType.LA_BUC_03
         );

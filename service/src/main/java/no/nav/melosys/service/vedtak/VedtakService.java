@@ -2,7 +2,7 @@ package no.nav.melosys.service.vedtak;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -75,7 +75,7 @@ public class VedtakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType,
-                           String fritekst, String fritekstSed, List<String> mottakerinstitusjoner,
+                           String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
@@ -108,7 +108,7 @@ public class VedtakService {
                 avklarBucType(behandlingsresultat)
             );
         } else {
-            mottakerinstitusjoner = Collections.emptyList();
+            mottakerinstitusjoner = Collections.emptySet();
         }
 
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);

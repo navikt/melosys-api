@@ -233,16 +233,16 @@ public class EessiService {
      * Hvis minst et land ikke er påkoblet - returner tom liste. Det skal ikke åpnes BUC med valgte land som mottakere da ikke alle er påkoblet
      * Hvis alle er påkoblet - valider at det er satt nøyaktig èn institusjon for hvert land, returner dermed liste med validerte institusjoner
      */
-    public List<String> validerOgAvklarMottakerInstitusjonerForBuc(final List<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
+    public Set<String> validerOgAvklarMottakerInstitusjonerForBuc(final Set<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
 
         Map<Landkoder, Collection<String>> institusjonerPerLand = new EnumMap<>(Landkoder.class);
 
         for (var land : mottakerland) {
             Collection<String> alleInstitusjonerForLand = hentEessiMottakerinstitusjoner(bucType.name(), land.getKode())
-                .stream().map(Institusjon::getId).collect(Collectors.toList());
+                .stream().map(Institusjon::getId).collect(Collectors.toSet());
             if (alleInstitusjonerForLand.isEmpty()) {
                 log.info("{} er ikke EESSI-ready, skal ikke sendes SED", land.getBeskrivelse());
-                return Collections.emptyList();
+                return Collections.emptySet();
             }
 
             institusjonerPerLand.put(land, alleInstitusjonerForLand);

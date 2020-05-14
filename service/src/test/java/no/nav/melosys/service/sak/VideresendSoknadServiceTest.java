@@ -2,6 +2,7 @@ package no.nav.melosys.service.sak;
 
 
 import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -76,7 +77,7 @@ public class VideresendSoknadServiceTest {
 
     @Test
     public void henleggOgVideresend_bostedsLandSpaniaErSøknad_prosessinstansBlirOpprettet() throws MelosysException {
-        final List<String> validerteMottakere = List.of("ES:mottakerID123");
+        final Set<String> validerteMottakere = Set.of("ES:mottakerID123");
         when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.ES);
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Landkoder.ES)), eq(BucType.LA_BUC_03)))
             .thenReturn(validerteMottakere);
@@ -86,7 +87,7 @@ public class VideresendSoknadServiceTest {
          videresendSoknadService.henleggOgVideresend(saksnummer, "");
 
          verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.VIDERESENDT);
-         verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling), eq(validerteMottakere.get(0)));
+         verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling), eq(validerteMottakere.iterator().next()));
          verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(saksnummer));
     }
 

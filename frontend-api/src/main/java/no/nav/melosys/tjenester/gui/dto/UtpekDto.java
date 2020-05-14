@@ -1,16 +1,16 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.util.List;
+import java.util.Set;
 
 public class UtpekDto {
-    private List<String> mottakerinstitusjoner;
+    private Set<String> mottakerinstitusjoner;
     private String fritekstSed;
 
-    public List<String> getMottakerinstitusjoner() {
+    public Set<String> getMottakerinstitusjoner() {
         return mottakerinstitusjoner;
     }
 
-    public void setMottakerinstitusjoner(List<String> mottakerinstitusjoner) {
+    public void setMottakerinstitusjoner(Set<String> mottakerinstitusjoner) {
         this.mottakerinstitusjoner = mottakerinstitusjoner;
     }
 
