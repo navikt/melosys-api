@@ -36,7 +36,7 @@ public class VarsleUtland extends AbstraktStegBehandler {
 
         if (behandling.erUtpekingAvAnnetLand() && Boolean.TRUE.equals(varsleUtland)) {
             if (saksopplysningerService.hentSedOpplysninger(behandling.getId()).getErElektronisk()) {
-                eessiService.sendGodkjenningArbeidFlereLand(behandling.getId());
+                eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), null);
             } else {
                 throw new UnsupportedOperationException("Sending av brev-A012 er ikke implementert");
             }
