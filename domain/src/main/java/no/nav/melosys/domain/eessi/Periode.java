@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.eessi.melding;
+package no.nav.melosys.domain.eessi;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -6,6 +6,14 @@ import java.util.Objects;
 public class Periode {
     private LocalDate fom;
     private LocalDate tom;
+
+    public Periode() {
+    }
+
+    public Periode(LocalDate fom, LocalDate tom) {
+        this.fom = fom;
+        this.tom = tom;
+    }
 
     public LocalDate getFom() {
         return fom;

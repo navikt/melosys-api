@@ -51,8 +51,11 @@ public enum BucType {
 
     private static BucType hentBucTypeFra883_2004(Lovvalgbestemmelser_883_2004 bestemmelse) {
         switch (bestemmelse) {
+            case FO_883_2004_ART11_1:
+            case FO_883_2004_ART11_3A:
             case FO_883_2004_ART11_3B:
             case FO_883_2004_ART11_3C:
+            case FO_883_2004_ART11_3D:
             case FO_883_2004_ART11_3E:
             case FO_883_2004_ART11_4_2:
             case FO_883_2004_ART15:

@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.eessi.dto;
+package no.nav.melosys.domain.eessi.sed;
 
 import java.time.LocalDate;
 
@@ -15,6 +15,7 @@ public class Lovvalgsperiode {
     private String lovvalgsland;
     private String unntakFraLovvalgsland;
     private Bestemmelse bestemmelse;
+    private Bestemmelse tilleggsBestemmelse;
 
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -56,6 +57,14 @@ public class Lovvalgsperiode {
 
     public void setBestemmelse(Bestemmelse bestemmelse) {
         this.bestemmelse = bestemmelse;
+    }
+
+    public Bestemmelse getTilleggsBestemmelse() {
+        return tilleggsBestemmelse;
+    }
+
+    public void setTilleggsBestemmelse(Bestemmelse tilleggsBestemmelse) {
+        this.tilleggsBestemmelse = tilleggsBestemmelse;
     }
 
     public LocalDate getFom() {

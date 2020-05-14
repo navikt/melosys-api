@@ -13,16 +13,15 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
+import no.nav.melosys.domain.eessi.sed.Adresse;
+import no.nav.melosys.domain.eessi.sed.Adressetype;
+import no.nav.melosys.domain.eessi.sed.Arbeidssted;
+import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.eessi.dto.Adresse;
-import no.nav.melosys.integrasjon.eessi.dto.Adressetype;
-import no.nav.melosys.integrasjon.eessi.dto.Arbeidssted;
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -90,7 +89,7 @@ public class SedDataByggerTest {
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
 
         utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now().plusYears(3), Landkoder.DK,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, Tilleggsbestemmelser_883_2004.FO_883_2004_ART13_4);
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         behandling = DataByggerStubs.hentBehandlingStub();

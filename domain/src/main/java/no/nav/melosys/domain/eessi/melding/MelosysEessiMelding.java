@@ -2,6 +2,9 @@ package no.nav.melosys.domain.eessi.melding;
 
 import java.util.List;
 
+import no.nav.melosys.domain.eessi.Periode;
+import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
+
 public class MelosysEessiMelding {
     private String sedId;
     private String rinaSaksnummer;

@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -21,8 +20,8 @@ public class FellesBrevtypeMappingTest {
 
     @Test
     public void testLovvalgsbestemmelseKode() throws Exception {
-        List<String> uimplementerteEllerUgyldigeKoder = Collections.singletonList(
-            "FO_883_2004_ART15"
+        List<String> uimplementerteEllerUgyldigeKoder = List.of(
+            "FO_883_2004_ART11_3D", "FO_883_2004_ART15"
         );
 
         Stream<String> koder;

@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.eessi.dto;
+package no.nav.melosys.domain.eessi.sed;
 
 
 import java.util.Arrays;
@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 public enum Bestemmelse {
 
     ART_11_1("11_1"),
+    ART_11_2("11_2"),
     ART_11_3_a("11_3_a"),
     ART_11_3_b("11_3_b"),
     ART_11_3_c("11_3_c"),
@@ -50,9 +51,11 @@ public enum Bestemmelse {
     private static final BiMap<LovvalgBestemmelse, Bestemmelse> BESTEMMELSE_MAP =
         HashBiMap.create(ImmutableMap.<LovvalgBestemmelse, Bestemmelse>builder()
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1, Bestemmelse.ART_11_1)
+            .put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2, Bestemmelse.ART_11_2)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, Bestemmelse.ART_11_3_a)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B, Bestemmelse.ART_11_3_b)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C, Bestemmelse.ART_11_3_c)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3D, Bestemmelse.ART_11_3_d)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E, Bestemmelse.ART_11_3_e)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, Bestemmelse.ART_11_4)
             .put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5, Bestemmelse.ART_11_5)

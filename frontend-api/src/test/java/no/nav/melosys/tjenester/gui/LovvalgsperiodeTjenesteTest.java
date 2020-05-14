@@ -38,7 +38,7 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
     private static final LocalDate FOM = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
-            Tilleggsbestemmelser_883_2004.FO_883_2004_ART13_4,
+            Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
             Landkoder.SK,
             InnvilgelsesResultat.AVSLAATT,
             null,
