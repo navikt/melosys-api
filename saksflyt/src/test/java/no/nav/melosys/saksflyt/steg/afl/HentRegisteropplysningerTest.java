@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;

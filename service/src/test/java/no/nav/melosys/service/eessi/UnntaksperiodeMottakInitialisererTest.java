@@ -5,9 +5,11 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.eessi.melding.Periode;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;

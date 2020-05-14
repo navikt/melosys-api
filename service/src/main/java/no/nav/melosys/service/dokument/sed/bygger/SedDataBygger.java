@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
+import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -293,14 +294,14 @@ public class SedDataBygger {
             .collect(Collectors.toList());
     }
 
-    private static SvarAnmodningUnntakDto lagSvarAnmodningUnntakDto(Behandlingsresultat behandlingsresultat) throws TekniskException {
+    private static SvarAnmodningUnntak lagSvarAnmodningUnntakDto(Behandlingsresultat behandlingsresultat) throws TekniskException {
         Anmodningsperiode anmodningsperiode = null;
         if (behandlingsresultat.getAnmodningsperioder().iterator().hasNext()) {
             anmodningsperiode = behandlingsresultat.getAnmodningsperioder().iterator().next();
         }
 
         if (anmodningsperiode != null && anmodningsperiode.getAnmodningsperiodeSvar() != null) {
-            return SvarAnmodningUnntakDto.av(anmodningsperiode.getAnmodningsperiodeSvar());
+            return SvarAnmodningUnntak.av(anmodningsperiode.getAnmodningsperiodeSvar());
         }
         return null;
     }

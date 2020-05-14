@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.eessi.melding.SvarAnmodningUnntak;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;

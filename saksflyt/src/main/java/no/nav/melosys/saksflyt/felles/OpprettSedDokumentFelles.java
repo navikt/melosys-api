@@ -103,7 +103,7 @@ public class OpprettSedDokumentFelles {
         return Landkoder.valueOf(unntakFraLovvalgsland);
     }
 
-    private static Periode tilPeriode(no.nav.melosys.domain.eessi.melding.Periode periode) {
+    private static Periode tilPeriode(no.nav.melosys.domain.eessi.Periode periode) {
         return new Periode(
             periode.getFom(),
             periode.getTom()

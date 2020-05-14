@@ -3,6 +3,8 @@ package no.nav.melosys.domain.eessi.sed;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
+
 public class SedDataDto extends SedGrunnlagDto {
     //Persondok.
     private List<FamilieMedlem> familieMedlem = new ArrayList<>();
@@ -21,7 +23,7 @@ public class SedDataDto extends SedGrunnlagDto {
 
     private List<String> mottakerIder;
 
-    private SvarAnmodningUnntakDto svarAnmodningUnntak;
+    private SvarAnmodningUnntak svarAnmodningUnntak;
 
     private UtpekingAvvisDto utpekingAvvis;
 
@@ -81,11 +83,11 @@ public class SedDataDto extends SedGrunnlagDto {
         this.mottakerIder = mottakerIder;
     }
 
-    public SvarAnmodningUnntakDto getSvarAnmodningUnntak() {
+    public SvarAnmodningUnntak getSvarAnmodningUnntak() {
         return svarAnmodningUnntak;
     }
 
-    public void setSvarAnmodningUnntak(SvarAnmodningUnntakDto svarAnmodningUnntak) {
+    public void setSvarAnmodningUnntak(SvarAnmodningUnntak svarAnmodningUnntak) {
         this.svarAnmodningUnntak = svarAnmodningUnntak;
     }
 
