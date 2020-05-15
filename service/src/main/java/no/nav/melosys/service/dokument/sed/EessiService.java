@@ -149,19 +149,26 @@ public class EessiService {
 
     }
 
-    public void sendGodkjenningArbeidFlereLand(long behandlingID) throws MelosysException {
+    public void sendGodkjenningArbeidFlereLand(long behandlingID, String ytterligereInformasjon) throws MelosysException {
         log.info("Sender svar på A003 for behandling {}", behandlingID);
-        sendSedPåEksisterendeBehandling(behandlingID, MedlemsperiodeType.LOVVALGSPERIODE, br -> SedType.A012);
+        sendSedPåEksisterendeBehandling(behandlingID, MedlemsperiodeType.LOVVALGSPERIODE, br -> SedType.A012, ytterligereInformasjon);
     }
 
     private void sendSedPåEksisterendeBehandling(long behandlingID,
                                                  MedlemsperiodeType medlemsperiodeType,
                                                  Function<Behandlingsresultat, SedType> sedTypeAvklarer) throws MelosysException {
+        sendSedPåEksisterendeBehandling(behandlingID, medlemsperiodeType, sedTypeAvklarer, null);
+    }
+
+    private void sendSedPåEksisterendeBehandling(long behandlingID,
+                                                 MedlemsperiodeType medlemsperiodeType,
+                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
         String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
 
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingID);

@@ -142,6 +142,7 @@ public class SendVedtakUtlandTest {
     @Test
     public void utførSteg_norgeErUtpektElektronisk_senderA012() throws MelosysException {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
+        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         SedDokument sedDokument = new SedDokument();
         sedDokument.setErElektronisk(true);
@@ -149,6 +150,6 @@ public class SendVedtakUtlandTest {
 
         sendVedtakUtland.utfør(prosessinstans);
 
-        verify(eessiService).sendGodkjenningArbeidFlereLand(eq(behandling.getId()));
+        verify(eessiService).sendGodkjenningArbeidFlereLand(eq(behandling.getId()), eq("Hei"));
     }
 }

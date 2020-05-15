@@ -302,7 +302,7 @@ public class EessiServiceTest {
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        eessiService.sendGodkjenningArbeidFlereLand(1L);
+        eessiService.sendGodkjenningArbeidFlereLand(1L, null);
 
         verify(behandlingService).hentBehandling(eq(1L));
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(MedlemsperiodeType.LOVVALGSPERIODE));
