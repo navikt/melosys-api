@@ -52,7 +52,8 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(new OpprettSakRequest.Builder()
             .medAktørID(aktørId)
             .medSakstype(Sakstyper.EU_EOS)
-            .medBehandlingstype(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class))
+            .medBehandlingstype(Behandlingstyper.SED)
+            .medBehandlingstema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
             .medInitierendeDokumentId(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID))
             .medInitierendeJournalpostId(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID))
             .build());
