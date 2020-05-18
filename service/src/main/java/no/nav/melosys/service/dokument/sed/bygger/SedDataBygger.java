@@ -82,6 +82,7 @@ public class SedDataBygger {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
         sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
@@ -90,6 +91,7 @@ public class SedDataBygger {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
         sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
         sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
