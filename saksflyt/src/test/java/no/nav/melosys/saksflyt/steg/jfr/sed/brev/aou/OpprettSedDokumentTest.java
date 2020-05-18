@@ -1,9 +1,10 @@
-package no.nav.melosys.saksflyt.steg.jfr.sed.brev;
+package no.nav.melosys.saksflyt.steg.jfr.sed.brev.aou;
 
 import java.time.LocalDate;
 import java.util.Collections;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;

@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.jfr.sed.brev;
+package no.nav.melosys.saksflyt.steg.jfr.sed.brev.aou;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
