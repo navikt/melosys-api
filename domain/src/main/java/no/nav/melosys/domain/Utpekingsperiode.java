@@ -61,6 +61,10 @@ public class Utpekingsperiode implements Medlemskapsperiode {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Behandlingsresultat getBehandlingsresultat() {
         return behandlingsresultat;
     }

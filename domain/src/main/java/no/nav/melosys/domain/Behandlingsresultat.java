@@ -46,6 +46,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "utfall_registrering_unntak")
     private Utfallregistreringunntak utfallRegistreringUnntak;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "utfall_utpeking")
+    private Utfallregistreringunntak utfallUtpeking; //FIXME: egne kodeverk-verdier for utfallUtpeking
+
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
 
@@ -129,6 +133,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setUtfallRegistreringUnntak(Utfallregistreringunntak utfallRegistreringUnntak) {
         this.utfallRegistreringUnntak = utfallRegistreringUnntak;
+    }
+
+    public Utfallregistreringunntak getUtfallUtpeking() {
+        return utfallUtpeking;
+    }
+
+    public void setUtfallUtpeking(Utfallregistreringunntak utfallUtpeking) {
+        this.utfallUtpeking = utfallUtpeking;
     }
 
     public Set<Lovvalgsperiode> getLovvalgsperioder() {

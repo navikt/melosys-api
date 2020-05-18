@@ -3,17 +3,19 @@ package no.nav.melosys.saksflyt.steg.iv;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.VedtakMetadata;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +36,11 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
 
     static final int FRIST_KLAGE_UKER = 6;
 
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public OppdaterBehandlingsresultat(BehandlingsresultatRepository behandlingsresultatRepository) {
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+    public OppdaterBehandlingsresultat(BehandlingsresultatService behandlingsresultatService) {
+        this.behandlingsresultatService = behandlingsresultatService;
         log.info("OppdaterBehandlingsresultat initialisert");
     }
 
@@ -52,8 +54,11 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Long behandlingID = prosessinstans.getBehandling().getId();
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
-            .orElseThrow(() -> new FunksjonellException("Behandlingsresultat " + behandlingID + " finnes ikke."));
+        if (prosessinstans.getBehandling().norgeErUtpekt()) {
+            behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.GODKJENT);
+        }
+
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
             behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
@@ -76,7 +81,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         vedtakMetadata.setRevurderBegrunnelse(prosessinstans.getData(ProsessDataKey.REVURDER_BEGRUNNELSE));
         vedtakMetadata.setVedtakstype(prosessinstans.getData(ProsessDataKey.VEDTAKSTYPE) == null ? null : Vedtakstyper.valueOf(prosessinstans.getData(ProsessDataKey.VEDTAKSTYPE)));
 
-        behandlingsresultatRepository.save(behandlingsresultat);
+        behandlingsresultatService.lagre(behandlingsresultat);
 
         prosessinstans.setSteg(IV_AVKLAR_MYNDIGHET);
         log.info("Oppdatert behandlingsresultat for prosessinstans {}. Klagefrist: {}", prosessinstans.getId(), klagefrist);
