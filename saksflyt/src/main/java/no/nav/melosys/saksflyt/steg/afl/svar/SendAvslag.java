@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_OPPDATER_MEDL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_SVAR_AVSLUTT_BEHANDLING;
 
 @Component("AFLSvarSendAvslag")
 public class SendAvslag extends AbstraktStegBehandler {
@@ -35,6 +35,6 @@ public class SendAvslag extends AbstraktStegBehandler {
 
         eessiService.sendAvslagUtpekingSvar(behandlingId, utpekingAvvis);
 
-        prosessinstans.setSteg(AFL_OPPDATER_MEDL);
+        prosessinstans.setSteg(AFL_SVAR_AVSLUTT_BEHANDLING);
     }
 }
