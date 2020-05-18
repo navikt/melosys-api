@@ -117,6 +117,7 @@ public class UtpekingService {
         }
 
         prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, utpekingAvvis);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) throws FunksjonellException {

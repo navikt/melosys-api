@@ -110,6 +110,7 @@ public class UtpekingServiceTest {
 
         verify(behandlingsresultatService).oppdaterUtfallUtpeking(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
         verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
     }
 
     @Test
