@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.jfr.sed.brev;
+package no.nav.melosys.saksflyt.steg.jfr.sed.brev.aou;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -19,10 +19,13 @@ import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import no.nav.melosys.service.sak.SakService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.kodeverk.Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET;
 
 @Component("JournalførAouBrevOpprettFagsakOgBehandling")
 public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
@@ -48,11 +51,13 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+        validerAvsender(prosessinstans);
         String aktørId = hentAktørId(prosessinstans);
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(new OpprettSakRequest.Builder()
             .medAktørID(aktørId)
             .medSakstype(Sakstyper.EU_EOS)
-            .medBehandlingstype(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class))
+            .medBehandlingstype(Behandlingstyper.SED)
+            .medBehandlingstema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
             .medInitierendeDokumentId(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID))
             .medInitierendeJournalpostId(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID))
             .build());
@@ -65,11 +70,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         long gsakSaksnummer = opprettGsakSak(fagsak, behandling.getTema(), aktørId);
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
 
-        lagreAvsender(
-            fagsak.getSaksnummer(),
-            prosessinstans.getData(ProsessDataKey.AVSENDER_ID),
-            prosessinstans.getData(ProsessDataKey.AVSENDER_TYPE, Avsendertyper.class)
-        );
+        fagsakService.leggTilAktør(fagsak.getSaksnummer(), Aktoersroller.MYNDIGHET, prosessinstans.getData(ProsessDataKey.AVSENDER_ID));
 
         prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST);
     }
@@ -97,21 +98,14 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         return gsakSaksnummer;
     }
 
-    private void lagreAvsender(String saksnummer, String avsenderID, Avsendertyper avsenderType) throws FunksjonellException {
-        Aktoersroller aktørrolle;
-        switch (avsenderType) {
-            case PERSON:
-                return;
-            case ORGANISASJON:
-                aktørrolle = Aktoersroller.ARBEIDSGIVER;
-                break;
-            case UTENLANDSK_TRYGDEMYNDIGHET:
-                aktørrolle = Aktoersroller.MYNDIGHET;
-                break;
-            default:
-                throw new FunksjonellException("Kan ikke legge til aktør for avsenderType " + avsenderType);
+    private void validerAvsender(Prosessinstans prosessinstans) throws FunksjonellException {
+        Avsendertyper avsenderType = prosessinstans.getData(ProsessDataKey.AVSENDER_TYPE, Avsendertyper.class);
+        if (avsenderType != UTENLANDSK_TRYGDEMYNDIGHET) {
+            throw new FunksjonellException("Forventer A001 fra utenlandsk trygdemyndighet og ikke fra " + avsenderType);
         }
-
-        fagsakService.leggTilAktør(saksnummer, aktørrolle, avsenderID);
+        String avsenderID = prosessinstans.getData(ProsessDataKey.AVSENDER_ID);
+        if (StringUtils.isBlank(avsenderID)) {
+            throw new FunksjonellException("InstitusjonID trenges for å behandle ikke elektronisk A001.");
+        }
     }
 }
