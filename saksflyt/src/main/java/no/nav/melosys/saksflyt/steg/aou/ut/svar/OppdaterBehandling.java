@@ -19,6 +19,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -54,7 +55,8 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     public OppdaterBehandling(AnmodningsperiodeService anmodningsperiodeService,
                               BehandlingService behandlingService,
                               BehandlingsresultatService behandlingsresultatService,
-                              @Qualifier("system") VedtakService vedtakService, LovvalgsperiodeService lovvalgsperiodeService) {
+                              @Qualifier("system") VedtakService vedtakService,
+                              LovvalgsperiodeService lovvalgsperiodeService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -87,26 +89,35 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
 
         if (erInnvilgelse && !inneholderYtterligereInformasjon(melosysEessiMelding)) {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Iverksetter vedtak",
-                Anmodningsperiodesvartyper.INNVILGELSE  , behandlingID);
+                Anmodningsperiodesvartyper.INNVILGELSE, behandlingID);
             fattVedtak(behandlingID);
         } else {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Endrer behandlingsstatus til {}",
                 anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType(),
                 behandlingID,
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
-            oppdaterBehandlingsstatusUnderBehandling(prosessinstans);
+            oppdaterBehandlingsstatusUnderBehandling(behandlingID);
         }
         registrerMetrikk(melosysEessiMelding);
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 
     private void fattVedtak(long behandlingID) throws MelosysException {
+        try {
+            vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        } catch (ValideringException e) {
+            log.info("Kan ikke fatte vedtak automatisk pga. treff i vedtakkontroller: {}. Endrer behandlingsstatus til {}",
+                String.join(", ", e.getFeilkoder()),
+                Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
+            oppdaterBehandlingsstatusUnderBehandling(behandlingID);
+            return;
+        }
+
         behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
-        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
-    private void oppdaterBehandlingsstatusUnderBehandling(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        behandlingService.oppdaterStatus(prosessinstans.getBehandling().getId(), Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
+    private void oppdaterBehandlingsstatusUnderBehandling(long behandlingID) throws FunksjonellException, TekniskException {
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
     }
 
     private boolean inneholderYtterligereInformasjon(MelosysEessiMelding melosysEessiMelding) {
