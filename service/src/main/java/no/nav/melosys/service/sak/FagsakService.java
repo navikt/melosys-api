@@ -342,6 +342,7 @@ public class FagsakService {
         }
         oppdaterStatus(fagsak, saksstatus);
         behandlingService.avsluttBehandling(behandling.getId());
+        log.info("Fagsak {} med behandling avsluttet", fagsak.getSaksnummer());
     }
 
     protected void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {

@@ -208,6 +208,20 @@ public class BehandlingsresultatServiceTest {
 
     }
 
+    @Test
+    public void oppdaterBegrunnelser_enBegrunnelse_blirLagret() throws IkkeFunnetException {
+        var behandlingsresultatBegrunnelse = new BehandlingsresultatBegrunnelse();
+        behandlingsresultatBegrunnelse.setKode("koden");
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatRepo.findById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+
+        behandlingsresultatService.oppdaterBegrunnelser(1L, Set.of(behandlingsresultatBegrunnelse), "fri");
+
+        verify(behandlingsresultatRepo).save(eq(behandlingsresultat));
+        assertThat(behandlingsresultatBegrunnelse.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
+    }
+
     private Lovvalgsperiode opprettLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setId(32L);
