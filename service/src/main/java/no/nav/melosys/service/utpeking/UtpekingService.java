@@ -99,7 +99,7 @@ public class UtpekingService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException {
+    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException, TekniskException {
         validerAvslagUtpeking(utpekingAvvis);
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
@@ -107,9 +107,6 @@ public class UtpekingService {
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");
         }
-
-        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
-        behandlingService.lagre(behandling);
 
         if (behandling.erUtpekingAvAnnetLand()) {
             behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);

@@ -93,7 +93,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void avvisUtpeking_utpekingAvAnnetLand_oppdaterUtfallRegistreringUnntak() throws FunksjonellException {
+    public void avvisUtpeking_utpekingAvAnnetLand_oppdaterUtfallRegistreringUnntak() throws FunksjonellException, TekniskException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
@@ -103,7 +103,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void avvisUtpeking_utpekingAvNorge_oppdaterUtfallUtpeking() throws FunksjonellException {
+    public void avvisUtpeking_utpekingAvNorge_oppdaterUtfallUtpeking() throws FunksjonellException, TekniskException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
