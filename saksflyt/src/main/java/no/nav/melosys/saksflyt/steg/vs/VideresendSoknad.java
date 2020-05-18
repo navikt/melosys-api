@@ -12,6 +12,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -20,7 +21,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.eessi.dto.VedleggDto;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -89,7 +89,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
         }
     }
 
-    private VedleggDto hentSøknadSomVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
+    private Vedlegg hentSøknadSomVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
         final String journalpostID = behandling.getInitierendeJournalpostId();
 
         if (StringUtils.isEmpty(journalpostID)) {
@@ -100,7 +100,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
         String tittel = journalpost.getHoveddokument().getTittel();
         byte[] pdf = joarkFasade.hentDokument(journalpostID, journalpost.getHoveddokument().getDokumentId());
 
-        return new VedleggDto(pdf, tittel);
+        return new Vedlegg(pdf, tittel);
     }
 
     @Override

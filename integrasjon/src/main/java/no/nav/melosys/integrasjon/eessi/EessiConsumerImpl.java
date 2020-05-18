@@ -8,16 +8,16 @@ import javax.annotation.Nullable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.eessi.BucInformasjon;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.eessi.dto.*;
+import no.nav.melosys.integrasjon.eessi.dto.BucinfoDto;
+import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
+import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
+import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, @Nullable VedleggDto vedlegg, BucType bucType, boolean sendAutomatisk) throws MelosysException {
+    public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, @Nullable Vedlegg vedlegg, BucType bucType, boolean sendAutomatisk) throws MelosysException {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath(String.format("/buc/%s", bucType))
             .queryParam(SEND_AUTOMATISK, sendAutomatisk);

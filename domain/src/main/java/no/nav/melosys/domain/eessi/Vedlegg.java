@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.eessi.dto;
+package no.nav.melosys.domain.eessi;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -6,12 +6,12 @@ import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public class VedleggDto {
+public class Vedlegg {
 
     private final byte[] innhold;
     private final String tittel;
 
-    public VedleggDto(byte[] innhold, String tittel) {
+    public Vedlegg(byte[] innhold, String tittel) {
         this.innhold = innhold;
         this.tittel = tittel;
     }
@@ -32,7 +32,7 @@ public class VedleggDto {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VedleggDto that = (VedleggDto) o;
+        Vedlegg that = (Vedlegg) o;
         return Arrays.equals(innhold, that.innhold) &&
             Objects.equals(tittel, that.tittel);
     }

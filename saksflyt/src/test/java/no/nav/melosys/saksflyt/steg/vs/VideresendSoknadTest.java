@@ -7,6 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -15,7 +16,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.eessi.dto.VedleggDto;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -104,7 +104,7 @@ public class VideresendSoknadTest {
         videresendSoknad.utfør(prosessinstans);
 
         verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_03),
-            eq(new VedleggDto(vedlegg, journalpost.getHoveddokument().getTittel())), isNull());
+            eq(new Vedlegg(vedlegg, journalpost.getHoveddokument().getTittel())), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_STATUS_BEH_AVSL);
     }
 

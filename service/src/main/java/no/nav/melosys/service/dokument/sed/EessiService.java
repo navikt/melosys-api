@@ -10,10 +10,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.MedlemsperiodeType;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.eessi.BucInformasjon;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
@@ -28,7 +25,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.VedleggDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
@@ -64,7 +60,7 @@ public class EessiService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType, VedleggDto vedlegg, String ytterligereInformasjon) throws MelosysException {
+    public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType, Vedlegg vedlegg, String ytterligereInformasjon) throws MelosysException {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
