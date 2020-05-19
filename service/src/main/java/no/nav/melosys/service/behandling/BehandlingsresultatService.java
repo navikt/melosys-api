@@ -71,8 +71,22 @@ public class BehandlingsresultatService {
         replikerAnmodningsperioder(behandlingsresultat, behandlingsresultatsreplika);
         replikerBehandlingsresultatBegrunnelser(behandlingsresultat, behandlingsresultatsreplika);
         replikerKontrollResultater(behandlingsresultat, behandlingsresultatsreplika);
+        replikerUtpekingsperioder(behandlingsresultat, behandlingsresultatsreplika);
 
         behandlingsresultatRepository.save(behandlingsresultatsreplika);
+    }
+
+    private void replikerUtpekingsperioder(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        behandlingsresultatsreplika.setUtpekingsperioder(new HashSet<>());
+        for (Utpekingsperiode utpekingsperiode : behandlingsresultat.getUtpekingsperioder()) {
+            Utpekingsperiode utpekingsperiodereplika = (Utpekingsperiode) BeanUtils.cloneBean(utpekingsperiode);
+            utpekingsperiodereplika.setBehandlingsresultat(behandlingsresultatsreplika);
+            utpekingsperiodereplika.setId(null);
+            utpekingsperiodereplika.setMedlPeriodeID(null);
+            utpekingsperiodereplika.setSendtUtland(null);
+            behandlingsresultatsreplika.getUtpekingsperioder().add(utpekingsperiodereplika);
+        }
     }
 
     private void replikerAnmodningsperioder(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
