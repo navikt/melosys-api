@@ -2,20 +2,21 @@ package no.nav.melosys.saksflyt.steg.ufm;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,30 +24,35 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnntaksperiodeIkkeGodkjentTest {
 
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private FagsakService fagsakService;
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
     private UnntaksperiodeIkkeGodkjent unntaksperiodeIkkeGodkjent;
 
     private Behandling behandling = new Behandling();
+    private Fagsak fagsak = new Fagsak();
     private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
     @Before
-    public void setup() {
-        unntaksperiodeIkkeGodkjent = new UnntaksperiodeIkkeGodkjent(behandlingRepository, behandlingsresultatRepository, medlPeriodeService);
+    public void setup() throws IkkeFunnetException {
+        unntaksperiodeIkkeGodkjent = new UnntaksperiodeIkkeGodkjent(fagsakService, behandlingsresultatService, medlPeriodeService);
 
+        fagsak.setSaksnummer("MEL-111111");
+        behandling.setId(1L);
+        behandling.setFagsak(fagsak);
         behandlingsresultat.getLovvalgsperioder().add(new Lovvalgsperiode());
-        when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test
@@ -57,18 +63,15 @@ public class UnntaksperiodeIkkeGodkjentTest {
         ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.ANNET);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.getBehandling().setFagsak(new Fagsak());
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, ikkeGodkjentBegrunnelser);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, "fritekst");
 
         unntaksperiodeIkkeGodkjent.utfør(prosessinstans);
 
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.AVSLUTTET));
+        verify(behandlingsresultatService).oppdaterBegrunnelser(eq(behandling.getId()), anySet(), eq("fritekst"));
+
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
-        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
-        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isEqualTo(Utfallregistreringunntak.IKKE_GODKJENT);
-        assertThat(behandlingsresultat.getBegrunnelseFritekst()).isEqualTo("fritekst");
-        assertThat(behandlingsresultat.getBehandlingsresultatBegrunnelser().stream().map(BehandlingsresultatBegrunnelse::getKode).collect(Collectors.toList()))
-            .containsExactlyInAnyOrder(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name(), Ikke_godkjent_begrunnelser.ANNET.name());
     }
 
     @Test(expected = TekniskException.class)

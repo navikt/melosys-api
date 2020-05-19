@@ -3,10 +3,12 @@ package no.nav.melosys.service.behandling;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -172,6 +174,25 @@ public class BehandlingsresultatService {
         }
 
         behandlingsresultat.setBehandlingsmåte(behandlingsmaate);
+        behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    public void oppdaterUtfallRegistreringUnntak(long behandlingID, Utfallregistreringunntak utfallRegistreringUnntak) throws FunksjonellException {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        if (behandlingsresultat.getUtfallRegistreringUnntak() != null) {
+            throw new FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat " + behandlingID);
+        }
+
+        behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        behandlingsresultat.setUtfallRegistreringUnntak(utfallRegistreringUnntak);
+        behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) throws IkkeFunnetException {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        begrunnelser.forEach(b -> b.setBehandlingsresultat(behandlingsresultat));
+        behandlingsresultat.setBehandlingsresultatBegrunnelser(begrunnelser);
+        behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 }
