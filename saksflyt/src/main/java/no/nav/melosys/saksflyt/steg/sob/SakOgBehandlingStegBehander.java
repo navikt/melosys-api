@@ -11,7 +11,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 
@@ -22,12 +22,12 @@ import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId
 public abstract class SakOgBehandlingStegBehander extends AbstraktStegBehandler {
 
     private final SakOgBehandlingFasade sakOgBehandlingFasade;
-    private final TpsService tpsService;
+    private final TpsFasade tpsService;
     private final BehandlingService behandlingService;
 
-    protected SakOgBehandlingStegBehander(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
+    protected SakOgBehandlingStegBehander(SakOgBehandlingFasade sakOgBehandlingFasade, TpsFasade tpsFasade, BehandlingService behandlingService) {
         this.sakOgBehandlingFasade = sakOgBehandlingFasade;
-        this.tpsService = tpsService;
+        this.tpsService = tpsFasade;
         this.behandlingService = behandlingService;
     }
 

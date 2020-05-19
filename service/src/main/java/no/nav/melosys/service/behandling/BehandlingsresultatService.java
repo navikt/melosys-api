@@ -188,6 +188,17 @@ public class BehandlingsresultatService {
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 
+    public void oppdaterUtfallUtpeking(long behandlingID, Utfallregistreringunntak utfallUtpeking) throws FunksjonellException {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        if (behandlingsresultat.getUtfallUtpeking() != null) {
+            throw new FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat " + behandlingID);
+        }
+
+        //behandlingsresultat.setType(??); FIXME
+        behandlingsresultat.setUtfallUtpeking(utfallUtpeking);
+        behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
     public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) throws IkkeFunnetException {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         begrunnelser.forEach(b -> b.setBehandlingsresultat(behandlingsresultat));

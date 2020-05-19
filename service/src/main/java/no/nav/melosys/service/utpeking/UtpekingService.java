@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Service
@@ -86,42 +85,40 @@ public class UtpekingService {
         log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
             behandling.getFagsak().getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
 
-        List<Utpekingsperiode> utpekingsperioder = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
-        validerUtpekingsperioder(utpekingsperioder);
-
         mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjoner,
             landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID),
             BucType.LA_BUC_02
         );
 
+        Utpekingsperiode utpekingsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertUtpekingsperiode();
+
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
-            behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed
+            behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException {
+    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException, TekniskException {
         validerAvslagUtpeking(utpekingAvvis);
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
-        behandlingService.lagre(behandling);
+
+        if (!behandling.erAktiv()) {
+            throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");
+        }
+
         if (behandling.erUtpekingAvAnnetLand()) {
             behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+        } else if (behandling.norgeErUtpekt()) {
+            behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+        } else {
+            throw new FunksjonellException("Kan ikke avvise utpeking for en behandling med tema " + behandling.getTema());
         }
 
         prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, utpekingAvvis);
-    }
-
-    private void validerUtpekingsperioder(List<Utpekingsperiode> utpekingsperioder) throws MelosysException {
-        if (CollectionUtils.isEmpty(utpekingsperioder)) {
-            throw new FunksjonellException("Du må velge en utpekingsperiode for å kunne utpeke et annet land");
-        }
-        if (utpekingsperioder.size() != 1) {
-            throw new FunksjonellException("Flere utpekingsperioder er ikke støttet ved utpeking av et annet land");
-        }
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) throws FunksjonellException {

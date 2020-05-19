@@ -130,8 +130,9 @@ public enum ProsessSteg implements Kodeverk {
     AFL_OPPRETT_OPPGAVE("AFL_OPPRETT_OPPGAVE","Oppretter oppgave til manuell behandling"),
     AFL_OPPDATER_MEDL("AFL_OPPDATER_MEDL", "Setter status i MEDL"),
 
-    //Svar på utpeking av land
+    // Svar på A003
     AFL_SVAR_SEND_AVSLAG("AFL_SVAR_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),
+    AFL_SVAR_AVSLUTT_BEHANDLING("AFL_SVAR_AVSLUTT_BEHANDLING", "Avslutter behandling etter utpeking er avslått"),
 
     //Unntak medlemskap
     REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
