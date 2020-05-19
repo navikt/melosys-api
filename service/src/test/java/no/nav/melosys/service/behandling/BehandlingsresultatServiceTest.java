@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -110,6 +111,9 @@ public class BehandlingsresultatServiceTest {
         Anmodningsperiode anmodningsperiode = opprettAnmodningsperiode();
         behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
 
+        Utpekingsperiode utpekingsperiode = opprettUtpekingsperiode();
+        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
+
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
         behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
@@ -139,6 +143,14 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> !a.erSendtUtland());
         assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getAnmodningsperioder()).allMatch(a -> a.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
+
+        assertThat(behandlingsresultatreplika.getUtpekingsperioder()).allMatch(l -> l.getId() == null);
+        assertThat(behandlingsresultatreplika.getUtpekingsperioder()).allMatch(a -> a.getFom() != null);
+        assertThat(behandlingsresultatreplika.getUtpekingsperioder()).allMatch(a -> a.getTom() != null);
+        assertThat(behandlingsresultatreplika.getUtpekingsperioder()).allMatch(a -> a.getLovvalgsland() == Landkoder.SE);
+        assertThat(behandlingsresultatreplika.getUtpekingsperioder()).allMatch(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A);
+        assertThat(behandlingsresultatreplika.getUtpekingsperioder()).allMatch(a -> a.getSendtUtland() == null);
+        assertThat(behandlingsresultatreplika.getUtpekingsperioder()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
 
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
@@ -247,6 +259,16 @@ public class BehandlingsresultatServiceTest {
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
         anmodningsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
         return anmodningsperiode;
+    }
+
+    private Utpekingsperiode opprettUtpekingsperiode() {
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(
+            LocalDate.now(), LocalDate.now().plusYears(1), Landkoder.SE,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        utpekingsperiode.setId(11111L);
+        utpekingsperiode.setMedlPeriodeID(1242L);
+        utpekingsperiode.setSendtUtland(LocalDate.now());
+        return utpekingsperiode;
     }
 
     private Avklartefakta opprettAvklartefakta() {
