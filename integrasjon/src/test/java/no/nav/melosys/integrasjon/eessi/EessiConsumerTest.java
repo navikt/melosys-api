@@ -64,7 +64,7 @@ public class EessiConsumerTest {
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andRespond(withSuccess("{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}", MediaType.APPLICATION_JSON));
 
-        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, "pdf".getBytes(), bucType, true);
+        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, new Vedlegg("pdf".getBytes(), "tittel"), bucType, true);
         assertThat(opprettSedDto.getRinaSaksnummer()).isEqualTo("12345");
     }
 

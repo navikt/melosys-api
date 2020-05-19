@@ -1,8 +1,12 @@
 package no.nav.melosys.saksflyt.steg;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -12,9 +16,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 
@@ -32,7 +33,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         return sendUtland(bucType, prosessinstans, null);
     }
 
-    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg) throws MelosysException {
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Vedlegg vedlegg) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         SendUtlandStatus sendUtlandStatus = SendUtlandStatus.IKKE_SENDT;
