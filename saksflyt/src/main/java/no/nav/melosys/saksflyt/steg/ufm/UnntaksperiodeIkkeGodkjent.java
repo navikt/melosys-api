@@ -64,7 +64,7 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (!lovvalgsperioder.isEmpty()) {
             medlPeriodeService.avvisPeriode(lovvalgsperioder.iterator().next().getMedlPeriodeID());
-            log.info("Unntaksperiode avvist i medl fagsak {}", prosessinstans.getBehandling().getFagsak().getSaksnummer());
+            log.info("Unntaksperiode avvist i medl for fagsak {}", prosessinstans.getBehandling().getFagsak().getSaksnummer());
         }
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
