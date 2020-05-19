@@ -117,7 +117,6 @@ public class SedDataByggerTest {
         assertThat(sedData.getBostedsadresse()).isNotNull();
         assertThat(sedData.getFamilieMedlem()).isNotNull();
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotNull();
-        assertThat(sedData.getUtenlandskeVirksomheter()).isNotNull();
         assertThat(sedData.getUtenlandskIdent()).isNotNull();
 
         assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
@@ -367,7 +366,6 @@ public class SedDataByggerTest {
         assertThat(sedData.getFamilieMedlem()).isNotEmpty();
         assertThat(sedData.getUtenlandskIdent()).isNotEmpty();
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotEmpty();
-        assertThat(sedData.getUtenlandskeVirksomheter()).isNotNull();
         assertThat(sedData.getTidligereLovvalgsperioder()).isNotNull();
         assertThat(sedData.getArbeidsgivendeVirksomheter().isEmpty()).isFalse();
     }
