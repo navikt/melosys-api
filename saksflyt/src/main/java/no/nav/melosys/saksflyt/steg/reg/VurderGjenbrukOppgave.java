@@ -32,7 +32,7 @@ public class VurderGjenbrukOppgave extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return OPPFRISK_SAKSOPPLYSNINGER;
+        return VURDER_GJENBRUK_OPPGAVE;
     }
 
     @Override

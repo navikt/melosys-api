@@ -53,6 +53,6 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
         fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
 
-        prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
+        prosessinstans.setSteg(ProsessSteg.VURDER_GJENBRUK_OPPGAVE);
     }
 }

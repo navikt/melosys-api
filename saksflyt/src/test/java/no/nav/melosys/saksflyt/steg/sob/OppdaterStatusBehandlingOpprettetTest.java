@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_REGISTER_OPPL;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_SAKSRELASJON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -67,7 +67,7 @@ public class OppdaterStatusBehandlingOpprettetTest {
         Behandling b = lagBehandling();
         p.setBehandling(b);
         agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(JFR_HENT_PERS_OPPL);
+        assertThat(p.getSteg()).isEqualTo(JFR_HENT_REGISTER_OPPL);
     }
 
     private static Behandling lagBehandling() {

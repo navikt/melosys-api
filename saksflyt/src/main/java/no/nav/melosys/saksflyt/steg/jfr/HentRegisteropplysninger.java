@@ -14,8 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_PERS_OPPL;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 /**
  * Steget sørger for å hente personinfo fra TPS
@@ -39,7 +38,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_HENT_PERS_OPPL;
+        return JFR_HENT_REGISTER_OPPL;
     }
 
     @Override
