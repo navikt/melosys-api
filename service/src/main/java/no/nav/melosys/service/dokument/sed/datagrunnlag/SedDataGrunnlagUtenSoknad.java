@@ -8,10 +8,9 @@ import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataGrunnlagUtenSoknad implements SedDataGrunnlag {
-
-    private Behandling behandling;
-    private PersonDokument personDokument;
-    private BostedGrunnlag bostedGrunnlag;
+    private final Behandling behandling;
+    private final PersonDokument personDokument;
+    private final BostedGrunnlag bostedGrunnlag;
 
     public SedDataGrunnlagUtenSoknad(Behandling behandling, KodeverkService kodeverkService) throws TekniskException {
         this.behandling = behandling;
@@ -19,27 +18,17 @@ public class SedDataGrunnlagUtenSoknad implements SedDataGrunnlag {
         this.bostedGrunnlag = new BostedGrunnlag(null, personDokument, kodeverkService);
     }
 
+    @Override
     public Behandling getBehandling() {
         return behandling;
-    }
-
-    public void setBehandling(Behandling behandling) {
-        this.behandling = behandling;
     }
 
     public PersonDokument getPerson() {
         return personDokument;
     }
 
-    public void setPerson(PersonDokument personDokument) {
-        this.personDokument = personDokument;
-    }
-
+    @Override
     public BostedGrunnlag getBostedGrunnlag() {
         return bostedGrunnlag;
-    }
-
-    public void setBostedGrunnlag(BostedGrunnlag bostedGrunnlag) {
-        this.bostedGrunnlag = bostedGrunnlag;
     }
 }
