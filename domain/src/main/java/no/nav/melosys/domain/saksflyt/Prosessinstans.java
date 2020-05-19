@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.saksflyt;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -42,7 +41,7 @@ public class Prosessinstans {
 
     @Column(name = "data")
     @Convert(converter = PropertiesConverter.class)
-    private Properties data = new Properties();
+    private final Properties data = new Properties();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "steg", nullable = false)
@@ -66,7 +65,7 @@ public class Prosessinstans {
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProsessinstansHendelse> hendelser;
 
-    private static ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+    private static final ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
 
     public UUID getId() {
@@ -201,8 +200,6 @@ public class Prosessinstans {
             .orElse(Boolean.FALSE) ? getData(ProsessDataKey.SAKSBEHANDLER) : null;
     }
 
-    private static final int VARCHAR2_MAX_BYTES = 4000;
-
     private void leggTilHendelse(ProsessinstansHendelse piHend) {
         if (!this.equals(piHend.getProsessinstans())) {
             // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
@@ -221,11 +218,7 @@ public class Prosessinstans {
 
     public void leggTilHendelse(String type, String melding, Throwable t) {
         if (t != null) {
-            String loggMelding = melding + " - " + ExceptionUtils.getStackTrace(t);
-            if (loggMelding.getBytes(StandardCharsets.UTF_8).length > VARCHAR2_MAX_BYTES) {
-                loggMelding = new String(loggMelding.getBytes(StandardCharsets.UTF_8), 0, VARCHAR2_MAX_BYTES, StandardCharsets.UTF_8);
-            }
-            leggTilHendelse(type, loggMelding);
+            leggTilHendelse(type, melding + " - " + ExceptionUtils.getStackTrace(t));
         } else {
             leggTilHendelse(type, melding);
         }

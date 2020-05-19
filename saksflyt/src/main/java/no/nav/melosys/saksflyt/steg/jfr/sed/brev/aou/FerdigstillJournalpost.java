@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.jfr.sed.brev;
+package no.nav.melosys.saksflyt.steg.jfr.sed.brev.aou;
 
 import java.util.List;
 import java.util.Map;

@@ -4,9 +4,13 @@ import java.time.LocalDate;
 import java.util.Collection;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -27,19 +31,15 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VedtakKontrollServiceTest {
-
-    private Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-    private MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
-
-    private Behandling behandling = new Behandling();
-    private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-
     @Mock
     private BehandlingService behandlingService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
 
     private final long behandlingID = 33L;
+    private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+    private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
+    private final PersonDokument personDokument = new PersonDokument();
 
     private VedtakKontrollService vedtakKontrollService;
 
@@ -49,17 +49,24 @@ public class VedtakKontrollServiceTest {
         medlSaksopplysning.setType(SaksopplysningType.MEDL);
         medlSaksopplysning.setDokument(medlemskapDokument);
 
+        Saksopplysning persopplysning = new Saksopplysning();
+        persopplysning.setType(SaksopplysningType.PERSOPL);
+        persopplysning.setDokument(personDokument);
+        personDokument.bostedsadresse.setPoststed("altOK");
+
+        Behandling behandling = new Behandling();
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.getSaksopplysninger().add(medlSaksopplysning);
+        behandling.getSaksopplysninger().add(persopplysning);
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(eq(behandlingID))).thenReturn(lovvalgsperiode);
-
-        behandling.getSaksopplysninger().add(medlSaksopplysning);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
         vedtakKontrollService = new VedtakKontrollService(behandlingService, lovvalgsperiodeService);
     }
 
     @Test
-    public void utførKontroller_periodeUnder24MndArt12IkkeOverlappendePeriode_returnererTomColleciton() throws TekniskException, FunksjonellException {
+    public void utførKontroller_periodeUnder24MndArt12IkkeOverlappendePeriode_returnererTomCollection() throws TekniskException, FunksjonellException {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
@@ -68,13 +75,15 @@ public class VedtakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_periodeOver24MndArt16IkkeOverlappendePeriode_returnererTomColleciton() throws TekniskException, FunksjonellException {
+    public void utførKontroller_periodeOver24MndArt16IkkeOverlappendePeriode_returnererTomCollection() throws TekniskException, FunksjonellException {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
         Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat).isEmpty();
     }
+
+
 
     @Test
     public void utførKontroller_periodeOver24MndArt12MedOverlappendePeriode_returnererCollectionMedToKoder() throws TekniskException, FunksjonellException {
@@ -90,4 +99,16 @@ public class VedtakKontrollServiceTest {
         Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat).containsExactlyInAnyOrder(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
     }
+
+    @Test
+    public void utførKontroller_manglerBostedsadresse_returnererKode() throws TekniskException, FunksjonellException {
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        personDokument.bostedsadresse = new Bostedsadresse();
+
+        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        assertThat(resultat).contains(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
+    }
+
 }

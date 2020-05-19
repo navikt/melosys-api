@@ -64,17 +64,17 @@ public class VedtakServiceTest {
     @Mock
     private TpsFasade tpsFasade;
     @Mock
-    private VedtakKontrollService vedtakKontrollService;
-    @Mock
     private RegisteropplysningerService registeropplysningerService;
+    @Mock
+    private VedtakKontrollService vedtakKontrollService;
 
     private VedtakService vedtakService;
 
     private long behandlingID;
-    private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private Behandling behandling = new Behandling();
-    private Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-    private Behandling replikertBehandling = new Behandling();
+    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+    private final Behandling behandling = new Behandling();
+    private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+    private final Behandling replikertBehandling = new Behandling();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -82,7 +82,7 @@ public class VedtakServiceTest {
     @Before
     public void setUp() throws Exception {
         vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, tpsFasade, vedtakKontrollService, registeropplysningerService);
+            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -209,7 +209,7 @@ public class VedtakServiceTest {
     }
 
     @Test
-    public void fattVedtak_feilIValidering_kasterExceptionMedFeilkode() throws MelosysException {
+    public void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() throws MelosysException {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
