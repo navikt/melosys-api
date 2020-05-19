@@ -15,15 +15,18 @@ public class BehandlingsresultatDto {
     private final List<String> begrunnelseKoder;
     private final String begrunnelseFritekst;
     private final String utfallRegistreringUnntak;
+    private final String utfallUtpeking;
     private final String vedtakstype;
     private final List<String> kontrollresultatBegrunnelseKoder;
 
     private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
                                    String begrunnelseFritekst,
                                    String utfallRegistreringUnntak,
+                                   String utfallUtpeking,
                                    String vedtakstype,
                                    List<String> kontrollresultatBegrunnelseKoder) {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode.getKode();
+        this.utfallUtpeking = utfallUtpeking;
         this.begrunnelseKoder = new ArrayList<>();
         this.begrunnelseFritekst = begrunnelseFritekst;
         this.utfallRegistreringUnntak = utfallRegistreringUnntak;
@@ -36,6 +39,7 @@ public class BehandlingsresultatDto {
             resultat.getType(),
             resultat.getBegrunnelseFritekst(),
             resultat.getUtfallRegistreringUnntak() != null ? resultat.getUtfallRegistreringUnntak().getKode() : null,
+            resultat.getUtfallUtpeking() != null ? resultat.getUtfallUtpeking().getKode() : null,
             resultat.getVedtakMetadata() != null ? resultat.getVedtakMetadata().getVedtakstype().getKode() : null,
             resultat.getKontrollresultater().stream().map(Kontrollresultat::getBegrunnelse).map(Kontroll_begrunnelser::getKode).collect(Collectors.toList())
         );
@@ -64,6 +68,10 @@ public class BehandlingsresultatDto {
 
     public String getUtfallRegistreringUnntak() {
         return utfallRegistreringUnntak;
+    }
+
+    public String getUtfallUtpeking() {
+        return utfallUtpeking;
     }
 
     public String getVedtakstype() {

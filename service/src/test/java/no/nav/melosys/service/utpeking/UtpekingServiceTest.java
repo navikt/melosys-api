@@ -2,6 +2,7 @@ package no.nav.melosys.service.utpeking;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -82,7 +83,7 @@ public class UtpekingServiceTest {
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
-        final List<String> mottakerInstitusjoner = List.of("SE:123");
+        final Set<String> mottakerInstitusjoner = Set.of("SE:123");
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), eq(List.of(Landkoder.SE)), eq(BucType.LA_BUC_02)))
             .thenReturn(mottakerInstitusjoner);
 
