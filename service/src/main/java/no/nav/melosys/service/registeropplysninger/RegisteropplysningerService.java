@@ -150,7 +150,10 @@ public class RegisteropplysningerService {
             fom = fom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
         }
 
-        if (tom == null || tom.isAfter(iDag)) {
+        if (tom == null) {
+            tom = behandling.erBehandlingAvSøknad() ? registeropplysningerRequest.getFom().plusYears(1) : iDag;
+        }
+        if (tom.isAfter(iDag)) {
             tom = iDag;
         }
 

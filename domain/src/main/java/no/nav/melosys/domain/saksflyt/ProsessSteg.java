@@ -22,6 +22,7 @@ public enum ProsessSteg implements Kodeverk {
     JFR_FERDIGSTILL_JOURNALPOST("JFR_FERDIGSTILL_JOURNALPOST", "Ferdigstiller journalposten i Joark"),
     JFR_SETT_VURDER_DOKUMENT("JFR_SETT_VURDER_DOKUMENT", "Setter status til VURDER_DOKUMENT"),
     JFR_TILDEL_BEHANDLINGSOPPGAVE("JFR_TILDEL_BEHANDLINGSOPPGAVE", "Tildeler behandlingsoppgave for gjeldende fagsak til en saksbehandler"),
+    // FIXME: Slå sammen til ett her og i DB
     JFR_HENT_PERS_OPPL("JFR_HENT_PERS_OPPL", "Hent personopplysninger fra TPS"),
     JFR_VURDER_INNGANGSVILKÅR("JFR_VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår"),
 
@@ -31,6 +32,7 @@ public enum ProsessSteg implements Kodeverk {
     HENT_ORG_OPPL("HENT_ORG_OPPL", "Hent organisasjoner fra EREG"),
     HENT_MEDL_OPPL("HENT_MEDL_OPPL", "Hent medlemskapsopplysninger fra MEDL"),
     HENT_SOB_SAKER("HENT_SOB_SAKER", "Hent saker fra Sak og behandling"),
+    // FIXME: Endre her og i DB
     OPPFRISK_SAKSOPPLYSNINGER("OPPFRISK_SAKSOPPLYSNINGER", "Oppfrisking av saksopplysninger"),
 
     // Oppgave

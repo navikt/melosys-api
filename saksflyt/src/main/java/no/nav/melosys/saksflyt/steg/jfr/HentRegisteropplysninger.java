@@ -24,15 +24,15 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_VURDER_INNGANGSVILK
  * JFR_HENT_PERS_OPPL → JFR_VURDER_INNGANGSVILKÅR hvis alt ok
  * JFR_HENT_PERS_OPPL → FEILET_MASKINELT hvis personen ikke finnes i TPS
  */
-@Component
-public class HentPersonopplysninger extends AbstraktStegBehandler {
+@Component("JFRHentRegisteropplysninger")
+public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(HentPersonopplysninger.class);
+    private static final Logger log = LoggerFactory.getLogger(HentRegisteropplysninger.class);
 
     private final RegisteropplysningerService registeropplysningerService;
 
     @Autowired
-    public HentPersonopplysninger(RegisteropplysningerService registeropplysningerService) {
+    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService) {
         this.registeropplysningerService = registeropplysningerService;
         log.info("HentPersonopplysninger initialisert");
     }
@@ -48,15 +48,22 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
         Periode søknadsperiode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        // FIXME: Logikk i registeropplysningerService for å sette default tom dato
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(prosessinstans.getBehandling().getId())
                 .fnr(brukerId)
                 .fom(søknadsperiode.getFom())
+                .tom(søknadsperiode.getTom())
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
                     .personopplysninger()
                     .personhistorikkopplysninger()
+                    .arbeidsforholdopplysninger()
+                    .inntektsopplysninger()
+                    .organisasjonsopplysninger()
+                    .medlemskapsopplysninger()
+                    .sakOgBehandlingopplysninger()
                     .build())
                 .build());
 
