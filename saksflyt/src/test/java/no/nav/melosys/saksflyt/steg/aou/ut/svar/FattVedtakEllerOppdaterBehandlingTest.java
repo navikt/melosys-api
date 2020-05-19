@@ -34,8 +34,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OppdaterBehandlingTest {
-    private OppdaterBehandling oppdaterBehandling;
+public class FattVedtakEllerOppdaterBehandlingTest {
+    private FattVedtakEllerOppdaterBehandling fattVedtakEllerOppdaterBehandling;
 
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
@@ -58,7 +58,7 @@ public class OppdaterBehandlingTest {
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
         anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
         anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-        oppdaterBehandling = new OppdaterBehandling(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService, lovvalgsperiodeService);
+        fattVedtakEllerOppdaterBehandling = new FattVedtakEllerOppdaterBehandling(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService, lovvalgsperiodeService);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
     }
 
@@ -78,7 +78,7 @@ public class OppdaterBehandlingTest {
 
         prosessinstans.setBehandling(behandling);
 
-        oppdaterBehandling.utfør(prosessinstans);
+        fattVedtakEllerOppdaterBehandling.utfør(prosessinstans);
 
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
@@ -106,7 +106,7 @@ public class OppdaterBehandlingTest {
 
         prosessinstans.setBehandling(behandling);
 
-        oppdaterBehandling.utfør(prosessinstans);
+        fattVedtakEllerOppdaterBehandling.utfør(prosessinstans);
 
         verify(vedtakService).fattVedtak(eq(behandling.getId()), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
         verify(behandlingsresultatService).oppdaterBehandlingsMaate(anyLong(), any());
@@ -136,7 +136,7 @@ public class OppdaterBehandlingTest {
 
         prosessinstans.setBehandling(behandling);
 
-        oppdaterBehandling.utfør(prosessinstans);
+        fattVedtakEllerOppdaterBehandling.utfør(prosessinstans);
 
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
@@ -169,7 +169,7 @@ public class OppdaterBehandlingTest {
 
         prosessinstans.setBehandling(behandling);
 
-        oppdaterBehandling.utfør(prosessinstans);
+        fattVedtakEllerOppdaterBehandling.utfør(prosessinstans);
 
         verify(vedtakService).fattVedtak(eq(123L), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
         verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(eq(123L), eq(Behandlingsmaate.DELVIS_AUTOMATISERT));

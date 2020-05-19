@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
@@ -37,8 +36,8 @@ import static no.nav.melosys.metrics.MetrikkerNavn.SVAR_AOU;
 import static no.nav.melosys.metrics.MetrikkerNavn.TAG_RESULTAT;
 
 @Component
-public class OppdaterBehandling extends AbstraktStegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(OppdaterBehandling.class);
+public class FattVedtakEllerOppdaterBehandling extends AbstraktStegBehandler {
+    private static final Logger log = LoggerFactory.getLogger(FattVedtakEllerOppdaterBehandling.class);
 
     private static final String INNVILGELSE = "godkjent";
     private static final String INNVILGELSE_YTTERLIGEREINFO = "godkjentmedinfo";
@@ -52,11 +51,11 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
     @Autowired
-    public OppdaterBehandling(AnmodningsperiodeService anmodningsperiodeService,
-                              BehandlingService behandlingService,
-                              BehandlingsresultatService behandlingsresultatService,
-                              @Qualifier("system") VedtakService vedtakService,
-                              LovvalgsperiodeService lovvalgsperiodeService) {
+    public FattVedtakEllerOppdaterBehandling(AnmodningsperiodeService anmodningsperiodeService,
+                                             BehandlingService behandlingService,
+                                             BehandlingsresultatService behandlingsresultatService,
+                                             @Qualifier("system") VedtakService vedtakService,
+                                             LovvalgsperiodeService lovvalgsperiodeService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -96,7 +95,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
                 anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType(),
                 behandlingID,
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
-            oppdaterBehandlingsstatusUnderBehandling(behandlingID);
+            behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         }
         registrerMetrikk(melosysEessiMelding);
         prosessinstans.setSteg(ProsessSteg.FERDIG);
@@ -105,19 +104,13 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     private void fattVedtak(long behandlingID) throws MelosysException {
         try {
             vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+            behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
         } catch (ValideringException e) {
             log.info("Kan ikke fatte vedtak automatisk pga. treff i vedtakkontroller: {}. Endrer behandlingsstatus til {}",
                 String.join(", ", e.getFeilkoder()),
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
-            oppdaterBehandlingsstatusUnderBehandling(behandlingID);
-            return;
+            behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         }
-
-        behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
-    }
-
-    private void oppdaterBehandlingsstatusUnderBehandling(long behandlingID) throws FunksjonellException, TekniskException {
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
     }
 
     private boolean inneholderYtterligereInformasjon(MelosysEessiMelding melosysEessiMelding) {
