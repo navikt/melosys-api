@@ -43,6 +43,9 @@ public class BehandlingService {
     private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
 
     static {
+        Arrays.stream(Behandlingstema.values()).forEach(
+            b -> Metrics.counter(BEHANDLINGSTEMAER_OPPRETTET, TAG_TEMA, b.getKode())
+        );
         Arrays.stream(Behandlingstyper.values()).forEach(
             b -> Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, b.getKode())
         );
@@ -148,6 +151,7 @@ public class BehandlingService {
         behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         behandlingsresultatRepository.save(behandlingsresultat);
 
+        Metrics.counter(BEHANDLINGSTEMAER_OPPRETTET, TAG_TEMA, behandlingstema.getKode()).increment();
         Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, behandlingstype.getKode()).increment();
         return behandling;
     }
