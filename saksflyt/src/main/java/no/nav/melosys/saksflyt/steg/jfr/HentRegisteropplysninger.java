@@ -47,7 +47,6 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
         Periode søknadsperiode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        // FIXME: Logikk i registeropplysningerService for å sette default tom dato
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
