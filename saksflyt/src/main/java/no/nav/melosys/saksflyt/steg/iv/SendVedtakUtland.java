@@ -55,7 +55,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         Behandling behandling = prosessinstans.getBehandling();
-        if (behandling.norgeErUtpekt()) {
+        if (behandling.erNorgeUtpekt()) {
             sendA012Sed(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
         } else {
             super.sendUtland(avklarBucType(behandling), prosessinstans);

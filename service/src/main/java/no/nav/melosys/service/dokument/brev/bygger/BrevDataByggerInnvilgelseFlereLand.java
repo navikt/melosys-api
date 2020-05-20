@@ -69,7 +69,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
             grunnlagData.periode.getFom(), grunnlagData.periode.getTom(), brevdata.lovvalgsperiode.getFom(), brevdata.lovvalgsperiode.getTom()
         );
 
-        if (dataGrunnlag.getBehandling().norgeErUtpekt()) {
+        if (dataGrunnlag.getBehandling().erNorgeUtpekt()) {
             brevdata.trydemyndighetsland = saksopplysningerService.hentSedOpplysninger(behandlingID).getAvsenderLandkode();
         }
 

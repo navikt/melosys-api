@@ -20,7 +20,7 @@ final class BehandlingstypeKodeMapper {
                 return BehandlingstypeKode.KLAGE;
             }
             return BehandlingstypeKode.SOEKNAD;
-        } else if (behandling.norgeErUtpekt()) {
+        } else if (behandling.erNorgeUtpekt()) {
             return BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE;
         }
 

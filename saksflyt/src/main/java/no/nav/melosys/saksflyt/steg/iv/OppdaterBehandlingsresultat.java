@@ -54,7 +54,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Long behandlingID = prosessinstans.getBehandling().getId();
 
-        if (prosessinstans.getBehandling().norgeErUtpekt()) {
+        if (prosessinstans.getBehandling().erNorgeUtpekt()) {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.GODKJENT);
         }
 
