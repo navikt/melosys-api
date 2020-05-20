@@ -112,7 +112,7 @@ public class SedDataBygger {
         SedDataDto sedDataDto = new SedDataDto();
 
         sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(dataGrunnlag));
-        sedDataDto.setSelvstendigeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige()));
+        sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(dataGrunnlag));
 
         sedDataDto.setArbeidssteder(dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()));
@@ -135,16 +135,20 @@ public class SedDataBygger {
 
     private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         Collection<AvklartVirksomhet> avklarteVirksomheter = new ArrayList<>();
-        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter());
         avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere());
+        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter());
 
         return avklarteVirksomheter.stream()
             .map(SedDataBygger::lagVirksomhet)
             .collect(Collectors.toList());
     }
 
-    private static List<Virksomhet> map(List<AvklartVirksomhet> avklarteArbeidsgivere) {
-        return avklarteArbeidsgivere.stream()
+    private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Collection<AvklartVirksomhet> avklarteSelvstendigeVirksomheter = new ArrayList();
+        avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige());
+        avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
+
+        return avklarteSelvstendigeVirksomheter.stream()
             .map(SedDataBygger::lagVirksomhet)
             .collect(Collectors.toList());
     }

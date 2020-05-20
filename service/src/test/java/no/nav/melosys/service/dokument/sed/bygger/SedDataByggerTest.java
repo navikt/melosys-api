@@ -45,15 +45,15 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SedDataByggerTest {
     @Mock
-    KodeverkService kodeverkService;
+    private KodeverkService kodeverkService;
     @Mock
-    RegisterOppslagService registerOppslagService;
+    private RegisterOppslagService registerOppslagService;
     @Mock
-    LovvalgsperiodeService lovvalgsperiodeService;
+    private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    AvklartefaktaService avklartefaktaService;
+    private AvklartefaktaService avklartefaktaService;
     @Mock
-    LandvelgerService landvelgerService;
+    private LandvelgerService landvelgerService;
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
