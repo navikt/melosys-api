@@ -1,15 +1,8 @@
 package no.nav.melosys.service.registeropplysninger;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.List;
-import java.util.Optional;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -29,14 +22,16 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RegisteropplysningerServiceTest {
-
-    private static final String AKTØR_ID = "123321";
-    private static final String FNR = "432234";
+public class RegisteropplysningerServiceTest extends RegisteropplysningerServiceTestParent {
 
     @Mock
     private TpsFasade tpsFasade;
@@ -58,11 +53,6 @@ public class RegisteropplysningerServiceTest {
     private SaksopplysningerService saksopplysningerService;
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-
-    private Integer arbeidsforholdhistorikkAntallMåneder = 6;
-    private Integer medlemskaphistorikkAntallÅr = 5;
-    private Integer inntektshistorikkAntallMåneder = 6;
-
 
     private RegisteropplysningerService registeropplysningerService;
 
@@ -187,7 +177,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentArbeidsforholdopplysninger_fremtidigPeriode() throws MelosysException {
+    public void utfoerSteg_fremtidigPeriode() throws MelosysException {
         LocalDate fom = LocalDate.now().plusYears(1);
         LocalDate tom = LocalDate.now().plusYears(2);
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
@@ -204,7 +194,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentArbeidsforholdopplysninger_åpenPeriodeMottakSed() throws MelosysException {
+    public void hentArbeidsforholdopplysninger_åpenPeriode() throws MelosysException {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = null;
         Saksopplysning saksopplysning = lagSaksopplysning(SaksopplysningType.ARBFORH);
@@ -221,24 +211,6 @@ public class RegisteropplysningerServiceTest {
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
-    @Test
-    public void hentArbeidsforholdopplysninger_åpenPeriodeBehandlingSøknad() throws MelosysException {
-        LocalDate fom = LocalDate.now().minusYears(2);
-        LocalDate tom = null;
-        Saksopplysning saksopplysning = lagSaksopplysning(SaksopplysningType.ARBFORH);
-        when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(saksopplysning);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling(saksopplysning, true));
-
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(fom, tom)
-            .saksopplysningTyper(saksopplysningstyper().arbeidsforholdopplysninger().build())
-            .build());
-
-        LocalDate forventetFom = fom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
-        LocalDate forventetTom = fom.plusYears(1);
-
-        verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(eq(FNR), eq(forventetFom), eq(forventetTom));
-        verify(behandlingService).lagre(any(Behandling.class));
-    }
 
     @Test
     public void hentPersonopplysninger() throws MelosysException {
@@ -271,7 +243,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentInntektsopplysninger_åpenPeriodeMottakSed_forespørTomTilDato() throws MelosysException {
+    public void hentInntektsopplysninger_tomTilDato_forespørTomTilDato() throws MelosysException {
         LocalDate fom = LocalDate.now().minusYears(2);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, null);
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(saksopplysning);
@@ -300,7 +272,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentInntektsopplysninger_periodeIkkePåbegyntMottakSed_verifiserInntektPeriode() throws MelosysException {
+    public void hentInntektsopplysninger_periodeIkkePåbegynt_verifiserInntektPeriode() throws MelosysException {
         LocalDate fom = LocalDate.now().plusYears(1);
         LocalDate tom = LocalDate.now().plusYears(2);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
@@ -327,43 +299,6 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(inntektService).hentInntektListe(anyString(), eq(YearMonth.from(fom)), eq(YearMonth.from(tom)));
-        verify(behandlingService).lagre(any(Behandling.class));
-    }
-
-    @Test
-    public void hentInntektsopplysninger_åpenPeriodeBehandlingSøknad_forespørTomTilDato() throws MelosysException {
-        LocalDate fom = LocalDate.now().minusYears(2);
-        Saksopplysning saksopplysning = hentSedSaksopplysning(fom, null);
-        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(saksopplysning);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling(saksopplysning, true));
-
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(fom, null)
-            .saksopplysningTyper(saksopplysningstyper().inntektsopplysninger().build())
-            .build());
-
-        YearMonth forventetFom = YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder));
-        YearMonth forventetTom = YearMonth.from(fom.plusYears(1));
-
-        verify(inntektService).hentInntektListe(anyString(), eq(forventetFom), eq(forventetTom));
-        verify(behandlingService).lagre(any(Behandling.class));
-    }
-
-    @Test
-    public void hentInntektsopplysninger_periodeIkkePåbegyntBehandlingSøknad_verifiserInntektPeriode() throws MelosysException {
-        LocalDate fom = LocalDate.now().plusYears(1);
-        LocalDate tom = LocalDate.now().plusYears(2);
-        Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
-        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(saksopplysning);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling(saksopplysning, true));
-
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(fom, tom)
-            .saksopplysningTyper(saksopplysningstyper().inntektsopplysninger().build())
-            .build());
-
-        YearMonth forventetInntektFom = YearMonth.now().minusMonths(inntektshistorikkAntallMåneder);
-        YearMonth forventetInntektTom = YearMonth.now();
-
-        verify(inntektService).hentInntektListe(anyString(), eq(forventetInntektFom), eq(forventetInntektTom));
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
@@ -404,92 +339,5 @@ public class RegisteropplysningerServiceTest {
             .build());
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(1L));
-    }
-
-    private Behandling hentBehandling() {
-        return hentBehandling(false);
-    }
-
-    private Behandling hentBehandling(boolean erBehandlingAvSøknad) {
-        Behandling behandling = new Behandling();
-        behandling.setId(2L);
-        behandling.setTema(erBehandlingAvSøknad
-            ? Behandlingstema.UTSENDT_ARBEIDSTAKER
-            : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-
-        return behandling;
-    }
-
-    private Behandling hentBehandling(Saksopplysning saksopplysning) {
-        return hentBehandling(saksopplysning, false);
-    }
-
-    private Behandling hentBehandling(Saksopplysning saksopplysning, boolean erBehandlingAvSøknad) {
-        Behandling behandling = hentBehandling(erBehandlingAvSøknad);
-        behandling.getSaksopplysninger().add(saksopplysning);
-
-        return behandling;
-    }
-
-    private Saksopplysning hentSedSaksopplysning(LocalDate fom, LocalDate tom) {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(hentSedDokument(fom, tom));
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        return saksopplysning;
-    }
-
-    private SedDokument hentSedDokument(LocalDate fom, LocalDate tom) {
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(new no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom));
-        sedDokument.setFnr("123");
-        return sedDokument;
-    }
-
-    private Saksopplysning lagSaksopplysning(SaksopplysningType saksopplysningType) {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(saksopplysningType);
-
-        return saksopplysning;
-    }
-
-    private ArbeidsforholdDokument lagArbeidsforholdDokument() {
-        Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.arbeidsgiverID = "123456789";
-
-        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(List.of(arbeidsforhold));
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(arbeidsforholdDokument);
-        saksopplysning.setType(SaksopplysningType.ARBFORH);
-        saksopplysning.setKilde(SaksopplysningKilde.AAREG);
-
-        return arbeidsforholdDokument;
-    }
-
-    private RegisteropplysningerRequest.RegisteropplysningerRequestBuilder registeropplysningerRequest() {
-        return registeropplysningerRequest(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1));
-    }
-
-    private RegisteropplysningerRequest.RegisteropplysningerRequestBuilder registeropplysningerRequest(LocalDate fom, LocalDate tom) {
-        return RegisteropplysningerRequest.builder()
-            .behandlingID(2L)
-            .fom(fom)
-            .tom(tom)
-            .fnr(FNR);
-    }
-
-    private RegisteropplysningerRequest.SaksopplysningTyper.SaksopplysningTyperBuilder saksopplysningstyper() {
-        return RegisteropplysningerRequest.SaksopplysningTyper.builder();
-    }
-
-    private LocalDate anyLocalDate() {
-        return any(LocalDate.class);
-    }
-
-    private YearMonth anyYearMonth() {
-        return any(YearMonth.class);
-    }
-
-    private Saksopplysning anySaksopplysning() {
-        return any(Saksopplysning.class);
     }
 }

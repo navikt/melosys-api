@@ -11,10 +11,12 @@ import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
 /**
  * Steget sørger for å hente personinfo fra TPS
@@ -31,7 +33,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
     private final RegisteropplysningerService registeropplysningerService;
 
     @Autowired
-    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService) {
+    public HentRegisteropplysninger(@Qualifier("jfr") RegisteropplysningerService registeropplysningerService) {
         this.registeropplysningerService = registeropplysningerService;
         log.info("HentPersonopplysninger initialisert");
     }
@@ -54,15 +56,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
                 .fnr(brukerId)
                 .fom(søknadsperiode.getFom())
                 .tom(søknadsperiode.getTom())
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .personopplysninger()
-                    .personhistorikkopplysninger()
-                    .arbeidsforholdopplysninger()
-                    .inntektsopplysninger()
-                    .organisasjonsopplysninger()
-                    .medlemskapsopplysninger()
-                    .sakOgBehandlingopplysninger()
-                    .build())
+                .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()))
                 .build());
 
         prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);

@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -31,6 +32,7 @@ public class HentRegisteropplysningerTest {
     public void utførSteg() throws MelosysException {
         Behandling behandling = new Behandling();
         behandling.setId(222L);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);

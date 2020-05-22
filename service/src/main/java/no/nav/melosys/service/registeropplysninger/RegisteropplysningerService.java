@@ -28,11 +28,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Primary
 public class RegisteropplysningerService {
     private static final Logger log = LoggerFactory.getLogger(RegisteropplysningerService.class);
 
@@ -63,9 +65,9 @@ public class RegisteropplysningerService {
     private final InntektService inntektService;
     private final UtbetaldataService utbetaldataService;
     private final SaksopplysningerService saksopplysningerService;
-    private final Integer arbeidsforholdhistorikkAntallMåneder;
-    private final Integer medlemskaphistorikkAntallÅr;
-    private final Integer inntektshistorikkAntallMåneder;
+    final Integer arbeidsforholdhistorikkAntallMåneder;
+    final Integer medlemskaphistorikkAntallÅr;
+    final Integer inntektshistorikkAntallMåneder;
 
     @Autowired
     public RegisteropplysningerService(@Qualifier("system") TpsFasade tpsFasade,
@@ -143,21 +145,9 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        final LocalDate iDag = LocalDate.now();
-        if (fom.isAfter(iDag)) {
-            fom = iDag.minusMonths(arbeidsforholdhistorikkAntallMåneder);
-        } else {
-            fom = fom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
-        }
+        DatoPeriode periodeForArbeidsforhold = hentPeriodeForArbeidsforhold(fom, tom);
+        Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(registeropplysningerRequest.getFnr(), periodeForArbeidsforhold.fom, periodeForArbeidsforhold.tom);
 
-        if (tom == null) {
-            tom = behandling.erBehandlingAvSøknad() ? registeropplysningerRequest.getFom().plusYears(1) : iDag;
-        }
-        if (tom.isAfter(iDag)) {
-            tom = iDag;
-        }
-
-        Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(registeropplysningerRequest.getFnr(), fom, tom);
         return List.of(saksopplysning);
     }
 
@@ -178,7 +168,7 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom, behandling.erBehandlingAvSøknad());
+        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom);
         Saksopplysning saksopplysning = inntektService.hentInntektListe(registeropplysningerRequest.getFnr(), periodeForYtelser.fom, periodeForYtelser.tom);
 
         return List.of(saksopplysning);
@@ -198,7 +188,7 @@ public class RegisteropplysningerService {
             fom = treÅrTilbake;
         }
 
-        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom, false);
+        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom);
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
 
         return List.of(saksopplysning);
@@ -233,34 +223,63 @@ public class RegisteropplysningerService {
         return List.of(saksopplysning);
     }
 
-    private Periode hentPeriodeForYtelser(LocalDate fom, LocalDate tom, boolean erBehandlingAvSøknad) {
+    DatoPeriode hentPeriodeForArbeidsforhold(LocalDate fom, LocalDate tom) {
+
+        LocalDate fomDato = fom;
+        LocalDate tomDato = tom;
+
+        final LocalDate iDag = LocalDate.now();
+        if (fomDato.isAfter(iDag)) {
+            fomDato = iDag.minusMonths(arbeidsforholdhistorikkAntallMåneder);
+        } else {
+            fomDato = fomDato.minusMonths(arbeidsforholdhistorikkAntallMåneder);
+        }
+
+        if (tomDato == null || tomDato.isAfter(iDag)) {
+            tomDato = iDag;
+        }
+
+        return new DatoPeriode(fomDato, tomDato);
+    }
+
+    Periode hentPeriodeForYtelser(LocalDate fom, LocalDate tom) {
 
         YearMonth fomMnd;
         YearMonth tomMnd;
 
         LocalDate nå = LocalDate.now();
         if (tom == null) {
-            fomMnd = YearMonth.from(erBehandlingAvSøknad ? fom.minusMonths(inntektshistorikkAntallMåneder) : fom);
-            tomMnd = YearMonth.from(fom.plusYears(erBehandlingAvSøknad ? 1 : 2));
+            fomMnd = YearMonth.from(fom);
+            tomMnd = YearMonth.from(fom.plusYears(2));
         } else if (fom.isBefore(nå) && tom.isAfter(nå)) { //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
-            fomMnd = YearMonth.from(fom.minusMonths(erBehandlingAvSøknad ? inntektshistorikkAntallMåneder : 2L));
+            fomMnd = YearMonth.from(fom.minusMonths(2L));
             tomMnd = YearMonth.from(tom);
         } else if (fom.isAfter(nå)) { //2. Periode ikke påbegynt. Inneværende mnd og 2 mnd tilbake
-            fomMnd = YearMonth.from(nå.minusMonths(erBehandlingAvSøknad ? inntektshistorikkAntallMåneder : 2L));
+            fomMnd = YearMonth.from(nå.minusMonths(2L));
             tomMnd = YearMonth.from(nå);
         } else { //3. Avsluttet: sjekker hele periode
-            fomMnd = YearMonth.from(erBehandlingAvSøknad ? fom.minusMonths(6L) : fom);
+            fomMnd = YearMonth.from(fom);
             tomMnd = YearMonth.from(tom);
         }
 
         return new Periode(fomMnd, tomMnd);
     }
 
-    private static final class Periode {
+    static final class Periode {
         private YearMonth fom;
         private YearMonth tom;
 
         Periode(YearMonth fom, YearMonth tom) {
+            this.fom = fom;
+            this.tom = tom;
+        }
+    }
+
+    static final class DatoPeriode {
+        private LocalDate fom;
+        private LocalDate tom;
+
+        DatoPeriode(LocalDate fom, LocalDate tom) {
             this.fom = fom;
             this.tom = tom;
         }
