@@ -1,18 +1,17 @@
 package no.nav.melosys.saksflyt.steg.afl;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +21,14 @@ import org.springframework.stereotype.Component;
 public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     private final InngangsvilkaarService inngangsvilkaarService;
     private final FagsakService fagsakService;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     @Autowired
     public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService,
-                                 FagsakService fagsakService) {
+                                 FagsakService fagsakService, BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.fagsakService = fagsakService;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
     @Override
@@ -42,23 +43,18 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             throw new TekniskException("Steget vurderer inngangsvilkår når Norge er utpekt, ikke for " + behandling.getTema());
         }
 
-        MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        List<String> søknadsland = hentArbeidsLandFraSed(melosysEessiMelding);
-        Periode periode = new Periode(melosysEessiMelding.getPeriode().getFom(), melosysEessiMelding.getPeriode().getTom());
-        boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandling.getId(), søknadsland, periode);
+        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandling.getId());
+        BehandlingsgrunnlagData data = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        List<String> arbeidsland = data.hentUtenlandskeArbeidsstederLandkode();
+
+        boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(
+            behandling.getId(),
+            arbeidsland.isEmpty() ? List.of(Landkoder.NO.getKode()) : arbeidsland,
+            data.periode
+        );
 
         fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
 
         prosessinstans.setSteg(ProsessSteg.AFL_REGISTERKONTROLL);
-    }
-
-    private List<String> hentArbeidsLandFraSed(MelosysEessiMelding melosysEessiMelding) {
-        List<String> arbeidsland = melosysEessiMelding.getArbeidssteder() == null
-            ? Collections.emptyList()
-            : melosysEessiMelding.getArbeidssteder().stream()
-                .map(a -> a.adresse.land)
-                .collect(Collectors.toList());
-
-        return arbeidsland.isEmpty() ? List.of(melosysEessiMelding.getLovvalgsland()) : arbeidsland;
     }
 }

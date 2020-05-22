@@ -3,6 +3,7 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -10,6 +11,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -42,7 +44,7 @@ public class OppfriskSaksopplysningerServiceTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    KontrollresultatService kontrollresultatService;
+    private KontrollresultatService kontrollresultatService;
     @Mock
     private InngangsvilkaarService inngangsvilkaarService;
     @Mock
@@ -51,6 +53,8 @@ public class OppfriskSaksopplysningerServiceTest {
     private TpsFasade tpsFasade;
 
     private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
+
+    private static final long BEHANDLING_ID = 11L;
 
     @Before
     public void setUp() throws IkkeFunnetException {
@@ -68,7 +72,7 @@ public class OppfriskSaksopplysningerServiceTest {
     public void oppfriskSaksopplysning() throws MelosysException {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(13L);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID);
 
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
         verify(registeropplysningerService).hentOgLagreOpplysninger(any(RegisteropplysningerRequest.class));
@@ -76,29 +80,42 @@ public class OppfriskSaksopplysningerServiceTest {
 
     @Test
     public void oppfriskSaksopplysning_medSED_kallerKontroller() throws MelosysException {
-        final long behandlingID = 14L;
         Behandling behandling = lagBehandling();
-        behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
 
         behandling.getSaksopplysninger().add(lagSED());
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(eq(BEHANDLING_ID))).thenReturn(behandling);
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID);
 
-        verify(kontrollresultatService).utførKontrollerOgRegistrerFeil(eq(behandlingID));
+        verify(kontrollresultatService).utførKontrollerOgRegistrerFeil(eq(BEHANDLING_ID));
     }
 
     @Test
-    public void oppfriskSaksopplysning_sakstypeUkjent_oppdaterTypeHvisVilkårEndres() throws MelosysException {
+    public void oppfriskSaksopplysning_sakstypeUkjentErSøknad_oppdatererType() throws MelosysException {
         Behandling behandling = lagBehandling();
         behandling.getFagsak().setType(Sakstyper.UKJENT);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), any(Periode.class))).thenReturn(true);
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(15L);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID);
 
         verify(fagsakService).oppdaterType(eq(behandling.getFagsak()), eq(true));
+        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("SE")), any(Periode.class));
+    }
+
+    @Test
+    public void oppfriskSaksopplysning_sakstypeUkjentNorgeUtpekt_oppdatererType() throws MelosysException {
+        Behandling behandling = lagBehandling();
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        behandling.getFagsak().setType(Sakstyper.UKJENT);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), any(Periode.class))).thenReturn(true);
+
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID);
+
+        verify(fagsakService).oppdaterType(eq(behandling.getFagsak()), eq(true));
+        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("NO")), any(Periode.class));
     }
 
     private Saksopplysning lagSED() {
@@ -114,6 +131,7 @@ public class OppfriskSaksopplysningerServiceTest {
     private static Behandling lagBehandling() {
         final String aktørID = "123";
         Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         Aktoer aktør = new Aktoer();
@@ -138,6 +156,7 @@ public class OppfriskSaksopplysningerServiceTest {
         soeknadDokument.arbeidUtland.add(arbeidUtland);
 
         soeknadDokument.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+        soeknadDokument.soeknadsland = Soeknadsland.av(List.of("SE"));
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);

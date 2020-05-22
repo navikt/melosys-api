@@ -1,11 +1,13 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
@@ -64,7 +66,7 @@ public class OppfriskSaksopplysningerService {
         LocalDate fom = null;
         LocalDate tom = null;
 
-        if (behandling.erBehandlingAvSøknad()) {
+        if (behandling.kanResultereIVedtak()) {
             grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
             fom = grunnlagData.periode.getFom();
             tom = grunnlagData.periode.getTom();
@@ -90,8 +92,18 @@ public class OppfriskSaksopplysningerService {
         }
 
         Fagsak fagsak = behandling.getFagsak();
-        if (grunnlagData != null && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
-            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, grunnlagData.soeknadsland.landkoder, grunnlagData.periode);
+        if (grunnlagData != null && behandling.kanResultereIVedtak() && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
+            var søknadsland = behandling.erNorgeUtpekt()
+                ? grunnlagData.hentUtenlandskeArbeidsstederLandkode()
+                : grunnlagData.soeknadsland.landkoder;
+
+            if (behandling.erNorgeUtpekt() && søknadsland.isEmpty()) {
+                søknadsland = List.of(Landkoder.NO.getKode());
+            }
+
+            var periode = grunnlagData.periode;
+
+            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
             fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);
         }
     }
