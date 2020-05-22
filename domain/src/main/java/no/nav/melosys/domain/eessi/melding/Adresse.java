@@ -11,6 +11,19 @@ public class Adresse {
     public String region;
     public String type;
 
+    public Adresse() {
+    }
+
+    public Adresse(String by, String bygning, String gate, String land, String postnummer, String region, String type) {
+        this.by = by;
+        this.bygning = bygning;
+        this.gate = gate;
+        this.land = land;
+        this.postnummer = postnummer;
+        this.region = region;
+        this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -1,9 +1,12 @@
 package no.nav.melosys.saksflyt.steg.afl;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.Periode;
+import no.nav.melosys.domain.eessi.melding.Adresse;
+import no.nav.melosys.domain.eessi.melding.Arbeidssted;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -34,31 +37,38 @@ public class VurderInngangsvilkaarTest {
 
     private VurderInngangsvilkaar vurderInngangsvilkaar;
 
+    private Prosessinstans prosessinstans = new Prosessinstans();
+    private MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+    private Behandling behandling = new Behandling();
+
     @Before
-    public void setup() {
+    public void setup() throws FunksjonellException, TekniskException {
         vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, fagsakService);
-    }
 
-    @Test
-    public void utfør() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        p.setBehandling(behandling);
-
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setPeriode(new Periode());
         melosysEessiMelding.getPeriode().setFom(LocalDate.now());
         melosysEessiMelding.getPeriode().setTom(LocalDate.now().plusYears(1));
-        melosysEessiMelding.setLovvalgsland("IDK");
-        p.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        melosysEessiMelding.setLovvalgsland("NO");
+
+        behandling.setId(11L);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+
+        prosessinstans.setBehandling(behandling);
 
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(eq(behandling.getId()), any(), any())).thenReturn(true);
+    }
 
-        vurderInngangsvilkaar.utfør(p);
+    @Test
+    public void utfør_arbeidsstedISverige_sverigeVurderesSomSøknadsland() throws FunksjonellException, TekniskException {
+        Adresse adresse = new Adresse();
+        adresse.land = "SE";
+        Arbeidssted arbeidssted = new Arbeidssted("arbeid på sted", adresse);
+        melosysEessiMelding.setArbeidssteder(List.of(arbeidssted));
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+
+        vurderInngangsvilkaar.utfør(prosessinstans);
 
         verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), any(), any());
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AFL_REGISTERKONTROLL);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_REGISTERKONTROLL);
     }
 }

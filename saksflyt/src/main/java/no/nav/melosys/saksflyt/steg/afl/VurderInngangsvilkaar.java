@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.afl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
@@ -42,12 +43,20 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
 
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        Soeknadsland søknadsland = Soeknadsland.av(List.of(melosysEessiMelding.getLovvalgsland())); //FIXME hva bør brukes her?
+        Soeknadsland søknadsland = Soeknadsland.av(hentArbeidsLandFraSed(melosysEessiMelding));
         Periode periode = new Periode(melosysEessiMelding.getPeriode().getFom(), melosysEessiMelding.getPeriode().getTom());
         boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandling.getId(), søknadsland, periode);
 
         fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
 
         prosessinstans.setSteg(ProsessSteg.AFL_REGISTERKONTROLL);
+    }
+
+    private List<String> hentArbeidsLandFraSed(MelosysEessiMelding melosysEessiMelding) {
+        List<String> arbeidsland = melosysEessiMelding.getArbeidssteder().stream()
+            .map(a -> a.adresse.land)
+            .collect(Collectors.toList());
+
+        return arbeidsland.isEmpty() ? List.of(melosysEessiMelding.getLovvalgsland()) : arbeidsland;
     }
 }
