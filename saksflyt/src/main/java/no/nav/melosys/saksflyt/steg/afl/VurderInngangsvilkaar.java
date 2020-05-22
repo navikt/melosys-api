@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.afl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,9 +53,11 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     }
 
     private List<String> hentArbeidsLandFraSed(MelosysEessiMelding melosysEessiMelding) {
-        List<String> arbeidsland = melosysEessiMelding.getArbeidssteder().stream()
-            .map(a -> a.adresse.land)
-            .collect(Collectors.toList());
+        List<String> arbeidsland = melosysEessiMelding.getArbeidssteder() == null
+            ? Collections.emptyList()
+            : melosysEessiMelding.getArbeidssteder().stream()
+                .map(a -> a.adresse.land)
+                .collect(Collectors.toList());
 
         return arbeidsland.isEmpty() ? List.of(melosysEessiMelding.getLovvalgsland()) : arbeidsland;
     }

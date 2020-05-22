@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,7 +69,26 @@ public class VurderInngangsvilkaarTest {
 
         vurderInngangsvilkaar.utfør(prosessinstans);
 
-        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), any(), any());
+        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), eq(List.of("SE")), any());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_REGISTERKONTROLL);
+    }
+
+    @Test
+    public void utfør_ingenArbeidssteder_norgeVurderesSomSøknadsland() throws FunksjonellException, TekniskException {
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+
+        vurderInngangsvilkaar.utfør(prosessinstans);
+
+        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), eq(List.of("NO")), any());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_REGISTERKONTROLL);
+    }
+
+    @Test
+    public void utførikkeUtpekingAvNorge_kasterException() {
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
+
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> vurderInngangsvilkaar.utfør(prosessinstans))
+            .withMessageContaining("Steget vurderer inngangsvilkår når Norge er utpekt, ikke for ");
     }
 }
