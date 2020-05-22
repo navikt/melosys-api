@@ -29,6 +29,8 @@ public class VilkaarsresultatService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final VilkaarsresultatRepository vilkaarsresultatRepo;
 
+    private static final Collection<Vilkaar> IMMUTABLE_VILKAAR = Collections.singleton(FO_883_2004_INNGANGSVILKAAR);
+
     @Autowired
     public VilkaarsresultatService(BehandlingsresultatService behandlingsresultatService,
                                    VilkaarsresultatRepository vilkaarsresultatRepo) {
@@ -80,7 +82,7 @@ public class VilkaarsresultatService {
     public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
         validerVilkår(vilkaarDtoer);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
+        vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
         vilkaarsresultatRepo.flush();
 
         for (VilkaarDto vilkaarDto :  vilkaarDtoer) {
@@ -94,10 +96,13 @@ public class VilkaarsresultatService {
     }
 
     private void validerVilkår(List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
-        boolean inngangsvilkårFinnes = vilkaarDtoer.stream().map(VilkaarDto::getVilkaar)
-            .anyMatch(s -> FO_883_2004_INNGANGSVILKAAR.toString().equalsIgnoreCase(s));
-        if (inngangsvilkårFinnes) {
-            throw new FunksjonellException("FO_883_2004_INNGANGSVILKAAR kan ikke overskrives. Backend er ansvarlig for inngangsvilkår.");
+
+        final Collection<String> nyeVilkår = vilkaarDtoer.stream().map(VilkaarDto::getVilkaar).collect(Collectors.toList());
+
+        for (Vilkaar immutableVilkår : IMMUTABLE_VILKAAR) {
+            if (nyeVilkår.contains(immutableVilkår.getKode())) {
+                throw new FunksjonellException("Kan ikke endre vilkår " + immutableVilkår);
+            }
         }
     }
 
