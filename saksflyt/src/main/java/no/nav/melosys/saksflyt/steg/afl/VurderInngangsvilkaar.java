@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -43,7 +42,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
 
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        Soeknadsland søknadsland = Soeknadsland.av(hentArbeidsLandFraSed(melosysEessiMelding));
+        List<String> søknadsland = hentArbeidsLandFraSed(melosysEessiMelding);
         Periode periode = new Periode(melosysEessiMelding.getPeriode().getFom(), melosysEessiMelding.getPeriode().getTom());
         boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandling.getId(), søknadsland, periode);
 

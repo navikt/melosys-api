@@ -1,5 +1,7 @@
 package no.nav.melosys.service;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -19,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
 
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
@@ -91,7 +91,7 @@ public class OppfriskSaksopplysningerService {
 
         Fagsak fagsak = behandling.getFagsak();
         if (grunnlagData != null && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
-            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, grunnlagData.soeknadsland, grunnlagData.periode);
+            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, grunnlagData.soeknadsland.landkoder, grunnlagData.periode);
             fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);
         }
     }

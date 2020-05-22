@@ -11,13 +11,11 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
-import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
-import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
@@ -65,7 +63,7 @@ public class InngangsvilkaarServiceTest {
         res.kvalifisererForEf883_2004 = true;
         when(regelmodulFasade.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, Soeknadsland.av(landkoder), periode);
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
         verify(regelmodulFasade).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, null);
@@ -79,7 +77,7 @@ public class InngangsvilkaarServiceTest {
         personhistorikkDokument.statsborgerskapListe = Collections.emptyList();
         when(saksopplysningerService.hentPersonhistorikk(anyLong())).thenReturn(personhistorikkDokument);
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, Soeknadsland.av(landkoder), periode);
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Inngangsvilkaar.MANGLER_STATSBORGERSKAP);
@@ -100,7 +98,7 @@ public class InngangsvilkaarServiceTest {
         res.kvalifisererForEf883_2004 = false;
         when(regelmodulFasade.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, Soeknadsland.av(landkoder), periode);
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
         verify(regelmodulFasade).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
