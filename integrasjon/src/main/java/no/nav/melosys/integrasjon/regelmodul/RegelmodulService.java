@@ -6,8 +6,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.RestClientLoggingFilter;
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
@@ -34,7 +34,7 @@ public class RegelmodulService implements RegelmodulFasade {
      * @throws RuntimeException Hvis request- eller reply-prosessering feiler, hvis IO-feil ved kommunikasjon med regelmodulen, eller hvis regelmodulen returnerer noe annet enn HTTP 2xx
      */
     @Override
-    public VurderInngangsvilkaarReply vurderInngangsvilkår(Land brukersStatsborgerskap, List<String> søknadsland, Periode søknadsperiode) throws TekniskException {
+    public VurderInngangsvilkaarReply vurderInngangsvilkår(Land brukersStatsborgerskap, List<String> søknadsland, ErPeriode søknadsperiode) throws TekniskException {
         Assert.notNull(brukersStatsborgerskap, "Tjenesten krever at brukersStatsborgerskap ikke er null");
         Assert.notEmpty(søknadsland, "Tjenesten krever at søknadsland ikke er null eller tom");
         Assert.notNull(søknadsperiode, "Tjenesten krever at søknadsperiode ikke er null");

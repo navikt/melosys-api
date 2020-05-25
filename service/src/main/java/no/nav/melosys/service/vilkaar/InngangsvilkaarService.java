@@ -5,10 +5,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -43,8 +42,8 @@ public class InngangsvilkaarService {
     }
 
     public boolean vurderOgLagreInngangsvilkår(long behandlingID,
-                                               Soeknadsland søknadsland,
-                                               Periode søknadsperiode) throws FunksjonellException, TekniskException {
+                                               List<String> søknadsland,
+                                               ErPeriode søknadsperiode) throws FunksjonellException, TekniskException {
         final InngangsvilkaarVurdering vurderingEF_883_2004 = vurderInngangsvilkår(behandlingID, søknadsland, søknadsperiode);
         final boolean erEF_883_2004 = vurderingEF_883_2004.isOppfylt();
 
@@ -53,14 +52,14 @@ public class InngangsvilkaarService {
         return erEF_883_2004;
     }
 
-    private InngangsvilkaarVurdering vurderInngangsvilkår(long behandlingID, Soeknadsland søknadsland, Periode søknadsperiode)
+    private InngangsvilkaarVurdering vurderInngangsvilkår(long behandlingID, List<String> søknadsland, ErPeriode søknadsperiode)
         throws FunksjonellException, TekniskException {
         Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
         if (statsborgerskap == null) {
             return new InngangsvilkaarVurdering(false, Inngangsvilkaar.MANGLER_STATSBORGERSKAP);
         }
 
-        var landkoderISO3 = tilIso3(søknadsland.landkoder);
+        var landkoderISO3 = tilIso3(søknadsland);
         VurderInngangsvilkaarReply res = regelmodulFasade.vurderInngangsvilkår(statsborgerskap, landkoderISO3, søknadsperiode);
 
         List<String> feilmeldinger = res.feilmeldinger.stream()
@@ -79,7 +78,7 @@ public class InngangsvilkaarService {
         }
     }
 
-    Land hentStatsborgerskapForPerioden(long behandlingID, Periode periode) throws IkkeFunnetException {
+    Land hentStatsborgerskapForPerioden(long behandlingID, ErPeriode periode) throws IkkeFunnetException {
         // Hent statsborgerskap fra saksopplysningene...
         // Ved søknad tilbake i tid brukes historisk statsborgerskap
         if (periode.getFom().isBefore(LocalDate.now())) {

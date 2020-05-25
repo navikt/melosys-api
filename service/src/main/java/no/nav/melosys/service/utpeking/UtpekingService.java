@@ -111,7 +111,7 @@ public class UtpekingService {
 
         if (behandling.erUtpekingAvAnnetLand()) {
             behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
-        } else if (behandling.norgeErUtpekt()) {
+        } else if (behandling.erNorgeUtpekt()) {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         } else {
             throw new FunksjonellException("Kan ikke avvise utpeking for en behandling med tema " + behandling.getTema());

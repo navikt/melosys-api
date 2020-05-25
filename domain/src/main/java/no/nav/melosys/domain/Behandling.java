@@ -239,7 +239,7 @@ public class Behandling extends RegistreringsInfo {
         return type == Behandlingstyper.KLAGE;
     }
 
-    public boolean norgeErUtpekt() {
+    public boolean erNorgeUtpekt() {
         return tema == Behandlingstema.BESLUTNING_LOVVALG_NORGE;
     }
 
@@ -248,7 +248,7 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean kanResultereIVedtak() {
-        return erBehandlingAvSøknad() || norgeErUtpekt();
+        return erBehandlingAvSøknad() || erNorgeUtpekt();
     }
 
     public boolean erUtsending() {

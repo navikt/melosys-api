@@ -1,16 +1,17 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
-import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingID = prosessinstans.getBehandling().getId();
 
-        var søknadsland = Soeknadsland.av(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<>() {}));
+        var søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
         var periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
         boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
 
