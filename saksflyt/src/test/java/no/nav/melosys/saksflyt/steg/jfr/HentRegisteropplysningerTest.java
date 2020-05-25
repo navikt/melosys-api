@@ -39,7 +39,7 @@ public class HentRegisteropplysningerTest {
         p.setData(ProsessDataKey.BRUKER_ID, "99999999991");
         p.setData(ProsessDataKey.SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now()));
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(any());
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_VURDER_INNGANGSVILKÅR);

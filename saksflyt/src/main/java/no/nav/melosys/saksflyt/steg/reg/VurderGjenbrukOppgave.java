@@ -15,9 +15,6 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
-/**
- * Oppdaterer behandling med siste opplysninger hentet dato.
- */
 @Component
 public class VurderGjenbrukOppgave extends AbstraktStegBehandler {
 
@@ -49,6 +46,6 @@ public class VurderGjenbrukOppgave extends AbstraktStegBehandler {
             prosessinstans.setSteg(GSAK_OPPRETT_OPPGAVE);
         }
 
-        log.debug("Prosessinstans {} oppdatert behandling {} med sisteOpplysningerHentetDato.", prosessinstans.getId(), behandling.getId());
+        log.debug("Vurdert gjenbruk av oppgave for prosessinstans {}, behandling {}", prosessinstans.getId(), behandling.getId());
     }
 }

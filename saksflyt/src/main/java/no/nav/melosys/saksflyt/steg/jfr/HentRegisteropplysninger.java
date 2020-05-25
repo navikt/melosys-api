@@ -17,13 +17,6 @@ import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
-/**
- * Steget sørger for å hente personinfo fra TPS
- *
- * Transisjoner:
- * JFR_HENT_PERS_OPPL → JFR_VURDER_INNGANGSVILKÅR hvis alt ok
- * JFR_HENT_PERS_OPPL → FEILET_MASKINELT hvis personen ikke finnes i TPS
- */
 @Component("JFRHentRegisteropplysninger")
 public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
@@ -34,7 +27,6 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
     @Autowired
     public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService) {
         this.registeropplysningerService = registeropplysningerService;
-        log.info("HentPersonopplysninger initialisert");
     }
 
     @Override
@@ -60,6 +52,6 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
 
         prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);
 
-        log.info("Hentet personopplysninger for prosessinstans {}", prosessinstans.getId());
+        log.info("Hentet registeropplysninger for prosessinstans {}", prosessinstans.getId());
     }
 }
