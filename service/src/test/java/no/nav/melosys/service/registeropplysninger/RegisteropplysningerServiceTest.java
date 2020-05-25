@@ -270,6 +270,40 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
+    public void hentMedlemskapsopplysninger_åpenPeriodeBehandlingSøknad_forespørTomTilDato() throws MelosysException {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        Saksopplysning saksopplysning = hentSedSaksopplysning(fom, null);
+        when(medlPeriodeService.hentPeriodeListe(anyString(), any(), any())).thenReturn(saksopplysning);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling(saksopplysning, true));
+
+        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(fom, null)
+            .saksopplysningTyper(saksopplysningstyper().medlemskapsopplysninger().build())
+            .build());
+
+        LocalDate forventetFom = fom.minusYears(medlemskaphistorikkAntallÅr);
+        LocalDate forventetTom = fom.plusYears(1);
+
+        verify(medlPeriodeService).hentPeriodeListe(anyString(), eq(forventetFom), eq(forventetTom));
+        verify(behandlingService).lagre(any(Behandling.class));
+    }
+
+    @Test
+    public void hentMedlemskapsopplysninger_åpenPeriodeMottakSed_forespørTomTilDato() throws MelosysException {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        Saksopplysning saksopplysning = hentSedSaksopplysning(fom, null);
+        when(medlPeriodeService.hentPeriodeListe(anyString(), any(), any())).thenReturn(saksopplysning);
+
+        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(fom, null)
+            .saksopplysningTyper(saksopplysningstyper().medlemskapsopplysninger().build())
+            .build());
+
+        LocalDate forventetFom = fom.minusYears(medlemskaphistorikkAntallÅr);
+
+        verify(medlPeriodeService).hentPeriodeListe(anyString(), eq(forventetFom), eq(null));
+        verify(behandlingService).lagre(any(Behandling.class));
+    }
+
+    @Test
     public void hentInntektsopplysninger_åpenPeriodeMottakSed_forespørTomTilDato() throws MelosysException {
         LocalDate fom = LocalDate.now().minusYears(2);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, null);

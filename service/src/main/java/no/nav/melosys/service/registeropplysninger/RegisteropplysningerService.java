@@ -150,7 +150,7 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periodeForMedlemskap = registeropplysningerPeriodeFactory.hentPeriodeForMedlemskap(fom, tom);
+        RegisteropplysningerPeriodeFactory.DatoPeriode periodeForMedlemskap = registeropplysningerPeriodeFactory.hentPeriodeForMedlemskap(fom, tom, behandling);
         Saksopplysning saksopplysning = medlPeriodeService.hentPeriodeListe(registeropplysningerRequest.getFnr(), periodeForMedlemskap.fom, periodeForMedlemskap.tom);
 
         return List.of(saksopplysning);

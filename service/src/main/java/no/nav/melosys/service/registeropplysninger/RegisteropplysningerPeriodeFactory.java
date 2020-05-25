@@ -29,11 +29,10 @@ public class RegisteropplysningerPeriodeFactory {
             : hentPeriodeForArbeidsforholdMottakSed(fom, tom);
     }
 
-    public DatoPeriode hentPeriodeForMedlemskap(LocalDate fom, LocalDate tom) {
-        LocalDate fomDato = fom.minusYears(medlemskaphistorikkAntallÅr);
-        LocalDate tomDato = tom;
-
-        return new DatoPeriode(fomDato, tomDato);
+    DatoPeriode hentPeriodeForMedlemskap(LocalDate fom, LocalDate tom, Behandling behandling) {
+        return behandling.erBehandlingAvSøknad()
+            ? hentPeriodeForMedlemskapBehandlingSøknad(fom, tom)
+            : hentPeriodeForMedlemskapMottakSed(fom, tom);
     }
 
     Periode hentPeriodeForYtelser(LocalDate fom, LocalDate tom, Behandling behandling) {
@@ -122,6 +121,19 @@ public class RegisteropplysningerPeriodeFactory {
         }
 
         return new Periode(fomMnd, tomMnd);
+    }
+
+    private DatoPeriode hentPeriodeForMedlemskapBehandlingSøknad(LocalDate fom, LocalDate tom) {
+        LocalDate fomDato = fom.minusYears(medlemskaphistorikkAntallÅr);
+        LocalDate tomDato = tom == null ? fom.plusYears(defaultSluttdatoAntallÅr) : tom;
+
+        return new DatoPeriode(fomDato, tomDato);
+    }
+
+    private DatoPeriode hentPeriodeForMedlemskapMottakSed(LocalDate fom, LocalDate tom) {
+        LocalDate fomDato = fom.minusYears(medlemskaphistorikkAntallÅr);
+
+        return new DatoPeriode(fomDato, tom);
     }
 
     static final class Periode {
