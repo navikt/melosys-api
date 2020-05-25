@@ -19,12 +19,12 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,13 +40,12 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataServiceTest {
-
-    @Mock
-    private TpsFasade tpsFasade;
-
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
-
+    @Mock
+    private SaksbehandlerService saksbehandlerService;
+    @Mock
+    private TpsFasade tpsFasade;
     @Mock
     private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
@@ -59,14 +58,13 @@ public class BrevDataServiceTest {
 
     private static final String sammensattNavn = "ALTFOR SAMMENSATT";
 
-
     @Before
-    public void setUp() throws FunksjonellException, IntegrasjonException {
-        service = spy(new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository));
+    public void setUp() throws FunksjonellException, TekniskException {
+        service = spy(new BrevDataService(behandlingsresultatRepository, saksbehandlerService, tpsFasade, utenlandskMyndighetRepository));
 
-        when(tpsFasade.hentIdentForAktørId(any())).thenReturn(FNR);
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
-
+        when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Joe Moe");
+        when(tpsFasade.hentIdentForAktørId(any())).thenReturn(FNR);
         when(tpsFasade.hentSammensattNavn(anyString())).thenReturn(sammensattNavn);
         lagUtenlandskMyndighet();
     }
@@ -361,12 +359,12 @@ public class BrevDataServiceTest {
     }
 
     private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) throws Exception {
-        testLagDokumentMetadata(doktype, lagAktør(rolle), null, rolle);
+        testLagDokumentMetadata(doktype, lagAktør(rolle), rolle);
     }
 
-    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Aktoersroller rolle) throws Exception {
+    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoer mottaker, Aktoersroller rolle) throws Exception {
         DokumentbestillingMetadata resultat = service.lagBestillingMetadata(
-            doktype, mottaker, kontaktopplysning, lagBehandling(lagSaksopplysninger(), lagSøknadDokument()), lagBrevData()
+            doktype, mottaker, null, lagBehandling(lagSaksopplysninger(), lagSøknadDokument()), lagBrevData()
         );
         DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype, rolle);
         assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
