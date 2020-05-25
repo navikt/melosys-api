@@ -45,15 +45,15 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SedDataByggerTest {
     @Mock
-    KodeverkService kodeverkService;
+    private KodeverkService kodeverkService;
     @Mock
-    RegisterOppslagService registerOppslagService;
+    private RegisterOppslagService registerOppslagService;
     @Mock
-    LovvalgsperiodeService lovvalgsperiodeService;
+    private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    AvklartefaktaService avklartefaktaService;
+    private AvklartefaktaService avklartefaktaService;
     @Mock
-    LandvelgerService landvelgerService;
+    private LandvelgerService landvelgerService;
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
@@ -117,7 +117,6 @@ public class SedDataByggerTest {
         assertThat(sedData.getBostedsadresse()).isNotNull();
         assertThat(sedData.getFamilieMedlem()).isNotNull();
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotNull();
-        assertThat(sedData.getUtenlandskeVirksomheter()).isNotNull();
         assertThat(sedData.getUtenlandskIdent()).isNotNull();
 
         assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
@@ -367,7 +366,6 @@ public class SedDataByggerTest {
         assertThat(sedData.getFamilieMedlem()).isNotEmpty();
         assertThat(sedData.getUtenlandskIdent()).isNotEmpty();
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotEmpty();
-        assertThat(sedData.getUtenlandskeVirksomheter()).isNotNull();
         assertThat(sedData.getTidligereLovvalgsperioder()).isNotNull();
         assertThat(sedData.getArbeidsgivendeVirksomheter().isEmpty()).isFalse();
     }

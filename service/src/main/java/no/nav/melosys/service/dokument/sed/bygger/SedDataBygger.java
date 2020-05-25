@@ -14,6 +14,8 @@ import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
@@ -109,7 +111,8 @@ public class SedDataBygger {
     private SedDataDto lagPersonopplysninger(SedDataGrunnlagMedSoknad dataGrunnlag) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = new SedDataDto();
 
-        sedDataDto.setArbeidsgivendeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere()));
+        sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(dataGrunnlag));
+        sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(dataGrunnlag));
 
         sedDataDto.setArbeidssteder(dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()));
@@ -124,21 +127,35 @@ public class SedDataBygger {
             .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(SedDataBygger::hentFamilieMedlem).collect(Collectors.toList()));
 
-        sedDataDto.setSelvstendigeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige()));
-
-        sedDataDto.setUtenlandskeVirksomheter(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter().stream().map(
-            SedDataBygger::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));
-
         sedDataDto.setUtenlandskIdent(dataGrunnlag.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
         return sedDataDto;
     }
 
-    private static List<Virksomhet> map(List<AvklartVirksomhet> avklarteArbeidsgivere) {
-        return avklarteArbeidsgivere.stream()
-            .map(aa -> new Virksomhet(aa.navn, aa.orgnr, fraStrukturertAdresse((StrukturertAdresse) aa.adresse)))
+    private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Collection<AvklartVirksomhet> avklarteVirksomheter = new ArrayList<>();
+        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere());
+        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter());
+
+        return avklarteVirksomheter.stream()
+            .map(SedDataBygger::lagVirksomhet)
             .collect(Collectors.toList());
+    }
+
+    private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Collection<AvklartVirksomhet> avklarteSelvstendigeVirksomheter = new ArrayList();
+        avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige());
+        avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
+
+        return avklarteSelvstendigeVirksomheter.stream()
+            .map(SedDataBygger::lagVirksomhet)
+            .collect(Collectors.toList());
+    }
+
+    private static Virksomhet lagVirksomhet(AvklartVirksomhet avklartVirksomhet) {
+        return new Virksomhet(avklartVirksomhet.navn, avklartVirksomhet.orgnr,
+            fraStrukturertAdresse((StrukturertAdresse) avklartVirksomhet.adresse));
     }
 
     private static Optional<Adresse> finnAdresse(BostedGrunnlag bostedGrunnlag) {

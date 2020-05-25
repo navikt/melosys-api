@@ -10,9 +10,6 @@ public class SedDataDto extends SedGrunnlagDto {
     private List<FamilieMedlem> familieMedlem = new ArrayList<>();
     private Bruker bruker;
 
-    //Andre medlemsvariabler
-    private List<Virksomhet> utenlandskeVirksomheter = new ArrayList<>();
-
     //Videresending av søknad
     private String avklartBostedsland;
 
@@ -41,14 +38,6 @@ public class SedDataDto extends SedGrunnlagDto {
 
     public void setBruker(Bruker bruker) {
         this.bruker = bruker;
-    }
-
-    public List<Virksomhet> getUtenlandskeVirksomheter() {
-        return utenlandskeVirksomheter;
-    }
-
-    public void setUtenlandskeVirksomheter(List<Virksomhet> utenlandskeVirksomheter) {
-        this.utenlandskeVirksomheter = utenlandskeVirksomheter;
     }
 
     public String getAvklartBostedsland() {
