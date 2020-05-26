@@ -16,7 +16,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
@@ -55,7 +54,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException, IntegrasjonException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
@@ -73,7 +72,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
         log.info("Hentet organisasjonsopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 
-    private void hentOgLagreOrganisasjoner(Behandling behandling, Set<String> orgnumre) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    private void hentOgLagreOrganisasjoner(Behandling behandling, Set<String> orgnumre) throws IkkeFunnetException, IntegrasjonException {
 
         for (String orgnr : orgnumre) {
             Instant nå = Instant.now();

@@ -12,7 +12,6 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -48,7 +47,7 @@ public class HentOrganisasjonsopplysningerTest {
     }
 
     @Test
-    public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public void utfoerSteg() throws IkkeFunnetException, IntegrasjonException {
         final Long behandlingID = 111L;
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());

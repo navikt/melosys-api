@@ -43,7 +43,6 @@ import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -60,6 +59,7 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -261,7 +261,7 @@ public final class DokumentServiceTest {
             prosessinstansService, brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
     }
 
-    private BrevdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    private BrevdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, TekniskException {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
@@ -378,7 +378,7 @@ public final class DokumentServiceTest {
         return brevdatabyggervelger;
     }
 
-    private static EregFasade mockEregFasade() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private static EregFasade mockEregFasade() throws IkkeFunnetException, IntegrasjonException {
         EregFasade eregFasade = mock(EregFasade.class);
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
         orgDok.setNavn(Collections.singletonList("Virker av og til"));
