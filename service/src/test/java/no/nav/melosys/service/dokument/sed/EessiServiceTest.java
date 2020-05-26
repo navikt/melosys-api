@@ -4,7 +4,6 @@ import java.util.*;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
@@ -30,6 +29,7 @@ import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
+import no.nav.melosys.service.eessi.SedGrunnlagMapper;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
@@ -58,6 +58,8 @@ public class EessiServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private SedDataGrunnlagFactory dokumentdataGrunnlagFactory;
+    @Mock
+    private SedGrunnlagMapper sedGrunnlagMapper;
 
     private EessiService eessiService;
 
@@ -75,7 +77,7 @@ public class EessiServiceTest {
     @Before
     public void setup() throws Exception {
         eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory,
-            eessiConsumer, behandlingService, behandlingsresultatService);
+            eessiConsumer, behandlingService, behandlingsresultatService, sedGrunnlagMapper);
 
         behandling = new Behandling();
         behandling.setId(1L);
@@ -556,10 +558,7 @@ public class EessiServiceTest {
     @Test
     public void hentSedGrunnlag() throws MelosysException {
         when(eessiConsumer.hentSedGrunnlag(anyString(), anyString())).thenReturn(new EasyRandom().nextObject(SedGrunnlagDto.class));
-
-        SedGrunnlag sedGrunnlag = eessiService.hentSedGrunnlag("123", "abc");
-
-        assertThat(sedGrunnlag).isNotNull();
-        assertThat(sedGrunnlag).isInstanceOf(SedGrunnlag.class);
+        eessiService.hentSedGrunnlag("123", "abc");
+        verify(sedGrunnlagMapper).mapSedGrunnlag(any(SedGrunnlagDto.class));
     }
 }

@@ -30,6 +30,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
+import no.nav.melosys.service.eessi.SedGrunnlagMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
@@ -47,17 +48,20 @@ public class EessiService {
     private final EessiConsumer eessiConsumer;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final SedGrunnlagMapper sedGrunnlagMapper;
 
     public EessiService(SedDataBygger sedDataBygger,
                         SedDataGrunnlagFactory dataGrunnlagFactory,
                         EessiConsumer eessiConsumer,
                         BehandlingService behandlingService,
-                        BehandlingsresultatService behandlingsresultatService) {
+                        BehandlingsresultatService behandlingsresultatService,
+                        SedGrunnlagMapper sedGrunnlagMapper) {
         this.sedDataBygger = sedDataBygger;
         this.dataGrunnlagFactory = dataGrunnlagFactory;
         this.eessiConsumer = eessiConsumer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.sedGrunnlagMapper = sedGrunnlagMapper;
     }
 
     public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType, Vedlegg vedlegg, String ytterligereInformasjon) throws MelosysException {
@@ -280,6 +284,6 @@ public class EessiService {
     }
 
     public SedGrunnlag hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) throws MelosysException {
-        return eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID).tilDomene();
+        return sedGrunnlagMapper.mapSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
     }
 }
