@@ -117,7 +117,8 @@ public class BehandlingService {
         return (behandlingsstatus == Behandlingsstatus.UNDER_BEHANDLING)
             || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART)
             || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL)
-            || (behandlingsstatus == Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+            || (behandlingsstatus == Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
+            || (behandlingsstatus == Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
     }
 
     /**

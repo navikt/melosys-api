@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -95,6 +92,12 @@ public class SedDataByggerTest {
         behandling = DataByggerStubs.hentBehandlingStub();
 
         dataBygger = new SedDataBygger(lovvalgsperiodeService, landvelgerService);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(LocalDate.now().plusMonths(2L));
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
+        when(lovvalgsperiodeService.hentTidligereLovvalgsperioder(any())).thenReturn(List.of(lovvalgsperiode));
     }
 
     private SedDataGrunnlagMedSoknad lagDokumentressurser() throws TekniskException {

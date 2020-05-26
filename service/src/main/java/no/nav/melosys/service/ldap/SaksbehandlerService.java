@@ -39,7 +39,7 @@ public class SaksbehandlerService {
     }
 
     private Saksbehandler hentBrukerinformasjon(String ident) throws TekniskException, IkkeFunnetException {
-        return finnBrukerinformasjon(ident).orElseThrow(() -> new IkkeFunnetException("Finner ikke ident" + ident));
+        return finnBrukerinformasjon(ident).orElseThrow(() -> new IkkeFunnetException("Finner ikke ident " + ident));
     }
 
     private Optional<Saksbehandler> finnBrukerinformasjon(String ident) throws TekniskException {
@@ -56,5 +56,10 @@ public class SaksbehandlerService {
         navnForIdent.ifPresent(navn -> identTilNavnCache.put(ident, navn));
         return navnForIdent;
 
+    }
+
+    public String hentNavnForIdent(String ident) throws IkkeFunnetException, TekniskException {
+        return finnNavnForIdent(ident)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke navn for ident " + ident));
     }
 }

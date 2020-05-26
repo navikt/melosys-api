@@ -14,7 +14,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 public class BrevDataGrunnlag implements DataGrunnlag {
     private final Behandling behandling;
     private final BehandlingsgrunnlagData behandlingsgrunnlagData;
-    private PersonDokument person;
+    private final PersonDokument person;
 
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final BostedGrunnlag bostedGrunnlag;
@@ -32,6 +32,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         this.arbeidssteder = new ArbeidsstedGrunnlag(behandling, behandlingsgrunnlagData, getAvklarteVirksomheterGrunnlag(), avklartefaktaService);
     }
 
+    @Override
     public Behandling getBehandling() {
         return behandling;
     }
@@ -48,6 +49,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         return avklarteVirksomheterGrunnlag;
     }
 
+    @Override
     public BostedGrunnlag getBostedGrunnlag() {
         return bostedGrunnlag;
     }
