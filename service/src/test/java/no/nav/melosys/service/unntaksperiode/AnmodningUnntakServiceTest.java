@@ -1,20 +1,20 @@
 package no.nav.melosys.service.unntaksperiode;
 
 import java.util.Collections;
+import java.util.Set;
 
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -53,12 +53,16 @@ public class AnmodningUnntakServiceTest {
     private LandvelgerService landvelgerService;
     @Mock
     private EessiService eessiService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
 
     private AnmodningUnntakService anmodningUnntakService;
 
     @Before
-    public void setUp() {
-        anmodningUnntakService = new AnmodningUnntakService(behandlingService, oppgaveService, prosessinstansService, anmodningsperiodeService, lovvalgsperiodeService, landvelgerService, eessiService);
+    public void setUp() throws IkkeFunnetException {
+        anmodningUnntakService = new AnmodningUnntakService(
+            behandlingService, oppgaveService, prosessinstansService, anmodningsperiodeService,
+            lovvalgsperiodeService, landvelgerService, eessiService, behandlingsresultatService);
     }
 
     @Test
@@ -72,9 +76,11 @@ public class AnmodningUnntakServiceTest {
         behandling.setFagsak(fagsak);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsresultat());
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed);
 
+        verify(behandlingsresultatService).hentBehandlingsresultat(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
@@ -174,5 +180,11 @@ public class AnmodningUnntakServiceTest {
         behandling.setId(1L);
 
         return behandling;
+    }
+
+    private static Behandlingsresultat lagBehandlingsresultat() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setAnmodningsperioder(Set.of(new Anmodningsperiode()));
+        return behandlingsresultat;
     }
 }

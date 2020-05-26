@@ -23,7 +23,7 @@ public class Anmodningsperiode implements Medlemskapsperiode {
     @Column(name = "fom_dato", nullable = false, updatable = false)
     private LocalDate fom;
 
-    @Column(name = "tom_dato", nullable = false, updatable = false)
+    @Column(name = "tom_dato", nullable = true, updatable = false)
     private LocalDate tom;
 
     @Enumerated(EnumType.STRING)

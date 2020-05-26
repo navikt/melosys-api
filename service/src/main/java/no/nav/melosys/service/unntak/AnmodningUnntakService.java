@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.BucType;
@@ -15,6 +16,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -35,12 +37,16 @@ public class AnmodningUnntakService {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final LandvelgerService landvelgerService;
     private final EessiService eessiService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     public AnmodningUnntakService(BehandlingService behandlingService,
                                   OppgaveService oppgaveService,
                                   ProsessinstansService prosessinstansService,
                                   AnmodningsperiodeService anmodningsperiodeService,
-                                  LovvalgsperiodeService lovvalgsperiodeService, LandvelgerService landvelgerService, EessiService eessiService) {
+                                  LovvalgsperiodeService lovvalgsperiodeService,
+                                  LandvelgerService landvelgerService,
+                                  EessiService eessiService,
+                                  BehandlingsresultatService behandlingsresultatService) {
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
@@ -48,6 +54,7 @@ public class AnmodningUnntakService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.landvelgerService = landvelgerService;
         this.eessiService = eessiService;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -56,6 +63,8 @@ public class AnmodningUnntakService {
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+
+        validerAnmodningsperiode(behandlingID);
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner, ytterligereInformasjonSed);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
@@ -104,6 +113,13 @@ public class AnmodningUnntakService {
     private void validerFritekstLengde(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
         if (anmodningsperiodeSvar.getBegrunnelseFritekst() != null && anmodningsperiodeSvar.getBegrunnelseFritekst().length() > 255) {
             throw new FunksjonellException("Kan ikke ha fritekst lengre enn 255 for avslag på anmodning om unntak");
+        }
+    }
+
+    private void validerAnmodningsperiode(long behandlingID) throws FunksjonellException {
+        Anmodningsperiode anmodningsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertAnmodningsperiode();
+        if (anmodningsperiode.getTom() != null) {
+            throw new FunksjonellException("Anmodningsperioden mangler sluttdato");
         }
     }
 }
