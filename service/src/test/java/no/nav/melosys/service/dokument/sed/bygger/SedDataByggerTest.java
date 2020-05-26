@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -23,7 +20,6 @@ import no.nav.melosys.integrasjon.eessi.dto.Adressetype;
 import no.nav.melosys.integrasjon.eessi.dto.Arbeidssted;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -31,6 +27,7 @@ import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,6 +87,12 @@ public class SedDataByggerTest {
         behandling = DataByggerStubs.hentBehandlingStub();
 
         dataBygger = new SedDataBygger(lovvalgsperiodeService, landvelgerService);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(LocalDate.now().plusMonths(2L));
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
+        when(lovvalgsperiodeService.hentTidligereLovvalgsperioder(any())).thenReturn(List.of(lovvalgsperiode));
     }
 
     private SedDataGrunnlagMedSoknad lagDokumentressurser() throws TekniskException {
@@ -345,7 +348,7 @@ public class SedDataByggerTest {
         assertThat(sedData.getUtenlandskIdent()).isNotEmpty();
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotEmpty();
         assertThat(sedData.getUtenlandskeVirksomheter()).isNotNull();
-        assertThat(sedData.getTidligereLovvalgsperioder()).isNotNull();
+        assertThat(sedData.getTidligereLovvalgsperioder()).isNotEmpty();
         assertThat(sedData.getArbeidsgivendeVirksomheter().isEmpty()).isFalse();
     }
 }

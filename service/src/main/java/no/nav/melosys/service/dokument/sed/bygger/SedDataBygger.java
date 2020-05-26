@@ -41,16 +41,9 @@ public class SedDataBygger {
         this.landvelgerService = landvelgerService;
     }
 
-    public SedDataDto lag(SedDataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
-        if (dataGrunnlag instanceof SedDataGrunnlagMedSoknad) {
-            return lag((SedDataGrunnlagMedSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
-        } else if (dataGrunnlag instanceof SedDataGrunnlagUtenSoknad) {
-            return lag((SedDataGrunnlagUtenSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
-        }
-        throw new IllegalArgumentException("Ukjent datagrunnlag: " + dataGrunnlag.getClass().getSimpleName());
-    }
-
-    private SedDataDto lag(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
+    public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
+                          Behandlingsresultat behandlingsresultat,
+                          MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
         sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
             .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
@@ -60,38 +53,24 @@ public class SedDataBygger {
         return sedDataDto;
     }
 
-    private SedDataDto lag(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
-            .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
-        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
+    public SedDataDto lagUtkast(SedDataGrunnlag sedDataGrunnlag,
+                                Behandlingsresultat behandlingsresultat,
+                                MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+        SedDataDto sedDataDto = lagPersonopplysninger(sedDataGrunnlag);
+        sedDataDto.setBostedsadresse(finnAdresse(sedDataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
+        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(sedDataGrunnlag.getBehandling()));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
 
-    public SedDataDto lagUtkast(SedDataGrunnlag dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
+    private SedDataDto lagPersonopplysninger(SedDataGrunnlag dataGrunnlag) throws FunksjonellException, TekniskException {
         if (dataGrunnlag instanceof SedDataGrunnlagMedSoknad) {
-            return lagUtkast((SedDataGrunnlagMedSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+            return lagPersonopplysninger((SedDataGrunnlagMedSoknad) dataGrunnlag);
         } else if (dataGrunnlag instanceof SedDataGrunnlagUtenSoknad) {
-            return lagUtkast((SedDataGrunnlagUtenSoknad) dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+            return lagPersonopplysninger((SedDataGrunnlagUtenSoknad) dataGrunnlag);
         }
         throw new IllegalArgumentException("Ukjent datagrunnlag: " + dataGrunnlag.getClass().getSimpleName());
-    }
-
-    private SedDataDto lagUtkast(SedDataGrunnlagMedSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
-        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
-        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
-        return sedDataDto;
-    }
-
-    private SedDataDto lagUtkast(SedDataGrunnlagUtenSoknad dataGrunnlag, Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) throws TekniskException {
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
-        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
-        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
-        return sedDataDto;
     }
 
     private static SedDataDto lagPersonopplysninger(SedDataGrunnlagUtenSoknad dataGrunnlag) {
