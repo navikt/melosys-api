@@ -19,8 +19,15 @@ public class Virksomhet {
         this.adresse = adresse;
     }
 
+    public ForetakUtland tilForetakUtland() {
+        return tilForetakUtland(false);
+    }
 
-    public ForetakUtland tilForetakUtland(boolean erSelvstendig) {
+    public ForetakUtland tilSelvstendigForetakUtland() {
+        return tilForetakUtland(true);
+    }
+
+    private ForetakUtland tilForetakUtland(boolean erSelvstendig) {
         ForetakUtland foretakUtland = new ForetakUtland();
 
         foretakUtland.navn = navn;

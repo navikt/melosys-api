@@ -271,7 +271,7 @@ public final class DokumentServiceTest {
     }
 
     private BrevdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        throws IkkeFunnetException, TekniskException {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
@@ -388,7 +388,7 @@ public final class DokumentServiceTest {
         return brevdatabyggervelger;
     }
 
-    private static EregFasade mockEregFasade() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private static EregFasade mockEregFasade() throws IkkeFunnetException, IntegrasjonException {
         EregFasade eregFasade = mock(EregFasade.class);
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
         orgDok.setNavn(Collections.singletonList("Virker av og til"));

@@ -127,6 +127,32 @@
       },
       "orgnr": "115511",
       "type": null
+    },
+    {
+      "navn": "annen norsk",
+      "adresse": {
+        "poststed": "oslo",
+        "postnr": null,
+        "land": "NO",
+        "gateadresse": "oslogata 3",
+        "region": null,
+        "adressetype": null
+      },
+      "orgnr": "226622",
+      "type": null
+    },
+    {
+      "navn": "finner ikke orgnummer så vi sender uten",
+      "adresse": {
+        "poststed": "oslo",
+        "postnr": null,
+        "land": "NO",
+        "gateadresse": "oslogata 4",
+        "region": null,
+        "adressetype": null
+      },
+      "orgnr": null,
+      "type": null
     }
   ]
 }

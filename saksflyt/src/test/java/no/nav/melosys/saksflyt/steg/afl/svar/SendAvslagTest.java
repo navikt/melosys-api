@@ -21,6 +21,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.dokument.sed.SedDataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
+import no.nav.melosys.service.eessi.SedGrunnlagMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +47,8 @@ public class SendAvslagTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private SedGrunnlagMapper sedGrunnlagMapper;
 
     private SendAvslag sendAvslag;
     private EessiService eessiService;
@@ -55,7 +58,7 @@ public class SendAvslagTest {
     public void settOpp() throws FunksjonellException, TekniskException {
         eessiService = new EessiService(
             sedDataBygger, sedDataGrunnlagFactory,
-            eessiConsumer, behandlingService, behandlingsresultatService
+            eessiConsumer, behandlingService, behandlingsresultatService, sedGrunnlagMapper
         );
         sendAvslag = new SendAvslag(eessiService);
 

@@ -198,7 +198,7 @@ public class RegisteropplysningerService {
         return List.of(saksopplysning);
     }
 
-    private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, IntegrasjonException {
         Set<String> orgnumre = new HashSet<>();
 
         Optional<ArbeidsforholdDokument> arbeidsforholdDokument = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId());
