@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
@@ -48,10 +48,10 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final String EUEOS_BEHANDLINGSTEMAKODE_GAMMEL = "ab0390";
 
 
-    private static final ImmutableBiMap<no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema, String> BEHANDLINGSTYPE_FELLESKODE_MAP =
-        ImmutableBiMap.<no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema, String>builder()
+    private static final ImmutableMap<no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema, String> BEHANDLINGSTYPE_FELLESKODE_MAP =
+        ImmutableMap.<no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema, String>builder()
             .put(UTSENDT_ARBEIDSTAKER, "ae0034")
-            //.put(UTSENDT_SELVSTENDIG, "ae0034") fixme
+            .put(UTSENDT_SELVSTENDIG, "ae0034")
             .put(IKKE_YRKESAKTIV, "ae0238")
             //.put(ENDRET_PERIODE, "ae0052")
             //.put(ANKE, "ae0046")
@@ -63,9 +63,8 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, "ae0235")
             .put(ARBEID_FLERE_LAND, "ae0242")
-            //.put(ARBEID_NORGE_BOSATT_ANNET_LAND, "ukjent") fixme: usikkert om vil tas i bruk
-            // FIXME: Mangler behandlingstype i kodeverk
-            .put(ØVRIGE_SED, "ukjent")
+            .put(ØVRIGE_SED_MED, "ae0254")
+            .put(ØVRIGE_SED_UFM, "ae0254")
             .put(TRYGDETID, "ae0236")
             .build();
 
@@ -314,40 +313,17 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .setPrioritet(StringUtils.isNotEmpty(oppgaveDto.getPrioritet()) ? PrioritetType.valueOf(oppgaveDto.getPrioritet()) : null)
             .setBehandlesAvApplikasjon(mapTilEnumFraKode(Fagsystem.class, StringUtils.defaultString(oppgaveDto.getBehandlesAvApplikasjon()), oppgaveId));
 
-        /* todo: kan ikke sette behanlingstype/tema i revers før nytt felles kodeverk er på plass
-        if (oppgaveDto.getBehandlingstype() != null) {
-            try {
-                domainOppgaveBuilder.setBehandlingstype(hentBehandlingstyper(oppgaveDto.getBehandlingstype()));
-            } catch (IllegalArgumentException e) {
-                log.warn("Fikk uventet behandlingstype: {} for OppgaveID: {}", oppgaveDto.getBehandlingstype(), oppgaveDto.getId());
-            }
-        }*/
-
         return domainOppgaveBuilder.build();
     }
 
     /**
      * Henter koder fra felleskodeverk: Behandlingstyper.
      */
-    static String hentFellesKode(no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema behandlingstema) {
-        if (behandlingstema == UTSENDT_SELVSTENDIG) {
-            //fixme: når vi har egen kodeverk-verdi
-            behandlingstema = UTSENDT_ARBEIDSTAKER;
-        }
+    private static String hentFellesKode(no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema behandlingstema) {
         if (BEHANDLINGSTYPE_FELLESKODE_MAP.containsKey(behandlingstema)) {
             return BEHANDLINGSTYPE_FELLESKODE_MAP.get(behandlingstema);
         }
         throw new IllegalArgumentException(behandlingstema + " er ikke implementert i felleskodeverk.");
-    }
-
-    /**
-     * Mapper felleskodeverk til behandlingstyper.
-     */
-    static Behandlingstema hentBehandlingstyper(String felleskode) {
-        if (BEHANDLINGSTYPE_FELLESKODE_MAP.containsValue(felleskode)) {
-            return BEHANDLINGSTYPE_FELLESKODE_MAP.inverse().get(felleskode);
-        }
-        throw new IllegalArgumentException(felleskode + " har ingen matchende behandlingstype.");
     }
 
     private static <K extends Kodeverk> K mapTilEnumFraKode(Class<K> clazz, String verdi, String oppgaveId) {

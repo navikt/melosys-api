@@ -144,7 +144,7 @@ public class ManuellSedBehandlingInitialisererTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setTema(Behandlingstema.ØVRIGE_SED);
+        behandling.setTema(Behandlingstema.ØVRIGE_SED_MED);
         behandling.setType(Behandlingstyper.SOEKNAD);
 
         Fagsak fagsak = new Fagsak();

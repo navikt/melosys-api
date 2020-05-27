@@ -317,7 +317,7 @@ public class ProsessinstansServiceTest {
     @Test
     public void opprettProsessinstansNySak_behandlingstypeIkkeStøttet_feiler() throws FunksjonellException {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
         expectedException.expect(FunksjonellException.class);
         prosessinstansService.opprettProsessinstansNySak("journalpostID", opprettSakDto);
     }

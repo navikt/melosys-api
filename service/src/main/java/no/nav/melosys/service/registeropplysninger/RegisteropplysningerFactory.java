@@ -25,7 +25,8 @@ public class RegisteropplysningerFactory {
             case BESLUTNING_LOVVALG_NORGE:
             case BESLUTNING_LOVVALG_ANNET_LAND:
                 return hentSaksopplysningTyperForBeslutningOmLovvalg();
-            case ØVRIGE_SED:
+            case ØVRIGE_SED_MED:
+            case ØVRIGE_SED_UFM:
             case TRYGDETID:
                 return hentSaksopplysningTyperForBehandlingAvØvrigeSedOgTrygdetid();
             default:
