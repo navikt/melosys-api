@@ -1,9 +1,12 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -14,10 +17,13 @@ import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,6 +36,9 @@ public class OpprettFagsakOgBehandlingTest {
 
     private OpprettFagsakOgBehandling opprettFagsakOgBehandling;
 
+    @Captor
+    private ArgumentCaptor<OpprettSakRequest> opprettSakRequestArgumentCaptor;
+
     @Before
     public void setUp() throws Exception {
         opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService);
@@ -38,26 +47,40 @@ public class OpprettFagsakOgBehandlingTest {
 
     @Test
     public void utførSteg_prosessTypeAnmodningsUnntak_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         opprettFagsakOgBehandling.utfør(prosessinstans);
-        verify(fagsakService).nyFagsakOgBehandling(any(OpprettSakRequest.class));
+        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_SAK);
     }
 
-    @Test(expected = TekniskException.class)
-    public void utførSteg_ikkeProsessTypeMottakSed_kasterException() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans();
-        prosessinstans.setType(ProsessType.MOTTAK_SED);
+    @Test
+    public void utførSteg__verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
+        Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         opprettFagsakOgBehandling.utfør(prosessinstans);
+        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.UKJENT);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_SAK);
     }
 
-    private Prosessinstans hentProsessinstans() {
+    @Test
+    public void utførSteg_ikkeProsessTypeMottakSed_kasterException() {
+        Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
+        prosessinstans.setType(ProsessType.MOTTAK_SED);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> opprettFagsakOgBehandling.utfør(prosessinstans))
+            .withMessageContaining("Prosessinstans er av type");
+    }
+
+    private Prosessinstans hentProsessinstans(Behandlingstema behandlingstema) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, "321");
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, 123);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer("123rina");

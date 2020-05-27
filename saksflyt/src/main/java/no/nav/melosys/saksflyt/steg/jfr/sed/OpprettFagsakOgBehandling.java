@@ -43,12 +43,12 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(EESSI_MELDING, MelosysEessiMelding.class);
 
-        //Verifiser prosessType
         if (prosessinstans.getType() == ProsessType.MOTTAK_SED || prosessinstans.getType() == ProsessType.MOTTAK_SED_JOURNALFØRING) {
             throw new TekniskException("Prosessinstans er av type " + prosessinstans.getType());
         }
 
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
+        Sakstyper sakstype = behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE ? Sakstyper.UKJENT : Sakstyper.EU_EOS;
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(prosessinstans.getData(AKTØR_ID))
@@ -56,7 +56,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             .medBehandlingstema(behandlingstema)
             .medInitierendeJournalpostId(prosessinstans.getData(JOURNALPOST_ID))
             .medInitierendeDokumentId(prosessinstans.getData(DOKUMENT_ID))
-            .medSakstype(Sakstyper.EU_EOS)
+            .medSakstype(sakstype)
             .build();
 
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
