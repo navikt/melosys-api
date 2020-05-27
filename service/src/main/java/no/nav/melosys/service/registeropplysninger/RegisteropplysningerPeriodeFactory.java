@@ -13,7 +13,7 @@ public class RegisteropplysningerPeriodeFactory {
     private final Integer arbeidsforholdhistorikkAntallMåneder;
     private final Integer medlemskaphistorikkAntallÅr;
     private final Integer inntektshistorikkAntallMåneder;
-    private final Integer defaultSluttdatoAntallÅr = 1;
+    public static final Integer REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR = 1;
 
     public RegisteropplysningerPeriodeFactory(@Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}") Integer arbeidsforholdhistorikkAntallMåneder,
                                               @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr,
@@ -53,7 +53,7 @@ public class RegisteropplysningerPeriodeFactory {
         }
 
         if (tomDato == null) {
-            tomDato = fom.plusYears(defaultSluttdatoAntallÅr);
+            tomDato = fom.plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR);
         }
         if (tomDato.isAfter(iDag)) {
             tomDato = iDag;
@@ -86,7 +86,7 @@ public class RegisteropplysningerPeriodeFactory {
         LocalDate nå = LocalDate.now();
         if (tom == null) {
             fomMnd = YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder));
-            tomMnd = YearMonth.from(fom.plusYears(defaultSluttdatoAntallÅr));
+            tomMnd = YearMonth.from(fom.plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR));
         } else if (fom.isBefore(nå) && tom.isAfter(nå)) { //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
             fomMnd = YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder));
             tomMnd = YearMonth.from(tom);
@@ -125,7 +125,7 @@ public class RegisteropplysningerPeriodeFactory {
 
     private DatoPeriode hentPeriodeForMedlemskapBehandlingSøknad(LocalDate fom, LocalDate tom) {
         LocalDate fomDato = fom.minusYears(medlemskaphistorikkAntallÅr);
-        LocalDate tomDato = tom == null ? fom.plusYears(defaultSluttdatoAntallÅr) : tom;
+        LocalDate tomDato = tom == null ? fom.plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR) : tom;
 
         return new DatoPeriode(fomDato, tomDato);
     }

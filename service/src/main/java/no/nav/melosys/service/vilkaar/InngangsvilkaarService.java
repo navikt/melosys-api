@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
+import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerPeriodeFactory.REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR;
 
 @Service
 public class InngangsvilkaarService {
@@ -60,10 +61,7 @@ public class InngangsvilkaarService {
             return new InngangsvilkaarVurdering(false, Inngangsvilkaar.MANGLER_STATSBORGERSKAP);
         }
         if (søknadsperiode.getTom() == null) {
-            søknadsperiode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusYears(1L));
-        }
-        if (søknadsperiode.getTom() == null) {
-            søknadsperiode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusYears(1L));
+            søknadsperiode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR));
         }
 
         var landkoderISO3 = tilIso3(søknadsland);

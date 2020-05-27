@@ -8,9 +8,9 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -25,8 +25,13 @@ public class HentRegisteropplysningerTest {
 
     @Mock
     private RegisteropplysningerService registeropplysningerService;
-    @InjectMocks
+
     private HentRegisteropplysninger agent;
+
+    @Before
+    public void setUp() {
+        agent = new HentRegisteropplysninger(registeropplysningerService);
+    }
 
     @Test
     public void utførSteg() throws MelosysException {
