@@ -51,7 +51,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final ImmutableMap<no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema, String> BEHANDLINGSTYPE_FELLESKODE_MAP =
         ImmutableMap.<no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema, String>builder()
             .put(UTSENDT_ARBEIDSTAKER, "ae0034")
-            //.put(UTSENDT_SELVSTENDIG, "ae0034") fixme
+            .put(UTSENDT_SELVSTENDIG, "ae0034")
             .put(IKKE_YRKESAKTIV, "ae0238")
             //.put(ENDRET_PERIODE, "ae0052")
             //.put(ANKE, "ae0046")
@@ -63,7 +63,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
             .put(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, "ae0235")
             .put(ARBEID_FLERE_LAND, "ae0242")
-            //.put(ARBEID_NORGE_BOSATT_ANNET_LAND, "ukjent") FIXME: usikkert om vil tas i bruk
             .put(ØVRIGE_SED_MED, "ae0254")
             .put(ØVRIGE_SED_UFM, "ae0254")
             .put(TRYGDETID, "ae0236")
@@ -314,26 +313,13 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .setPrioritet(StringUtils.isNotEmpty(oppgaveDto.getPrioritet()) ? PrioritetType.valueOf(oppgaveDto.getPrioritet()) : null)
             .setBehandlesAvApplikasjon(mapTilEnumFraKode(Fagsystem.class, StringUtils.defaultString(oppgaveDto.getBehandlesAvApplikasjon()), oppgaveId));
 
-        /* todo: kan ikke sette behanlingstype/tema i revers før nytt felles kodeverk er på plass
-        if (oppgaveDto.getBehandlingstype() != null) {
-            try {
-                domainOppgaveBuilder.setBehandlingstype(hentBehandlingstyper(oppgaveDto.getBehandlingstype()));
-            } catch (IllegalArgumentException e) {
-                log.warn("Fikk uventet behandlingstype: {} for OppgaveID: {}", oppgaveDto.getBehandlingstype(), oppgaveDto.getId());
-            }
-        }*/
-
         return domainOppgaveBuilder.build();
     }
 
     /**
      * Henter koder fra felleskodeverk: Behandlingstyper.
      */
-    static String hentFellesKode(no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema behandlingstema) {
-        if (behandlingstema == UTSENDT_SELVSTENDIG) {
-            //fixme: når vi har egen kodeverk-verdi
-            behandlingstema = UTSENDT_ARBEIDSTAKER;
-        }
+    private static String hentFellesKode(no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema behandlingstema) {
         if (BEHANDLINGSTYPE_FELLESKODE_MAP.containsKey(behandlingstema)) {
             return BEHANDLINGSTYPE_FELLESKODE_MAP.get(behandlingstema);
         }
