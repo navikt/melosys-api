@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SakServiceTest {
-
     @Mock
     private SakConsumer sakConsumer;
 
@@ -74,15 +73,6 @@ public class SakServiceTest {
 
         SakDto opprettetSakDto = captor.getValue();
         assertThat(opprettetSakDto.getTema()).isEqualTo(Tema.UFM.getKode());
-    }
-
-    @Test(expected = FunksjonellException.class)
-    public void opprettSak_behandlingstypeAnke_ankeIkkeStøttetKasterExcept() throws FunksjonellException, TekniskException {
-        final String saksnummer = "MEL-123";
-        final Behandlingstema behandlingstema = Behandlingstema.ØVRIGE_SED;
-        final String aktørID = "123123123";
-
-        sakService.opprettSak(saksnummer, behandlingstema, aktørID);
     }
 
     @Test

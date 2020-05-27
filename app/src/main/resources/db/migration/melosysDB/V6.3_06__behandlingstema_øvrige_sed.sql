@@ -1,0 +1,5 @@
+INSERT INTO BEHANDLING_TEMA(kode, navn) VALUES ('ØVRIGE_SED_MED', 'MED: Henvendelse eller forespørsel');
+INSERT INTO BEHANDLING_TEMA(kode, navn) VALUES ('ØVRIGE_SED_UFM', 'UFM: Henvendelse eller forespørsel');
+
+UPDATE BEHANDLING b SET beh_tema = 'ØVRIGE_SED_MED' WHERE b.BEH_TEMA = 'ØVRIGE_SED';
+DELETE FROM BEHANDLING_TEMA WHERE kode = 'ØVRIGE_SED';

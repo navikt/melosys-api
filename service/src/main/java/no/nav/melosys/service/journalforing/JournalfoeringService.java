@@ -132,7 +132,8 @@ public class JournalfoeringService {
 
     private void validerBehandlingstemaForSed(String behandlingstypeKode) throws FunksjonellException {
         if (!Behandlingstema.TRYGDETID.getKode().equals(behandlingstypeKode)
-            && !Behandlingstema.ØVRIGE_SED.getKode().equalsIgnoreCase(behandlingstypeKode)) {
+            && !Behandlingstema.ØVRIGE_SED_MED.getKode().equalsIgnoreCase(behandlingstypeKode)
+            && !Behandlingstema.ØVRIGE_SED_UFM.getKode().equalsIgnoreCase(behandlingstypeKode)) {
             throw new FunksjonellException(String.format("Opprettelse av behandling med tema %s støttes ikke", behandlingstypeKode));
         }
     }

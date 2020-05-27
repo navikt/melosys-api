@@ -190,6 +190,16 @@ public class Behandling extends RegistreringsInfo {
         return Objects.hash(registrertDato, fagsak);
     }
 
+    public boolean kanAvsluttesManuelt() {
+        return (tema == Behandlingstema.IKKE_YRKESAKTIV
+            || tema == Behandlingstema.ØVRIGE_SED_MED
+            || tema == Behandlingstema.ØVRIGE_SED_UFM
+            || tema == Behandlingstema.TRYGDETID);
+    }
+
+    public boolean kanResultereIVedtak() {
+        return erBehandlingAvSøknad() || erNorgeUtpekt();
+    }
 
     public boolean erAktiv() {
         return !erInaktiv();
@@ -245,10 +255,6 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean erUtpekingAvAnnetLand() {
         return tema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
-    }
-
-    public boolean kanResultereIVedtak() {
-        return erBehandlingAvSøknad() || erNorgeUtpekt();
     }
 
     public boolean erUtsending() {

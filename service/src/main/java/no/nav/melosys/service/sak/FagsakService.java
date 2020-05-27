@@ -320,13 +320,12 @@ public class FagsakService {
     @Transactional(rollbackFor = MelosysException.class)
     public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException, TekniskException {
         Behandlingstema behandlingstema = behandling.getTema();
-        if (behandlingstema != Behandlingstema.IKKE_YRKESAKTIV
-            && behandlingstema != Behandlingstema.ØVRIGE_SED
-            && behandlingstema != Behandlingstema.TRYGDETID) {
+        if (!behandling.kanAvsluttesManuelt()) {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " kan ikke avsluttes manuelt");
         }
 
-        Saksstatuser saksstatus = behandlingstema == Behandlingstema.IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
+        Saksstatuser saksstatus = behandlingstema == Behandlingstema.IKKE_YRKESAKTIV
+            ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
         avsluttFagsakOgBehandling(fagsak, saksstatus);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
