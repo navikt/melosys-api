@@ -58,25 +58,8 @@ public class InntektService implements InntektFasade {
     // Henter inntekter for én ident fra hentInntektListeBolk for å få opplysninger om frilansforhold (se MELOSYS-1453).
     @Override
     public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws FunksjonellException, IntegrasjonException {
-        HentInntektListeBolkRequest request = new HentInntektListeBolkRequest();
 
-        PersonIdent personIdent = objectFactory.createPersonIdent();
-        personIdent.setPersonIdent(personID);
-        request.getIdentListe().add(personIdent);
-
-        request.setUttrekksperiode(lagUttrekksperiode(fom, tom));
-        request.setAinntektsfilter(lagAinntektsfilter());
-        request.setFormaal(lagFormaal());
-
-        // Kall til Inntektskomponenten
-        HentInntektListeBolkResponse response;
-        try {
-            response = inntektConsumer.hentInntektListeBolk(request);
-        } catch (HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter e) {
-            throw new SikkerhetsbegrensningException(e);
-        } catch (HentInntektListeBolkUgyldigInput | SOAPFaultException e) {
-            throw new IntegrasjonException(e);
-        }
+        HentInntektListeBolkResponse response = hentInntektListeBolkResponse(personID, fom, tom);
 
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();
@@ -105,16 +88,39 @@ public class InntektService implements InntektFasade {
         return saksopplysning;
     }
 
-    private Uttrekksperiode lagUttrekksperiode(YearMonth fom, YearMonth tom) throws FunksjonellException {
-        Uttrekksperiode uttrekksperiode = objectFactory.createUttrekksperiode();
+    private HentInntektListeBolkResponse hentInntektListeBolkResponse(String personID, YearMonth fom, YearMonth tom) throws FunksjonellException, IntegrasjonException {
 
         if (fom.isBefore(JANUAR_2015)) {
             if (tom.isBefore(JANUAR_2015)) {
-                throw new FunksjonellException("Kan ikke hente inntektsopplysninger da både fom og tom-dato er før " + JANUAR_2015);
+                log.info("Hele perioden er fra før {} som inntektskomponenten ikke støtter. Lager en tom respons", JANUAR_2015);
+                return lagTomInntektListeBolkResponse();
             }
             log.info("Periode har fom dato {} som inntektskomponent ikke støtter, henter inntekt med fom {}", fom, JANUAR_2015);
             fom = JANUAR_2015;
         }
+
+
+        HentInntektListeBolkRequest request = new HentInntektListeBolkRequest();
+
+        PersonIdent personIdent = objectFactory.createPersonIdent();
+        personIdent.setPersonIdent(personID);
+        request.getIdentListe().add(personIdent);
+
+        request.setUttrekksperiode(lagUttrekksperiode(fom, tom));
+        request.setAinntektsfilter(lagAinntektsfilter());
+        request.setFormaal(lagFormaal());
+
+        try {
+            return inntektConsumer.hentInntektListeBolk(request);
+        } catch (HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (HentInntektListeBolkUgyldigInput | SOAPFaultException e) {
+            throw new IntegrasjonException(e);
+        }
+    }
+
+    private Uttrekksperiode lagUttrekksperiode(YearMonth fom, YearMonth tom) {
+        Uttrekksperiode uttrekksperiode = objectFactory.createUttrekksperiode();
 
         try {
             uttrekksperiode.setMaanedFom(convertToXMLGregorianCalendar(fom));
@@ -140,6 +146,12 @@ public class InntektService implements InntektFasade {
         formaal.setKodeRef(FORMAALSKODE);
         formaal.setKodeverksRef(FORMAALSKODE_URI);
         return formaal;
+    }
+
+    private HentInntektListeBolkResponse lagTomInntektListeBolkResponse() {
+        HentInntektListeBolkResponse hentInntektListeBolkResponse = new HentInntektListeBolkResponse();
+        hentInntektListeBolkResponse.getArbeidsInntektIdentListe().add(new ArbeidsInntektIdent());
+        return hentInntektListeBolkResponse;
     }
 
     private static XMLGregorianCalendar convertToXMLGregorianCalendar(YearMonth yearMonth) throws DatatypeConfigurationException {

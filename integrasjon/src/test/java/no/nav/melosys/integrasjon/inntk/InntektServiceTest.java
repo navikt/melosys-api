@@ -10,6 +10,8 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektMock;
+import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter;
+import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkUgyldigInput;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Uttrekksperiode;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 import org.junit.Before;
@@ -21,6 +23,8 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -62,8 +66,16 @@ public class InntektServiceTest {
         assertThat(uttrekksperiodeReq.getMaanedTom().getMonth()).isEqualTo(8);
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void hentInntektListe_periodeFørJan2015_kasterException() throws FunksjonellException, IntegrasjonException {
-        inntektService.hentInntektListe("99999999992", YearMonth.of(2012, 1), YearMonth.of(2014, 12));
+    @Test
+    public void hentInntektListe_helePeriodeFørJan2015_returnererTomInntektListe() throws FunksjonellException, IntegrasjonException, HentInntektListeBolkUgyldigInput, HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter {
+        Saksopplysning saksopplysning = inntektService.hentInntektListe("99999999992", YearMonth.of(2012, 1), YearMonth.of(2014, 12));
+
+        verify(inntektMock, never()).hentInntektListeBolk(any());
+        assertThat(saksopplysning.getDokumentXml()).isNotEmpty();
+        assertThat(saksopplysning.getDokument())
+            .isInstanceOf(InntektDokument.class)
+            .extracting(s -> ((InntektDokument) s).getArbeidsInntektMaanedListe())
+            .asList()
+            .isEmpty();
     }
 }
