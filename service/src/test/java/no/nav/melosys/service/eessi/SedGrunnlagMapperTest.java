@@ -42,22 +42,28 @@ public class SedGrunnlagMapperTest {
 
     @Test
     public void mapSedGrunnlag() throws MelosysException, IOException, URISyntaxException {
-        SedGrunnlag sedGrunnlag = sedGrunnlagMapper.mapSedGrunnlag(lagSedGrunnlag());
+        SedGrunnlag sedGrunnlag = sedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag());
 
         assertThat(sedGrunnlag).isNotNull();
         assertThat(sedGrunnlag).isInstanceOf(SedGrunnlag.class);
 
-        assertThat(sedGrunnlag.bosted)
-            .extracting("oppgittAdresse")
-            .extracting("landkode", "postnummer", "poststed")
+        assertThat(sedGrunnlag.bosted.oppgittAdresse)
+            .extracting(
+                strukturertAdresse -> strukturertAdresse.landkode,
+                strukturertAdresse -> strukturertAdresse.postnummer,
+                strukturertAdresse -> strukturertAdresse.poststed)
             .containsExactly("BE", "Testpostkode", "Testby");
 
         assertThat(sedGrunnlag.personOpplysninger.utenlandskIdent)
-            .extracting("ident", "landkode")
+            .extracting(
+                utenlandskIdent -> utenlandskIdent.ident,
+                utenlandskIdent -> utenlandskIdent.landkode)
             .containsExactly(tuple("15225345345", "BG"));
 
         assertThat(sedGrunnlag.arbeidUtland)
-            .extracting("foretakNavn", "foretakOrgnr")
+            .extracting(
+                arbeidUtland -> arbeidUtland.foretakNavn,
+                arbeidUtland -> arbeidUtland.foretakOrgnr)
             .containsExactlyInAnyOrder(
                 tuple("Testarbeidsstednavn", null),
                 tuple("Testarbeidsstednavn2", null)
@@ -68,7 +74,7 @@ public class SedGrunnlagMapperTest {
     public void mapSedGrunnlag_orgnummerFinnes_forventJuridiskArbeidsgiverNorge() throws IntegrasjonException, IOException, URISyntaxException, FunksjonellException {
         when(eregFasade.organisasjonFinnes(eq("115511"))).thenReturn(true);
 
-        SedGrunnlag sedGrunnlag = sedGrunnlagMapper.mapSedGrunnlag(lagSedGrunnlag());
+        SedGrunnlag sedGrunnlag = sedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag());
 
         verify(eregFasade).organisasjonFinnes(eq("115511"));
         verify(eregFasade).organisasjonFinnes(eq("226622"));
@@ -76,12 +82,14 @@ public class SedGrunnlagMapperTest {
         assertThat(sedGrunnlag.juridiskArbeidsgiverNorge).isNotNull();
         assertThat(sedGrunnlag.juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre()).containsExactly("115511");
         assertThat(sedGrunnlag.foretakUtland).hasSize(6);
-        assertThat(sedGrunnlag.foretakUtland).extracting("orgnr").doesNotContain("115511");
+        assertThat(sedGrunnlag.foretakUtland)
+            .extracting(foretakUtland -> foretakUtland.orgnr)
+            .doesNotContain("115511");
     }
 
     @Test
     public void mapSedGrunnlag_orgnummerFinnesIkke_forventUtenlandskeForetak() throws IntegrasjonException, IOException, URISyntaxException, FunksjonellException {
-        SedGrunnlag sedGrunnlag = sedGrunnlagMapper.mapSedGrunnlag(lagSedGrunnlag());
+        SedGrunnlag sedGrunnlag = sedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag());
 
         verify(eregFasade).organisasjonFinnes(eq("115511"));
         verify(eregFasade).organisasjonFinnes(eq("226622"));
@@ -89,7 +97,9 @@ public class SedGrunnlagMapperTest {
         assertThat(sedGrunnlag.juridiskArbeidsgiverNorge).isNotNull();
         assertThat(sedGrunnlag.juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre()).isEmpty();
         assertThat(sedGrunnlag.foretakUtland).hasSize(7);
-        assertThat(sedGrunnlag.foretakUtland).extracting("orgnr").containsAll(List.of("115511", "226622"));
+        assertThat(sedGrunnlag.foretakUtland)
+            .extracting(foretakUtland -> foretakUtland.orgnr)
+            .containsAll(List.of("115511", "226622"));
     }
 
     private SedGrunnlagDto lagSedGrunnlag() throws IOException, URISyntaxException {

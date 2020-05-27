@@ -559,6 +559,6 @@ public class EessiServiceTest {
     public void hentSedGrunnlag() throws MelosysException {
         when(eessiConsumer.hentSedGrunnlag(anyString(), anyString())).thenReturn(new EasyRandom().nextObject(SedGrunnlagDto.class));
         eessiService.hentSedGrunnlag("123", "abc");
-        verify(sedGrunnlagMapper).mapSedGrunnlag(any(SedGrunnlagDto.class));
+        verify(sedGrunnlagMapper).tilSedGrunnlag(any(SedGrunnlagDto.class));
     }
 }

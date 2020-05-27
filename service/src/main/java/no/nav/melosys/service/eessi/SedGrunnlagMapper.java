@@ -26,7 +26,7 @@ public class SedGrunnlagMapper {
         this.eregFasade = eregFasade;
     }
 
-    public SedGrunnlag mapSedGrunnlag(SedGrunnlagDto sedGrunnlagDto) throws IntegrasjonException, FunksjonellException {
+    public SedGrunnlag tilSedGrunnlag(SedGrunnlagDto sedGrunnlagDto) throws IntegrasjonException, FunksjonellException {
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
