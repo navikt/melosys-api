@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTERING_UTPEKING_UTLAND;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 
 @Component
@@ -32,11 +33,13 @@ public class UtpekAnnetLandSendOrienteringsbrev extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         Behandling behandling = prosessinstans.getBehandling();
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        String fritekst = prosessinstans.getData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(ORIENTERING_UTPEKING_UTLAND)
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(Mottaker.av(BRUKER))
+            .medFritekst(fritekst)
             .build();
         brevBestiller.bestill(brevbestilling);
 
