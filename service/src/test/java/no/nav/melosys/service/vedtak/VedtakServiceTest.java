@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
@@ -43,7 +44,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -209,6 +210,20 @@ public class VedtakServiceTest {
     }
 
     @Test
+    public void fattVedtak_prosessinstansFinnes_kasterException() {
+        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        behandlingsresultat.setType(resultatType);
+        when(prosessinstansService.harAktivProsessinstans(eq(behandlingID))).thenReturn(true);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null));
+
+        verify(prosessinstansService, never())
+            .opprettProsessinstansIverksettVedtak(any(), any(), any(), any(), anySet(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), any());
+    }
+
+    @Test
     public void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() throws MelosysException {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
@@ -222,15 +237,12 @@ public class VedtakServiceTest {
         when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
             .thenReturn(Collections.singletonList(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER));
 
-        ValideringException forventetException = null;
-        try {
-            vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        } catch (ValideringException ex) {
-            forventetException = ex;
-        }
+        Throwable forventetException = catchThrowable(() ->
+            vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null)
+        );
 
-        assertThat(forventetException).isNotNull();
-        assertThat(forventetException.getFeilkoder()).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
+        Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder()).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
+        assertThat(forventetException).isInstanceOfSatisfying(ValideringException.class, medFeilkode);
     }
 
     @Test
