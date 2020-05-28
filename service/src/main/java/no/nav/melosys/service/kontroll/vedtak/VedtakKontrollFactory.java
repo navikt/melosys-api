@@ -26,7 +26,8 @@ class VedtakKontrollFactory {
         return Set.of(
             VedtakKontroller::bostedsadresseForA1,
             VedtakKontroller::overlappendeMedlemsperiode,
-            VedtakKontroller::periodeOver24Mnd
+            VedtakKontroller::periodeOver24Mnd,
+            VedtakKontroller::periodeManglerSluttdato
         );
     }
 }

@@ -55,9 +55,6 @@ public class LovvalgsperiodeService {
         if (lovvalgsperiode.harUgyldigTilstand()) {
             throw new FunksjonellException("Lovvalgsperioden har en ugyldig kombinasjon av resultat og lovvalgsland");
         }
-        if (lovvalgsperiode.getTom() == null) {
-            throw new FunksjonellException("Lovvalgsperioden mangler sluttdato");
-        }
         return lovvalgsperiode;
     }
 
