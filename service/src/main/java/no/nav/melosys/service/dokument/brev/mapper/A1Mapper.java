@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
@@ -133,15 +136,33 @@ class A1Mapper {
         arbeidssteder = fyllMinimumAntallArbeidsstederMedDummyVerdier(arbeidssteder);
 
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
-        for (Arbeidssted arbeidssted : arbeidssteder) {
-            if (arbeidssted.erFysisk()) {
-                fysiskeAdresserBrev.getAdresse().add(mapFysiskArbeidssted((FysiskArbeidssted)arbeidssted));
-            }
-            else {
-                fysiskeAdresserBrev.getAdresse().add(mapIkkeFysiskArbeidssted((IkkeFysiskArbeidssted)arbeidssted));
-            }
-        }
+        arbeidssteder.stream()
+            .map(this::mapArbeidssted)
+            .forEach(a -> fysiskeAdresserBrev.getAdresse().add(a));
+
         return fysiskeAdresserBrev;
+    }
+
+    private AdresseType mapArbeidssted(Arbeidssted arbeidssted) {
+        AdresseType adresseType = new AdresseType();
+        String adresselinje;
+
+        if (arbeidssted.erFysisk()) {
+            FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arbeidssted;
+            UstrukturertAdresse ustrukturertAdresse = UstrukturertAdresse.av(fysiskArbeidssted.getAdresse());
+            adresselinje = Stream.of(
+                ustrukturertAdresse.getAdresselinje(1),
+                ustrukturertAdresse.getAdresselinje(2),
+                ustrukturertAdresse.getAdresselinje(3),
+                ustrukturertAdresse.getAdresselinje(4),
+                ustrukturertAdresse.landkode).filter(Objects::nonNull).collect(Collectors.joining(" "));
+        } else {
+            IkkeFysiskArbeidssted ikkeFysiskArbeidssted = (IkkeFysiskArbeidssted) arbeidssted;
+            adresselinje = String.join(" ", ikkeFysiskArbeidssted.getEnhetNavn(), ikkeFysiskArbeidssted.getOmråde());
+        }
+
+        adresseType.setAdresselinje1(adresselinje);
+        return adresseType;
     }
 
     /**
@@ -166,25 +187,6 @@ class A1Mapper {
             utfylltListe.add(new DummyArbeidssted());
         }
         return utfylltListe;
-    }
-
-    private AdresseType mapFysiskArbeidssted(FysiskArbeidssted fysiskArbeidssted) {
-        AdresseType adresseType = new AdresseType();
-        adresseType.setNavn(fysiskArbeidssted.getForetakNavn());
-        UstrukturertAdresse adresse = UstrukturertAdresse.av(fysiskArbeidssted.getAdresse());
-        adresseType.setAdresselinje1(adresse.getAdresselinje(1));
-        adresseType.setAdresselinje2(adresse.getAdresselinje(2));
-        adresseType.setAdresselinje3(adresse.getAdresselinje(3));
-        adresseType.setAdresselinje4(adresse.getAdresselinje(4));
-        adresseType.setLand(adresse.landkode);
-        return adresseType;
-    }
-
-    private AdresseType mapIkkeFysiskArbeidssted(IkkeFysiskArbeidssted ikkeFysiskArbeidssted) {
-        AdresseType adresseType = new AdresseType();
-        adresseType.setNavn(ikkeFysiskArbeidssted.getEnhetNavn());
-        adresseType.setLand(ikkeFysiskArbeidssted.getOmråde());
-        return adresseType;
     }
 
     /**
