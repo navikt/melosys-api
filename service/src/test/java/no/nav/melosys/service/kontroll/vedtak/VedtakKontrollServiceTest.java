@@ -111,4 +111,13 @@ public class VedtakKontrollServiceTest {
         assertThat(resultat).contains(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
     }
 
+    @Test
+    public void utførKontroller_periodeManglerSluttdato_returnererKode() throws FunksjonellException, TekniskException {
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(null);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+
+        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        assertThat(resultat).contains(Kontroll_begrunnelser.INGEN_SLUTTDATO);
+    }
 }

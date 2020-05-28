@@ -91,6 +91,13 @@ public class AnmodningsperiodeService {
         anmodningsperiodeRepository.save(anmodningsperiode);
     }
 
+    public void validerAnmodningsperiodeForBehandling(long behandlingID) throws FunksjonellException {
+        Anmodningsperiode anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
+        if (anmodningsperiode.getTom() != null) {
+            throw new FunksjonellException("Anmodningsperioden mangler sluttdato");
+        }
+    }
+
     private AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
         validerSvar(anmodningsperiodeSvar);
 

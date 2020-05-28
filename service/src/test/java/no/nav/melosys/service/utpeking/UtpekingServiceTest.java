@@ -79,7 +79,7 @@ public class UtpekingServiceTest {
 
     @Test
     public void utpekLovvalgsland_harUtpekingsperiode_prosessinstansBlirOpprettet() throws MelosysException {
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Landkoder.SE,
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 

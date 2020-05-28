@@ -92,6 +92,7 @@ public class UtpekingService {
         );
 
         Utpekingsperiode utpekingsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertUtpekingsperiode();
+        validerUtpekingsperiode(utpekingsperiode);
 
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed
@@ -127,6 +128,12 @@ public class UtpekingService {
         }
         if (utpekingAvvis.isEtterspørInformasjon() == null) {
             throw new FunksjonellException("Du må oppgi om forespørsel om mer informasjon vil bli sendt");
+        }
+    }
+
+    private void validerUtpekingsperiode(Utpekingsperiode utpekingsperiode) throws FunksjonellException {
+        if (utpekingsperiode.getTom() == null) {
+            throw new FunksjonellException("Utpekingsperioden mangler sluttdato");
         }
     }
 
