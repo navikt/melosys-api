@@ -13,10 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.sob.SobService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -36,17 +33,13 @@ public class OppdaterStatusBehandlingAvsluttetTest {
     public final ExpectedException expectedException = ExpectedException.none();
 
     @Mock
-    private SakOgBehandlingFasade sakOgBehandlingFasade;
-    @Mock
-    private TpsService tpsService;
-    @Mock
-    private BehandlingService behandlingService;
+    private SobService sobService;
 
-    private OppdaterStatusBehandlingAvsluttet agent;
+    private OppdaterStatusBehandlingAvsluttet oppdaterStatusBehandlingAvsluttet;
 
     @Before
     public void setUp() {
-        agent = new OppdaterStatusBehandlingAvsluttet(sakOgBehandlingFasade, tpsService, behandlingService);
+        oppdaterStatusBehandlingAvsluttet = new OppdaterStatusBehandlingAvsluttet(sobService);
     }
 
     @Test
@@ -54,8 +47,9 @@ public class OppdaterStatusBehandlingAvsluttetTest {
         Prosessinstans p = new Prosessinstans();
         Behandling b = lagBehandling();
         p.setBehandling(b);
-        agent.utfør(p);
-        verify(sakOgBehandlingFasade).sendBehandlingAvsluttet(any(BehandlingStatusMapper.class));
+        oppdaterStatusBehandlingAvsluttet.utfør(p);
+
+        verify(sobService).sakOgBehandlingAvsluttet(eq("123"), eq(123L), eq("123"));
     }
 
     @Test
@@ -66,9 +60,9 @@ public class OppdaterStatusBehandlingAvsluttetTest {
         p.setBehandling(b);
 
         expectedException.expect(FunksjonellException.class);
-        agent.utfør(p);
+        oppdaterStatusBehandlingAvsluttet.utfør(p);
 
-        verify(sakOgBehandlingFasade, never()).sendBehandlingAvsluttet(any(BehandlingStatusMapper.class));
+        verify(sobService, never()).sakOgBehandlingAvsluttet(anyString(), anyLong(), anyString());
     }
 
     @Test
@@ -79,9 +73,9 @@ public class OppdaterStatusBehandlingAvsluttetTest {
         p.setBehandling(b);
 
         expectedException.expect(FunksjonellException.class);
-        agent.utfør(p);
+        oppdaterStatusBehandlingAvsluttet.utfør(p);
 
-        verify(sakOgBehandlingFasade, never()).sendBehandlingAvsluttet(any(BehandlingStatusMapper.class));
+        verify(sobService, never()).sakOgBehandlingAvsluttet(anyString(), anyLong(), anyString());
     }
 
     private static Behandling lagBehandling() {

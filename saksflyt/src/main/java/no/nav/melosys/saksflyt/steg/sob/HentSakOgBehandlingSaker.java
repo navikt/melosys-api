@@ -1,15 +1,12 @@
 package no.nav.melosys.saksflyt.steg.sob;
 
-import java.time.Instant;
-
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +18,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPFRISK_SAKSOPPLYSNING
 
 /**
  * Steget sørger for å hente saker fra SOB
- *
+ * <p>
  * Transisjoner:
  * HENT_SOB_SAKER → OPPFRISK_SAKSOPPLYSNINGER hvis alt ok
  * HENT_SOB_SAKER → FEILET_MASKINELT hvis oppslag mot SOB feilet
@@ -31,14 +28,13 @@ public class HentSakOgBehandlingSaker extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentSakOgBehandlingSaker.class);
 
-    private final SakOgBehandlingFasade sakOgBehandlingFasade;
-
-    private final SaksopplysningRepository saksopplysningRepo;
+    private final RegisteropplysningerService registeropplysningerService;
+    private final TpsFasade tpsFasade;
 
     @Autowired
-    public HentSakOgBehandlingSaker(SakOgBehandlingFasade sakOgBehandlingFasade, SaksopplysningRepository saksopplysningRepo) {
-        this.sakOgBehandlingFasade = sakOgBehandlingFasade;
-        this.saksopplysningRepo = saksopplysningRepo;
+    public HentSakOgBehandlingSaker(RegisteropplysningerService registeropplysningerService, TpsFasade tpsFasade) {
+        this.registeropplysningerService = registeropplysningerService;
+        this.tpsFasade = tpsFasade;
     }
 
     @Override
@@ -47,18 +43,18 @@ public class HentSakOgBehandlingSaker extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws IntegrasjonException {
+    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
+        String fnr = tpsFasade.hentIdentForAktørId(aktørId);
 
-        Instant nå = Instant.now();
-        Behandling behandling = prosessinstans.getBehandling();
-        Saksopplysning saksopplysning = sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(aktørId);
-        saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(nå);
-        saksopplysning.setEndretDato(nå);
-        saksopplysningRepo.save(saksopplysning);
+        registeropplysningerService.hentOgLagreOpplysninger(RegisteropplysningerRequest.builder()
+            .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                .sakOgBehandlingopplysninger().build())
+            .behandlingID(prosessinstans.getBehandling().getId())
+            .fnr(fnr)
+            .build());
 
         prosessinstans.setSteg(OPPFRISK_SAKSOPPLYSNINGER);
         log.info("Hentet saker fra Sak og behandling for prosessinstans {}", prosessinstans.getId());

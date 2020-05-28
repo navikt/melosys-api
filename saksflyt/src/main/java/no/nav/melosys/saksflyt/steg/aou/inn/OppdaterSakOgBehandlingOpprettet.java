@@ -5,21 +5,23 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.saksflyt.steg.sob.SakOgBehandlingStegBehander;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sob.SobService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("AnmodningUnntakMottakOppdaterSakOgBehandlingOpprettet")
-public class OppdaterSakOgBehandlingOpprettet extends SakOgBehandlingStegBehander {
+public class OppdaterSakOgBehandlingOpprettet extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterSakOgBehandlingOpprettet.class);
 
-    protected OppdaterSakOgBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
-        super(sakOgBehandlingFasade, tpsService, behandlingService);
+    private final SobService sobService;
+
+    @Autowired
+    public OppdaterSakOgBehandlingOpprettet(SobService sobService) {
+        this.sobService = sobService;
     }
 
     @Override
@@ -39,7 +41,7 @@ public class OppdaterSakOgBehandlingOpprettet extends SakOgBehandlingStegBehande
         }
 
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
-        sakOgBehandlingOpprettet(saksnummer, behandlingId, aktørId);
+        sobService.sakOgBehandlingOpprettet(saksnummer, behandlingId, aktørId);
 
         prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE);
     }

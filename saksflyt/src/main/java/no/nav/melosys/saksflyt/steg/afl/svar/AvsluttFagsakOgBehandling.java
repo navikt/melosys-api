@@ -6,25 +6,26 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.saksflyt.steg.sob.SakOgBehandlingStegBehander;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("AvvisUtpekingAvsluttFagsakOgBehandling")
-public class AvsluttFagsakOgBehandling extends SakOgBehandlingStegBehander {
+public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AvsluttFagsakOgBehandling.class);
 
     private final FagsakService fagsakService;
+    private final SobService sobService;
 
-    public AvsluttFagsakOgBehandling(SakOgBehandlingFasade sakOgBehandlingFasade, BehandlingService behandlingService, TpsFasade tpsFasade, FagsakService fagsakService) {
-        super(sakOgBehandlingFasade, tpsFasade, behandlingService);
+    @Autowired
+    public AvsluttFagsakOgBehandling(FagsakService fagsakService, SobService sobService) {
         this.fagsakService = fagsakService;
+        this.sobService = sobService;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class AvsluttFagsakOgBehandling extends SakOgBehandlingStegBehander {
         final Fagsak fagsak = behandling.getFagsak();
 
         fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.AVSLUTTET);
-        sakOgBehandlingAvsluttet(fagsak.getSaksnummer(), behandling.getId(), fagsak.hentBruker().getAktørId());
+        sobService.sakOgBehandlingAvsluttet(fagsak.getSaksnummer(), behandling.getId(), fagsak.hentBruker().getAktørId());
         log.info("Behandling {} og fagsak {} avsluttet", behandling.getId(), behandling.getFagsak().getSaksnummer());
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }

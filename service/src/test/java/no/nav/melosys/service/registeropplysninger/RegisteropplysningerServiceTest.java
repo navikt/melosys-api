@@ -14,12 +14,12 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.sob.SobService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,7 +49,7 @@ public class RegisteropplysningerServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private SakOgBehandlingFasade sakOgBehandlingFasade;
+    private SobService sobService;
     @Mock
     private InntektService inntektService;
     @Mock
@@ -59,15 +59,15 @@ public class RegisteropplysningerServiceTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private Integer arbeidsforholdhistorikkAntallMåneder = 6;
-    private Integer medlemskaphistorikkAntallÅr = 5;
+    private final Integer arbeidsforholdhistorikkAntallMåneder = 6;
+    private final Integer medlemskaphistorikkAntallÅr = 5;
 
     private RegisteropplysningerService registeropplysningerService;
 
     @Before
     public void setUp() throws Exception {
         registeropplysningerService = new RegisteropplysningerService(tpsFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            sakOgBehandlingFasade, inntektService, utbetaldataService, saksopplysningerService, arbeidsforholdhistorikkAntallMåneder, medlemskaphistorikkAntallÅr);
+            sobService, inntektService, utbetaldataService, saksopplysningerService, arbeidsforholdhistorikkAntallMåneder, medlemskaphistorikkAntallÅr);
         when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
@@ -77,7 +77,7 @@ public class RegisteropplysningerServiceTest {
         when(utbetaldataService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
         when(eregFasade.hentOrganisasjon(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.ORG));
         when(tpsFasade.hentPersonhistorikk(anyString(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.PERSHIST));
-        when(sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.SOB_SAK));
+        when(sobService.finnSakOgBehandlingskjedeListe(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.SOB_SAK));
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling());
         when(saksopplysningerService.finnArbeidsforholdsopplysninger(anyLong())).thenReturn(Optional.of(lagArbeidsforholdDokument()));
@@ -113,7 +113,7 @@ public class RegisteropplysningerServiceTest {
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
         verify(tpsFasade).hentPersonMedAdresse(anyString());
-        verify(sakOgBehandlingFasade).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
@@ -162,7 +162,7 @@ public class RegisteropplysningerServiceTest {
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
         verify(tpsFasade).hentPersonMedAdresse(anyString());
-        verify(sakOgBehandlingFasade).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 

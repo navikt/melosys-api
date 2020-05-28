@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 
-import java.time.LocalDateTime;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 
@@ -36,8 +35,6 @@ public class BehandlingstatusClientImplTest {
     @Test
     public void behandlingOpprettetTilXml() throws Exception {
         BehandlingStatusMapper.Builder builder = new BehandlingStatusMapper.Builder();
-        builder.medAnsvarligEnhet("MELOSYS");
-        builder.medHendelsestidspunkt(LocalDateTime.now());
 
         behandlingstatusClient.sendBehandlingOpprettet(builder.build());
 
@@ -49,8 +46,6 @@ public class BehandlingstatusClientImplTest {
     @Test
     public void sendBehandlingAvsluttetTilKø() throws Exception {
         BehandlingStatusMapper.Builder builder = new BehandlingStatusMapper.Builder();
-        builder.medAnsvarligEnhet("MELOSYS");
-        builder.medHendelsestidspunkt(LocalDateTime.now());
 
         behandlingstatusClient.sendBehandlingAvsluttet(builder.build());
 

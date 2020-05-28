@@ -17,12 +17,12 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class RegisteropplysningerService {
     private final EregFasade eregFasade;
     private final AaregFasade aaregFasade;
     private final BehandlingService behandlingService;
-    private final SakOgBehandlingFasade sakOgBehandlingFasade;
+    private final SobService sobService;
     private final InntektService inntektService;
     private final UtbetaldataService utbetaldataService;
     private final SaksopplysningerService saksopplysningerService;
@@ -71,7 +71,7 @@ public class RegisteropplysningerService {
                                        MedlPeriodeService medlPeriodeService, @Qualifier("system") EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
-                                       SakOgBehandlingFasade sakOgBehandlingFasade,
+                                       SobService sobService,
                                        InntektService inntektService,
                                        UtbetaldataService utbetaldataService,
                                        SaksopplysningerService saksopplysningerService,
@@ -83,7 +83,7 @@ public class RegisteropplysningerService {
         this.eregFasade = eregFasade;
         this.aaregFasade = aaregFasade;
         this.behandlingService = behandlingService;
-        this.sakOgBehandlingFasade = sakOgBehandlingFasade;
+        this.sobService = sobService;
         this.inntektService = inntektService;
         this.utbetaldataService = utbetaldataService;
         this.saksopplysningerService = saksopplysningerService;
@@ -222,7 +222,7 @@ public class RegisteropplysningerService {
 
     private List<Saksopplysning> hentSakOgBehandlingSaker(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, IntegrasjonException {
         String aktørId = tpsFasade.hentAktørIdForIdent(registeropplysningerRequest.getFnr());
-        Saksopplysning saksopplysning = sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(aktørId);
+        Saksopplysning saksopplysning = sobService.finnSakOgBehandlingskjedeListe(aktørId);
 
         return List.of(saksopplysning);
     }
@@ -251,8 +251,8 @@ public class RegisteropplysningerService {
     }
 
     private static final class Periode {
-        private YearMonth fom;
-        private YearMonth tom;
+        private final YearMonth fom;
+        private final YearMonth tom;
 
         Periode(YearMonth fom, YearMonth tom) {
             this.fom = fom;

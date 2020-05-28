@@ -5,17 +5,19 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.saksflyt.steg.sob.SakOgBehandlingStegBehander;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sob.SobService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OppdaterSakOgBehandlingAvsluttet extends SakOgBehandlingStegBehander {
+public class OppdaterSakOgBehandlingAvsluttet extends AbstraktStegBehandler {
 
-    protected OppdaterSakOgBehandlingAvsluttet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
-        super(sakOgBehandlingFasade, tpsService, behandlingService);
+    private final SobService sobService;
+
+    @Autowired
+    public OppdaterSakOgBehandlingAvsluttet(SobService sobService) {
+        this.sobService = sobService;
     }
 
     @Override
@@ -30,7 +32,7 @@ public class OppdaterSakOgBehandlingAvsluttet extends SakOgBehandlingStegBehande
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
 
-        sakOgBehandlingAvsluttet(saksnummer, behandlingId, aktørId);
+        sobService.sakOgBehandlingAvsluttet(saksnummer, behandlingId, aktørId);
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 }
