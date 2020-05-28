@@ -14,4 +14,9 @@ public final class DummyArbeidssted extends AbstractArbeidssted implements IkkeF
     public String getEnhetNavn() {
         return "";
     }
+
+    @Override
+    public String lagAdresselinje() {
+        return " ";
+    }
 }

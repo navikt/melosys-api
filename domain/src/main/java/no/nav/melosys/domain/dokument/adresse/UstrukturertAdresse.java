@@ -2,6 +2,9 @@ package no.nav.melosys.domain.dokument.adresse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
@@ -84,5 +87,13 @@ public class UstrukturertAdresse extends Adresse {
 
     public boolean erTom() {
         return adresselinjer.isEmpty() && StringUtils.isEmpty(landkode);
+    }
+
+    @Override
+    public String toString() {
+        return Stream.of(getAdresselinje(1), getAdresselinje(2),
+            getAdresselinje(3), getAdresselinje(4), landkode)
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(" "));
     }
 }

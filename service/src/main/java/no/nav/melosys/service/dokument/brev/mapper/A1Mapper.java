@@ -4,9 +4,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
@@ -17,15 +14,12 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.DummyArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
@@ -145,23 +139,7 @@ class A1Mapper {
 
     private AdresseType mapArbeidssted(Arbeidssted arbeidssted) {
         AdresseType adresseType = new AdresseType();
-        String adresselinje;
-
-        if (arbeidssted.erFysisk()) {
-            FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arbeidssted;
-            UstrukturertAdresse ustrukturertAdresse = UstrukturertAdresse.av(fysiskArbeidssted.getAdresse());
-            adresselinje = Stream.of(
-                ustrukturertAdresse.getAdresselinje(1),
-                ustrukturertAdresse.getAdresselinje(2),
-                ustrukturertAdresse.getAdresselinje(3),
-                ustrukturertAdresse.getAdresselinje(4),
-                ustrukturertAdresse.landkode).filter(Objects::nonNull).collect(Collectors.joining(" "));
-        } else {
-            IkkeFysiskArbeidssted ikkeFysiskArbeidssted = (IkkeFysiskArbeidssted) arbeidssted;
-            adresselinje = String.join(" ", ikkeFysiskArbeidssted.getEnhetNavn(), ikkeFysiskArbeidssted.getOmråde());
-        }
-
-        adresseType.setAdresselinje1(adresselinje);
+        adresseType.setAdresselinje1(arbeidssted.lagAdresselinje());
         return adresseType;
     }
 
