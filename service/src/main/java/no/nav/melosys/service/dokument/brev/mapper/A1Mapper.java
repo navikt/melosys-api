@@ -14,15 +14,12 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.DummyArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
@@ -133,15 +130,17 @@ class A1Mapper {
         arbeidssteder = fyllMinimumAntallArbeidsstederMedDummyVerdier(arbeidssteder);
 
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
-        for (Arbeidssted arbeidssted : arbeidssteder) {
-            if (arbeidssted.erFysisk()) {
-                fysiskeAdresserBrev.getAdresse().add(mapFysiskArbeidssted((FysiskArbeidssted)arbeidssted));
-            }
-            else {
-                fysiskeAdresserBrev.getAdresse().add(mapIkkeFysiskArbeidssted((IkkeFysiskArbeidssted)arbeidssted));
-            }
-        }
+        arbeidssteder.stream()
+            .map(this::mapArbeidssted)
+            .forEach(a -> fysiskeAdresserBrev.getAdresse().add(a));
+
         return fysiskeAdresserBrev;
+    }
+
+    private AdresseType mapArbeidssted(Arbeidssted arbeidssted) {
+        AdresseType adresseType = new AdresseType();
+        adresseType.setAdresselinje1(arbeidssted.lagAdresselinje());
+        return adresseType;
     }
 
     /**
@@ -166,25 +165,6 @@ class A1Mapper {
             utfylltListe.add(new DummyArbeidssted());
         }
         return utfylltListe;
-    }
-
-    private AdresseType mapFysiskArbeidssted(FysiskArbeidssted fysiskArbeidssted) {
-        AdresseType adresseType = new AdresseType();
-        adresseType.setNavn(fysiskArbeidssted.getForetakNavn());
-        UstrukturertAdresse adresse = UstrukturertAdresse.av(fysiskArbeidssted.getAdresse());
-        adresseType.setAdresselinje1(adresse.getAdresselinje(1));
-        adresseType.setAdresselinje2(adresse.getAdresselinje(2));
-        adresseType.setAdresselinje3(adresse.getAdresselinje(3));
-        adresseType.setAdresselinje4(adresse.getAdresselinje(4));
-        adresseType.setLand(adresse.landkode);
-        return adresseType;
-    }
-
-    private AdresseType mapIkkeFysiskArbeidssted(IkkeFysiskArbeidssted ikkeFysiskArbeidssted) {
-        AdresseType adresseType = new AdresseType();
-        adresseType.setNavn(ikkeFysiskArbeidssted.getEnhetNavn());
-        adresseType.setLand(ikkeFysiskArbeidssted.getOmråde());
-        return adresseType;
     }
 
     /**

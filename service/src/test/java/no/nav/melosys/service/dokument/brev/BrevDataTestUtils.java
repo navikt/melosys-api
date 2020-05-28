@@ -79,14 +79,22 @@ public class BrevDataTestUtils {
     }
 
     public static Arbeidssted lagMaritimtArbeidssted() {
+        return lagMaritimtArbeidssted(Maritimtyper.SKIP);
+    }
+
+    public static Arbeidssted lagMaritimtArbeidssted(Maritimtyper maritimtype) {
         MaritimtArbeid maritimtArbeid = lagMaritimtArbeid();
-        AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
+        AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid(maritimtype);
         return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);
     }
 
     public static AvklartMaritimtArbeid lagAvklartMaritimtArbeid() {
+        return lagAvklartMaritimtArbeid(Maritimtyper.SKIP);
+    }
+
+    private static AvklartMaritimtArbeid lagAvklartMaritimtArbeid(Maritimtyper maritimtype) {
         AvklartMaritimtArbeid avklartMaritimtArbeid = mock(AvklartMaritimtArbeid.class);
-        when(avklartMaritimtArbeid.getMaritimtype()).thenReturn(Maritimtyper.SKIP);
+        when(avklartMaritimtArbeid.getMaritimtype()).thenReturn(maritimtype);
         when(avklartMaritimtArbeid.getLand()).thenReturn(Landkoder.GB.getKode());
         return avklartMaritimtArbeid;
     }
