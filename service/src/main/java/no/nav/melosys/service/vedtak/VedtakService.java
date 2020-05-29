@@ -88,6 +88,9 @@ public class VedtakService {
 
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandlingID, mottakerinstitusjoner, behandlingsresultat);
 
+        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
+            throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
+        }
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType,
@@ -165,6 +168,9 @@ public class VedtakService {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
+        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
+            throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
+        }
         prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode, fritekst, fritekstSed);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
