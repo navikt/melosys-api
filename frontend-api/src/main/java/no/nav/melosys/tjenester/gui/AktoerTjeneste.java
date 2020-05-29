@@ -8,10 +8,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
@@ -32,11 +29,8 @@ import static java.util.stream.Collectors.toList;
 @Api(tags = {"fagsaker"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AktoerTjeneste {
-
     private final TilgangService tilgangService;
-
     private final AktoerService aktoerService;
-
     private final FagsakService fagsakService;
 
     @Autowired
@@ -76,7 +70,9 @@ public class AktoerTjeneste {
     @ApiOperation(
         value = "Lagrer/oppdaterer aktør informasjon for et gitt saksnummer.",
         response = AktoerDto.class)
-    public ResponseEntity lagAktoerer(@PathVariable("saksnummer") String saksnummer, @RequestBody AktoerDto aktoerDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<AktoerDto> lagAktoerer(@PathVariable("saksnummer") String saksnummer,
+                                                 @RequestBody AktoerDto aktoerDto)
+        throws MelosysException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
         Long databaseId = aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
@@ -88,7 +84,8 @@ public class AktoerTjeneste {
     @ApiOperation(
         value = "Sletter aktøren med en gitt database-id.",
         response = AktoerDto.class)
-    public ResponseEntity slettAktoer(@PathVariable("databaseID") long databaseID) throws TekniskException, FunksjonellException {
+    public ResponseEntity<Void> slettAktoer(@PathVariable("databaseID") long databaseID)
+        throws TekniskException, FunksjonellException {
         aktoerService.slettAktoer(databaseID);
         return ResponseEntity.ok().build();
     }

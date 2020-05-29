@@ -3,8 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -33,7 +32,9 @@ public class BehandlingTjeneste {
     private final TilgangService tilgangService;
 
     @Autowired
-    public BehandlingTjeneste(BehandlingService behandlingService, SaksopplysningerTilDto saksopplysningerTilDto, TilgangService tilgangService) {
+    public BehandlingTjeneste(BehandlingService behandlingService,
+                              SaksopplysningerTilDto saksopplysningerTilDto,
+                              TilgangService tilgangService) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.tilgangService = tilgangService;
@@ -42,9 +43,11 @@ public class BehandlingTjeneste {
     @PostMapping("{behandlingID}/status")
     @ApiOperation("Oppdaterer status for en behandling. " +
         "Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.")
-    public ResponseEntity oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
-                               @RequestBody BehandlingsstatusDto status) throws FunksjonellException, TekniskException {
-        log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, status.getBehandlingsstatus().getKode());
+    public ResponseEntity<Void> oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
+                                               @RequestBody BehandlingsstatusDto status)
+        throws MelosysException {
+        log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
+            behandlingID, status.getBehandlingsstatus().getKode());
         tilgangService.sjekkTilgang(behandlingID);
         behandlingService.oppdaterStatus(behandlingID, status.getBehandlingsstatus());
         return ResponseEntity.noContent().build();
@@ -53,8 +56,9 @@ public class BehandlingTjeneste {
     @PostMapping("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
-    public ResponseEntity knyttMedlemsperioder(@PathVariable("behandlingID") long behandlingID,
-                                               @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException, TekniskException {
+    public ResponseEntity<TidligereMedlemsperioderDto> knyttMedlemsperioder(@PathVariable("behandlingID") long behandlingID,
+                                                                            @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder)
+        throws MelosysException {
         log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 
@@ -65,7 +69,8 @@ public class BehandlingTjeneste {
     @GetMapping("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
-    public ResponseEntity hentMedlemsperioder(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+    public ResponseEntity<TidligereMedlemsperioderDto> hentMedlemsperioder(@PathVariable("behandlingID") long behandlingID)
+        throws MelosysException {
         log.debug("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 
@@ -76,7 +81,8 @@ public class BehandlingTjeneste {
 
     @GetMapping("{behandlingID}")
     @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
-    public ResponseEntity hentBehandling(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+    public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID)
+        throws MelosysException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
@@ -87,7 +93,7 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(behandlingDto);
     }
 
-    private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
+    private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) throws MelosysException {
         BehandlingDto behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setRedigerbart(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler));

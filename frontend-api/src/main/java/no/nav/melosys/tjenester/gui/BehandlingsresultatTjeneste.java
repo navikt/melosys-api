@@ -37,7 +37,8 @@ public class BehandlingsresultatTjeneste {
     @GetMapping("{behandlingID}/resultat")
     @ApiOperation(value = "Hent behandlingsresultat knyttet til en behandling",
         response = BehandlingsresultatDto.class)
-    public ResponseEntity hentBehandlingsresultat(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+    public ResponseEntity<BehandlingsresultatDto> hentBehandlingsresultat(@PathVariable("behandlingID") long behandlingID)
+        throws FunksjonellException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
 
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultatMedKontrollresultat(behandlingID);

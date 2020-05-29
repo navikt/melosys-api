@@ -31,7 +31,9 @@ public class AnmodningUnntakTjeneste {
 
     @PostMapping("{behandlingID}/bestill")
     @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
-    public ResponseEntity anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID, @RequestBody AnmodningUnntakDto anmodningUnntakDto) throws MelosysException {
+    public ResponseEntity<Void> anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID,
+                                                  @RequestBody AnmodningUnntakDto anmodningUnntakDto)
+        throws MelosysException {
         tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID, anmodningUnntakDto.getMottakerinstitusjon(), anmodningUnntakDto.getFritekstSed());
         return ResponseEntity.ok().build();
@@ -39,7 +41,7 @@ public class AnmodningUnntakTjeneste {
 
     @PutMapping(value = "{behandlingID}/svar", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
-    public ResponseEntity svar(@PathVariable("behandlingID") long behandlingID) throws MelosysException {
+    public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID) throws MelosysException {
         tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntakSvar(behandlingID);
         return ResponseEntity.ok().build();

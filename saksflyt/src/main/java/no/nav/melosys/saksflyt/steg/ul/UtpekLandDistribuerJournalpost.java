@@ -15,8 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UtpekLandDistribuerJournalpost extends AbstraktDistribuerJournalpost {
-
-    private static final Logger log = LoggerFactory.getLogger(UtpekAnnetLandSendUtland.class);
+    private static final Logger log = LoggerFactory.getLogger(UtpekLandDistribuerJournalpost.class);
 
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
