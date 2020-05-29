@@ -37,7 +37,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.39-114</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.42-118</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.26</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
@@ -46,7 +46,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.2.28</dokprod.melosysbrev.version>
+        <dokprod.melosysbrev.version>1.2.33</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <joark.journalfoerinngaaende.version>0.0.21</joark.journalfoerinngaaende.version>
         <sakogbehandling.version>1.0.0-alpha011</sakogbehandling.version>

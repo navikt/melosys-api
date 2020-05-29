@@ -79,7 +79,7 @@ public class UtpekingServiceTest {
 
     @Test
     public void utpekLovvalgsland_harUtpekingsperiode_prosessinstansBlirOpprettet() throws MelosysException {
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Landkoder.SE,
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
@@ -87,9 +87,9 @@ public class UtpekingServiceTest {
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), eq(List.of(Landkoder.SE)), eq(BucType.LA_BUC_02)))
             .thenReturn(mottakerInstitusjoner);
 
-        utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null);
+        utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
 
-        verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull());
+        verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
     }
 

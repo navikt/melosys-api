@@ -49,7 +49,7 @@ public class VurderInngangsvilkaarTest {
         agent.utfør(p);
 
         verify(fagsakService).oppdaterType(eq(p.getBehandling().getFagsak()), eq(true));
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ARBF_OPPL);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.VURDER_GJENBRUK_OPPGAVE);
     }
 
     public static Prosessinstans lagProsessinstans() {

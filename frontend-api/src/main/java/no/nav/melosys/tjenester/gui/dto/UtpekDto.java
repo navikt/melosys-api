@@ -5,6 +5,7 @@ import java.util.Set;
 public class UtpekDto {
     private Set<String> mottakerinstitusjoner;
     private String fritekstSed;
+    private String fritekstBrev;
 
     public Set<String> getMottakerinstitusjoner() {
         return mottakerinstitusjoner;
@@ -20,5 +21,13 @@ public class UtpekDto {
 
     public void setFritekstSed(String fritekstSed) {
         this.fritekstSed = fritekstSed;
+    }
+
+    public String getFritekstBrev() {
+        return fritekstBrev;
+    }
+
+    public void setFritekstBrev(String fritekstBrev) {
+        this.fritekstBrev = fritekstBrev;
     }
 }

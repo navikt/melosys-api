@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.ul;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
@@ -40,6 +41,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
 
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST));
         behandlingsresultatService.lagre(behandlingsresultat);
         log.info("Behandlingsresultat {} oppdatert til type {}, og utpekingsperiode markert som sendt til utland",
             behandlingID, behandlingsresultat.getType());

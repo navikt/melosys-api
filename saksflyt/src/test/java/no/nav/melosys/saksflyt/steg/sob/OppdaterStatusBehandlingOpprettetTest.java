@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_REGISTER_OPPL;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_SAKSRELASJON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -63,7 +63,7 @@ public class OppdaterStatusBehandlingOpprettetTest {
         oppdaterStatusBehandlingOpprettet.utfør(prosessinstans);
 
         verify(sobService).sakOgBehandlingOpprettet(eq("123"), eq(123L), eq("123"));
-        assertThat(prosessinstans.getSteg()).isEqualTo(JFR_HENT_PERS_OPPL);
+        assertThat(prosessinstans.getSteg()).isEqualTo(JFR_HENT_REGISTER_OPPL);
     }
 
     private static Behandling lagBehandling() {

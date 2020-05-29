@@ -17,4 +17,6 @@ public interface Arbeidssted {
     default Yrkesgrupper getYrkesgruppe() {
         return Yrkesgrupper.ORDINAER;
     }
+
+    String lagAdresselinje();
 }

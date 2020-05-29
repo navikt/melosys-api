@@ -39,6 +39,7 @@ public class RegelmodulService implements RegelmodulFasade {
         Assert.notEmpty(søknadsland, "Tjenesten krever at søknadsland ikke er null eller tom");
         Assert.notNull(søknadsperiode, "Tjenesten krever at søknadsperiode ikke er null");
         Assert.notNull(søknadsperiode.getFom(), "Tjenesten krever at søknadsperiode har fom dato");
+        Assert.notNull(søknadsperiode.getTom(), "Tjenesten krever at søknadsperiode har tom dato");
 
         try {
             String req = lagXMLRequest(brukersStatsborgerskap.getKode(), søknadsperiode.getFom().toString(), søknadsperiode.getTom().toString(), søknadsland);

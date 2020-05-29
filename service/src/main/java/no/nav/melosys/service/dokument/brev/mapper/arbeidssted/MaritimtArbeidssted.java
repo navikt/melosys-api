@@ -38,6 +38,11 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
         return enhetNavn;
     }
 
+    @Override
+    public String lagAdresselinje() {
+        return String.join(" ", getEnhetNavn(), getOmråde());
+    }
+
     public String getFlaggLandKode() {
         return flaggLandKode;
     }
