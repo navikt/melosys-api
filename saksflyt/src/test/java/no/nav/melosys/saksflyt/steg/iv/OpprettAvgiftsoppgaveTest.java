@@ -1,14 +1,14 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,10 +20,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_AVSLUTT_BEHANDLING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettAvgiftsoppgaveTest {
+    @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private OppgaveService oppgaveService;
     @Captor
@@ -34,8 +38,10 @@ public class OpprettAvgiftsoppgaveTest {
     private static final String DUMM_ID = "DUMM_ID";
 
     @Before
-    public void setUp() {
-        opprettAvgiftsoppgave = new OpprettAvgiftsoppgave(oppgaveService);
+    public void setUp() throws FunksjonellException {
+        opprettAvgiftsoppgave = new OpprettAvgiftsoppgave(lovvalgsperiodeService, oppgaveService);
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
+        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
     }
 
     @Test
@@ -56,6 +62,15 @@ public class OpprettAvgiftsoppgaveTest {
         Prosessinstans p = lagProsessinstans();
         opprettAvgiftsoppgave.utfør(p);
         assertThat(p.getSteg()).isEqualTo(IV_AVSLUTT_BEHANDLING);
+    }
+
+    @Test
+    public void utfør_art13_oppretterIkkeOppgave() throws FunksjonellException, TekniskException {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        opprettAvgiftsoppgave.utfør(lagProsessinstans());
+
+        verify(oppgaveService, never()).opprettOppgave(any());
     }
 
     private static Prosessinstans lagProsessinstans() {
@@ -87,5 +102,13 @@ public class OpprettAvgiftsoppgaveTest {
         behandling.setFagsak(fagsak);
         behandling.setInitierendeJournalpostId("JOURNALPOSTID");
         return behandling;
+    }
+
+    private static Lovvalgsperiode lagLovvalgsperiode(LovvalgBestemmelse bestemmelse) {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(bestemmelse);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        return lovvalgsperiode;
     }
 }
