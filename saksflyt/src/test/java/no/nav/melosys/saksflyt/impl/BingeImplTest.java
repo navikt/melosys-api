@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_AKTØR_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_REGISTER_OPPL;
 import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +28,7 @@ public class BingeImplTest {
         pi1.setRegistrertDato(LocalDateTime.of(2017, 1, 2, 0, 0));
         pi2.setRegistrertDato(LocalDateTime.of(2017, 1, 1, 0, 0));
         pi1.setSteg(JFR_AKTØR_ID);
-        pi2.setSteg(JFR_HENT_PERS_OPPL);
+        pi2.setSteg(JFR_HENT_REGISTER_OPPL);
         assertTrue(binge.leggTil(pi1));
         assertTrue(binge.leggTil(pi2));
         assertFalse(binge.leggTil(pi2)); // Skal ikke kunne legge til samme sak flere ganger

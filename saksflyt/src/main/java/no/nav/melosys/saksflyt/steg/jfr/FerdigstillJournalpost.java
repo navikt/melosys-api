@@ -60,7 +60,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         if (type == ProsessType.JFR_NY_BEHANDLING && behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
             prosessinstans.setSteg(REPLIKER_BEHANDLING);
         } else if (type == ProsessType.JFR_NY_SAK || type == ProsessType.JFR_NY_BEHANDLING) {
-            prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
+            prosessinstans.setSteg(JFR_HENT_REGISTER_OPPL);
         } else if (type == ProsessType.JFR_KNYTT) {
             prosessinstans.setSteg(JFR_SETT_VURDER_DOKUMENT);
         } else {

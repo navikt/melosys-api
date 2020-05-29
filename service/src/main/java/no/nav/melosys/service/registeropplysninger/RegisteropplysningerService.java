@@ -2,7 +2,6 @@ package no.nav.melosys.service.registeropplysninger;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,8 +61,7 @@ public class RegisteropplysningerService {
     private final InntektService inntektService;
     private final UtbetaldataService utbetaldataService;
     private final SaksopplysningerService saksopplysningerService;
-    private final Integer arbeidsforholdhistorikkAntallMåneder;
-    private final Integer medlemskaphistorikkAntallÅr;
+    private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
 
     @Autowired
     public RegisteropplysningerService(@Qualifier("system") TpsFasade tpsFasade,
@@ -75,8 +72,7 @@ public class RegisteropplysningerService {
                                        InntektService inntektService,
                                        UtbetaldataService utbetaldataService,
                                        SaksopplysningerService saksopplysningerService,
-                                       @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}") Integer arbeidsforholdhistorikkAntallMåneder,
-                                       @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr
+                                       RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory
     ) {
         this.tpsFasade = tpsFasade;
         this.medlPeriodeService = medlPeriodeService;
@@ -87,8 +83,7 @@ public class RegisteropplysningerService {
         this.inntektService = inntektService;
         this.utbetaldataService = utbetaldataService;
         this.saksopplysningerService = saksopplysningerService;
-        this.arbeidsforholdhistorikkAntallMåneder = arbeidsforholdhistorikkAntallMåneder;
-        this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
+        this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)
@@ -140,18 +135,9 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        final LocalDate iDag = LocalDate.now();
-        if (fom.isAfter(iDag)) {
-            fom = iDag.minusMonths(arbeidsforholdhistorikkAntallMåneder);
-        } else {
-            fom = fom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
-        }
+        RegisteropplysningerPeriodeFactory.DatoPeriode periodeForArbeidsforhold = registeropplysningerPeriodeFactory.hentPeriodeForArbeidsforhold(fom, tom, behandling);
+        Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(registeropplysningerRequest.getFnr(), periodeForArbeidsforhold.fom, periodeForArbeidsforhold.tom);
 
-        if (tom == null || tom.isAfter(iDag)) {
-            tom = iDag;
-        }
-
-        Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(registeropplysningerRequest.getFnr(), fom, tom);
         return List.of(saksopplysning);
     }
 
@@ -164,7 +150,9 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        Saksopplysning saksopplysning = medlPeriodeService.hentPeriodeListe(registeropplysningerRequest.getFnr(), fom.minusYears(medlemskaphistorikkAntallÅr), tom);
+        RegisteropplysningerPeriodeFactory.DatoPeriode periodeForMedlemskap = registeropplysningerPeriodeFactory.hentPeriodeForMedlemskap(fom, tom, behandling);
+        Saksopplysning saksopplysning = medlPeriodeService.hentPeriodeListe(registeropplysningerRequest.getFnr(), periodeForMedlemskap.fom, periodeForMedlemskap.tom);
+
         return List.of(saksopplysning);
     }
 
@@ -172,7 +160,7 @@ public class RegisteropplysningerService {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
-        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom);
+        RegisteropplysningerPeriodeFactory.Periode periodeForYtelser = registeropplysningerPeriodeFactory.hentPeriodeForYtelser(fom, tom, behandling);
         Saksopplysning saksopplysning = inntektService.hentInntektListe(registeropplysningerRequest.getFnr(), periodeForYtelser.fom, periodeForYtelser.tom);
 
         return List.of(saksopplysning);
@@ -192,7 +180,7 @@ public class RegisteropplysningerService {
             fom = treÅrTilbake;
         }
 
-        Periode periodeForYtelser = hentPeriodeForYtelser(fom, tom);
+        RegisteropplysningerPeriodeFactory.Periode periodeForYtelser = registeropplysningerPeriodeFactory.hentPeriodeForYtelser(fom, tom, behandling);
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
 
         return List.of(saksopplysning);
@@ -225,39 +213,6 @@ public class RegisteropplysningerService {
         Saksopplysning saksopplysning = sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(aktørId);
 
         return List.of(saksopplysning);
-    }
-
-    private static Periode hentPeriodeForYtelser(LocalDate fom, LocalDate tom) {
-
-        YearMonth fomMnd;
-        YearMonth tomMnd;
-
-        LocalDate nå = LocalDate.now();
-        if (tom == null) {
-            fomMnd = YearMonth.from(fom);
-            tomMnd = YearMonth.from(fom.plusYears(2));
-        } else if (fom.isBefore(nå) && tom.isAfter(nå)) { //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
-            fomMnd = YearMonth.from(fom.minusMonths(2L));
-            tomMnd = YearMonth.from(tom);
-        } else if (fom.isAfter(nå)) { //2. Periode ikke påbegynt. Inneværende mnd og 2 mnd tilbake
-            fomMnd = YearMonth.from(nå.minusMonths(2L));
-            tomMnd = YearMonth.from(nå);
-        } else { //3. Avsluttet: sjekker hele periode
-            fomMnd = YearMonth.from(fom);
-            tomMnd = YearMonth.from(tom);
-        }
-
-        return new Periode(fomMnd, tomMnd);
-    }
-
-    private static final class Periode {
-        private YearMonth fom;
-        private YearMonth tom;
-
-        Periode(YearMonth fom, YearMonth tom) {
-            this.fom = fom;
-            this.tom = tom;
-        }
     }
 
     @FunctionalInterface
