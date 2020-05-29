@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
@@ -31,6 +32,7 @@ public class UtpekAnnetLandSendOrienteringsbrevTest {
     @Test
     public void utfør() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, "fritekst");
 
         utpekAnnetLandSendOrienteringsbrev.utfør(prosessinstans);
 
@@ -39,6 +41,7 @@ public class UtpekAnnetLandSendOrienteringsbrevTest {
 
         Brevbestilling brevbestilling = captor.getValue();
         assertThat(brevbestilling.getDokumentType()).isEqualTo(Produserbaredokumenter.ORIENTERING_UTPEKING_UTLAND);
+        assertThat(brevbestilling.getFritekst()).isEqualTo("fritekst");
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.UL_SEND_UTLAND);
     }
