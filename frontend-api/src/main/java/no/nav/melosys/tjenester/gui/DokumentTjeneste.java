@@ -53,7 +53,8 @@ public class DokumentTjeneste {
 
     @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
-    public ResponseEntity hentDokument(@PathVariable("journalpostID") String journalpostID, @PathVariable("dokumentID") String dokumentID)
+    public ResponseEntity<byte[]> hentDokument(@PathVariable("journalpostID") String journalpostID,
+                                               @PathVariable("dokumentID") String dokumentID)
         throws SikkerhetsbegrensningException, IkkeFunnetException {
         byte[] dokument;
         dokument = dokumentVisningService.hentDokument(journalpostID, dokumentID);

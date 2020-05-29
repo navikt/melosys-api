@@ -51,7 +51,8 @@ public class BehandlingsgrunnlagTjeneste {
         return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag, hentTilleggsData(behandlingsgrunnlag.getBehandlingsgrunnlagdata())));
     }
 
-    private BehandlingsgrunnlagTilleggsData hentTilleggsData(BehandlingsgrunnlagData behandlingsgrunnlagData) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private BehandlingsgrunnlagTilleggsData hentTilleggsData(BehandlingsgrunnlagData behandlingsgrunnlagData)
+        throws IkkeFunnetException, IntegrasjonException {
         return new BehandlingsgrunnlagTilleggsData(
             registerOppslagService.hentOrganisasjoner(behandlingsgrunnlagData.hentAlleOrganisasjonsnumre())
         );

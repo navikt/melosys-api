@@ -46,7 +46,8 @@ public class BehandlingsnotatTjeneste {
     @ApiOperation(value = "Henter alle notater knyttet til behandlinger for fagsaken",
         response = BehandlingsnotatGetDto.class,
         responseContainer = "List")
-    public ResponseEntity hentBehandlingsnotaterForFagsak(@PathVariable("saksnummer") String saksnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public ResponseEntity<Collection> hentBehandlingsnotaterForFagsak(@PathVariable("saksnummer") String saksnummer)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgangService.sjekkSak(saksnummer);
 
         Collection<BehandlingsnotatGetDto> notater = behandlingsnotatService.hentNotatForFagsak(saksnummer)
@@ -60,8 +61,9 @@ public class BehandlingsnotatTjeneste {
     @PostMapping("/{saksnummer}/notater")
     @ApiOperation(value = "Oppretter et nytt notat på fagsaken sin aktive behandling",
         response = BehandlingsnotatGetDto.class)
-    public ResponseEntity opprettBehandlingsnotatForFagsak(@PathVariable("saksnummer") String saksnummer,
-                                                           @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<BehandlingsnotatGetDto> opprettBehandlingsnotatForFagsak(@PathVariable("saksnummer") String saksnummer,
+                                                                                   @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto)
+        throws FunksjonellException, TekniskException {
         tilgangService.sjekkSak(saksnummer);
         Behandlingsnotat behandlingsnotat = behandlingsnotatService.opprettNotat(saksnummer, behandlingsnotatPostDto.getTekst());
         return ResponseEntity.ok(
@@ -72,9 +74,10 @@ public class BehandlingsnotatTjeneste {
     @PutMapping("/{saksnummer}/notater/{notatID}")
     @ApiOperation(value = "Oppdaterer tekst på et notat",
         response = BehandlingsnotatGetDto.class)
-    public ResponseEntity oppdaterBehandlingsnotat(@PathVariable("saksnummer") String saksnummer,
-                                                   @PathVariable("notatID") Long notatID,
-                                                   @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<BehandlingsnotatGetDto> oppdaterBehandlingsnotat(@PathVariable("saksnummer") String saksnummer,
+                                                                           @PathVariable("notatID") Long notatID,
+                                                                           @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto)
+        throws FunksjonellException, TekniskException {
         tilgangService.sjekkSak(saksnummer);
         return ResponseEntity.ok(
             lagBehandlingsnotatGetDto(behandlingsnotatService.oppdaterNotat(notatID, behandlingsnotatPostDto.getTekst()))

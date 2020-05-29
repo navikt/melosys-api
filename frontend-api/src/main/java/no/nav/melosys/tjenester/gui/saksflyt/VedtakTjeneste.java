@@ -33,7 +33,8 @@ public class VedtakTjeneste {
 
     @PostMapping("{behandlingID}/fatt")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
-    public ResponseEntity fattVedtak(@PathVariable("behandlingID") long behandlingID, @RequestBody FattVedtakDto fattVedtakDto) throws MelosysException {
+    public ResponseEntity<Void> fattVedtak(@PathVariable("behandlingID") long behandlingID,
+                                           @RequestBody FattVedtakDto fattVedtakDto) throws MelosysException {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null || fattVedtakDto.getVedtakstype() == null) {
             throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
@@ -45,7 +46,8 @@ public class VedtakTjeneste {
 
     @PostMapping("{behandlingID}/endre")
     @ApiOperation(value = "Endrer et vedtak for en gitt behandling")
-    public ResponseEntity endreVedtak(@PathVariable("behandlingID") long behandlingID, @RequestBody EndreVedtakDto endreVedtakDto)
+    public ResponseEntity<Void> endreVedtak(@PathVariable("behandlingID") long behandlingID,
+                                            @RequestBody EndreVedtakDto endreVedtakDto)
         throws FunksjonellException, TekniskException {
         if (endreVedtakDto.getBegrunnelseKode() == null) {
             throw new FunksjonellException("BegrunnelseKode mangler.");

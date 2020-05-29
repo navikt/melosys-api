@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.jpa.SaksopplysningListener;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
