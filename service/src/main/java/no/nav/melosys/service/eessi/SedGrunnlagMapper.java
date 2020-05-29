@@ -13,6 +13,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -22,7 +23,7 @@ public class SedGrunnlagMapper {
     private final EregFasade eregFasade;
 
     @Autowired
-    public SedGrunnlagMapper(EregFasade eregFasade) {
+    public SedGrunnlagMapper(@Qualifier("system") EregFasade eregFasade) {
         this.eregFasade = eregFasade;
     }
 
