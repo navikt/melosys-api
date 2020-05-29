@@ -29,7 +29,7 @@ final class VedtakKontroller {
     static Kontroll_begrunnelser overlappendeMedlemsperiode(VedtakKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
-        
+
         return MedlemskapKontroller.overlappendeMedlemsperiodeGyldigPeriode(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), medlemskapDokument)
             ? Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
@@ -40,5 +40,11 @@ final class VedtakKontroller {
         return lovvalgsperiode.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
             && PeriodeKontroller.periodeOver24Mnd(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
             ? Kontroll_begrunnelser.PERIODEN_OVER_24_MD : null;
+    }
+
+    static Kontroll_begrunnelser periodeManglerSluttdato(VedtakKontrollData kontrollData) {
+        Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();
+
+        return lovvalgsperiode.getTom() == null ? Kontroll_begrunnelser.INGEN_SLUTTDATO : null;
     }
 }

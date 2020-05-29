@@ -22,18 +22,11 @@ public enum ProsessSteg implements Kodeverk {
     JFR_FERDIGSTILL_JOURNALPOST("JFR_FERDIGSTILL_JOURNALPOST", "Ferdigstiller journalposten i Joark"),
     JFR_SETT_VURDER_DOKUMENT("JFR_SETT_VURDER_DOKUMENT", "Setter status til VURDER_DOKUMENT"),
     JFR_TILDEL_BEHANDLINGSOPPGAVE("JFR_TILDEL_BEHANDLINGSOPPGAVE", "Tildeler behandlingsoppgave for gjeldende fagsak til en saksbehandler"),
-    JFR_HENT_PERS_OPPL("JFR_HENT_PERS_OPPL", "Hent personopplysninger fra TPS"),
+    JFR_HENT_REGISTER_OPPL("JFR_HENT_REGISTER_OPPL", "Hent registeropplysninger"),
     JFR_VURDER_INNGANGSVILKÅR("JFR_VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår"),
 
-    // Hent saksopplysninger
-    HENT_ARBF_OPPL("HENT_ARBF_OPPL", "Hent arbeidsforholdopplysninger fra AAREG"),
-    HENT_INNT_OPPL("HENT_INNT_OPPL", "Hent inntektopplysninger fra INNTK"),
-    HENT_ORG_OPPL("HENT_ORG_OPPL", "Hent organisasjoner fra EREG"),
-    HENT_MEDL_OPPL("HENT_MEDL_OPPL", "Hent medlemskapsopplysninger fra MEDL"),
-    HENT_SOB_SAKER("HENT_SOB_SAKER", "Hent saker fra Sak og behandling"),
-    OPPFRISK_SAKSOPPLYSNINGER("OPPFRISK_SAKSOPPLYSNINGER", "Oppfrisking av saksopplysninger"),
-
     // Oppgave
+    VURDER_GJENBRUK_OPPGAVE("VURDER_GJENBRUK_OPPGAVE", "Vurder om eksisterende oppgave skal gjenbrukes"),
     GJENBRUK_OPPGAVE("GJENBRUK_OPPGAVE", "Gjenbruker eksisterende oppgave"),
     GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i Oppgave"),
 

@@ -48,7 +48,7 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
         sakOgBehandlingOpprettet(saksnummer, behandling.getId(), aktørID);
 
         if (prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
-            prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
+            prosessinstans.setSteg(JFR_HENT_REGISTER_OPPL);
         } else {
             prosessinstans.setSteg(JFR_OPPDATER_SAKSRELASJON);
         }

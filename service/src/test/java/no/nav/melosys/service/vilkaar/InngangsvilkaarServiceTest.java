@@ -23,6 +23,7 @@ import no.nav.melosys.service.SaksopplysningerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -84,6 +85,26 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
+    public void vurderOgLagreInngangsvilkår_tomDatoErNull_tomDatoSettesTilEttÅrEtterFomDato() throws FunksjonellException, TekniskException {
+        ArgumentCaptor<no.nav.melosys.domain.dokument.soeknad.Periode> søknadsperiodeCaptor = ArgumentCaptor.forClass(no.nav.melosys.domain.dokument.soeknad.Periode.class);
+
+        final List<String> landkoder = List.of("FR", "DK", "NO");
+        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), null);
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.statsborgerskap = Land.av(FINLAND);
+        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
+        res.feilmeldinger = Collections.emptyList();
+        res.kvalifisererForEf883_2004 = true;
+        when(regelmodulFasade.vurderInngangsvilkår(any(), anyList(), søknadsperiodeCaptor.capture())).thenReturn(res);
+
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
+
+        no.nav.melosys.domain.dokument.soeknad.Periode søknadsperiode = søknadsperiodeCaptor.getValue();
+        assertThat(søknadsperiode.getTom()).isEqualTo(LocalDate.now().plusYears(2));
+    }
+
+    @Test
     public void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
@@ -104,8 +125,7 @@ public class InngangsvilkaarServiceTest {
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Inngangsvilkaar.TEKNISK_FEIL);
     }
-
-
+    
     @Test
     public void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
         Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);

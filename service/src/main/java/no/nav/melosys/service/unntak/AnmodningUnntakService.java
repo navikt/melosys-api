@@ -57,6 +57,8 @@ public class AnmodningUnntakService {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
+        anmodningsperiodeService.validerAnmodningsperiodeForBehandling(behandlingID);
+
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner, ytterligereInformasjonSed);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
