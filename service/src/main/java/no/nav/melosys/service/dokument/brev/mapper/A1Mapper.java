@@ -139,7 +139,8 @@ class A1Mapper {
 
     private AdresseType mapArbeidssted(Arbeidssted arbeidssted) {
         AdresseType adresseType = new AdresseType();
-        adresseType.setAdresselinje1(arbeidssted.lagAdresselinje());
+        String adresselinje = arbeidssted.lagAdresselinje();
+        adresseType.setAdresselinje1(adresselinje.isBlank() ? "" : adresselinje); //uten dette viser ikke brev alle linjene i en A1
         return adresseType;
     }
 
