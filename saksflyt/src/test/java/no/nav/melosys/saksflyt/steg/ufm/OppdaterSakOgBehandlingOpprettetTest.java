@@ -1,11 +1,11 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.sob.SobService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,22 +13,20 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterSakOgBehandlingOpprettetTest {
 
     @Mock
-    private SakOgBehandlingFasade sakOgBehandlingFasade;
-    @Mock
-    private TpsService tpsService;
+    private SobService sobService;
 
     private OppdaterSakOgBehandlingOpprettet oppdaterSakOgBehandlingOpprettet;
 
     @Before
     public void setup() {
-        oppdaterSakOgBehandlingOpprettet = new OppdaterSakOgBehandlingOpprettet(sakOgBehandlingFasade, tpsService, null);
+        oppdaterSakOgBehandlingOpprettet = new OppdaterSakOgBehandlingOpprettet(sobService);
     }
 
     @Test
@@ -44,7 +42,7 @@ public class OppdaterSakOgBehandlingOpprettetTest {
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "123");
 
         oppdaterSakOgBehandlingOpprettet.utfør(prosessinstans);
-        verify(sakOgBehandlingFasade).sendBehandlingOpprettet(any());
+        verify(sobService).sakOgBehandlingOpprettet(eq("123"), eq(1L), eq("123"));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE);
     }
 }

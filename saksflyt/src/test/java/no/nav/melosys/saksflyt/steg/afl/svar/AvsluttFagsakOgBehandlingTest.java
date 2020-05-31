@@ -10,11 +10,8 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sob.SobService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -30,11 +26,7 @@ import static org.mockito.Mockito.verify;
 public class AvsluttFagsakOgBehandlingTest {
 
     @Mock
-    private SakOgBehandlingFasade sakOgBehandlingFasade;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private TpsFasade tpsFasade;
+    private SobService sobService;
     @Mock
     private FagsakService fagsakService;
 
@@ -42,7 +34,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
     @Before
     public void setup() {
-        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(sakOgBehandlingFasade, behandlingService, tpsFasade, fagsakService);
+        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, sobService);
     }
 
     @Test
@@ -62,7 +54,7 @@ public class AvsluttFagsakOgBehandlingTest {
         prosessinstans.setBehandling(behandling);
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
-        verify(sakOgBehandlingFasade).sendBehandlingAvsluttet(any(BehandlingStatusMapper.class));
+        verify(sobService).sakOgBehandlingAvsluttet(eq("MEL-123"), eq(1L), eq("!312312"));
         verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.AVSLUTTET));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }

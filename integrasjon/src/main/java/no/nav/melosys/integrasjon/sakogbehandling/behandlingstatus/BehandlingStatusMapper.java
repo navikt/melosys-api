@@ -1,47 +1,50 @@
 package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 
 import java.time.LocalDateTime;
-
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelseshandtererbehandlingsstatus.*;
+import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+
+import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId;
 
 public class BehandlingStatusMapper {
 
     // Identifiserer unik hendelse for hendelsesprodusent.
-    private String hendelsesId;
+    private final String hendelsesId;
 
     // Identifiserer opprettet behandling.
-    private String behandlingsID;
+    private final String behandlingsID;
 
     // Identifiserer i hvilken sak behandlingen inngår, i gjeldende applikasjon (fagsystem) dersom en slik eksisterer.
-    private String applikasjonSakREF;
+    private final String applikasjonSakREF;
 
     // Unik identifikator for en hendelsesprodusent.
-    private Applikasjoner hendelsesprodusentREF; // http://nav.no/kodeverk/Kodeverk/Applikasjoner
+    private final Applikasjoner hendelsesprodusentREF; // http://nav.no/kodeverk/Kodeverk/Applikasjoner
 
     // Tidspunktet hendelsen inntraff/oppstod (i produsentsystemet).
-    private XMLGregorianCalendar hendelsesTidspunkt;
+    private final XMLGregorianCalendar hendelsesTidspunkt;
 
     // Identifiserer hvilken prosess behandlingen følger.
-    private Sakstemaer sakstema; // http://nav.no/kodeverk/Kodeverk/Arkivtemaer
+    private final Sakstemaer sakstema; // http://nav.no/kodeverk/Kodeverk/Arkivtemaer
 
     // Identifiserer hvilke(n) aktør(er), person eller organisasjon, som 'eier' saken behandlingen inngår i.
-    private Aktoer aktoerREF;
+    private final Aktoer aktoerREF;
 
-    private String ansvarligEnhetREF;
+    private final String ansvarligEnhetREF;
 
     @SuppressWarnings("squid:S00107")
     private BehandlingStatusMapper(String hendelsesId,
-                                  String behandlingsID,
-                                  String saksnummer,
-                                  Applikasjoner hendelsesprodusentREF,
-                                  XMLGregorianCalendar hendelsestidspunkt,
-                                  Sakstemaer sakstema,
-                                  Aktoer aktoerREF,
-                                  String ansvarligEnhetREF) {
+                                   String behandlingsID,
+                                   String saksnummer,
+                                   Applikasjoner hendelsesprodusentREF,
+                                   XMLGregorianCalendar hendelsestidspunkt,
+                                   Sakstemaer sakstema,
+                                   Aktoer aktoerREF,
+                                   String ansvarligEnhetREF) {
         this.hendelsesId = hendelsesId;
         this.behandlingsID = behandlingsID;
         this.applikasjonSakREF = saksnummer;
@@ -50,6 +53,38 @@ public class BehandlingStatusMapper {
         this.sakstema = sakstema;
         this.aktoerREF = aktoerREF;
         this.ansvarligEnhetREF = ansvarligEnhetREF;
+    }
+
+    public String getHendelsesId() {
+        return hendelsesId;
+    }
+
+    public String getBehandlingsID() {
+        return behandlingsID;
+    }
+
+    public String getApplikasjonSakREF() {
+        return applikasjonSakREF;
+    }
+
+    public Applikasjoner getHendelsesprodusentREF() {
+        return hendelsesprodusentREF;
+    }
+
+    public XMLGregorianCalendar getHendelsesTidspunkt() {
+        return hendelsesTidspunkt;
+    }
+
+    public Sakstemaer getSakstema() {
+        return sakstema;
+    }
+
+    public Aktoer getAktoerREF() {
+        return aktoerREF;
+    }
+
+    public String getAnsvarligEnhetREF() {
+        return ansvarligEnhetREF;
     }
 
     public static class Builder {
@@ -63,13 +98,14 @@ public class BehandlingStatusMapper {
         private Aktoer aktør;
         private String ansvarligEnhet;
 
-        public Builder medHendelsesId(String hendelsesId) {
+        private Builder medHendelsesId(String hendelsesId) {
             this.hendelsesId = hendelsesId;
             return this;
         }
 
-        public Builder medBehandlingsId(String behandlingsId) {
-            this.behandlingsId = behandlingsId;
+        public Builder medBehandlingsId(long behandlingsId) {
+            // BehandlingsId i SOB skal være unik i NAV, så vi prefikser med applikasjonsID.
+            this.behandlingsId = String.format("%s-%d", Fagsystem.MELOSYS.getKode(), behandlingsId);
             return this;
         }
 
@@ -78,13 +114,13 @@ public class BehandlingStatusMapper {
             return this;
         }
 
-        public Builder medHendelsesprodusent(String hendelsesprodusent) {
+        private Builder medHendelsesprodusent(String hendelsesprodusent) {
             this.hendelsesprodusent = new Applikasjoner();
             this.hendelsesprodusent.setValue(hendelsesprodusent);
             return this;
         }
 
-        public Builder medHendelsestidspunkt(LocalDateTime hendelsestidspunkt) {
+        private Builder medHendelsestidspunkt(LocalDateTime hendelsestidspunkt) {
             try {
                 this.hendelsestidspunkt = KonverteringsUtils.localDateTimeToXMLGregorianCalendar(hendelsestidspunkt);
             } catch (DatatypeConfigurationException e) {
@@ -105,12 +141,17 @@ public class BehandlingStatusMapper {
             return this;
         }
 
-        public Builder medAnsvarligEnhet(String ansvarligEnhet) {
+        private Builder medAnsvarligEnhet(String ansvarligEnhet) {
             this.ansvarligEnhet = ansvarligEnhet;
             return this;
         }
 
         public BehandlingStatusMapper build() {
+            this.medHendelsesId(generateCallId())
+                .medHendelsesprodusent(Fagsystem.MELOSYS.getKode())
+                .medHendelsestidspunkt(LocalDateTime.now())
+                .medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
+
             return new BehandlingStatusMapper(hendelsesId, behandlingsId, applikasjonSak, hendelsesprodusent, hendelsestidspunkt, sakstema, aktør, ansvarligEnhet);
         }
     }

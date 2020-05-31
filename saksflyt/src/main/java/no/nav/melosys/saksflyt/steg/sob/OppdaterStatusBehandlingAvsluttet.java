@@ -7,9 +7,8 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +24,15 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
  * IV_STATUS_BEH_AVSL → FEILET_MASKINELT hvis oppdatering av status feilet
  */
 @Component
-public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehander {
+public class OppdaterStatusBehandlingAvsluttet extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingAvsluttet.class);
 
+    private final SobService sobService;
+
     @Autowired
-    public OppdaterStatusBehandlingAvsluttet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
-        super(sakOgBehandlingFasade, tpsService, behandlingService);
-        log.info("OppdaterStatusBehandlingAvsluttet initialisert");
+    public OppdaterStatusBehandlingAvsluttet(SobService sobService) {
+        this.sobService = sobService;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
             throw new FunksjonellException("Sak " + saksnummer + " har ingen bruker." );
         }
 
-        sakOgBehandlingAvsluttet(saksnummer, behandling.getId(), aktørID);
+        sobService.sakOgBehandlingAvsluttet(saksnummer, behandling.getId(), aktørID);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Oppdatert sob-status til avsluttet for prosessinstans {}", prosessinstans.getId());

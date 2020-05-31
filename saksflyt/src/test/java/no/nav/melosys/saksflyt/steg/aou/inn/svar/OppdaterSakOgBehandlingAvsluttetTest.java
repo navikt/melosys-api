@@ -13,10 +13,8 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sob.SobService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,19 +22,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterSakOgBehandlingAvsluttetTest {
 
     @Mock
-    private SakOgBehandlingFasade sakOgBehandlingFasade;
-    @Mock
-    private TpsService tpsService;
-    @Mock
-    private BehandlingService behandlingService;
+    private SobService sobService;
     @Mock
     private FagsakService fagsakService;
 
@@ -44,7 +37,7 @@ public class OppdaterSakOgBehandlingAvsluttetTest {
 
     @Before
     public void setup() {
-        oppdaterSakOgBehandlingAvsluttet = new OppdaterSakOgBehandlingAvsluttet(sakOgBehandlingFasade, tpsService, behandlingService, fagsakService);
+        oppdaterSakOgBehandlingAvsluttet = new OppdaterSakOgBehandlingAvsluttet(fagsakService, sobService);
     }
 
     @Test
@@ -71,8 +64,6 @@ public class OppdaterSakOgBehandlingAvsluttetTest {
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(fagsakService).avsluttFagsakOgBehandling(eq(behandling.getFagsak()), eq(Saksstatuser.LOVVALG_AVKLART));
-        verify(sakOgBehandlingFasade).sendBehandlingAvsluttet(any());
-        verify(tpsService, never()).hentAktørIdForIdent(anyString());
-        verify(behandlingService, never()).hentBehandling(anyLong());
+        verify(sobService).sakOgBehandlingAvsluttet(eq("123"), eq(1L), eq("22"));
     }
 }
