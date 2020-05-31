@@ -31,7 +31,7 @@ public class EregService implements EregFasade {
         this.organisasjonConsumer = organisasjonConsumer;
         this.dokumentFactory = dokumentFactory;
     }
-    
+
     @Override
     public Saksopplysning hentOrganisasjon(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
         HentOrganisasjonResponse response = hentOrganisasjonResponse(orgnummer);
@@ -59,10 +59,10 @@ public class EregService implements EregFasade {
     }
 
     @Override
-    public boolean organisasjonFinnes(String orgnummer) throws IntegrasjonException {
+    public boolean organisasjonFinnes(String orgnummer) {
         try {
             return hentOrganisasjonResponse(orgnummer) != null;
-        } catch (IkkeFunnetException e) {
+        } catch (IkkeFunnetException|IntegrasjonException e) {
             return false;
         }
     }
