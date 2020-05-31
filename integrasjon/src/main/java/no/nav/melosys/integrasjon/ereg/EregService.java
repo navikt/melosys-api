@@ -31,21 +31,10 @@ public class EregService implements EregFasade {
         this.organisasjonConsumer = organisasjonConsumer;
         this.dokumentFactory = dokumentFactory;
     }
-    
+
     @Override
     public Saksopplysning hentOrganisasjon(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
-        HentOrganisasjonRequest request = new HentOrganisasjonRequest();
-        request.setOrgnummer(orgnummer);
-
-        // Kall til E-reg
-        HentOrganisasjonResponse response;
-        try {
-            response = organisasjonConsumer.hentOrganisasjon(request);
-        } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {
-            throw new IkkeFunnetException(hentOrganisasjonOrganisasjonIkkeFunnet);
-        } catch (HentOrganisasjonUgyldigInput hentOrganisasjonUgyldigInput) {
-            throw new IntegrasjonException(hentOrganisasjonUgyldigInput);
-        }
+        HentOrganisasjonResponse response = hentOrganisasjonResponse(orgnummer);
 
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();
@@ -69,5 +58,27 @@ public class EregService implements EregFasade {
         return saksopplysning;
     }
 
+    @Override
+    public boolean organisasjonFinnes(String orgnummer) {
+        try {
+            return hentOrganisasjonResponse(orgnummer) != null;
+        } catch (IkkeFunnetException|IntegrasjonException e) {
+            return false;
+        }
+    }
 
+    private HentOrganisasjonResponse hentOrganisasjonResponse(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
+        HentOrganisasjonRequest request = new HentOrganisasjonRequest();
+        request.setOrgnummer(orgnummer);
+
+        HentOrganisasjonResponse response;
+        try {
+            response = organisasjonConsumer.hentOrganisasjon(request);
+        } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {
+            throw new IkkeFunnetException(hentOrganisasjonOrganisasjonIkkeFunnet);
+        } catch (HentOrganisasjonUgyldigInput hentOrganisasjonUgyldigInput) {
+            throw new IntegrasjonException(hentOrganisasjonUgyldigInput);
+        }
+        return response;
+    }
 }

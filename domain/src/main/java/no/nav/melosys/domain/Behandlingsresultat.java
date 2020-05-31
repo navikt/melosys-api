@@ -1,9 +1,6 @@
 package no.nav.melosys.domain;
 
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
@@ -49,6 +46,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "utfall_registrering_unntak")
     private Utfallregistreringunntak utfallRegistreringUnntak;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "utfall_utpeking")
+    private Utfallregistreringunntak utfallUtpeking; //FIXME: egne kodeverk-verdier for utfallUtpeking
+
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
 
@@ -57,6 +58,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Anmodningsperiode> anmodningsperioder = new HashSet<>(1);
+
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Utpekingsperiode> utpekingsperioder = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>(1);
@@ -131,6 +135,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.utfallRegistreringUnntak = utfallRegistreringUnntak;
     }
 
+    public Utfallregistreringunntak getUtfallUtpeking() {
+        return utfallUtpeking;
+    }
+
+    public void setUtfallUtpeking(Utfallregistreringunntak utfallUtpeking) {
+        this.utfallUtpeking = utfallUtpeking;
+    }
+
     public Set<Lovvalgsperiode> getLovvalgsperioder() {
         return lovvalgsperioder;
     }
@@ -145,6 +157,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setAnmodningsperioder(Set<Anmodningsperiode> anmodningsperioder) {
         this.anmodningsperioder = anmodningsperioder;
+    }
+
+    public Set<Utpekingsperiode> getUtpekingsperioder() {
+        return utpekingsperioder;
+    }
+
+    public void setUtpekingsperioder(Set<Utpekingsperiode> utpekingsperioder) {
+        this.utpekingsperioder = utpekingsperioder;
     }
 
     public Set<Vilkaarsresultat> getVilkaarsresultater() {
@@ -252,35 +272,55 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean harMedlemskapsperiode() {
-        return !lovvalgsperioder.isEmpty() || !anmodningsperioder.isEmpty();
+        return !lovvalgsperioder.isEmpty() || !anmodningsperioder.isEmpty() || !utpekingsperioder.isEmpty();
     }
 
     public Medlemskapsperiode hentValidertMedlemskapsperiode() {
         if (!lovvalgsperioder.isEmpty()) {
             return hentValidertLovvalgsperiode();
-        } else {
+        } else if (!anmodningsperioder.isEmpty()){
             return hentValidertAnmodningsperiode();
+        } else if (!utpekingsperioder.isEmpty()){
+            return hentValidertUtpekingsperiode();
         }
+
+        throw new NoSuchElementException("Ingen medlemskapsperiode finnes for behandling " + id);
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
-        if (lovvalgsperioder.isEmpty()) {
-            throw new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id);
-        }
+        return finnValidertLovvalgsperiode()
+            .orElseThrow(() -> new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id));
+    }
+
+    public Optional<Lovvalgsperiode> finnValidertLovvalgsperiode() {
         if (lovvalgsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en lovvalgsperiode er ikke støttet");
         }
-        return lovvalgsperioder.iterator().next();
+        return lovvalgsperioder.stream().findFirst();
     }
 
     public Anmodningsperiode hentValidertAnmodningsperiode() {
-        if (anmodningsperioder.isEmpty()) {
-            throw new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id);
-        }
+        return finnValidertAnmodningsperiode()
+            .orElseThrow(() -> new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id));
+    }
+
+    public Optional<Anmodningsperiode> finnValidertAnmodningsperiode() {
         if (anmodningsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en anmodningsperiode er ikke støttet");
         }
-        return anmodningsperioder.iterator().next();
+        return anmodningsperioder.stream().findFirst();
+    }
+
+    public Utpekingsperiode hentValidertUtpekingsperiode() {
+        return finnValidertUtpekingsperiode()
+            .orElseThrow(() -> new NoSuchElementException("Ingen utpekingsperioder finnes for behandlingsresultat " + id));
+    }
+
+    public Optional<Utpekingsperiode> finnValidertUtpekingsperiode() {
+        if (utpekingsperioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en utpekingsperiode er ikke støttet");
+        }
+        return utpekingsperioder.stream().findFirst();
     }
 
     public Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar vilkaarType) {
@@ -293,5 +333,22 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erAutomatisert() {
         return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
             || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
+    }
+
+    public boolean harVedtak() {
+        return vedtakMetadata != null;
+    }
+
+    public boolean harUtpektAnnetLand() {
+        return finnValidertUtpekingsperiode().map(Utpekingsperiode::getSendtUtland).isPresent();
+    }
+
+
+    @Override
+    public String toString() {
+        return "Behandlingsresultat{" +
+            "id=" + id +
+            ", type=" + type +
+            '}';
     }
 }

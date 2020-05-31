@@ -8,6 +8,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -15,9 +16,9 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,8 +55,8 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         Behandling behandling = prosessinstans.getBehandling();
-        if (behandling.norgeErUtpekt()) {
-            sendA012Sed(behandling.getId());
+        if (behandling.erNorgeUtpekt()) {
+            sendA012Sed(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
         } else {
             super.sendUtland(avklarBucType(behandling), prosessinstans);
         }
@@ -68,11 +69,11 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     }
 
-    private void sendA012Sed(long behandlingID) throws MelosysException {
+    private void sendA012Sed(long behandlingID, String ytterligereInformasjon) throws MelosysException {
         SedDokument sedDokument = saksopplysningerService.hentSedOpplysninger(behandlingID);
 
         if (sedDokument.getErElektronisk()) {
-            eessiService.sendGodkjenningArbeidFlereLand(behandlingID);
+            eessiService.sendGodkjenningArbeidFlereLand(behandlingID, ytterligereInformasjon);
         } else {
             throw new UnsupportedOperationException("Sending av brev-A012 er ikke implementert");
         }

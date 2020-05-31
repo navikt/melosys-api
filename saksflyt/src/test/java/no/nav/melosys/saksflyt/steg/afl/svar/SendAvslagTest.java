@@ -3,29 +3,32 @@ package no.nav.melosys.saksflyt.steg.afl.svar;
 import java.time.LocalDate;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
+import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.dokument.sed.SedDataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
+import no.nav.melosys.service.eessi.SedGrunnlagMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_OPPDATER_MEDL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_SVAR_AVSLUTT_BEHANDLING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -44,6 +47,8 @@ public class SendAvslagTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private SedGrunnlagMapper sedGrunnlagMapper;
 
     private SendAvslag sendAvslag;
     private EessiService eessiService;
@@ -53,7 +58,7 @@ public class SendAvslagTest {
     public void settOpp() throws FunksjonellException, TekniskException {
         eessiService = new EessiService(
             sedDataBygger, sedDataGrunnlagFactory,
-            eessiConsumer, behandlingService, behandlingsresultatService
+            eessiConsumer, behandlingService, behandlingsresultatService, sedGrunnlagMapper
         );
         sendAvslag = new SendAvslag(eessiService);
 
@@ -86,6 +91,6 @@ public class SendAvslagTest {
 
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), any());
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(AFL_OPPDATER_MEDL);
+        assertThat(prosessinstans.getSteg()).isEqualTo(AFL_SVAR_AVSLUTT_BEHANDLING);
     }
 }

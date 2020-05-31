@@ -42,7 +42,7 @@ public class VarsleUtlandTest {
         varsleUtland.utfør(prosessinstans);
 
         verify(saksopplysningerService).hentSedOpplysninger(anyLong());
-        verify(eessiService).sendGodkjenningArbeidFlereLand(anyLong());
+        verify(eessiService).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
@@ -63,7 +63,7 @@ public class VarsleUtlandTest {
         varsleUtland.utfør(prosessinstans);
 
         verify(saksopplysningerService, never()).hentSedOpplysninger(anyLong());
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong());
+        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
@@ -75,7 +75,7 @@ public class VarsleUtlandTest {
         varsleUtland.utfør(prosessinstans);
 
         verify(saksopplysningerService, never()).hentSedOpplysninger(anyLong());
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong());
+        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 

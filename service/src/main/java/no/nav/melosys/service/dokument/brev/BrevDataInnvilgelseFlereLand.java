@@ -5,16 +5,18 @@ import java.util.List;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 
-public class BrevDataInnvilgelseFlereLand extends BrevData {
-    public Lovvalgsperiode lovvalgsperiode;
-    public List<String> alleArbeidsland;
-    public Maritimtyper avklartMaritimType;
+public final class BrevDataInnvilgelseFlereLand extends BrevData {
     public Collection<AvklartVirksomhet> arbeidsgivere;
+    public List<String> alleArbeidsland;
+    public Lovvalgsperiode lovvalgsperiode;
+    public Maritimtyper avklartMaritimType;
     public String bostedsland;
     public boolean erBegrensetPeriode;
     public boolean erMarginaltArbeid;
+    public Landkoder trydemyndighetsland;
 
     public BrevDataA1 vedleggA1;
 

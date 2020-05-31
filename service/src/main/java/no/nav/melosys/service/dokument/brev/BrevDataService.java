@@ -8,7 +8,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
@@ -31,6 +30,7 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -49,24 +49,24 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
  */
 @Service
 public class BrevDataService {
-
     static final String MELOSYS_ENHET_ID = "4530";
 
     static final String PLASSHOLDER_TEKST = "-";
     static final String PLASSHOLDER_POSTNUMMER = "0000";
 
-    private final TpsFasade tpsFasade;
-
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-
+    private final SaksbehandlerService saksbehandlerService;
+    private final TpsFasade tpsFasade;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Autowired
-    public BrevDataService(@Qualifier("system") TpsFasade tpsFasade,
-                           BehandlingsresultatRepository behandlingsresultatRepository,
+    public BrevDataService(BehandlingsresultatRepository behandlingsresultatRepository,
+                           SaksbehandlerService saksbehandlerService,
+                           @Qualifier("system") TpsFasade tpsFasade,
                            UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
-        this.tpsFasade = tpsFasade;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.saksbehandlerService = saksbehandlerService;
+        this.tpsFasade = tpsFasade;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
     }
 
@@ -185,9 +185,10 @@ public class BrevDataService {
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
         navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
         navFelles.setSakspart(lagSakspart(behandling));
-        navFelles.setSignerendeBeslutter(lagSaksbehandler(brevData.saksbehandler));
-        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevData.saksbehandler));
 
+        Saksbehandler saksbehandler = lagSaksbehandler(brevData.saksbehandler);
+        navFelles.setSignerendeBeslutter(saksbehandler);
+        navFelles.setSignerendeSaksbehandler(saksbehandler);
         return navFelles;
     }
 
@@ -259,10 +260,11 @@ public class BrevDataService {
         return mottakerBrev;
     }
 
-    private Saksbehandler lagSaksbehandler(String userId) {
+    private Saksbehandler lagSaksbehandler(String ident) throws IkkeFunnetException, TekniskException {
         Saksbehandler saksbehandler = new Saksbehandler();
         saksbehandler.setNavEnhet(lagNavEnhet());
-        saksbehandler.setNavAnsatt(lagNavAnsatt(userId));
+        var saksbehandlerNavn = saksbehandlerService.hentNavnForIdent(ident);
+        saksbehandler.setNavAnsatt(lagNavAnsatt(ident, saksbehandlerNavn));
         return saksbehandler;
     }
 

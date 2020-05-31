@@ -22,18 +22,11 @@ public enum ProsessSteg implements Kodeverk {
     JFR_FERDIGSTILL_JOURNALPOST("JFR_FERDIGSTILL_JOURNALPOST", "Ferdigstiller journalposten i Joark"),
     JFR_SETT_VURDER_DOKUMENT("JFR_SETT_VURDER_DOKUMENT", "Setter status til VURDER_DOKUMENT"),
     JFR_TILDEL_BEHANDLINGSOPPGAVE("JFR_TILDEL_BEHANDLINGSOPPGAVE", "Tildeler behandlingsoppgave for gjeldende fagsak til en saksbehandler"),
-    JFR_HENT_PERS_OPPL("JFR_HENT_PERS_OPPL", "Hent personopplysninger fra TPS"),
+    JFR_HENT_REGISTER_OPPL("JFR_HENT_REGISTER_OPPL", "Hent registeropplysninger"),
     JFR_VURDER_INNGANGSVILKÅR("JFR_VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår"),
 
-    // Hent saksopplysninger
-    HENT_ARBF_OPPL("HENT_ARBF_OPPL", "Hent arbeidsforholdopplysninger fra AAREG"),
-    HENT_INNT_OPPL("HENT_INNT_OPPL", "Hent inntektopplysninger fra INNTK"),
-    HENT_ORG_OPPL("HENT_ORG_OPPL", "Hent organisasjoner fra EREG"),
-    HENT_MEDL_OPPL("HENT_MEDL_OPPL", "Hent medlemskapsopplysninger fra MEDL"),
-    HENT_SOB_SAKER("HENT_SOB_SAKER", "Hent saker fra Sak og behandling"),
-    OPPFRISK_SAKSOPPLYSNINGER("OPPFRISK_SAKSOPPLYSNINGER", "Oppfrisking av saksopplysninger"),
-
     // Oppgave
+    VURDER_GJENBRUK_OPPGAVE("VURDER_GJENBRUK_OPPGAVE", "Vurder om eksisterende oppgave skal gjenbrukes"),
     GJENBRUK_OPPGAVE("GJENBRUK_OPPGAVE", "Gjenbruker eksisterende oppgave"),
     GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i Oppgave"),
 
@@ -89,6 +82,7 @@ public enum ProsessSteg implements Kodeverk {
     UL_SEND_UTLAND("UL_SEND_UTLAND", "Send SED A003 eller brev til utenlandsk trygdemyndighet"),
     UL_DISTRIBUER_JOURNALPOST("UL_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),
     UL_OPPDATER_MEDL("UL_OPPDATER_MEDL", "Oppdatering av medlemskap"),
+    UL_OPPDATER_BEHANDLINGSRESULTAT("UL_OPPDATER_BEHANDLINGSRESULTAT", "Oppdater behandlingsresultat etter land er blitt utpekt"),
 
     //Henlegg sak
     HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
@@ -124,13 +118,15 @@ public enum ProsessSteg implements Kodeverk {
     AFL_SAK_OG_BEHANDLING_OPPRETTET("AFL_SAK_OG_BEHANDLING_OPPRETTET","Oppdaterer status på sak i sob til opprettet"),
     AFL_AVSLUTT_TIDLIGERE_PERIODE("AFL_AVSLUTT_TIDLIGERE_PERIODE","Avslutter tidligere periode hvis oppdatert SED"),
     AFL_HENT_REGISTEROPPLYSNINGER("AFL_HENT_REGISTEROPPLYSNINGER","Innhenter registeropplysninger"),
+    AFL_VURDER_INNGANGSVILKÅR("AFL_VURDER_INNGANGSVILKÅR","Vurderer inngangsvilkår når Norge er utpekt"),
     AFL_OPPRETT_BEHANDLINGSGRUNNLAG("AFL_OPPRETT_BEHANDLINGSGRUNNLAG","Oppretter behandlingsgrunnlag"),
     AFL_REGISTERKONTROLL("AFL_REGISTERKONTROLL","Utfører registerkontroll"),
     AFL_OPPRETT_OPPGAVE("AFL_OPPRETT_OPPGAVE","Oppretter oppgave til manuell behandling"),
     AFL_OPPDATER_MEDL("AFL_OPPDATER_MEDL", "Setter status i MEDL"),
 
-    //Svar på utpeking av land
+    // Svar på A003
     AFL_SVAR_SEND_AVSLAG("AFL_SVAR_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),
+    AFL_SVAR_AVSLUTT_BEHANDLING("AFL_SVAR_AVSLUTT_BEHANDLING", "Avslutter behandling etter utpeking er avslått"),
 
     //Unntak medlemskap
     REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),

@@ -5,10 +5,9 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType type = prosessinstans.getType();
@@ -61,14 +60,11 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         if (type == ProsessType.JFR_NY_BEHANDLING && behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
             prosessinstans.setSteg(REPLIKER_BEHANDLING);
         } else if (type == ProsessType.JFR_NY_SAK || type == ProsessType.JFR_NY_BEHANDLING) {
-            prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
+            prosessinstans.setSteg(JFR_HENT_REGISTER_OPPL);
         } else if (type == ProsessType.JFR_KNYTT) {
             prosessinstans.setSteg(JFR_SETT_VURDER_DOKUMENT);
         } else {
-            String feilmelding = "Ukjent prosess type: " + type;
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-            return;
+            throw new TekniskException("Ukjent prosess type: " + type);
         }
 
         log.info("Prosessinstans {} har ferdigstillt journalpost {}", prosessinstans.getId(), journalpostID);

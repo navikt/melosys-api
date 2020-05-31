@@ -33,15 +33,12 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class OppgaveFasadeImplTest {
-
     @Mock
     private OppgaveConsumer oppgaveConsumer;
     @Captor
     private ArgumentCaptor<OpprettOppgaveDto> opprettOppgaveDtoCaptor;
     @Captor
     private ArgumentCaptor<OppgaveSearchRequest> oppgaveSearchRequestCaptor;
-    @Captor
-    private ArgumentCaptor<OppgaveDto> oppgaveDtoCaptor;
 
     private OppgaveFasadeImpl oppgaveFasadeImpl;
 

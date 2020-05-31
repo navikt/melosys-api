@@ -42,6 +42,8 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -76,7 +78,6 @@ import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.*;
 
 public final class DokumentServiceTest {
-
     private static final long BEHANDLINGSID = 13L;
     private static final long GSAKSNUMMER = 321L;
     private static final String ORGNR = "123456789";
@@ -200,7 +201,7 @@ public final class DokumentServiceTest {
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.arbeidsland = "Norway";
-        brevdataInnvilgelse.anmodningsperiodesvar = Optional.of(lagAnmodningsperiodeSvarInnvilgelse());
+        brevdataInnvilgelse.setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse());
         brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
 
         return brevdataInnvilgelse;
@@ -254,14 +255,23 @@ public final class DokumentServiceTest {
             brevdatabyggervelger = lagBrevdataByggerVelger(avklartefaktaService);
         }
 
+        SaksbehandlerService saksbehandlerService = mock(SaksbehandlerService.class);
+        when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Bob Lastname");
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
-        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
-        BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class), avklarteVirksomheterService, mock(UtenlandskMyndighetService.class), behandlingsresultatService);
+        BrevDataService brevDataService = new BrevDataService(behandlingsresultatRepository,
+            saksbehandlerService,
+            tpsFasade,
+            utenlandskMyndighetRepository);
+        BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class),
+            avklarteVirksomheterService,
+            mock(UtenlandskMyndighetService.class),
+            behandlingsresultatService);
         return new DokumentService(behandlingService, brevDataService, dokSysFasade,
             prosessinstansService, brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
     }
 
-    private BrevdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    private BrevdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService)
+        throws IkkeFunnetException, TekniskException {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
@@ -332,17 +342,20 @@ public final class DokumentServiceTest {
 
     private static BrevDataByggerVelger lagBrevdataByggerVelger(AvklartefaktaService avklartefaktaService) {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
-        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
-        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
-        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
-        VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
-        JoarkService joarkService = mock(JoarkService.class);
-        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
-        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, behandlingsgrunnlagService, vilkaarsresultatRepository);
+        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
+        JoarkService joarkService = mock(JoarkService.class);
+        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
+        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService,
+            behandlingsgrunnlagService, vilkaarsresultatRepository);
+        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
+        SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
+        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         UtpekingService utpekingService = mock(UtpekingService.class);
-        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, lovvalgsperiodeService,
-            utenlandskMyndighetService, vilkaarsresultatRepository, vilkaarsresultatService, joarkService, landvelgerService, utpekingService);
+        VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
+        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
+            landvelgerService, lovvalgsperiodeService, saksopplysningerService,
+            utenlandskMyndighetService, utpekingService, vilkaarsresultatRepository, vilkaarsresultatService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() throws FunksjonellException, TekniskException {
@@ -375,7 +388,7 @@ public final class DokumentServiceTest {
         return brevdatabyggervelger;
     }
 
-    private static EregFasade mockEregFasade() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private static EregFasade mockEregFasade() throws IkkeFunnetException, IntegrasjonException {
         EregFasade eregFasade = mock(EregFasade.class);
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
         orgDok.setNavn(Collections.singletonList("Virker av og til"));

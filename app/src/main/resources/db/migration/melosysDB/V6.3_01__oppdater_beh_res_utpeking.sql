@@ -1,0 +1,1 @@
+INSERT INTO PROSESS_STEG(KODE, NAVN) VALUES('UL_OPPDATER_BEHANDLINGSRESULTAT', 'Oppdater behandlingsresultat etter land er blitt utpekt');

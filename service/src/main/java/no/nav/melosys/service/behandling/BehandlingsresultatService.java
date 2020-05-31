@@ -3,10 +3,12 @@ package no.nav.melosys.service.behandling;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -69,8 +71,22 @@ public class BehandlingsresultatService {
         replikerAnmodningsperioder(behandlingsresultat, behandlingsresultatsreplika);
         replikerBehandlingsresultatBegrunnelser(behandlingsresultat, behandlingsresultatsreplika);
         replikerKontrollResultater(behandlingsresultat, behandlingsresultatsreplika);
+        replikerUtpekingsperioder(behandlingsresultat, behandlingsresultatsreplika);
 
         behandlingsresultatRepository.save(behandlingsresultatsreplika);
+    }
+
+    private void replikerUtpekingsperioder(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        behandlingsresultatsreplika.setUtpekingsperioder(new HashSet<>());
+        for (Utpekingsperiode utpekingsperiode : behandlingsresultat.getUtpekingsperioder()) {
+            Utpekingsperiode utpekingsperiodereplika = (Utpekingsperiode) BeanUtils.cloneBean(utpekingsperiode);
+            utpekingsperiodereplika.setBehandlingsresultat(behandlingsresultatsreplika);
+            utpekingsperiodereplika.setId(null);
+            utpekingsperiodereplika.setMedlPeriodeID(null);
+            utpekingsperiodereplika.setSendtUtland(null);
+            behandlingsresultatsreplika.getUtpekingsperioder().add(utpekingsperiodereplika);
+        }
     }
 
     private void replikerAnmodningsperioder(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
@@ -172,6 +188,36 @@ public class BehandlingsresultatService {
         }
 
         behandlingsresultat.setBehandlingsmåte(behandlingsmaate);
+        behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    public void oppdaterUtfallRegistreringUnntak(long behandlingID, Utfallregistreringunntak utfallRegistreringUnntak) throws FunksjonellException {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        if (behandlingsresultat.getUtfallRegistreringUnntak() != null) {
+            throw new FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat " + behandlingID);
+        }
+
+        behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        behandlingsresultat.setUtfallRegistreringUnntak(utfallRegistreringUnntak);
+        behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    public void oppdaterUtfallUtpeking(long behandlingID, Utfallregistreringunntak utfallUtpeking) throws FunksjonellException {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        if (behandlingsresultat.getUtfallUtpeking() != null) {
+            throw new FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat " + behandlingID);
+        }
+
+        //behandlingsresultat.setType(??); FIXME
+        behandlingsresultat.setUtfallUtpeking(utfallUtpeking);
+        behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) throws IkkeFunnetException {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        begrunnelser.forEach(b -> b.setBehandlingsresultat(behandlingsresultat));
+        behandlingsresultat.getBehandlingsresultatBegrunnelser().addAll(begrunnelser);
+        behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 }

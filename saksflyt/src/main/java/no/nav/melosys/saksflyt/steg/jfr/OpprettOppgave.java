@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -40,7 +39,6 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        validerSakstype(prosessinstans.getBehandling().getFagsak().getType());
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             prosessinstans.getBehandling(),
             prosessinstans.hentJournalpostID(),
@@ -62,12 +60,6 @@ public class OpprettOppgave extends AbstraktStegBehandler {
             String feilmelding = prosessinstans.getId() + ":" + System.lineSeparator()
                 + "prosessType " + prosessinstans.getType() + STØTTES_IKKE;
             throw new TekniskException(feilmelding);
-        }
-    }
-
-    private void validerSakstype(Sakstyper sakstype) throws FunksjonellException {
-        if (sakstype != Sakstyper.EU_EOS) {
-            throw new FunksjonellException("Sakstyper " + sakstype + STØTTES_IKKE);
         }
     }
 }

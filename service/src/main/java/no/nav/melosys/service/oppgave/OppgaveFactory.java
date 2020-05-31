@@ -13,10 +13,6 @@ public final class OppgaveFactory {
 
     private OppgaveFactory() {}
 
-    static Oppgavetyper hentOppgavetype(Behandlingstema behandlingstema) {
-        return hentOppgaveParametere(behandlingstema).oppgavetype;
-    }
-
     public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         OppgaveParametere parametere = hentOppgaveParametere(behandlingstema);
 
@@ -43,6 +39,7 @@ public final class OppgaveFactory {
             case UTSENDT_SELVSTENDIG:
             case ARBEID_FLERE_LAND:
             case ARBEID_NORGE_BOSATT_ANNET_LAND:
+            case ARBEID_ETT_LAND_ØVRIG:
             case IKKE_YRKESAKTIV:
                 oppgaveParametere = new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
                 break;
@@ -57,10 +54,11 @@ public final class OppgaveFactory {
                 oppgaveParametere = new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4));
                 break;
             case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-            case ØVRIGE_SED:
+            case ØVRIGE_SED_UFM:
                 oppgaveParametere =  new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
                 break;
             case TRYGDETID:
+            case ØVRIGE_SED_MED:
                 oppgaveParametere = new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
                 break;
             default:

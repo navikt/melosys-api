@@ -66,21 +66,24 @@ public class AvklarteVirksomheterService {
         return arbeidsgivendeOrgnumre;
     }
 
-    public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
+        throws IkkeFunnetException, TekniskException {
         Set<String> selvstendigeForetakOrgnumre = hentNorskeSelvstendigeForetakOrgnumre(behandling);
         return registerOppslagService.hentOrganisasjoner(selvstendigeForetakOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.SELVSTENDIG))
             .collect(Collectors.toList());
     }
 
-    public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
+        throws IkkeFunnetException, TekniskException {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return registerOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID))
             .collect(Collectors.toList());
     }
 
-    public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         List<AvklartVirksomhet> norskeVirksomheter = hentNorskeArbeidsgivere(behandling, adressekonverterer);
         norskeVirksomheter.addAll(hentNorskeSelvstendigeForetak(behandling, adressekonverterer));
         return norskeVirksomheter;

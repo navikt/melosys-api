@@ -22,7 +22,7 @@ public class ServerinfoTjeneste {
         value = "Henter informasjon om miljø og bygg av backend.",
         response = ServerinfoDto.class
     )
-    public ResponseEntity hentServerStatus() {
+    public ResponseEntity<ServerinfoDto> hentServerStatus() {
         return ResponseEntity.ok(Serverinfo.tilDto());
     }
 }

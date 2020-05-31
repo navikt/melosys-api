@@ -23,10 +23,10 @@ public final class BrevDataUtils {
         throw new IllegalStateException("Utility");
     }
 
-    static NavAnsatt lagNavAnsatt(String ansattId) {
+    static NavAnsatt lagNavAnsatt(String ansattId, String navn) {
         NavAnsatt navAnsatt = new NavAnsatt();
         navAnsatt.setAnsattId(ansattId);
-        navAnsatt.setNavn(PLASSHOLDER_TEKST);
+        navAnsatt.setNavn(navn);
         return navAnsatt;
     }
 

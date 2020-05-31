@@ -320,45 +320,49 @@ public class FagsakService {
     @Transactional(rollbackFor = MelosysException.class)
     public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException, TekniskException {
         Behandlingstema behandlingstema = behandling.getTema();
-        if (behandlingstema != Behandlingstema.IKKE_YRKESAKTIV
-            && behandlingstema != Behandlingstema.ØVRIGE_SED
-            && behandlingstema != Behandlingstema.TRYGDETID) {
+        if (!behandling.kanAvsluttesManuelt()) {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " kan ikke avsluttes manuelt");
         }
 
-        Saksstatuser saksstatus = behandlingstema == Behandlingstema.IKKE_YRKESAKTIV ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
+        Saksstatuser saksstatus = behandlingstema == Behandlingstema.IKKE_YRKESAKTIV
+            ? Saksstatuser.LOVVALG_AVKLART : Saksstatuser.AVSLUTTET;
         avsluttFagsakOgBehandling(fagsak, saksstatus);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) throws IkkeFunnetException, TekniskException {
-        oppdaterStatus(fagsak, saksstatus);
-        behandlingService.avsluttBehandling(fagsak.getAktivBehandling().getId());
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) throws FunksjonellException, TekniskException {
+        avsluttFagsakOgBehandling(fagsak, fagsak.getAktivBehandling(), saksstatus);
     }
 
-    public void oppdaterFagsakOgBehandlingStatuser(Fagsak fagsak, Saksstatuser saksstatus, Behandlingsstatus behandlingsstatus) throws FunksjonellException, TekniskException {
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Behandling behandling, Saksstatuser saksstatus) throws FunksjonellException {
+
+        if (!behandling.getFagsak().getSaksnummer().equals(fagsak.getSaksnummer())) {
+            throw new FunksjonellException("Behandling " + behandling.getId() + " tilhører ikke fagsak " + fagsak.getSaksnummer());
+        }
         oppdaterStatus(fagsak, saksstatus);
-        behandlingService.oppdaterStatus(fagsak.getAktivBehandling().getId(), behandlingsstatus);
+        behandlingService.avsluttBehandling(behandling.getId());
+        log.info("Fagsak {} med behandling avsluttet", fagsak.getSaksnummer());
     }
 
-    private void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
+    protected void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void henleggOgVideresend(String saksnummer, String mottakerinstitusjon) throws FunksjonellException, TekniskException {
-        Fagsak fagsak = hentFagsak(saksnummer);
-
-        long behandlingId = fagsak.getAktivBehandling().getId();
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
-        log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingId);
-
-        fagsak.setStatus(Saksstatuser.VIDERESENDT);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-
-        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, mottakerinstitusjon);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    public void oppdaterType(Fagsak fagsak, boolean kvalifisererForEF_883_2004) throws FunksjonellException {
+        Sakstyper nyFagsakstype;
+        if (kvalifisererForEF_883_2004) {
+            nyFagsakstype = Sakstyper.EU_EOS;
+        } else {
+            nyFagsakstype = Sakstyper.UKJENT;
+        }
+        if (fagsak.getType() != null && Sakstyper.UKJENT != fagsak.getType() && fagsak.getType() != nyFagsakstype) {
+            throw new FunksjonellException("Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakstype);
+        }
+        fagsak.setType(nyFagsakstype);
+        lagre(fagsak);
+        log.info("Satt type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakstype);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -370,7 +374,7 @@ public class FagsakService {
         validerOpprettNyVurdering(behandling, behandlingsresultat);
 
         Behandlingstyper behandlingstype;
-        if (behandling.erAvsluttet()) {
+        if (behandling.erInaktiv()) {
             behandlingstype = Behandlingstyper.NY_VURDERING;
         } else {
             behandlingstype = behandling.getType();

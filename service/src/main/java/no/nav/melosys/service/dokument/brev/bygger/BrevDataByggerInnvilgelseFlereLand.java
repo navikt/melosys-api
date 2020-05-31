@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -25,10 +26,12 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     private final BrevDataByggerA1 brevbyggerA1;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final LandvelgerService landvelgerService;
+    private final SaksopplysningerService saksopplysningerService;
 
     public BrevDataByggerInnvilgelseFlereLand(AvklartefaktaService avklartefaktaService,
                                               LandvelgerService landvelgerService,
                                               LovvalgsperiodeService lovvalgsperiodeService,
+                                              SaksopplysningerService saksopplysningerService,
                                               BrevbestillingDto brevbestillingDto,
                                               BrevDataByggerA1 brevbyggerA1) {
 
@@ -37,6 +40,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         this.brevbyggerA1 = brevbyggerA1;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.landvelgerService = landvelgerService;
+        this.saksopplysningerService = saksopplysningerService;
     }
 
     @Override
@@ -64,6 +68,10 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         brevdata.erBegrensetPeriode = !PeriodeKontroller.periodeErLik(
             grunnlagData.periode.getFom(), grunnlagData.periode.getTom(), brevdata.lovvalgsperiode.getFom(), brevdata.lovvalgsperiode.getTom()
         );
+
+        if (dataGrunnlag.getBehandling().erNorgeUtpekt()) {
+            brevdata.trydemyndighetsland = saksopplysningerService.hentSedOpplysninger(behandlingID).getAvsenderLandkode();
+        }
 
         return brevdata;
     }

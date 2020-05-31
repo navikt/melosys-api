@@ -1,7 +1,9 @@
 package no.nav.melosys.service.utpeking;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -9,9 +11,11 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -23,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Service
@@ -74,7 +77,7 @@ public class UtpekingService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void utpekLovvalgsland(Fagsak fagsak, List<String> mottakerinstitusjoner) throws MelosysException {
+    public void utpekLovvalgsland(Fagsak fagsak, Set<String> mottakerinstitusjoner, String ytterligereInformasjonSed, String fritekstBrev) throws MelosysException {
         long behandlingID = fagsak.getAktivBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
@@ -82,36 +85,41 @@ public class UtpekingService {
         log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
             behandling.getFagsak().getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
 
-        List<Utpekingsperiode> utpekingsperioder = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
-        validerUtpekingsperioder(utpekingsperioder);
-
         mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjoner,
             landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID),
             BucType.LA_BUC_02
         );
 
-        prosessinstansService.opprettProsessinstansUtpekAnnetLand(behandling, utpekingsperioder.get(0).getLovvalgsland(), mottakerinstitusjoner);
+        Utpekingsperiode utpekingsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertUtpekingsperiode();
+        validerUtpekingsperiode(utpekingsperiode);
+
+        prosessinstansService.opprettProsessinstansUtpekAnnetLand(
+            behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
+        );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException {
+    @Transactional(rollbackFor = MelosysException.class)
+    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException, TekniskException {
         validerAvslagUtpeking(utpekingAvvis);
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
-        behandlingService.lagre(behandling);
+
+        if (!behandling.erAktiv()) {
+            throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");
+        }
+
+        if (behandling.erUtpekingAvAnnetLand()) {
+            behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+        } else if (behandling.erNorgeUtpekt()) {
+            behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+        } else {
+            throw new FunksjonellException("Kan ikke avvise utpeking for en behandling med tema " + behandling.getTema());
+        }
 
         prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, utpekingAvvis);
-    }
-
-    void validerUtpekingsperioder(List<Utpekingsperiode> utpekingsperioder) throws MelosysException {
-        if (CollectionUtils.isEmpty(utpekingsperioder)) {
-            throw new FunksjonellException("Du må velge en utpekingsperiode for å kunne utpeke et annet land");
-        }
-        if (utpekingsperioder.size() != 1) {
-            throw new FunksjonellException("Flere utpekingsperioder er ikke støttet ved utpeking av et annet land");
-        }
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) throws FunksjonellException {
@@ -121,5 +129,24 @@ public class UtpekingService {
         if (utpekingAvvis.isEtterspørInformasjon() == null) {
             throw new FunksjonellException("Du må oppgi om forespørsel om mer informasjon vil bli sendt");
         }
+    }
+
+    private void validerUtpekingsperiode(Utpekingsperiode utpekingsperiode) throws FunksjonellException {
+        if (utpekingsperiode.getTom() == null) {
+            throw new FunksjonellException("Utpekingsperioden mangler sluttdato");
+        }
+    }
+
+    @Transactional(rollbackFor = MelosysException.class)
+    public void oppdaterSendtUtland(Utpekingsperiode utpekingsperiode) throws FunksjonellException, TekniskException {
+
+        if (utpekingsperiode.getId() == null) {
+            throw new TekniskException("Forsøk på å oppdatere en ikke-persistert utpekingsperiode");
+        } else if (utpekingsperiode.getSendtUtland() != null) {
+            throw new FunksjonellException("Utpekingsperiode " + utpekingsperiode.getId() + " er allerede markert som sendtUtland");
+        }
+
+        utpekingsperiode.setSendtUtland(LocalDate.now());
+        utpekingsperiodeRepository.save(utpekingsperiode);
     }
 }

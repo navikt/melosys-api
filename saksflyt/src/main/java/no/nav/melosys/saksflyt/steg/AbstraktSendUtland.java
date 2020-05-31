@@ -1,10 +1,12 @@
 package no.nav.melosys.saksflyt.steg;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -31,16 +33,16 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
         return sendUtland(bucType, prosessinstans, null);
     }
 
-    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, byte[] vedlegg) throws MelosysException {
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Vedlegg vedlegg) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         SendUtlandStatus sendUtlandStatus = SendUtlandStatus.IKKE_SENDT;
 
         if (skalSendesUtland(behandlingsresultat)) {
-            List<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {});
+            Set<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>() {});
 
             if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
-                eessiService.opprettOgSendSed(behandlingID, mottakerinstitusjoner, bucType, vedlegg);
+                eessiService.opprettOgSendSed(behandlingID, new ArrayList<>(mottakerinstitusjoner), bucType, vedlegg, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
                 sendUtlandStatus = SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);

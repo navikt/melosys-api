@@ -14,9 +14,9 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
+import no.nav.melosys.domain.eessi.sed.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,6 +59,7 @@ public class OpprettSedDokumentFelles {
 
     private static SedDokument opprettSedDokument(MelosysEessiMelding melosysEessiMelding) {
         SedDokument sedDokument = new SedDokument();
+        sedDokument.setAvsenderLandkode(Landkoder.valueOf(melosysEessiMelding.getAvsender().getLandkode()));
         sedDokument.setLovvalgslandKode(Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()));
         sedDokument.setLovvalgBestemmelse(
             Bestemmelse.fraBestemmelseString(melosysEessiMelding.getArtikkel()).tilMelosysBestemmelse()
@@ -102,7 +103,7 @@ public class OpprettSedDokumentFelles {
         return Landkoder.valueOf(unntakFraLovvalgsland);
     }
 
-    private static Periode tilPeriode(no.nav.melosys.domain.eessi.melding.Periode periode) {
+    private static Periode tilPeriode(no.nav.melosys.domain.eessi.Periode periode) {
         return new Periode(
             periode.getFom(),
             periode.getTom()

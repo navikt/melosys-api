@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -61,11 +61,11 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     public void fattVedtak_henleggelse_fungerer() throws MelosysException, IOException {
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtakDto.setMottakerinstitusjoner(List.of("SE:4343"));
+        fattVedtakDto.setMottakerinstitusjoner(Set.of("SE:4343"));
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), null,
+        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), null, null,
             fattVedtakDto.getMottakerinstitusjoner(), fattVedtakDto.getVedtakstype(), null);
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
@@ -95,7 +95,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakService).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, null);
+        verify(vedtakService).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, null, endreVedtakDto.getFritekstSed());
 
         valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }

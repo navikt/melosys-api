@@ -35,7 +35,7 @@ public class AdresseTjeneste {
     @ApiOperation(
         value = "Henter adressen til en gitt utenlandsk myndighet",
         response = UtenlandskMyndighet.class)
-    public ResponseEntity hentMyndighet(@PathVariable("landkode") Landkoder landkode) {
+    public ResponseEntity<UtenlandskMyndighet> hentMyndighet(@PathVariable("landkode") Landkoder landkode) {
         Optional<UtenlandskMyndighet> utenlandskMyndighet = utenlandskMyndighetRepo.findByLandkode(landkode);
         return utenlandskMyndighet.map(ResponseEntity::ok).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
@@ -45,8 +45,7 @@ public class AdresseTjeneste {
         value = "Henter adresser til alle utenlandske myndigheter",
         response = UtenlandskMyndighet.class,
         responseContainer = "List")
-    public ResponseEntity hentMyndigheter() {
-        List<UtenlandskMyndighet> utenlandskeMyndigheter = utenlandskMyndighetRepo.findAll();
-        return ResponseEntity.ok(utenlandskeMyndigheter);
+    public ResponseEntity<List<UtenlandskMyndighet>> hentMyndigheter() {
+        return ResponseEntity.ok(utenlandskMyndighetRepo.findAll());
     }
 }

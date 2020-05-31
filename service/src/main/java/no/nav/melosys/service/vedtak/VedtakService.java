@@ -2,7 +2,7 @@ package no.nav.melosys.service.vedtak;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -69,12 +69,12 @@ public class VedtakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
-        fattVedtak(behandlingID, behandlingsresultattype, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        fattVedtak(behandlingID, behandlingsresultattype, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType,
-                           String fritekst, List<String> mottakerinstitusjoner,
+                           String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
@@ -88,10 +88,13 @@ public class VedtakService {
 
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandlingID, mottakerinstitusjoner, behandlingsresultat);
 
+        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
+            throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
+        }
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType,
-            fritekst, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
+            fritekst, fritekstSed, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -114,8 +117,8 @@ public class VedtakService {
         kontrollerFattVedtak(behandling.getId(), vedtakstype);
     }
 
-    private List<String> validerOgAvklarMottakerInstitusjoner(long behandlingID,
-                                                              List<String> mottakerinstitusjoner,
+    private Set<String> validerOgAvklarMottakerInstitusjoner(long behandlingID,
+                                                              Set<String> mottakerinstitusjoner,
                                                               Behandlingsresultat behandlingsresultat) throws MelosysException {
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         if (skalSendesSed(behandlingsresultat, landkoder)) {
@@ -125,7 +128,7 @@ public class VedtakService {
                 avklarBucType(behandlingsresultat)
             );
         } else {
-            mottakerinstitusjoner = Collections.emptyList();
+            mottakerinstitusjoner = Collections.emptySet();
         }
         return mottakerinstitusjoner;
     }
@@ -161,11 +164,14 @@ public class VedtakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void endreVedtak(Long behandlingID, Endretperiode endretperiode, String fritekst) throws FunksjonellException, TekniskException {
+    public void endreVedtak(Long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode, fritekst);
+        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
+            throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
+        }
+        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode, fritekst, fritekstSed);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

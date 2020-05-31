@@ -11,10 +11,12 @@ import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
+import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
+import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.eessi.dto.Lovvalgsperiode;
-import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -88,7 +90,8 @@ public class SedDataBygger {
     private SedDataDto lagPersonopplysninger(SedDataGrunnlagMedSoknad dataGrunnlag) throws TekniskException, FunksjonellException {
         SedDataDto sedDataDto = new SedDataDto();
 
-        sedDataDto.setArbeidsgivendeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere()));
+        sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(dataGrunnlag));
+        sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(dataGrunnlag));
 
         sedDataDto.setArbeidssteder(dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()));
@@ -103,21 +106,35 @@ public class SedDataBygger {
             .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(SedDataBygger::hentFamilieMedlem).collect(Collectors.toList()));
 
-        sedDataDto.setSelvstendigeVirksomheter(map(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige()));
-
-        sedDataDto.setUtenlandskeVirksomheter(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter().stream().map(
-            SedDataBygger::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));
-
         sedDataDto.setUtenlandskIdent(dataGrunnlag.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
         return sedDataDto;
     }
 
-    private static List<Virksomhet> map(List<AvklartVirksomhet> avklarteArbeidsgivere) {
-        return avklarteArbeidsgivere.stream()
-            .map(aa -> new Virksomhet(aa.navn, aa.orgnr, fraStrukturertAdresse((StrukturertAdresse) aa.adresse)))
+    private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Collection<AvklartVirksomhet> avklarteVirksomheter = new ArrayList<>();
+        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere());
+        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter());
+
+        return avklarteVirksomheter.stream()
+            .map(SedDataBygger::lagVirksomhet)
             .collect(Collectors.toList());
+    }
+
+    private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Collection<AvklartVirksomhet> avklarteSelvstendigeVirksomheter = new ArrayList();
+        avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige());
+        avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
+
+        return avklarteSelvstendigeVirksomheter.stream()
+            .map(SedDataBygger::lagVirksomhet)
+            .collect(Collectors.toList());
+    }
+
+    private static Virksomhet lagVirksomhet(AvklartVirksomhet avklartVirksomhet) {
+        return new Virksomhet(avklartVirksomhet.navn, avklartVirksomhet.orgnr,
+            fraStrukturertAdresse((StrukturertAdresse) avklartVirksomhet.adresse));
     }
 
     private static Optional<Adresse> finnAdresse(BostedGrunnlag bostedGrunnlag) {
@@ -213,35 +230,36 @@ public class SedDataBygger {
         return gatenavn + (StringUtils.isEmpty(husnummer) ? "" : String.format(" %s", husnummer));
     }
 
-    private static List<Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
+    private static List<no.nav.melosys.domain.eessi.sed.Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
 
         if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
         } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE) {
             return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(),
                 hentUnntaksBegrunnelse(behandlingsresultat)));
+        } else if (medlemsperiodeType == MedlemsperiodeType.UTPEKINGSPERIODE) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertUtpekingsperiode()));
         }
 
         return Collections.emptyList();
     }
 
-    private static List<Lovvalgsperiode> lagLovvalgsperioderDtoHvisFinnes(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
+    private static List<no.nav.melosys.domain.eessi.sed.Lovvalgsperiode> lagLovvalgsperioderDtoHvisFinnes(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
 
-        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE && !behandlingsresultat.getLovvalgsperioder().isEmpty()) {
-            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.getLovvalgsperioder().iterator().next()));
-        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE && !behandlingsresultat.getAnmodningsperioder().isEmpty()) {
-            return Collections.singletonList(lagLovvalgsperiodeDto(
-                behandlingsresultat.getAnmodningsperioder().iterator().next(),
-                hentUnntaksBegrunnelse(behandlingsresultat)
-            ));
+        if (medlemsperiodeType == MedlemsperiodeType.LOVVALGSPERIODE && behandlingsresultat.finnValidertLovvalgsperiode().isPresent()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertLovvalgsperiode()));
+        } else if (medlemsperiodeType == MedlemsperiodeType.ANMODNINGSPERIODE && behandlingsresultat.finnValidertAnmodningsperiode().isPresent()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertAnmodningsperiode(), hentUnntaksBegrunnelse(behandlingsresultat)));
+        } else if (medlemsperiodeType == MedlemsperiodeType.UTPEKINGSPERIODE && behandlingsresultat.finnValidertUtpekingsperiode().isPresent()) {
+            return Collections.singletonList(lagLovvalgsperiodeDto(behandlingsresultat.hentValidertUtpekingsperiode()));
         }
 
         return Collections.emptyList();
     }
 
 
-    private static Lovvalgsperiode lagLovvalgsperiodeDto(Anmodningsperiode anmodningsperiode, String unntaksBegrunnelse) {
-        Lovvalgsperiode lovvalgsperiodeDto = lagLovvalgsperiodeDto(anmodningsperiode);
+    private static no.nav.melosys.domain.eessi.sed.Lovvalgsperiode lagLovvalgsperiodeDto(Anmodningsperiode anmodningsperiode, String unntaksBegrunnelse) {
+        no.nav.melosys.domain.eessi.sed.Lovvalgsperiode lovvalgsperiodeDto = lagLovvalgsperiodeDto(anmodningsperiode);
 
         lovvalgsperiodeDto.setUnntakFraLovvalgsland(anmodningsperiode.getUnntakFraLovvalgsland().getKode());
         lovvalgsperiodeDto.setUnntakFraBestemmelse(Bestemmelse.fraMelosysBestemmelse(anmodningsperiode.getUnntakFraBestemmelse()));
@@ -250,16 +268,18 @@ public class SedDataBygger {
         return lovvalgsperiodeDto;
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode periodeMedBestemmelse) {
-        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
-        lovvalgsperiodeDto.setFom(periodeMedBestemmelse.getFom());
-        lovvalgsperiodeDto.setTom(periodeMedBestemmelse.getTom());
-        lovvalgsperiodeDto.setLovvalgsland(periodeMedBestemmelse.getLovvalgsland() != null ? periodeMedBestemmelse.getLovvalgsland().getKode() : null);
-        lovvalgsperiodeDto.setBestemmelse(Bestemmelse.fraMelosysBestemmelse(periodeMedBestemmelse.getBestemmelse()));
+    private static no.nav.melosys.domain.eessi.sed.Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode medlemskapsperiode) {
+        no.nav.melosys.domain.eessi.sed.Lovvalgsperiode lovvalgsperiodeDto = new no.nav.melosys.domain.eessi.sed.Lovvalgsperiode();
+        lovvalgsperiodeDto.setFom(medlemskapsperiode.getFom());
+        lovvalgsperiodeDto.setTom(medlemskapsperiode.getTom());
+        lovvalgsperiodeDto.setLovvalgsland(medlemskapsperiode.getLovvalgsland() != null ? medlemskapsperiode.getLovvalgsland().getKode() : null);
+        lovvalgsperiodeDto.setBestemmelse(Bestemmelse.fraMelosysBestemmelse(medlemskapsperiode.getBestemmelse()));
+        lovvalgsperiodeDto.setTilleggsBestemmelse(medlemskapsperiode.getTilleggsbestemmelse() != null
+            ? Bestemmelse.fraMelosysBestemmelse(medlemskapsperiode.getTilleggsbestemmelse()) : null);
         return lovvalgsperiodeDto;
     }
 
-    private List<Lovvalgsperiode> lagTidligereLovvalgsperioderDto(Behandling behandling)
+    private List<no.nav.melosys.domain.eessi.sed.Lovvalgsperiode> lagTidligereLovvalgsperioderDto(Behandling behandling)
         throws TekniskException {
 
         Collection<no.nav.melosys.domain.Lovvalgsperiode> tidligereLovvalgsperioder =
@@ -270,22 +290,19 @@ public class SedDataBygger {
             .collect(Collectors.toList());
     }
 
-    private static SvarAnmodningUnntakDto lagSvarAnmodningUnntakDto(Behandlingsresultat behandlingsresultat) throws TekniskException {
+    private static SvarAnmodningUnntak lagSvarAnmodningUnntakDto(Behandlingsresultat behandlingsresultat) throws TekniskException {
         Anmodningsperiode anmodningsperiode = null;
         if (behandlingsresultat.getAnmodningsperioder().iterator().hasNext()) {
             anmodningsperiode = behandlingsresultat.getAnmodningsperioder().iterator().next();
         }
 
         if (anmodningsperiode != null && anmodningsperiode.getAnmodningsperiodeSvar() != null) {
-            return SvarAnmodningUnntakDto.av(anmodningsperiode.getAnmodningsperiodeSvar());
+            return SvarAnmodningUnntak.av(anmodningsperiode.getAnmodningsperiodeSvar());
         }
         return null;
     }
 
     private static String hentUnntaksBegrunnelse(Behandlingsresultat behandlingsresultat) {
-        if (behandlingsresultat == null) {
-            return null;
-        }
         Set<Vilkaarsresultat> vilkaarsresultater = behandlingsresultat.getVilkaarsresultater();
 
         return vilkaarsresultater == null ? null : vilkaarsresultater.stream()

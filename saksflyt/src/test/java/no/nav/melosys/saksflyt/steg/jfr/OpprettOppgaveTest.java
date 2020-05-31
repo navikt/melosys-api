@@ -117,15 +117,6 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg_feilSakstype_feiler() throws FunksjonellException, TekniskException {
-        behandling.getFagsak().setType(Sakstyper.FTRL);
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage(Sakstyper.FTRL + " er ikke støttet");
-        agent.utfør(prosessinstans);
-    }
-
-    @Test
     public void utfoerSteg_feilProsessType_feiler() throws FunksjonellException, TekniskException {
         prosessinstans.setType(ProsessType.MANGELBREV);
 

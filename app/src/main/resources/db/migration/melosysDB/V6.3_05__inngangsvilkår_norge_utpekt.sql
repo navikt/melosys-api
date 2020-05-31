@@ -1,0 +1,1 @@
+INSERT INTO PROSESS_STEG(KODE, NAVN) VALUES ('AFL_VURDER_INNGANGSVILKÅR', 'Vurderer inngangsvilkår når Norge er utpekt');

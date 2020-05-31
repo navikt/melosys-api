@@ -5,18 +5,20 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.saksflyt.steg.sob.SakOgBehandlingStegBehander;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sob.SobService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OppdaterSakOgBehandlingOpprettet extends SakOgBehandlingStegBehander {
+public class OppdaterSakOgBehandlingOpprettet extends AbstraktStegBehandler {
 
-    protected OppdaterSakOgBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
-        super(sakOgBehandlingFasade, tpsService, behandlingService);
+    private final SobService sobService;
+
+    @Autowired
+    public OppdaterSakOgBehandlingOpprettet(SobService sobService) {
+        this.sobService = sobService;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class OppdaterSakOgBehandlingOpprettet extends SakOgBehandlingStegBehande
         }
 
         if (!Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class))) {
-            sakOgBehandlingOpprettet(saksnummer, behandlingId, aktørId);
+            sobService.sakOgBehandlingOpprettet(saksnummer, behandlingId, aktørId);
         }
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE);

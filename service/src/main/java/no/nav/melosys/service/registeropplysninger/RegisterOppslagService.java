@@ -32,7 +32,7 @@ public class RegisterOppslagService {
     /**
      *  Henter et sett med organisasjonsopplysninger
      */
-    public Set<OrganisasjonDokument> hentOrganisasjoner(Set<String> orgnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public Set<OrganisasjonDokument> hentOrganisasjoner(Set<String> orgnumre) throws IkkeFunnetException, IntegrasjonException {
         Set<OrganisasjonDokument> organisasjoner = new HashSet<>();
         for (String orgnr : orgnumre) {
             OrganisasjonDokument saksopplysning = hentOrganisasjon(orgnr);
@@ -46,7 +46,7 @@ public class RegisterOppslagService {
     /**
      * Henter organisasjonsopplysninger.
      */
-    public OrganisasjonDokument hentOrganisasjon(String orgnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public OrganisasjonDokument hentOrganisasjon(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
         Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnummer);
         return (OrganisasjonDokument) saksopplysning.getDokument();
     }

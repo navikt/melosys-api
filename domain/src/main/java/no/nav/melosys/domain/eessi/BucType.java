@@ -3,6 +3,7 @@ package no.nav.melosys.domain.eessi;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 
 public enum BucType {
     LA_BUC_01,
@@ -31,11 +32,23 @@ public enum BucType {
     public static BucType fraBestemmelse(LovvalgBestemmelse bestemmelse) {
         if (bestemmelse instanceof Lovvalgbestemmelser_883_2004) {
             return hentBucTypeFra883_2004((Lovvalgbestemmelser_883_2004) bestemmelse);
-        } else if (bestemmelse instanceof Lovvalgbestemmelser_987_2009) {
+        } else if (bestemmelse instanceof Tilleggsbestemmelser_883_2004) {
+            return hentBuctypeFraTilleggsBestemmelser((Tilleggsbestemmelser_883_2004) bestemmelse);
+        } else if (bestemmelse == Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11) {
             return BucType.LA_BUC_02;
         } else {
-            throw new IllegalArgumentException("Bestemmelse " + bestemmelse.name() + " er ikke støttet enda!");
+            throw lagExceptionBestemmelseStøttesIkke(bestemmelse);
         }
+    }
+
+    private static BucType hentBuctypeFraTilleggsBestemmelser(Tilleggsbestemmelser_883_2004 bestemmelse) {
+        if (bestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8 || bestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A) {
+            return LA_BUC_02;
+        } else if (bestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5) {
+            return LA_BUC_05;
+        }
+
+        throw lagExceptionBestemmelseStøttesIkke(bestemmelse);
     }
 
     private static BucType hentBucTypeFra883_2004(Lovvalgbestemmelser_883_2004 bestemmelse) {
@@ -44,8 +57,10 @@ public enum BucType {
             case FO_883_2004_ART11_3A:
             case FO_883_2004_ART11_3B:
             case FO_883_2004_ART11_3C:
+            case FO_883_2004_ART11_3D:
             case FO_883_2004_ART11_3E:
             case FO_883_2004_ART11_4_2:
+            case FO_883_2004_ART15:
                 return BucType.LA_BUC_05;
             case FO_883_2004_ART12_1:
             case FO_883_2004_ART12_2:
@@ -64,7 +79,11 @@ public enum BucType {
             case FO_883_2004_ART16_2:
                 return BucType.LA_BUC_01;
             default:
-                throw new IllegalArgumentException("Bestemmelse " + bestemmelse.name() + " er ikke støttet enda!");
+                throw lagExceptionBestemmelseStøttesIkke(bestemmelse);
         }
+    }
+
+    private static IllegalArgumentException lagExceptionBestemmelseStøttesIkke(LovvalgBestemmelse bestemmelse) {
+        return new IllegalArgumentException("Bestemmelse " + bestemmelse + " kan ikke mappes til en BucType!");
     }
 }

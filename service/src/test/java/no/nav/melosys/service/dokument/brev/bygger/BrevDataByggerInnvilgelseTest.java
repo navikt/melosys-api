@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -36,8 +37,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,11 +60,9 @@ public class BrevDataByggerInnvilgelseTest {
     VilkaarsresultatService vilkaarsresultatService;
 
     private Behandling behandling;
-
-    @Mock
     private BrevbestillingDto brevbestillingDto;
 
-    private String saksbehandler = "saksbehandler";
+    private final String saksbehandler = "saksbehandler";
     private BrevDataByggerInnvilgelse brevDataByggerInnvilgelse;
 
     @Before
@@ -74,6 +72,11 @@ public class BrevDataByggerInnvilgelseTest {
         behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
+
+        brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
+        brevbestillingDto.begrunnelseKode = "BEGRUNNELSEKODE";
+        brevbestillingDto.fritekst = "FRITEKST";
 
         PersonDokument person = new PersonDokument();
         person.sammensattNavn = "Tom Mestokk";
@@ -123,15 +126,16 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
+    public void lag_medFtrl2_12_setterTuristSkipTrue() throws FunksjonellException, TekniskException {
+        when(vilkaarsresultatService.oppfyllerVilkaar(eq(behandling.getId()), eq(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)))
+            .thenReturn(true);
+
+        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
+        assertThat(brevData.erTuristskip).isTrue();
+    }
+
+    @Test
     public void lag_innvilgelsesBrev_harBestillingsinformasjon() throws FunksjonellException, TekniskException {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
-        brevbestillingDto.begrunnelseKode = "BEGRUNNELSEKODE";
-        brevbestillingDto.fritekst = "FRITEKST";
-
-        BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService, anmodningsperiodeService, brevbestillingDto, brevDataByggerA1, vilkaarsresultatService);
-
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
@@ -139,9 +143,6 @@ public class BrevDataByggerInnvilgelseTest {
 
     @Test
     public void lag_medAnmodningsperiode_girAnmodningsperiodeSvar() throws FunksjonellException, TekniskException {
-        BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService, anmodningsperiodeService, brevbestillingDto, brevDataByggerA1, vilkaarsresultatService);
-
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         AnmodningsperiodeSvar anmodningsperiodeSvar = lagAnmodningsperiodeSvarInnvilgelse();
         anmodningsperiode.setSendtUtland(true);
@@ -149,17 +150,14 @@ public class BrevDataByggerInnvilgelseTest {
 
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.anmodningsperiodesvar.get()).isEqualTo(anmodningsperiodeSvar);
+        assertThat(brevData.getAnmodningsperiodesvar()).isPresent().get().isEqualTo(anmodningsperiodeSvar);
     }
 
     @Test
     public void lag_utenAnmodningsperiode_erMulig() throws FunksjonellException, TekniskException {
-        BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService, anmodningsperiodeService, brevbestillingDto, brevDataByggerA1, vilkaarsresultatService);
-
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.anmodningsperiodesvar.isPresent()).isFalse();
+        assertThat(brevData.getAnmodningsperiodesvar().isPresent()).isFalse();
     }
 
     @Test

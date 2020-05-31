@@ -2,16 +2,17 @@ package no.nav.melosys.domain.eessi;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 public class BucInformasjon {
 
     private final String id;
     private final String bucType;
     private final LocalDate opprettetDato;
-    private final List<String> mottakerinstitusjoner;
+    private final Set<String> mottakerinstitusjoner;
     private final List<SedInformasjon> seder;
 
-    public BucInformasjon(String id, String bucType, LocalDate opprettetDato, List<String> mottakerinstitusjoner, List<SedInformasjon> seder) {
+    public BucInformasjon(String id, String bucType, LocalDate opprettetDato, Set<String> mottakerinstitusjoner, List<SedInformasjon> seder) {
         this.id = id;
         this.bucType = bucType;
         this.opprettetDato = opprettetDato;
@@ -31,7 +32,7 @@ public class BucInformasjon {
         return opprettetDato;
     }
 
-    public List<String> getMottakerinstitusjoner() {
+    public Set<String> getMottakerinstitusjoner() {
         return mottakerinstitusjoner;
     }
 

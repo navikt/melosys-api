@@ -1,9 +1,9 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -11,7 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 public class OppdaterBehandlingsresultatTest {
 
     @Mock
-    BehandlingsresultatRepository behandlingsresultatRepository;
+    private BehandlingsresultatService behandlingsresultatService;
 
     private OppdaterBehandlingsresultat oppdaterBehandlingsresultat;
 
@@ -37,7 +37,7 @@ public class OppdaterBehandlingsresultatTest {
 
     @Before
     public void setUp() {
-        oppdaterBehandlingsresultat = new OppdaterBehandlingsresultat(behandlingsresultatRepository);
+        oppdaterBehandlingsresultat = new OppdaterBehandlingsresultat(behandlingsresultatService);
     }
 
     @Test
@@ -55,11 +55,11 @@ public class OppdaterBehandlingsresultatTest {
         p.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, "BEGRUNNELSE");
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         oppdaterBehandlingsresultat.utfør(p);
 
-        verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
@@ -84,14 +84,14 @@ public class OppdaterBehandlingsresultatTest {
         p.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, "BEGRUNNELSE");
 
         Behandlingsresultat behandlingsresultat = spy(new Behandlingsresultat());
-        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         oppdaterBehandlingsresultat.utfør(p);
 
         verify(behandlingsresultat, never()).setType(any());
         verify(behandlingsresultat, never()).setFastsattAvLand(any());
 
-        verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getVedtakMetadata().getVedtaksdato()).isNotNull();

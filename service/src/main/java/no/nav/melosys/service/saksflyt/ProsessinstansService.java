@@ -2,13 +2,13 @@ package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -31,8 +31,8 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
-import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,8 +44,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
 
 @Service
 public class ProsessinstansService {
@@ -115,10 +113,6 @@ public class ProsessinstansService {
         return journalfoeringDto.isIkkeSendForvaltingsmelding() != null && !journalfoeringDto.isIkkeSendForvaltingsmelding();
     }
 
-    public boolean erUnderOppfriskning(Long behandlingID) {
-        return prosessinstansRepo.findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(ProsessType.OPPFRISKNING, behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG).isPresent();
-    }
-
     public boolean harAktivProsessinstans(Long behandlingID) {
         return prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG).isPresent();
     }
@@ -142,12 +136,13 @@ public class ProsessinstansService {
         logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler, prosessinstans.getId(), prosessinstans.getType());
     }
 
-    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, List<String> mottakerInstitusjon) {
+    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon, String ytterligereInformasjonSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medSteg(ProsessSteg.AOU_VALIDERING)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
+            .medYtterligereinformasjonSed(ytterligereInformasjonSed)
             .build();
 
         lagre(prosessinstans);
@@ -176,7 +171,7 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                                                     String fritekst, List<String> mottakerinstitusjoner,
+                                                     String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                                                      Vedtakstyper vedtakstype, String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
@@ -184,6 +179,7 @@ public class ProsessinstansService {
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
             .medEessiMottakere(mottakerinstitusjoner)
+            .medYtterligereinformasjonSed(fritekstSed)
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
@@ -226,30 +222,13 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOppfriskning(Behandling behandling, String aktørID, String brukerID) {
-        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        Prosessinstans nyprosessinstans = new Prosessinstans();
-        nyprosessinstans.setBehandling(behandling);
-        nyprosessinstans.setType(ProsessType.OPPFRISKNING);
-
-        nyprosessinstans.setData(ProsessDataKey.SAKSNUMMER, behandling.getFagsak().getSaksnummer());
-        nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
-        nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
-
-        nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(grunnlagData));
-        nyprosessinstans.setData(ProsessDataKey.SØKNADSLAND, hentSøknadsland(grunnlagData));
-
-        nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
-
-        lagre(nyprosessinstans);
-    }
-
-    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode, String fritekst) {
+    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         Prosessinstans nyprosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE)
             .medSteg(ProsessSteg.IV_FORKORT_PERIODE)
             .medBegrunnelseFritekst(fritekst)
+            .medYtterligereinformasjonSed(fritekstSed)
             .build();
 
         nyprosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.ENDRINGSVEDTAK.getKode());
@@ -318,23 +297,25 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansVideresendSoknad(Behandling behandling, String mottakerinstitusjon) {
+    public void opprettProsessinstansVideresendSoknad(Behandling behandling, @Nullable String mottakerInstitusjoner) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
-            .medEessiMottakere(List.of(mottakerinstitusjon))
+            .medEessiMottakere(mottakerInstitusjoner != null ? Set.of(mottakerInstitusjoner) : null)
             .build();
 
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, List<String> mottakerinstitusjoner) {
+    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, Set<String> mottakerinstitusjoner, String ytterligereInformasjonSed, String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEK_LAND)
             .medSteg(ProsessSteg.UL_OPPDATER_MEDL)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerinstitusjoner)
+            .medYtterligereinformasjonSed(ytterligereInformasjonSed)
+            .medBegrunnelseFritekst(fritekstBrev)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
 

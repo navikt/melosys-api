@@ -4,17 +4,19 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.saksflyt.steg.sob.SakOgBehandlingStegBehander;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.service.sob.SobService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("AFLSakOgBehandlingOpprettet")
-public class SakOgBehandlingOpprettet extends SakOgBehandlingStegBehander {
+public class SakOgBehandlingOpprettet extends AbstraktStegBehandler {
 
-    public SakOgBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade, TpsService tpsService, BehandlingService behandlingService) {
-        super(sakOgBehandlingFasade, tpsService, behandlingService);
+    private final SobService sobService;
+
+    @Autowired
+    public SakOgBehandlingOpprettet(SobService sobService) {
+        this.sobService = sobService;
     }
 
     @Override
@@ -24,7 +26,7 @@ public class SakOgBehandlingOpprettet extends SakOgBehandlingStegBehander {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        sakOgBehandlingOpprettet(
+        sobService.sakOgBehandlingOpprettet(
             prosessinstans.getBehandling().getFagsak().getSaksnummer(),
             prosessinstans.getBehandling().getId(),
             prosessinstans.getData(ProsessDataKey.AKTØR_ID)

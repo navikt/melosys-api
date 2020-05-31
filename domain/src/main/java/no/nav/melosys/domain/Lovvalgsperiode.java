@@ -22,7 +22,7 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
     @Column(name = "fom_dato", nullable = false, updatable = false)
     private LocalDate fom;
 
-    @Column(name = "tom_dato", nullable = false, updatable = false)
+    @Column(name = "tom_dato", nullable = true, updatable = false)
     private LocalDate tom;
 
     @Enumerated(EnumType.STRING)
@@ -223,6 +223,21 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
             lovvalgsperiode.setLovvalgsland(anmodningsperiode.getLovvalgsland());
         }
         lovvalgsperiode.setDekning(anmodningsperiode.getDekning());
+        return lovvalgsperiode;
+    }
+
+    public static Lovvalgsperiode av(Utpekingsperiode utpekingsperiode) {
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(utpekingsperiode.getFom());
+        lovvalgsperiode.setTom(utpekingsperiode.getTom());
+        lovvalgsperiode.setBestemmelse(utpekingsperiode.getBestemmelse());
+        lovvalgsperiode.setTilleggsbestemmelse(utpekingsperiode.getTilleggsbestemmelse());
+        lovvalgsperiode.setLovvalgsland(utpekingsperiode.getLovvalgsland());
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
+        lovvalgsperiode.setMedlPeriodeID(utpekingsperiode.getMedlPeriodeID());
         return lovvalgsperiode;
     }
 }

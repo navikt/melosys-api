@@ -33,12 +33,16 @@ public class OpprettBehandlingsgrunnlag extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
-
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         opprettSedDokumentFelles.opprettSedSaksopplysning(melosysEessiMelding, prosessinstans.getBehandling());
 
         SedGrunnlag sedGrunnlag = eessiService.hentSedGrunnlag(melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getSedId());
         behandlingsgrunnlagService.opprettSedGrunnlag(prosessinstans.getBehandling().getId(), sedGrunnlag);
-        prosessinstans.setSteg(ProsessSteg.AFL_REGISTERKONTROLL);
+
+        if (prosessinstans.getBehandling().erNorgeUtpekt()) {
+            prosessinstans.setSteg(ProsessSteg.AFL_VURDER_INNGANGSVILKÅR);
+        } else  {
+            prosessinstans.setSteg(ProsessSteg.AFL_REGISTERKONTROLL);
+        }
     }
 }

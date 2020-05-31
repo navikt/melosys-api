@@ -8,7 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_AKTØR_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_REGISTER_OPPL;
 import static org.junit.Assert.*;
 
 public class BehandlingUtilsTest {
@@ -17,9 +17,9 @@ public class BehandlingUtilsTest {
     public void testPredicateMedStatus() {
         Prosessinstans pi = new Prosessinstans();
         pi.setSteg(JFR_AKTØR_ID);
-        assertFalse(Utils.medSteg(JFR_HENT_PERS_OPPL).test(pi));
-        pi.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
-        assertTrue(Utils.medSteg(JFR_HENT_PERS_OPPL).test(pi));
+        assertFalse(Utils.medSteg(JFR_HENT_REGISTER_OPPL).test(pi));
+        pi.setSteg(ProsessSteg.JFR_HENT_REGISTER_OPPL);
+        assertTrue(Utils.medSteg(JFR_HENT_REGISTER_OPPL).test(pi));
     }
 
     @Test

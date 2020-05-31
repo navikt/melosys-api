@@ -42,5 +42,9 @@ public enum SedType {
     H121,
     H130,
     S040,
-    S041
+    S041;
+
+    public boolean erPurring() {
+        return this == X009;
+    }
 }

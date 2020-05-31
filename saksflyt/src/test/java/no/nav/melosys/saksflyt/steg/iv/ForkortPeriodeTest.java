@@ -77,7 +77,7 @@ public class ForkortPeriodeTest {
         p.setBehandling(lagBehandling());
         p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
 
-        List<String> mottakerInstitusjoner = List.of("SE:123");
+        Set<String> mottakerInstitusjoner = Set.of("SE:123");
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(List.of(
@@ -87,7 +87,7 @@ public class ForkortPeriodeTest {
         forkortPeriode.utfør(p);
 
         verify(avklartefaktaService).leggTilBegrunnelse(behandlingId, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiodeKode.getKode());
-        assertThat(p.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>(){})).isEqualTo(mottakerInstitusjoner);
+        assertThat(p.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>(){})).isEqualTo(mottakerInstitusjoner);
         assertThat(p.getSteg()).isEqualTo(IV_VALIDERING);
     }
 
@@ -99,7 +99,7 @@ public class ForkortPeriodeTest {
         p.setBehandling(lagBehandling());
         p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
 
-        List<String> mottakerInstitusjoner = Collections.emptyList();
+        Set<String> mottakerInstitusjoner = Collections.emptySet();
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(List.of(
@@ -109,7 +109,7 @@ public class ForkortPeriodeTest {
         forkortPeriode.utfør(p);
 
         verify(avklartefaktaService).leggTilBegrunnelse(behandlingId, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiodeKode.getKode());
-        assertThat(p.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>(){})).isEqualTo(mottakerInstitusjoner);
+        assertThat(p.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>(){})).isEqualTo(mottakerInstitusjoner);
         assertThat(p.getSteg()).isEqualTo(IV_VALIDERING);
     }
 

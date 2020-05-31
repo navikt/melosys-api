@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.ul;
 
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
@@ -39,8 +39,8 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Long behandlingID = prosessinstans.getBehandling().getId();
 
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertLovvalgsperiode();
-        medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandlingID, false, null);
+        Utpekingsperiode utpekingsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertUtpekingsperiode();
+        medlPeriodeService.opprettPeriodeForeløpig(utpekingsperiode, behandlingID, false);
 
         prosessinstans.setSteg(UL_SEND_ORIENTERINGSBREV);
     }

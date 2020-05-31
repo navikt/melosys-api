@@ -40,7 +40,7 @@ public class FerdigstillJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_REGISTER_OPPL);
     }
 
     @Test
@@ -51,7 +51,7 @@ public class FerdigstillJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_REGISTER_OPPL);
     }
 
     @Test

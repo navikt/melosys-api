@@ -3,18 +3,18 @@ package no.nav.melosys.service.dokument.sed;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.MedlemsperiodeType;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.eessi.BucInformasjon;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
+import no.nav.melosys.domain.eessi.sed.SedDataDto;
+import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -25,12 +25,12 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.dto.UtpekingAvvisDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
+import no.nav.melosys.service.eessi.SedGrunnlagMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
@@ -48,32 +48,33 @@ public class EessiService {
     private final EessiConsumer eessiConsumer;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final SedGrunnlagMapper sedGrunnlagMapper;
 
     public EessiService(SedDataBygger sedDataBygger,
-                        SedDataGrunnlagFactory dataGrunnlagFactory, EessiConsumer eessiConsumer,
+                        SedDataGrunnlagFactory dataGrunnlagFactory,
+                        EessiConsumer eessiConsumer,
                         BehandlingService behandlingService,
-                        BehandlingsresultatService behandlingsresultatService) {
+                        BehandlingsresultatService behandlingsresultatService,
+                        SedGrunnlagMapper sedGrunnlagMapper) {
         this.sedDataBygger = sedDataBygger;
         this.dataGrunnlagFactory = dataGrunnlagFactory;
         this.eessiConsumer = eessiConsumer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.sedGrunnlagMapper = sedGrunnlagMapper;
     }
 
-    public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType) throws MelosysException {
-        opprettOgSendSed(behandlingID, mottakerInstitusjoner, bucType, null);
-    }
-
-    public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType, byte[] vedlegg) throws MelosysException {
+    public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType, Vedlegg vedlegg, String ytterligereInformasjon) throws MelosysException {
         log.info("Starter sending av SED for behandling {}", behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
 
         SedDataGrunnlag datagrunnlag = dataGrunnlagFactory.av(behandling);
-        SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
+        SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));
         sedData.setMottakerIder(mottakerInstitusjoner);
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
+        sedData.setYtterligereInformasjon(ytterligereInformasjon);
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
         OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedData, vedlegg, bucType, true);
@@ -83,18 +84,14 @@ public class EessiService {
 
     @Transactional(readOnly = true)
     public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId) throws MelosysException {
-        return opprettBucOgSed(behandling, bucType, mottakerId, null);
-    }
-
-    private String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId, byte[] vedlegg) throws MelosysException {
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType));
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));
         sedDataDto.setMottakerIder(mottakerId);
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
-        return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, false).getRinaUrl();
+        return eessiConsumer.opprettBucOgSed(sedDataDto, null, bucType, false).getRinaUrl();
     }
 
     public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, String landkode) throws MelosysException {
@@ -149,19 +146,26 @@ public class EessiService {
 
     }
 
-    public void sendGodkjenningArbeidFlereLand(long behandlingID) throws MelosysException {
+    public void sendGodkjenningArbeidFlereLand(long behandlingID, String ytterligereInformasjon) throws MelosysException {
         log.info("Sender svar på A003 for behandling {}", behandlingID);
-        sendSedPåEksisterendeBehandling(behandlingID, MedlemsperiodeType.LOVVALGSPERIODE, br -> SedType.A012);
+        sendSedPåEksisterendeBehandling(behandlingID, MedlemsperiodeType.LOVVALGSPERIODE, br -> SedType.A012, ytterligereInformasjon);
     }
 
     private void sendSedPåEksisterendeBehandling(long behandlingID,
                                                  MedlemsperiodeType medlemsperiodeType,
                                                  Function<Behandlingsresultat, SedType> sedTypeAvklarer) throws MelosysException {
+        sendSedPåEksisterendeBehandling(behandlingID, medlemsperiodeType, sedTypeAvklarer, null);
+    }
+
+    private void sendSedPåEksisterendeBehandling(long behandlingID,
+                                                 MedlemsperiodeType medlemsperiodeType,
+                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
         String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
 
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingID);
@@ -187,6 +191,11 @@ public class EessiService {
 
     @Transactional(readOnly = true)
     public byte[] genererSedPdf(long behandlingID, SedType sedType) throws MelosysException {
+        return genererSedPdf(behandlingID, sedType, null);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] genererSedPdf(long behandlingID, SedType sedType, @Nullable SedPdfData sedPdfData) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -194,11 +203,17 @@ public class EessiService {
         MedlemsperiodeType medlemsperiodeType;
         if (sedType == SedType.A001) {
             medlemsperiodeType = MedlemsperiodeType.ANMODNINGSPERIODE;
+        } else if (sedType == SedType.A003 && behandlingsresultat.finnValidertUtpekingsperiode().isPresent()){
+            medlemsperiodeType = MedlemsperiodeType.UTPEKINGSPERIODE;
         } else {
             medlemsperiodeType = MedlemsperiodeType.LOVVALGSPERIODE;
         }
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+
+        if (sedPdfData != null) {
+            sedPdfData.utfyllSedDataDto(sedDataDto);
+        }
         log.info("Henter pdf for sed med type {} for behandling {}", sedType, behandlingID);
         return eessiConsumer.genererSedPdf(sedDataDto, sedType);
     }
@@ -222,16 +237,16 @@ public class EessiService {
      * Hvis minst et land ikke er påkoblet - returner tom liste. Det skal ikke åpnes BUC med valgte land som mottakere da ikke alle er påkoblet
      * Hvis alle er påkoblet - valider at det er satt nøyaktig èn institusjon for hvert land, returner dermed liste med validerte institusjoner
      */
-    public List<String> validerOgAvklarMottakerInstitusjonerForBuc(final List<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
+    public Set<String> validerOgAvklarMottakerInstitusjonerForBuc(final Set<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
 
         Map<Landkoder, Collection<String>> institusjonerPerLand = new EnumMap<>(Landkoder.class);
 
         for (var land : mottakerland) {
             Collection<String> alleInstitusjonerForLand = hentEessiMottakerinstitusjoner(bucType.name(), land.getKode())
-                .stream().map(Institusjon::getId).collect(Collectors.toList());
+                .stream().map(Institusjon::getId).collect(Collectors.toSet());
             if (alleInstitusjonerForLand.isEmpty()) {
                 log.info("{} er ikke EESSI-ready, skal ikke sendes SED", land.getBeskrivelse());
-                return Collections.emptyList();
+                return Collections.emptySet();
             }
 
             institusjonerPerLand.put(land, alleInstitusjonerForLand);
@@ -269,6 +284,6 @@ public class EessiService {
     }
 
     public SedGrunnlag hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) throws MelosysException {
-        return eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID).tilDomene();
+        return sedGrunnlagMapper.tilSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
     }
 }

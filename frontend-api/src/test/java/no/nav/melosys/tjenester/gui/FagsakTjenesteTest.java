@@ -35,6 +35,7 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.sak.VideresendSoknadService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory;
@@ -71,6 +72,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static FagsakService fagsakService;
     private static TilgangService tilgangService;
     private static UtpekingService utpekingService;
+    private static VideresendSoknadService videresendSoknadService;
 
     private EasyRandom random;
 
@@ -294,6 +296,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         tilgangService = mock(TilgangService.class);
         fagsakService = mock(FagsakService.class);
         utpekingService = mock(UtpekingService.class);
+        videresendSoknadService = mock(VideresendSoknadService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
         PersonDokument personDokument = (PersonDokument)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
@@ -307,7 +310,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, saksopplysningerService, behandlingsgrunnlagService, tilgangService, utpekingService);
+        return new FagsakTjeneste(fagsakService, saksopplysningerService, behandlingsgrunnlagService, tilgangService, utpekingService, videresendSoknadService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {
@@ -347,6 +350,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         fagsakTjeneste.utpekLovvalgsland(fagsak.getSaksnummer(), utpekDto);
 
         verify(tilgangService).sjekkSak(fagsak);
-        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner());
+        verify(utpekingService).utpekLovvalgsland(eq(fagsak), eq(utpekDto.getMottakerinstitusjoner()), eq(utpekDto.getFritekstSed()), eq(utpekDto.getFritekstBrev()));
     }
 }

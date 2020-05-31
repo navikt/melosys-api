@@ -14,6 +14,7 @@ import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.DokumentVisningService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -52,7 +53,8 @@ public class DokumentTjeneste {
 
     @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
-    public ResponseEntity hentDokument(@PathVariable("journalpostID") String journalpostID, @PathVariable("dokumentID") String dokumentID)
+    public ResponseEntity<byte[]> hentDokument(@PathVariable("journalpostID") String journalpostID,
+                                               @PathVariable("dokumentID") String dokumentID)
         throws SikkerhetsbegrensningException, IkkeFunnetException {
         byte[] dokument;
         dokument = dokumentVisningService.hentDokument(journalpostID, dokumentID);
@@ -72,27 +74,28 @@ public class DokumentTjeneste {
 
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     public ResponseEntity produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
-                                       @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                       @RequestBody BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
+                                             @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
+                                             @RequestBody BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
         dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
-    @GetMapping(value = "pdf/sed/utkast/{behandlingID}/{sedType}", produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "pdf/sed/utkast/{behandlingID}/{sedType}", produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
-                                      @PathVariable("sedType") SedType sedType) throws MelosysException {
+                                            @PathVariable("sedType") SedType sedType,
+                                            @RequestBody SedPdfData sedPdfData) throws MelosysException {
 
         tilgangService.sjekkTilgang(behandlingID);
-        byte[] dokument = eessiService.genererSedPdf(behandlingID, sedType);
+        byte[] dokument = eessiService.genererSedPdf(behandlingID, sedType, sedPdfData);
         return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
     }
 
     @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
     public ResponseEntity produserDokument(@PathVariable("behandlingID") long behandlingID,
-                                                   @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                                   @RequestBody BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
+                                           @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
+                                           @RequestBody BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
         if (brevBestillingDto.mottaker == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }

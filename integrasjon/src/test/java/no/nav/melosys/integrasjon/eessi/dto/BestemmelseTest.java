@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.eessi.dto;
 
+import no.nav.melosys.domain.eessi.sed.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
@@ -17,6 +18,14 @@ public class BestemmelseTest {
     }
 
     @Test
+    public void map11_4_1FraMelosysBestemmelse_forventKorrektBestemmelse() {
+        LovvalgBestemmelse lovvalgBestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1;
+        Bestemmelse resultat = Bestemmelse.fraMelosysBestemmelse(lovvalgBestemmelse);
+
+        assertThat(resultat).isEqualTo(Bestemmelse.ART_11_3_a);
+    }
+
+    @Test
     public void map12_2FraMelosysBestemmelse_forventKorrektBestemmelse() {
         LovvalgBestemmelse lovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2;
         Bestemmelse resultat = Bestemmelse.fraMelosysBestemmelse(lovvalgBestemmelse);
@@ -25,11 +34,11 @@ public class BestemmelseTest {
     }
 
     @Test
-    public void map11_4_1FraMelosysBestemmelse_forventKorrektBestemmelse() {
-        LovvalgBestemmelse lovvalgBestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1;
+    public void map13_1B4FraMelosysBestemmelse_forventKorrektBestemmelse() {
+        LovvalgBestemmelse lovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4;
         Bestemmelse resultat = Bestemmelse.fraMelosysBestemmelse(lovvalgBestemmelse);
 
-        assertThat(resultat).isEqualTo(Bestemmelse.ART_11_3_a);
+        assertThat(resultat).isEqualTo(Bestemmelse.ART_13_1_b_4);
     }
 
     @Test

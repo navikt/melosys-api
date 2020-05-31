@@ -2,6 +2,7 @@ package no.nav.melosys.service.unntak;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
@@ -50,21 +51,23 @@ public class AnmodningUnntakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon) throws MelosysException {
-        List<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
+    public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon, String ytterligereInformasjonSed) throws MelosysException {
+        Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner);
+        anmodningsperiodeService.validerAnmodningsperiodeForBehandling(behandlingID);
+
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner, ytterligereInformasjonSed);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private List<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) throws MelosysException {
+    private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) throws MelosysException {
         Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
             .orElseThrow(() -> new FunksjonellException("Finner ikke utenlandsk myndighet for behandling " + behandlingID));
 
-        return eessiService.validerOgAvklarMottakerInstitusjonerForBuc(List.of(mottakerinstitusjon), List.of(landkode), BucType.LA_BUC_01);
+        return eessiService.validerOgAvklarMottakerInstitusjonerForBuc(Set.of(mottakerinstitusjon), List.of(landkode), BucType.LA_BUC_01);
     }
 
     @Transactional(rollbackFor = MelosysException.class)

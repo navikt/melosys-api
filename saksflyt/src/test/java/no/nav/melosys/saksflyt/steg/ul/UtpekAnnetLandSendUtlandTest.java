@@ -25,8 +25,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.eessi.BucType.LA_BUC_02;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.UL_DISTRIBUER_JOURNALPOST;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.UL_OPPDATER_BEHANDLINGSRESULTAT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -67,9 +67,9 @@ public class UtpekAnnetLandSendUtlandTest {
 
         utpekAnnetLandSendUtland.utfør(prosessinstans);
 
-        verify(eessiService).opprettOgSendSed(123L, List.of("SE:001", "SE:002"), LA_BUC_02, null);
+        verify(eessiService).opprettOgSendSed(123L, List.of("SE:001", "SE:002"), LA_BUC_02, null, null);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);
+        assertThat(prosessinstans.getSteg()).isEqualTo(UL_OPPDATER_BEHANDLINGSRESULTAT);
     }
 
     @Test

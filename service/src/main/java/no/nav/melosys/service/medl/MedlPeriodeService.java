@@ -11,6 +11,7 @@ import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +26,21 @@ public class MedlPeriodeService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
     private final AnmodningsperiodeRepository anmodningsperiodeRepository;
+    private final UtpekingsperiodeRepository utpekingsperiodeRepository;
+
+    private static final String FEIL_VED_OPPDATERING_MEDL = "Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling ";
 
     public MedlPeriodeService(TpsFasade tpsFasade,
                               MedlFasade medlFasade,
                               BehandlingsresultatService behandlingsresultatService,
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,
-                              AnmodningsperiodeRepository anmodningsperiodeRepository) {
+                              AnmodningsperiodeRepository anmodningsperiodeRepository, UtpekingsperiodeRepository utpekingsperiodeRepository) {
         this.tpsFasade = tpsFasade;
         this.medlFasade = medlFasade;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
         this.anmodningsperiodeRepository = anmodningsperiodeRepository;
+        this.utpekingsperiodeRepository = utpekingsperiodeRepository;
     }
 
     public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
@@ -112,6 +117,8 @@ public class MedlPeriodeService {
             lagreMedlPeriodeId(medlPeriodeID, (Lovvalgsperiode) medlemskapsperiode, behandlingID);
         } else if (medlemskapsperiode instanceof Anmodningsperiode) {
             lagreMedlPeriodeId(medlPeriodeID, (Anmodningsperiode) medlemskapsperiode, behandlingID);
+        } else if (medlemskapsperiode instanceof Utpekingsperiode) {
+            lagreMedlPeriodeId(medlPeriodeID, (Utpekingsperiode) medlemskapsperiode, behandlingID);
         } else {
             throw new UnsupportedOperationException("Uventet medlemskapsperiode kan ikke lagres");
         }
@@ -119,7 +126,7 @@ public class MedlPeriodeService {
 
     private void lagreMedlPeriodeId(Long medlPeriodeID, Lovvalgsperiode lovvalgsperiode, long behandlingID) throws FunksjonellException {
         if (medlPeriodeID == null) {
-            throw new FunksjonellException("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling " + behandlingID);
+            throw new FunksjonellException(FEIL_VED_OPPDATERING_MEDL + behandlingID);
         }
         lovvalgsperiode.setMedlPeriodeID(medlPeriodeID);
         lovvalgsperiodeRepository.save(lovvalgsperiode);
@@ -127,10 +134,18 @@ public class MedlPeriodeService {
 
     private void lagreMedlPeriodeId(Long medlPeriodeID, Anmodningsperiode anmodningsperiode, long behandlingID) throws FunksjonellException {
         if (medlPeriodeID == null) {
-            throw new FunksjonellException("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling " + behandlingID);
+            throw new FunksjonellException(FEIL_VED_OPPDATERING_MEDL + behandlingID);
         }
         anmodningsperiode.setMedlPeriodeID(medlPeriodeID);
         anmodningsperiodeRepository.save(anmodningsperiode);
+    }
+
+    private void lagreMedlPeriodeId(Long medlPeriodeID, Utpekingsperiode utpekingsperiode, long behandlingID) throws FunksjonellException {
+        if (medlPeriodeID == null) {
+            throw new FunksjonellException(FEIL_VED_OPPDATERING_MEDL + behandlingID);
+        }
+        utpekingsperiode.setMedlPeriodeID(medlPeriodeID);
+        utpekingsperiodeRepository.save(utpekingsperiode);
     }
 
     public void avsluttTidligerMedlPeriode(Fagsak fagsak) throws FunksjonellException {

@@ -115,7 +115,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
             defaultEasyRandom().nextObject(String.class),
             defaultEasyRandom().nextObject(String.class),
             defaultEasyRandom().nextObject(LocalDate.class),
-            Collections.singletonList(defaultEasyRandom().toString()),
+            Collections.singleton(defaultEasyRandom().toString()),
             Arrays.asList(
                 sedInformasjonMedGyldigUrl(),
                 sedInformasjonMedGyldigUrl()
