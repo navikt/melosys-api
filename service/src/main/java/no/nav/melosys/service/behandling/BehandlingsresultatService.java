@@ -216,7 +216,7 @@ public class BehandlingsresultatService {
     public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) throws IkkeFunnetException {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         begrunnelser.forEach(b -> b.setBehandlingsresultat(behandlingsresultat));
-        behandlingsresultat.setBehandlingsresultatBegrunnelser(begrunnelser);
+        behandlingsresultat.getBehandlingsresultatBegrunnelser().addAll(begrunnelser);
         behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
         behandlingsresultatRepository.save(behandlingsresultat);
     }
