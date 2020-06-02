@@ -84,7 +84,7 @@ public class VilkaarsresultatService {
     public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
         validerVilkår(vilkaarDtoer);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
+        tømVilkårForBehandlingsresultat(behandlingsresultat);
         vilkaarsresultatRepo.flush();
 
         for (VilkaarDto vilkaarDto :  vilkaarDtoer) {
@@ -95,6 +95,11 @@ public class VilkaarsresultatService {
                 vilkaarDto.getBegrunnelseFritekst());
             vilkaarsresultatRepo.save(vilkaarsresultat);
         }
+    }
+
+    @Transactional(rollbackFor = MelosysException.class)
+    public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
+        vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
     }
 
     private void validerVilkår(List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {

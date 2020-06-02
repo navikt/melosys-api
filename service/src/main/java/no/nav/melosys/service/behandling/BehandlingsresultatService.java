@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +25,12 @@ public class BehandlingsresultatService {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatService.class);
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
-    public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository) {
+    public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
+                                      VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     @Transactional
@@ -36,7 +40,7 @@ public class BehandlingsresultatService {
             log.info("Fjerner avklarte fakta, lovvalgsperioder og vilkårsresultater fra behandlingsresultat med behandlingsid: {} ", behandlingsid);
             behandlingsresultat.getAvklartefakta().clear();
             behandlingsresultat.getLovvalgsperioder().clear();
-            behandlingsresultat.getVilkaarsresultater().clear();
+            vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
             behandlingsresultatRepository.save(behandlingsresultat);
         }
     }
