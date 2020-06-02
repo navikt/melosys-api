@@ -17,6 +17,7 @@ import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,7 @@ public class BehandlingsresultatService {
     private final VilkaarsresultatService vilkaarsresultatService;
 
     public BehandlingsresultatService(BehandlingsresultatRepository behandlingsresultatRepository,
-                                      VilkaarsresultatService vilkaarsresultatService) {
+                                      @Lazy VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
