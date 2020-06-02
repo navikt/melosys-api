@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,12 +35,14 @@ import static org.mockito.Mockito.*;
 public class BehandlingsresultatServiceTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepo;
+    @Mock
+    private VilkaarsresultatService vilkaarsresultatService;
 
     private BehandlingsresultatService behandlingsresultatService;
 
     @Before
     public void setUp() {
-        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo));
+        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
     }
 
     @Test
@@ -55,7 +58,7 @@ public class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
         assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
-        assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
+        verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(eq(behandlingsresultat));
     }
 
     @Test(expected = IkkeFunnetException.class)
