@@ -13,8 +13,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,15 +132,9 @@ public class VilkaarsresultatService {
         vilkaarsresultat.setBehandlingsresultat(behandlingsresultat);
         vilkaarsresultat.setVilkaar(vilkaar);
         vilkaarsresultat.setOppfylt(oppfylt);
-        if (!oppfylt) {
-            vilkaarsresultat.setBegrunnelser(begrunnelseKoder.stream().map(kode -> lagBegrunnelse(vilkaarsresultat, kode))
-                .collect(Collectors.toSet()));
-            vilkaarsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
-        } else {
-            if (CollectionUtils.isNotEmpty(begrunnelseKoder) || StringUtils.isNotBlank(begrunnelseFritekst)) {
-                log.warn("Begrunnelser trengs ikke for oppfylt {} i behandlingsresultat {}.", vilkaar, behandlingsresultat);
-            }
-        }
+        vilkaarsresultat.setBegrunnelser(begrunnelseKoder.stream().map(kode -> lagBegrunnelse(vilkaarsresultat, kode))
+            .collect(Collectors.toSet()));
+        vilkaarsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
         return vilkaarsresultat;
     }
 
