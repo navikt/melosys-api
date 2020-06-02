@@ -194,7 +194,6 @@ public class MelosysEessiMelding {
             ", artikkel='" + artikkel + '\'' +
             ", erEndring=" + erEndring +
             ", midlertidigBestemmelse=" + midlertidigBestemmelse +
-            ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
             ", bucType='" + bucType + '\'' +
             ", sedType='" + sedType + '\'' +
             '}';
