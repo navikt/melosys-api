@@ -81,6 +81,24 @@ public class AnmodningUnntakServiceTest {
     }
 
     @Test
+    public void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws MelosysException {
+        final long behandlingID = 1L;
+        final String fritekstSed = "friteksssst";
+        Behandling behandling = new Behandling();
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-111");
+        behandling.setFagsak(fagsak);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
+
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed);
+
+        verify(anmodningsperiodeService).validerAnmodningsperiodeForBehandling(behandlingID);
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
+        verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
+    }
+
+    @Test
     public void anmodningOmUnntakSvar_validert_forventMetodekall() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
