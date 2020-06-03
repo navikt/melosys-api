@@ -93,7 +93,7 @@ public class AnmodningsperiodeService {
 
     public void validerAnmodningsperiodeForBehandling(long behandlingID) throws FunksjonellException {
         Anmodningsperiode anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
-        if (anmodningsperiode.getTom() != null) {
+        if (anmodningsperiode.getTom() == null) {
             throw new FunksjonellException("Anmodningsperioden mangler sluttdato");
         }
     }
