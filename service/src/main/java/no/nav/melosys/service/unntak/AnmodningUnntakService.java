@@ -1,5 +1,6 @@
 package no.nav.melosys.service.unntak;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -19,6 +20,7 @@ import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -67,7 +69,9 @@ public class AnmodningUnntakService {
         Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
             .orElseThrow(() -> new FunksjonellException("Finner ikke utenlandsk myndighet for behandling " + behandlingID));
 
-        return eessiService.validerOgAvklarMottakerInstitusjonerForBuc(Set.of(mottakerinstitusjon), List.of(landkode), BucType.LA_BUC_01);
+        return eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+            StringUtils.isEmpty(mottakerinstitusjon) ? Collections.emptySet() : Set.of(mottakerinstitusjon),
+            List.of(landkode), BucType.LA_BUC_01);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
