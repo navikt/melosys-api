@@ -2,14 +2,15 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 
-import org.jeasy.random.EasyRandom;
 import no.nav.dok.melosysbrev._000074.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,6 +45,7 @@ public class MangelbrevMapperTest {
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
         Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
@@ -59,10 +61,12 @@ public class MangelbrevMapperTest {
     public void mapFag() throws Exception {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
-
         brevData.fritekst = "Test";
 
-        Fag fag = mapper.mapFag(brevData);
+        Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
+
+        Fag fag = mapper.mapFag(brevData, behandling);
 
         assertThat(fag).isNotNull();
         assertThat(fag.getDatoMottatt()).isNotNull();
@@ -78,9 +82,9 @@ public class MangelbrevMapperTest {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-
         expectedException.expect(IntegrasjonException.class);
+        expectedException.expectMessage("Mangelbrev mangler informasjon");
 
-        mapper.mapFag(brevData);
+        mapper.mapFag(brevData, new Behandling());
     }
 }

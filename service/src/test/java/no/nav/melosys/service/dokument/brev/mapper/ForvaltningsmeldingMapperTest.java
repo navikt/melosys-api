@@ -2,13 +2,14 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 
-import org.jeasy.random.EasyRandom;
 import no.nav.dok.melosysbrev._000082.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,6 +41,7 @@ public class ForvaltningsmeldingMapperTest {
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
         Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.UTSENDT_SELVSTENDIG);
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
@@ -52,8 +54,10 @@ public class ForvaltningsmeldingMapperTest {
     public void mapFag() throws Exception {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+        Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-        Fag fag = mapper.mapFag(brevData);
+        Fag fag = mapper.mapFag(brevData, behandling);
 
         assertThat(fag).isNotNull();
         assertThat(fag.getDatoMottatt()).isNotNull();

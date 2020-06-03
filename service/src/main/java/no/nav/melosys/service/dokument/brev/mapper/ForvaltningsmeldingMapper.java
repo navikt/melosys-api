@@ -30,15 +30,16 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
-        Fag fag = mapFag(brevData);
+        Fag fag = mapFag(brevData, behandling);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    Fag mapFag(BrevData brevData) {
+    Fag mapFag(BrevData brevData, Behandling behandling) {
         Fag fag = new Fag();
         BrevDataMottattDato brevDataMottattDato = (BrevDataMottattDato) brevData;
         final Instant forsendelseMottattTidspunkt = brevDataMottattDato.initierendeJournalpostForsendelseMottattTidspunkt;
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
         fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(forsendelseMottattTidspunkt));
         fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(forsendelseMottattTidspunkt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS)));
 
