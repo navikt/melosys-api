@@ -114,7 +114,18 @@ public class ProsessinstansService {
     }
 
     public boolean harAktivProsessinstans(Long behandlingID) {
-        return prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG).isPresent();
+        return prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(
+            behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG
+        ).isPresent();
+    }
+
+    public boolean harAktivVedtakInstans(Long behandlingID) {
+        return prosessinstansRepo.findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(
+            ProsessType.IVERKSETT_VEDTAK,
+            behandlingID,
+            ProsessSteg.FEILET_MASKINELT,
+            ProsessSteg.FERDIG
+        ).isPresent();
     }
 
     public void lagre(Prosessinstans prosessinstans) {

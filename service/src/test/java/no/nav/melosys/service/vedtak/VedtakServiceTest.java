@@ -214,7 +214,7 @@ public class VedtakServiceTest {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         behandlingsresultat.setType(resultatType);
-        when(prosessinstansService.harAktivProsessinstans(eq(behandlingID))).thenReturn(true);
+        when(prosessinstansService.harAktivVedtakInstans(eq(behandlingID))).thenReturn(true);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null));

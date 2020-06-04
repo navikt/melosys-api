@@ -88,7 +88,7 @@ public class VedtakService {
 
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandlingID, mottakerinstitusjoner, behandlingsresultat);
 
-        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
+        if (prosessinstansService.harAktivVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
         }
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
