@@ -6,7 +6,6 @@ import java.util.Collections;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -77,7 +76,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), true, ident);
         } else {
             medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), true, ident);
-            behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         }
     }
 }
