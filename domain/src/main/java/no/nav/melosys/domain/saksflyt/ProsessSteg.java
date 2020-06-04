@@ -122,7 +122,6 @@ public enum ProsessSteg implements Kodeverk {
     AFL_OPPRETT_BEHANDLINGSGRUNNLAG("AFL_OPPRETT_BEHANDLINGSGRUNNLAG","Oppretter behandlingsgrunnlag"),
     AFL_REGISTERKONTROLL("AFL_REGISTERKONTROLL","Utfører registerkontroll"),
     AFL_OPPRETT_OPPGAVE("AFL_OPPRETT_OPPGAVE","Oppretter oppgave til manuell behandling"),
-    AFL_OPPDATER_MEDL("AFL_OPPDATER_MEDL", "Setter status i MEDL"),
 
     // Svar på A003
     AFL_SVAR_SEND_AVSLAG("AFL_SVAR_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),

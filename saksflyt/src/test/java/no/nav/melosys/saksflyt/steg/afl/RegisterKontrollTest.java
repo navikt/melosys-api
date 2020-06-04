@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.afl;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsmaate;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -8,8 +9,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.kontroll.KontrollresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.KontrollresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,8 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RegisterKontrollTest {
@@ -40,7 +41,9 @@ public class RegisterKontrollTest {
         Prosessinstans prosessinstans = prosessinstans(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat(false));
         registerKontroll.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_OPPDATER_MEDL);
+
+        verify(behandlingsresultatService).oppdaterBehandlingsMaate(eq(123L), eq(Behandlingsmaate.AUTOMATISERT));
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
     }
 
     @Test
@@ -48,6 +51,8 @@ public class RegisterKontrollTest {
         Prosessinstans prosessinstans = prosessinstans(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat(true));
         registerKontroll.utfør(prosessinstans);
+
+        verify(behandlingsresultatService).oppdaterBehandlingsMaate(eq(123L), eq(Behandlingsmaate.DELVIS_AUTOMATISERT));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_OPPRETT_OPPGAVE);
     }
 
@@ -56,6 +61,8 @@ public class RegisterKontrollTest {
         Prosessinstans prosessinstans = prosessinstans(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat(false));
         registerKontroll.utfør(prosessinstans);
+
+        verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(anyLong(), any(Behandlingsmaate.class));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_OPPRETT_OPPGAVE);
     }
 
