@@ -1,8 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.Collection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,11 +9,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
+import no.nav.melosys.tjenester.gui.schema.ClasspathSchemaClient;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -24,7 +22,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 
 import static org.jeasy.random.FieldPredicates.named;
@@ -131,16 +128,5 @@ public class JsonSchemaTestParent {
             .map(ValidationException::toJSON)
             .forEach(jsonObject -> logger.error(jsonObject.toString()));
         throw e;
-    }
-
-    private class ClasspathSchemaClient implements SchemaClient {
-        public InputStream get(String url) {
-            try {
-                url = url.replace("http://melosys.nav.no/schemas", "");
-                return new ClassPathResource(url).getInputStream();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
     }
 }
