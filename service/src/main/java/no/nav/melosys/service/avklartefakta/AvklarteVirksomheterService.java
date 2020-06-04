@@ -13,7 +13,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +82,7 @@ public class AvklarteVirksomheterService {
     }
 
     public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        throws IkkeFunnetException, TekniskException {
         List<AvklartVirksomhet> norskeVirksomheter = hentNorskeArbeidsgivere(behandling, adressekonverterer);
         norskeVirksomheter.addAll(hentNorskeSelvstendigeForetak(behandling, adressekonverterer));
         return norskeVirksomheter;

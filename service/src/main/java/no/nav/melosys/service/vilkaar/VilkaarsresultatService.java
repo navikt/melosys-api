@@ -13,8 +13,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -24,8 +22,6 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 
 @Service
 public class VilkaarsresultatService {
-    private static final Logger log = LoggerFactory.getLogger(VilkaarsresultatService.class);
-
     private final BehandlingsresultatService behandlingsresultatService;
     private final VilkaarsresultatRepository vilkaarsresultatRepo;
 
@@ -85,7 +81,7 @@ public class VilkaarsresultatService {
         tømVilkårForBehandlingsresultat(behandlingsresultat);
         vilkaarsresultatRepo.flush();
 
-        for (VilkaarDto vilkaarDto :  vilkaarDtoer) {
+        for (VilkaarDto vilkaarDto : vilkaarDtoer) {
             Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(behandlingsresultat,
                 Vilkaar.valueOf(vilkaarDto.getVilkaar()),
                 vilkaarDto.isOppfylt(),

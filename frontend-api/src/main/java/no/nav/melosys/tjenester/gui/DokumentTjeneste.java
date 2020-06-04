@@ -63,7 +63,8 @@ public class DokumentTjeneste {
 
     @GetMapping("/oversikt/{saksnummer}")
     @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
-    public ResponseEntity hentDokumenter(@PathVariable("saksnummer") String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+    public ResponseEntity<List<JournalpostInfoDto>> hentDokumenter(@PathVariable("saksnummer") String saksnummer)
+        throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
         List<JournalpostInfoDto> dokumentListe = dokumentVisningService.hentDokumenter(saksnummer)
             .stream()
             .map(JournalpostInfoDto::av)
@@ -73,29 +74,31 @@ public class DokumentTjeneste {
     }
 
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
-    public ResponseEntity produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
-                                             @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                             @RequestBody BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
+    public ResponseEntity<byte[]> produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
+                                                     @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
+                                                     @RequestBody BrevbestillingDto brevBestillingDto)
+        throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
         dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
-    @PostMapping(value = "pdf/sed/utkast/{behandlingID}/{sedType}", produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
-                                            @PathVariable("sedType") SedType sedType,
-                                            @RequestBody SedPdfData sedPdfData) throws MelosysException {
-
+    @PostMapping(value = "pdf/sed/utkast/{behandlingID}/{sedType}",
+        produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<byte[]> produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
+                                                    @PathVariable("sedType") SedType sedType,
+                                                    @RequestBody SedPdfData sedPdfData) throws MelosysException {
         tilgangService.sjekkTilgang(behandlingID);
         byte[] dokument = eessiService.genererSedPdf(behandlingID, sedType, sedPdfData);
         return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
     }
 
     @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
-    public ResponseEntity produserDokument(@PathVariable("behandlingID") long behandlingID,
-                                           @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                           @RequestBody BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<Void> produserDokument(@PathVariable("behandlingID") long behandlingID,
+                                                 @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
+                                                 @RequestBody BrevbestillingDto brevBestillingDto)
+        throws FunksjonellException, TekniskException {
         if (brevBestillingDto.mottaker == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
@@ -106,7 +109,7 @@ public class DokumentTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    private static ResponseEntity lagResponseAvDokument(byte[] dokument, String filnavn) {
+    private static ResponseEntity<byte[]> lagResponseAvDokument(byte[] dokument, String filnavn) {
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(dokument.length))
             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + filnavn)

@@ -46,7 +46,7 @@ public class BehandlingsnotatTjeneste {
     @ApiOperation(value = "Henter alle notater knyttet til behandlinger for fagsaken",
         response = BehandlingsnotatGetDto.class,
         responseContainer = "List")
-    public ResponseEntity<Collection> hentBehandlingsnotaterForFagsak(@PathVariable("saksnummer") String saksnummer)
+    public ResponseEntity<Collection<BehandlingsnotatGetDto>> hentBehandlingsnotaterForFagsak(@PathVariable("saksnummer") String saksnummer)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         tilgangService.sjekkSak(saksnummer);
 
