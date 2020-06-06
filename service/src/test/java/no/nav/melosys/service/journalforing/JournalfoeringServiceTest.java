@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -27,6 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,7 +86,7 @@ public class JournalfoeringServiceTest {
     }
 
     @Test
-    public void opprettSakOgJournalfør() throws MelosysException {
+    public void opprettSakOgJournalfør_ikkeSed_prosessinstansBlirOpprettet() throws MelosysException {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK");
         opprettDto.setFagsak(fagsakDto);
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
@@ -96,11 +98,13 @@ public class JournalfoeringServiceTest {
         verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void opprettSakOgJournalfør_fomEtterTom_feiler() throws MelosysException {
+    @Test
+    public void opprettSakOgJournalfør_fomEtterTom_feiler() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MAX, LocalDate.MIN, "DK");
         opprettDto.setFagsak(fagsakDto);
-        journalfoeringService.opprettOgJournalfør(opprettDto);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .withMessageContaining("Fra og med dato kan ikke være etter til og med dato");
     }
 
     @Test
@@ -116,19 +120,24 @@ public class JournalfoeringServiceTest {
         verify(oppgaveService).ferdigstillOppgave(anyString());
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void opprettSakOgJournalfør_oppgaveID_mangler() throws MelosysException {
+    @Test
+    public void opprettSakOgJournalfør_oppgaveID_mangler() {
         opprettDto.setOppgaveID(null);
-        journalfoeringService.opprettOgJournalfør(opprettDto);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .withMessageContaining("OppgaveID mangler");
     }
 
-    @Test(expected = FunksjonellException.class)
+    @Test
     public void opprettOgJournalfør_støtterAutomatiskBehandling_forventException() throws MelosysException {
         opprettDto.setBehandlingstemaKode(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode());
         journalpost.setMottaksKanal("EESSI");
         when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.TRUE);
 
-        journalfoeringService.opprettOgJournalfør(opprettDto);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .withMessageContaining("skal ikke journalføres manuelt");
     }
 
     @Test
@@ -141,14 +150,15 @@ public class JournalfoeringServiceTest {
         verify(prosessinstansService).opprettProsessinstansGenerellSedBehandling(any(JournalfoeringOpprettDto.class));
     }
 
-    @Test(expected = FunksjonellException.class)
+    @Test
     public void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_feilBehandlingstype() throws MelosysException {
         opprettDto.setBehandlingstemaKode(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode());
         journalpost.setMottaksKanal("EESSI");
         when(eessiService.støtterAutomatiskBehandling(anyString())).thenReturn(Boolean.FALSE);
 
-        journalfoeringService.opprettOgJournalfør(opprettDto);
-        verify(prosessinstansService).opprettProsessinstansSedMottak(anyString(), anyString());
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .withMessageContaining("Manuell journalføring av behandlingstema");
     }
 
     @Test
@@ -196,9 +206,12 @@ public class JournalfoeringServiceTest {
     }
 
     @Test(expected = FunksjonellException.class)
-    public void tilordneSakOgJournalfør_saksnr_mangler() throws FunksjonellException, TekniskException {
+    public void tilordneSakOgJournalfør_saksnr_mangler() {
         tilordneDto.setSaksnummer("");
-        journalfoeringService.tilordneSakOgJournalfør(tilordneDto);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.tilordneSakOgJournalfør(tilordneDto))
+            .withMessageContaining("Saksnummer mangler");
     }
 
     @Test
@@ -206,34 +219,49 @@ public class JournalfoeringServiceTest {
         journalfoeringService.valider(opprettDto);
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void valider_brukerID_mangler() throws FunksjonellException {
+    @Test
+    public void valider_brukerID_mangler() {
         opprettDto.setBrukerID(null);
-        journalfoeringService.valider(opprettDto);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.valider(opprettDto))
+            .withMessageContaining("BrukerID mangler");
     }
 
-    @Test(expected = FunksjonellException.class)
+    @Test
     public void journalførSed_støtterIkkeAutomatiskBehandling_forventException() throws MelosysException {
         when(eessiService.støtterAutomatiskBehandling(eq(journalfoeringSedDto.getJournalpostID()))).thenReturn(false);
-        journalfoeringService.journalførSed(journalfoeringSedDto);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførSed(journalfoeringSedDto))
+            .withMessageContaining("støtter ikke automatisk behandling");
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void journalførSed_manglerBrukerID_forventException() throws MelosysException {
+    @Test
+    public void journalførSed_manglerBrukerID_forventException() {
         journalfoeringSedDto.setBrukerID(null);
-        journalfoeringService.journalførSed(journalfoeringSedDto);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførSed(journalfoeringSedDto))
+            .withMessageContaining("BrukerID mangler");
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void journalførSed_manglerJournalpostID_forventException() throws MelosysException {
+    @Test
+    public void journalførSed_manglerJournalpostID_forventException() {
         journalfoeringSedDto.setJournalpostID(null);
-        journalfoeringService.journalførSed(journalfoeringSedDto);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførSed(journalfoeringSedDto))
+            .withMessageContaining("JournalpostID mangler");
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void journalførSed_manglerOppgaveID_forventException() throws MelosysException {
+    @Test
+    public void journalførSed_manglerOppgaveID_forventException() {
         journalfoeringSedDto.setOppgaveID(null);
-        journalfoeringService.journalførSed(journalfoeringSedDto);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførSed(journalfoeringSedDto))
+            .withMessageContaining("OppgaveID mangler");
     }
 
     @Test
