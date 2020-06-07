@@ -3,7 +3,9 @@ package no.nav.melosys.service.journalforing;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -14,11 +16,11 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -36,15 +38,17 @@ public class JournalfoeringService {
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final EessiService eessiService;
+    private final FagsakService fagsakService;
 
     @Autowired
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  OppgaveService oppgaveService,
-                                 ProsessinstansService prosessinstansService, EessiService eessiService) {
+                                 ProsessinstansService prosessinstansService, EessiService eessiService, FagsakService fagsakService) {
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
+        this.fagsakService = fagsakService;
     }
 
     public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
@@ -55,8 +59,8 @@ public class JournalfoeringService {
     public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         Journalpost journalpost = hentJournalpost(journalfoeringDto.getJournalpostID());
 
-        if (journalpost.mottaksKanalErEessi() && eessiService.støtterAutomatiskBehandling(journalpost.getJournalpostId())) {
-            throw new FunksjonellException("Journalpost med id " + journalpost.getJournalpostId() + " skal ikke journalføres manuelt");
+        if (journalpost.mottaksKanalErEessi()) {
+            validerKanOppretteSakFraSed(journalpost);
         }
 
         if (journalfoeringDto.behandlingstypeErSøknad()){
@@ -66,12 +70,34 @@ public class JournalfoeringService {
         } else if (journalpost.mottaksKanalErEessi()) {
             opprettSakForSed(journalfoeringDto);
         } else {
-            throw new IllegalArgumentException(
+            throw new FunksjonellException(
                 String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
             );
         }
 
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
+    }
+
+    private void validerKanOppretteSakFraSed(Journalpost journalpost) throws MelosysException {
+
+        final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
+        validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding);
+
+        Optional<Fagsak> tilknyttetFagsak = finnSakTilknyttetSed(melosysEessiMelding);
+        if (tilknyttetFagsak.isPresent()) {
+             throw new FunksjonellException(String.format("RINA-sak %s er allerede tilknyttet %s", melosysEessiMelding.getRinaSaksnummer(), tilknyttetFagsak.get().getSaksnummer()));
+        }
+    }
+
+    private Optional<Fagsak> finnSakTilknyttetSed(MelosysEessiMelding melosysEessiMelding) throws MelosysException {
+        final Optional<Long> tilknyttetArkivsak = eessiService.finnSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
+        return tilknyttetArkivsak.flatMap(fagsakService::finnFagsakFraGsakSaksnummer);
+    }
+
+    private void validerSkalIkkeBehandlesAutomatisk(MelosysEessiMelding melosysEessiMelding) throws FunksjonellException {
+        if (eessiService.støtterAutomatiskBehandling(melosysEessiMelding)) {
+            throw new FunksjonellException("Journalpost med id " + melosysEessiMelding.getJournalpostId() + " skal ikke journalføres manuelt");
+        }
     }
 
     private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
@@ -145,8 +171,15 @@ public class JournalfoeringService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
-        String saksnummer = journalfoeringDto.getSaksnummer();
+    public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws MelosysException {
+
+        final Journalpost journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
+        final String saksnummer = journalfoeringDto.getSaksnummer();
+
+        if (journalpost.mottaksKanalErEessi()) {
+            validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
+        }
+
         Behandlingstyper behandlingstype =  StringUtils.isNotEmpty(journalfoeringDto.getBehandlingstypeKode())
             ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
 
@@ -169,8 +202,17 @@ public class JournalfoeringService {
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
-    // Denne er package-visible kun for at det skal være lettere å teste den isolert
-    void valider(JournalfoeringDto journalfoeringDto) throws FunksjonellException {
+    private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) throws MelosysException {
+        final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
+        validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding);
+
+        Optional<Fagsak> tilknyttetFagsak = finnSakTilknyttetSed(melosysEessiMelding);
+        if (tilknyttetFagsak.isPresent() && !tilknyttetFagsak.get().getSaksnummer().equals(tilknyttTilSaksnummer)) {
+            throw new FunksjonellException(String.format("RINA-sak %s er allerede tilknyttet %s", melosysEessiMelding.getRinaSaksnummer(), tilknyttetFagsak.get().getSaksnummer()));
+        }
+    }
+
+    private void valider(JournalfoeringDto journalfoeringDto) throws FunksjonellException {
         if (StringUtils.isEmpty(journalfoeringDto.getJournalpostID())) {
             throw new FunksjonellException("JournalpostID mangler");
         }

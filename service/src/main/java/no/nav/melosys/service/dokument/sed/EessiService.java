@@ -117,11 +117,19 @@ public class EessiService {
     }
 
     public boolean støtterAutomatiskBehandling(String journalpostID) throws MelosysException {
-        return finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID).isPresent();
+        return finnBehandlingstemaForSedTilknyttetJournalpost(hentSedTilknyttetJournalpost(journalpostID)).isPresent();
+    }
+
+    public boolean støtterAutomatiskBehandling(MelosysEessiMelding melosysEessiMelding) {
+        return finnBehandlingstemaForSedTilknyttetJournalpost(melosysEessiMelding).isPresent();
     }
 
     public Optional<Behandlingstema> finnBehandlingstemaForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
-        MelosysEessiMelding melosysEessiMelding = hentSedTilknyttetJournalpost(journalpostID);
+        return finnBehandlingstemaForSedTilknyttetJournalpost(hentSedTilknyttetJournalpost(journalpostID));
+
+    }
+
+    private Optional<Behandlingstema> finnBehandlingstemaForSedTilknyttetJournalpost(MelosysEessiMelding melosysEessiMelding) {
         String sedType = melosysEessiMelding.getSedType();
         String lovvalgsland = melosysEessiMelding.getLovvalgsland();
         return SedTypeTilBehandlingstemaMapper.finnBehandlingstemaForSedType(sedType, lovvalgsland);
