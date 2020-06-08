@@ -26,12 +26,13 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_RESULTAT;
 
 
 @Component
 public class SendVedtakUtland extends AbstraktSendUtland {
-    private BehandlingService behandlingService;
-    private BrevBestiller brevBestiller;
+    private final BehandlingService behandlingService;
+    private final BrevBestiller brevBestiller;
     private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
@@ -61,12 +62,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             super.sendUtland(avklarBucType(behandling), prosessinstans);
         }
 
-        if (erArtikkel11(prosessinstans)) {
-            prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
-        } else {
-            prosessinstans.setSteg(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
-        }
-
+        prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
     }
 
     private void sendA012Sed(long behandlingID, String ytterligereInformasjon) throws MelosysException {
@@ -98,12 +94,6 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.erInnvilgelse() &&
             behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse() != Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
-    }
-
-    private boolean erArtikkel11(Prosessinstans prosessinstans) throws IkkeFunnetException {
-        return behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId())
-            .hentValidertLovvalgsperiode()
-            .erArtikkel11();
     }
 
     private BucType avklarBucType(Behandling behandling) throws IkkeFunnetException, TekniskException {

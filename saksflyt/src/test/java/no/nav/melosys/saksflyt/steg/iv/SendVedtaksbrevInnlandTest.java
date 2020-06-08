@@ -406,11 +406,11 @@ public class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    public final void utførSteg_avslag12_1_tilAvsluttBehandling() throws Exception {
+    public final void utførSteg_avslag12_1_tilOppdaterResultat() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
     }
 
     @Test
