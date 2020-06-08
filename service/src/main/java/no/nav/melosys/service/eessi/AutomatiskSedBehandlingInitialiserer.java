@@ -1,6 +1,8 @@
 package no.nav.melosys.service.eessi;
 
 
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -8,6 +10,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
 
 public interface AutomatiskSedBehandlingInitialiserer {
 
@@ -24,4 +27,21 @@ public interface AutomatiskSedBehandlingInitialiserer {
     }
 
     ProsessType hentAktuellProsessType();
+
+    default boolean periodeErEndret(MelosysEessiMelding melosysEessiMelding, Behandlingsresultat behandlingsresultat) {
+        Periode periode = tilPeriode(melosysEessiMelding.getPeriode());
+        String lovvalgsLand = melosysEessiMelding.getLovvalgsland();
+
+        return behandlingsresultat.finnValidertLovvalgsperiode().map(lovvalgsperiode ->
+            !PeriodeKontroller.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), periode.getFom(), periode.getTom())
+                || !lovvalgsLand.equalsIgnoreCase(lovvalgsperiode.getLovvalgsland().getKode()))
+            .orElse(true);
+    }
+
+    default Periode tilPeriode(no.nav.melosys.domain.eessi.Periode periode) {
+        return new Periode(
+            periode.getFom(),
+            periode.getTom()
+        );
+    }
 }

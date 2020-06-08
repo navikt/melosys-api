@@ -3,6 +3,7 @@ package no.nav.melosys.service.eessi;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -15,9 +16,9 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 //A003
@@ -26,13 +27,15 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
 
     public ArbeidFlereLandMottakInitialiserer(FagsakService fagsakService,
                                               BehandlingService behandlingService,
-                                              @Qualifier("system") OppgaveService oppgaveService) {
+                                              BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
     }
 
@@ -49,16 +52,26 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
             throw new FunksjonellException("Finner ingen sak tilknyttet gsaksaksnummer " + gsakSaksnummer);
         }
 
-        Behandling behandling = fagsak.get().getAktivBehandling();
-        if (behandling == null || behandling.getStatus() == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) {
-            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-                fagsak.get().getSistOppdaterteBehandling(),
-                prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID),
-                prosessinstans.getData(ProsessDataKey.AKTØR_ID),
-                prosessinstans.hentSaksbehandlerHvisTilordnes()
-            );
-        } else {
-            behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+        final MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+        final Behandling eksisterendeBehandling = fagsak.get().hentSistAktiveBehandling();
+        final Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(eksisterendeBehandling.getId());
+        final Behandlingstema nyttBehandlingstema = hentBehandlingstema(melosysEessiMelding);
+
+        if (eksisterendeBehandling.getTema() != nyttBehandlingstema) {
+            return RutingResultat.NY_BEHANDLING;
+        } else if (nyttBehandlingstema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
+            return RutingResultat.NY_BEHANDLING;
+        } else if (nyttBehandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE) {
+            if (eksisterendeBehandling.erAktiv()) {
+                behandlingService.oppdaterStatus(eksisterendeBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+            } else {
+                oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
+                    eksisterendeBehandling,
+                    prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID),
+                    prosessinstans.getData(ProsessDataKey.AKTØR_ID),
+                    prosessinstans.hentSaksbehandlerHvisTilordnes()
+                );
+            }
         }
 
         return RutingResultat.INGEN_BEHANDLING;
