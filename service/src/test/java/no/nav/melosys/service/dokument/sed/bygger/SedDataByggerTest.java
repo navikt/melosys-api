@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.service.dokument.sed.bygger.SedDataBygger.INGEN_FAST_ADRESSE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
@@ -358,6 +359,20 @@ public class SedDataByggerTest {
 
         lagUtkastAssertions(sedData);
         assertThat(sedData.getBostedsadresse()).isEqualToComparingFieldByField(new Adresse());
+    }
+
+    @Test
+    public void lagUtkast_harIkkeFastArbeidsstedForArbeidsland_arbeidsstedBlirSatt() throws TekniskException, FunksjonellException {
+        when(landvelgerService.hentAlleArbeidsland(anyLong())).thenReturn(List.of(Landkoder.SE));
+        SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
+        SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidssteder().size()).isEqualTo(2);
+
+        Arbeidssted ikkeOppgittArbeidsstedForLand = sedData.getArbeidssteder().get(1);
+
+        assertThat(ikkeOppgittArbeidsstedForLand.getNavn()).isEqualTo(INGEN_FAST_ADRESSE);
+        assertThat(ikkeOppgittArbeidsstedForLand.getAdresse().getPoststed()).isEqualTo(INGEN_FAST_ADRESSE);
     }
 
     private void lagUtkastAssertions(SedDataDto sedData) {
