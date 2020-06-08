@@ -4,9 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
@@ -67,7 +65,7 @@ public class JournalfoeringTjeneste {
 
     @PostMapping("tilordne")
     @ApiOperation(value = "Tilordne sak og journalfør.")
-    public ResponseEntity tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalfoeringDto) throws MelosysException {
         journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
         return ResponseEntity.noContent().build();
     }
