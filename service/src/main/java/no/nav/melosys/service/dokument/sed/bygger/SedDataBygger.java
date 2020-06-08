@@ -97,7 +97,7 @@ public class SedDataBygger {
         sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(dataGrunnlag));
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(dataGrunnlag));
 
-        sedDataDto.setArbeidssteder(hentArbeidssteder(dataGrunnlag, sedDataDto));
+        sedDataDto.setArbeidssteder(hentArbeidssteder(dataGrunnlag));
 
         sedDataDto.setAvklartBostedsland(
             landvelgerService.hentBostedsland(dataGrunnlag.getBehandling().getId(), dataGrunnlag.getBehandlingsgrunnlagData()).getKode()
@@ -115,7 +115,7 @@ public class SedDataBygger {
         return sedDataDto;
     }
 
-    private List<Arbeidssted> hentArbeidssteder(SedDataGrunnlagMedSoknad dataGrunnlag, SedDataDto sedDataDto) throws IkkeFunnetException {
+    private List<Arbeidssted> hentArbeidssteder(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException {
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList());
 
@@ -125,7 +125,7 @@ public class SedDataBygger {
             .map(Landkoder::getKode)
             .distinct()
             .filter(not(arbeidsland::contains))
-            .map(SedDataBygger::lagArbeidssted)
+            .map(SedDataBygger::lagTomtArbeidssted)
             .forEach(arbeidssteder::add);
 
         return arbeidssteder;
@@ -358,7 +358,7 @@ public class SedDataBygger {
         return virksomhet;
     }
 
-    private static Arbeidssted lagArbeidssted(String landkode) {
+    private static Arbeidssted lagTomtArbeidssted(String landkode) {
         Adresse adresse = new Adresse();
         adresse.setPoststed(INGEN_FAST_ADRESSE);
         adresse.setLand(landkode);
