@@ -1,6 +1,7 @@
 package no.nav.melosys.service.utpeking;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -8,6 +9,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Utpekingsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -26,7 +30,9 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -39,6 +45,8 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UtpekingServiceTest {
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private BehandlingService behandlingService;
@@ -58,7 +66,7 @@ public class UtpekingServiceTest {
     private UtpekingService utpekingService;
 
     private final long behandlingID = 431;
-    private Behandling behandling = new Behandling();
+    private Behandling behandling = lagBehandlingMedBehandlingsgrunnlag();
     private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private Fagsak fagsak = new Fagsak();
 
@@ -177,10 +185,34 @@ public class UtpekingServiceTest {
             .withMessageContaining("er allerede markert som sendtUtland");
     }
 
+    @Test
+    public void utpekLovvalgsland_harTomtForetakNavn_forventException() throws MelosysException {
+        Behandling behandling = lagBehandlingMedBehandlingsgrunnlag();
+        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().arbeidUtland.add(new ArbeidUtland());
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(behandlingID))).thenReturn(behandling);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Foretaksnavn kan ikke være tomt");
+
+        utpekingService.utpekLovvalgsland(fagsak, null, null, null);
+    }
+
     private UtpekingAvvis lagUtpekingAvvis() {
         UtpekingAvvis utpekingAvvis = new UtpekingAvvis();
         utpekingAvvis.setBegrunnelse("taddaaa");
         utpekingAvvis.setEtterspørInformasjon(Boolean.TRUE);
         return utpekingAvvis;
+    }
+
+    private static Behandling lagBehandlingMedBehandlingsgrunnlag() {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.foretakUtland = new ArrayList<>();
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
+        Behandling behandling = new Behandling();
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        return behandling;
     }
 }

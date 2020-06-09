@@ -9,6 +9,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Utpekingsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
@@ -80,6 +82,7 @@ public class UtpekingService {
     public void utpekLovvalgsland(Fagsak fagsak, Set<String> mottakerinstitusjoner, String ytterligereInformasjonSed, String fritekstBrev) throws MelosysException {
         long behandlingID = fagsak.getAktivBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        validerBehandlingsgrunnlagData(behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
 
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
@@ -134,6 +137,14 @@ public class UtpekingService {
     private void validerUtpekingsperiode(Utpekingsperiode utpekingsperiode) throws FunksjonellException {
         if (utpekingsperiode.getTom() == null) {
             throw new FunksjonellException("Utpekingsperioden mangler sluttdato");
+        }
+    }
+
+    private void validerBehandlingsgrunnlagData(BehandlingsgrunnlagData behandlingsgrunnlagData) throws FunksjonellException {
+        for (ArbeidUtland arbeidUtland : behandlingsgrunnlagData.arbeidUtland) {
+            if (org.apache.commons.lang3.StringUtils.isEmpty(arbeidUtland.foretakNavn)) {
+                throw new FunksjonellException("Foretaksnavn kan ikke være tomt");
+            }
         }
     }
 

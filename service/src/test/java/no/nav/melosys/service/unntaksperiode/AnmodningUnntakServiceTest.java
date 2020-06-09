@@ -1,11 +1,15 @@
 package no.nav.melosys.service.unntaksperiode;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -66,10 +70,7 @@ public class AnmodningUnntakServiceTest {
         final long behandlingID = 1L;
         final String mottakerInstitusjon = "SE:432";
         final String fritekstSed = "friteksssst";
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
-        behandling.setFagsak(fagsak);
+        Behandling behandling = lagBehandlingMedBehandlingsgrunnlag();
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
@@ -84,10 +85,7 @@ public class AnmodningUnntakServiceTest {
     public void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws MelosysException {
         final long behandlingID = 1L;
         final String fritekstSed = "friteksssst";
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
-        behandling.setFagsak(fagsak);
+        Behandling behandling = lagBehandlingMedBehandlingsgrunnlag();
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
@@ -185,6 +183,22 @@ public class AnmodningUnntakServiceTest {
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
     }
 
+    @Test
+    public void anmodningOmUnntak_harTomtForetakNavn_forventException() throws MelosysException {
+        final long behandlingID = 1L;
+        final String fritekstSed = "friteksssst";
+        Behandling behandling = lagBehandlingMedBehandlingsgrunnlag();
+        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().arbeidUtland.add(new ArbeidUtland());
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Foretaksnavn kan ikke være tomt");
+
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed);
+    }
+
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
@@ -192,6 +206,18 @@ public class AnmodningUnntakServiceTest {
         behandling.setFagsak(fagsak);
         behandling.setId(1L);
 
+        return behandling;
+    }
+
+    private static Behandling lagBehandlingMedBehandlingsgrunnlag() {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.foretakUtland = new ArrayList<>();
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
+        Behandling behandling = lagBehandling();
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandling;
     }
 }

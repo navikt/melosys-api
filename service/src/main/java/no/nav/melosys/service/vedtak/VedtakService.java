@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -30,6 +32,7 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +82,7 @@ public class VedtakService {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstypeFattVedtak(behandling);
+        validerBehandlingsgrunnlagData(behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
@@ -136,6 +140,14 @@ public class VedtakService {
     private void validerBehandlingstypeFattVedtak(Behandling behandling) throws FunksjonellException {
         if (!behandling.kanResultereIVedtak()) {
             throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstema " + behandling.getTema().getBeskrivelse());
+        }
+    }
+
+    private void validerBehandlingsgrunnlagData(BehandlingsgrunnlagData behandlingsgrunnlagData) throws FunksjonellException {
+        for (ArbeidUtland arbeidUtland : behandlingsgrunnlagData.arbeidUtland) {
+            if (StringUtils.isEmpty(arbeidUtland.foretakNavn)) {
+                throw new FunksjonellException("Foretaksnavn kan ikke være tomt");
+            }
         }
     }
 

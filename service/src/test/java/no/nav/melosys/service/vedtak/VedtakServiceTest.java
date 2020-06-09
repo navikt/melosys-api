@@ -1,12 +1,16 @@
 package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -73,7 +77,7 @@ public class VedtakServiceTest {
 
     private long behandlingID;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = lagBehandlingMedBehandlingsgrunnlag();
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final Behandling replikertBehandling = new Behandling();
 
@@ -267,5 +271,31 @@ public class VedtakServiceTest {
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), eq("FRITEKST"), eq("FRITEKST_SED"));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+    }
+
+    @Test
+    public void fattVedtak_harTomtForetakNavn_forventException() throws MelosysException {
+        final long behandlingID = 2L;
+        Behandling behandling = lagBehandlingMedBehandlingsgrunnlag();
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().arbeidUtland.add(new ArbeidUtland());
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Foretaksnavn kan ikke være tomt");
+
+        vedtakService.fattVedtak(behandlingID, null, null, null, null, null, null);
+    }
+
+    private static Behandling lagBehandlingMedBehandlingsgrunnlag() {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.foretakUtland = new ArrayList<>();
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
+        Behandling behandling = new Behandling();
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        return behandling;
     }
 }

@@ -7,6 +7,8 @@ import java.util.Set;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -58,6 +60,7 @@ public class AnmodningUnntakService {
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+        validerBehandlingsgrunnlagData(behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
 
         anmodningsperiodeService.validerAnmodningsperiodeForBehandling(behandlingID);
 
@@ -110,6 +113,14 @@ public class AnmodningUnntakService {
     private void validerFritekstLengde(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
         if (anmodningsperiodeSvar.getBegrunnelseFritekst() != null && anmodningsperiodeSvar.getBegrunnelseFritekst().length() > 255) {
             throw new FunksjonellException("Kan ikke ha fritekst lengre enn 255 for avslag på anmodning om unntak");
+        }
+    }
+
+    private void validerBehandlingsgrunnlagData(BehandlingsgrunnlagData behandlingsgrunnlagData) throws FunksjonellException {
+        for (ArbeidUtland arbeidUtland : behandlingsgrunnlagData.arbeidUtland) {
+            if (StringUtils.isEmpty(arbeidUtland.foretakNavn)) {
+                throw new FunksjonellException("Foretaksnavn kan ikke være tomt");
+            }
         }
     }
 }
