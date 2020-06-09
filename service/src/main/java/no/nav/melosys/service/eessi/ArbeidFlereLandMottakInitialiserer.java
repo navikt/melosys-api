@@ -14,16 +14,21 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 //A003
 @Service
 public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandlingInitialiserer {
+
+    private static final Logger log = LoggerFactory.getLogger(ArbeidFlereLandMottakInitialiserer.class);
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
@@ -32,7 +37,8 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
 
     public ArbeidFlereLandMottakInitialiserer(FagsakService fagsakService,
                                               BehandlingService behandlingService,
-                                              BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService) {
+                                              BehandlingsresultatService behandlingsresultatService,
+                                              @Qualifier("system") OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -40,7 +46,7 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
     }
 
     @Override
-    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
+    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws MelosysException {
 
         if (gsakSaksnummer == null) {
             return RutingResultat.NY_SAK;
@@ -58,6 +64,7 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
         final Behandlingstema nyttBehandlingstema = hentBehandlingstema(melosysEessiMelding);
 
         if (eksisterendeBehandling.getTema() != nyttBehandlingstema) {
+            validerNorgeIkkeUtpektOgVedtakIkkeFattet(eksisterendeBehandling, behandlingsresultat);
             return RutingResultat.NY_BEHANDLING;
         } else if (nyttBehandlingstema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
             return RutingResultat.NY_BEHANDLING;
@@ -74,6 +81,7 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
             }
         }
 
+        prosessinstans.setBehandling(eksisterendeBehandling);
         return RutingResultat.INGEN_BEHANDLING;
     }
 
@@ -92,5 +100,13 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
     @Override
     public ProsessType hentAktuellProsessType() {
         return ProsessType.ARBEID_FLERE_LAND;
+    }
+
+    private void validerNorgeIkkeUtpektOgVedtakIkkeFattet(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+        if (behandling.erNorgeUtpekt() && behandlingsresultat.harVedtak()) {
+            throw new FunksjonellException(String.format(
+                    "Det er allerede fattet vedtak på behandling %s med tema %s. Støtte for omgjøring ikke implementert",
+                    behandling.getId(), behandling.getTema()));
+        }
     }
 }

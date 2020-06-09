@@ -8,13 +8,12 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 
 public interface AutomatiskSedBehandlingInitialiserer {
 
-    RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException;
+    RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws MelosysException;
 
     boolean gjelderSedType(SedType sedType);
 

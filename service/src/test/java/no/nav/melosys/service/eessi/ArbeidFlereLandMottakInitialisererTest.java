@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SedType;
@@ -19,7 +16,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -82,13 +79,13 @@ public class ArbeidFlereLandMottakInitialisererTest {
     }
 
     @Test
-    public void finnsakOgBestemRuting_utenArkivsaknummer_forventNySakRuting() throws FunksjonellException, TekniskException {
+    public void finnsakOgBestemRuting_utenArkivsaknummer_forventNySakRuting() throws MelosysException {
         RutingResultat rutingResultat = arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(new Prosessinstans(), null);
         assertThat(rutingResultat).isEqualTo(RutingResultat.NY_SAK);
     }
 
     @Test
-    public void finnsakOgBestemRuting_fagsakEksistererIkke_forventNySakRuting() {
+    public void finnsakOgBestemRuting_fagsakEksistererIkke_kasterException() {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(new Prosessinstans(), 0L))
             .withMessageContaining("Finner ingen sak tilknyttet");
@@ -96,7 +93,7 @@ public class ArbeidFlereLandMottakInitialisererTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_norgeUtpektNyttTemaAnnetLandUtpekt_forventNyBehandling() throws FunksjonellException, TekniskException {
+    public void finnSakOgBestemRuting_norgeUtpektNyttTemaAnnetLandUtpektVedtakIkkeFattet_forventNyBehandling() throws MelosysException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         melosysEessiMelding.setLovvalgsland(Landkoder.SE.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
@@ -105,7 +102,19 @@ public class ArbeidFlereLandMottakInitialisererTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaNorgeUtpekt_forventNyBehandling() throws FunksjonellException, TekniskException {
+    public void finnSakOgBestemRuting_norgeUtpektNyttTemaAnnetLandUtpektVedtakFattet_kasterException() {
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        behandlingsresultat.setVedtakMetadata(new VedtakMetadata());
+        melosysEessiMelding.setLovvalgsland(Landkoder.SE.getKode());
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer))
+            .withMessageContaining("Det er allerede fattet vedtak på behandling");
+    }
+
+    @Test
+    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaNorgeUtpekt_forventNyBehandling() throws MelosysException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
@@ -114,28 +123,30 @@ public class ArbeidFlereLandMottakInitialisererTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventIngenBehandlingOpprettOppgave() throws FunksjonellException, TekniskException {
+    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventIngenBehandlingOpprettOppgave() throws MelosysException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         assertThat(arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer)).isEqualTo(RutingResultat.INGEN_BEHANDLING);
+        assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any());
     }
 
     @Test
-    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingAktiv_forventIngenBehandlingStatusVurderDokument() throws FunksjonellException, TekniskException {
+    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingAktiv_forventIngenBehandlingStatusVurderDokument() throws MelosysException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         assertThat(arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer)).isEqualTo(RutingResultat.INGEN_BEHANDLING);
+        assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);
         verify(behandlingService).oppdaterStatus(eq(behandlingID), eq(Behandlingsstatus.VURDER_DOKUMENT));
     }
 
     @Test
-    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektSammePeriode_forventIngenBehandling() throws FunksjonellException, TekniskException {
+    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektSammePeriode_forventIngenBehandling() throws MelosysException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -149,10 +160,11 @@ public class ArbeidFlereLandMottakInitialisererTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         assertThat(arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer)).isEqualTo(RutingResultat.INGEN_BEHANDLING);
+        assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);
     }
 
     @Test
-    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektEndretPeriode_forventNyBehandling() throws FunksjonellException, TekniskException {
+    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektEndretPeriode_forventNyBehandling() throws MelosysException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
