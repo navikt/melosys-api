@@ -61,20 +61,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.github.everit-org.json-schema</groupId>
-            <artifactId>org.everit.json.schema</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-validator</groupId>
-                    <artifactId>commons-validator</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-        </dependency>
 
         <!-- Test -->
         <dependency>
@@ -83,8 +69,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.github.everit-org.json-schema</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.jeasy</groupId>
             <artifactId>easy-random-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
