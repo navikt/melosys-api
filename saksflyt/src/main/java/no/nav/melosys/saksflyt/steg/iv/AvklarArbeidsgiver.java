@@ -16,11 +16,11 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,19 +38,19 @@ public class AvklarArbeidsgiver extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(AvklarArbeidsgiver.class);
     private static final Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
 
-    private final BehandlingsresultatService behandlingsresultatService;
     private final AktoerService aktoerService;
     private final AvklarteVirksomheterService avklarteVirksomheterSystemService;
-    private final BehandlingRepository behandlingRepository;
+    private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
     public AvklarArbeidsgiver(AktoerService aktoerService,
                               AvklarteVirksomheterSystemService avklarteVirksomheterService,
-                              BehandlingRepository behandlingRepository,
+                              BehandlingService behandlingService,
                               BehandlingsresultatService behandlingsresultatService) {
         this.aktoerService = aktoerService;
         this.avklarteVirksomheterSystemService = avklarteVirksomheterService;
-        this.behandlingRepository = behandlingRepository;
+        this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
 
         log.info("AvklarArbeidsgiver initialisert");
@@ -68,7 +68,7 @@ public class AvklarArbeidsgiver extends AbstraktStegBehandler {
         ProsessType prosessType = prosessinstans.getType();
         if (arbeidsgiverAvklares(prosessType, resultat)) {
             long behandlingID = prosessinstans.getBehandling().getId();
-            Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
+            Behandling behandling = behandlingService.hentBehandling(behandlingID);
             Fagsak fagsak = behandling.getFagsak();
             String saksnummer = fagsak.getSaksnummer();
 
