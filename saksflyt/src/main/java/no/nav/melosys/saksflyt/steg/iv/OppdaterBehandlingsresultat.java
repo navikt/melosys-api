@@ -61,7 +61,6 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
             behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST));
         }
 
-        behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         VedtakMetadata vedtakMetadata;
         if (behandlingsresultat.getVedtakMetadata() == null) {
             vedtakMetadata = new VedtakMetadata();

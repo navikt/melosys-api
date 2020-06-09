@@ -61,7 +61,6 @@ public class OppdaterBehandlingsresultatTest {
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getVedtakMetadata().getVedtaksdato()).isNotNull();
         assertThat(capture.getVedtakMetadata().getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
         assertThat(capture.getVedtakMetadata().getVedtakstype()).isEqualTo(Vedtakstyper.KORRIGERT_VEDTAK);
@@ -92,7 +91,6 @@ public class OppdaterBehandlingsresultatTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
-        assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getVedtakMetadata().getVedtaksdato()).isNotNull();
         assertThat(capture.getVedtakMetadata().getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
         assertThat(capture.getVedtakMetadata().getVedtakstype()).isEqualTo(Vedtakstyper.KORRIGERT_VEDTAK);
