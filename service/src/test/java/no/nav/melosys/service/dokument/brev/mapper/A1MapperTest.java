@@ -2,10 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -186,6 +183,27 @@ public class A1MapperTest {
         assertThat(xml).isNotNull();
     }
 
+    @Test
+    public void mapBrevTilXML_ingenArbeidssted_settFysiskArbeidsstedFraArbeidsland() throws TekniskException, JAXBException, SAXException {
+        FellesType fellesType = new FellesType();
+        fellesType.setFagsaksnummer("MELTEST-4");
+
+        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
+        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
+        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
+
+        brevData.arbeidssteder = Collections.emptyList();
+        brevData.arbeidsland = List.of(Landkoder.SE, Landkoder.DK);
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+
+        assertThat(a1.getFysiskArbeidsstedAdresseListe().getAdresse())
+            .extracting("adresselinje1")
+            .containsSequence("Sverige", "Danmark", "");
+
+        String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
+
+        assertThat(xml).isNotNull();
+    }
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
         final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";

@@ -6,6 +6,7 @@ import java.util.List;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 
@@ -15,6 +16,7 @@ public class BrevDataA1 extends BrevData {
     public AvklartVirksomhet hovedvirksomhet;
 
     public List<Arbeidssted> arbeidssteder;
+    public Collection<Landkoder> arbeidsland;
 
     public StrukturertAdresse bostedsadresse;
     public Collection<AvklartVirksomhet> bivirksomheter;

@@ -195,6 +195,7 @@ public final class DokumentServiceTest {
         brevDataA1.bivirksomheter = Collections.emptyList();
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
+        brevDataA1.arbeidsland = new ArrayList<>();
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevDataA1;
         brevdataInnvilgelse.hovedvirksomhet = arbeidsgiver;
