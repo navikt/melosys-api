@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
@@ -15,6 +16,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -53,7 +55,11 @@ class A1Mapper {
 
         a1.setBivirksomhetListe(mapBivirksomheter(brevData.bivirksomheter));
 
-        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder));
+        if (brevData.arbeidssteder.isEmpty()) {
+            a1.setFysiskArbeidsstedAdresseListe(mapArbeidsland(brevData.arbeidsland));
+        } else {
+            a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder));
+        }
 
         String ikkeFysiskArbeidssted = harIkkeFastArbeidssted(brevData.arbeidssteder) ? "true" : "false";
         a1.setIkkeFysiskArbeidssted(ikkeFysiskArbeidssted);
@@ -90,7 +96,7 @@ class A1Mapper {
             brevPeriode.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
             brevPeriode.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
         } catch (DatatypeConfigurationException e) {
-            throw new TekniskException("Konferteringsfeil ved konvertering av lovvalgsperiode", e);
+            throw new TekniskException("Konverteringsfeil ved konvertering av lovvalgsperiode", e);
         }
         return brevPeriode;
     }
@@ -137,6 +143,16 @@ class A1Mapper {
         return fysiskeAdresserBrev;
     }
 
+    private FysiskArbeidsstedAdresseListeType mapArbeidsland(Collection<Landkoder> landkoder) {
+        FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
+        Stream.concat(
+            landkoder.stream().map(this::mapLandkode),
+            Stream.generate(A1Mapper::adresseTypeSupplier))
+            .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2)
+            .forEach(adresseType -> fysiskeAdresserBrev.getAdresse().add(adresseType));
+        return fysiskeAdresserBrev;
+    }
+
     private AdresseType mapArbeidssted(Arbeidssted arbeidssted) {
         AdresseType adresseType = new AdresseType();
         String adresselinje = arbeidssted.lagAdresselinje();
@@ -176,5 +192,17 @@ class A1Mapper {
 
         return antallArbeidssteder < 1 ||
                antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
+    }
+
+    private AdresseType mapLandkode(Landkoder landkode) {
+        AdresseType adresseType = new AdresseType();
+        adresseType.setAdresselinje1(landkode.getBeskrivelse());
+        return adresseType;
+    }
+
+    private static AdresseType adresseTypeSupplier() {
+        AdresseType adresseType = new AdresseType();
+        adresseType.setAdresselinje1("");
+        return adresseType;
     }
 }

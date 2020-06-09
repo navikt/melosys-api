@@ -7,6 +7,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
@@ -15,9 +16,11 @@ import org.apache.commons.lang3.StringUtils;
 
 public class BrevDataByggerA1 implements BrevDataBygger {
     private final AvklartefaktaService avklartefaktaService;
+    private final LandvelgerService landvelgerService;
 
-    public BrevDataByggerA1(AvklartefaktaService avklartefaktaService) {
+    public BrevDataByggerA1(AvklartefaktaService avklartefaktaService, LandvelgerService landvelgerService) {
         this.avklartefaktaService = avklartefaktaService;
+        this.landvelgerService = landvelgerService;
     }
 
     @Override
@@ -33,6 +36,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
 
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
         brevData.arbeidssteder = arbeidssteder;
+        brevData.arbeidsland = landvelgerService.hentAlleArbeidsland(dataGrunnlag.getBehandling().getId());
 
         brevData.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
         brevData.bivirksomheter = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentBivirksomheter();
