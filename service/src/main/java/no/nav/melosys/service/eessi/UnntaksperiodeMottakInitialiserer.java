@@ -15,12 +15,16 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 //A009,A010
 @Service
 public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlingInitialiserer {
+
+    private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeMottakInitialiserer.class);
 
     private final FagsakService fagsakService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -45,8 +49,12 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
             Behandling behandling = fagsak.get().hentSistAktiveBehandling();
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             if (periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
+                log.info("Mottatt ny {} i {} hvor periode er endret. Oppretter ny behandling",
+                    melosysEessiMelding.getSedType(), fagsak.get().getSaksnummer());
                 return RutingResultat.NY_BEHANDLING;
             } else {
+                log.info("Mottatt ny {} i {} periode er ikke endret. Oppretter ikke ny behandling",
+                    melosysEessiMelding.getSedType(), fagsak.get().getSaksnummer());
                 prosessinstans.setBehandling(behandling);
                 return RutingResultat.INGEN_BEHANDLING;
             }

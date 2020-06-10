@@ -9,7 +9,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
@@ -87,7 +86,7 @@ public class SedMottakRuting extends AbstraktStegBehandler {
     private void rutSedTilAutomatiskBehandling(Prosessinstans prosessinstans,
                                                AutomatiskSedBehandlingInitialiserer automatiskSedBehandlingInitialiserer,
                                                MelosysEessiMelding melosysEessiMelding,
-                                               Long gsakSaksnummer) throws TekniskException, FunksjonellException {
+                                               Long gsakSaksnummer) throws MelosysException {
         RutingResultat resultat = automatiskSedBehandlingInitialiserer
             .finnSakOgBestemRuting(prosessinstans, gsakSaksnummer);
 

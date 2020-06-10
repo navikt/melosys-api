@@ -64,14 +64,25 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
         final Behandlingstema nyttBehandlingstema = hentBehandlingstema(melosysEessiMelding);
 
         if (eksisterendeBehandling.getTema() != nyttBehandlingstema) {
+
             validerNorgeIkkeUtpektOgVedtakIkkeFattet(eksisterendeBehandling, behandlingsresultat);
+            log.info("Ny A003 resulterer i nytt behandlingstema {}", nyttBehandlingstema);
             return RutingResultat.NY_BEHANDLING;
-        } else if (nyttBehandlingstema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
+
+        } else if (eksisterendeBehandling.erUtpekingAvAnnetLand() && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
+
+            log.info("Mottatt oppdatert A003 i {}, rinasak {} hvor et annet land er utpekt",
+                fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
             return RutingResultat.NY_BEHANDLING;
-        } else if (nyttBehandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE) {
+
+        } else if (eksisterendeBehandling.erNorgeUtpekt()) {
+
             if (eksisterendeBehandling.erAktiv()) {
+                log.info("Mottatt oppdatert A003 norge utpekt sak {}, oppdaterer status til {}",
+                    fagsak.get().getSaksnummer(), Behandlingsstatus.VURDER_DOKUMENT);
                 behandlingService.oppdaterStatus(eksisterendeBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
             } else {
+                log.info("Mottatt oppdatert A003 norge utpekt sak {}. Behandling er avsluttet, oppretter oppgave", fagsak.get().getSaksnummer());
                 oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
                     eksisterendeBehandling,
                     prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID),
