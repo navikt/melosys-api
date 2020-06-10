@@ -23,11 +23,11 @@ import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.brekkTekstTilListe;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 class A1Mapper {
@@ -138,29 +138,22 @@ class A1Mapper {
     private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         Stream.concat(
-            adresseTypeStream(arbeidssteder, arbeidsland),
-            Stream.generate(A1Mapper::adresseTypeSupplier))
+            hentArbeidsstederOgLandUtenOppgittArbeidssted(arbeidssteder, arbeidsland),
+            Stream.generate(A1Mapper::lagTomAdresseType))
             .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2)
             .forEach(adresseType -> fysiskeAdresserBrev.getAdresse().add(adresseType));
         return fysiskeAdresserBrev;
     }
 
-    /**
-     * Legg til beskrivelse for arbeidsland som ikke har fysisk arbeidssted
-     */
-    private Stream<AdresseType> adresseTypeStream(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
-        Set<String> landkoder = arbeidssteder.stream()
-            .map(Arbeidssted::getLandkode).collect(Collectors.toSet());
-        Stream<AdresseType> landkoderStream = adresseTypeStream(arbeidsland.stream()
-            .filter(a -> !landkoder.contains(a.getKode())));
-
+    private Stream<AdresseType> hentArbeidsstederOgLandUtenOppgittArbeidssted(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+        List<String> landUtenOppgittArbeidssted = hentLandUtenOppgittArbeidssted(arbeidssteder, arbeidsland);
         return Stream.concat(
-            arbeidssteder.stream().map(this::mapArbeidssted),
-            landkoderStream
+            arbeidssteder.stream().map(this::tilAdresseType),
+            landUtenOppgittArbeidssted.stream().map(this::tilAdresseType)
         );
     }
 
-    private AdresseType mapArbeidssted(Arbeidssted arbeidssted) {
+    private AdresseType tilAdresseType(Arbeidssted arbeidssted) {
         AdresseType adresseType = new AdresseType();
         String adresselinje = arbeidssted.lagAdresselinje();
         adresseType.setAdresselinje1(adresselinje.isBlank() ? "" : adresselinje); //uten dette viser ikke brev alle linjene i en A1
@@ -191,24 +184,25 @@ class A1Mapper {
                antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
     }
 
-    private Stream<AdresseType> adresseTypeStream(Stream<Landkoder> landkoder) {
-        String beskrivelser = landkoder
+    private List<String> hentLandUtenOppgittArbeidssted(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+        Set<String> utfylteArbeidsland = arbeidssteder.stream()
+            .map(Arbeidssted::getLandkode).collect(Collectors.toSet());
+        String beskrivelser = arbeidsland.stream()
+            .filter(a -> !utfylteArbeidsland.contains(a.getKode()))
             .map(Landkoder::getBeskrivelse)
             .collect(Collectors.joining(", "));
-        String beskrivelserLinjer = WordUtils.wrap(beskrivelser, MAKS_ANTALL_TEGN_PER_LINJE_5_2);
-        return List.of(beskrivelserLinjer.split("\n")).stream()
-            .map(this::mapLandkode);
+        return brekkTekstTilListe(beskrivelser, MAKS_ANTALL_TEGN_PER_LINJE_5_2);
     }
 
-    private static AdresseType adresseTypeSupplier() {
+    private static AdresseType lagTomAdresseType() {
         AdresseType adresseType = new AdresseType();
         adresseType.setAdresselinje1("");
         return adresseType;
     }
 
-    private AdresseType mapLandkode(String landkodeBeskrivelse) {
+    private AdresseType tilAdresseType(String tekst) {
         AdresseType adresseType = new AdresseType();
-        adresseType.setAdresselinje1(landkodeBeskrivelse);
+        adresseType.setAdresselinje1(tekst);
         return adresseType;
     }
 }
