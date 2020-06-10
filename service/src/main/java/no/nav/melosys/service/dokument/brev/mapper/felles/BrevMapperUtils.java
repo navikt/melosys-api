@@ -1,6 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
+import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang.WordUtils;
+
 import java.time.*;
+import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -47,4 +51,8 @@ public final class BrevMapperUtils {
         }
     }
 
+    public static List<String> brekkTekstTilListe(String tekst, int maksLengde) {
+        String tekstMedLinjeskift = WordUtils.wrap(tekst, maksLengde);
+        return List.of(tekstMedLinjeskift.split(SystemUtils.LINE_SEPARATOR));
+    }
 }
