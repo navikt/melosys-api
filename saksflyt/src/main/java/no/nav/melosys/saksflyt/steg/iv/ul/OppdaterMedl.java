@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.ul;
+package no.nav.melosys.saksflyt.steg.iv.ul;
 
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;

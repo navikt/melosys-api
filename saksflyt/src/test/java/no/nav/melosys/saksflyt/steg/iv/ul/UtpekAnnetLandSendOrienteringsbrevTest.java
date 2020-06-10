@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.ul;
+package no.nav.melosys.saksflyt.steg.iv.ul;
 
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -6,6 +6,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.saksflyt.steg.iv.ul.UtpekAnnetLandSendOrienteringsbrev;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

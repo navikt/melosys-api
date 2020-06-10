@@ -17,10 +17,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.steg.iv.AvklarArbeidsgiver;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +36,7 @@ public class AvklarArbeidsgiverTest {
     @Mock
     AktoerService aktoerService;
     @Mock
-    BehandlingRepository behandlingRepository;
+    BehandlingService behandlingService;
     @Mock
     BehandlingsresultatService behandlingsresultatService;
     @Mock
@@ -54,7 +54,7 @@ public class AvklarArbeidsgiverTest {
     @Before
     public void setUp() throws IkkeFunnetException {
         aktoerService = mock(AktoerService.class);
-        steg = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingRepository, behandlingsresultatService);
+        steg = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService);
 
         p = new Prosessinstans();
         p.setBehandling(behandling);
@@ -63,7 +63,7 @@ public class AvklarArbeidsgiverTest {
         fagsak = new Fagsak();
         fagsak.setSaksnummer("saksnr");
         when(behandling.getFagsak()).thenReturn(fagsak);
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
@@ -80,7 +80,8 @@ public class AvklarArbeidsgiverTest {
     @Test
     public void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() throws FunksjonellException, TekniskException {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService, behandlingRepository, behandlingsresultatService);
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
+            behandlingService, behandlingsresultatService);
 
         List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
@@ -99,7 +100,8 @@ public class AvklarArbeidsgiverTest {
     @Test
     public void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() throws FunksjonellException, TekniskException {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService, behandlingRepository, behandlingsresultatService);
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
+            behandlingService, behandlingsresultatService);
 
         steg.utfør(p);
         verify(aktoerRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));

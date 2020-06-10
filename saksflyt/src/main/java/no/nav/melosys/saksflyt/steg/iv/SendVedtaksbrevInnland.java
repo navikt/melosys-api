@@ -75,7 +75,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         if (resultat.erAvslag()) {
             sendAvslagsbrev(prosessinstans, behandling, behandlingsresultatType, saksbehandler);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
+            prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(prosessinstans, behandling, resultat, saksbehandler);
             sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);

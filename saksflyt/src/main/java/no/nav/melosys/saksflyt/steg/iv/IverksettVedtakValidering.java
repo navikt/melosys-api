@@ -21,22 +21,17 @@ import org.springframework.util.StringUtils;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTATTYPE;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_RESULTAT;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_VALIDERING;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 /**
  * Validerer opplysning bli brukt for iverksett vedtak.
- *
- * Transisjoner:
- *
- * ProsessType.IVERKSETT_VEDTAK
- *  IV_VALIDERING -> IV_OPPDATER_RESULTAT eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class IverksettVedtakValidering extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(IverksettVedtakValidering.class);
-    private static final EnumSet AKSEPTERTE_PROSESSTYPER = EnumSet.of(
+    private static final EnumSet<ProsessType> AKSEPTERTE_PROSESSTYPER = EnumSet.of(
         ProsessType.IVERKSETT_VEDTAK,
+        ProsessType.UTPEK_LAND,
         ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
 
     private final BehandlingsresultatService behandlingsresultatService;
@@ -81,7 +76,7 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
             validerLovalgsperioder(prosessinstans, behandlingsresultat);
         }
 
-        prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
+        prosessinstans.setSteg(IV_AVKLAR_MYNDIGHET);
     }
 
     private void validerBehandlingsResultatType(Prosessinstans prosessinstans) throws FunksjonellException {
