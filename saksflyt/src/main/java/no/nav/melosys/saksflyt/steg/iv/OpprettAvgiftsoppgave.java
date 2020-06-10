@@ -46,15 +46,13 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
         final long behandlingID = behandling.getId();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
-        if (behandlingsresultat.erAvslag()) {
-            prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
-            return;
+        if (!behandlingsresultat.erAvslag()) {
+            Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
+            if (!lovvalgsperiode.erArtikkel11() && !lovvalgsperiode.erArtikkel13()) {
+                oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling));
+            }
         }
-
-        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
-        if (!lovvalgsperiode.erArtikkel11() && !lovvalgsperiode.erArtikkel13()) {
-            oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling));
-        }
+        
         prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 
