@@ -3,8 +3,8 @@ package no.nav.melosys.service.eessi;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -12,28 +12,31 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-//A003,A009,A010
+//A009,A010
 @Service
 public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlingInitialiserer {
 
+    private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeMottakInitialiserer.class);
+
     private final FagsakService fagsakService;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public UnntaksperiodeMottakInitialiserer(FagsakService fagsakService,
-                                             LovvalgsperiodeService lovvalgsperiodeService) {
+    public UnntaksperiodeMottakInitialiserer(FagsakService fagsakService, BehandlingsresultatService behandlingsresultatService) {
         this.fagsakService = fagsakService;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Override
-    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException {
+    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException, TekniskException {
 
         if (gsakSaksnummer == null) {
             return RutingResultat.NY_SAK;
@@ -43,10 +46,15 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
 
         Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer);
         if (fagsak.isPresent()) {
-            Behandling behandling = fagsak.get().getSistOppdaterteBehandling();
-            if (periodeErEndret(melosysEessiMelding, behandling)) {
+            Behandling behandling = fagsak.get().hentSistAktiveBehandling();
+            Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+            if (periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
+                log.info("Mottatt ny {} i {} hvor periode er endret. Oppretter ny behandling",
+                    melosysEessiMelding.getSedType(), fagsak.get().getSaksnummer());
                 return RutingResultat.NY_BEHANDLING;
             } else {
+                log.info("Mottatt ny {} i {} periode er ikke endret. Oppretter ikke ny behandling",
+                    melosysEessiMelding.getSedType(), fagsak.get().getSaksnummer());
                 prosessinstans.setBehandling(behandling);
                 return RutingResultat.INGEN_BEHANDLING;
             }
@@ -81,22 +89,5 @@ public class UnntaksperiodeMottakInitialiserer implements AutomatiskSedBehandlin
         }
 
         throw new IllegalArgumentException("UnntaksperiodeMottakInitialiserer støtter ikke sedtype " + sedType);
-    }
-
-    private boolean periodeErEndret(MelosysEessiMelding melosysEessiMelding, Behandling behandling) {
-        Periode periode = tilPeriode(melosysEessiMelding.getPeriode());
-        String lovvalgsLand = melosysEessiMelding.getLovvalgsland();
-
-        return lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId()).stream().findFirst().map(lovvalgsperiode ->
-            !PeriodeKontroller.periodeErLik(lovvalgsperiode.getFom(), lovvalgsperiode.getTom(), periode.getFom(), periode.getTom())
-            || !lovvalgsLand.equalsIgnoreCase(lovvalgsperiode.getLovvalgsland().getKode()))
-            .orElse(true);
-    }
-
-    private static Periode tilPeriode(no.nav.melosys.domain.eessi.Periode periode) {
-        return new Periode(
-            periode.getFom(),
-            periode.getTom()
-        );
     }
 }

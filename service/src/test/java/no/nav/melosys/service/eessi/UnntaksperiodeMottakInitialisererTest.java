@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.Periode;
@@ -16,7 +17,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,17 +36,17 @@ public class UnntaksperiodeMottakInitialisererTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
+    private BehandlingsresultatService behandlingsresultatService;
 
     private UnntaksperiodeMottakInitialiserer unntaksperiodeMottakInitialiserer;
 
     @Before
     public void setup() {
-        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, lovvalgsperiodeService);
+        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, behandlingsresultatService);
     }
 
     @Test
-    public void finnSakOgBestemRuting_nySak_verifiserResultatNySak() throws FunksjonellException {
+    public void finnSakOgBestemRuting_nySak_verifiserResultatNySak() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1));
 
         RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
@@ -62,9 +64,12 @@ public class UnntaksperiodeMottakInitialisererTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.SE);
         lovvalgsperiode.setFom(fom);
         lovvalgsperiode.setTom(tom);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
+
         RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
         assertThat(resultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);
@@ -79,9 +84,11 @@ public class UnntaksperiodeMottakInitialisererTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(fom.plusMonths(1));
         lovvalgsperiode.setTom(LocalDate.now().plusYears(2));
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
-        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
 
         RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
 
