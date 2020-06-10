@@ -115,6 +115,7 @@ public class A1MapperTest {
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
         brevData.bostedsadresse = boAdresse;
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidsstedSkip, maritimtArbeidsstedSokkel));
+        brevData.arbeidsland = List.of(Landkoder.SE);
         brevData.person = lagPersonDokument();
         brevData.hovedvirksomhet = virksomhet;
         brevData.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
@@ -158,6 +159,7 @@ public class A1MapperTest {
         ForetakUtland utenlandskForetak = lagForetakUtland(false);
         utenlandskForetak.orgnr = null;
         brevData.hovedvirksomhet = new AvklartVirksomhet(utenlandskForetak);
+        brevData.arbeidsland = List.of(Landkoder.values());// List.of(Landkoder.GB, Landkoder.SE);
 
         mapper.mapA1(behandling, behandlingsresultat, brevData);
 
@@ -184,7 +186,7 @@ public class A1MapperTest {
     }
 
     @Test
-    public void mapBrevTilXML_ingenArbeidssted_settFysiskArbeidsstedFraArbeidsland() throws TekniskException, JAXBException, SAXException {
+    public void mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() throws TekniskException, JAXBException, SAXException {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-4");
 
@@ -192,13 +194,12 @@ public class A1MapperTest {
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
-        brevData.arbeidssteder = Collections.emptyList();
-        brevData.arbeidsland = List.of(Landkoder.SE, Landkoder.DK);
+        brevData.arbeidsland = List.of(Landkoder.SE, Landkoder.DK, Landkoder.GB);
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
 
         assertThat(a1.getFysiskArbeidsstedAdresseListe().getAdresse())
             .extracting("adresselinje1")
-            .containsSequence("Sverige", "Danmark", "");
+            .contains("Sverige, Danmark");
 
         String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 

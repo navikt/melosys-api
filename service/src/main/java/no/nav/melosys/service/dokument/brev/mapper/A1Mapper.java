@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -21,7 +23,7 @@ import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.DummyArbeidssted;
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
@@ -32,6 +34,7 @@ class A1Mapper {
     private static final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 15;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
+    private static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
 
     private BrevDataA1 brevData;
 
@@ -55,11 +58,7 @@ class A1Mapper {
 
         a1.setBivirksomhetListe(mapBivirksomheter(brevData.bivirksomheter));
 
-        if (brevData.arbeidssteder.isEmpty()) {
-            a1.setFysiskArbeidsstedAdresseListe(mapArbeidsland(brevData.arbeidsland));
-        } else {
-            a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder));
-        }
+        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder, brevData.arbeidsland));
 
         String ikkeFysiskArbeidssted = harIkkeFastArbeidssted(brevData.arbeidssteder) ? "true" : "false";
         a1.setIkkeFysiskArbeidssted(ikkeFysiskArbeidssted);
@@ -132,25 +131,33 @@ class A1Mapper {
         return bivirksomheterBrev;
     }
 
-    private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder) {
-        arbeidssteder = fyllMinimumAntallArbeidsstederMedDummyVerdier(arbeidssteder);
-
-        FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
-        arbeidssteder.stream()
-            .map(this::mapArbeidssted)
-            .forEach(a -> fysiskeAdresserBrev.getAdresse().add(a));
-
-        return fysiskeAdresserBrev;
-    }
-
-    private FysiskArbeidsstedAdresseListeType mapArbeidsland(Collection<Landkoder> landkoder) {
+    /**
+     * Brevtjenesten trenger et fast antall enheter i listen.
+     * Fyller derfor opp med tomme elementer for resterende felter
+     */
+    private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         Stream.concat(
-            landkoder.stream().map(this::mapLandkode),
+            adresseTypeStream(arbeidssteder, arbeidsland),
             Stream.generate(A1Mapper::adresseTypeSupplier))
             .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2)
             .forEach(adresseType -> fysiskeAdresserBrev.getAdresse().add(adresseType));
         return fysiskeAdresserBrev;
+    }
+
+    /**
+     * Legg til beskrivelse for arbeidsland som ikke har fysisk arbeidssted
+     */
+    private Stream<AdresseType> adresseTypeStream(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+        Set<String> landkoder = arbeidssteder.stream()
+            .map(Arbeidssted::getLandkode).collect(Collectors.toSet());
+        Stream<AdresseType> landkoderStream = adresseTypeStream(arbeidsland.stream()
+            .filter(a -> !landkoder.contains(a.getKode())));
+
+        return Stream.concat(
+            arbeidssteder.stream().map(this::mapArbeidssted),
+            landkoderStream
+        );
     }
 
     private AdresseType mapArbeidssted(Arbeidssted arbeidssted) {
@@ -174,16 +181,6 @@ class A1Mapper {
         return utfylltListe;
     }
 
-    private List<Arbeidssted> fyllMinimumAntallArbeidsstederMedDummyVerdier(Collection<Arbeidssted> arbeidssteder) {
-        List<Arbeidssted> utfylltListe = new ArrayList<>(arbeidssteder);
-        int antallAdresserIListe = arbeidssteder.size();
-        int gjenståendeAdresser = ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 - antallAdresserIListe;
-        for (int i = 0; i < gjenståendeAdresser; i++) {
-            utfylltListe.add(new DummyArbeidssted());
-        }
-        return utfylltListe;
-    }
-
     /**
      * Ikke fast Arbeidssted er definert som flere enn 3 arbeidssteder eller ingen arbeidssteder.
      */
@@ -194,15 +191,24 @@ class A1Mapper {
                antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
     }
 
-    private AdresseType mapLandkode(Landkoder landkode) {
-        AdresseType adresseType = new AdresseType();
-        adresseType.setAdresselinje1(landkode.getBeskrivelse());
-        return adresseType;
+    private Stream<AdresseType> adresseTypeStream(Stream<Landkoder> landkoder) {
+        String beskrivelser = landkoder
+            .map(Landkoder::getBeskrivelse)
+            .collect(Collectors.joining(", "));
+        String beskrivelserLinjer = WordUtils.wrap(beskrivelser, MAKS_ANTALL_TEGN_PER_LINJE_5_2);
+        return List.of(beskrivelserLinjer.split("\n")).stream()
+            .map(this::mapLandkode);
     }
 
     private static AdresseType adresseTypeSupplier() {
         AdresseType adresseType = new AdresseType();
         adresseType.setAdresselinje1("");
+        return adresseType;
+    }
+
+    private AdresseType mapLandkode(String landkodeBeskrivelse) {
+        AdresseType adresseType = new AdresseType();
+        adresseType.setAdresselinje1(landkodeBeskrivelse);
         return adresseType;
     }
 }
