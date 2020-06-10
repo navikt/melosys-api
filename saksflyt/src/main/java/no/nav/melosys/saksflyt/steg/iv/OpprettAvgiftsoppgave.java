@@ -11,6 +11,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,12 +22,15 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
     private static final long FRIST_AVGIFTSVURDERING_MD = 1;
     static final String AVGIFTSVURDERING_BESKRIVELSE = "Vurderes for innregistrering i Avgiftssystemet";
 
+    private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppgaveService oppgaveService;
 
     @Autowired
-    public OpprettAvgiftsoppgave(LovvalgsperiodeService lovvalgsperiodeService,
+    public OpprettAvgiftsoppgave(BehandlingsresultatService behandlingsresultatService,
+                                 LovvalgsperiodeService lovvalgsperiodeService,
                                  @Qualifier("system") OppgaveService oppgaveService) {
+        this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
     }
@@ -38,8 +42,16 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        Behandling behandling = prosessinstans.getBehandling();
-        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandling.getId());
+        final Behandling behandling = prosessinstans.getBehandling();
+        final long behandlingID = behandling.getId();
+        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+
+        if (behandlingsresultat.erAvslag()) {
+            prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+            return;
+        }
+
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
         if (!lovvalgsperiode.erArtikkel11() && !lovvalgsperiode.erArtikkel13()) {
             oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling));
         }
