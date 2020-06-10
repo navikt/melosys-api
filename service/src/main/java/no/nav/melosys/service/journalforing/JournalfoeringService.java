@@ -273,9 +273,9 @@ public class JournalfoeringService {
         int antallLand = journalfoeringDto.getFagsak().getLand().size();
 
         if (Behandling.erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode) && antallLand < 2) {
-            throw new FunksjonellException("Det er påkrevd med to eller flere land for behandlingstype " + behandlingstemaKode);
+            throw new FunksjonellException("Det er påkrevd med to eller flere land for behandlingstema " + behandlingstemaKode);
         } else if (Behandling.erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode) && antallLand != 1) {
-            throw new FunksjonellException("Kun ett søknadsland er tillatt for behandlingstype " + behandlingstemaKode);
+            throw new FunksjonellException("Kun ett søknadsland er tillatt for behandlingstema " + behandlingstemaKode);
         }
 
     }
