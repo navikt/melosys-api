@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.*;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -42,6 +43,8 @@ public class BrevDataByggerA1Test {
 
     @Mock
     private AvklartefaktaService avklartefaktaService;
+    @Mock
+    private LandvelgerService landvelgerService;
 
     private Behandling behandling;
 
@@ -100,7 +103,7 @@ public class BrevDataByggerA1Test {
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
-        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService);
+        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService);
     }
 
     private void lagAvklartOrganisasjoner(List<String> orgnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {

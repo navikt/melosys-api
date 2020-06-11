@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
@@ -15,21 +18,23 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.DummyArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.brekkTekstTilListe;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 class A1Mapper {
     private static final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 15;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
+    private static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
 
     private BrevDataA1 brevData;
 
@@ -53,7 +58,7 @@ class A1Mapper {
 
         a1.setBivirksomhetListe(mapBivirksomheter(brevData.bivirksomheter));
 
-        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder));
+        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder, brevData.arbeidsland));
 
         String ikkeFysiskArbeidssted = harIkkeFastArbeidssted(brevData.arbeidssteder) ? "true" : "false";
         a1.setIkkeFysiskArbeidssted(ikkeFysiskArbeidssted);
@@ -90,7 +95,7 @@ class A1Mapper {
             brevPeriode.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
             brevPeriode.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
         } catch (DatatypeConfigurationException e) {
-            throw new TekniskException("Konferteringsfeil ved konvertering av lovvalgsperiode", e);
+            throw new TekniskException("Konverteringsfeil ved konvertering av lovvalgsperiode", e);
         }
         return brevPeriode;
     }
@@ -126,18 +131,29 @@ class A1Mapper {
         return bivirksomheterBrev;
     }
 
-    private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder) {
-        arbeidssteder = fyllMinimumAntallArbeidsstederMedDummyVerdier(arbeidssteder);
-
+    /**
+     * Brevtjenesten trenger et fast antall enheter i listen.
+     * Fyller derfor opp med tomme elementer for resterende felter
+     */
+    private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
-        arbeidssteder.stream()
-            .map(this::mapArbeidssted)
-            .forEach(a -> fysiskeAdresserBrev.getAdresse().add(a));
-
+        Stream.concat(
+            hentArbeidsstederOgLandUtenOppgittArbeidssted(arbeidssteder, arbeidsland),
+            Stream.generate(A1Mapper::lagTomAdresseType))
+            .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2)
+            .forEach(adresseType -> fysiskeAdresserBrev.getAdresse().add(adresseType));
         return fysiskeAdresserBrev;
     }
 
-    private AdresseType mapArbeidssted(Arbeidssted arbeidssted) {
+    private Stream<AdresseType> hentArbeidsstederOgLandUtenOppgittArbeidssted(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+        List<String> landUtenOppgittArbeidssted = hentLandUtenOppgittArbeidssted(arbeidssteder, arbeidsland);
+        return Stream.concat(
+            arbeidssteder.stream().map(this::tilAdresseType),
+            landUtenOppgittArbeidssted.stream().map(this::tilAdresseType)
+        );
+    }
+
+    private AdresseType tilAdresseType(Arbeidssted arbeidssted) {
         AdresseType adresseType = new AdresseType();
         String adresselinje = arbeidssted.lagAdresselinje();
         adresseType.setAdresselinje1(adresselinje.isBlank() ? "" : adresselinje); //uten dette viser ikke brev alle linjene i en A1
@@ -158,16 +174,6 @@ class A1Mapper {
         return utfylltListe;
     }
 
-    private List<Arbeidssted> fyllMinimumAntallArbeidsstederMedDummyVerdier(Collection<Arbeidssted> arbeidssteder) {
-        List<Arbeidssted> utfylltListe = new ArrayList<>(arbeidssteder);
-        int antallAdresserIListe = arbeidssteder.size();
-        int gjenståendeAdresser = ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 - antallAdresserIListe;
-        for (int i = 0; i < gjenståendeAdresser; i++) {
-            utfylltListe.add(new DummyArbeidssted());
-        }
-        return utfylltListe;
-    }
-
     /**
      * Ikke fast Arbeidssted er definert som flere enn 3 arbeidssteder eller ingen arbeidssteder.
      */
@@ -176,5 +182,27 @@ class A1Mapper {
 
         return antallArbeidssteder < 1 ||
                antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
+    }
+
+    private List<String> hentLandUtenOppgittArbeidssted(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+        Set<String> utfylteArbeidsland = arbeidssteder.stream()
+            .map(Arbeidssted::getLandkode).collect(Collectors.toSet());
+        String beskrivelser = arbeidsland.stream()
+            .filter(a -> !utfylteArbeidsland.contains(a.getKode()))
+            .map(Landkoder::getBeskrivelse)
+            .collect(Collectors.joining(", "));
+        return brekkTekstTilListe(beskrivelser, MAKS_ANTALL_TEGN_PER_LINJE_5_2);
+    }
+
+    private static AdresseType lagTomAdresseType() {
+        AdresseType adresseType = new AdresseType();
+        adresseType.setAdresselinje1("");
+        return adresseType;
+    }
+
+    private AdresseType tilAdresseType(String tekst) {
+        AdresseType adresseType = new AdresseType();
+        adresseType.setAdresselinje1(tekst);
+        return adresseType;
     }
 }

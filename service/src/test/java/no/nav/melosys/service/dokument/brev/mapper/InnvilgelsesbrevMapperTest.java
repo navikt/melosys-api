@@ -76,6 +76,7 @@ public class InnvilgelsesbrevMapperTest {
         brevdataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
         brevdataA1.person = lagPersonDokument();
         brevdataA1.arbeidssteder = new ArrayList<>();
+        brevdataA1.arbeidsland = new ArrayList<>();
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(),"SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();

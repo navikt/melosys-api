@@ -93,6 +93,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         brevdataA1.bivirksomheter = bivirksomheter;
 
         brevdataA1.arbeidssteder = new ArrayList<>();
+        brevdataA1.arbeidsland = new ArrayList<>();
         return brevdataA1;
     }
 
