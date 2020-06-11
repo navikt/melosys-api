@@ -52,7 +52,7 @@ public class SendVedtakUtlandTest {
 
     private Prosessinstans prosessinstans;
     private Lovvalgsperiode lovvalgsperiode;
-    private Behandling behandling = new Behandling();
+    private final Behandling behandling = new Behandling();
 
     @Captor
     private ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor;
@@ -83,20 +83,20 @@ public class SendVedtakUtlandTest {
     }
 
     @Test
-    public void utførSteg_artikkel12Suksessfull_statusErAvgiftsoppgave() throws Exception {
+    public void utførSteg_artikkel12Suksessfull_statusErOppdaterResultat() throws Exception {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), isNull(), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
     }
 
     @Test
-    public void utførSteg_artikkel13Suksessfull_statusErAvgiftsoppgave() throws Exception {
+    public void utførSteg_artikkel13Suksessfull_statusErOppdaterResultat() throws Exception {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_02), isNull(), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
     }
 
     @Test
@@ -105,16 +105,15 @@ public class SendVedtakUtlandTest {
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
         assertThat(brevbestillingArgumentCaptor.getValue().getDokumentType()).isEqualTo(Produserbaredokumenter.ATTEST_A1);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
     @Test
-    public void utførStegForArtikkel11_suksessfull_statusErAvsluttBehandling() throws Exception {
+    public void utførStegForArtikkel11Suksessfull_statusErOppdaterResultat() throws Exception {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B);
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), isNull(), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
     }
 
     @SuppressWarnings("unchecked")

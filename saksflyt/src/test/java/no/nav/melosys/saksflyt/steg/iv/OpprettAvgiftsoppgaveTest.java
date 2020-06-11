@@ -1,7 +1,10 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -9,6 +12,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +31,8 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettAvgiftsoppgaveTest {
     @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+    @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private OppgaveService oppgaveService;
@@ -36,12 +42,18 @@ public class OpprettAvgiftsoppgaveTest {
     private OpprettAvgiftsoppgave opprettAvgiftsoppgave;
 
     private static final String DUMM_ID = "DUMM_ID";
+    private Behandlingsresultat behandlingsresultat;
 
     @Before
     public void setUp() throws FunksjonellException {
-        opprettAvgiftsoppgave = new OpprettAvgiftsoppgave(lovvalgsperiodeService, oppgaveService);
+        opprettAvgiftsoppgave = new OpprettAvgiftsoppgave(behandlingsresultatService,
+            lovvalgsperiodeService, oppgaveService);
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test
@@ -62,6 +74,17 @@ public class OpprettAvgiftsoppgaveTest {
         Prosessinstans p = lagProsessinstans();
         opprettAvgiftsoppgave.utfør(p);
         assertThat(p.getSteg()).isEqualTo(IV_AVSLUTT_BEHANDLING);
+    }
+
+    @Test
+    public void utfør_avslag_oppretterIkkeOppgave() throws FunksjonellException, TekniskException {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        opprettAvgiftsoppgave.utfør(lagProsessinstans());
+
+        verify(oppgaveService, never()).opprettOppgave(any());
     }
 
     @Test

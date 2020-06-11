@@ -20,13 +20,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_AVKLAR_MYNDIGHET;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterBehandlingsresultatTest {
-
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
@@ -62,12 +61,11 @@ public class OppdaterBehandlingsresultatTest {
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getVedtakMetadata().getVedtaksdato()).isNotNull();
         assertThat(capture.getVedtakMetadata().getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
         assertThat(capture.getVedtakMetadata().getVedtakstype()).isEqualTo(Vedtakstyper.KORRIGERT_VEDTAK);
         assertThat(capture.getVedtakMetadata().getRevurderBegrunnelse()).isEqualTo("BEGRUNNELSE");
-        assertThat(p.getSteg()).isEqualTo(IV_AVKLAR_MYNDIGHET);
+        assertThat(p.getSteg()).isEqualTo(IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 
     @Test
@@ -93,11 +91,10 @@ public class OppdaterBehandlingsresultatTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
-        assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getVedtakMetadata().getVedtaksdato()).isNotNull();
         assertThat(capture.getVedtakMetadata().getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
         assertThat(capture.getVedtakMetadata().getVedtakstype()).isEqualTo(Vedtakstyper.KORRIGERT_VEDTAK);
         assertThat(capture.getVedtakMetadata().getRevurderBegrunnelse()).isEqualTo("BEGRUNNELSE");
-        assertThat(p.getSteg()).isEqualTo(IV_AVKLAR_MYNDIGHET);
+        assertThat(p.getSteg()).isEqualTo(IV_OPPRETT_AVGIFTSOPPGAVE);
     }
 }

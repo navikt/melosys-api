@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.ul;
+package no.nav.melosys.saksflyt.steg.iv.ul;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
@@ -8,6 +8,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
+import no.nav.melosys.saksflyt.steg.iv.ul.UtpekLandDistribuerJournalpost;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.Before;
 import org.junit.Test;
