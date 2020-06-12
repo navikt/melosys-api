@@ -54,13 +54,13 @@ public class OppdaterBehandlingsresultatTest {
         p.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, "BEGRUNNELSE");
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         oppdaterBehandlingsresultat.utfør(p);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
-        assertThat(capture.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         assertThat(capture.getVedtakMetadata().getVedtaksdato()).isNotNull();
         assertThat(capture.getVedtakMetadata().getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
         assertThat(capture.getVedtakMetadata().getVedtakstype()).isEqualTo(Vedtakstyper.KORRIGERT_VEDTAK);
@@ -69,7 +69,7 @@ public class OppdaterBehandlingsresultatTest {
     }
 
     @Test
-    public void utfør_annenProsesstypeEnnIverksettVedtak_setterIkkeResultattypeOgLand() throws FunksjonellException {
+    public void utfør_forkortPeriode_setterIkkeResultattypeOgLand() throws FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
