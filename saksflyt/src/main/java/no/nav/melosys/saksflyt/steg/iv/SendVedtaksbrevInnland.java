@@ -71,29 +71,34 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
+        String begrunnelseKode = hentBegrunnelseKode(prosessinstans);
+        String fritekst = hentBegrunnelseFritekst(prosessinstans);
 
         if (resultat.erAvslag()) {
-            sendAvslagsbrev(prosessinstans, behandling, behandlingsresultatType, saksbehandler);
+            sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler, fritekst);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
         } else if (resultat.erInnvilgelse()) {
-            sendInnvilgelsesbrev(prosessinstans, behandling, resultat, saksbehandler);
+            sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
             sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
-            sendA1tilSkattOppkreverUtland(prosessinstans, behandling, resultat, saksbehandler);
+            sendA1tilSkattOppkreverUtland(behandling, resultat, begrunnelseKode, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
+        } else if (resultat.erUtpeking()) {
+            sendUtpekingsbrev(behandling, saksbehandler, fritekst);
+            log.info("Sendt utpekingsbrev for prosessinstans {}", prosessinstans.getId());
+            prosessinstans.setSteg(IV_SEND_SED);
         } else {
-            log.warn("Vedtaksbrev kan ikke sendes for behandling {} i "
-                    + "prosessinstansen {}.",
-                behandling.getId(), prosessinstans.getId());
+            log.error("Vedtaksbrev kan ikke sendes for behandlingsresultat {} i prosessinstans {}.",
+                behandlingsresultatType, prosessinstans.getId());
             prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
         }
     }
 
-    private void sendAvslagsbrev(Prosessinstans prosessinstans,
-                                 Behandling behandling,
+    private void sendAvslagsbrev(Behandling behandling,
                                  Behandlingsresultattyper behandlingsresultatType,
-                                 String saksbehandler)
+                                 String saksbehandler,
+                                 String fritekst)
         throws FunksjonellException, TekniskException {
         Produserbaredokumenter avslagTypeBruker = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
             ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
@@ -104,8 +109,6 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         } else {
             mottakerListe = List.of(Mottaker.av(BRUKER));
         }
-
-        String fritekst = hentBegrunnelseFritekst(prosessinstans);
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(avslagTypeBruker)
             .medAvsender(saksbehandler)
@@ -130,10 +133,11 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         }
     }
 
-    private void sendInnvilgelsesbrev(Prosessinstans prosessinstans,
-                                      Behandling behandling,
+    private void sendInnvilgelsesbrev(Behandling behandling,
                                       Behandlingsresultat resultat,
-                                      String saksbehandler)
+                                      String saksbehandler,
+                                      String begrunnelseKode,
+                                      String fritekst)
         throws FunksjonellException, TekniskException {
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
@@ -141,11 +145,22 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         Brevbestilling innvilgelseBrukerOgSkatt = new Brevbestilling.Builder().medDokumentType(innvilgelseType)
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
-            .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans))
+            .medBegrunnelseKode(begrunnelseKode)
             .medMottakere(Mottaker.av(BRUKER), FastMottaker.av(SKATT))
-            .medFritekst(hentBegrunnelseFritekst(prosessinstans))
+            .medFritekst(fritekst)
             .build();
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
+    }
+
+    private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst)
+        throws FunksjonellException, TekniskException {
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(ORIENTERING_UTPEKING_UTLAND)
+            .medAvsender(saksbehandler)
+            .medBehandling(behandling)
+            .medMottakere(Mottaker.av(BRUKER))
+            .medFritekst(fritekst)
+            .build();
+        brevBestiller.bestill(brevbestilling);
     }
 
     private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler)
@@ -159,9 +174,9 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
         }
     }
 
-    private void sendA1tilSkattOppkreverUtland(Prosessinstans prosessinstans,
-                                               Behandling behandling,
+    private void sendA1tilSkattOppkreverUtland(Behandling behandling,
                                                Behandlingsresultat resultat,
+                                               String begrunnelsekode,
                                                String saksbehandler)
         throws FunksjonellException, TekniskException {
         final boolean erArtikkel13 = resultat.hentValidertLovvalgsperiode().erArtikkel13();
@@ -171,7 +186,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
                     .medAvsender(saksbehandler)
                     .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
                     .medBehandling(behandling)
-                    .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans)).build();
+                    .medBegrunnelseKode(begrunnelsekode).build();
                 brevBestiller.bestill(a1SkatteoppkreverUtland);
             }
         } else {
@@ -180,7 +195,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
                     .medAvsender(saksbehandler)
                     .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
                     .medBehandling(behandling)
-                    .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans)).build();
+                    .medBegrunnelseKode(begrunnelsekode).build();
                 brevBestiller.bestill(a1SkatteoppkreverUtland);
             }
         }
