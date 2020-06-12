@@ -221,9 +221,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
         if (type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return true;
         }
-        Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
         return type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            && lovvalgsperiode.erAvslått();
+            && hentValidertLovvalgsperiode().erAvslått();
     }
 
     public boolean erAnmodningOmUnntak() {
@@ -243,6 +242,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
             Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
             return lovvalgsperiode.erInnvilget() && lovvalgsperiode.erArtikkel13();
+        } else {
+            return false;
+        }
+    }
+
+    public boolean erUtpeking() {
+        if (type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND) {
+            return !utpekingsperioder.isEmpty();
         } else {
             return false;
         }
