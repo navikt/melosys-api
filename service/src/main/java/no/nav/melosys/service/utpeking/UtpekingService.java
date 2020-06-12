@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -77,13 +78,19 @@ public class UtpekingService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void utpekLovvalgsland(Fagsak fagsak, Set<String> mottakerinstitusjoner, String ytterligereInformasjonSed, String fritekstBrev) throws MelosysException {
+    public void utpekLovvalgsland(Fagsak fagsak,
+                                  Set<String> mottakerinstitusjoner,
+                                  String ytterligereInformasjonSed,
+                                  String fritekstBrev)
+        throws MelosysException {
         long behandlingID = fagsak.getAktivBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
-            behandling.getFagsak().getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
+
+        if (log.isInfoEnabled()) {
+            log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
+                behandling.getFagsak().getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
+        }
 
         mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjoner,
@@ -91,9 +98,13 @@ public class UtpekingService {
             BucType.LA_BUC_02
         );
 
-        Utpekingsperiode utpekingsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertUtpekingsperiode();
+        Utpekingsperiode utpekingsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+            .hentValidertUtpekingsperiode();
         validerUtpekingsperiode(utpekingsperiode);
 
+        behandlingsresultatService.oppdaterBehandlingsresultattype(
+            behandlingID, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
+        );
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
         );
