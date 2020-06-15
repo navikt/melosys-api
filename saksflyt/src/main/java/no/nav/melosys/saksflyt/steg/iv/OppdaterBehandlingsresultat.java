@@ -1,21 +1,20 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.VedtakMetadata;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +32,13 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     static final int FRIST_KLAGE_UKER = 6;
 
     private final BehandlingsresultatService behandlingsresultatService;
+    private final UtpekingService utpekingService;
 
     @Autowired
-    public OppdaterBehandlingsresultat(BehandlingsresultatService behandlingsresultatService) {
+    public OppdaterBehandlingsresultat(BehandlingsresultatService behandlingsresultatService,
+                                       UtpekingService utpekingService) {
         this.behandlingsresultatService = behandlingsresultatService;
+        this.utpekingService = utpekingService;
     }
 
     @Override
@@ -45,7 +47,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Long behandlingID = prosessinstans.getBehandling().getId();
 
@@ -54,31 +56,26 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         }
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if (behandlingsresultat.erUtpeking()) {
+            utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
+        }
 
-        if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
-            behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
+        if (prosessinstans.getType() != ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE) {
             behandlingsresultat.setFastsattAvLand(Landkoder.NO);
-            behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST));
+            String fritekst = prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
+            behandlingsresultat.setBegrunnelseFritekst(fritekst);
         }
 
-        VedtakMetadata vedtakMetadata;
-        if (behandlingsresultat.getVedtakMetadata() == null) {
-            vedtakMetadata = new VedtakMetadata();
-            vedtakMetadata.setBehandlingsresultat(behandlingsresultat);
-            behandlingsresultat.setVedtakMetadata(vedtakMetadata);
-        } else {
-            vedtakMetadata = behandlingsresultat.getVedtakMetadata();
-        }
-        vedtakMetadata.setVedtaksdato(Instant.now());
-        LocalDate klagefrist = LocalDate.now().plusWeeks(FRIST_KLAGE_UKER);
-        vedtakMetadata.setVedtakKlagefrist(klagefrist);
-        vedtakMetadata.setRevurderBegrunnelse(prosessinstans.getData(ProsessDataKey.REVURDER_BEGRUNNELSE));
-        vedtakMetadata.setVedtakstype(prosessinstans.getData(ProsessDataKey.VEDTAKSTYPE) == null ? null : Vedtakstyper.valueOf(prosessinstans.getData(ProsessDataKey.VEDTAKSTYPE)));
+        Vedtakstyper vedtakstype = Vedtakstyper.valueOf(prosessinstans.getData(ProsessDataKey.VEDTAKSTYPE));
+        String revurderBegrunnelse = prosessinstans.getData(ProsessDataKey.REVURDER_BEGRUNNELSE);
+        LocalDate klagefrist = LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER);
+        behandlingsresultat.settVedtakMetadata(vedtakstype, revurderBegrunnelse, klagefrist);
 
         behandlingsresultatService.lagre(behandlingsresultat);
 
         prosessinstans.setSteg(ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE);
 
-        log.info("Oppdatert behandlingsresultat for prosessinstans {}. Klagefrist: {}", prosessinstans.getId(), klagefrist);
+        log.info("Oppdatert resultat og vedtak for for prosessinstans {}.", prosessinstans.getId());
     }
+
 }

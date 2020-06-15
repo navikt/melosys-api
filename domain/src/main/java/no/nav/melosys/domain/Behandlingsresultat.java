@@ -1,5 +1,7 @@
 package no.nav.melosys.domain;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
@@ -7,6 +9,7 @@ import javax.persistence.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -340,6 +343,23 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erAutomatisert() {
         return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
             || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
+    }
+
+    public void settVedtakMetadata(Vedtakstyper vedtakstype,
+                                   String revurderBegrunnelse,
+                                   LocalDate klagefrist) {
+        if (vedtakMetadata == null) {
+            vedtakMetadata = new VedtakMetadata();
+            vedtakMetadata.setBehandlingsresultat(this);
+            setVedtakMetadata(vedtakMetadata);
+        } else {
+            throw new UnsupportedOperationException("Trenger vi å oppdatere et vedtak?");
+        }
+
+        vedtakMetadata.setVedtakstype(vedtakstype);
+        vedtakMetadata.setVedtaksdato(Instant.now());
+        vedtakMetadata.setRevurderBegrunnelse(revurderBegrunnelse);
+        vedtakMetadata.setVedtakKlagefrist(klagefrist);
     }
 
     public boolean harVedtak() {
