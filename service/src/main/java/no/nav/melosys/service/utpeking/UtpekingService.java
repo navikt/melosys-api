@@ -13,7 +13,6 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -83,13 +82,12 @@ public class UtpekingService {
                                   String ytterligereInformasjonSed,
                                   String fritekstBrev)
         throws MelosysException {
+        Behandling behandling = fagsak.getAktivBehandling();
         long behandlingID = fagsak.getAktivBehandling().getId();
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
 
         if (log.isInfoEnabled()) {
             log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",
-                behandling.getFagsak().getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
+                fagsak.getSaksnummer(), behandlingID, String.join(", ", mottakerinstitusjoner));
         }
 
         mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
@@ -108,7 +106,7 @@ public class UtpekingService {
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
         );
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     @Transactional(rollbackFor = MelosysException.class)

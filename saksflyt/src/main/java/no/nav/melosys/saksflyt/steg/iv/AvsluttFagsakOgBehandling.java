@@ -54,7 +54,8 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService
             .hentBehandlingsresultat(prosessinstans.getBehandling().getId());
 
-        if (behandlingsresultat.erInnvilgelse() && behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel13()) {
+        if (behandlingsresultat.erInnvilgelse() && behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel13()
+            || behandlingsresultat.erUtpeking()) {
             long behandlingID = prosessinstans.getBehandling().getId();
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
