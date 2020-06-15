@@ -319,7 +319,11 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling, Landkoder utpektLand, Set<String> mottakerinstitusjoner, String ytterligereInformasjonSed, String fritekstBrev) {
+    public void opprettProsessinstansUtpekAnnetLand(Behandling behandling,
+                                                    Landkoder utpektLand,
+                                                    Set<String> mottakerinstitusjoner,
+                                                    String ytterligereInformasjonSed,
+                                                    String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.UTPEK_LAND)
             .medSteg(ProsessSteg.UL_OPPDATER_MEDL)
@@ -329,6 +333,7 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(fritekstBrev)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
+        prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.FØRSTEGANGSVEDTAK);
 
         lagre(prosessinstans);
     }

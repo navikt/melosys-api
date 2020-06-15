@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -11,7 +12,9 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +31,8 @@ import static org.mockito.Mockito.*;
 public class OppdaterBehandlingsresultatTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private UtpekingService utpekingService;
 
     private OppdaterBehandlingsresultat oppdaterBehandlingsresultat;
 
@@ -36,11 +41,11 @@ public class OppdaterBehandlingsresultatTest {
 
     @Before
     public void setUp() {
-        oppdaterBehandlingsresultat = new OppdaterBehandlingsresultat(behandlingsresultatService);
+        oppdaterBehandlingsresultat = new OppdaterBehandlingsresultat(behandlingsresultatService, utpekingService);
     }
 
     @Test
-    public void utfør() throws FunksjonellException {
+    public void utfør() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -69,7 +74,28 @@ public class OppdaterBehandlingsresultatTest {
     }
 
     @Test
-    public void utfør_forkortPeriode_setterIkkeResultattypeOgLand() throws FunksjonellException {
+    public void utfør_utpeking_oppdatererSendtUtland() throws FunksjonellException, TekniskException {
+        Prosessinstans p = new Prosessinstans();
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        p.setBehandling(behandling);
+        p.setType(ProsessType.IVERKSETT_VEDTAK);
+        p.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.FØRSTEGANGSVEDTAK.getKode());
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode();
+        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        oppdaterBehandlingsresultat.utfør(p);
+
+        verify(utpekingService).oppdaterSendtUtland(any());
+        assertThat(p.getSteg()).isEqualTo(IV_OPPRETT_AVGIFTSOPPGAVE);
+    }
+
+    @Test
+    public void utfør_forkortPeriode_setterIkkeResultattypeOgLand() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);

@@ -11,8 +11,10 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +32,13 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     static final int FRIST_KLAGE_UKER = 6;
 
     private final BehandlingsresultatService behandlingsresultatService;
+    private final UtpekingService utpekingService;
 
     @Autowired
-    public OppdaterBehandlingsresultat(BehandlingsresultatService behandlingsresultatService) {
+    public OppdaterBehandlingsresultat(BehandlingsresultatService behandlingsresultatService,
+                                       UtpekingService utpekingService) {
         this.behandlingsresultatService = behandlingsresultatService;
+        this.utpekingService = utpekingService;
     }
 
     @Override
@@ -42,7 +47,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Long behandlingID = prosessinstans.getBehandling().getId();
 
@@ -51,6 +56,9 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         }
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if (behandlingsresultat.erUtpeking()) {
+            utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
+        }
 
         if (prosessinstans.getType() != ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE) {
             behandlingsresultat.setFastsattAvLand(Landkoder.NO);
