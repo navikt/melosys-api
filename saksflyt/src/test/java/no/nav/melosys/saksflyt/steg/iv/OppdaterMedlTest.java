@@ -25,13 +25,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_SEND_BREV;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
@@ -74,6 +73,7 @@ public class OppdaterMedlTest {
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
 
         behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
@@ -90,29 +90,37 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void utførStegNårBehandlingsresultatTypeErFastsatt_lovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
+    public void utførSteg_behandlingsresultatTypeErFastsattLovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
         oppdaterMedl.utførSteg(prosessinstans);
         verify(medlPeriodeService).opprettPeriodeEndelig(eq(lovvalgsperiode), eq(1L), eq(false));
     }
 
     @Test
-    public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() throws IkkeFunnetException {
+    public void utførSteg_behandlingsresultatHarIngenLovvalgPeriode_feiler() throws IkkeFunnetException {
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         oppdaterMedl.utførSteg(prosessinstans);
-        assertEquals(ProsessSteg.FEILET_MASKINELT, prosessinstans.getSteg());
+        assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
     @Test
-    public void erPeriodeEndelig() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+    public void utfør_avslagManglendeOpplysningerUtenPeriode_oppdaterIkkeMedl() throws Exception {
+        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        oppdaterMedl.utfør(prosessinstans);
+        verifyNoInteractions(medlPeriodeService);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
+    }
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
+    @Test
+    public void utfør_avslagManglendeOpplysningerMedPeriode_oppdaterMedl() throws Exception {
+        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        lovvalgsperiode.setMedlPeriodeID(123L);
+        oppdaterMedl.utfør(prosessinstans);
+        verify(medlPeriodeService).avvisPeriode(123L);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
     }
 
     @Test
