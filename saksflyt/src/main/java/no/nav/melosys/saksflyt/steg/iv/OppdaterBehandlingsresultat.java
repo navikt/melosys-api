@@ -69,7 +69,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         Vedtakstyper vedtakstype = Vedtakstyper.valueOf(prosessinstans.getData(ProsessDataKey.VEDTAKSTYPE));
         String revurderBegrunnelse = prosessinstans.getData(ProsessDataKey.REVURDER_BEGRUNNELSE);
         LocalDate klagefrist = LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER);
-        behandlingsresultat.fornyeVedtakMetadata(vedtakstype, revurderBegrunnelse, klagefrist);
+        behandlingsresultat.settVedtakMetadata(vedtakstype, revurderBegrunnelse, klagefrist);
 
         behandlingsresultatService.lagre(behandlingsresultat);
 

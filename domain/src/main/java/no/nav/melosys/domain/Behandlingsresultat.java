@@ -345,13 +345,15 @@ public class Behandlingsresultat extends RegistreringsInfo {
             || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
     }
 
-    public void fornyeVedtakMetadata(Vedtakstyper vedtakstype,
-                                     String revurderBegrunnelse,
-                                     LocalDate klagefrist) {
+    public void settVedtakMetadata(Vedtakstyper vedtakstype,
+                                   String revurderBegrunnelse,
+                                   LocalDate klagefrist) {
         if (vedtakMetadata == null) {
             vedtakMetadata = new VedtakMetadata();
             vedtakMetadata.setBehandlingsresultat(this);
             setVedtakMetadata(vedtakMetadata);
+        } else {
+            throw new UnsupportedOperationException("Trenger vi å oppdatere et vedtak?");
         }
 
         vedtakMetadata.setVedtakstype(vedtakstype);
