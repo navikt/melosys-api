@@ -7,7 +7,6 @@ public class ArbeidNorge {
     public Boolean arbeidsforholdOpprettholdIHelePerioden;
     public String arbeidsforholdVikarNavn;
     public String vikarOrgnr;
-    public String flyendePersonellHjemmebase;
     public String kontaktNavn;
     public String kontaktEpost;
     public String fullmektigFirma;
