@@ -39,6 +39,8 @@ public class BehandlingsgrunnlagData {
 
     public List<MaritimtArbeid> maritimtArbeid = new ArrayList<>();
 
+    public List<LuftfartBase> luftfartBaser = new ArrayList<>();
+
     public Bosted bosted = new Bosted();
 
     public Set<String> hentAlleOrganisasjonsnumre() {

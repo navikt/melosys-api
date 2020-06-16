@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.sed.bygger;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
@@ -71,6 +72,10 @@ class DataByggerStubs {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.enhetNavn = "enhet";
         søknadDokument.maritimtArbeid = Collections.singletonList(maritimtArbeid);
+
+        LuftfartBase luftfartBase = new LuftfartBase();
+        luftfartBase.hjemmebaseNavn = "hjemmebase";
+        søknadDokument.luftfartBaser = List.of(luftfartBase);
 
         PersonDokument personDokument = new PersonDokument();
         personDokument.erEgenAnsatt = true;
