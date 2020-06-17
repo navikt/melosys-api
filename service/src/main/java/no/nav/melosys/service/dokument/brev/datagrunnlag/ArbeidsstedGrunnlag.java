@@ -8,6 +8,7 @@ import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 
@@ -34,6 +35,7 @@ public class ArbeidsstedGrunnlag {
     public List<Arbeidssted> hentArbeidssteder() {
         List<Arbeidssted> arbeidssteder = hentFysiskearbeidssteder();
         arbeidssteder.addAll(hentMaritimeArbeidssteder());
+        arbeidssteder.addAll(hentFlyvendeArbeidssteder());
         return arbeidssteder;
     }
 
@@ -58,6 +60,12 @@ public class ArbeidsstedGrunnlag {
         return grunnlagData.maritimtArbeid.stream()
             .map(ma -> lagMaritimtArbeidssted(ma, avklartMaritimtArbeid))
             .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    }
+
+    private List<FlyvendeArbeidssted> hentFlyvendeArbeidssteder() {
+        return grunnlagData.luftfartBaser.stream()
+            .map(FlyvendeArbeidssted::new)
             .collect(Collectors.toList());
     }
 
