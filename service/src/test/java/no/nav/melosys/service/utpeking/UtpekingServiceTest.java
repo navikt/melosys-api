@@ -39,7 +39,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UtpekingServiceTest {
-
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -58,9 +57,9 @@ public class UtpekingServiceTest {
     private UtpekingService utpekingService;
 
     private final long behandlingID = 431;
-    private Behandling behandling = new Behandling();
-    private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private Fagsak fagsak = new Fagsak();
+    private final Behandling behandling = new Behandling();
+    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+    private final Fagsak fagsak = new Fagsak();
 
 
     @Before
@@ -79,6 +78,7 @@ public class UtpekingServiceTest {
 
     @Test
     public void utpekLovvalgsland_harUtpekingsperiode_prosessinstansBlirOpprettet() throws MelosysException {
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
@@ -91,6 +91,18 @@ public class UtpekingServiceTest {
 
         verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
+    }
+
+    @Test
+    public void utpekLovvalgsland_feilBehandlingstema_kasterException() {
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Landkoder.SE,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
+        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
+        final Set<String> mottakerInstitusjoner = Set.of("SE:123");
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null));
     }
 
     @Test

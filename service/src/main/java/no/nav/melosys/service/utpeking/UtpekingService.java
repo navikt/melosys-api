@@ -83,6 +83,9 @@ public class UtpekingService {
                                   String fritekstBrev)
         throws MelosysException {
         Behandling behandling = fagsak.getAktivBehandling();
+        if (!behandling.erUtpekingAvAnnetLand()) {
+            throw new FunksjonellException("Utpeking kan ikke skje for en behandling med tema " + behandling.getTema());
+        }
         long behandlingID = fagsak.getAktivBehandling().getId();
 
         if (log.isInfoEnabled()) {
