@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper.arbeidssted;
 
 import no.nav.melosys.domain.dokument.soeknad.LuftfartBase;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 
 public final class FlyvendeArbeidssted extends AbstractArbeidssted implements IkkeFysiskArbeidssted {
@@ -29,6 +30,6 @@ public final class FlyvendeArbeidssted extends AbstractArbeidssted implements Ik
 
     @Override
     public String lagAdresselinje() {
-        return String.join(" ", getEnhetNavn(), getOmråde());
+        return Landkoder.valueOf(landkode).getBeskrivelse();
     }
 }
