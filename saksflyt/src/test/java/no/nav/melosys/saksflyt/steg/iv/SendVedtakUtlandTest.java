@@ -9,6 +9,7 @@ import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -23,6 +24,7 @@ import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +49,8 @@ public class SendVedtakUtlandTest {
     private BrevBestiller brevBestiller;
     @Mock
     private SaksopplysningerService saksopplysningerService;
+    @Mock
+    private SedSomBrevService sedSomBrevService;
 
     private SendVedtakUtland sendVedtakUtland;
 
@@ -79,7 +83,8 @@ public class SendVedtakUtlandTest {
         behandlingsresultat.setBehandling(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, saksopplysningerService);
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService,
+            brevBestiller, saksopplysningerService, sedSomBrevService);
     }
 
     @Test
@@ -136,6 +141,17 @@ public class SendVedtakUtlandTest {
         verify(eessiService).opprettOgSendSed(anyLong(), captor.capture(), any(), any(), isNull());
 
         assertThat(captor.getValue()).containsExactly(MOTTAKER_INSTITUSJON);
+    }
+
+    @Test
+    public void utførSteg_utpekAnnetLandUtenEessiMottakere_lagerBrev() throws MelosysException {
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
+        prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT);
+        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any()))
+            .thenReturn("journalpostID");
+        sendVedtakUtland.utfør(prosessinstans);
+        verify(sedSomBrevService).lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), eq(behandling), any());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
     }
 
     @Test
