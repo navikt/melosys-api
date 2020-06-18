@@ -14,6 +14,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -26,8 +27,8 @@ import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagG
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -44,7 +45,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 
-@Ignore // FIXME: Krever oppdatert skjema
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsgrunnlagTjenesteTest.class);
@@ -71,7 +71,9 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
             .stringLengthRange(2, 10)
             .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnr").and(ofType(String.class)), new NumericStringRandomizer(9))
-            .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9)));
+            .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9))
+            .randomize(named("typeFlyvninger"), () -> new EnumRandomizer<>(Flyvningstyper.class).getRandomValue().getKode()));
+        ;
 
         OrganisasjonDokument organisasjonDokument = random.nextObject(OrganisasjonDokument.class);
         when(registerOppslagService.hentOrganisasjoner(anySet())).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
