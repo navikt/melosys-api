@@ -11,6 +11,7 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -85,7 +86,7 @@ public class UtpekingService {
                                   String fritekstBrev)
         throws MelosysException {
         Behandling behandling = fagsak.getAktivBehandling();
-        if (!behandling.erUtpekingAvAnnetLand()) {
+        if (behandling.getTema() != Behandlingstema.ARBEID_FLERE_LAND) {
             throw new FunksjonellException("Utpeking kan ikke skje for en behandling med tema " + behandling.getTema());
         }
         long behandlingID = fagsak.getAktivBehandling().getId();
@@ -115,9 +116,9 @@ public class UtpekingService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
-    private Lovvalgsperiode opprettLovvalgsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {
-        return lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(Lovvalgsperiode.av(utpekingsperiode)))
-            .stream().findFirst().orElseThrow(() -> new IllegalStateException("Feil ved lagring av lovvalgsperiode"));
+    private void opprettLovvalgsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {
+        lovvalgsperiodeService
+            .lagreLovvalgsperioder(behandlingID, Collections.singleton(Lovvalgsperiode.av(utpekingsperiode)));
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -130,7 +131,7 @@ public class UtpekingService {
             throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");
         }
 
-        if (behandling.erUtpekingAvAnnetLand()) {
+        if (behandling.erBeslutningLovvalgAnnetLand()) {
             behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         } else if (behandling.erNorgeUtpekt()) {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);

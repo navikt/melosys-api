@@ -198,7 +198,7 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean kanResultereIVedtak() {
-        return erBehandlingAvSøknad() || erNorgeUtpekt() || erUtpekingAvAnnetLand();
+        return erBehandlingAvSøknad() || erNorgeUtpekt();
     }
 
     public boolean erAktiv() {
@@ -253,7 +253,7 @@ public class Behandling extends RegistreringsInfo {
         return tema == Behandlingstema.BESLUTNING_LOVVALG_NORGE;
     }
 
-    public boolean erUtpekingAvAnnetLand() {
+    public boolean erBeslutningLovvalgAnnetLand() {
         return tema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 
