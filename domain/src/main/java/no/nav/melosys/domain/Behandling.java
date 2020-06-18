@@ -198,7 +198,7 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean kanResultereIVedtak() {
-        return erBehandlingAvSøknad() || erNorgeUtpekt();
+        return erBehandlingAvSøknad() || erNorgeUtpekt() || erUtpekingAvAnnetLand();
     }
 
     public boolean erAktiv() {
