@@ -366,11 +366,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return vedtakMetadata != null;
     }
 
-    public boolean harUtpektAnnetLand() {
-        return finnValidertUtpekingsperiode().map(Utpekingsperiode::getSendtUtland).isPresent();
-    }
-
-
     @Override
     public String toString() {
         return "Behandlingsresultat{" +
