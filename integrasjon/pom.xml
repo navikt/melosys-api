@@ -24,10 +24,6 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>sikkerhet</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>regler-api</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
