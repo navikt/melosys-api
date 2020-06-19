@@ -64,11 +64,12 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+        final var behandling = prosessinstans.getBehandling();
+        final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
-        Behandling behandling = prosessinstans.getBehandling();
         if (behandling.erNorgeUtpekt()) {
             sendSedA012(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
-        } else if (behandling.erUtpekingAvAnnetLand()) {
+        } else if (behandlingsresultat.erUtpeking()) {
             SendUtlandStatus status = sendSedA003(prosessinstans);
             if (status == SendUtlandStatus.BREV_SENDT) {
                 prosessinstans.setSteg(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
@@ -110,7 +111,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     @Override
     protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
         Behandling behandling = prosessinstans.getBehandling();
-        if (behandling.erUtpekingAvAnnetLand()) {
+        if (prosessinstans.getData(ProsessDataKey.UTPEKT_LAND) != null) {
             Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
             String journalpostID = sedSomBrevService
                 .lagJournalpostForSendingAvSedSomBrev(SedType.A003, behandling, utpektLand);
@@ -122,8 +123,9 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     @Override
     protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.erInnvilgelse() &&
-            behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse() != Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
+        return (behandlingsresultat.erInnvilgelse() && behandlingsresultat.hentValidertLovvalgsperiode()
+            .getBestemmelse() != Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)
+            || behandlingsresultat.erInnvilgelseFlereLand();
     }
 
     private BucType avklarBucType(Behandling behandling) throws IkkeFunnetException, TekniskException {

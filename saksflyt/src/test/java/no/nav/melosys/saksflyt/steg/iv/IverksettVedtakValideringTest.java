@@ -34,7 +34,7 @@ public class IverksettVedtakValideringTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    private IverksettVedtakValidering agent;
+    private IverksettVedtakValidering validering;
 
     private Prosessinstans p;
 
@@ -47,7 +47,7 @@ public class IverksettVedtakValideringTest {
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        agent = new IverksettVedtakValidering(behandlingsresultatService);
+        validering = new IverksettVedtakValidering(behandlingsresultatService);
 
         p = new Prosessinstans();
         Behandling behandling = new Behandling();
@@ -71,7 +71,7 @@ public class IverksettVedtakValideringTest {
 
     @Test
     public void utfoerSteg() throws FunksjonellException, TekniskException {
-        agent.utfør(p);
+        validering.utfør(p);
 
         assertThat(p.getSteg()).isEqualTo(IV_AVKLAR_MYNDIGHET);
     }
@@ -83,23 +83,19 @@ public class IverksettVedtakValideringTest {
         expectedException.expect(TekniskException.class);
         expectedException.expectMessage("ProsessType " + ProsessType.MOTTAK_SED + " er ikke støttet.");
 
-        agent.utfør(p);
+        validering.utfør(p);
     }
 
     @Test
     public void utfør_manglerBehandlingsresultatType() throws FunksjonellException, TekniskException {
-        p = new Prosessinstans();
-        Behandling behandling = new Behandling();
-        behandling.setId(2L);
-        p.setBehandling(behandling);
-        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
-        p.setType(ProsessType.IVERKSETT_VEDTAK);
-        p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("BehandlingsResultatType er ikke oppgitt.");
 
-        agent.utfør(p);
+        validering.utfør(p);
     }
 
     @Test
@@ -109,7 +105,7 @@ public class IverksettVedtakValideringTest {
         expectedException.expect(NoSuchElementException.class);
         expectedException.expectMessage("Ingen lovvalgsperiode finnes for behandlingsresultat");
 
-        agent.utfør(p);
+        validering.utfør(p);
     }
 
     @Test
@@ -118,7 +114,7 @@ public class IverksettVedtakValideringTest {
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("SaksbehandlerID er ikke oppgitt.");
-        agent.utfør(p);
+        validering.utfør(p);
     }
 
     @Test
@@ -129,6 +125,6 @@ public class IverksettVedtakValideringTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         p.setData(ProsessDataKey.SAKSBEHANDLER, "");
-        agent.utfør(p);
+        validering.utfør(p);
     }
 }

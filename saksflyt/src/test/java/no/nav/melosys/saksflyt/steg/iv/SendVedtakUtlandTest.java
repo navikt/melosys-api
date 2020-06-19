@@ -10,6 +10,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.sed.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -20,6 +21,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.regler.api.lovvalg.rep.Lovvalgsbestemmelse;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -145,7 +147,14 @@ public class SendVedtakUtlandTest {
 
     @Test
     public void utførSteg_utpekAnnetLandUtenEessiMottakere_lagerBrev() throws MelosysException {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
+        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT);
         when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any()))
             .thenReturn("journalpostID");
