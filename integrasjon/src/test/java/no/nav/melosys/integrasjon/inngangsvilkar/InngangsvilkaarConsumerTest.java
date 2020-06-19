@@ -23,13 +23,13 @@ public class InngangsvilkaarConsumerTest {
 
     private MockRestServiceServer server;
     private final String url = "http://melosys-inngangsvilkar/api";
-    private InngangsvilkaarConsumer inngangsvilkaarConsumer;
+    private InngangsvilkaarConsumerImpl inngangsvilkaarConsumer;
 
     @Before
     public void setup() {
         RestTemplate restTemplate = new InngangsvilkarConfig().inngangsVilkaarRestTemplate(url);
         server = MockRestServiceServer.createServer(restTemplate);
-        inngangsvilkaarConsumer = new InngangsvilkaarConsumer(restTemplate);
+        inngangsvilkaarConsumer = new InngangsvilkaarConsumerImpl(restTemplate);
     }
 
     @Test

@@ -18,7 +18,7 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
+import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
 import no.nav.melosys.service.SaksopplysningerService;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class InngangsvilkaarServiceTest {
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
-    private InngangsvilkaarConsumer inngangsvilkaarConsumer;
+    private InngangsvilkaarConsumerImpl inngangsvilkaarConsumer;
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
 
