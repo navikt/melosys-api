@@ -140,11 +140,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>regler-api</artifactId>
-                <version>${melosys.regler.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>saksflyt</artifactId>
                 <version>${project.version}</version>
             </dependency>
