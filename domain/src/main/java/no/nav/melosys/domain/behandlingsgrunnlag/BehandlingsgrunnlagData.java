@@ -29,9 +29,6 @@ public class BehandlingsgrunnlagData {
     // Opplysninger om opphold i utland
     public OppholdUtland oppholdUtland = new OppholdUtland();
 
-    // Opplysninger om arbeid i Norge
-    public ArbeidNorge arbeidNorge = new ArbeidNorge();
-
     public SelvstendigArbeid selvstendigArbeid = new SelvstendigArbeid();
 
     // Opplysninger om juridiske arbeidsgiver i Norge
