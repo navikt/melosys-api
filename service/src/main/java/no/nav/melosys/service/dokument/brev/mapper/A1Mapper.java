@@ -122,7 +122,9 @@ class A1Mapper {
      * Brevtjenesten trenger et fast antall enheter i listen.
      * Fyller derfor opp med tomme elementer for resterende felter
      */
-    private BivirksomhetListeType mapBivirksomheter(Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidssteder) {
+    private BivirksomhetListeType mapBivirksomheter(
+        Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidssteder) {
+
         BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
         Stream.concat(
             hentAvklarteVirksomheterOgFlyvendeArbeidssteder(avklarteVirksomheter, arbeidssteder),
@@ -136,7 +138,9 @@ class A1Mapper {
      * Brevtjenesten trenger et fast antall enheter i listen.
      * Fyller derfor opp med tomme elementer for resterende felter
      */
-    private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+    private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(
+        List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         Stream.concat(
             hentArbeidsstederOgLandUtenOppgittArbeidssted(arbeidssteder, arbeidsland),
@@ -146,7 +150,9 @@ class A1Mapper {
         return fysiskeAdresserBrev;
     }
 
-    private Stream<AdresseType> hentArbeidsstederOgLandUtenOppgittArbeidssted(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+    private Stream<AdresseType> hentArbeidsstederOgLandUtenOppgittArbeidssted(
+        List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+
         List<String> landUtenOppgittArbeidssted = hentLandUtenOppgittArbeidssted(arbeidssteder, arbeidsland);
         return Stream.concat(
             arbeidssteder.stream().map(this::tilAdresseType),
@@ -154,8 +160,10 @@ class A1Mapper {
         );
     }
 
-    private Stream<BivirksomhetType> hentAvklarteVirksomheterOgFlyvendeArbeidssteder(Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidsland) {
-        Stream<Arbeidssted> flyvendeArbeidssteder = arbeidsland.stream()
+    private Stream<BivirksomhetType> hentAvklarteVirksomheterOgFlyvendeArbeidssteder(
+        Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidssteder) {
+
+        Stream<Arbeidssted> flyvendeArbeidssteder = arbeidssteder.stream()
             .filter(FlyvendeArbeidssted.class::isInstance);
         return Stream.concat(
             avklarteVirksomheter.stream().map(this::tilBivirksomhetType),
@@ -180,7 +188,9 @@ class A1Mapper {
                antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
     }
 
-    private List<String> hentLandUtenOppgittArbeidssted(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+    private List<String> hentLandUtenOppgittArbeidssted(
+        List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+
         Set<String> utfylteArbeidsland = arbeidssteder.stream()
             .map(Arbeidssted::getLandkode).collect(Collectors.toSet());
         String beskrivelser = arbeidsland.stream()
