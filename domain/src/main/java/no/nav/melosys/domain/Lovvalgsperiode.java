@@ -178,14 +178,11 @@ public class Lovvalgsperiode implements Medlemskapsperiode {
     }
 
     public boolean erInnvilget() {
-        return getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET
-            && getLovvalgsland() == Landkoder.NO
-            && harGyldigBestemmelse();
+        return getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
     }
 
     public boolean erAvslått() {
-        return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT
-            && harGyldigBestemmelse();
+        return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT;
     }
 
     public boolean harUgyldigTilstand() {

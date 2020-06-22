@@ -150,6 +150,7 @@ public class SendVedtakUtlandTest {
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
+        lovvalgsperiode.setLovvalgsland(Landkoder.AT);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
@@ -163,7 +164,6 @@ public class SendVedtakUtlandTest {
 
     @Test
     public void utførSteg_norgeErUtpektElektronisk_senderA012() throws MelosysException {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         SedDokument sedDokument = new SedDokument();

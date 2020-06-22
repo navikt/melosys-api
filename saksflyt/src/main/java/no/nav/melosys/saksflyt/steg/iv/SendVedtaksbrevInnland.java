@@ -78,15 +78,15 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
             sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler, fritekst);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
+        } else if (resultat.erUtpeking()) {
+            sendUtpekingsbrev(behandling, saksbehandler, fritekst);
+            log.info("Sendt utpekingsbrev for prosessinstans {}", prosessinstans.getId());
+            prosessinstans.setSteg(IV_SEND_SED);
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
             sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
             sendA1tilSkattOppkreverUtland(behandling, resultat, begrunnelseKode, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(IV_SEND_SED);
-        } else if (resultat.erUtpeking()) {
-            sendUtpekingsbrev(behandling, saksbehandler, fritekst);
-            log.info("Sendt utpekingsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
             log.error("Vedtaksbrev kan ikke sendes for behandlingsresultat {} i prosessinstans {}.",
