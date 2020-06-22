@@ -158,7 +158,8 @@ public class SendVedtakUtlandTest {
         when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any()))
             .thenReturn("journalpostID");
         sendVedtakUtland.utfør(prosessinstans);
-        verify(sedSomBrevService).lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), eq(behandling), any());
+        verify(sedSomBrevService)
+            .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), eq(Landkoder.AT), eq(behandling));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
     }
 

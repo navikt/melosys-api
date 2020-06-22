@@ -114,7 +114,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         if (prosessinstans.getData(ProsessDataKey.UTPEKT_LAND) != null) {
             Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
             String journalpostID = sedSomBrevService
-                .lagJournalpostForSendingAvSedSomBrev(SedType.A003, behandling, utpektLand);
+                .lagJournalpostForSendingAvSedSomBrev(SedType.A003, utpektLand, behandling);
             prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         } else {
             brevBestiller.bestill(lagBrevBestilling(prosessinstans));

@@ -6,10 +6,8 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.Vedlegg;
@@ -23,10 +21,9 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
@@ -47,26 +44,22 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
  */
 @Component
 public class VideresendSoknad extends AbstraktSendUtland {
-
     private static final Logger log = LoggerFactory.getLogger(VideresendSoknad.class);
 
-    private final TpsFasade tpsFasade;
-    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final JoarkFasade joarkFasade;
     private final FagsakService fagsakService;
+    private final SedSomBrevService sedSomBrevService;
 
     @Autowired
     protected VideresendSoknad(@Qualifier("system") EessiService eessiService,
                                BehandlingsresultatService behandlingsresultatService,
-                               TpsFasade tpsFasade,
-                               UtenlandskMyndighetService utenlandskMyndighetService,
                                @Qualifier("system") JoarkFasade joarkFasade,
-                               FagsakService fagsakService) {
+                               FagsakService fagsakService,
+                               SedSomBrevService sedSomBrevService) {
         super(eessiService, behandlingsresultatService);
-        this.fagsakService = fagsakService;
-        this.tpsFasade = tpsFasade;
-        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.joarkFasade = joarkFasade;
+        this.fagsakService = fagsakService;
+        this.sedSomBrevService = sedSomBrevService;
     }
 
     @Override
@@ -117,17 +110,9 @@ public class VideresendSoknad extends AbstraktSendUtland {
         behandling.setFagsak(fagsak);
 
         Landkoder landkode = fagsak.hentMyndighetLandkode();
-        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
-        String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
-        String institusjonNavn = utenlandskMyndighet.navn;
+        String journalpostID = sedSomBrevService
+            .lagJournalpostForSendingAvSedSomBrev(SedType.A008, landkode, behandling, lagSøknadVedlegg(behandling));
 
-        String fnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
-        OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
-            fagsak.getGsakSaksnummer(), fnr, SedType.A008, eessiService.genererSedPdf(behandling.getId(), SedType.A008),
-            institusjonID, institusjonNavn, landkode.getKode(), lagSøknadVedlegg(behandling)
-        );
-
-        String journalpostID = joarkFasade.opprettJournalpost(opprettJournalpost, true);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
     }
 
