@@ -333,7 +333,7 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(fritekstBrev)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
-        prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.FØRSTEGANGSVEDTAK.getKode());
 
         lagre(prosessinstans);
     }
