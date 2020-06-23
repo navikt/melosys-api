@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
+import org.apache.commons.lang3.StringUtils;
 
 public class AnmodningsperiodeSkrivDto {
     private static final LovvalgBestemmelsekonverterer konverterer = new LovvalgBestemmelsekonverterer();
@@ -51,7 +52,8 @@ public class AnmodningsperiodeSkrivDto {
     @SuppressWarnings("unused")
     public AnmodningsperiodeSkrivDto(Map<String, String> json) {
         this(json.get("id"),
-            new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
+            new PeriodeDto(LocalDate.parse(json.get("fomDato")),
+                StringUtils.isEmpty(json.get("tomDato")) ? null : LocalDate.parse(json.get("tomDato"))),
             konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
             konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
