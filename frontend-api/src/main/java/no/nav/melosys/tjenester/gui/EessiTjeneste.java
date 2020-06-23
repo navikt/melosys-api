@@ -46,8 +46,9 @@ public class EessiTjeneste {
         response = Institusjon.class,
         responseContainer = "List"
     )
-    public ResponseEntity hentMottakerinstitusjoner(@PathVariable("bucType") String bucType,
-                                                    @RequestParam(value = "landkode", required = false) String landkode) throws MelosysException {
+    public ResponseEntity<List<Institusjon>> hentMottakerinstitusjoner(@PathVariable("bucType") String bucType,
+                                                    @RequestParam(value = "landkode", required = false) String landkode)
+        throws MelosysException {
         log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
         return ResponseEntity.ok(eessiService.hentEessiMottakerinstitusjoner(bucType, landkode));
     }
@@ -55,9 +56,11 @@ public class EessiTjeneste {
     @PostMapping("/bucer/{behandlingID}/opprett")
     @ApiOperation(
         value = "Oppretter en sak i RINA og sakens første tilgjengelige SED. Returnerer en URL til saken i RINA.",
-        response = String.class
+        response = OpprettBucSvarDto.class
     )
-    public ResponseEntity opprettBuc(@RequestBody BucBestillingDto nyBucDto, @PathVariable("behandlingID") long behandlingID) throws MelosysException {
+    public ResponseEntity<OpprettBucSvarDto> opprettBuc(@RequestBody BucBestillingDto nyBucDto,
+                                                        @PathVariable("behandlingID") long behandlingID)
+        throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
             eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), List.of(nyBucDto.getMottakerId()))
@@ -71,8 +74,9 @@ public class EessiTjeneste {
         value = "Returnerer en liste av bucer for gjeldende behandling.",
         response = BucerTilknyttetBehandlingDto.class
     )
-    public ResponseEntity hentBucer(@PathVariable("behandlingID") long behandlingID,
-                              @RequestParam(value = "statuser", required = false) List<String> statuser) throws MelosysException {
+    public ResponseEntity<BucerTilknyttetBehandlingDto> hentBucer(@PathVariable("behandlingID") long behandlingID,
+                                                                  @RequestParam(value = "statuser", required = false) List<String> statuser)
+        throws MelosysException {
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();

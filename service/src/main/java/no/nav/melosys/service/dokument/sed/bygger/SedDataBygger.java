@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -30,12 +31,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static java.util.function.Predicate.not;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 @Service
 public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final LandvelgerService landvelgerService;
+
+    static final String INGEN_FAST_ADRESSE = "No fixed address";
 
     @Autowired
     public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService, LandvelgerService landvelgerService) {
@@ -93,8 +97,7 @@ public class SedDataBygger {
         sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(dataGrunnlag));
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(dataGrunnlag));
 
-        sedDataDto.setArbeidssteder(dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
-            .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()));
+        sedDataDto.setArbeidssteder(hentArbeidssteder(dataGrunnlag));
 
         sedDataDto.setAvklartBostedsland(
             landvelgerService.hentBostedsland(dataGrunnlag.getBehandling().getId(), dataGrunnlag.getBehandlingsgrunnlagData()).getKode()
@@ -110,6 +113,22 @@ public class SedDataBygger {
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
         return sedDataDto;
+    }
+
+    private List<Arbeidssted> hentArbeidssteder(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException {
+        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
+            .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList());
+
+        Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
+
+        landvelgerService.hentAlleArbeidsland(dataGrunnlag.getBehandling().getId()).stream()
+            .map(Landkoder::getKode)
+            .distinct()
+            .filter(not(arbeidsland::contains))
+            .map(SedDataBygger::lagTomtArbeidssted)
+            .forEach(arbeidssteder::add);
+
+        return arbeidssteder;
     }
 
     private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -337,5 +356,15 @@ public class SedDataBygger {
         virksomhet.setType("registrering");
         virksomhet.setAdresse(fraStrukturertAdresse((StrukturertAdresse) uVirksomhet.adresse));
         return virksomhet;
+    }
+
+    private static Arbeidssted lagTomtArbeidssted(String landkode) {
+        Adresse adresse = new Adresse();
+        adresse.setPoststed(INGEN_FAST_ADRESSE);
+        adresse.setLand(landkode);
+        Arbeidssted arbeidssted = new Arbeidssted();
+        arbeidssted.setNavn(INGEN_FAST_ADRESSE);
+        arbeidssted.setAdresse(adresse);
+        return arbeidssted;
     }
 }

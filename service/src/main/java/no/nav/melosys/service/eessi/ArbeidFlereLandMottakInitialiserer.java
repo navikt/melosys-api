@@ -69,7 +69,7 @@ public class ArbeidFlereLandMottakInitialiserer implements AutomatiskSedBehandli
             log.info("Ny A003 resulterer i nytt behandlingstema {}", nyttBehandlingstema);
             return RutingResultat.NY_BEHANDLING;
 
-        } else if (eksisterendeBehandling.erUtpekingAvAnnetLand() && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
+        } else if (eksisterendeBehandling.erBeslutningLovvalgAnnetLand() && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
 
             log.info("Mottatt oppdatert A003 i {}, rinasak {} hvor et annet land er utpekt",
                 fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());

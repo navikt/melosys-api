@@ -13,15 +13,15 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTATTYPE;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_AVKLAR_MYNDIGHET;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_VALIDERING;
 
 /**
  * Validerer opplysning bli brukt for iverksett vedtak.
@@ -31,7 +31,6 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(IverksettVedtakValidering.class);
     private static final EnumSet<ProsessType> AKSEPTERTE_PROSESSTYPER = EnumSet.of(
         ProsessType.IVERKSETT_VEDTAK,
-        ProsessType.UTPEK_LAND,
         ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
 
     private final BehandlingsresultatService behandlingsresultatService;
@@ -62,32 +61,29 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         }
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (behandlingsresultat == null) {
-            throw new TekniskException("Ingen behandlingsresultat knyttet til behandling " + behandling.getId());
-        }
+        validerBehandlingsresultat(behandlingsresultat);
 
         String saksbehandlerID = prosessinstans.getData(SAKSBEHANDLER);
         if (StringUtils.isEmpty(saksbehandlerID) && !behandlingsresultat.erAutomatisert()) {
             throw new FunksjonellException("SaksbehandlerID er ikke oppgitt.");
         }
 
-        if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
-            validerBehandlingsResultatType(prosessinstans);
-            validerLovalgsperioder(prosessinstans, behandlingsresultat);
+        if (prosessinstans.getType() != ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE) {
+            validerLovalgsperioder(behandlingsresultat);
         }
 
         prosessinstans.setSteg(IV_AVKLAR_MYNDIGHET);
     }
 
-    private void validerBehandlingsResultatType(Prosessinstans prosessinstans) throws FunksjonellException {
-        String behandlingsResultatType = prosessinstans.getData(BEHANDLINGSRESULTATTYPE);
-        if (behandlingsResultatType == null) {
+    private void validerBehandlingsresultat(Behandlingsresultat behandlingsresultat)
+        throws FunksjonellException {
+        if (behandlingsresultat.getType() == Behandlingsresultattyper.IKKE_FASTSATT) {
             throw new FunksjonellException("BehandlingsResultatType er ikke oppgitt.");
         }
     }
 
-    private void validerLovalgsperioder(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
-        if (Behandlingsresultattyper.valueOf(prosessinstans.getData(BEHANDLINGSRESULTATTYPE)) == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
+    private void validerLovalgsperioder(Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+        if (behandlingsresultat.getType() != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
             if (lovvalgsperiode.harUgyldigTilstand()) {
                 throw new FunksjonellException("Lovvalgsperioden har en ugyldig kombinasjon av lovvalgsresultat og lovvalgsland");

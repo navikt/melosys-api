@@ -13,7 +13,6 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -39,21 +38,21 @@ public class AvklarteVirksomheterGrunnlag {
         this.kodeverkService = kodeverkService;
     }
 
-    public List<AvklartVirksomhet> hentAlleNorskeVirksomheterMedAdresse() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public List<AvklartVirksomhet> hentAlleNorskeVirksomheterMedAdresse() throws IkkeFunnetException, TekniskException {
         if (norskeVirksomheter == null) {
             norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
         }
         return norskeVirksomheter;
     }
 
-    public List<AvklartVirksomhet> hentNorskeArbeidsgivere() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeArbeidsgivere() throws IkkeFunnetException, TekniskException {
         if (norskeArbeidsgivere == null) {
             norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, this::utfyllManglendeAdressefelter);
         }
         return norskeArbeidsgivere;
     }
 
-    public List<AvklartVirksomhet> hentNorskeSelvstendige() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeSelvstendige() throws IkkeFunnetException, TekniskException {
         if (norskeSelvstendige == null) {
             norskeSelvstendige = avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter);
         }
@@ -83,7 +82,7 @@ public class AvklarteVirksomheterGrunnlag {
         return avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
     }
 
-    public AvklartVirksomhet hentHovedvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public AvklartVirksomhet hentHovedvirksomhet() throws IkkeFunnetException, TekniskException {
         if (!hentAlleNorskeVirksomheterMedAdresse().isEmpty()) {
             return hentAlleNorskeVirksomheterMedAdresse().iterator().next();
         } else {
@@ -91,12 +90,12 @@ public class AvklarteVirksomheterGrunnlag {
         }
     }
 
-    public int antallVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public int antallVirksomheter() throws IkkeFunnetException, TekniskException {
         return hentAlleNorskeVirksomheterMedAdresse().size() +
                hentUtenlandskeVirksomheter().size();
     }
 
-    public Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, TekniskException {
         Collection<AvklartVirksomhet> bivirksomheter = new ArrayList<>();
         bivirksomheter.addAll(hentAlleNorskeVirksomheterMedAdresse());
         bivirksomheter.addAll(hentUtenlandskeVirksomheter());

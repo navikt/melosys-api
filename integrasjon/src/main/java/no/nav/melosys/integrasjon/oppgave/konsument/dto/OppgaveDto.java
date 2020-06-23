@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.oppgave.konsument.dto;
 
 import java.time.ZonedDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,6 +20,7 @@ public class OppgaveDto extends OpprettOppgaveDto {
         this.id = id;
     }
 
+    @JsonIgnore //FIXME: ZonedDateTime -> OffsetDateTime
     public ZonedDateTime getOpprettetTidspunkt() {
         return opprettetTidspunkt;
     }

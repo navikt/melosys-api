@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.iv.ul;
+package no.nav.melosys.saksflyt.steg.iv;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
@@ -8,7 +8,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.saksflyt.steg.iv.ul.UtpekLandDistribuerJournalpost;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +49,7 @@ public class UtpekLandDistribuerJournalpostTest {
         ArgumentCaptor<StrukturertAdresse> captor = ArgumentCaptor.forClass(StrukturertAdresse.class);
         verify(doksysFasade).distribuerJournalpost(eq("12345"), captor.capture());
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.UL_OPPDATER_BEHANDLINGSRESULTAT);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
 
         StrukturertAdresse strukturertAdresse = captor.getValue();
         assertThat(strukturertAdresse).isNotNull();

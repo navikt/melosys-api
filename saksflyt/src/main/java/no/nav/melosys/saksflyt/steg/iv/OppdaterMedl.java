@@ -51,10 +51,18 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        if (behandlingsresultat.medlOppdateres()) {
+            oppdaterMedl(behandlingsresultat);
+        }
+        prosessinstans.setSteg(IV_SEND_BREV);
+    }
+
+    private void oppdaterMedl(Behandlingsresultat behandlingsresultat) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingsresultat.getBehandling();
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
         if (lovvalgsperiode.getMedlPeriodeID() != null) {
             oppdaterEksisterendeMedlPeriode(lovvalgsperiode);
-        } else if (behandlingsresultat.erInnvilgelseFlereLand()) {
+        } else if (behandlingsresultat.erInnvilgelseFlereLand() || behandlingsresultat.erUtpeking()) {
             medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), !behandling.erBehandlingAvSøknad());
         } else if (behandlingsresultat.erInnvilgelse()) {
             medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), false);
@@ -64,8 +72,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             throw new FunksjonellException("Opprettelse av Periode i MEDL støttes ikke for behandlingsresultat type "
                 + behandlingsresultat.getType() + " og InnvilgelsesResultat type " + lovvalgsperiode.getInnvilgelsesresultat().getKode());
         }
-
-        prosessinstans.setSteg(IV_SEND_BREV);
     }
 
     private void oppdaterEksisterendeMedlPeriode(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {

@@ -11,14 +11,14 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
+import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
+import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
+import no.nav.melosys.domain.inngangsvilkar.Kategori;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.regelmodul.RegelmodulFasade;
-import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
-import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
-import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
+import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
 import no.nav.melosys.service.SaksopplysningerService;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class InngangsvilkaarServiceTest {
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
-    private RegelmodulFasade regelmodulFasade;
+    private InngangsvilkaarConsumerImpl inngangsvilkaarConsumer;
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
 
@@ -49,7 +49,7 @@ public class InngangsvilkaarServiceTest {
 
     @Before
     public void setUp() {
-        inngangsvilkaarService = new InngangsvilkaarService(saksopplysningerService, regelmodulFasade, vilkaarsresultatService);
+        inngangsvilkaarService = new InngangsvilkaarService(saksopplysningerService, inngangsvilkaarConsumer, vilkaarsresultatService);
     }
 
     @Test
@@ -59,14 +59,14 @@ public class InngangsvilkaarServiceTest {
         PersonDokument personDokument = new PersonDokument();
         personDokument.statsborgerskap = Land.av(FINLAND);
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
-        VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
-        res.feilmeldinger = Collections.emptyList();
-        res.kvalifisererForEf883_2004 = true;
-        when(regelmodulFasade.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
+        InngangsvilkarResponse res = new InngangsvilkarResponse();
+        res.setFeilmeldinger(Collections.emptyList());
+        res.setKvalifisererForEf883_2004(Boolean.TRUE);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        verify(regelmodulFasade).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, null);
     }
 
@@ -93,10 +93,10 @@ public class InngangsvilkaarServiceTest {
         PersonDokument personDokument = new PersonDokument();
         personDokument.statsborgerskap = Land.av(FINLAND);
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
-        VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
-        res.feilmeldinger = Collections.emptyList();
-        res.kvalifisererForEf883_2004 = true;
-        when(regelmodulFasade.vurderInngangsvilkår(any(), anyList(), søknadsperiodeCaptor.capture())).thenReturn(res);
+        InngangsvilkarResponse res = new InngangsvilkarResponse();
+        res.setFeilmeldinger(Collections.emptyList());
+        res.setKvalifisererForEf883_2004(Boolean.TRUE);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anyList(), søknadsperiodeCaptor.capture())).thenReturn(res);
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
@@ -111,21 +111,21 @@ public class InngangsvilkaarServiceTest {
         PersonDokument personDokument = new PersonDokument();
         personDokument.statsborgerskap = Land.av(FINLAND);
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
-        VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
+        InngangsvilkarResponse res = new InngangsvilkarResponse();
         var feilmelding = new Feilmelding();
-        feilmelding.kategori = Kategori.TEKNISK_FEIL;
-        feilmelding.melding = "FEIL!!!";
-        res.feilmeldinger = Collections.singletonList(feilmelding);
-        res.kvalifisererForEf883_2004 = false;
-        when(regelmodulFasade.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
+        feilmelding.setKategori(Kategori.TEKNISK_FEIL);
+        feilmelding.setMelding("FEIL!!!");
+        res.setFeilmeldinger(Collections.singletonList(feilmelding));
+        res.setKvalifisererForEf883_2004(Boolean.FALSE);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        verify(regelmodulFasade).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Inngangsvilkaar.TEKNISK_FEIL);
     }
-    
+
     @Test
     public void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
         Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);

@@ -10,15 +10,11 @@ import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.SaksopplysningRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SaksopplysningerService {
-    private static final Logger log = LoggerFactory.getLogger(SaksopplysningerService.class);
-
     private final SaksopplysningRepository saksopplysningRepo;
 
     @Autowired

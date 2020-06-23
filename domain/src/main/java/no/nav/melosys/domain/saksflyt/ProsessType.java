@@ -25,7 +25,6 @@ public enum ProsessType implements Kodeverk {
     OPPRETT_NY_SAK("OPPRETT_NY_SAK", "Oppretter ny sak (fra journalført dokument)"),
     REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak"),
     SED_GENERELL_SAK("SED_OPPRETT_SAK", "Oppretter sak for SED for generell behandling"),
-    UTPEK_LAND("UTPEK_LAND", "Lovvalgslandet er ikke Norge, utpek annet land"),
     VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
 
     private String kode;

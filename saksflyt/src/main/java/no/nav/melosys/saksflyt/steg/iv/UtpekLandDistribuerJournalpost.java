@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.iv.ul;
+package no.nav.melosys.saksflyt.steg.iv;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -38,6 +38,6 @@ public class UtpekLandDistribuerJournalpost extends AbstraktDistribuerJournalpos
         log.info("Bestiller distribuering av journalpost {} for å sende A003 som brev i behandling {}",
             journalpostId, prosessinstans.getBehandling().getId());
         bestillDistribuering(journalpostId, utenlandskMyndighet);
-        prosessinstans.setSteg(ProsessSteg.UL_OPPDATER_BEHANDLINGSRESULTAT);
+        prosessinstans.setSteg(ProsessSteg.IV_OPPDATER_RESULTAT);
     }
 }

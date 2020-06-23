@@ -31,7 +31,9 @@ public class UtpekingTjeneste {
     }
 
     @PostMapping("{behandlingID}/avvis")
-    public ResponseEntity avvisUtpeking(@PathVariable("behandlingID") Long behandlingId, @RequestBody UtpekingAvvisDto utpekingAvvisDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<Void> avvisUtpeking(@PathVariable("behandlingID") Long behandlingId,
+                                              @RequestBody UtpekingAvvisDto utpekingAvvisDto)
+        throws FunksjonellException, TekniskException {
         tilgangService.sjekkTilgang(behandlingId);
         utpekingService.avvisUtpeking(behandlingId, utpekingAvvisDto.tilDomene());
         return ResponseEntity.noContent().build();
