@@ -90,6 +90,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medBehandlingsType(hentFellesKode(behandlingstema))
             .medBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE)
+            .medOppgaveTyper(hentGyldigeOppgaveyper())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
@@ -309,7 +310,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             /*todo, ikke bruke lenger - kan ikke mappes tilbake hvis vi bruker melosys behandlingstema?
             .setBehandlingstema(mapTilEnumFraKode(OppgaveBehandlingstema.class, oppgaveDto.getBehandlingstema(), oppgaveId))*/
             .setTema(mapTilEnumFraKode(Tema.class, oppgaveDto.getTema(), oppgaveId))
-            .setOppgavetype(mapTilEnumFraKode(no.nav.melosys.domain.kodeverk.Oppgavetyper.class, oppgaveDto.getOppgavetype(), oppgaveId))
+            .setOppgavetype(mapTilEnumFraKode(Oppgavetyper.class, oppgaveDto.getOppgavetype(), oppgaveId))
             .setPrioritet(StringUtils.isNotEmpty(oppgaveDto.getPrioritet()) ? PrioritetType.valueOf(oppgaveDto.getPrioritet()) : null)
             .setBehandlesAvApplikasjon(mapTilEnumFraKode(Fagsystem.class, StringUtils.defaultString(oppgaveDto.getBehandlesAvApplikasjon()), oppgaveId));
 
@@ -335,5 +336,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             }
         }
         return null;
+    }
+
+    private static String[] hentGyldigeOppgaveyper() {
+        return Stream.of(Oppgavetyper.values())
+            .map(Oppgavetyper::getKode)
+            .toArray(String[]::new);
     }
 }
