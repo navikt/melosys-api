@@ -26,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,13 +46,13 @@ public class LandvelgerServiceTest {
     private Lovvalgsperiode lovvalgsperiode;
     private Anmodningsperiode anmodningsperiode;
     private LandvelgerService landvelgerService;
-    private List<Vilkaarsresultat> vilkaar = new ArrayList<>();
+    private final List<Vilkaarsresultat> vilkaar = new ArrayList<>();
 
-    private Landkoder søknadsland = Landkoder.DE;
-    private Landkoder avklartArbeidsland = Landkoder.DK;
-    private Landkoder oppgittbostedsland = Landkoder.SE;
-    private Landkoder avklartBostedsland = Landkoder.FI;
-    private Landkoder territorialfarvannLand = Landkoder.GB;
+    private final Landkoder søknadsland = Landkoder.DE;
+    private final Landkoder avklartArbeidsland = Landkoder.DK;
+    private final Landkoder oppgittbostedsland = Landkoder.SE;
+    private final Landkoder avklartBostedsland = Landkoder.FI;
+    private final Landkoder territorialfarvannLand = Landkoder.GB;
 
     @Before
     public void setUp() throws IkkeFunnetException {
@@ -128,7 +129,7 @@ public class LandvelgerServiceTest {
         lagBehandlingsresultat(lovvalgsperiode);
         leggTilAlleAvklartArbeidsland(Collections.singleton(avklartArbeidsland));
 
-        Collection<Landkoder> land = landvelgerService.hentAlleArbeidsland(behandlingID);
+        Collection<Landkoder> land = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         assertThat(land).containsExactly(avklartArbeidsland);
     }
 
@@ -139,7 +140,7 @@ public class LandvelgerServiceTest {
         søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID);
+        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK, Landkoder.SE);
         assertThat(arbeidsland).containsOnlyOnce(Landkoder.DK);
     }
@@ -150,7 +151,7 @@ public class LandvelgerServiceTest {
         leggTilAlleAvklartArbeidsland(Arrays.asList(Landkoder.DK, Landkoder.SE));
         when(avklartefaktaService.hentLandkoderMedMarginaltArbeid(anyLong())).thenReturn(new HashSet<>(Collections.singletonList(Landkoder.SE)));
 
-        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID);
+        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.DK);
     }
 
@@ -160,7 +161,7 @@ public class LandvelgerServiceTest {
         søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
 
-        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID);
+        Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK);
     }
 
@@ -171,7 +172,7 @@ public class LandvelgerServiceTest {
 
         oppfyll(Vilkaar.FO_883_2004_ART16_1);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
-        Collection<Landkoder> land = landvelgerService.hentAlleArbeidsland(behandlingID);
+        Collection<Landkoder> land = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         assertThat(land).containsExactly(søknadsland);
     }
 
@@ -261,7 +262,7 @@ public class LandvelgerServiceTest {
     public void hentUtenlandskTrygdemyndighetsland_medArt13BostedsadresseIkkeNorge() throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(){{
+        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>() {{
             add(avklartBostedsland);
         }});
 
@@ -295,5 +296,27 @@ public class LandvelgerServiceTest {
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         assertThat(land).containsExactly(søknadsland);
+    }
+
+    @Test
+    public void alleArbeidslandHarMarginaltArbeid_medEtLandIkkeMarginalt_forventFalse() throws IkkeFunnetException {
+        when(avklartefaktaService.hentLandkoderMedMarginaltArbeid(eq(behandlingID))).thenReturn(Set.of(Landkoder.IT, Landkoder.NO));
+        when(avklartefaktaService.hentAlleAvklarteArbeidsland(eq(behandlingID))).thenReturn(new HashSet<>(Arrays.asList(Landkoder.IT, Landkoder.NO, Landkoder.DE)));
+
+        assertThat(landvelgerService.alleArbeidslandHarMarginaltArbeid(behandlingID)).isFalse();
+
+        verify(avklartefaktaService).hentLandkoderMedMarginaltArbeid(eq(behandlingID));
+        verify(avklartefaktaService).hentAlleAvklarteArbeidsland(eq(behandlingID));
+    }
+
+    @Test
+    public void alleArbeidslandHarMarginaltArbeid_medAlleLandMarginalt_forventTrue() throws IkkeFunnetException {
+        when(avklartefaktaService.hentLandkoderMedMarginaltArbeid(eq(behandlingID))).thenReturn(Set.of(Landkoder.IT, Landkoder.NO));
+        when(avklartefaktaService.hentAlleAvklarteArbeidsland(eq(behandlingID))).thenReturn(new HashSet<>(Arrays.asList(Landkoder.IT, Landkoder.NO)));
+
+        assertThat(landvelgerService.alleArbeidslandHarMarginaltArbeid(behandlingID)).isTrue();
+
+        verify(avklartefaktaService).hentLandkoderMedMarginaltArbeid(eq(behandlingID));
+        verify(avklartefaktaService).hentAlleAvklarteArbeidsland(eq(behandlingID));
     }
 }

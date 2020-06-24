@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
@@ -42,22 +43,28 @@ public class LandvelgerService {
     }
 
     public Landkoder hentArbeidsland(long behandlingID) throws FunksjonellException {
-        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         if (alleArbeidsland.size() != 1) {
             throw new FunksjonellException("Fant ingen eller flere enn ett arbeidsland");
         }
         return alleArbeidsland.iterator().next();
     }
 
-    public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
+    private Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
             BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
             alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
         }
 
+        return alleArbeidsland;
+    }
+
+    public Collection<Landkoder> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) throws IkkeFunnetException {
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
         Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         alleArbeidsland.removeAll(landMedMarginaltArbeid);
+
         return alleArbeidsland;
     }
 
@@ -69,6 +76,14 @@ public class LandvelgerService {
         } else {
             return erVideresendt(behandlingsresultat);
         }
+    }
+
+    public boolean alleArbeidslandHarMarginaltArbeid(long behandlingID) throws IkkeFunnetException {
+        Set<Landkoder> marginaleArbeidsland = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
+        alleArbeidsland.removeAll(marginaleArbeidsland);
+
+        return alleArbeidsland.isEmpty();
     }
 
     private boolean erVideresendt(Behandlingsresultat behandlingsresultat) {
@@ -94,7 +109,7 @@ public class LandvelgerService {
             return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata));
         }
 
-        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         return new ArrayList<>(alleArbeidsland);
     }
 

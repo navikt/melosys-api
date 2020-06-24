@@ -363,7 +363,7 @@ public class SedDataByggerTest {
 
     @Test
     public void lagUtkast_harIkkeFastArbeidsstedForArbeidsland_arbeidsstedBlirSatt() throws TekniskException, FunksjonellException {
-        when(landvelgerService.hentAlleArbeidsland(anyLong())).thenReturn(List.of(Landkoder.SE));
+        when(landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(anyLong())).thenReturn(List.of(Landkoder.SE));
         SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
         SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 

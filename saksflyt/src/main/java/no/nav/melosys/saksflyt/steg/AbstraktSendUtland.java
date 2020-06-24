@@ -36,25 +36,24 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
     protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Vedlegg vedlegg) throws MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        SendUtlandStatus sendUtlandStatus = SendUtlandStatus.IKKE_SENDT;
 
         if (skalSendesUtland(behandlingsresultat)) {
             Set<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>() {});
 
             if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
                 eessiService.opprettOgSendSed(behandlingID, new ArrayList<>(mottakerinstitusjoner), bucType, vedlegg, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
-                sendUtlandStatus = SendUtlandStatus.SED_SENDT;
+                return SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);
-                sendUtlandStatus = SendUtlandStatus.BREV_SENDT;
+                return SendUtlandStatus.BREV_SENDT;
             }
         }
-        return sendUtlandStatus;
+        return SendUtlandStatus.IKKE_SENDT;
     }
 
     protected abstract void sendBrev(Prosessinstans prosessinstans) throws MelosysException;
 
-    protected abstract boolean skalSendesUtland(Behandlingsresultat behandlingsresultat);
+    protected abstract boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) throws MelosysException;
 
     protected String hentBegrunnelseKode(Prosessinstans prosessinstans) {
         Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);

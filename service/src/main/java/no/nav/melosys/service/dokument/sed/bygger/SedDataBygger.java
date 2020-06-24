@@ -121,7 +121,7 @@ public class SedDataBygger {
 
         Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
 
-        landvelgerService.hentAlleArbeidsland(dataGrunnlag.getBehandling().getId()).stream()
+        landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(dataGrunnlag.getBehandling().getId()).stream()
             .map(Landkoder::getKode)
             .distinct()
             .filter(not(arbeidsland::contains))
