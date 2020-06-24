@@ -57,7 +57,7 @@ public enum Bestemmelse {
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C, Bestemmelse.ART_11_3_c)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3D, Bestemmelse.ART_11_3_d)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E, Bestemmelse.ART_11_3_e)
-            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, Bestemmelse.ART_11_4)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4, Bestemmelse.ART_11_4)
             .put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5, Bestemmelse.ART_11_5)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Bestemmelse.ART_12_1)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2, Bestemmelse.ART_12_2)
@@ -107,6 +107,8 @@ public enum Bestemmelse {
 
         if (lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1) {
             return Bestemmelse.ART_11_3_a;
+        } else if (lovvalgBestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2) {
+            return Bestemmelse.ART_11_4;
         }
 
         if (BESTEMMELSE_MAP.containsKey(lovvalgBestemmelse)) {
