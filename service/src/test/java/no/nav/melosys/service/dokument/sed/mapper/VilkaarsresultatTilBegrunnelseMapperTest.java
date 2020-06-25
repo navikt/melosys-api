@@ -85,7 +85,7 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
     @Test
     public void tilEngelskBegrunnelseString_art16_forventFritekst() {
         Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(Collections.singletonList("SAERLIG_GRUNN"));
-        vilkaarsresultat.setBegrunnelseFritekst("Fritekst som beskriver anmodning om unntak");
+        vilkaarsresultat.setBegrunnelseFritekstEessi("Fritekst som beskriver anmodning om unntak");
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
             .isEqualTo("Fritekst som beskriver anmodning om unntak");
@@ -98,11 +98,12 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
             "IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK",
             "SAERLIG_GRUNN"
         ));
-        vilkaarsresultat.setBegrunnelseFritekst("Fritekst som skal vises");
+        final String fritekstEngelsk = "Something";
+        vilkaarsresultat.setBegrunnelseFritekstEessi(fritekstEngelsk);
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
             .isEqualTo("Ongoing contract for a period longer than 2 and shorter than 5 years.\n"
-                + "Fritekst som skal vises\n"
+                + fritekstEngelsk + "\n"
                 + "Working for a non-profit organization.");
     }
 

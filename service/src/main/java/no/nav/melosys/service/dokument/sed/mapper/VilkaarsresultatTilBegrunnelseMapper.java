@@ -24,7 +24,7 @@ public final class VilkaarsresultatTilBegrunnelseMapper {
             .map(VilkaarBegrunnelse::getKode)
             .map(VilkaarsresultatTilBegrunnelseMapper::getEngelskKodeverk)
             .filter(Objects::nonNull)
-            .map(begrunnelseKode -> tilFritekst(begrunnelseKode, vilkaarsresultat.getBegrunnelseFritekst()))
+            .map(begrunnelseKode -> tilFritekst(begrunnelseKode, vilkaarsresultat.getBegrunnelseFritekstEessi()))
             .collect(Collectors.joining("\n"));
     }
 

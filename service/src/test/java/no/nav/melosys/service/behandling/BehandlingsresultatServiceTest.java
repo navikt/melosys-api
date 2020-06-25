@@ -162,6 +162,7 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getId() == null);
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBegrunnelseFritekst().equals("fritekst"));
+        assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBegrunnelseFritekstEessi().equals("free text"));
         VilkaarBegrunnelse vilkaarBegrunnelse = behandlingsresultatreplika.getVilkaarsresultater().stream().findFirst().get().getBegrunnelser().stream().findFirst().get();
         assertThat(vilkaarBegrunnelse.getId()).isNull();
         assertThat(vilkaarBegrunnelse.getKode()).isEqualTo("kode");
@@ -296,6 +297,7 @@ public class BehandlingsresultatServiceTest {
         vilkaarsresultat.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
         vilkaarsresultat.setId(32L);
         vilkaarsresultat.setBegrunnelseFritekst("fritekst");
+        vilkaarsresultat.setBegrunnelseFritekstEessi("free text");
 
         HashSet<VilkaarBegrunnelse> begrunnelser = new HashSet<>();
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
