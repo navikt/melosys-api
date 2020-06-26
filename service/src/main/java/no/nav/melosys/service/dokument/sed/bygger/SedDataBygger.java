@@ -21,6 +21,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.LandvelgerService;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
@@ -194,6 +195,17 @@ public class SedDataBygger {
             FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arb;
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
             arbeidssted.setNavn(arb.getForetakNavn());
+        } else if (arb instanceof FlyvendeArbeidssted) {
+            FlyvendeArbeidssted flyvendeArbeidssted = (FlyvendeArbeidssted) arb;
+            arbeidssted.setNavn(flyvendeArbeidssted.getEnhetNavn());
+
+            Adresse adresse = new Adresse();
+            adresse.setLand(flyvendeArbeidssted.getLandkode());
+            adresse.setPoststed("N/A");
+            adresse.setGateadresse("N/A");
+
+            arbeidssted.setAdresse(adresse);
+            arbeidssted.setHjemmebase(flyvendeArbeidssted.getLandkode());
         } else {
             MaritimtArbeidssted maritimtArbeidssted = (MaritimtArbeidssted) arb;
             arbeidssted.setNavn(maritimtArbeidssted.getEnhetNavn() + (maritimtArbeidssted.erSokkel() ? " offshore" : ""));

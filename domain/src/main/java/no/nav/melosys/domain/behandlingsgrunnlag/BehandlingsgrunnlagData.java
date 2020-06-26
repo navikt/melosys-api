@@ -29,15 +29,14 @@ public class BehandlingsgrunnlagData {
     // Opplysninger om opphold i utland
     public OppholdUtland oppholdUtland = new OppholdUtland();
 
-    // Opplysninger om arbeid i Norge
-    public ArbeidNorge arbeidNorge = new ArbeidNorge();
-
     public SelvstendigArbeid selvstendigArbeid = new SelvstendigArbeid();
 
     // Opplysninger om juridiske arbeidsgiver i Norge
     public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
 
     public List<MaritimtArbeid> maritimtArbeid = new ArrayList<>();
+
+    public List<LuftfartBase> luftfartBaser = new ArrayList<>();
 
     public Bosted bosted = new Bosted();
 
