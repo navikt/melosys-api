@@ -3,10 +3,9 @@ package no.nav.melosys.integrasjon.medl.behandle;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.*;
@@ -14,33 +13,34 @@ import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriode
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class MedlPeriodeKonverterTest {
 
     @Test
-    public void hentFellesKodeForGrunnlagMedltype() throws TekniskException {
-        Lovvalgbestemmelser_883_2004 lovvalgsbestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2;
-        GrunnlagMedl grunnlagMedltype = MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsbestemmelse);
-        assertThat(grunnlagMedltype).isEqualTo(GrunnlagMedl.FO_12_2);
-    }
+    public void tilGrunnlagMedltype() throws TekniskException {
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2))
+            .isEqualTo(GrunnlagMedl.FO_12_2);
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1))
+            .isEqualTo(GrunnlagMedl.FO_16);
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2))
+            .isEqualTo(GrunnlagMedl.FO_16);
 
-    @Test(expected = TekniskException.class)
-    public void hentFellesKodeForGrunnlagMedltype_() throws TekniskException {
-        Lovvalgbestemmelser_883_2004 lovvalgsbestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1;
-        MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsbestemmelse);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1))
+            .withMessageContaining("støttes ikke i MEDL");
     }
 
     @Test
-    public void hentKodeverkForLovvalgsbestemmelse() throws TekniskException {
-        GrunnlagMedl grunnlagKode = GrunnlagMedl.FO_12_2;
-        LovvalgBestemmelse lovvalgsbestemmelse = MedlPeriodeKonverter.tilLovvalgBestemmelse(grunnlagKode);
-        assertThat(lovvalgsbestemmelse).isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
-    }
+    public void tilLovvalgBestemmelse() throws TekniskException {
+        assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_12_2))
+            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
+        assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_16))
+            .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
 
-    @Test(expected = TekniskException.class)
-    public void hentKodeverkForLovvalgsbestemmelseUkjentMedlKode() throws TekniskException {
-        GrunnlagMedl grunnlagKode = GrunnlagMedl.MEDFT;
-        MedlPeriodeKonverter.tilLovvalgBestemmelse(grunnlagKode);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.MEDFT))
+            .withMessageContaining("GrunnlagMedlKode er ukjent");
     }
 
     @Test
@@ -76,17 +76,6 @@ public class MedlPeriodeKonverterTest {
         assertThat(medlemsperiode.getKildedokumenttype().getValue()).isEqualTo("Henv_Soknad");
     }
 
-
-    @Test
-    public void tilGrunnlagMedltype_både_FO_883_2004_ART16_1_og_FO_883_2004_ART16_2_gir_FO_16() throws TekniskException {
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)).isEqualTo(GrunnlagMedl.FO_16);
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2)).isEqualTo(GrunnlagMedl.FO_16);
-    }
-
-    @Test
-    public void tilLovvalgBestemmelse_FO_16_gir_FO_883_2004_ART16_1() throws TekniskException {
-        assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_16)).isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-    }
 
     @Test
     public void opprettPeriodeRequest_medBådeTillegsbestemmelseFO_883_2004_ART11_4_1ogBestemmelse_velgerGrunnlagMedlFO_11_4_1() throws TekniskException {
