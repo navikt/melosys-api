@@ -38,6 +38,11 @@ final class UfmKontroller {
             Kontroll_begrunnelser.PERIODE_FOR_GAMMEL : null;
     }
 
+    static Kontroll_begrunnelser periodeStarterFørFørsteJuni2012(UfmKontrollData kontrollData) {
+        return PeriodeKontroller.datoErFørFørsteJuni2012(kontrollData.getSedDokument().getLovvalgsperiode().getFom())
+            ? Kontroll_begrunnelser.PERIODE_FOR_GAMMEL : null;
+    }
+
     static Kontroll_begrunnelser periodeOver1ÅrFremITid(UfmKontrollData kontrollData) {
         return PeriodeKontroller.datoOver1ÅrFremITid(kontrollData.getSedDokument().getLovvalgsperiode().getFom()) ?
             Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID : null;

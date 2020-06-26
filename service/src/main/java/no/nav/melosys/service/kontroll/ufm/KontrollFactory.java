@@ -28,7 +28,7 @@ class KontrollFactory {
     private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a001Kontroller() {
         return List.of(
             UfmKontroller::periodeErÅpen,
-            UfmKontroller::periodeEldreEnn3År,
+            UfmKontroller::periodeStarterFørFørsteJuni2012,
             UfmKontroller::periodeOver5År,
             UfmKontroller::periodeOver1ÅrFremITid,
             UfmKontroller::overlappendeMedlemsperiode,
@@ -44,8 +44,8 @@ class KontrollFactory {
     private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a003Kontroller() {
         return List.of(
             UfmKontroller::periodeErÅpen,
-            UfmKontroller::periodeEldreEnn3År,
-            UfmKontroller::periodeOver24Mnd,
+            UfmKontroller::periodeStarterFørFørsteJuni2012,
+            UfmKontroller::periodeOver5År,
             UfmKontroller::periodeOver1ÅrFremITid,
             UfmKontroller::overlappendeMedlemsperiode,
             UfmKontroller::statsborgerskapIkkeMedlemsland,
@@ -60,7 +60,7 @@ class KontrollFactory {
     private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a009Kontroller() {
         return List.of(
             UfmKontroller::periodeErÅpen,
-            UfmKontroller::periodeEldreEnn3År,
+            UfmKontroller::periodeStarterFørFørsteJuni2012,
             UfmKontroller::periodeOver24Mnd,
             UfmKontroller::periodeOver1ÅrFremITid,
             UfmKontroller::overlappendeMedlemsperiode,
@@ -76,7 +76,8 @@ class KontrollFactory {
     private List<Function<UfmKontrollData, Kontroll_begrunnelser>> a010Kontroller() {
         return List.of(
             UfmKontroller::periodeErÅpen,
-            UfmKontroller::periodeEldreEnn3År,
+            UfmKontroller::periodeStarterFørFørsteJuni2012,
+            UfmKontroller::periodeOver5År,
             UfmKontroller::periodeOver1ÅrFremITid,
             UfmKontroller::overlappendeMedlemsperiode,
             UfmKontroller::lovvalgslandErNorge,

@@ -7,6 +7,8 @@ import java.time.temporal.ChronoUnit;
 
 public final class PeriodeKontroller {
 
+    private static final LocalDate FØRSTE_JUNI_2012 = LocalDate.of(2012, 6, 1);
+
     private PeriodeKontroller() {
     }
 
@@ -40,6 +42,10 @@ public final class PeriodeKontroller {
 
     public static boolean periodeErLik(LocalDate fom1, LocalDate tom1, LocalDate fom2, LocalDate tom2) {
         return datoErLik(fom1, fom2) && datoErLik(tom1, tom2);
+    }
+
+    public static boolean datoErFørFørsteJuni2012(LocalDate dato) {
+        return dato.isBefore(FØRSTE_JUNI_2012);
     }
 
     private static boolean datoErLik(LocalDate date1, LocalDate date2) {
