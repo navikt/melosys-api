@@ -325,15 +325,15 @@ public class ProsessinstansService {
                                                     String ytterligereInformasjonSed,
                                                     String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.UTPEK_LAND)
-            .medSteg(ProsessSteg.UL_OPPDATER_MEDL)
+            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medSteg(ProsessSteg.IV_VALIDERING)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerinstitusjoner)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)
             .medBegrunnelseFritekst(fritekstBrev)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
-        prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.FØRSTEGANGSVEDTAK.getKode());
 
         lagre(prosessinstans);
     }

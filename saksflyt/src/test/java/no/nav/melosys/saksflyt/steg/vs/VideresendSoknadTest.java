@@ -3,12 +3,17 @@ package no.nav.melosys.saksflyt.steg.vs;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -17,9 +22,8 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
@@ -37,24 +41,21 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VideresendSoknadTest {
-
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private EessiService eessiService;
     @Mock
-    private TpsFasade tpsFasade;
-    @Mock
-    private UtenlandskMyndighetService utenlandskMyndighetService;
-    @Mock
     private JoarkFasade joarkFasade;
     @Mock
     private FagsakService fagsakService;
+    @Mock
+    private SedSomBrevService sedSomBrevService;
 
     private VideresendSoknad videresendSoknad;
 
-    private Behandling behandling = new Behandling();
-    private Journalpost journalpost = new Journalpost("123");
+    private final Behandling behandling = new Behandling();
+    private final Journalpost journalpost = new Journalpost("123");
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -63,7 +64,8 @@ public class VideresendSoknadTest {
 
     @Before
     public void setup() throws SikkerhetsbegrensningException, IntegrasjonException {
-        videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService, tpsFasade, utenlandskMyndighetService, joarkFasade, fagsakService);
+        videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService,
+            joarkFasade, fagsakService, sedSomBrevService);
 
         behandling.setId(1L);
         behandling.setInitierendeJournalpostId("123");
@@ -117,19 +119,20 @@ public class VideresendSoknadTest {
         when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(journalpost.getHoveddokument().getDokumentId())))
             .thenReturn(vedlegg);
 
-        when(joarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("2");
+        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(any(SedType.class), any(Landkoder.class), any(), any()))
+            .thenReturn("2");
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
         behandlingsresultat.setBehandling(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(any())).thenReturn(new UtenlandskMyndighet());
         when(fagsakService.hentFagsak(any())).thenReturn(lagFagsak());
 
         videresendSoknad.utfør(prosessinstans);
 
-        verify(joarkFasade).opprettJournalpost(any(), anyBoolean());
+        verify(sedSomBrevService)
+            .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A008), any(Landkoder.class), eq(behandling), anyList());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.VS_DISTRIBUER_JOURNALPOST);
     }
 

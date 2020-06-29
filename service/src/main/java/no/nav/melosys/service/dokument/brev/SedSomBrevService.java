@@ -1,8 +1,12 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.util.Collections;
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -31,17 +35,27 @@ public class SedSomBrevService {
         this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
-    public String lagJournalpostForSendingAvSedSomBrev(SedType sedType, Behandling behandling, Landkoder land)
+    public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
+                                                       Landkoder mottakerland,
+                                                       Behandling behandling)
+        throws MelosysException {
+        return lagJournalpostForSendingAvSedSomBrev(sedType, mottakerland, behandling, Collections.emptyList());
+    }
+
+    public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
+                                                       Landkoder mottakerland,
+                                                       Behandling behandling,
+                                                       List<FysiskDokument> vedlegg)
         throws MelosysException {
         Fagsak fagsak = behandling.getFagsak();
-        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(land);
-        String institusjonsId = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
-        String fnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
-        byte[] pdf = eessiService.genererSedPdf(behandling.getId(), sedType);
+        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
+        String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
+        String brukerFnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
+        byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
-            fagsak.getGsakSaksnummer(), fnr, sedType, pdf,
-            institusjonsId, utenlandskMyndighet.navn, land.getKode(), null
+            fagsak.getGsakSaksnummer(), brukerFnr, sedType, sedPdf,
+            institusjonID, utenlandskMyndighet.navn, mottakerland.getKode(), vedlegg
         );
         return joarkFasade.opprettJournalpost(opprettJournalpost, true);
     }

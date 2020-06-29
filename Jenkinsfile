@@ -8,7 +8,7 @@ node {
 
     properties([
         parameters([
-            choice(choices: ['--ingen--', 't8', 'q0', 'q1', 'q2', 'p'],
+            choice(choices: ['--ingen--', 'q1', 'q2', 'p'],
                 description: 'Hvilket miljø skal applikasjon deployes til.', name: 'ENV')
         ])
     ])
@@ -16,7 +16,6 @@ node {
     def KUBECTL = "/usr/local/bin/kubectl"
     def KUBECONFIG_NAISERATOR = "/var/lib/jenkins/kubeconfigs/kubeconfig-teammelosys.json"
     def NAISERATOR_CONFIG = "nais.yaml"
-    def DEFAULT_BUILD_USER = "eessi2-jenkins"
 
     def cluster = "dev-fss"
     def dockerRepo = "repo.adeo.no:5443"
@@ -99,22 +98,11 @@ node {
         }
 
     } catch (e) {
-        GString message = ":crying_cat_face: \n Siste commit på ${branchName} kunne ikke deployes til ${environment}. Se logg for mer info ${env.BUILD_URL}\nCommit ${commit}"
-        sendSlackMessage("danger", message)
-        throw e
-    }
-}
-
-def getBuildUser(defaultUser) {
-    def buildUser = defaultUser
-
-    try {
-        wrap([$class: 'BuildUser']) {
-            buildUser = "${BUILD_USER} (${BUILD_USER_ID})"
+        if (environment != '--ingen--') {
+            GString message = ":crying_cat_face: \n Siste commit på ${branchName} kunne ikke deployes til ${environment}. Se logg for mer info ${env.BUILD_URL}\nCommit ${commit}"
+            sendSlackMessage("danger", message)
         }
-    } catch (e) {
-        // Dersom bygg er auto-trigget, er ikke BUILD_USER variablene satt => defaultUser benyttes
-        return buildUser
+        throw e
     }
 }
 

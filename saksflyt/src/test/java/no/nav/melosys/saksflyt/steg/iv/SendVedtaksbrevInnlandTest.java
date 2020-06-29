@@ -183,7 +183,7 @@ public class SendVedtaksbrevInnlandTest {
         Behandlingsresultat innvilgetResultat11_4 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2));
         when(behandlingsresultatService.hentBehandlingsresultat(ART11_4_INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetResultat11_4);
 
-        Behandlingsresultat uktpekingsResultat = lagBehandlingsresultat(lagUtpekingsperiode());
+        Behandlingsresultat uktpekingsResultat = lagBehandlingsresultat(lagUtpekingsperiode(), lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, LocalDate.now(), Landkoder.SE, true));
         when(behandlingsresultatService.hentBehandlingsresultat(ART13_1B1_UTPEKING_BEHANDLINGSID)).thenReturn(uktpekingsResultat);
 
         Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET));
@@ -273,9 +273,10 @@ public class SendVedtaksbrevInnlandTest {
         return lagBehandlingsresultat(Behandlingsresultattyper.IKKE_FASTSATT, Collections.singleton(periode), Landkoder.AT);
     }
 
-    private static Behandlingsresultat lagBehandlingsresultat(Utpekingsperiode utpekingsperiode) {
+    private static Behandlingsresultat lagBehandlingsresultat(Utpekingsperiode utpekingsperiode, Lovvalgsperiode lovvalgsperiode) {
         Behandlingsresultat utpekingsresultat = new Behandlingsresultat();
         utpekingsresultat.setUtpekingsperioder(Set.of(utpekingsperiode));
+        utpekingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         utpekingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         utpekingsresultat.setFastsattAvLand(Landkoder.NO);
         return utpekingsresultat;

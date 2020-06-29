@@ -242,7 +242,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erInnvilgelseFlereLand() {
-        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND) {
+        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            || type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND) {
             Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
             return lovvalgsperiode.erInnvilget() && lovvalgsperiode.erArtikkel13();
         } else {
@@ -365,11 +366,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean harVedtak() {
         return vedtakMetadata != null;
     }
-
-    public boolean harUtpektAnnetLand() {
-        return finnValidertUtpekingsperiode().map(Utpekingsperiode::getSendtUtland).isPresent();
-    }
-
 
     @Override
     public String toString() {

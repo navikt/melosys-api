@@ -1,16 +1,16 @@
 package no.nav.melosys.service.utpeking;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Utpekingsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -19,6 +19,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -28,6 +29,8 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -39,7 +42,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UtpekingServiceTest {
-
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -47,25 +49,31 @@ public class UtpekingServiceTest {
     @Mock
     private EessiService eessiService;
     @Mock
+    private LandvelgerService landvelgerService;
+    @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
     private OppgaveService oppgaveService;
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
     private UtpekingsperiodeRepository utpekingsperiodeRepository;
-    @Mock
-    private LandvelgerService landvelgerService;
+
+    @Captor
+    private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperiodeCaptor;
 
     private UtpekingService utpekingService;
 
     private final long behandlingID = 431;
-    private Behandling behandling = new Behandling();
-    private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private Fagsak fagsak = new Fagsak();
+    private final Behandling behandling = new Behandling();
+    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+    private final Fagsak fagsak = new Fagsak();
 
 
     @Before
     public void setup() throws FunksjonellException {
-        utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, landvelgerService);
+        utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
+            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository);
 
         fagsak.setBehandlinger(List.of(behandling));
         behandling.setId(behandlingID);
@@ -78,19 +86,47 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void utpekLovvalgsland_harUtpekingsperiode_prosessinstansBlirOpprettet() throws MelosysException {
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Landkoder.SE,
+    public void utpekLovvalgsland_harUtpekingsperiode_lovvalgsperiodeOgProsessinstansOpprettes()
+        throws MelosysException {
+        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         final Set<String> mottakerInstitusjoner = Set.of("SE:123");
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), eq(List.of(Landkoder.SE)), eq(BucType.LA_BUC_02)))
             .thenReturn(mottakerInstitusjoner);
+        when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
+            .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
 
         utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
 
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
+
+        Collection<Lovvalgsperiode> lagretLovvalgsperioder = lovvalgsperiodeCaptor.getValue();
+        assertThat(lagretLovvalgsperioder).isNotEmpty().hasSize(1);
+
+        Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperioder.iterator().next();
+        assertThat(lovvalgsperiode.getBestemmelse()).isEqualTo(utpekingsperiode.getBestemmelse());
+        assertThat(lovvalgsperiode.getFom()).isEqualTo(utpekingsperiode.getFom());
+        assertThat(lovvalgsperiode.getTom()).isEqualTo(utpekingsperiode.getTom());
+        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
+        assertThat(lovvalgsperiode.getDekning()).isEqualTo(Trygdedekninger.UTEN_DEKNING);
+        assertThat(lovvalgsperiode.getTilleggsbestemmelse()).isEqualTo(utpekingsperiode.getTilleggsbestemmelse());
+    }
+
+    @Test
+    public void utpekLovvalgsland_feilBehandlingstema_kasterException() {
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Landkoder.SE,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
+        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
+        final Set<String> mottakerInstitusjoner = Set.of("SE:123");
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null));
     }
 
     @Test

@@ -19,20 +19,20 @@
             <groupId>no.nav.dok.metaforcemal</groupId>
             <artifactId>melosysbrev</artifactId>
             <scope>runtime</scope>
-        </dependency>    
+        </dependency>
         <dependency>
             <groupId>no.nav.dok.metaforcemal</groupId>
             <artifactId>melosysbrev</artifactId>
             <classifier>jaxb</classifier>
         </dependency>
-        <!-- Hack to force Maven to download the source attachment of the 
+        <!-- Hack to force Maven to download the source attachment of the
              above dependency. Not a real dependency. -->
         <dependency>
             <groupId>no.nav.dok.metaforcemal</groupId>
             <artifactId>melosysbrev</artifactId>
             <classifier>jaxb-sources</classifier>
             <scope>provided</scope>
-        </dependency>        
+        </dependency>
 
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -66,10 +66,6 @@
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-internt-kodeverk</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>regler-api</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>

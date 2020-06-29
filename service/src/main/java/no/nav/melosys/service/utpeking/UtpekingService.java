@@ -2,21 +2,21 @@ package no.nav.melosys.service.utpeking;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Utpekingsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -37,22 +37,25 @@ public class UtpekingService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final EessiService eessiService;
+    private final LandvelgerService landvelgerService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
-    private final LandvelgerService landvelgerService;
 
     public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                           EessiService eessiService, OppgaveService oppgaveService,
+                           EessiService eessiService, LandvelgerService landvelgerService,
+                           LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
-                           UtpekingsperiodeRepository utpekingsperiodeRepository, LandvelgerService landvelgerService) {
+                           UtpekingsperiodeRepository utpekingsperiodeRepository) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
+        this.landvelgerService = landvelgerService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
-        this.landvelgerService = landvelgerService;
     }
 
     public Collection<Utpekingsperiode> hentUtpekingsperioder(long behandlingID) {
@@ -83,6 +86,9 @@ public class UtpekingService {
                                   String fritekstBrev)
         throws MelosysException {
         Behandling behandling = fagsak.getAktivBehandling();
+        if (behandling.getTema() != Behandlingstema.ARBEID_FLERE_LAND) {
+            throw new FunksjonellException("Utpeking kan ikke skje for en behandling med tema " + behandling.getTema());
+        }
         long behandlingID = fagsak.getAktivBehandling().getId();
 
         if (log.isInfoEnabled()) {
@@ -103,10 +109,16 @@ public class UtpekingService {
         behandlingsresultatService.oppdaterBehandlingsresultattype(
             behandlingID, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
         );
+        opprettLovvalgsperiode(behandlingID, utpekingsperiode);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+    }
+
+    private void opprettLovvalgsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {
+        lovvalgsperiodeService
+            .lagreLovvalgsperioder(behandlingID, Collections.singleton(Lovvalgsperiode.av(utpekingsperiode)));
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -119,7 +131,7 @@ public class UtpekingService {
             throw new FunksjonellException("Behandling " + behandlingID + " er ikke aktiv!");
         }
 
-        if (behandling.erUtpekingAvAnnetLand()) {
+        if (behandling.erBeslutningLovvalgAnnetLand()) {
             behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         } else if (behandling.erNorgeUtpekt()) {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);

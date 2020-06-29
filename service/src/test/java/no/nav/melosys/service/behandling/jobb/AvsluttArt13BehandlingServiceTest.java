@@ -3,20 +3,15 @@ package no.nav.melosys.service.behandling.jobb;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Collections;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -26,18 +21,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvsluttArt13BehandlingServiceTest {
-
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -46,28 +37,24 @@ public class AvsluttArt13BehandlingServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private MedlPeriodeService medlPeriodeService;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
 
     private AvsluttArt13BehandlingService avsluttArt13BehandlingService;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    @Captor
-    private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperiodeCaptor;
-
-    private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private Behandling behandling = new Behandling();
-    private Fagsak fagsak = new Fagsak();
-    private Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-    private VedtakMetadata vedtakMetadata = new VedtakMetadata();
+    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+    private final Behandling behandling = new Behandling();
+    private final Fagsak fagsak = new Fagsak();
+    private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+    private final VedtakMetadata vedtakMetadata = new VedtakMetadata();
 
     private final long behandlingID = 11L;
 
     @Before
     public void setup() throws IkkeFunnetException {
-        avsluttArt13BehandlingService = new AvsluttArt13BehandlingService(behandlingService, fagsakService, behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService);
+        avsluttArt13BehandlingService = new AvsluttArt13BehandlingService(behandlingService, fagsakService,
+            behandlingsresultatService, medlPeriodeService);
 
         behandling.setId(behandlingID);
         behandlingsresultat.setId(behandlingID);
@@ -129,46 +116,15 @@ public class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    public void avsluttBehandlingArt13_annetLandUtpekt2Mnd1DagSidenEndretDato_behandlingBlirAvsluttet() throws FunksjonellException, TekniskException {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
+    public void avsluttBehandlingArt13_søknad2Mnd1DagSidenEndretDato_medlOppdatertOgBehandlingBlirAvsluttet()
+        throws FunksjonellException, TekniskException {
         behandlingsresultat.setEndretDato(månederOgDagerSiden(2, 1));
+        vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(true));
-    }
-
-
-    @Test
-    public void avsluttBehandlingArt13_søknad2Mnd1DagSidenEndretDato_lovvalgsperiodeOpprettBehandlingBlirAvsluttet() throws FunksjonellException, TekniskException {
-        behandlingsresultat.setEndretDato(månederOgDagerSiden(2, 1));
-        behandlingsresultat.getLovvalgsperioder().clear();
-        behandlingsresultat.setVedtakMetadata(null);
-
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now().plusYears(1), Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, null);
-        utpekingsperiode.setMedlPeriodeID(123L);
-        utpekingsperiode.setSendtUtland(LocalDate.now());
-        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
-
-        when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
-            .thenReturn(Collections.singletonList(lovvalgsperiode));
-
-        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
         verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
         verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(false));
 
-        Collection<Lovvalgsperiode> lagretLovvalgsperioder = lovvalgsperiodeCaptor.getValue();
-        assertThat(lagretLovvalgsperioder).isNotEmpty().hasSize(1);
-
-        Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperioder.iterator().next();
-        assertThat(lovvalgsperiode.getBestemmelse()).isEqualTo(utpekingsperiode.getBestemmelse());
-        assertThat(lovvalgsperiode.getFom()).isEqualTo(utpekingsperiode.getFom());
-        assertThat(lovvalgsperiode.getTom()).isEqualTo(utpekingsperiode.getTom());
-        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
-        assertThat(lovvalgsperiode.getDekning()).isEqualTo(Trygdedekninger.UTEN_DEKNING);
-        assertThat(lovvalgsperiode.getMedlPeriodeID()).isEqualTo(utpekingsperiode.getMedlPeriodeID()).isNotNull();
-        assertThat(lovvalgsperiode.getTilleggsbestemmelse()).isEqualTo(utpekingsperiode.getTilleggsbestemmelse());
     }
 
     private Instant månederOgDagerSiden(long mnd, long dager) {

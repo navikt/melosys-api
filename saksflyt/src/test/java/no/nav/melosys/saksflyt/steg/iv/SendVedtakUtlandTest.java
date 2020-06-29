@@ -145,18 +145,26 @@ public class SendVedtakUtlandTest {
 
     @Test
     public void utførSteg_utpekAnnetLandUtenEessiMottakere_lagerBrev() throws MelosysException {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
+        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
+        lovvalgsperiode.setLovvalgsland(Landkoder.AT);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT);
         when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any()))
             .thenReturn("journalpostID");
         sendVedtakUtland.utfør(prosessinstans);
-        verify(sedSomBrevService).lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), eq(behandling), any());
+        verify(sedSomBrevService)
+            .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), eq(Landkoder.AT), eq(behandling));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
     }
 
     @Test
     public void utførSteg_norgeErUtpektElektronisk_senderA012() throws MelosysException {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         SedDokument sedDokument = new SedDokument();
