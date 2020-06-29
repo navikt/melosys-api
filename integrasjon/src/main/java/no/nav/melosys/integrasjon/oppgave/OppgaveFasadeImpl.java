@@ -119,7 +119,9 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             ));
         }
 
-        return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain).collect(Collectors.toList());
+        return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
+            .filter(oppgave -> oppgave.getSaksnummer() != null)
+            .collect(Collectors.toList());
     }
 
     private boolean erBehandlingstypeUtsending(Behandlingstema behandlingstema) {
