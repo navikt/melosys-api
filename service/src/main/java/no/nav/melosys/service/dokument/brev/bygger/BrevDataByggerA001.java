@@ -82,7 +82,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         }
 
         if (harSærligGrunn(art16VilkaarBegrunnelser)) {
-            brevData.anmodningFritekst = art16Vilkaar.getBegrunnelseFritekst();
+            brevData.anmodningFritekst = art16Vilkaar.getBegrunnelseFritekstEessi();
         }
 
         return brevData;

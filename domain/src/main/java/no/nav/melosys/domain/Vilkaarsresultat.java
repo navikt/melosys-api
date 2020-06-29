@@ -34,6 +34,9 @@ public class Vilkaarsresultat extends RegistreringsInfo {
     @Column(name = "begrunnelse_fritekst")
     private String begrunnelseFritekst;
 
+    @Column(name = "begrunnelse_fritekst_eessi")
+    private String begrunnelseFritekstEessi;
+
     public Long getId() {
         return id;
     }
@@ -80,6 +83,14 @@ public class Vilkaarsresultat extends RegistreringsInfo {
 
     public void setBegrunnelseFritekst(String begrunnelseFritekst) {
         this.begrunnelseFritekst = begrunnelseFritekst;
+    }
+
+    public String getBegrunnelseFritekstEessi() {
+        return begrunnelseFritekstEessi;
+    }
+
+    public void setBegrunnelseFritekstEessi(String begrunnelseFritekstEessi) {
+        this.begrunnelseFritekstEessi = begrunnelseFritekstEessi;
     }
 
     @Override
