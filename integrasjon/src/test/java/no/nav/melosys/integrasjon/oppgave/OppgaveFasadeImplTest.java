@@ -137,6 +137,24 @@ public final class OppgaveFasadeImplTest {
         assertThat(oppgave.getTema()).isEqualTo(Tema.valueOf("MED"));
     }
 
+    @Test
+    public void finnUtildelteOppgaverEtterFrist_mottarBehandlingsOppgaveUtenSaksreferanse_returnererGyldigeOppgaver() throws Exception {
+        OppgaveDto jfrOppgave = new OppgaveDto();
+        jfrOppgave.setOppgavetype("JFR");
+        OppgaveDto behOppgave = new OppgaveDto();
+        behOppgave.setSaksreferanse("MEL-123");
+        OppgaveDto ikkeGyldigOppgave = new OppgaveDto();
+
+        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
+            .thenReturn(List.of(jfrOppgave, behOppgave, ikkeGyldigOppgave));
+
+        List<Oppgave> oppgaver = oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist(Behandlingstema.TRYGDETID);
+
+        assertThat(oppgaver.size()).isEqualTo(2);
+        assertThat(oppgaver.get(0).getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
+        assertThat(oppgaver.get(1).getSaksnummer()).isEqualTo("MEL-123");
+    }
+
     private Oppgave lagOppgave() {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setAktivDato(LocalDate.now());
