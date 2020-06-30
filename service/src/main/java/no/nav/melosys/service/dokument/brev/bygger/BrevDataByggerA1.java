@@ -12,7 +12,10 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
 import org.apache.commons.lang3.StringUtils;
+
+import static java.util.function.Predicate.not;
 
 public class BrevDataByggerA1 implements BrevDataBygger {
     private final AvklartefaktaService avklartefaktaService;
@@ -51,6 +54,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
     // men skal vises i listen (5.1) sammen med andre utenlandske foretak (utenlandske arbeidsgivere/selvstendig næringsdrivende)
     private List<AvklartVirksomhet> hentForetakFraArbeidssteder(List<Arbeidssted> arbeidssteder) {
         return arbeidssteder.stream()
+            .filter(not(FlyvendeArbeidssted.class::isInstance))
             .filter(this::arbeidsstedHarForetak)
             .map(this::utledVirksomhetFraArbeidssted)
             .collect(Collectors.toList());
