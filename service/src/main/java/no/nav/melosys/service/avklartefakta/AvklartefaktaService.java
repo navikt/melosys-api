@@ -98,10 +98,10 @@ public class AvklartefaktaService {
         return !marginaltArbeid.isEmpty();
     }
 
-    public Set<Maritimtyper> hentMaritimType(long behandlingsid) {
-        Set<Avklartefakta> avklartefaktaOpt =
+    public Set<Maritimtyper> hentMaritimTyper(long behandlingsid) {
+        Set<Avklartefakta> avklartefakta =
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.SOKKEL_ELLER_SKIP);
-        return avklartefaktaOpt.stream()
+        return avklartefakta.stream()
             .map(af -> Maritimtyper.valueOf(af.getFakta()))
             .collect(Collectors.toSet());
     }

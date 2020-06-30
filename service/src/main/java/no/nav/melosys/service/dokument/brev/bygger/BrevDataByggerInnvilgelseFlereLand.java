@@ -61,7 +61,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
 
         brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, grunnlagData).getBeskrivelse();
 
-        Set<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandlingID);
+        Set<Maritimtyper> maritimType = avklartefaktaService.hentMaritimTyper(behandlingID);
         brevdata.harAvklartMaritimTypeSokkel = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SOKKEL);
         brevdata.harAvklartMaritimTypeSkip = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SKIP);
 

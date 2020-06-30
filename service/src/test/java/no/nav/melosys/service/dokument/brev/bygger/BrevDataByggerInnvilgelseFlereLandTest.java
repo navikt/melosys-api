@@ -99,7 +99,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     @Test
     public void lag_medSokkel_setterMaritimtypeSokkel() throws FunksjonellException, TekniskException {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
-        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Set.of(maritimType));
+        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
@@ -110,7 +110,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
 
     @Test
     public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
-        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Collections.emptySet());
+        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);

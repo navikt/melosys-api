@@ -110,7 +110,7 @@ public class BrevDataByggerInnvilgelseTest {
     @Test
     public void lag_medSokkel_setterMaritimtypeSokkel() throws FunksjonellException, TekniskException {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
-        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Set.of(maritimType));
+        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
@@ -119,7 +119,7 @@ public class BrevDataByggerInnvilgelseTest {
 
     @Test
     public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
-        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Collections.emptySet());
+        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.avklartMaritimType).isNull();

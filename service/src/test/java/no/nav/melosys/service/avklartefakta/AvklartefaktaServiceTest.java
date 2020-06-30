@@ -169,7 +169,7 @@ public class AvklartefaktaServiceTest {
         Set<Avklartefakta> avklartefaktaFraDb = Set.of(avklartefakta);
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimType(1L);
+        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimTyper(1L);
         assertThat(maritimTyper).isNotEmpty();
         assertThat(maritimTyper.iterator().next()).isEqualTo(Maritimtyper.SOKKEL);
     }
@@ -181,7 +181,7 @@ public class AvklartefaktaServiceTest {
         Set<Avklartefakta> avklartefaktaFraDb = Set.of(avklartefakta);
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimType(1L);
+        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimTyper(1L);
         assertThat(maritimTyper).isNotEmpty();
         assertThat(maritimTyper.iterator().next()).isEqualTo(Maritimtyper.SKIP);
     }
