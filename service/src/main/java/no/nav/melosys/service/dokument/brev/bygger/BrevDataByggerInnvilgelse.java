@@ -85,9 +85,10 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
 
         brevdata.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
 
-        Set<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandlingID);
-        brevdata.harAvklartMaritimTypeSokkel = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SOKKEL);
-        brevdata.harAvklartMaritimTypeSkip = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SKIP);
+        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimType(behandlingID);
+        if (!maritimTyper.isEmpty()) {
+            brevdata.avklartMaritimType = maritimTyper.iterator().next();
+        }
 
         brevdata.setAnmodningsperiodesvar(anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream()

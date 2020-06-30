@@ -5,6 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
 
 public class BrevDataInnvilgelse extends BrevData {
     private AnmodningsperiodeSvar anmodningsperiodesvar;
@@ -12,8 +13,7 @@ public class BrevDataInnvilgelse extends BrevData {
     public String arbeidsland;
     public String bostedsland;
     public AvklartVirksomhet hovedvirksomhet;
-    public boolean harAvklartMaritimTypeSokkel;
-    public boolean harAvklartMaritimTypeSkip;
+    public Maritimtyper avklartMaritimType;
     public String trygdemyndighetsland;
     public BrevDataA1 vedleggA1;
     public String personNavn;

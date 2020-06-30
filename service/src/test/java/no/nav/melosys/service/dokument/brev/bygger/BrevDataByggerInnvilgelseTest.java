@@ -114,7 +114,7 @@ public class BrevDataByggerInnvilgelseTest {
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
-        assertThat(brevData.harAvklartMaritimTypeSokkel).isTrue();
+        assertThat(brevData.avklartMaritimType).isEqualTo(Maritimtyper.SOKKEL);
     }
 
     @Test
@@ -122,8 +122,7 @@ public class BrevDataByggerInnvilgelseTest {
         when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.harAvklartMaritimTypeSokkel).isFalse();
-        assertThat(brevData.harAvklartMaritimTypeSkip).isFalse();
+        assertThat(brevData.avklartMaritimType).isNull();
     }
 
     @Test
