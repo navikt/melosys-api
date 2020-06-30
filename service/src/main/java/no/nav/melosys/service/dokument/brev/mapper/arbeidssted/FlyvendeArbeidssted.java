@@ -9,7 +9,7 @@ public final class FlyvendeArbeidssted extends AbstractArbeidssted implements Ik
     private final String hjemmebaseNavn;
 
     public FlyvendeArbeidssted(LuftfartBase luftfartBase) {
-        super(luftfartBase.hjemmebaseNavn, "", luftfartBase.hjemmebaseLand);
+        super("", "", luftfartBase.hjemmebaseLand);
         this.hjemmebaseNavn = luftfartBase.hjemmebaseNavn;
     }
 

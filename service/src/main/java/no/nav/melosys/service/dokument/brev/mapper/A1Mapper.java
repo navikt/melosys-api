@@ -163,8 +163,9 @@ class A1Mapper {
     private Stream<BivirksomhetType> hentAvklarteVirksomheterOgFlyvendeArbeidssteder(
         Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidssteder) {
 
-        Stream<Arbeidssted> flyvendeArbeidssteder = arbeidssteder.stream()
-            .filter(FlyvendeArbeidssted.class::isInstance);
+        Stream<FlyvendeArbeidssted> flyvendeArbeidssteder = arbeidssteder.stream()
+            .filter(FlyvendeArbeidssted.class::isInstance)
+            .map(FlyvendeArbeidssted.class::cast);
         return Stream.concat(
             avklarteVirksomheter.stream().map(this::tilBivirksomhetType),
             flyvendeArbeidssteder.map(this::tilBivirksomhetType)
@@ -226,9 +227,9 @@ class A1Mapper {
         return bivirksomhetType;
     }
 
-    private BivirksomhetType tilBivirksomhetType(Arbeidssted arbeidssted) {
+    private BivirksomhetType tilBivirksomhetType(FlyvendeArbeidssted arbeidssted) {
         BivirksomhetType bivirksomhetType = new BivirksomhetType();
-        bivirksomhetType.setNavn(arbeidssted.getForetakNavn());
+        bivirksomhetType.setNavn(arbeidssted.getEnhetNavn());
         bivirksomhetType.setOrgnummer("");
         return bivirksomhetType;
     }
