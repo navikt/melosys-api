@@ -200,7 +200,8 @@ public final class DokumentServiceTest {
         brevdataInnvilgelse.vedleggA1 = brevDataA1;
         brevdataInnvilgelse.hovedvirksomhet = arbeidsgiver;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
+        brevdataInnvilgelse.harAvklartMaritimTypeSkip = true;
+        brevdataInnvilgelse.harAvklartMaritimTypeSokkel = false;
         brevdataInnvilgelse.arbeidsland = "Norway";
         brevdataInnvilgelse.setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse());
         brevdataInnvilgelse.trygdemyndighetsland = "Denmark";

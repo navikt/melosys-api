@@ -166,22 +166,24 @@ public class AvklartefaktaServiceTest {
     public void hentMaritimType_medSokkelTekst_foventerSokkelType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL");
-        Optional<Avklartefakta> avklartefaktaFraDb = Optional.of(avklartefakta);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
+        Set<Avklartefakta> avklartefaktaFraDb = Set.of(avklartefakta);
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
-        assertThat(maritimType).isPresent().get().isEqualTo(Maritimtyper.SOKKEL);
+        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimType(1L);
+        assertThat(maritimTyper).isNotEmpty();
+        assertThat(maritimTyper.iterator().next()).isEqualTo(Maritimtyper.SOKKEL);
     }
 
     @Test
     public void hentMaritimType_medSkipTekst_foventerSkipType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SKIP");
-        Optional<Avklartefakta> avklartefaktaFraDb = Optional.of(avklartefakta);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
+        Set<Avklartefakta> avklartefaktaFraDb = Set.of(avklartefakta);
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
-        assertThat(maritimType).isPresent().get().isEqualTo(Maritimtyper.SKIP);
+        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimType(1L);
+        assertThat(maritimTyper).isNotEmpty();
+        assertThat(maritimTyper.iterator().next()).isEqualTo(Maritimtyper.SKIP);
     }
 
     public static Set<Avklartefakta> lagAlleMaritimeAvklartefakta(String navn, String maritimType, String landkode) {

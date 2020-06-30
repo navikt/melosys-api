@@ -13,6 +13,8 @@ public final class BrevDataInnvilgelseFlereLand extends BrevData {
     public List<String> alleArbeidsland;
     public Lovvalgsperiode lovvalgsperiode;
     public Maritimtyper avklartMaritimType;
+    public boolean harAvklartMaritimTypeSokkel;
+    public boolean harAvklartMaritimTypeSkip;
     public String bostedsland;
     public boolean erBegrensetPeriode;
     public boolean erMarginaltArbeid;

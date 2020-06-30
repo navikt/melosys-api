@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Collections;
-import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -99,21 +99,23 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     @Test
     public void lag_medSokkel_setterMaritimtypeSokkel() throws FunksjonellException, TekniskException {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
-        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.of(maritimType));
+        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Set.of(maritimType));
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
-        assertThat(brevData.avklartMaritimType).isEqualTo(Maritimtyper.SOKKEL);
+        assertThat(brevData.harAvklartMaritimTypeSokkel).isTrue();
+        assertThat(brevData.harAvklartMaritimTypeSkip).isFalse();
     }
 
     @Test
     public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
-        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.empty());
+        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
         BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
-        assertThat(brevData.avklartMaritimType).isNull();
+        assertThat(brevData.harAvklartMaritimTypeSokkel).isFalse();
+        assertThat(brevData.harAvklartMaritimTypeSkip).isFalse();
         assertThat(brevData.trydemyndighetsland).isNull();
     }
 

@@ -15,7 +15,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -74,10 +73,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             }
         }
 
-        if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
+        if (brevdata.harAvklartMaritimTypeSkip) {
             fag.setArbeidPåSkip(JA);
         }
-        if (brevdata.avklartMaritimType == Maritimtyper.SOKKEL) {
+        if (brevdata.harAvklartMaritimTypeSokkel) {
             fag.setArbeidPåSokkel(JA);
         }
 
