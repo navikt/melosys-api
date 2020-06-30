@@ -56,6 +56,7 @@ node {
 
             commit = sh(script: "git log -1 --oneline", returnStdout: true)
             imageVersion = "${branchName}-${BUILD_NUMBER}-${commitId}"
+            imageVersion = imageVersion.replaceAll("[æøåÆØÅ]", "x");
         }
 
         stage("Build application") {
