@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -85,8 +85,10 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
 
         brevdata.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
 
-        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandlingID);
-        maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
+        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimTyper(behandlingID);
+        if (!maritimTyper.isEmpty()) {
+            brevdata.avklartMaritimType = maritimTyper.iterator().next();
+        }
 
         brevdata.setAnmodningsperiodesvar(anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream()
