@@ -106,7 +106,7 @@ public class OppgaveServiceTest {
 
         Set<Oppgave> oppgaver = Set.of(oppgave1.build(), oppgave2.build());
 
-        when(oppgaveFasade.finnOppgaveListeMedAnsvarlig(eq(tilordnetRessurs))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(eq(tilordnetRessurs))).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);

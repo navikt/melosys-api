@@ -66,7 +66,7 @@ public class OppgaveService {
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
-        Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
+        Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 

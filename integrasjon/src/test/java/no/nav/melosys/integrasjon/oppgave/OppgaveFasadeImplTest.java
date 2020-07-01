@@ -92,7 +92,7 @@ public final class OppgaveFasadeImplTest {
         OppgaveDto oppgaveDto = new OppgaveDto();
         when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Collections.singletonList(oppgaveDto));
 
-        oppgaveFasadeImpl.finnOppgaveListeMedAnsvarlig("123");
+        oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123");
         verify(oppgaveConsumer, times(2)).hentOppgaveListe(oppgaveSearchRequestCaptor.capture());
 
         List<OppgaveSearchRequest> requests = oppgaveSearchRequestCaptor.getAllValues();
@@ -114,7 +114,7 @@ public final class OppgaveFasadeImplTest {
 
         when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Arrays.asList(oppgaveDto1, oppgaveDto2));
 
-        Set<Oppgave> oppgaver = oppgaveFasadeImpl.finnOppgaveListeMedAnsvarlig("123");
+        Set<Oppgave> oppgaver = oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123");
 
         assertThat(oppgaver.size()).isEqualTo(1);
         assertThat(oppgaver.iterator().next().getOppgaveId()).isEqualTo(oppgaveID);

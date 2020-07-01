@@ -237,7 +237,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public Set<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws FunksjonellException, TekniskException {
+    public Set<Oppgave> finnOppgaverMedAnsvarlig(String tilordnetRessurs) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTilordnetRessurs(tilordnetRessurs)
             .medSorteringsfelt(SORTERINGSFELT)
