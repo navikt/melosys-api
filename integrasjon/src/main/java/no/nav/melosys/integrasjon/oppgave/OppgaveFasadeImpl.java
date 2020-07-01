@@ -240,8 +240,9 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     public Set<Oppgave> finnOppgaverMedAnsvarlig(String tilordnetRessurs) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTilordnetRessurs(tilordnetRessurs)
-            .medSorteringsfelt(SORTERINGSFELT)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medOppgaveTyper(hentGyldigeOppgavetyper())
+            .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN);
 
         return hentOppgaverAlleTyper(oppgaveSearchRequestBuilder);
@@ -270,6 +271,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
@@ -341,8 +343,8 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         return null;
     }
 
-    private Predicate<Oppgave> erGyldigJournalføringEllerBehandlingsoppgave
-        = (oppgave) -> oppgave.getOppgavetype() == Oppgavetyper.JFR || oppgave.getSaksnummer() != null;
+    private final Predicate<Oppgave> erGyldigJournalføringEllerBehandlingsoppgave
+        = oppgave -> oppgave.getOppgavetype() == Oppgavetyper.JFR || oppgave.getSaksnummer() != null;
 
     private static String[] hentGyldigeOppgavetyper() {
         return Stream.of(Oppgavetyper.values())

@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -90,7 +91,8 @@ public final class OppgaveFasadeImplTest {
     @Test
     public void finnOppgaveListeMedAnsvarlig_gyldigOppgave_verifiserToKallMotOppgave() throws Exception {
         OppgaveDto oppgaveDto = new OppgaveDto();
-        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Collections.singletonList(oppgaveDto));
+        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
+            .thenReturn(Collections.singletonList(oppgaveDto));
 
         oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123");
         verify(oppgaveConsumer, times(2)).hentOppgaveListe(oppgaveSearchRequestCaptor.capture());
@@ -98,7 +100,6 @@ public final class OppgaveFasadeImplTest {
         List<OppgaveSearchRequest> requests = oppgaveSearchRequestCaptor.getAllValues();
         assertThat(requests.size()).isEqualTo(2);
         assertThat(requests.get(0).getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
-        assertThat(requests.get(0).getOppgavetype()).isNullOrEmpty();
         assertThat(requests.get(1).getBehandlesAvApplikasjon()).isNullOrEmpty();
         assertThat(requests.get(1).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
     }
