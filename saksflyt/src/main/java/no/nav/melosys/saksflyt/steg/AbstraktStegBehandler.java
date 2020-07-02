@@ -71,14 +71,14 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
             String feilmelding = "TekniskException ";
             log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, e);
-        } catch (RuntimeException e) {
-            String feilmelding = "RuntimeException ";
-            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
-            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
         } catch (Exception e) {
             String feilmelding = "Exception ";
             log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
+        } catch (Throwable t) { //NOSONAR
+            String feilmelding = "Throwable ";
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, t);
+            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, t);
         }
     }
 
