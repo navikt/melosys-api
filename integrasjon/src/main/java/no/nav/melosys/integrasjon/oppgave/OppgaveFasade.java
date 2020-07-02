@@ -27,7 +27,7 @@ public interface OppgaveFasade {
      * Finner Oppgaver basert på ansvarlig saksbehandler
      * Oppgave sorterer oppgavene stigende etter frist.
      */
-    Set<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
+    Set<Oppgave> finnOppgaverMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
 
     /**
      * Finner oppgaver relatert til en bruker.

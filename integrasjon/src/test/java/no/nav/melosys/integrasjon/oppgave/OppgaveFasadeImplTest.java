@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -90,15 +91,15 @@ public final class OppgaveFasadeImplTest {
     @Test
     public void finnOppgaveListeMedAnsvarlig_gyldigOppgave_verifiserToKallMotOppgave() throws Exception {
         OppgaveDto oppgaveDto = new OppgaveDto();
-        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Collections.singletonList(oppgaveDto));
+        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
+            .thenReturn(Collections.singletonList(oppgaveDto));
 
-        oppgaveFasadeImpl.finnOppgaveListeMedAnsvarlig("123");
+        oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123");
         verify(oppgaveConsumer, times(2)).hentOppgaveListe(oppgaveSearchRequestCaptor.capture());
 
         List<OppgaveSearchRequest> requests = oppgaveSearchRequestCaptor.getAllValues();
         assertThat(requests.size()).isEqualTo(2);
         assertThat(requests.get(0).getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
-        assertThat(requests.get(0).getOppgavetype()).isNullOrEmpty();
         assertThat(requests.get(1).getBehandlesAvApplikasjon()).isNullOrEmpty();
         assertThat(requests.get(1).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
     }
@@ -114,7 +115,7 @@ public final class OppgaveFasadeImplTest {
 
         when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Arrays.asList(oppgaveDto1, oppgaveDto2));
 
-        Set<Oppgave> oppgaver = oppgaveFasadeImpl.finnOppgaveListeMedAnsvarlig("123");
+        Set<Oppgave> oppgaver = oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123");
 
         assertThat(oppgaver.size()).isEqualTo(1);
         assertThat(oppgaver.iterator().next().getOppgaveId()).isEqualTo(oppgaveID);
@@ -135,6 +136,24 @@ public final class OppgaveFasadeImplTest {
         assertThat(oppgave.getSaksnummer()).isEqualTo("MEL-111");
         assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.valueOf("BEH_SAK_MK"));
         assertThat(oppgave.getTema()).isEqualTo(Tema.valueOf("MED"));
+    }
+
+    @Test
+    public void finnUtildelteOppgaverEtterFrist_mottarBehandlingsOppgaveUtenSaksreferanse_returnererGyldigeOppgaver() throws Exception {
+        OppgaveDto jfrOppgave = new OppgaveDto();
+        jfrOppgave.setOppgavetype("JFR");
+        OppgaveDto behOppgave = new OppgaveDto();
+        behOppgave.setSaksreferanse("MEL-123");
+        OppgaveDto ikkeGyldigOppgave = new OppgaveDto();
+
+        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
+            .thenReturn(List.of(jfrOppgave, behOppgave, ikkeGyldigOppgave));
+
+        List<Oppgave> oppgaver = oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist(Behandlingstema.TRYGDETID);
+
+        assertThat(oppgaver.size()).isEqualTo(2);
+        assertThat(oppgaver.get(0).getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
+        assertThat(oppgaver.get(1).getSaksnummer()).isEqualTo("MEL-123");
     }
 
     private Oppgave lagOppgave() {
