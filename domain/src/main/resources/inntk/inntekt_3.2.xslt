@@ -82,7 +82,7 @@
         </xsl:element>
     </xsl:template>
 
-    <xsl:template match="forskuddstrekkListe|fradragListe">
+    <xsl:template match="avvikListe|forskuddstrekkListe|fradragListe">
         <!-- Ignoreres -->
     </xsl:template>
 
