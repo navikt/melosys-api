@@ -21,7 +21,7 @@ public class SettTilFeilet implements UnntakBehandler {
 
     @Override
     public void behandleUnntak(Prosessinstans prosessinstans, String melding, Throwable t) {
-        logger.warn("Setter prosessinstans {} til feilet.", prosessinstans.getId());
+        logger.error("Setter prosessinstans {} til feilet.", prosessinstans.getId());
         prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
     }
 

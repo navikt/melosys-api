@@ -33,10 +33,10 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROT
 public class ArbeiderTraad implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(ArbeiderTraad.class);
 
-    private long oppholdMellomSteg;
-    private Binge binge;
-    private ProsessinstansRepository prosessinstansRepo;
-    private List<StegBehandler> stegBehandlere;
+    private final long oppholdMellomSteg;
+    private final Binge binge;
+    private final ProsessinstansRepository prosessinstansRepo;
+    private final List<StegBehandler> stegBehandlere;
     private StegBehandler aktivStegBehandler; // Brukes kun for logging
     private Prosessinstans aktivProsessinstans;
 
@@ -64,7 +64,7 @@ public class ArbeiderTraad implements Runnable {
                     // Prosessinstanser som avbrytes må registreres som feilet.
                     settTilFeilet();
                     Thread.currentThread().interrupt();
-                } catch (RuntimeException e) {
+                } catch (Exception e) {
                     logger.error("Ubehandlet exception! Aktiv stegBehandler: {}.", lagStegNavn(aktivStegBehandler), e);
                     settTilFeilet();
                 }
@@ -79,7 +79,7 @@ public class ArbeiderTraad implements Runnable {
                 aktivProsessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
                 prosessinstansRepo.save(aktivProsessinstans);
                 aktivProsessinstans = null;
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
                 logger.error("Prosessinstans {} kunne ikke settes til feilet: ", aktivProsessinstans.getId(), e);
             }
         }

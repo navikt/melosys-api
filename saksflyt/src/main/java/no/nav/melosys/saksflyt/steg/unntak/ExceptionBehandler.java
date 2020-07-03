@@ -13,22 +13,26 @@ import org.springframework.core.NestedRuntimeException;
 import static no.nav.melosys.saksflyt.steg.unntak.KjedetUnntakBehandler.først;
 
 public class ExceptionBehandler implements UnntakBehandler {
+    private static final ExceptionBehandler INSTANS = new ExceptionBehandler();
 
-    private static ExceptionBehandler instanse = new ExceptionBehandler();
-
-    private static Retry retryIoFeil = Retry.prøvIgjen(100, 300000);
-    private static UnntakBehandler settTilFeilet = SettTilFeilet.settTilFeilet();
-    private static UnntakBehandler funksjonellFeilBehandler = først(OpprettHendelse.opprettHendelse("Funksjonell feil")).så(settTilFeilet);
-    private static UnntakBehandler ikkeFunnetBehandler = først(OpprettHendelse.opprettHendelse("Ikke funnet")).så(settTilFeilet);
-    private static UnntakBehandler runtimeOgErrorBehandler = først(OpprettHendelse.opprettHendelse("Runtime exception eller error")).så(settTilFeilet);
-    private static UnntakBehandler sikkerhetsbegrensningBehandler = først(OpprettHendelse.opprettHendelse("Ingen tilgang")).så(settTilFeilet);
-    private static UnntakBehandler tekniskFeilBehandler = først(OpprettHendelse.opprettHendelse("Teknisk feil")).så(settTilFeilet);
+    private static final Retry retryIoFeil = Retry.prøvIgjen(100, 300000);
+    private static final UnntakBehandler settTilFeilet = SettTilFeilet.settTilFeilet();
+    private static final UnntakBehandler funksjonellFeilBehandler =
+        først(OpprettHendelse.opprettHendelse("Funksjonell feil")).så(settTilFeilet);
+    private static final UnntakBehandler ikkeFunnetBehandler =
+        først(OpprettHendelse.opprettHendelse("Ikke funnet")).så(settTilFeilet);
+    private static final UnntakBehandler sikkerhetsbegrensningBehandler =
+        først(OpprettHendelse.opprettHendelse("Ingen tilgang")).så(settTilFeilet);
+    private static final UnntakBehandler tekniskFeilBehandler =
+        først(OpprettHendelse.opprettHendelse("Teknisk feil")).så(settTilFeilet);
+    private static final UnntakBehandler defaultThrowableBehandler =
+        først(OpprettHendelse.opprettHendelse("Exception eller error")).så(settTilFeilet);
 
     private ExceptionBehandler() {
     }
 
     static ExceptionBehandler exceptionBehandler() {
-        return instanse;
+        return INSTANS;
     }
 
     @Override
@@ -62,7 +66,7 @@ public class ExceptionBehandler implements UnntakBehandler {
             tekniskFeilBehandler.behandleUnntak(prosessinstans, melding, t);
             return;
         }
-        runtimeOgErrorBehandler.behandleUnntak(prosessinstans, melding, t);
+        defaultThrowableBehandler.behandleUnntak(prosessinstans, melding, t);
     }
 
     private static boolean erForårsaketAv(Throwable e, Class<? extends Throwable> clzz) {
@@ -76,5 +80,4 @@ public class ExceptionBehandler implements UnntakBehandler {
         }
         return erForårsaketAv(e.getCause(), clzz);
     }
-
 }
