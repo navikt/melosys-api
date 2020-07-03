@@ -106,7 +106,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
         assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(2)));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(tom));
+        assertThat(periode.tom).isEqualTo(YearMonth.from(LocalDate.now()));
     }
 
     @Test

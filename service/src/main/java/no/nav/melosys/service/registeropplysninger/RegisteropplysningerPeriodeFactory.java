@@ -111,7 +111,7 @@ public class RegisteropplysningerPeriodeFactory {
             tomMnd = YearMonth.from(fom.plusYears(2));
         } else if (fom.isBefore(nå) && tom.isAfter(nå)) { //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
             fomMnd = YearMonth.from(fom.minusMonths(2L));
-            tomMnd = YearMonth.from(tom);
+            tomMnd = YearMonth.from(nå);
         } else if (fom.isAfter(nå)) { //2. Periode ikke påbegynt. Inneværende mnd og 2 mnd tilbake
             fomMnd = YearMonth.from(nå.minusMonths(2L));
             tomMnd = YearMonth.from(nå);
