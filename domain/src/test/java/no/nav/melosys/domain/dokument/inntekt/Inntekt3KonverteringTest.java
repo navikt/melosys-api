@@ -41,13 +41,13 @@ public class Inntekt3KonverteringTest implements KonverteringTest {
         assertThat(dokument.getArbeidsInntektMaanedListe()).isNotEmpty();
 
         for (ArbeidsInntektMaaned arbeidsInntektMaaned : dokument.getArbeidsInntektMaanedListe()) {
-
             assertThat(arbeidsInntektMaaned.getArbeidsInntektInformasjon()).isNotNull();
-            assertThat(arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe()).isNotEmpty();
 
-            for (ArbeidsforholdFrilanser arbeidsforhold : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe()) {
-                assertThat(arbeidsforhold.yrke).isNotBlank();
-                assertThat(arbeidsforhold.frilansPeriode).isNotNull();
+            if (!arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe().isEmpty()) {
+                for (ArbeidsforholdFrilanser arbeidsforhold : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe()) {
+                    assertThat(arbeidsforhold.yrke).isNotBlank();
+                    assertThat(arbeidsforhold.frilansPeriode).isNotNull();
+                }
             }
         }
     }
