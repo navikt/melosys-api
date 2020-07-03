@@ -9,11 +9,11 @@ import java.time.YearMonth;
 
 @Component
 public class RegisteropplysningerPeriodeFactory {
-
     private final Integer arbeidsforholdhistorikkAntallMåneder;
     private final Integer medlemskaphistorikkAntallÅr;
     private final Integer inntektshistorikkAntallMåneder;
-    public static final Integer REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR = 1;
+
+    public static final long REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR = 1;
 
     public RegisteropplysningerPeriodeFactory(@Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}") Integer arbeidsforholdhistorikkAntallMåneder,
                                               @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr,
@@ -84,17 +84,17 @@ public class RegisteropplysningerPeriodeFactory {
         YearMonth tomMnd;
 
         LocalDate nå = LocalDate.now();
-        if (tom == null) {
-            fomMnd = YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder));
-            tomMnd = YearMonth.from(fom.plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR));
-        } else if (fom.isBefore(nå) && tom.isAfter(nå)) { //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
-            fomMnd = YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder));
-            tomMnd = YearMonth.from(tom);
-        } else if (fom.isAfter(nå)) { //2. Periode ikke påbegynt. Inneværende mnd og 2 mnd tilbake
+        if (fom.isAfter(nå)) {
             fomMnd = YearMonth.from(nå.minusMonths(inntektshistorikkAntallMåneder));
-            tomMnd = YearMonth.from(nå);
-        } else { //3. Avsluttet: sjekker hele periode
+        } else {
             fomMnd = YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder));
+        }
+
+        if (tom == null) {
+            tomMnd = YearMonth.from(fom.plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR));
+        } else if (tom.isAfter(nå)) {
+            tomMnd = YearMonth.from(nå);
+        } else {
             tomMnd = YearMonth.from(tom);
         }
 
