@@ -103,7 +103,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForYtelser(fom, tom, mottakAvSed);
+        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
         assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(2)));
         assertThat(periode.tom).isEqualTo(YearMonth.from(tom));
@@ -114,7 +114,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = LocalDate.now().plusYears(1);
         LocalDate tom = LocalDate.now().plusYears(2);
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForYtelser(fom, tom, mottakAvSed);
+        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
         assertThat(periode.fom).isEqualTo(YearMonth.from(LocalDate.now().minusMonths(2)));
         assertThat(periode.tom).isEqualTo(YearMonth.from(LocalDate.now()));
@@ -125,7 +125,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = LocalDate.now().plusYears(1);
         LocalDate tom = LocalDate.now().plusYears(2);
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForYtelser(fom, tom, behandlingAvSøknad);
+        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, behandlingAvSøknad);
 
         assertThat(periode.fom).isEqualTo(YearMonth.now().minusMonths(inntektshistorikkAntallMåneder));
         assertThat(periode.tom).isEqualTo(YearMonth.now());
@@ -136,7 +136,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = LocalDate.now().minusYears(3);
         LocalDate tom = LocalDate.now().minusYears(2);
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForYtelser(fom, tom, mottakAvSed);
+        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
         assertThat(periode.fom).isEqualTo(YearMonth.from(fom));
         assertThat(periode.tom).isEqualTo(YearMonth.from(tom));
@@ -147,7 +147,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = null;
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForYtelser(fom, tom, mottakAvSed);
+        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
         assertThat(periode.fom).isEqualTo(YearMonth.from(fom));
         assertThat(periode.tom).isEqualTo(YearMonth.from(fom.plusYears(2)));
@@ -158,7 +158,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = null;
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForYtelser(fom, tom, behandlingAvSøknad);
+        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, behandlingAvSøknad);
 
         assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder)));
         assertThat(periode.tom).isEqualTo(YearMonth.from(fom.plusYears(1)));

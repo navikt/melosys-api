@@ -35,10 +35,10 @@ public class RegisteropplysningerPeriodeFactory {
             : hentPeriodeForMedlemskapMottakSed(fom, tom);
     }
 
-    Periode hentPeriodeForYtelser(LocalDate fom, LocalDate tom, Behandling behandling) {
+    Periode hentPeriodeForInntekt(LocalDate fom, LocalDate tom, Behandling behandling) {
         return behandling.erBehandlingAvSøknad()
-            ? hentPeriodeForYtelserBehandlingSøknad(fom, tom)
-            : hentPeriodeForYtelserMottakSed(fom, tom);
+            ? hentPeriodeForInntektBehandlingSøknad(fom, tom)
+            : hentPeriodeForInntektMottakSed(fom, tom);
     }
 
     private DatoPeriode hentPeriodeForArbeidsforholdBehandlingSøknad(LocalDate fom, LocalDate tom) {
@@ -79,7 +79,7 @@ public class RegisteropplysningerPeriodeFactory {
         return new DatoPeriode(fomDato, tomDato);
     }
 
-    private Periode hentPeriodeForYtelserBehandlingSøknad(LocalDate fom, LocalDate tom) {
+    private Periode hentPeriodeForInntektBehandlingSøknad(LocalDate fom, LocalDate tom) {
         YearMonth fomMnd;
         YearMonth tomMnd;
 
@@ -101,7 +101,7 @@ public class RegisteropplysningerPeriodeFactory {
         return new Periode(fomMnd, tomMnd);
     }
 
-    private Periode hentPeriodeForYtelserMottakSed(LocalDate fom, LocalDate tom) {
+    private Periode hentPeriodeForInntektMottakSed(LocalDate fom, LocalDate tom) {
         YearMonth fomMnd;
         YearMonth tomMnd;
 
