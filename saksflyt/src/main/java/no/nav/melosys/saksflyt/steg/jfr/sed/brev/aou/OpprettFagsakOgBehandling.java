@@ -62,7 +62,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             .medInitierendeJournalpostId(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID))
             .build());
 
-        Behandling behandling = fagsak.getAktivBehandling();
+        Behandling behandling = fagsak.hentAktivBehandling();
         log.info("Fagsak {} opprettet med behandling {}", fagsak.getSaksnummer(), behandling.getId());
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(behandling);

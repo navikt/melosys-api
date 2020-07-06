@@ -331,7 +331,7 @@ public class FagsakService {
     }
 
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) throws FunksjonellException, TekniskException {
-        avsluttFagsakOgBehandling(fagsak, fagsak.getAktivBehandling(), saksstatus);
+        avsluttFagsakOgBehandling(fagsak, fagsak.hentAktivBehandling(), saksstatus);
     }
 
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Behandling behandling, Saksstatuser saksstatus) throws FunksjonellException {

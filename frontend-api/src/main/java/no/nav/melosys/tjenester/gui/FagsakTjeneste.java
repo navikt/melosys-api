@@ -139,7 +139,7 @@ public class FagsakTjeneste {
     public ResponseEntity avsluttSakManuelt(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
-        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.getAktivBehandling());
+        fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.hentAktivBehandling());
 
         return ResponseEntity.noContent().build();
     }

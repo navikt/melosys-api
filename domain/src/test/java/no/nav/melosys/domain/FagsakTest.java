@@ -34,7 +34,7 @@ public class FagsakTest {
         behandlinger.add(b3);
         fagsak.setBehandlinger(behandlinger);
 
-        Behandling aktivBehandling = fagsak.getAktivBehandling();
+        Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
         assertThat(aktivBehandling).isEqualTo(b2);
     }
@@ -114,7 +114,7 @@ public class FagsakTest {
         behandlinger.add(b2);
         fagsak.setBehandlinger(behandlinger);
 
-        Behandling aktivBehandling = fagsak.getAktivBehandling();
+        Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
         assertThat(aktivBehandling).isNull();
     }
@@ -133,7 +133,7 @@ public class FagsakTest {
         behandlinger.add(b2);
         fagsak.setBehandlinger(behandlinger);
 
-        fagsak.getAktivBehandling();
+        fagsak.hentAktivBehandling();
     }
 
     @Test

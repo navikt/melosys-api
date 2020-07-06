@@ -40,7 +40,7 @@ public class BehandlingsnotatService {
 
     @Transactional
     public Behandlingsnotat opprettNotat(String saksnummer, String tekst) throws FunksjonellException, TekniskException {
-        Behandling behandling = Optional.ofNullable(fagsakService.hentFagsak(saksnummer).getAktivBehandling())
+        Behandling behandling = Optional.ofNullable(fagsakService.hentFagsak(saksnummer).hentAktivBehandling())
             .orElseThrow(() -> new FunksjonellException("Fagsak " + saksnummer + " har ingen aktive behandlinger"));
 
         Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
