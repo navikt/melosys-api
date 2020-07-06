@@ -16,7 +16,6 @@ import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
@@ -131,7 +130,8 @@ public class SedDataBygger {
         return arbeidssteder;
     }
 
-    private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag)
+        throws IkkeFunnetException, TekniskException {
         Collection<AvklartVirksomhet> avklarteVirksomheter = new ArrayList<>();
         avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere());
         avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter());
@@ -141,8 +141,9 @@ public class SedDataBygger {
             .collect(Collectors.toList());
     }
 
-    private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Collection<AvklartVirksomhet> avklarteSelvstendigeVirksomheter = new ArrayList();
+    private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad)
+        throws IkkeFunnetException, TekniskException {
+        Collection<AvklartVirksomhet> avklarteSelvstendigeVirksomheter = new ArrayList<>();
         avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige());
         avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
@@ -347,15 +348,6 @@ public class SedDataBygger {
         familieMedlem.setEtternavn(navn[1]);
         familieMedlem.setRelasjon(f.familierelasjon == Familierelasjon.FARA ? "FAR" : "MOR");
         return familieMedlem;
-    }
-
-    private static Virksomhet tilUtenlandsVirksomhetDto(AvklartVirksomhet uVirksomhet) {
-        Virksomhet virksomhet = new Virksomhet();
-        virksomhet.setNavn(uVirksomhet.navn);
-        virksomhet.setOrgnr(uVirksomhet.orgnr);
-        virksomhet.setType("registrering");
-        virksomhet.setAdresse(fraStrukturertAdresse((StrukturertAdresse) uVirksomhet.adresse));
-        return virksomhet;
     }
 
     private static Arbeidssted lagTomtArbeidssted(String landkode) {
