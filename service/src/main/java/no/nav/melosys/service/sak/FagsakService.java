@@ -330,14 +330,22 @@ public class FagsakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) throws FunksjonellException, TekniskException {
-        avsluttFagsakOgBehandling(fagsak, fagsak.hentAktivBehandling(), saksstatus);
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus)
+        throws FunksjonellException, TekniskException {
+        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+        if (aktivBehandling == null) {
+            throw new FunksjonellException("Fagsak " + fagsak.getSaksnummer() + " har ingen aktiv behandling");
+        } else {
+            avsluttFagsakOgBehandling(fagsak, aktivBehandling, saksstatus);
+        }
     }
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Behandling behandling, Saksstatuser saksstatus) throws FunksjonellException {
-
+    public void avsluttFagsakOgBehandling(Fagsak fagsak,
+                                          Behandling behandling,
+                                          Saksstatuser saksstatus) throws FunksjonellException {
         if (!behandling.getFagsak().getSaksnummer().equals(fagsak.getSaksnummer())) {
-            throw new FunksjonellException("Behandling " + behandling.getId() + " tilhører ikke fagsak " + fagsak.getSaksnummer());
+            throw new FunksjonellException("Behandling " + behandling.getId()
+                + " tilhører ikke fagsak " + fagsak.getSaksnummer());
         }
         oppdaterStatus(fagsak, saksstatus);
         behandlingService.avsluttBehandling(behandling.getId());

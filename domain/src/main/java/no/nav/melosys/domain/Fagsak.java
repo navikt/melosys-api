@@ -87,7 +87,7 @@ public class Fagsak extends RegistreringsInfo {
         List<Behandling> behandlingListe = getBehandlinger().stream()
             .filter(Behandling::erAktiv).collect(Collectors.toList());
         if (behandlingListe.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en aktive behandling for sak " + saksnummer);
+            throw new TekniskException("Det finnes mer enn en aktiv behandling for sak " + saksnummer);
         } else if (behandlingListe.size() == 1) {
             return behandlingListe.get(0);
         } else {
