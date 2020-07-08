@@ -64,7 +64,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
                             dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
         brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
-        brevData.arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
+        brevData.arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
 
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
         brevData.anmodningsperioder = anmodningsperioder;

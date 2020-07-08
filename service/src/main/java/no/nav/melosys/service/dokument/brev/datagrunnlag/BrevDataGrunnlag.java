@@ -18,7 +18,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
 
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final BostedGrunnlag bostedGrunnlag;
-    private final ArbeidsstedGrunnlag arbeidssteder;
+    private final ArbeidsstedGrunnlag arbeidsstedGrunnlag;
 
     public BrevDataGrunnlag(Behandling behandling,
                             KodeverkService kodeverkService,
@@ -29,7 +29,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService, kodeverkService);
         this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, getPerson(), kodeverkService);
-        this.arbeidssteder = new ArbeidsstedGrunnlag(behandling, behandlingsgrunnlagData, getAvklarteVirksomheterGrunnlag(), avklartefaktaService);
+        this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(behandling, behandlingsgrunnlagData, getAvklarteVirksomheterGrunnlag(), avklartefaktaService);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         return bostedGrunnlag;
     }
 
-    public ArbeidsstedGrunnlag getArbeidssteder() {
-        return arbeidssteder;
+    public ArbeidsstedGrunnlag getArbeidsstedGrunnlag() {
+        return arbeidsstedGrunnlag;
     }
 }
