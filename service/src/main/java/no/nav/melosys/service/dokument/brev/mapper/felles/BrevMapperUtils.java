@@ -1,10 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
-import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang.WordUtils;
 
-import java.time.*;
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -49,10 +49,5 @@ public final class BrevMapperUtils {
         } catch (DatatypeConfigurationException e) {
             throw new IllegalStateException("Feil ved konvertering av Instant til XmlGregorianCalendar", e);
         }
-    }
-
-    public static List<String> brekkTekstTilListe(String tekst, int maksLengde) {
-        String tekstMedLinjeskift = WordUtils.wrap(tekst, maksLengde);
-        return List.of(tekstMedLinjeskift.split(SystemUtils.LINE_SEPARATOR));
     }
 }
