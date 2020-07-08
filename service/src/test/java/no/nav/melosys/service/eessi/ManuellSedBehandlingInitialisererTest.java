@@ -121,7 +121,7 @@ public class ManuellSedBehandlingInitialisererTest {
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A004);
 
         Fagsak fagsak = hentFagsak();
-        fagsak.getAktivBehandling().setStatus(Behandlingsstatus.AVSLUTTET);
+        fagsak.hentAktivBehandling().setStatus(Behandlingsstatus.AVSLUTTET);
         when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
 
         manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);

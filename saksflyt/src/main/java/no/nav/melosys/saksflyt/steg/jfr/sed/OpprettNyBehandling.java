@@ -81,7 +81,7 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
     }
 
     private void avsluttTidligereBehandling(Fagsak fagsak) throws TekniskException, FunksjonellException {
-        Behandling aktivBehandling = fagsak.getAktivBehandling();
+        Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
         if (aktivBehandling != null) {
             behandlingService.avsluttBehandling(aktivBehandling.getId());

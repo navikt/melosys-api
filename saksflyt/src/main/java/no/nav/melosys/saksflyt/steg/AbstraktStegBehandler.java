@@ -17,14 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 public abstract class AbstraktStegBehandler implements StegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(AbstraktStegBehandler.class);
-
-    private Predicate<Prosessinstans> inngangsvilkår;
-
-    private Map<Feilkategori, UnntakBehandler> unntakBehandlere;
-
     private static final String PID_MELDING = "{}: {}";
+
+    private final Predicate<Prosessinstans> inngangsvilkår;
+    private final Map<Feilkategori, UnntakBehandler> unntakBehandlere;
 
     protected abstract ProsessSteg inngangsSteg();
 
@@ -74,14 +71,14 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
             String feilmelding = "TekniskException ";
             log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, e);
-        } catch (RuntimeException e) {
-            String feilmelding = "RuntimeException ";
+        } catch (Exception e) {
+            String feilmelding = "Exception ";
             log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
-        } catch (MelosysException e) {
-            String feilmelding = "Melosysexception ";
-            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
-            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
+        } catch (Throwable t) { //NOSONAR
+            String feilmelding = "Throwable ";
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, t);
+            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, t);
         }
     }
 

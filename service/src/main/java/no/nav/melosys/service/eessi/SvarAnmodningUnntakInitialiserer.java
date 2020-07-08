@@ -72,7 +72,7 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
         Fagsak fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)
             .orElseThrow(() -> new TekniskException("Finner ikke fagsak fra gsakSaksnummer " + gsakSaksnummer));
 
-        return fagsak.getAktivBehandling();
+        return fagsak.hentAktivBehandling();
     }
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {

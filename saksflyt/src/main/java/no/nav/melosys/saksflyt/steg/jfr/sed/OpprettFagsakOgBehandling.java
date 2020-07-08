@@ -62,7 +62,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
 
-        Behandling behandling = fagsak.getAktivBehandling();
+        Behandling behandling = fagsak.hentAktivBehandling();
         prosessinstans.setBehandling(behandling);
 
         log.info("Fagsak {} opprettet med behandling {} for RINA-sak {}",

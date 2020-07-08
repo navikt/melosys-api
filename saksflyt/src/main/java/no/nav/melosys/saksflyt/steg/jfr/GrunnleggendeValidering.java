@@ -69,7 +69,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
             }
 
             if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
-                Behandling aktivBehandling = fagsak.getAktivBehandling();
+                Behandling aktivBehandling = fagsak.hentAktivBehandling();
                 Behandling tidligsteInaktiveBehandling = fagsak.getTidligsteInaktiveBehandling();
                 if (aktivBehandling != null) {
                     throw new FunksjonellException("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling");

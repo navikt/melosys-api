@@ -289,7 +289,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         instans.avsluttSakManuelt("123");
-        verify(fagsakService).avsluttFagsakOgBehandlingValiderBehandlingstype(eq(fagsak), eq(fagsak.getAktivBehandling()));
+        verify(fagsakService).avsluttFagsakOgBehandlingValiderBehandlingstype(eq(fagsak), eq(fagsak.hentAktivBehandling()));
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {

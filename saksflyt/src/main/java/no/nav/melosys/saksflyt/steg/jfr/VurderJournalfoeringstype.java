@@ -82,7 +82,7 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
         Behandlingstyper nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
 
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        Behandling aktivBehandling = fagsak.getAktivBehandling();
+        Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
         if (Behandlingstyper.ENDRET_PERIODE.equals(nyBehandlingstype) && aktivBehandling != null) {
             throw new FunksjonellException("Man kan ikke endre lovvalgsperiode på en fagsak med en aktiv behandling");

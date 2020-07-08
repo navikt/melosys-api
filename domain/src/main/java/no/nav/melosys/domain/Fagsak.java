@@ -83,11 +83,11 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Returnerer den aktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
      */
-    public Behandling getAktivBehandling() throws TekniskException {
+    public Behandling hentAktivBehandling() throws TekniskException {
         List<Behandling> behandlingListe = getBehandlinger().stream()
             .filter(Behandling::erAktiv).collect(Collectors.toList());
         if (behandlingListe.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en aktive behandling for sak " + saksnummer);
+            throw new TekniskException("Det finnes mer enn en aktiv behandling for sak " + saksnummer);
         } else if (behandlingListe.size() == 1) {
             return behandlingListe.get(0);
         } else {
@@ -106,7 +106,7 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     public Behandling hentSistAktiveBehandling() throws TekniskException, FunksjonellException {
-        return Optional.ofNullable(getAktivBehandling()).orElse(getSistOppdaterteBehandling());
+        return Optional.ofNullable(hentAktivBehandling()).orElse(getSistOppdaterteBehandling());
     }
 
     public Aktoer hentBruker() throws TekniskException {

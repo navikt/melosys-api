@@ -75,7 +75,7 @@ public class Oppgaveplukker {
 
     private void oppdaterBehandlingsstatus(String saksnummer) throws IkkeFunnetException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        Behandling behandling = fagsak.getAktivBehandling();
+        Behandling behandling = fagsak.hentAktivBehandling();
         if (behandling != null && (behandling.getStatus() == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.getStatus() == Behandlingsstatus.OPPRETTET)) {
             behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
             behandlingService.lagre(behandling);

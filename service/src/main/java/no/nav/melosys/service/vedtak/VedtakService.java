@@ -67,16 +67,15 @@ public class VedtakService {
         this.vedtakKontrollService = vedtakKontrollService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
         fattVedtak(behandlingID, behandlingsresultattype, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType,
                            String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstypeFattVedtak(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -86,6 +85,7 @@ public class VedtakService {
             validerInnvilgelse(vedtakstype, behandling, behandlingsresultat);
         }
 
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandlingID, mottakerinstitusjoner, behandlingsresultat);
 
         if (prosessinstansService.harAktivVedtakInstans(behandlingID)) {

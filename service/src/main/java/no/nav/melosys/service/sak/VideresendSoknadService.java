@@ -46,7 +46,7 @@ public class VideresendSoknadService {
     public void henleggOgVideresend(String saksnummer, String mottakerinstitusjon) throws MelosysException {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
-        final long behandlingId = fagsak.getAktivBehandling().getId();
+        final long behandlingId = fagsak.hentAktivBehandling().getId();
         final Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingId);
 

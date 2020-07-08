@@ -156,7 +156,7 @@ public class RegisteropplysningerRequest {
         }
 
         public static class SaksopplysningTyperBuilder {
-            private Set<SaksopplysningType> opplysningstyper = new HashSet<>();
+            private final Set<SaksopplysningType> opplysningstyper = new HashSet<>();
 
             SaksopplysningTyperBuilder() {
             }

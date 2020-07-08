@@ -54,7 +54,7 @@ public class SettVurderDokument extends AbstraktStegBehandler {
             return;
         }
 
-        Behandling behandling = fagsak.getAktivBehandling();
+        Behandling behandling = fagsak.hentAktivBehandling();
         boolean ingenVurdering = prosessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class);
         if (behandling != null && !ingenVurdering) {
             behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);

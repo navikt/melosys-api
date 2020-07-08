@@ -81,14 +81,16 @@ public class DokumentService {
         BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
         BrevData brevData = bygger.lag(brevdataRessurser, SubjectHandler.getInstance().getUserID());
 
-        Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ? brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
-        List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);
+        Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ?
+            brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
+        List<Aktoer> avklarteMottakere =
+            brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);
 
-        if (mottakere.isEmpty()) {
+        if (mottakerRolle != Aktoersroller.ARBEIDSGIVER && avklarteMottakere.isEmpty()) {
             log.info("Ingen mottaker funnet for {}, {}", produserbartDokument, brevbestillingDto);
             throw new FunksjonellException("Ingen mottaker funnet for sak " + behandling.getFagsak().getSaksnummer());
         } else {
-            return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, mottakere.get(0), behandling, brevData));
+            return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, avklarteMottakere.get(0), behandling, brevData));
         }
     }
 
