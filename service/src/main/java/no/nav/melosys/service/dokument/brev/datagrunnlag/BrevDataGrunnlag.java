@@ -15,7 +15,6 @@ public class BrevDataGrunnlag implements DataGrunnlag {
     private final Behandling behandling;
     private final BehandlingsgrunnlagData behandlingsgrunnlagData;
     private final PersonDokument person;
-
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final BostedGrunnlag bostedGrunnlag;
     private final ArbeidsstedGrunnlag arbeidsstedGrunnlag;
@@ -29,7 +28,11 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService, kodeverkService);
         this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, getPerson(), kodeverkService);
-        this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(behandling, behandlingsgrunnlagData, getAvklarteVirksomheterGrunnlag(), avklartefaktaService);
+        this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
+            avklartefaktaService.hentAlleMaritimeAvklartfakta(behandling.getId()),
+            getAvklarteVirksomheterGrunnlag(),
+            behandlingsgrunnlagData
+        );
     }
 
     @Override
