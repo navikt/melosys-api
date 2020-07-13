@@ -86,7 +86,7 @@ public class VedtakService {
         }
 
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
-        mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandlingID, mottakerinstitusjoner, behandlingsresultat);
+        mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, mottakerinstitusjoner, behandlingsresultat);
 
         if (prosessinstansService.harAktivVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
@@ -117,11 +117,11 @@ public class VedtakService {
         kontrollerFattVedtak(behandling.getId(), vedtakstype);
     }
 
-    private Set<String> validerOgAvklarMottakerInstitusjoner(long behandlingID,
-                                                              Set<String> mottakerinstitusjoner,
-                                                              Behandlingsresultat behandlingsresultat) throws MelosysException {
-        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
-        if (skalSendesSed(behandlingsresultat, landkoder)) {
+    private Set<String> validerOgAvklarMottakerInstitusjoner(Behandling behandling,
+                                                             Set<String> mottakerinstitusjoner,
+                                                             Behandlingsresultat behandlingsresultat) throws MelosysException {
+        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
+        if (mottakereTrenges(behandling) && skalSedSendes(behandlingsresultat, landkoder)) {
             mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
                 mottakerinstitusjoner,
                 landkoder,
@@ -131,6 +131,20 @@ public class VedtakService {
             mottakerinstitusjoner = Collections.emptySet();
         }
         return mottakerinstitusjoner;
+    }
+
+    private static boolean mottakereTrenges(Behandling behandling) {
+        return !behandling.erNorgeUtpekt();
+    }
+
+    private static boolean skalSedSendes(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {
+        if (behandlingsresultat.erAvslag()) {
+            return false;
+        }
+        if (landkoder.isEmpty()) {
+            return false;
+        }
+        return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
     }
 
     private void validerBehandlingstypeFattVedtak(Behandling behandling) throws FunksjonellException {
@@ -145,16 +159,6 @@ public class VedtakService {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
                 feilValideringer.stream().map(Kodeverk::getKode).collect(Collectors.toList()));
         }
-    }
-
-    private static boolean skalSendesSed(Behandlingsresultat behandlingsresultat, Collection<Landkoder> landkoder) {
-        if (behandlingsresultat.erAvslag()) {
-            return false;
-        }
-        if (landkoder.isEmpty()) {
-            return false;
-        }
-        return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
     }
 
     private static BucType avklarBucType(Behandlingsresultat behandlingsresultat) {
