@@ -49,7 +49,7 @@ public class BrevDataGrunnlagTest {
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         AvklartMaritimtArbeid maritimtArbeid = lagAvklartMaritimtArbeid();
-        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong()))
+        when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
             .thenReturn(Collections.singletonMap("Dunfjæder", maritimtArbeid));
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
@@ -155,7 +155,7 @@ public class BrevDataGrunnlagTest {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
-        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.emptyMap());
+        when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong())).thenReturn(Collections.emptyMap());
         dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
 
         Collection<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();

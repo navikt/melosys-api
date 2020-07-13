@@ -29,7 +29,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService, kodeverkService);
         this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, getPerson(), kodeverkService);
         this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
-            avklartefaktaService.hentAlleMaritimeAvklartfakta(behandling.getId()),
+            avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),
             getAvklarteVirksomheterGrunnlag(),
             behandlingsgrunnlagData
         );

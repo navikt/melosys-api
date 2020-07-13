@@ -32,7 +32,7 @@ public class AvklartefaktaService {
     private static final String VALGT_FAKTA = "TRUE";
     private static final String FANT_IKKE_RESULTAT = "Fant ikke behandlingsresultat for behandlingsid: ";
 
-    private static final EnumSet<Avklartefaktatyper> maritimeFaktatyper = EnumSet.of(
+    private static final EnumSet<Avklartefaktatyper> MARITIME_FAKTATYPER = EnumSet.of(
         Avklartefaktatyper.SOKKEL_ELLER_SKIP,
         Avklartefaktatyper.ARBEIDSLAND);
 
@@ -106,9 +106,9 @@ public class AvklartefaktaService {
             .collect(Collectors.toSet());
     }
 
-    public Map<String, AvklartMaritimtArbeid> hentAlleMaritimeAvklartfakta(long behandlingsid) {
+    public Map<String, AvklartMaritimtArbeid> hentMaritimeAvklartfaktaEtterSubjekt(long behandlingsid) {
         Set<Avklartefakta> maritimeAvklartefakta =
-            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(behandlingsid, maritimeFaktatyper);
+            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(behandlingsid, MARITIME_FAKTATYPER);
 
         Map<String, List<Avklartefakta>> maritimtArbeidGruppert = grupperForSubjekt(maritimeAvklartefakta);
         return maritimtArbeidGruppert.entrySet().stream()

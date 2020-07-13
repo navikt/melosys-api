@@ -196,7 +196,7 @@ public class AvklartefaktaServiceTest {
     public void hentAvklartMaritimeAvklartfakta_medAvklartSokkel_girAvklartMaritimtArbeid() {
         Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "GB");
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
-        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentAlleMaritimeAvklartfakta(1L);
+        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(1L);
         assertThat(avklarteMaritimeArbeid).hasSize(1);
 
         avklarteMaritimeArbeid.values().forEach(maritimtArbeid -> {
@@ -212,7 +212,7 @@ public class AvklartefaktaServiceTest {
         alleMaritimeFakta.addAll(lagAlleMaritimeAvklartefakta("Seven Kestrel", "SKIP", "GB"));
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
 
-        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentAlleMaritimeAvklartfakta(1L);
+        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(1L);
         assertThat(avklarteMaritimeArbeid).hasSize(2);
     }
 
