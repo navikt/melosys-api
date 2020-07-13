@@ -41,12 +41,16 @@ public class BrevDataGrunnlagTest {
     @Mock
     private AvklartefaktaService avklartefaktaService;
 
+    private Behandling behandling;
     private PersonDokument person;
     private SoeknadDokument søknad;
     private BrevDataGrunnlag dataGrunnlag;
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        AvklartMaritimtArbeid maritimtArbeid = lagAvklartMaritimtArbeid();
+        when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
+            .thenReturn(Collections.singletonMap("Dunfjæder", maritimtArbeid));
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
         Bostedsadresse boAdresseFraRegister = new Bostedsadresse();
@@ -60,7 +64,7 @@ public class BrevDataGrunnlagTest {
         person.bostedsadresse = boAdresseFraRegister;
 
         søknad = new SoeknadDokument();
-        Behandling behandling = lagBehandling(søknad, person);
+        behandling = lagBehandling(søknad, person);
 
         dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
     }
@@ -118,17 +122,14 @@ public class BrevDataGrunnlagTest {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
-        AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
-        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
-
-        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
         assertThat(arbeidssted.getForetakNavn()).isEqualTo(maritimtArbeidISøknad.foretakNavn);
         assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);
         assertThat(arbeidssted.getIdnummer()).isEqualTo(maritimtArbeidISøknad.foretakOrgnr);
-        assertThat(arbeidssted.getOmråde()).isEqualTo(avklartMaritimtArbeid.getLand());
+        assertThat(arbeidssted.getOmråde()).isEqualTo(lagAvklartMaritimtArbeid().getLand());
         assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
     }
 
@@ -139,10 +140,7 @@ public class BrevDataGrunnlagTest {
         maritimtArbeidISøknad.foretakNavn = null;
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
-        AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
-        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.singletonMap("Dunfjæder", avklartMaritimtArbeid));
-
-        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
+        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
@@ -153,13 +151,14 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() {
+    public void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() throws TekniskException {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
-        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(Collections.emptyMap());
+        when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong())).thenReturn(Collections.emptyMap());
+        dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
 
-        Collection<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
+        Collection<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
         assertThat(arbeidssteder).isEmpty();
     }
 }

@@ -251,7 +251,7 @@ public class SedDataByggerTest {
         AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("navn", Collections.singletonList(maritimtFakta));
         alleAvklarteMaritimeArbeid.put("enhet", avklartMaritimtArbeid);
 
-        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(alleAvklarteMaritimeArbeid);
+        when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong())).thenReturn(alleAvklarteMaritimeArbeid);
 
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 

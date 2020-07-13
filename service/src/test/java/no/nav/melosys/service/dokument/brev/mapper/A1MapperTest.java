@@ -201,7 +201,7 @@ public class A1MapperTest {
 
         assertThat(a1.getFysiskArbeidsstedAdresseListe().getAdresse())
             .extracting("adresselinje1")
-            .contains("Sverige, Danmark");
+            .contains("Danmark, Sverige");
 
         String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
