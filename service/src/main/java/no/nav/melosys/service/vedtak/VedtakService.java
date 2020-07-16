@@ -78,6 +78,8 @@ public class VedtakService {
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstypeFattVedtak(behandling);
+        
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
@@ -85,7 +87,6 @@ public class VedtakService {
             validerInnvilgelse(vedtakstype, behandling, behandlingsresultat);
         }
 
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, mottakerinstitusjoner, behandlingsresultat);
 
         if (prosessinstansService.harAktivVedtakInstans(behandlingID)) {
