@@ -3,11 +3,17 @@ package no.nav.melosys.domain.eessi.sed;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 
 public class Arbeidssted {
-
     private String navn;
     private Adresse adresse;
     private boolean fysisk;
     private String hjemmebase;
+
+    public static Arbeidssted lagTomtArbeidssted(String landkode) {
+        Arbeidssted arbeidssted = new Arbeidssted();
+        arbeidssted.setNavn(Adresse.INGEN_FAST_ADRESSE);
+        arbeidssted.setAdresse(Adresse.lagIkkeFastAdresse(landkode));
+        return arbeidssted;
+    }
 
     public ArbeidUtland tilArbeidUtland() {
         ArbeidUtland arbeidUtland = new ArbeidUtland();

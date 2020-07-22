@@ -34,7 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.dokument.sed.bygger.SedDataBygger.INGEN_FAST_ADRESSE;
+import static no.nav.melosys.domain.eessi.sed.Adresse.INGEN_FAST_ADRESSE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
@@ -358,7 +358,7 @@ public class SedDataByggerTest {
         SedDataDto sedData = dataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         lagUtkastAssertions(sedData);
-        assertThat(sedData.getBostedsadresse()).isEqualToComparingFieldByField(new Adresse());
+        assertThat(sedData.getBostedsadresse()).isEqualToComparingFieldByField(Adresse.lagTomAdresse());
     }
 
     @Test
