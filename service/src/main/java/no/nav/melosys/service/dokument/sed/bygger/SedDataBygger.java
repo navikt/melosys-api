@@ -48,22 +48,29 @@ public class SedDataBygger {
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
                           Behandlingsresultat behandlingsresultat,
                           MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
-            .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
-        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
-        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
-        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
-        return sedDataDto;
+        return lagSedDataDto(dataGrunnlag, behandlingsresultat, medlemsperiodeType, false);
     }
 
-    public SedDataDto lagUtkast(SedDataGrunnlag sedDataGrunnlag,
+    public SedDataDto lagUtkast(SedDataGrunnlag dataGrunnlag,
                                 Behandlingsresultat behandlingsresultat,
                                 MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
-        SedDataDto sedDataDto = lagPersonopplysninger(sedDataGrunnlag);
-        sedDataDto.setBostedsadresse(finnAdresse(sedDataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::lagTomAdresse));
-        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
-        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(sedDataGrunnlag.getBehandling()));
+        return lagSedDataDto(dataGrunnlag, behandlingsresultat, medlemsperiodeType, true);
+    }
+
+    private SedDataDto lagSedDataDto(SedDataGrunnlag dataGrunnlag,
+                                     Behandlingsresultat behandlingsresultat,
+                                     MedlemsperiodeType medlemsperiodeType,
+                                     boolean erUtkast) throws FunksjonellException, TekniskException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        if (erUtkast) {
+            sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::lagTomAdresse));
+            sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        } else {
+            sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
+                .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
+            sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
+        }
+        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
