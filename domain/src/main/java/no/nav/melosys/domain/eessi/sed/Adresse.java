@@ -38,17 +38,14 @@ public class Adresse {
         return new Adresse();
     }
 
-    public static Adresse lagAdresse(Adressetype adressetype, StrukturertAdresse bostedsadresse) {
-        if (bostedsadresse == null) {
+    public static Adresse lagAdresse(Adressetype adressetype, StrukturertAdresse strukturertAdresse) {
+        if (strukturertAdresse == null) {
             return Adresse.lagTomAdresse();
         }
 
-        Adresse adresse = new Adresse();
+        Adresse adresse = fraStrukturertAdresse(strukturertAdresse);
         adresse.setAdressetype(adressetype);
-        adresse.setPoststed(bostedsadresse.poststed);
-        adresse.setPostnr(bostedsadresse.postnummer);
-        adresse.setLand(tilIso3(bostedsadresse.landkode));
-        adresse.setGateadresse(lagGateadresse(bostedsadresse.gatenavn, bostedsadresse.husnummer));
+        adresse.setLand(tilIso3(strukturertAdresse.landkode));
         return adresse;
     }
 
@@ -83,7 +80,7 @@ public class Adresse {
         return adressetype;
     }
 
-    public void setAdressetype(Adressetype adressetype) {
+    private void setAdressetype(Adressetype adressetype) {
         this.adressetype = adressetype;
     }
 
@@ -91,7 +88,7 @@ public class Adresse {
         return gateadresse;
     }
 
-    public void setGateadresse(String gateadresse) {
+    private void setGateadresse(String gateadresse) {
         this.gateadresse = gateadresse;
     }
 
@@ -99,23 +96,23 @@ public class Adresse {
         return postnr;
     }
 
-    public void setPostnr(String postnr) {
-        this.postnr = postnr;
+    private void setPostnr(String postnr) {
+        this.postnr = StringUtils.isBlank(postnr) ? IKKE_TILGJENGELIG : postnr;
     }
 
     public String getPoststed() {
         return poststed;
     }
 
-    public void setPoststed(String poststed) {
-        this.poststed = poststed;
+    private void setPoststed(String poststed) {
+        this.poststed = StringUtils.isBlank(poststed) ? IKKE_TILGJENGELIG : poststed;
     }
 
     public String getRegion() {
         return region;
     }
 
-    public void setRegion(String region) {
+    private void setRegion(String region) {
         this.region = region;
     }
 
@@ -123,7 +120,7 @@ public class Adresse {
         return land;
     }
 
-    public void setLand(String land) {
+    private void setLand(String land) {
         this.land = land;
     }
 }
