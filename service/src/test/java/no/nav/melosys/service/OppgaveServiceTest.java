@@ -142,12 +142,7 @@ public class OppgaveServiceTest {
     @Test
     public void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() throws MelosysException {
         Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
-        assertThat(oppgave.erBehandling()).isEqualTo(true);
-    }
-
-    @Test(expected = TekniskException.class)
-    public void hentOppgaveForFagsaksnummer_medOppgaveSomIkkeFinnes_forventException() throws MelosysException {
-        oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12346");
+        assertThat(oppgave.erBehandling()).isTrue();
     }
 
     @Test
