@@ -130,7 +130,7 @@ public class SedDataBygger {
             .map(Landkoder::getKode)
             .distinct()
             .filter(not(arbeidsland::contains))
-            .map(Arbeidssted::lagTomtArbeidssted)
+            .map(Arbeidssted::lagIkkeFastArbeidssted)
             .forEach(arbeidssteder::add);
 
         return arbeidssteder;

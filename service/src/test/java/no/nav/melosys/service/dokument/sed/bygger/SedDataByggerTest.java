@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.eessi.sed.Adresse.IKKE_TILGJENGELIG;
 import static no.nav.melosys.domain.eessi.sed.Adresse.INGEN_FAST_ADRESSE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -184,7 +185,7 @@ public class SedDataByggerTest {
 
         SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
-        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo("N/A");
+        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo(IKKE_TILGJENGELIG);
     }
 
     @Test
@@ -202,7 +203,7 @@ public class SedDataByggerTest {
 
         SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
-        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo("N/A");
+        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo(IKKE_TILGJENGELIG);
     }
 
     @Test
@@ -220,7 +221,7 @@ public class SedDataByggerTest {
 
         SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
-        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo("N/A");
+        assertThat(sedData.getBostedsadresse()).extracting(Adresse::getGateadresse).isEqualTo(IKKE_TILGJENGELIG);
     }
 
     @Test
@@ -257,7 +258,7 @@ public class SedDataByggerTest {
         assertThat(sedData.getArbeidssteder())
             .extracting(Arbeidssted::getAdresse)
             .extracting(Adresse::getGateadresse)
-            .contains("N/A");
+            .contains(IKKE_TILGJENGELIG);
     }
 
     @Test

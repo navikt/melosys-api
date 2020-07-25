@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 public class Adresse {
-    static final String IKKE_TILGJENGELIG = "N/A";
+    public static final String IKKE_TILGJENGELIG = "N/A";
     public static final String INGEN_FAST_ADRESSE = "No fixed address";
 
     private Adressetype adressetype;
