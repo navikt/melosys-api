@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -22,11 +24,8 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TildelBehandlingsoppgaveTest {
-
     private static final String SAKSBEHANDLER = "Z998877";
-
     private static final String SAKSNUMMER = "MEL-1234";
-
     private static final String OPPGAVE_ID = "123123";
 
     @Rule
@@ -50,8 +49,9 @@ public class TildelBehandlingsoppgaveTest {
 
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId(OPPGAVE_ID);
+        Oppgave oppgave = oppgaveBuilder.build();
 
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(eq(SAKSNUMMER))).thenReturn(oppgaveBuilder.build());
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(eq(SAKSNUMMER))).thenReturn(Optional.of(oppgave));
     }
 
     @Test
@@ -59,7 +59,6 @@ public class TildelBehandlingsoppgaveTest {
         tildelBehandlingsoppgave.utførSteg(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-        verify(oppgaveService).hentOppgaveMedFagsaksnummer(eq(SAKSNUMMER));
         verify(oppgaveService).tildelOppgave(eq(OPPGAVE_ID), eq(SAKSBEHANDLER));
     }
 }
