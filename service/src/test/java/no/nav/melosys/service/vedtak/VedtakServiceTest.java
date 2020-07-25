@@ -191,7 +191,6 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService)
             .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anySet(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
@@ -205,7 +204,6 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        verify(eessiService, never()).landErEessiReady(anyString(), anyString());
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anySet(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
     }
 
