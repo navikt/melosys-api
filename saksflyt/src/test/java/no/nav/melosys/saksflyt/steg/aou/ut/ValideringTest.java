@@ -12,8 +12,8 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_OPPDATER_RESULTAT;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValideringTest {
@@ -39,20 +39,22 @@ public class ValideringTest {
     }
 
     @Test
-    public void utfoerSteg_feilProsessType() throws TekniskException {
+    public void utfoerSteg_feilProsessType() {
         p.setType(ProsessType.MOTTAK_SED);
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> agent.utfør(p))
+            .withMessageContaining("er ikke støttet");
     }
 
     @Test
-    public void utfoerSteg_manglerSaksbehandler_feiler() throws TekniskException {
+    public void utfoerSteg_manglerSaksbehandler_feiler() {
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
 
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> agent.utfør(p))
+            .withMessageContaining("SaksbehandlerID er ikke oppgitt");
     }
 }

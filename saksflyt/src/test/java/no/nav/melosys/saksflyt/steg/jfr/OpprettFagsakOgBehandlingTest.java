@@ -30,6 +30,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DOKUMENT_ID;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.JOURNALPOST_ID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -137,14 +138,14 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utfør_ukjentType_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_ukjentType_feiler() {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
 
-        agent.utfør(p);
-
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> agent.utfør(p))
+            .withMessageContaining("er ikke støttet");
     }
 }

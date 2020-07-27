@@ -64,7 +64,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         } else if (type == ProsessType.JFR_KNYTT) {
             prosessinstans.setSteg(JFR_SETT_VURDER_DOKUMENT);
         } else {
-            throw new TekniskException("Ukjent prosess type: " + type);
+            throw new TekniskException("Ukjent prosesstype: " + type);
         }
 
         log.info("Prosessinstans {} har ferdigstillt journalpost {}", prosessinstans.getId(), journalpostID);

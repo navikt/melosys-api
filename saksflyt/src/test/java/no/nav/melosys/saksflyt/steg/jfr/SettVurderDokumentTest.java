@@ -36,7 +36,6 @@ public class SettVurderDokumentTest {
 
     private SettVurderDokument agent;
 
-    private final static String SAKSNUMMER_FINNES_IKKE = "MELTEST-0";
     private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
     private final static String SAKSNUMMER_MED_BEHANDLING = "MELTEST-2";
 
@@ -106,18 +105,5 @@ public class SettVurderDokumentTest {
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_TILDEL_BEHANDLINGSOPPGAVE);
         verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
         assertThat(behandlingArgumentCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.VURDER_DOKUMENT);
-    }
-
-    @Test
-    public void utfør_ukjentSak_feiler() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_FINNES_IKKE);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
-        p.setData(ProsessDataKey.SKAL_TILORDNES, false);
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Det finnes ingen fagsak med saksnummer " + SAKSNUMMER_FINNES_IKKE);
     }
 }

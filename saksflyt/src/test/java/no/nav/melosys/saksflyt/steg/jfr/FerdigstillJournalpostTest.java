@@ -8,6 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,7 +40,7 @@ public class FerdigstillJournalpostTest {
 
         agent.utfør(p);
 
-        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
+        verify(joarkFasade).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_REGISTER_OPPL);
     }
 
@@ -50,7 +51,7 @@ public class FerdigstillJournalpostTest {
 
         agent.utfør(p);
 
-        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
+        verify(joarkFasade).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_REGISTER_OPPL);
     }
 
@@ -61,7 +62,7 @@ public class FerdigstillJournalpostTest {
 
         agent.utfør(p);
 
-        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
+        verify(joarkFasade).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_SETT_VURDER_DOKUMENT);
     }
 
@@ -73,7 +74,7 @@ public class FerdigstillJournalpostTest {
 
         agent.utfør(p);
 
-        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
+        verify(joarkFasade).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.REPLIKER_BEHANDLING);
     }
 
@@ -82,10 +83,11 @@ public class FerdigstillJournalpostTest {
         String journalpostID = "Journal_ID";
         Prosessinstans p = nyProsessinstans(null, journalpostID);
 
-        agent.utfør(p);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> agent.utfør(p))
+            .withMessageContaining("Ukjent prosesstype");
 
-        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        verify(joarkFasade).ferdigstillJournalføring(journalpostID);
     }
 
     private Prosessinstans nyProsessinstans(ProsessType prosessType, String journalpostID) {

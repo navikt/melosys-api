@@ -89,9 +89,7 @@ public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
-            log.error("Vedtaksbrev kan ikke sendes for behandlingsresultat {} i prosessinstans {}.",
-                behandlingsresultatType, prosessinstans.getId());
-            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+            throw new FunksjonellException("Vedtaksbrev kan ikke sendes for behandling " + behandling.getId());
         }
     }
 

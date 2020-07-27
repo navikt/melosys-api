@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.aou.ut;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -25,7 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -89,10 +90,11 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void utførNårBehandlingsresultatHarIngenLovvalgPeriode() throws FunksjonellException, TekniskException {
+    public void utførNårBehandlingsresultatHarIngenLovvalgPeriode() {
         behandlingsresultat.setAnmodningsperioder(new HashSet<>());
 
-        oppdaterMedl.utfør(prosessinstans);
-        assertEquals(ProsessSteg.FEILET_MASKINELT, prosessinstans.getSteg());
+        assertThatExceptionOfType(NoSuchElementException.class)
+            .isThrownBy(() -> oppdaterMedl.utfør(prosessinstans))
+            .withMessageContaining("Ingen anmodningsperioder finnes");
     }
 }

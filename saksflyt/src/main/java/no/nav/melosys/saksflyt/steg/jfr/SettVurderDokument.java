@@ -46,10 +46,6 @@ public class SettVurderDokument extends AbstraktStegBehandler {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        if (fagsak == null) {
-            throw new FunksjonellException("Det finnes ingen fagsak med saksnummer " + saksnummer);
-        }
-
         Behandling behandling = fagsak.hentAktivBehandling();
         boolean ingenVurdering = prosessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class);
         if (behandling != null && !ingenVurdering) {

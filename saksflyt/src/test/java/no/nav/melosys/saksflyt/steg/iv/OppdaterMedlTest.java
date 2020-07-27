@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.iv;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -25,9 +26,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_SEND_BREV;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -96,12 +97,13 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void utfør_behandlingsresultatHarIngenLovvalgPeriode_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_behandlingsresultatHarIngenLovvalgPeriode_feiler() throws FunksjonellException {
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        oppdaterMedl.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
+        assertThatExceptionOfType(NoSuchElementException.class)
+            .isThrownBy(() -> oppdaterMedl.utfør(prosessinstans))
+            .withMessageContaining("Ingen lovvalgsperiode finnes");
     }
 
     @Test

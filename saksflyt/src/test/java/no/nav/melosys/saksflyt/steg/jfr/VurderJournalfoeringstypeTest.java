@@ -21,6 +21,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -62,13 +63,12 @@ public class VurderJournalfoeringstypeTest {
     }
 
     @Test
-    public void ukjentProsesstype_Feiler() throws FunksjonellException, TekniskException {
+    public void ukjentProsesstype_Feiler() {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.IVERKSETT_VEDTAK);
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ukjent prosesstype: " + p.getType());
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> agent.utfør(p))
+            .withMessageContaining("Ukjent prosesstype");
     }
 
     @Test
@@ -120,12 +120,13 @@ public class VurderJournalfoeringstypeTest {
     }
 
     @Test
-    public void knyttTilFagsakMedEndretPeriodeMedAktivBehandling_kasterException() throws FunksjonellException, TekniskException {
+    public void knyttTilFagsakMedEndretPeriodeMedAktivBehandling_kasterException() {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> agent.utfør(p))
+            .withMessageContaining("Man kan ikke endre lovvalgsperiode");
     }
 }
