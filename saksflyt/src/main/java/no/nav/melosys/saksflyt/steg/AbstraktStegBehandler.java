@@ -1,87 +1,30 @@
 package no.nav.melosys.saksflyt.steg;
 
-import java.util.Map;
 import java.util.function.Predicate;
 
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.*;
-import no.nav.melosys.saksflyt.api.StegBehandler;
-import no.nav.melosys.saksflyt.feil.Feilkategori;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.impl.Utils;
-import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
-public abstract class AbstraktStegBehandler implements StegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(AbstraktStegBehandler.class);
-    private static final String PID_MELDING = "{}: {}";
+public abstract class AbstraktStegBehandler {
 
     private final Predicate<Prosessinstans> inngangsvilkår;
-    private final Map<Feilkategori, UnntakBehandler> unntakBehandlere;
 
     protected abstract ProsessSteg inngangsSteg();
 
-    /**
-     * Returnerer en Map som definerer unntakshåndtering for steget.
-     */
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
     public AbstraktStegBehandler() {
         inngangsvilkår = Utils.medSteg(inngangsSteg()).and(Utils.somIkkeSover);
-        unntakBehandlere = unntaksHåndtering();
     }
 
-    /**
-     * Kalles av subklasser for å håndtere evt. feilsituasjoner.
-     */
-    protected void håndterUnntak(Feilkategori kategori, Prosessinstans prosessinstans, String melding, Throwable e) {
-        UnntakBehandler ub = unntakBehandlere.get(kategori);
-        ub.behandleUnntak(prosessinstans, melding, e); // OK med NPE hvis ub er null
-    }
-
-    @Override
     public Predicate<Prosessinstans> inngangsvilkår() {
         return inngangsvilkår;
     }
 
-    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)
-    public void utførSteg(Prosessinstans prosessinstans) {
-        try {
-            utfør(prosessinstans);
-        } catch (SikkerhetsbegrensningException e) {
-            String feilmelding = "SikkerhetsbegrensningException ";
-            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
-            håndterUnntak(Feilkategori.INGEN_TILGANG, prosessinstans, feilmelding, e);
-        } catch (IkkeFunnetException e) {
-            String feilmelding = "IkkeFunnetException ";
-            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
-            håndterUnntak(Feilkategori.IKKE_FUNNET, prosessinstans, feilmelding, e);
-        } catch (FunksjonellException e) {
-            String feilmelding = "FunksjonellException ";
-            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
-            håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, e);
-        } catch (TekniskException e) {
-            String feilmelding = "TekniskException ";
-            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, e);
-        } catch (Exception e) {
-            String feilmelding = "Exception ";
-            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
-            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
-        } catch (Throwable t) { //NOSONAR
-            String feilmelding = "Throwable ";
-            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, t);
-            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, t);
-        }
-    }
-
-    protected abstract void utfør(Prosessinstans prosessinstans) throws MelosysException;
+    public abstract void utfør(Prosessinstans prosessinstans) throws MelosysException;
 
 }
