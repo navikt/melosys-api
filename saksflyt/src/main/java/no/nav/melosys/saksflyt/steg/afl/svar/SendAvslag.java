@@ -29,7 +29,7 @@ public class SendAvslag extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         long behandlingId = prosessinstans.getBehandling().getId();
         UtpekingAvvis utpekingAvvis = prosessinstans.getData(ProsessDataKey.UTPEKING_AVVIS, UtpekingAvvis.class);
 

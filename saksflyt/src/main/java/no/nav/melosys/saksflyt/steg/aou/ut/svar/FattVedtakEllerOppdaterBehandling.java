@@ -73,7 +73,7 @@ public class FattVedtakEllerOppdaterBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         final long behandlingID = prosessinstans.getBehandling().getId();

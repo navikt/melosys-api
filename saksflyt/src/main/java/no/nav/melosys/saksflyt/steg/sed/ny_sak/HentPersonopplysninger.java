@@ -27,7 +27,7 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String aktørID = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         String fnr = tpsFasade.hentIdentForAktørId(aktørID);
 

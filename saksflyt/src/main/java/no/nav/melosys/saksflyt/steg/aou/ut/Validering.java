@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.aou.ut;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.saksflyt.feil.Feilkategori;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_OPPDATER_RESULTAT;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_VALIDERING;
-import static no.nav.melosys.saksflyt.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
  * Validerer opplysning bli brukt for anmodning om unntak.
@@ -39,22 +38,17 @@ public class Validering extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType prosessType = prosessinstans.getType();
         if (prosessType != ProsessType.ANMODNING_OM_UNNTAK) {
-            String feilmelding = "ProsessType " + prosessType + " er ikke støttet";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-            return;
+            throw new TekniskException("ProsessType " + prosessType + " er ikke støttet");
         }
 
         String saksbehandlerID = prosessinstans.getData(SAKSBEHANDLER);
         if (saksbehandlerID == null) {
-            log.error("Funksjonell feil for prosessinstans {}: SaksbehandlerID er ikke oppgitt.", prosessinstans.getId());
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "saksbehandlerID er ikke oppgitt.", null);
-            return;
+            throw new TekniskException("SaksbehandlerID er ikke oppgitt.", null);
         }
 
         prosessinstans.setSteg(AOU_OPPDATER_RESULTAT);

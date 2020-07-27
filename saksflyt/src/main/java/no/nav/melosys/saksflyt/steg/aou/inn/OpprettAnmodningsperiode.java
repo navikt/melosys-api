@@ -49,7 +49,7 @@ public class OpprettAnmodningsperiode extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         if (prosessinstans.getBehandling() == null) {
             throw new FunksjonellException("Ingen behandling finnes for prosessinstans " + prosessinstans.getId());

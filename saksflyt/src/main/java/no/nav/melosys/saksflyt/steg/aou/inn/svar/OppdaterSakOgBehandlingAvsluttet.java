@@ -33,7 +33,7 @@ public class OppdaterSakOgBehandlingAvsluttet extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingId = prosessinstans.getBehandling().getId();
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();

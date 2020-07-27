@@ -29,7 +29,7 @@ public class HentEessiMelding extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 

@@ -35,7 +35,7 @@ public class OpprettBrevOgJournalpost extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         final Behandling behandling = prosessinstans.getBehandling();
         final SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(behandling.getId());
         String journalpostId = sedSomBrevService

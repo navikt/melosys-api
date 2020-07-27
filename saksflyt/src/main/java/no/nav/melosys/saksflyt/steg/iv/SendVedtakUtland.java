@@ -63,7 +63,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         final var behandling = prosessinstans.getBehandling();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 

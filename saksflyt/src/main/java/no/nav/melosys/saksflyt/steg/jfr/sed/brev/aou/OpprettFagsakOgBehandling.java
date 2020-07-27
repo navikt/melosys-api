@@ -50,7 +50,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         validerAvsender(prosessinstans);
         String aktørId = hentAktørId(prosessinstans);
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(new OpprettSakRequest.Builder()

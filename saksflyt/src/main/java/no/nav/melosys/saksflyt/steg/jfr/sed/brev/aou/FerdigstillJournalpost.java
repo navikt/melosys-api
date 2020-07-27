@@ -3,10 +3,10 @@ package no.nav.melosys.saksflyt.steg.jfr.sed.brev.aou;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
@@ -35,7 +35,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         Long arkivSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
         String hovedDokumentID = prosessinstans.getData(DOKUMENT_ID);

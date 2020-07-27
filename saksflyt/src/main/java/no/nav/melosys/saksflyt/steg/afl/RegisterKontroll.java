@@ -36,7 +36,7 @@ public class RegisterKontroll extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         final Behandling behandling = prosessinstans.getBehandling();
         final Behandlingstema behandlingstema = behandling.getTema();
         kontrollresultatService.utførKontrollerOgRegistrerFeil(behandling.getId());

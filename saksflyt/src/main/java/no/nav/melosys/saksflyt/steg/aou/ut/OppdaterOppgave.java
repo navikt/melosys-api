@@ -35,7 +35,7 @@ public class OppdaterOppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         LOGGER.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         LocalDate frist = LocalDate.from(prosessinstans.getBehandling().getDokumentasjonSvarfristDato().atZone(ZoneId.systemDefault()).toLocalDate());

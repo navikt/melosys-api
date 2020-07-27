@@ -48,7 +48,7 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         Instant nå = Instant.now();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setEndretDato(nå);

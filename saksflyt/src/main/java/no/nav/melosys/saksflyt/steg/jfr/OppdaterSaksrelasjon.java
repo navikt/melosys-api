@@ -29,7 +29,7 @@ public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
         if (journalpost.mottaksKanalErEessi()) {

@@ -38,7 +38,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
 

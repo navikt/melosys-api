@@ -9,7 +9,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
@@ -41,17 +40,14 @@ public class SettVurderDokument extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         if (fagsak == null) {
-            String feilmelding = "Det finnes ingen fagsak med saksnummer " + saksnummer;
-            log.error(feilmelding);
-            håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
-            return;
+            throw new FunksjonellException("Det finnes ingen fagsak med saksnummer " + saksnummer);
         }
 
         Behandling behandling = fagsak.hentAktivBehandling();

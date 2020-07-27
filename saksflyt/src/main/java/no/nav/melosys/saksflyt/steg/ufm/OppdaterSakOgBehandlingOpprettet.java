@@ -27,7 +27,7 @@ public class OppdaterSakOgBehandlingOpprettet extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
         long behandlingId = prosessinstans.getBehandling().getId();
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();

@@ -45,7 +45,7 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
         final long behandlingID = prosessinstans.getBehandling().getId();
 

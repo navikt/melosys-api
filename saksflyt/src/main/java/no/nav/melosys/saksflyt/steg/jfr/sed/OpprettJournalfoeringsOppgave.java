@@ -41,7 +41,7 @@ public class OpprettJournalfoeringsOppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         String aktørID = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         Tema tema = avklarTema(prosessinstans);

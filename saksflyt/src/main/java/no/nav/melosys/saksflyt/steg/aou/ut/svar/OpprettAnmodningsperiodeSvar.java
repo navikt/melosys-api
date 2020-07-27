@@ -37,7 +37,7 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         if (prosessinstans.getType() != ProsessType.ANMODNING_OM_UNNTAK_SVAR) {

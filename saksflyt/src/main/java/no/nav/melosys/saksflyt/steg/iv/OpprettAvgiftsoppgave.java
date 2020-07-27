@@ -41,7 +41,7 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         final Behandling behandling = prosessinstans.getBehandling();
         final long behandlingID = behandling.getId();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -52,7 +52,7 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
                 oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling));
             }
         }
-        
+
         prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 

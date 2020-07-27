@@ -34,7 +34,7 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);

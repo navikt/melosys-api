@@ -29,7 +29,7 @@ public class DistribuerJournalpost extends AbstraktDistribuerJournalpost {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         bestillDistribuering(journalpostId, hentUtenlandskMyndighet(prosessinstans.getBehandling().getFagsak()));
 

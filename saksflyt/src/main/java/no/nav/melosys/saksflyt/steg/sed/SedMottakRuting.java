@@ -56,7 +56,7 @@ public class SedMottakRuting extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
         Optional<Long> gsakSaksnummer = eessiService.finnSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());

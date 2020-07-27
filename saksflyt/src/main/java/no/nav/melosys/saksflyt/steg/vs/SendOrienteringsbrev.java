@@ -47,7 +47,7 @@ public class SendOrienteringsbrev extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
