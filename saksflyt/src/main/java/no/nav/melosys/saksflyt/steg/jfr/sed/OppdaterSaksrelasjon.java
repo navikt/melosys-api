@@ -5,7 +5,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("oppdaterSaksrelasjonSedMottak")
-public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
+public class OppdaterSaksrelasjon implements StegBehandler {
 
     private static Logger log = LoggerFactory.getLogger(OppdaterSaksrelasjon.class);
 
@@ -24,7 +24,7 @@ public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.SED_MOTTAK_OPPDATER_SAKSRELASJON;
     }
 

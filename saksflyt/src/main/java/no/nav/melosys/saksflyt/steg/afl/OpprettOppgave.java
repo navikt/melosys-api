@@ -4,13 +4,13 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("AFLOpprettOppgave")
-public class OpprettOppgave extends AbstraktStegBehandler {
+public class OpprettOppgave implements StegBehandler {
 
     private final OppgaveService oppgaveService;
 
@@ -19,7 +19,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AFL_OPPRETT_OPPGAVE;
     }
 

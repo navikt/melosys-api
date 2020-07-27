@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public abstract class AbstraktDistribuerJournalpost extends AbstraktStegBehandler {
+public abstract class AbstraktDistribuerJournalpost implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(AbstraktDistribuerJournalpost.class);
 
     private final DoksysFasade doksysFasade;

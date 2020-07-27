@@ -6,7 +6,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OpprettBrevOgJournalpost extends AbstraktStegBehandler {
+public class OpprettBrevOgJournalpost implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettBrevOgJournalpost.class);
 
     private final EessiService eessiService;
@@ -30,7 +30,7 @@ public class OpprettBrevOgJournalpost extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_MOTTAK_SVAR_OPPRETT_JOURNALPOST;
     }
 

@@ -15,7 +15,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -28,7 +28,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DOKUMENT_ID;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.JOURNALPOST_ID;
 
 @Component
-public class OpprettNyBehandling extends AbstraktStegBehandler {
+public class OpprettNyBehandling implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettNyBehandling.class);
 
@@ -45,7 +45,7 @@ public class OpprettNyBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.SED_MOTTAK_OPPRETT_NY_BEHANDLING;
     }
 

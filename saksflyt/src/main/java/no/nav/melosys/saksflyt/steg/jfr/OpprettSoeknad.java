@@ -8,7 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_SØKNAD;
  * JFR_OPPRETT_SOEKNAD -> JFR_OPPRETT_GSAK_SAK eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OpprettSoeknad extends AbstraktStegBehandler {
+public class OpprettSoeknad implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettSoeknad.class);
 

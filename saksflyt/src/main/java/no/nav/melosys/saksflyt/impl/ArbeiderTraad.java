@@ -14,7 +14,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.saksflyt.feil.Feilkategori;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflyt.steg.UnntakBehandler;
 import no.nav.melosys.saksflyt.steg.unntak.FeilStrategi;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
@@ -45,15 +45,15 @@ public class ArbeiderTraad implements Runnable {
     private final long oppholdMellomSteg;
     private final Binge binge;
     private final ProsessinstansRepository prosessinstansRepo;
-    private final List<AbstraktStegBehandler> stegBehandlere;
+    private final List<StegBehandler> stegBehandlere;
     private final Map<Feilkategori, UnntakBehandler> unntakBehandlere;
-    private AbstraktStegBehandler aktivStegBehandler; // Brukes kun for logging
+    private StegBehandler aktivStegBehandler; // Brukes kun for logging
     private Prosessinstans aktivProsessinstans;
 
     @Autowired
     ArbeiderTraad(Binge binge,
         ProsessinstansRepository prosessinstansRepo,
-        List<AbstraktStegBehandler> stegBehandlere,
+        List<StegBehandler> stegBehandlere,
         @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg:47}") long oppholdMellomSteg) {
         this.binge = binge;
         this.prosessinstansRepo = prosessinstansRepo;
@@ -66,7 +66,7 @@ public class ArbeiderTraad implements Runnable {
     public void run() {
         //noinspection InfiniteLoopStatement
         while (true) {
-            for (AbstraktStegBehandler stegBehandler : stegBehandlere) {
+            for (StegBehandler stegBehandler : stegBehandlere) {
                 try {
                     finnProsessinstansOgUtførSteg(stegBehandler);
                     Thread.sleep(oppholdMellomSteg);
@@ -96,7 +96,7 @@ public class ArbeiderTraad implements Runnable {
         }
     }
 
-    private void finnProsessinstansOgUtførSteg(AbstraktStegBehandler stegBehandler) {
+    private void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) {
         Prosessinstans pi = binge.hentOgSettProsessinstansTilAktiv(stegBehandler.inngangsvilkår());
         if (pi == null) {
             aktivStegBehandler = null;
@@ -128,7 +128,7 @@ public class ArbeiderTraad implements Runnable {
         }
     }
 
-    private void utførSteg(AbstraktStegBehandler stegBehandler, Prosessinstans prosessinstans) {
+    private void utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) {
         try {
             stegBehandler.utfør(prosessinstans);
         } catch (SikkerhetsbegrensningException e) {
@@ -163,7 +163,7 @@ public class ArbeiderTraad implements Runnable {
         ub.behandleUnntak(prosessinstans, melding, e); // OK med NPE hvis ub er null
     }
 
-    private static String lagStegNavn(AbstraktStegBehandler stegBehandler) {
+    private static String lagStegNavn(StegBehandler stegBehandler) {
         return ClassUtils.getUserClass(stegBehandler.getClass()).getSimpleName();
     }
 }

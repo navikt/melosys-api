@@ -15,7 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.MANGELBREV;
  * MANGELBREV -> null eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class SendMangelbrev extends AbstraktStegBehandler {
+public class SendMangelbrev implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendMangelbrev.class);
 
@@ -48,7 +48,7 @@ public class SendMangelbrev extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return MANGELBREV;
     }
 

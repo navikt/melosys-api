@@ -4,12 +4,12 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.springframework.stereotype.Component;
 
 @Component("AFLAvsluttTidligerePeriode")
-public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
+public class AvsluttTidligerePeriode implements StegBehandler {
 
     private final MedlPeriodeService medlPeriodeService;
 
@@ -18,7 +18,7 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AFL_AVSLUTT_TIDLIGERE_PERIODE;
     }
 

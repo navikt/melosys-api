@@ -63,7 +63,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return VS_SEND_SOKNAD;
     }
 

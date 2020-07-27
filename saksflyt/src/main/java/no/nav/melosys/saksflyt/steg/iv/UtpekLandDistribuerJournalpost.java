@@ -26,7 +26,7 @@ public class UtpekLandDistribuerJournalpost extends AbstraktDistribuerJournalpos
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.UL_DISTRIBUER_JOURNALPOST;
     }
 

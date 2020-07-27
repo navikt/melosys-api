@@ -4,7 +4,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_VALIDERING;
  *  AOU_VALIDERING -> AOU_OPPDATER_RESULTAT eller FEILET_MASKINELT hvis feil
  */
 @Component("AnmodningOmUnntakValidering")
-public class Validering extends AbstraktStegBehandler {
+public class Validering implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(Validering.class);
 

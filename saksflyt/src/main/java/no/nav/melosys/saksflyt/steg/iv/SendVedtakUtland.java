@@ -58,7 +58,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.IV_SEND_SED;
     }
 

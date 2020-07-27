@@ -6,7 +6,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.SakService;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.STATUS_BEH_OPPR;
  * JFR_OPPRETT_GSAK_SAK -> STATUS_BEH_OPPR eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OpprettSak extends AbstraktStegBehandler {
+public class OpprettSak implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettSak.class);
 

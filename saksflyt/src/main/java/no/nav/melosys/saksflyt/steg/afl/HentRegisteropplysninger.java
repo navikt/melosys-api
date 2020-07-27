@@ -6,7 +6,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
 @Component("AFLHentRegisteropplysninger")
-public class HentRegisteropplysninger extends AbstraktStegBehandler {
+public class HentRegisteropplysninger implements StegBehandler {
 
     private final RegisteropplysningerService registeropplysningerService;
 
@@ -23,7 +23,7 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AFL_HENT_REGISTEROPPLYSNINGER;
     }
 

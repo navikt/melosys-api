@@ -7,14 +7,14 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OpprettSedDokument extends AbstraktStegBehandler {
+public class OpprettSedDokument implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettSedDokument.class);
 
     private final OpprettSedDokumentFelles opprettSedDokumentFelles;
@@ -25,7 +25,7 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT;
     }
 

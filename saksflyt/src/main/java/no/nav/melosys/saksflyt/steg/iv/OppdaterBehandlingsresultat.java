@@ -12,7 +12,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_RESULTAT;
  * Oppdaterer behandlingsresultat med vedtaksdato og klagefrist.
  */
 @Component
-public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
+public class OppdaterBehandlingsresultat implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingsresultat.class);
 
     static final int FRIST_KLAGE_UKER = 6;

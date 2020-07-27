@@ -15,7 +15,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_JOURNALPOS
  * JFR_OPPDATER_JOURNALPOST -> JFR_FERDIGSTILL_JOURNALPOST eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OppdaterJournalpost extends AbstraktStegBehandler {
+public class OppdaterJournalpost implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterJournalpost.class);
 

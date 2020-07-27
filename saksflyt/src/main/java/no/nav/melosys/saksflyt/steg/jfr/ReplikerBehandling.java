@@ -10,7 +10,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.REPLIKER_BEHANDLING;
  *     REPLIKER_BEHANDLING -> EN NY FLOTT GREIE eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class ReplikerBehandling extends AbstraktStegBehandler {
+public class ReplikerBehandling implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(ReplikerBehandling.class);
 

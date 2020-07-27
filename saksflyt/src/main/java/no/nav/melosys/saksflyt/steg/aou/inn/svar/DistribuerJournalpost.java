@@ -24,7 +24,7 @@ public class DistribuerJournalpost extends AbstraktDistribuerJournalpost {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_MOTTAK_SVAR_DISTRIBUER_JOURNALPOST;
     }
 

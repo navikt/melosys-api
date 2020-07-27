@@ -10,7 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
  * HS_SEND_BREV -> IV_STATUS_BEH_AVSL eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class SendHenleggelsesbrev extends AbstraktStegBehandler {
+public class SendHenleggelsesbrev implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendHenleggelsesbrev.class);
 
@@ -40,7 +40,7 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return HS_SEND_BREV;
     }
 

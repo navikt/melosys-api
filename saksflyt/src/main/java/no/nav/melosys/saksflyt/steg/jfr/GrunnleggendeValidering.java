@@ -11,7 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_VURDER_JOURNALFOERI
  * JFR_VALIDERING → JFR_AVSLUTT_OPPGAVE (eller til FEILET_MASKINELT hvis det blir oppdaget feil eller mangler)
  */
 @Component
-public class GrunnleggendeValidering extends AbstraktStegBehandler {
+public class GrunnleggendeValidering implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(GrunnleggendeValidering.class);
 
@@ -41,7 +41,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_VALIDERING;
     }
 

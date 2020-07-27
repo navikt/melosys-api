@@ -17,7 +17,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.brev.FastMottaker;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -39,7 +39,7 @@ import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
  * Sender ulike brev basert på behandlingsresultat og lovvalgsbestemmelse.
  */
 @Component
-public class SendVedtaksbrevInnland extends AbstraktStegBehandler {
+public class SendVedtaksbrevInnland implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(SendVedtaksbrevInnland.class);
 
     private final BrevBestiller brevBestiller;

@@ -10,7 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 
 @Component("JournalførAouBrevFerdigstillJournalpost")
-public class FerdigstillJournalpost extends AbstraktStegBehandler {
+public class FerdigstillJournalpost implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(FerdigstillJournalpost.class);
 
     private final JoarkFasade joarkFasade;
@@ -30,7 +30,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST;
     }
 

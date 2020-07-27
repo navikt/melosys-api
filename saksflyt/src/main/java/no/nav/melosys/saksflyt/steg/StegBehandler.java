@@ -10,21 +10,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
-public abstract class AbstraktStegBehandler {
+public interface StegBehandler {
 
-    private final Predicate<Prosessinstans> inngangsvilkår;
-
-    public AbstraktStegBehandler() {
-        inngangsvilkår = Utils.medSteg(inngangsSteg()).and(Utils.somIkkeSover);
+    default Predicate<Prosessinstans> inngangsvilkår() {
+        return Utils.medSteg(inngangsSteg()).and(Utils.somIkkeSover);
     }
 
-    public Predicate<Prosessinstans> inngangsvilkår() {
-        return inngangsvilkår;
-    }
-
-    protected abstract ProsessSteg inngangsSteg();
+    ProsessSteg inngangsSteg();
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)
-    public abstract void utfør(Prosessinstans prosessinstans) throws MelosysException;
-
+    void utfør(Prosessinstans prosessinstans) throws MelosysException;
 }

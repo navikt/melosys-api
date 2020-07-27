@@ -6,7 +6,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
  * VS_OPPDATER_RESULTAT -> VS_AVSLUTT_FAGSAK eller FEILET_MASKINELT hvis feil
  */
 @Component("VideresendSoknadOppdaterBehandlingsresultat")
-public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
+public class OppdaterBehandlingsresultat implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingsresultat.class);
 
     private final BehandlingsresultatService behandlingsresultatService;

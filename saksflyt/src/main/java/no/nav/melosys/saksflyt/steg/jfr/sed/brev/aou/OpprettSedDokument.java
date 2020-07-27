@@ -22,14 +22,14 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.SaksopplysningRepository;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("JournalførAouBrevOpprettSedDokument")
-public class OpprettSedDokument extends AbstraktStegBehandler {
+public class OpprettSedDokument implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettSedDokument.class);
     private static final String SED_DOKUMENT_VERSJON = "0.2-SNAPSHOT";
 
@@ -43,7 +43,7 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_AOU_BREV_OPPRETT_SEDDOKUMENT;
     }
 

@@ -11,7 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 
 @Component("RegistreringUnntakOpprettFagsakOgBehandling")
-public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
+public class OpprettFagsakOgBehandling implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
 
@@ -34,7 +34,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH;
     }
 

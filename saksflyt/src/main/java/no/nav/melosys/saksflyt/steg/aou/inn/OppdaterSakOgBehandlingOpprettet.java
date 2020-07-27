@@ -5,7 +5,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sob.SobService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("AnmodningUnntakMottakOppdaterSakOgBehandlingOpprettet")
-public class OppdaterSakOgBehandlingOpprettet extends AbstraktStegBehandler {
+public class OppdaterSakOgBehandlingOpprettet implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterSakOgBehandlingOpprettet.class);
 
     private final SobService sobService;
@@ -25,7 +25,7 @@ public class OppdaterSakOgBehandlingOpprettet extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET;
     }
 

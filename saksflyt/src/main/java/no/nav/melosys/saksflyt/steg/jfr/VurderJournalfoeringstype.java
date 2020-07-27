@@ -10,7 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_JOURNALPOS
  *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class VurderJournalfoeringstype extends AbstraktStegBehandler {
+public class VurderJournalfoeringstype implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(VurderJournalfoeringstype.class);
 
@@ -50,7 +50,7 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE;
     }
 

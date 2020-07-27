@@ -33,7 +33,7 @@ public class DistribuerJournalpost extends AbstraktDistribuerJournalpost {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.VS_DISTRIBUER_JOURNALPOST;
     }
 

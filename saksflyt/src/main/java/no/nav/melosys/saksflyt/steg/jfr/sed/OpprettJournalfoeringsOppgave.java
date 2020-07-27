@@ -12,7 +12,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.SakService;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OpprettJournalfoeringsOppgave extends AbstraktStegBehandler {
+public class OpprettJournalfoeringsOppgave implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettJournalfoeringsOppgave.class);
 
@@ -36,7 +36,7 @@ public class OpprettJournalfoeringsOppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.SED_MOTTAK_OPPRETT_JFR_OPPG;
     }
 
