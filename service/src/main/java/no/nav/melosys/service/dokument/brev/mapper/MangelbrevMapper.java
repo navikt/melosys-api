@@ -27,8 +27,8 @@ public class MangelbrevMapper implements BrevDataMapper {
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000074.xsd";
 
-    // Frist er 4 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
-    private static final int FRIST_UKER = 4;
+    // Frist fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
+    private static final int FRIST_UKER = 3;
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
