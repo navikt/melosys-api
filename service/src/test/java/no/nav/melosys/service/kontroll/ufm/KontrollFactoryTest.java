@@ -33,7 +33,7 @@ public class KontrollFactoryTest {
     @Test
     public void hentKontrollerA010_verifiserKontroller() {
         List<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A010);
-        assertThat(kontroller).hasSize(10);
+        assertThat(kontroller).hasSize(11);
     }
 
     @Test(expected = UnsupportedOperationException.class)
