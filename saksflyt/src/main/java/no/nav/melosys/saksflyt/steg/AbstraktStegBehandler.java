@@ -14,8 +14,6 @@ public abstract class AbstraktStegBehandler {
 
     private final Predicate<Prosessinstans> inngangsvilkår;
 
-    protected abstract ProsessSteg inngangsSteg();
-
     public AbstraktStegBehandler() {
         inngangsvilkår = Utils.medSteg(inngangsSteg()).and(Utils.somIkkeSover);
     }
@@ -23,6 +21,8 @@ public abstract class AbstraktStegBehandler {
     public Predicate<Prosessinstans> inngangsvilkår() {
         return inngangsvilkår;
     }
+
+    protected abstract ProsessSteg inngangsSteg();
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)
     public abstract void utfør(Prosessinstans prosessinstans) throws MelosysException;
