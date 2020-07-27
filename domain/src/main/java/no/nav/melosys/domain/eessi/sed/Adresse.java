@@ -19,25 +19,6 @@ public class Adresse {
     private Adresse() {
     }
 
-    public static Adresse lagIkkeFastAdresse(String landkode) {
-        Adresse adresse = new Adresse();
-        adresse.setPoststed(INGEN_FAST_ADRESSE);
-        adresse.setLand(landkode);
-        return adresse;
-    }
-
-    public static Adresse lagMaritimAdresse(String landkode) {
-        Adresse adresse = new Adresse();
-        adresse.setLand(landkode);
-        adresse.setPoststed(IKKE_TILGJENGELIG);
-        adresse.setGateadresse(IKKE_TILGJENGELIG);
-        return adresse;
-    }
-
-    public static Adresse lagTomAdresse() {
-        return new Adresse();
-    }
-
     public static Adresse lagAdresse(Adressetype adressetype, StrukturertAdresse strukturertAdresse) {
         if (strukturertAdresse == null) {
             return Adresse.lagTomAdresse();
@@ -47,6 +28,25 @@ public class Adresse {
         adresse.setAdressetype(adressetype);
         adresse.setLand(tilIso3(strukturertAdresse.landkode));
         return adresse;
+    }
+
+    public static Adresse lagAdresseMedBareLandkode(String landkode) {
+        Adresse adresse = new Adresse();
+        adresse.setGateadresse(IKKE_TILGJENGELIG);
+        adresse.setPoststed(IKKE_TILGJENGELIG);
+        adresse.setLand(landkode);
+        return adresse;
+    }
+
+    public static Adresse lagIkkeFastAdresse(String landkode) {
+        Adresse adresse = new Adresse();
+        adresse.setPoststed(INGEN_FAST_ADRESSE);
+        adresse.setLand(landkode);
+        return adresse;
+    }
+
+    public static Adresse lagTomAdresse() {
+        return new Adresse();
     }
 
     public static Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {

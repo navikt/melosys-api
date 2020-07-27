@@ -191,18 +191,12 @@ public class SedDataBygger {
         } else if (arb instanceof FlyvendeArbeidssted) {
             FlyvendeArbeidssted flyvendeArbeidssted = (FlyvendeArbeidssted) arb;
             arbeidssted.setNavn(flyvendeArbeidssted.getEnhetNavn());
-
-            Adresse adresse = new Adresse();
-            adresse.setLand(flyvendeArbeidssted.getLandkode());
-            adresse.setPoststed("N/A");
-            adresse.setGateadresse("N/A");
-
-            arbeidssted.setAdresse(adresse);
+            arbeidssted.setAdresse(Adresse.lagAdresseMedBareLandkode(flyvendeArbeidssted.getLandkode()));
             arbeidssted.setHjemmebase(flyvendeArbeidssted.getLandkode());
         } else {
             MaritimtArbeidssted maritimtArbeidssted = (MaritimtArbeidssted) arb;
             arbeidssted.setNavn(maritimtArbeidssted.getEnhetNavn() + (maritimtArbeidssted.erSokkel() ? " offshore" : ""));
-            arbeidssted.setAdresse(Adresse.lagMaritimAdresse(maritimtArbeidssted.getLandkode()));
+            arbeidssted.setAdresse(Adresse.lagAdresseMedBareLandkode(maritimtArbeidssted.getLandkode()));
             arbeidssted.setHjemmebase(maritimtArbeidssted.getFlaggLandKode());
         }
         return arbeidssted;
