@@ -15,7 +15,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -51,7 +51,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_typeJfrNySak_tilStegJfrOpprettSøknad() throws FunksjonellException {
+    public void utfør_typeJfrNySak_tilStegJfrOpprettSøknad() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         String aktørId = "1000104568393";
@@ -72,7 +72,7 @@ public class OpprettFagsakOgBehandlingTest {
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
         when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getAktørID()).isEqualTo(aktørId);
@@ -86,7 +86,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_typeNySakFraDok_tilStegJfrOpprettSøknad() throws FunksjonellException {
+    public void utfør_typeNySakFraDok_tilStegJfrOpprettSøknad() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.OPPRETT_NY_SAK);
         String aktørId = "1000104568393";
@@ -97,7 +97,7 @@ public class OpprettFagsakOgBehandlingTest {
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
         when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getAktørID()).isEqualTo(aktørId);
@@ -107,7 +107,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_typeJfrNyBehandling_tilStegStatusBehOppr() throws IkkeFunnetException {
+    public void utfør_typeJfrNyBehandling_tilStegStatusBehOppr() throws FunksjonellException, TekniskException {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
 
@@ -129,7 +129,7 @@ public class OpprettFagsakOgBehandlingTest {
         when(fagsakService.hentFagsak("MELTEST-333")).thenReturn(fagsak);
         when(behandlingService.nyBehandling(eq(fagsak), any(), any(), any(), anyString(), anyString())).thenReturn(new Behandling());
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(behandlingService).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstyper.SOEKNAD, sistOppdaterteBehandling.getTema(), initierendeJournalpostId, initierendeDokumentId);
 
@@ -137,13 +137,13 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_ukjentType_feiler() {
+    public void utfør_ukjentType_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
     }

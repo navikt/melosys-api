@@ -1,12 +1,12 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -37,7 +37,7 @@ public class SendMangelbrevTest {
     }
 
     @Test
-    public void utførSteg() throws TekniskException, FunksjonellException {
+    public void utfør() throws TekniskException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -48,7 +48,7 @@ public class SendMangelbrevTest {
         BrevData brevData = new BrevData("Z123456");
         p.setData(ProsessDataKey.BREVDATA, brevData);
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor = ArgumentCaptor.forClass(Brevbestilling.class);
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());

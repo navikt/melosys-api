@@ -7,7 +7,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.SakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,17 +25,17 @@ public class OpprettSakTest {
     private SakService sakService;
 
     @Mock
-    private FagsakRepository fagsakRepository;
+    private FagsakService fagsakService;
 
     private OpprettSak agent;
 
     @Before
     public void setUp() {
-        agent = new OpprettSak(fagsakRepository, sakService);
+        agent = new OpprettSak(fagsakService, sakService);
     }
 
     @Test
-    public void utfoerSteg() throws FunksjonellException, TekniskException {
+    public void utfør() throws FunksjonellException, TekniskException {
         Behandlingstema behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER;
         String saksnummer = "MEL-009";
         String aktørID = "1000104568393";
@@ -47,9 +47,9 @@ public class OpprettSakTest {
         when(sakService.opprettSak(anyString(), eq(behandlingstema), anyString())).thenReturn(123L);
 
         Fagsak fagsak = new Fagsak();
-        when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
 
-        agent.utførSteg(prosessinstans);
+        agent.utfør(prosessinstans);
 
         verify(sakService, times(1)).opprettSak(saksnummer, behandlingstema, aktørID);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);

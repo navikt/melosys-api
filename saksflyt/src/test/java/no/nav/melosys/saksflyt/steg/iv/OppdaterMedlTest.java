@@ -84,23 +84,23 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void sjekkNestSteg() {
-        oppdaterMedl.utførSteg(prosessinstans);
+    public void sjekkNestSteg() throws FunksjonellException, TekniskException {
+        oppdaterMedl.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
     }
 
     @Test
-    public void utførSteg_behandlingsresultatTypeErFastsattLovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
-        oppdaterMedl.utførSteg(prosessinstans);
+    public void utfør_behandlingsresultatTypeErFastsattLovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
+        oppdaterMedl.utfør(prosessinstans);
         verify(medlPeriodeService).opprettPeriodeEndelig(eq(lovvalgsperiode), eq(1L), eq(false));
     }
 
     @Test
-    public void utførSteg_behandlingsresultatHarIngenLovvalgPeriode_feiler() throws IkkeFunnetException {
+    public void utfør_behandlingsresultatHarIngenLovvalgPeriode_feiler() throws FunksjonellException, TekniskException {
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        oppdaterMedl.utførSteg(prosessinstans);
+        oppdaterMedl.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
@@ -144,7 +144,7 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void utførSteg_erArtikkel13_opprettForeløpigPeriode() throws FunksjonellException, TekniskException {
+    public void utfør_erArtikkel13_opprettForeløpigPeriode() throws FunksjonellException, TekniskException {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);

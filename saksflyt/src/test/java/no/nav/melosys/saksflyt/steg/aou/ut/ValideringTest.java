@@ -1,10 +1,11 @@
 package no.nav.melosys.saksflyt.steg.aou.ut;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.exception.TekniskException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,26 +33,26 @@ public class ValideringTest {
     }
 
     @Test
-    public void utfoerSteg() {
-        agent.utførSteg(p);
+    public void utfoerSteg() throws TekniskException {
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(AOU_OPPDATER_RESULTAT);
     }
 
     @Test
-    public void utfoerSteg_feilProsessType() {
+    public void utfoerSteg_feilProsessType() throws TekniskException {
         p.setType(ProsessType.MOTTAK_SED);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
     @Test
-    public void utfoerSteg_manglerSaksbehandler_feiler() {
+    public void utfoerSteg_manglerSaksbehandler_feiler() throws TekniskException {
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
 
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 }

@@ -2,11 +2,11 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.Properties;
 
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import org.junit.Before;
@@ -33,56 +33,56 @@ public class FerdigstillJournalpostTest {
     }
 
     @Test
-    public void utførSteg_typeJfrNySak_tilStegJfrHentPersOppl() throws MelosysException {
+    public void utfør_typeJfrNySak_tilStegJfrHentPersOppl() throws MelosysException {
         String journalpostID = "Journal_ID";
         Prosessinstans p = nyProsessinstans(ProsessType.JFR_NY_SAK, journalpostID);
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_REGISTER_OPPL);
     }
 
     @Test
-    public void utførSteg_typeJfrNyBehandling_tilStegJfrHentPersOppl() throws MelosysException {
+    public void utfør_typeJfrNyBehandling_tilStegJfrHentPersOppl() throws MelosysException {
         String journalpostID = "Journal_ID";
         Prosessinstans p = nyProsessinstans(ProsessType.JFR_NY_BEHANDLING, journalpostID);
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_REGISTER_OPPL);
     }
 
     @Test
-    public void utførSteg_typeJfrKnytt_tilStegJfrSettVurderDokument() throws MelosysException {
+    public void utfør_typeJfrKnytt_tilStegJfrSettVurderDokument() throws MelosysException {
         String journalpostID = "Journal_ID";
         Prosessinstans p = nyProsessinstans(ProsessType.JFR_KNYTT, journalpostID);
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_SETT_VURDER_DOKUMENT);
     }
 
     @Test
-    public void utførSteg_typeJfrKnyttOgEndretPeriode_tilStegJfrReplikerBehandling() throws MelosysException {
+    public void utfør_typeJfrKnyttOgEndretPeriode_tilStegJfrReplikerBehandling() throws MelosysException {
         String journalpostID = "Journal_ID";
         Prosessinstans p = nyProsessinstans(ProsessType.JFR_NY_BEHANDLING, journalpostID);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.REPLIKER_BEHANDLING);
     }
 
     @Test
-    public void utførSteg_typeUgyldig_tilStegFeiletMaskinelt() throws MelosysException {
+    public void utfør_typeUgyldig_tilStegFeiletMaskinelt() throws MelosysException {
         String journalpostID = "Journal_ID";
         Prosessinstans p = nyProsessinstans(null, journalpostID);
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);

@@ -10,7 +10,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.saksflyt.feil.Feilkategori;
 import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,10 +66,7 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
                 knyttDokumentTilEksisterendeBehandlingEllerOpprettNyBehandling(prosessinstans);
                 break;
             default:
-                String feilmelding = "Ukjent prosesstype: " + prosessinstans.getType();
-                log.error("{}: {}", prosessinstans.getId(), feilmelding);
-                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-                return;
+                throw new TekniskException("Ukjent prosesstype: " + prosessinstans.getType());
         }
 
         log.info("Prosessinstans {} har vurdert journalpost {}", prosessinstans.getId(), prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));

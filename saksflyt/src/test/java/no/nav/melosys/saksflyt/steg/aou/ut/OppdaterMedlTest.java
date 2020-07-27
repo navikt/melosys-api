@@ -75,24 +75,24 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void sjekkNestSteg() {
-        oppdaterMedl.utførSteg(prosessinstans);
+    public void sjekkNestSteg() throws FunksjonellException, TekniskException {
+        oppdaterMedl.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_BREV);
     }
 
     @Test
-    public void utførStegNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
+    public void utførNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        oppdaterMedl.utførSteg(prosessinstans);
+        oppdaterMedl.utfør(prosessinstans);
         verify(medlPeriodeService).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), eq(false));
     }
 
     @Test
-    public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() {
+    public void utførNårBehandlingsresultatHarIngenLovvalgPeriode() throws FunksjonellException, TekniskException {
         behandlingsresultat.setAnmodningsperioder(new HashSet<>());
 
-        oppdaterMedl.utførSteg(prosessinstans);
+        oppdaterMedl.utfør(prosessinstans);
         assertEquals(ProsessSteg.FEILET_MASKINELT, prosessinstans.getSteg());
     }
 }

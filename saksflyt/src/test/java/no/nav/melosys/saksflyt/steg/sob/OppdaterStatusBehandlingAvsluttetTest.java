@@ -43,7 +43,7 @@ public class OppdaterStatusBehandlingAvsluttetTest {
     }
 
     @Test
-    public void utførSteg_aktørIdFinnes_kallerSakOgBehandling() throws FunksjonellException, TekniskException {
+    public void utfør_aktørIdFinnes_kallerSakOgBehandling() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Behandling b = lagBehandling();
         p.setBehandling(b);
@@ -53,7 +53,7 @@ public class OppdaterStatusBehandlingAvsluttetTest {
     }
 
     @Test
-    public void utførSteg_aktørFinnesIkke_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_aktørFinnesIkke_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Behandling b = lagBehandling();
         b.getFagsak().getAktører().clear();
@@ -66,7 +66,7 @@ public class OppdaterStatusBehandlingAvsluttetTest {
     }
 
     @Test
-    public void utførSteg_ingenAktørID_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_ingenAktørID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Behandling b = lagBehandling();
         b.getFagsak().hentBruker().setAktørId(null);

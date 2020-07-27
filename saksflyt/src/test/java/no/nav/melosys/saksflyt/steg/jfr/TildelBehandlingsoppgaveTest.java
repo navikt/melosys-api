@@ -55,8 +55,8 @@ public class TildelBehandlingsoppgaveTest {
     }
 
     @Test
-    public void utførSteg_finnerOppgave_forventTildelingAvOppgave() throws FunksjonellException, TekniskException {
-        tildelBehandlingsoppgave.utførSteg(prosessinstans);
+    public void utfør_finnerOppgave_forventTildelingAvOppgave() throws FunksjonellException, TekniskException {
+        tildelBehandlingsoppgave.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(oppgaveService).tildelOppgave(eq(OPPGAVE_ID), eq(SAKSBEHANDLER));
