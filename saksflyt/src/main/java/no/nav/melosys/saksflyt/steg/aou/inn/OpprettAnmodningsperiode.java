@@ -18,7 +18,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("AnmodningUnntakMottakOpprettAnmodningsperiode")
-public class OpprettAnmodningsperiode extends AbstraktStegBehandler {
+public class OpprettAnmodningsperiode implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettAnmodningsperiode.class);
 
     private final AnmodningsperiodeService anmodningsperiodeService;
@@ -44,12 +44,12 @@ public class OpprettAnmodningsperiode extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         if (prosessinstans.getBehandling() == null) {
             throw new FunksjonellException("Ingen behandling finnes for prosessinstans " + prosessinstans.getId());

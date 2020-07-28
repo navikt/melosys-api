@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.aou.ut;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -25,7 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -75,24 +76,25 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void sjekkNestSteg() {
-        oppdaterMedl.utførSteg(prosessinstans);
+    public void sjekkNestSteg() throws FunksjonellException, TekniskException {
+        oppdaterMedl.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_BREV);
     }
 
     @Test
-    public void utførStegNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
+    public void utførNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        oppdaterMedl.utførSteg(prosessinstans);
+        oppdaterMedl.utfør(prosessinstans);
         verify(medlPeriodeService).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), eq(false));
     }
 
     @Test
-    public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() {
+    public void utførNårBehandlingsresultatHarIngenLovvalgPeriode() {
         behandlingsresultat.setAnmodningsperioder(new HashSet<>());
 
-        oppdaterMedl.utførSteg(prosessinstans);
-        assertEquals(ProsessSteg.FEILET_MASKINELT, prosessinstans.getSteg());
+        assertThatExceptionOfType(NoSuchElementException.class)
+            .isThrownBy(() -> oppdaterMedl.utfør(prosessinstans))
+            .withMessageContaining("Ingen anmodningsperioder finnes");
     }
 }

@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.aou.ut;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -58,7 +58,7 @@ public class SendBrevTest {
 
     @Test
     public void utfoerSteg() throws FunksjonellException, TekniskException {
-        agent.utførSteg(p);
+        agent.utfør(p);
         brevBestiller.bestill(eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), eq(SAKSBEHANDLER), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_SED);
     }

@@ -7,7 +7,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 @Component
-public class VurderGjenbrukOppgave extends AbstraktStegBehandler {
+public class VurderGjenbrukOppgave implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(VurderGjenbrukOppgave.class);
 

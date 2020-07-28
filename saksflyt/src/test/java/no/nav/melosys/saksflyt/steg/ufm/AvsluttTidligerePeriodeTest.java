@@ -34,7 +34,7 @@ public class AvsluttTidligerePeriodeTest {
     }
 
     @Test
-    public void utførSteg_ikkeEndring_verifiserLagreLovvalgspeirode() throws Exception {
+    public void utfør_ikkeEndring_verifiserLagreLovvalgspeirode() throws Exception {
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -49,7 +49,7 @@ public class AvsluttTidligerePeriodeTest {
     }
 
     @Test
-    public void utførSteg_erEndring_verifiserAvsluttTidligereMedlPeriode() throws Exception {
+    public void utfør_erEndring_verifiserAvsluttTidligereMedlPeriode() throws Exception {
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);

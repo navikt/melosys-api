@@ -9,7 +9,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
@@ -34,7 +36,6 @@ public class SettVurderDokumentTest {
 
     private SettVurderDokument agent;
 
-    private final static String SAKSNUMMER_FINNES_IKKE = "MELTEST-0";
     private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
     private final static String SAKSNUMMER_MED_BEHANDLING = "MELTEST-2";
 
@@ -57,65 +58,52 @@ public class SettVurderDokumentTest {
     }
 
     @Test
-    public void utførSteg_sakMedBehandling_oppdatererStatus() {
+    public void utfør_sakMedBehandling_oppdatererStatus() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         p.setData(ProsessDataKey.SKAL_TILORDNES, false);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
         assertThat(behandlingArgumentCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.VURDER_DOKUMENT);
     }
 
     @Test
-    public void utførSteg_sakUtenBehandling_ingenStatusEndring() {
+    public void utfør_sakUtenBehandling_ingenStatusEndring() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         p.setData(ProsessDataKey.SKAL_TILORDNES, false);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(behandlingRepository, never()).save(any(Behandling.class));
     }
 
     @Test
-    public void utførSteg_ingenVurdering_ingenStatusEndring() {
+    public void utfør_ingenVurdering_ingenStatusEndring() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, true);
         p.setData(ProsessDataKey.SKAL_TILORDNES, false);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(behandlingRepository, never()).save(any(Behandling.class));
     }
 
     @Test
-    public void utførSteg_sakMedBehandling_skalTildeleBehandlingsoppgave() {
+    public void utfør_sakMedBehandling_skalTildeleBehandlingsoppgave() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         p.setData(ProsessDataKey.SKAL_TILORDNES, true);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_TILDEL_BEHANDLINGSOPPGAVE);
         verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
         assertThat(behandlingArgumentCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.VURDER_DOKUMENT);
-    }
-
-    @Test
-    public void utførSteg_ukjentSak_feiler() {
-        Prosessinstans p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_FINNES_IKKE);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
-        p.setData(ProsessDataKey.SKAL_TILORDNES, false);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Det finnes ingen fagsak med saksnummer " + SAKSNUMMER_FINNES_IKKE);
     }
 }

@@ -34,7 +34,7 @@ public class BestemBehandlingsMaateTest {
     }
 
     @Test
-    public void utførSteg_ingenTreffIRegister_verifiserNesteSteg() throws Exception {
+    public void utfør_ingenTreffIRegister_verifiserNesteSteg() throws Exception {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
@@ -45,7 +45,7 @@ public class BestemBehandlingsMaateTest {
     }
 
     @Test
-    public void utførSteg_treffIRegister_verifiserNesteSteg() throws Exception {
+    public void utfør_treffIRegister_verifiserNesteSteg() throws Exception {
         Kontrollresultat kontrollresultat = new Kontrollresultat();
         kontrollresultat.setBegrunnelse(Kontroll_begrunnelser.FEIL_I_PERIODEN);
 

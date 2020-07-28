@@ -22,7 +22,7 @@ public class AvklarMyndighet extends AbstraktAvklarMyndighet {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.VS_AVKLAR_MYNDIGHET;
     }
 

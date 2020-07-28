@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.hs;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
@@ -20,7 +21,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEGRUNNELSEKODE;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -41,7 +43,7 @@ public class SendHenleggelsesbrevTest {
     public ExpectedException expectException = ExpectedException.none();
 
     @Test
-    public void utførSteg_sendHenleggelsesbrev_produserDokument() throws FunksjonellException, TekniskException {
+    public void utfør_sendHenleggelsesbrev_produserDokument() throws FunksjonellException, TekniskException {
         long behandlingId = 234234L;
         String saksbehandler = "Z097";
         Fagsak fagsak = new Fagsak();

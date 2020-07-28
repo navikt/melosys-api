@@ -5,13 +5,13 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.SakService;
 import org.springframework.stereotype.Component;
 
 @Component("SedMottakOpprettSak")
-public class OpprettSak extends AbstraktStegBehandler {
+public class OpprettSak implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final SakService sakService;
@@ -22,12 +22,12 @@ public class OpprettSak extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.SED_MOTTAK_OPPRETT_SAK;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
 
         Long gsakSaksnummer = sakService.opprettSak(

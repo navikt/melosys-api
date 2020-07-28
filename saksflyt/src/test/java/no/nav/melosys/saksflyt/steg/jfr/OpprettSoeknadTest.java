@@ -31,14 +31,14 @@ public class OpprettSoeknadTest {
     }
 
     @Test
-    public void utfoerSteg() throws FunksjonellException {
+    public void utfør() throws FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
         p.setBehandling(behandling);
         p.setType(ProsessType.JFR_NY_SAK);
 
-        opprettSoeknad.utførSteg(p);
+        opprettSoeknad.utfør(p);
 
         verify(behandlingsgrunnlagService, times(1)).opprettSøknadGrunnlag(eq(behandling.getId()), any(SoeknadDokument.class));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);

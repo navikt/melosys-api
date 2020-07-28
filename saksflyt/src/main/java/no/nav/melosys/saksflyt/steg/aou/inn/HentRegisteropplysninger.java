@@ -8,7 +8,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
 @Component("AnmodningUnntakMottakHentRegisteropplysninger")
-public class HentRegisteropplysninger extends AbstraktStegBehandler {
+public class HentRegisteropplysninger implements StegBehandler {
 
     private final RegisteropplysningerService registeropplysningerService;
     private final BehandlingService behandlingService;
@@ -33,12 +33,12 @@ public class HentRegisteropplysninger extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
 

@@ -69,7 +69,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_ukjentProsess_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_ukjentProsess_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
 
@@ -80,7 +80,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_nySak_tilInkommendeDok() throws FunksjonellException, TekniskException {
+    public void utfør_nySak_tilInkommendeDok() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -93,7 +93,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_nySak_feilBehandlingstype() throws FunksjonellException, TekniskException {
+    public void utfør_nySak_feilBehandlingstype() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -107,7 +107,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_nySakManglerSøknadsperiode_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_nySakManglerSøknadsperiode_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -118,7 +118,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_nySakSøknadsperiodeMedFomEtterTom_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_nySakSøknadsperiodeMedFomEtterTom_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -131,7 +131,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerSaksnummer_tilInkommendeDok() throws FunksjonellException, TekniskException {
+    public void utfør_knyttManglerSaksnummer_tilInkommendeDok() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -145,7 +145,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerBrukerID_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_knyttManglerBrukerID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -160,7 +160,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerJournalpostID_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_knyttManglerJournalpostID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -175,7 +175,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerTittel_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_knyttManglerTittel_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -190,7 +190,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerDokumentID_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_knyttManglerDokumentID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
@@ -205,7 +205,7 @@ public class GrunnleggendeValideringTest {
     }
 
     @Test
-    public void utførSteg_knyttManglerSakbehandler_feiler() throws FunksjonellException, TekniskException {
+    public void utfør_knyttManglerSakbehandler_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);

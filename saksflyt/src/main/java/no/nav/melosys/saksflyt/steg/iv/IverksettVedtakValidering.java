@@ -11,7 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_VALIDERING;
  * Validerer opplysning bli brukt for iverksett vedtak.
  */
 @Component
-public class IverksettVedtakValidering extends AbstraktStegBehandler {
+public class IverksettVedtakValidering implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(IverksettVedtakValidering.class);
     private static final EnumSet<ProsessType> AKSEPTERTE_PROSESSTYPER = EnumSet.of(
         ProsessType.IVERKSETT_VEDTAK,

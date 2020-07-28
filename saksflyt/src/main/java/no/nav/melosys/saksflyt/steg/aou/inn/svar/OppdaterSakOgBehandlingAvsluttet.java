@@ -6,7 +6,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("AnmodningUnntakMottakSvarOppdaterSakOgBehandlingAvsluttet")
-public class OppdaterSakOgBehandlingAvsluttet extends AbstraktStegBehandler {
+public class OppdaterSakOgBehandlingAvsluttet implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterSakOgBehandlingAvsluttet.class);
 
     private final FagsakService fagsakService;
@@ -28,12 +28,12 @@ public class OppdaterSakOgBehandlingAvsluttet extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingId = prosessinstans.getBehandling().getId();
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();

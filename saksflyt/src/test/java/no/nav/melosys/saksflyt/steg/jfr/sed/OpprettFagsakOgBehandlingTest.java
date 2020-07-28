@@ -46,7 +46,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_prosessTypeAnmodningsUnntak_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
+    public void utfør_prosessTypeAnmodningsUnntak_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         opprettFagsakOgBehandling.utfør(prosessinstans);
@@ -56,7 +56,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg__verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
+    public void utfør__verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         opprettFagsakOgBehandling.utfør(prosessinstans);
@@ -66,7 +66,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_ikkeProsessTypeMottakSed_kasterException() {
+    public void utfør_ikkeProsessTypeMottakSed_kasterException() {
         Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
         prosessinstans.setType(ProsessType.MOTTAK_SED);
         assertThatExceptionOfType(TekniskException.class)
