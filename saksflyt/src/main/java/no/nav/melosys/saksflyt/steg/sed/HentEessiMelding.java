@@ -7,13 +7,13 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class HentEessiMelding extends AbstraktStegBehandler {
+public class HentEessiMelding implements StegBehandler {
 
     private final EessiService eessiService;
     private final TpsService tpsService;
@@ -24,12 +24,12 @@ public class HentEessiMelding extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 

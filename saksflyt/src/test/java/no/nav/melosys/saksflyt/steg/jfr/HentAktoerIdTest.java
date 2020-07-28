@@ -1,10 +1,10 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import org.junit.Before;
@@ -38,7 +38,7 @@ public class HentAktoerIdTest {
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("1000104568393");
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(tpsFasade).hentAktørIdForIdent(brukerID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
@@ -53,7 +53,7 @@ public class HentAktoerIdTest {
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("1000104568393");
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(tpsFasade).hentAktørIdForIdent(brukerID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);

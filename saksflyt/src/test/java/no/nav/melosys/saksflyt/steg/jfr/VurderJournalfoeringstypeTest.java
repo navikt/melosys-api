@@ -3,13 +3,16 @@ package no.nav.melosys.saksflyt.steg.jfr;
 import java.util.Arrays;
 import java.util.Collections;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Rule;
@@ -18,6 +21,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -62,57 +66,56 @@ public class VurderJournalfoeringstypeTest {
     public void ukjentProsesstype_Feiler() {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.IVERKSETT_VEDTAK);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ukjent prosesstype: " + p.getType());
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> agent.utfør(p))
+            .withMessageContaining("Ukjent prosesstype");
     }
 
     @Test
-    public void nySak_tilHentAktørID() {
+    public void nySak_tilHentAktørID() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
     }
 
     @Test
-    public void knyttTilFagsakMedAktivBehandling_tilOppdaterJournalpost() {
+    public void knyttTilFagsakMedAktivBehandling_tilOppdaterJournalpost() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
     }
 
     @Test
-    public void knyttMedBehandlingstypeNull_tilOppdaterJournalpost() {
+    public void knyttMedBehandlingstypeNull_tilOppdaterJournalpost() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
     }
 
     @Test
-    public void knyttTilFagsakUtenAktivBehandling_tilNyBehandling() {
+    public void knyttTilFagsakUtenAktivBehandling_tilNyBehandling() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getType()).isEqualTo(ProsessType.JFR_NY_BEHANDLING);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
     }
 
     @Test
-    public void knyttTilFagsakMedEndretPeriodeMedInaktivOgUtenAktivBehandling_steg_jfrOppdaterJournalpost() {
+    public void knyttTilFagsakMedEndretPeriodeMedInaktivOgUtenAktivBehandling_steg_jfrOppdaterJournalpost() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utførSteg(p);
+        agent.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
     }
 
@@ -122,7 +125,8 @@ public class VurderJournalfoeringstypeTest {
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> agent.utfør(p))
+            .withMessageContaining("Man kan ikke endre lovvalgsperiode");
     }
 }

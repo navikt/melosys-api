@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component("AFLRegisterKontroll")
-public class RegisterKontroll extends AbstraktStegBehandler {
+public class RegisterKontroll implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(RegisterKontroll.class);
 
     private final KontrollresultatService kontrollresultatService;
@@ -31,12 +31,12 @@ public class RegisterKontroll extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AFL_REGISTERKONTROLL;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         final Behandling behandling = prosessinstans.getBehandling();
         final Behandlingstema behandlingstema = behandling.getTema();
         kontrollresultatService.utførKontrollerOgRegistrerFeil(behandling.getId());

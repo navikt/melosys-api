@@ -1,14 +1,15 @@
 package no.nav.melosys.saksflyt.steg.hs;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.HS_HENLEGG_SAK;
  * HS_OPPDATER_RESULTAT -> HENLEGG_SAK eller FEILET_MASKINELT hvis feil
  */
 @Component("HenleggSakOppdaterBehandlingsresultat")
-public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
+public class OppdaterBehandlingsresultat implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingsresultat.class);
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +21,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDIN
  * Oppretter en oppgave i GSAK.
  */
 @Component
-public class OpprettOppgave extends AbstraktStegBehandler {
+public class OpprettOppgave implements StegBehandler {
 
     private static final String STØTTES_IKKE = " er ikke støttet";
 

@@ -4,13 +4,13 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sob.SobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("AFLSakOgBehandlingOpprettet")
-public class SakOgBehandlingOpprettet extends AbstraktStegBehandler {
+public class SakOgBehandlingOpprettet implements StegBehandler {
 
     private final SobService sobService;
 
@@ -20,12 +20,12 @@ public class SakOgBehandlingOpprettet extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AFL_SAK_OG_BEHANDLING_OPPRETTET;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         sobService.sakOgBehandlingOpprettet(
             prosessinstans.getBehandling().getFagsak().getSaksnummer(),
             prosessinstans.getBehandling().getId(),

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_OPPDATER_RESULTAT;
  * AOU_OPPDATER_RESULTAT -> AOU_AVKLAR_MYNDIGHET eller FEILET_MASKINELT hvis feil
  */
 @Component("AnmodningOmUnntakOppdaterBehandlingOgResultat")
-public class OppdaterBehandlingOgResultat extends AbstraktStegBehandler {
+public class OppdaterBehandlingOgResultat implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingOgResultat.class);
 
     private final BehandlingService behandlingService;

@@ -17,7 +17,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
@@ -38,7 +38,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_VALIDERING;
  * IV_FORKORT_PERIODE -> IV_VALIDERING eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class ForkortPeriode extends AbstraktStegBehandler {
+public class ForkortPeriode implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(ForkortPeriode.class);
 

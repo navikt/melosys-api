@@ -12,7 +12,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
+public class OpprettAnmodningsperiodeSvar implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettAnmodningsperiodeSvar.class);
 
@@ -32,12 +32,12 @@ public class OpprettAnmodningsperiodeSvar extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         if (prosessinstans.getType() != ProsessType.ANMODNING_OM_UNNTAK_SVAR) {

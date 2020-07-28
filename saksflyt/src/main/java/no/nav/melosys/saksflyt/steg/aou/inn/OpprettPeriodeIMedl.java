@@ -5,7 +5,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.slf4j.Logger;
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OpprettPeriodeIMedl extends AbstraktStegBehandler {
+public class OpprettPeriodeIMedl implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettPeriodeIMedl.class);
 
     private final BehandlingsresultatService behandlingsresultatService;
@@ -27,12 +27,12 @@ public class OpprettPeriodeIMedl extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_MOTTAK_OPPRETT_PERIODE_MEDL;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Long behandlingID = prosessinstans.getBehandling().getId();
 

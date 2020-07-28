@@ -6,7 +6,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
  *
  */
 @Component
-public class OppdaterStatusBehandlingOpprettet extends AbstraktStegBehandler {
+public class OppdaterStatusBehandlingOpprettet implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingOpprettet.class);
 
@@ -34,7 +34,7 @@ public class OppdaterStatusBehandlingOpprettet extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return STATUS_BEH_OPPR;
     }
 

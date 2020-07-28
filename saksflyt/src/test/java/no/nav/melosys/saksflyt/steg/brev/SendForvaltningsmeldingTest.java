@@ -48,7 +48,7 @@ public class SendForvaltningsmeldingTest {
         p.setBehandling(behandling);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(behandlingService).hentBehandling(1L);
         verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), anyString(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));

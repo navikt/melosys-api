@@ -11,7 +11,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 
-public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
+public abstract class AbstraktAvklarMyndighet implements StegBehandler {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;

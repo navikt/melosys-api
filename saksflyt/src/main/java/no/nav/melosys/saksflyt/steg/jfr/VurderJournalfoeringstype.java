@@ -10,8 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.saksflyt.feil.Feilkategori;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_JOURNALPOS
  *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class VurderJournalfoeringstype extends AbstraktStegBehandler {
+public class VurderJournalfoeringstype implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(VurderJournalfoeringstype.class);
 
@@ -51,12 +50,12 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         switch (prosessinstans.getType()) {
@@ -67,10 +66,7 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
                 knyttDokumentTilEksisterendeBehandlingEllerOpprettNyBehandling(prosessinstans);
                 break;
             default:
-                String feilmelding = "Ukjent prosesstype: " + prosessinstans.getType();
-                log.error("{}: {}", prosessinstans.getId(), feilmelding);
-                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-                return;
+                throw new TekniskException("Ukjent prosesstype: " + prosessinstans.getType());
         }
 
         log.info("Prosessinstans {} har vurdert journalpost {}", prosessinstans.getId(), prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));

@@ -56,12 +56,12 @@ public class SendUtland extends AbstraktSendUtland {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_SEND_SED;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         Behandling behandling = prosessinstans.getBehandling();
         LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);

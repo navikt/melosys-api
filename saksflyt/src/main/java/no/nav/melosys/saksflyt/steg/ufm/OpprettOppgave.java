@@ -5,14 +5,14 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("RegistreringUnntakOpprettOppgave")
-public class OpprettOppgave extends AbstraktStegBehandler {
+public class OpprettOppgave implements StegBehandler {
 
     private final OppgaveService oppgaveService;
 
@@ -22,12 +22,12 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.REG_UNNTAK_OPPRETT_OPPGAVE;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             prosessinstans.getBehandling(),
             prosessinstans.hentJournalpostID(),

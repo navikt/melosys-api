@@ -48,7 +48,7 @@ import static org.mockito.Mockito.*;
         p.setType(ProsessType.JFR_NY_SAK);
         p.setData(ProsessDataKey.GSAK_SAK_ID, 123L);
         p.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(joarkFasade).utledJournalfoeringsbehov(any());
         verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(false));
@@ -66,7 +66,7 @@ import static org.mockito.Mockito.*;
         p.setData(ProsessDataKey.GSAK_SAK_ID, 456L);
         p.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
 
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(joarkFasade).utledJournalfoeringsbehov(any());
         verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(false));
@@ -86,7 +86,7 @@ import static org.mockito.Mockito.*;
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         p.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         p.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
-        agent.utførSteg(p);
+        agent.utfør(p);
 
         verify(joarkFasade).utledJournalfoeringsbehov(any());
         verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(false));

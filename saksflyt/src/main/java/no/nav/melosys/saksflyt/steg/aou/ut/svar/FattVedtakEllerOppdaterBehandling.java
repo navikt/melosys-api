@@ -19,7 +19,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -36,7 +36,7 @@ import static no.nav.melosys.metrics.MetrikkerNavn.SVAR_AOU;
 import static no.nav.melosys.metrics.MetrikkerNavn.TAG_RESULTAT;
 
 @Component
-public class FattVedtakEllerOppdaterBehandling extends AbstraktStegBehandler {
+public class FattVedtakEllerOppdaterBehandling implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(FattVedtakEllerOppdaterBehandling.class);
 
     private static final String INNVILGELSE = "godkjent";
@@ -68,12 +68,12 @@ public class FattVedtakEllerOppdaterBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_SVAR_OPPDATER_BEHANDLING;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         final long behandlingID = prosessinstans.getBehandling().getId();
