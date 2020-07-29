@@ -49,7 +49,10 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
             .withTomDato(lagXmlDato(periode.getTom()))
             .build());
 
-        fag.setNavn(behandling.hentSammensattNavn());
+        final String sammensattNavn = behandling.finnPersonDokument().map(p -> p.sammensattNavn)
+            .orElseThrow(() -> new IllegalStateException("Persondokument finnes ikke for behandling " + behandling.getId()));
+
+        fag.setNavn(sammensattNavn);
         return fag;
     }
 

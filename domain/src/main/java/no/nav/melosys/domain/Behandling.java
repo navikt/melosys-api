@@ -184,6 +184,9 @@ public class Behandling extends RegistreringsInfo {
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
     }
 
+    public Optional<PersonDokument> finnPersonDokument() {
+        return hentDokument(SaksopplysningType.PERSOPL).map(s -> (PersonDokument) s);
+    }
 
     public MedlemskapDokument hentMedlemskapDokument() throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.MEDL);
@@ -221,15 +224,6 @@ public class Behandling extends RegistreringsInfo {
         return getSaksopplysninger().stream()
             .filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType))
             .findFirst().map(Saksopplysning::getDokument);
-    }
-
-    public String hentSammensattNavn() {
-        try {
-            PersonDokument personDokument = hentPersonDokument();
-            return personDokument.sammensattNavn;
-        } catch (TekniskException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     @Override
