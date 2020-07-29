@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -12,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -37,6 +39,8 @@ public class AvsluttArt13BehandlingServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private MedlPeriodeService medlPeriodeService;
+    @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
 
     private AvsluttArt13BehandlingService avsluttArt13BehandlingService;
 
@@ -54,7 +58,7 @@ public class AvsluttArt13BehandlingServiceTest {
     @Before
     public void setup() throws IkkeFunnetException {
         avsluttArt13BehandlingService = new AvsluttArt13BehandlingService(behandlingService, fagsakService,
-            behandlingsresultatService, medlPeriodeService);
+            behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService);
 
         behandling.setId(behandlingID);
         behandlingsresultat.setId(behandlingID);
@@ -76,7 +80,7 @@ public class AvsluttArt13BehandlingServiceTest {
 
     @Test
     public void avsluttBehandlingArt13_ikkeArt13_kasterException() throws FunksjonellException, TekniskException {
-        vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2,1));
+        vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
 
@@ -124,7 +128,27 @@ public class AvsluttArt13BehandlingServiceTest {
         avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
         verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
         verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(false));
+    }
 
+    @Test
+    public void avsluttBehandlingArt13_søknad3MndSidenEndretDatoUtpekingUtenVedtak_lovvalgsperiodeOpprettetOgBehandlingAvsluttet()
+        throws FunksjonellException, TekniskException {
+
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(
+            LocalDate.now(), LocalDate.now(), Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
+        utpekingsperiode.setMedlPeriodeID(123L);
+
+        behandlingsresultat.setEndretDato(månederOgDagerSiden(3, 0));
+        behandlingsresultat.setVedtakMetadata(null);
+        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
+
+        when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), anyCollection())).thenAnswer(a -> a.getArgument(1));
+
+        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
+
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), anyCollection());
+        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART));
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(false));
     }
 
     private Instant månederOgDagerSiden(long mnd, long dager) {
