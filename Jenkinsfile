@@ -14,9 +14,8 @@ node {
     ])
 
     def KUBECTL = "/usr/local/bin/kubectl"
-    def KUBECONFIG_NAISERATOR = "/var/lib/jenkins/kubeconfigs/kubeconfig-teammelosys.json"
+    def KUBECONFIG = "melosys-kubeconfig"
     def NAISERATOR_CONFIG = "nais.yaml"
-    def DEFAULT_BUILD_USER = "eessi2-jenkins"
 
     def cluster = "dev-fss"
     def dockerRepo = "repo.adeo.no:5443"
@@ -79,10 +78,12 @@ node {
         stage("Deploy to NAIS") {
             prepareNaisYaml(NAISERATOR_CONFIG, imageVersion, namespace, cluster)
 
-            sh "${KUBECTL} config --kubeconfig=${KUBECONFIG_NAISERATOR} set-context ${cluster} --namespace=${namespace}"
-            sh "${KUBECTL} config --kubeconfig=${KUBECONFIG_NAISERATOR} use-context ${cluster}"
-            sh "${KUBECTL} apply --kubeconfig=${KUBECONFIG_NAISERATOR} -f ${NAISERATOR_CONFIG}"
-            sh "${KUBECTL} rollout status deployment/${application} --kubeconfig=${KUBECONFIG_NAISERATOR}"
+            withCredentials([file(credentialsId: "${KUBECONFIG}", variable: "KUBECONFIG")]) {
+                sh "${KUBECTL} config set-context ${cluster} --namespace=${namespace}"
+                sh "${KUBECTL} config use-context ${cluster}"
+                sh "${KUBECTL} apply -f ${NAISERATOR_CONFIG}"
+                sh "${KUBECTL} rollout status deployment/${application}"
+            }
         }
 
         if (namespace == 'q1' || namespace == 'p') {
