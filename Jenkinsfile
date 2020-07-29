@@ -79,10 +79,8 @@ node {
             prepareNaisYaml(NAISERATOR_CONFIG, imageVersion, namespace, cluster)
 
             withCredentials([file(credentialsId: "${KUBECONFIG}", variable: "KUBECONFIG")]) {
-                sh "${KUBECTL} config set-context ${cluster} --namespace=${namespace}"
-                sh "${KUBECTL} config use-context ${cluster}"
-                sh "${KUBECTL} apply -f ${NAISERATOR_CONFIG}"
-                sh "${KUBECTL} rollout status deployment/${application}"
+                sh "${KUBECTL} --context=${cluster} --namespace=${namespace} apply -f ${NAISERATOR_CONFIG}"
+                sh "${KUBECTL} --context=${cluster} --namespace=${namespace} rollout status deployment/${application}"
             }
         }
 
