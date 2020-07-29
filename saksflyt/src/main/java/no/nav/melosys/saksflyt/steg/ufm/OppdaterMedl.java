@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -48,7 +47,7 @@ public class OppdaterMedl implements StegBehandler {
         final long behandlingId = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
-        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+        SedDokument sedDokument = behandling.hentSedDokument();
 
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
 
@@ -70,7 +69,7 @@ public class OppdaterMedl implements StegBehandler {
     }
 
     private void opprettPeriode(Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder, boolean erEndelig) throws TekniskException, FunksjonellException {
-        String ident = SaksopplysningerUtils.hentPersonDokument(behandling).fnr;
+        String ident = behandling.hentPersonDokument().fnr;
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
         if (erEndelig) {
             medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), true, ident);

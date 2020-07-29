@@ -16,7 +16,6 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +57,7 @@ public class UfmKontrollServiceTest {
 
     @Test
     public void utførKontroller_periodeIkkeGyldig_forventEttTreff() throws Exception {
-        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+        SedDokument sedDokument = behandling.hentSedDokument();
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().minusYears(1)));
         assertThat(ufmKontrollService.utførKontroller(behandling))
             .containsExactly(Kontroll_begrunnelser.FEIL_I_PERIODEN);

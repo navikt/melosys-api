@@ -16,7 +16,6 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentSammensattNavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
 
 public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
@@ -50,7 +49,7 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
             .withTomDato(lagXmlDato(periode.getTom()))
             .build());
 
-        fag.setNavn(hentSammensattNavn(behandling));
+        fag.setNavn(behandling.hentSammensattNavn());
         return fag;
     }
 
