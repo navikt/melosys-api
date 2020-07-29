@@ -12,9 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -25,6 +23,7 @@ import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +86,7 @@ public class FagsakTjeneste {
         return ResponseEntity.ok().build();
     }
 
+    @Deprecated
     @GetMapping("/sok")
     @ApiOperation(
         value = "Søk etter saker på fødselsnummer eller d-nummer",
@@ -94,6 +94,7 @@ public class FagsakTjeneste {
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestParam("fnr") String fnr) throws FunksjonellException {
+        //TODO: slettes etter POST-endepunkt under er tatt i bruk
         Iterable<Fagsak> saker;
         if (fnr == null) {
             throw new FunksjonellException("fnr er null");
@@ -101,6 +102,28 @@ public class FagsakTjeneste {
         tilgangService.sjekkFnr(fnr);
         saker = fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fnr);
         return tilFagsakOppsummeringDtoer(saker);
+    }
+
+    @PostMapping("/sok")
+    @ApiOperation(
+        value = "Søk etter saker på ident eller saksnummer",
+        notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
+        response = FagsakOppsummeringDto.class,
+        responseContainer = "List")
+    public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+
+        if (StringUtils.isNotEmpty(fagsakSokDto.getIdent())) {
+            tilgangService.sjekkFnr(fagsakSokDto.getIdent());
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.getIdent()));
+        } else if (StringUtils.isNotEmpty(fagsakSokDto.getSaksnummer())) {
+            Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.getSaksnummer());
+            if (fagsak.isPresent()) {
+                tilgangService.sjekkSak(fagsak.get());
+                return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
+            }
+        }
+
+        return Collections.emptyList();
     }
 
     @PostMapping("{saksnr}/henlegg")

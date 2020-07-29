@@ -92,11 +92,12 @@ public class FagsakService {
     }
 
     public Fagsak hentFagsak(String saksnummer) throws IkkeFunnetException {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        if (fagsak == null) {
-            throw new IkkeFunnetException("Det finnes ingen fagsak med saksnummer: " + saksnummer);
-        }
-        return fagsak;
+        return finnFagsakFraSaksnummer(saksnummer)
+            .orElseThrow(() -> new IkkeFunnetException("Det finnes ingen fagsak med saksnummer: " + saksnummer));
+    }
+
+    public Optional<Fagsak> finnFagsakFraSaksnummer(String saksnummer) {
+        return fagsakRepository.findBySaksnummer(saksnummer);
     }
 
     public Fagsak hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) throws IkkeFunnetException {

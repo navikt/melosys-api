@@ -9,8 +9,8 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +41,11 @@ public class VurderJournalfoeringstype implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(VurderJournalfoeringstype.class);
 
-    private final FagsakRepository fagsakRepository;
+    private final FagsakService fagsakService;
 
     @Autowired
-    public VurderJournalfoeringstype(FagsakRepository fagsakRepository) {
-        this.fagsakRepository = fagsakRepository;
-        log.info("VurderJournalfoeringstype initialisert");
+    public VurderJournalfoeringstype(FagsakService fagsakService) {
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -77,7 +76,7 @@ public class VurderJournalfoeringstype implements StegBehandler {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Behandlingstyper nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
 
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
         if (Behandlingstyper.ENDRET_PERIODE.equals(nyBehandlingstype) && aktivBehandling != null) {
