@@ -67,7 +67,7 @@ public class SedDataBygger {
             sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         } else {
             sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
-                .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
+                .orElseThrow(() -> new FunksjonellException("Finner ingen bostedsadresse på person i behandling " + behandlingsresultat.getId())));
             sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
         }
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
@@ -164,13 +164,7 @@ public class SedDataBygger {
     }
 
     private static Optional<Adresse> finnAdresse(BostedGrunnlag bostedGrunnlag) {
-        Optional<StrukturertAdresse> bostedsadresse = bostedGrunnlag.finnBostedsadresse();
-        if (bostedsadresse.isPresent()) {
-            return Optional.of(lagAdresse(Adressetype.BOSTEDSADRESSE, bostedsadresse.get()));
-        } else {
-            Optional<StrukturertAdresse> postadresse = bostedGrunnlag.finnPostadresse();
-            return postadresse.map(strukturertAdresse -> lagAdresse(Adressetype.POSTADRESSE, strukturertAdresse));
-        }
+        return bostedGrunnlag.finnBostedsadresse().map(b -> lagAdresse(Adressetype.BOSTEDSADRESSE, b));
     }
 
     private static Ident tilUtenlandskIdentDto(UtenlandskIdent ui) {

@@ -8,9 +8,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
 import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
-import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
@@ -49,22 +47,5 @@ public class BostedGrunnlag {
         }
         bostedsadresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, bostedsadresse.getPostnr(), LocalDate.now()));
         return Optional.of(StrukturertAdresse.av(bostedsadresse));
-    }
-
-    public Optional<StrukturertAdresse> finnPostadresse() {
-        UstrukturertAdresse ustrukturertAdresse = person.postadresse;
-
-        if (ustrukturertAdresse.erTom()) {
-            return Optional.empty();
-        }
-
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.gatenavn = ustrukturertAdresse.adresselinje1;
-        strukturertAdresse.poststed = ustrukturertAdresse.adresselinje2;
-        strukturertAdresse.postnummer = ustrukturertAdresse.adresselinje3;
-        strukturertAdresse.region = ustrukturertAdresse.adresselinje4;
-        strukturertAdresse.landkode = LandkoderUtils.tilIso2(ustrukturertAdresse.land.getKode());
-
-        return Optional.of(strukturertAdresse);
     }
 }

@@ -9,9 +9,8 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
-import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.soeknad.Bosted;
 import no.nav.melosys.domain.eessi.sed.Adresse;
-import no.nav.melosys.domain.eessi.sed.Adressetype;
 import no.nav.melosys.domain.eessi.sed.Arbeidssted;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
@@ -37,6 +36,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static no.nav.melosys.domain.eessi.sed.Adresse.IKKE_TILGJENGELIG;
 import static no.nav.melosys.domain.eessi.sed.Adresse.INGEN_FAST_ADRESSE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -243,6 +243,18 @@ public class SedDataByggerTest {
     }
 
     @Test
+    public void lag_bostedsadresseFinnesIkke_kasterException() throws TekniskException {
+
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
+        sedDataGrunnlagMedSoknad.getBehandlingsgrunnlagData().bosted = new Bosted();
+        sedDataGrunnlagMedSoknad.getPerson().bostedsadresse = new Bostedsadresse();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE))
+            .withMessageContaining("Finner ingen bostedsadresse ");
+    }
+
+    @Test
     public void lag_medMaritimtArbeid_gatenavnBlirNA() throws TekniskException, FunksjonellException {
         Map<String, AvklartMaritimtArbeid> alleAvklarteMaritimeArbeid = new HashMap<>();
         Avklartefakta maritimtFakta = new Avklartefakta();
@@ -333,28 +345,9 @@ public class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_ingenBostedsadresse_forventPostadresse() throws MelosysException {
-        SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
-        dataGrunnlag.getPerson().bostedsadresse = new no.nav.melosys.domain.dokument.person.Bostedsadresse();
-
-        UstrukturertAdresse postadresse = new UstrukturertAdresse();
-        postadresse.land = new Land("NOR");
-        postadresse.adresselinje1 = "gate";
-        dataGrunnlag.getPerson().postadresse = postadresse;
-
-        SedDataDto sedData = dataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
-
-        lagUtkastAssertions(sedData);
-        assertThat(sedData.getBostedsadresse().getLand()).isEqualTo("NOR");
-        assertThat(sedData.getBostedsadresse().getGateadresse()).isEqualTo("gate");
-        assertThat(sedData.getBostedsadresse().getAdressetype()).isEqualTo(Adressetype.POSTADRESSE);
-    }
-
-    @Test
     public void lagUtkast_ingenAdresse_forventTomAdresse() throws MelosysException {
         SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
         dataGrunnlag.getPerson().bostedsadresse = new no.nav.melosys.domain.dokument.person.Bostedsadresse();
-        dataGrunnlag.getPerson().postadresse = new UstrukturertAdresse();
 
         SedDataDto sedData = dataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
