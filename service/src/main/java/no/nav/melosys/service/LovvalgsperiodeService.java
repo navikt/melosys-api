@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -87,7 +86,7 @@ public class LovvalgsperiodeService {
             .map(utvalgtPeriode -> utvalgtPeriode.getId().getPeriodeId())
             .collect(Collectors.toSet());
 
-        MedlemskapDokument medlemskapdokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
+        MedlemskapDokument medlemskapdokument = behandling.hentMedlemskapDokument();
         Set<Medlemsperiode> perioder = medlemskapdokument.getMedlemsperiode().stream()
             .filter(periode -> utvalgtePeriodeIDer.contains(periode.id))
             .collect(Collectors.toSet());

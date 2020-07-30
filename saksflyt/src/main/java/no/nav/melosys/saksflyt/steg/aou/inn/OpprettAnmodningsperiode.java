@@ -5,15 +5,12 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -65,10 +62,10 @@ public class OpprettAnmodningsperiode implements StegBehandler {
 
     private SedDokument hentEllerOpprettSedDokument(Prosessinstans prosessinstans) throws IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        Optional<SaksopplysningDokument> sedDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.SEDOPPL);
+        Optional<SedDokument> sedDokument = behandling.finnSedDokument();
 
         if (sedDokument.isPresent()) {
-            return (SedDokument) sedDokument.get();
+            return sedDokument.get();
         }
 
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);

@@ -16,7 +16,6 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentSammensattNavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
 
 public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
@@ -50,7 +49,10 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
             .withTomDato(lagXmlDato(periode.getTom()))
             .build());
 
-        fag.setNavn(hentSammensattNavn(behandling));
+        final String sammensattNavn = behandling.finnPersonDokument().map(p -> p.sammensattNavn)
+            .orElseThrow(() -> new IllegalStateException("Persondokument finnes ikke for behandling " + behandling.getId()));
+
+        fag.setNavn(sammensattNavn);
         return fag;
     }
 

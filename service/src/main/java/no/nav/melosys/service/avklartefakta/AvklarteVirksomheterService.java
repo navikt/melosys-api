@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentArbeidsforholdDokument;
-
 @Service
 @Primary
 public class AvklarteVirksomheterService {
@@ -55,7 +53,7 @@ public class AvklarteVirksomheterService {
     }
 
     public Set<String> hentNorskeArbeidsgivendeOrgnumre(Behandling behandling) throws TekniskException {
-        ArbeidsforholdDokument arbDok = hentArbeidsforholdDokument(behandling);
+        ArbeidsforholdDokument arbDok = behandling.hentArbeidsforholdDokument();
         Set<String> arbeidsgivendeOrgnumre = arbDok.hentOrgnumre();
         BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         arbeidsgivendeOrgnumre.addAll(grunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);

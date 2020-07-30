@@ -3,7 +3,6 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
@@ -30,14 +29,14 @@ import static org.mockito.Mockito.*;
 
 public class LovvalgsperiodeServiceTest {
 
-    BehandlingRepository behandlingRepositoryMock = mock(BehandlingRepository.class);
+    private BehandlingRepository behandlingRepositoryMock = mock(BehandlingRepository.class);
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     private LovvalgsperiodeService instanse;
 
-    private static final Collection<Lovvalgsperiode> LOVVALGSPERIODER = Collections.singletonList(lagLovvalgsperiode());
+    private static final Collection<Lovvalgsperiode> LOVVALGSPERIODER = Collections.singletonList(new Lovvalgsperiode());
     private LovvalgsperiodeRepository lovvalgsperiodeRepositoryMock = mock(LovvalgsperiodeRepository.class);
 
     @Before
@@ -81,7 +80,7 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void lagreLovvalgsperioderGirKopiMedBehandlingsresultat() throws Throwable {
+    public void lagreLovvalgsperioderGirKopiMedBehandlingsresultat() {
         assertThat(LOVVALGSPERIODER.iterator().next().getBehandlingsresultat()).isNull();
         Collection<Lovvalgsperiode> resultat = instanse.lagreLovvalgsperioder(13L, LOVVALGSPERIODER);
         assertThat(resultat).size().isEqualTo(LOVVALGSPERIODER.size());
@@ -89,17 +88,12 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void lagreLovvalgsperioderUtenBehandlingsresultatKasterException() throws Throwable {
-        Throwable thrown = catchThrowable(() -> 
-            instanse.lagreLovvalgsperioder(42L, LOVVALGSPERIODER)       
+    public void lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
+        Throwable thrown = catchThrowable(() ->
+            instanse.lagreLovvalgsperioder(42L, LOVVALGSPERIODER)
         );
         assertThat(thrown).isInstanceOf(IllegalStateException.class)
                 .hasMessageEndingWith("fins ikke.");
-    }
-
-    private static Lovvalgsperiode lagLovvalgsperiode() {
-        Lovvalgsperiode resultat = new Lovvalgsperiode();
-        return resultat;
     }
 
     @Test
@@ -220,9 +214,9 @@ public class LovvalgsperiodeServiceTest {
         medl.setDokument(medlDokument);
         medl.setType(SaksopplysningType.MEDL);
 
-        Behandling behandling = mock(Behandling.class);
-        when(behandling.getId()).thenReturn(1L);
-        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Collections.singletonList(medl)));
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.getSaksopplysninger().add(medl);
         return behandling;
     }
 
