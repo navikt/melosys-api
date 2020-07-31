@@ -5,7 +5,6 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -45,7 +44,7 @@ public class HentRegisteropplysninger implements StegBehandler {
         String fnr = tpsFasade.hentIdentForAktørId(aktørId);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, fnr);
 
-        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+        SedDokument sedDokument = behandling.hentSedDokument();
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(behandling.getId())

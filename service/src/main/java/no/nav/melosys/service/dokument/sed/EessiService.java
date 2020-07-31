@@ -18,7 +18,6 @@ import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -98,7 +97,7 @@ public class EessiService {
         return eessiConsumer.hentMottakerinstitusjoner(bucType, landkode);
     }
 
-    public boolean landErEessiReady(String bucType, String landkode) throws MelosysException {
+    private boolean landErEessiReady(String bucType, String landkode) throws MelosysException {
         return !hentEessiMottakerinstitusjoner(bucType, landkode).isEmpty();
     }
 
@@ -174,7 +173,7 @@ public class EessiService {
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
         sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
-        String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
+        String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingID);
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
@@ -185,7 +184,7 @@ public class EessiService {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
 
-        String rinaSaksnummer = SaksopplysningerUtils.hentSedDokument(behandling).getRinaSaksnummer();
+        String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
         sedDataDto.setYtterligereInformasjon(utpekingAvvis.getFritekst());

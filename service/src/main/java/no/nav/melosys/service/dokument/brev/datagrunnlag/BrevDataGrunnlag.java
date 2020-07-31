@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.datagrunnlag;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -25,7 +24,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
                             AvklartefaktaService avklartefaktaService) throws TekniskException {
         this.behandling = behandling;
         this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
+        this.person = behandling.hentPersonDokument();
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService, kodeverkService);
         this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, getPerson(), kodeverkService);
         this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(

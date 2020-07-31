@@ -1,29 +1,20 @@
 package no.nav.melosys.service.kontroll.vedtak;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.kontroll.MedlemskapKontroller;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.kontroll.PersonKontroller;
 
 final class VedtakKontroller {
 
     private VedtakKontroller() {}
 
     static Kontroll_begrunnelser bostedsadresseForA1(VedtakKontrollData kontrollData) {
-        PersonDokument personDokument = kontrollData.getPersonDokument();
-        if (personDokument.manglerBostedsadresse()) {
-            BehandlingsgrunnlagData grunnlagData = kontrollData.getBehandlingsgrunnlagData();
-            StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
-            if (oppgittAdresse.erTom()) {
-                return Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE;
-            }
-        }
-        return null;
+        return PersonKontroller.harRegistrertBostedsadresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
+            ? null : Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE;
     }
 
     static Kontroll_begrunnelser overlappendeMedlemsperiode(VedtakKontrollData kontrollData) {

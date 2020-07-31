@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.springframework.stereotype.Service;
@@ -35,15 +34,15 @@ public class UfmKontrollService {
     }
 
     public List<Kontroll_begrunnelser> utførKontroller(Behandling behandling) throws TekniskException {
-        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+        SedDokument sedDokument = behandling.hentSedDokument();
         if (feilIPeriode(sedDokument)) {
             return Collections.singletonList(Kontroll_begrunnelser.FEIL_I_PERIODEN);
         }
 
-        PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
-        MedlemskapDokument medlemskapDokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
-        InntektDokument inntektDokument = SaksopplysningerUtils.hentInntektDokument(behandling);
-        UtbetalingDokument utbetalingDokument = SaksopplysningerUtils.finnUtbetalingDokument(behandling).orElse(null);
+        PersonDokument personDokument = behandling.hentPersonDokument();
+        MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
+        InntektDokument inntektDokument = behandling.hentInntektDokument();
+        UtbetalingDokument utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
         UfmKontrollData kontrollData = new UfmKontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
 
         return utførKontroller(kontrollData, kontrollFactory.hentKontrollerForSedType(sedDokument.getSedType()));

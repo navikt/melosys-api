@@ -18,11 +18,9 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -287,7 +285,6 @@ public class BrevDataService {
     }
 
     private boolean brukerHarIkkeAdresseiTps(Behandling behandling) throws TekniskException {
-        PersonDokument person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        return person.harIkkeRegistrertAdresse();
+        return behandling.hentPersonDokument().harIkkeRegistrertAdresse();
     }
 }

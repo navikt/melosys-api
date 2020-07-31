@@ -6,7 +6,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -52,7 +51,7 @@ public class OppdaterMedl implements StegBehandler {
             log.info("Lovvalgsperiode for behandling {} satt til avvist i Medl", behandling.getId());
         }
 
-        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+        SedDokument sedDokument = behandling.hentSedDokument();
         if (sedDokument.getErElektronisk()) {
             prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_SEND_SED);
         } else {

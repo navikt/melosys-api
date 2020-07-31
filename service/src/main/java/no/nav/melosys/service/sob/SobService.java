@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.TemaFactory;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -58,7 +57,7 @@ public class SobService {
     }
 
     private String hentAktørIdFraTps(Behandling behandling) throws TekniskException, IkkeFunnetException {
-        PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
+        PersonDokument personDokument = behandling.hentPersonDokument();
         return tpsFasade.hentAktørIdForIdent(personDokument.fnr);
     }
 }
