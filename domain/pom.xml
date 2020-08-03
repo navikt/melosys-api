@@ -18,9 +18,13 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
+            <artifactId>altinn</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-internt-kodeverk</artifactId>
         </dependency>
-    
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
