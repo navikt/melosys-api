@@ -27,7 +27,8 @@ public class HentSoknadsinnhold implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String søknadID = prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID);
-        String søknad = soknadMottakConsumer.hentSøknad(søknadID);
+        var søknad = soknadMottakConsumer.hentSøknad(søknadID);
+
         // todo mappe og lagre søknaden -  MELOSYS-3572
     }
 }

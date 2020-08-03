@@ -1,5 +1,7 @@
 package no.nav.melosys.integrasjon.altinn;
 
+import no.nav.melosys.altinn.MedlemskapArbeidEOSM;
+
 public interface SoknadMottakConsumer {
-    String hentSøknad(String søknadID);
+    MedlemskapArbeidEOSM hentSøknad(String søknadID);
 }
