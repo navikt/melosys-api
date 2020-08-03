@@ -13,6 +13,8 @@ import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 
 public final class MedlemskapKontroller {
 
+    private static final String STATSLØS = "XS";
+
     private MedlemskapKontroller() {
     }
 
@@ -50,5 +52,19 @@ public final class MedlemskapKontroller {
     public static boolean statsborgerskapIkkeMedlemsland(Collection<String> statsborgerskapLandkoder) {
         return !statsborgerskapLandkoder.isEmpty() && Arrays.stream(Landkoder.values())
             .noneMatch(landkode -> statsborgerskapLandkoder.contains(landkode.getKode()));
+    }
+
+    public static boolean statsborgerskapSkalIkkeSjekkes(Landkoder avsenderLandkode) {
+        return avsenderLandkode == Landkoder.SE
+            || avsenderLandkode == Landkoder.DK
+            || avsenderLandkode == Landkoder.FI
+            || avsenderLandkode == Landkoder.IS
+            || avsenderLandkode == Landkoder.AT
+            || avsenderLandkode == Landkoder.NL
+            || avsenderLandkode == Landkoder.LU;
+    }
+
+    public static boolean erStatsløs(Collection<String> statsborgerskapLandkoder) {
+        return !statsborgerskapLandkoder.isEmpty() && statsborgerskapLandkoder.contains(STATSLØS);
     }
 }

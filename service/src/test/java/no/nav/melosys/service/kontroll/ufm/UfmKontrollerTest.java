@@ -85,6 +85,20 @@ public class UfmKontrollerTest {
     }
 
     @Test
+    public void statsborgerskapStatsløs_erOK_ikkeSjekkMedlemsland() {
+        UfmKontrollData kontrollData = kontrollData();
+        kontrollData.getSedDokument().setStatsborgerskapKoder(List.of("XS"));
+        assertThat(UfmKontroller.statsborgerskapIkkeMedlemsland(kontrollData)).isNull();
+    }
+
+    @Test
+    public void avtalelandErSverige_erOK_ikkeSjekkMedlemsland() {
+        UfmKontrollData kontrollData = kontrollData();
+        kontrollData.getSedDokument().setAvsenderLandkode(Landkoder.SE);
+        assertThat(UfmKontroller.statsborgerskapIkkeMedlemsland(kontrollData)).isNull();
+    }
+
+    @Test
     public void personDød_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroller.personDød(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERSON_DOD);
     }

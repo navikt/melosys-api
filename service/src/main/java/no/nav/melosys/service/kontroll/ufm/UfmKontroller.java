@@ -72,7 +72,9 @@ final class UfmKontroller {
     }
 
     static Kontroll_begrunnelser statsborgerskapIkkeMedlemsland(UfmKontrollData kontrollData) {
-        return MedlemskapKontroller.statsborgerskapIkkeMedlemsland(kontrollData.getSedDokument().getStatsborgerskapKoder()) ?
+        return !MedlemskapKontroller.statsborgerskapSkalIkkeSjekkes(kontrollData.getSedDokument().getAvsenderLandkode())
+            && !MedlemskapKontroller.erStatsløs(kontrollData.getSedDokument().getStatsborgerskapKoder())
+            && MedlemskapKontroller.statsborgerskapIkkeMedlemsland(kontrollData.getSedDokument().getStatsborgerskapKoder()) ?
             Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND : null;
     }
 
