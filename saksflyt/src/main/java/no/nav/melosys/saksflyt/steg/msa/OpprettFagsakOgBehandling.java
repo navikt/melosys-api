@@ -1,0 +1,42 @@
+package no.nav.melosys.saksflyt.steg.msa;
+
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.altinn.AltinnSoeknadService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.MOTTATT_SOKNAD_ID;
+
+@Component
+public class OpprettFagsakOgBehandling implements StegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
+
+    private final AltinnSoeknadService altinnSoeknadService;
+
+    public OpprettFagsakOgBehandling(AltinnSoeknadService altinnSoeknadService) {
+        this.altinnSoeknadService = altinnSoeknadService;
+    }
+
+    @Override
+    public ProsessSteg inngangsSteg() {
+        return ProsessSteg.MSA_OPPRETT_SAK_OG_BEHANDLING;
+    }
+
+    @Override
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+
+        final String søknadID = prosessinstans.getData(MOTTATT_SOKNAD_ID);
+        log.info("Oppretter fagsak og behandling for Altinn-søknad med refernase {}", søknadID);
+
+        Behandling behandling = altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID);
+        prosessinstans.setBehandling(behandling);
+
+        prosessinstans.setSteg(ProsessSteg.MSA_OPPRETT_ARKIVSAK);
+    }
+}
