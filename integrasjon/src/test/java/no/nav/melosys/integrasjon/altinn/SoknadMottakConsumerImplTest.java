@@ -40,7 +40,7 @@ public class SoknadMottakConsumerImplTest {
         URI søknadURI = (getClass().getClassLoader().getResource("soknad_altinn.xml")).toURI();
         String xmlResponse = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
-        server.expect(requestTo("/soknad/" + soknadID))
+        server.expect(requestTo("/soknader/" + soknadID))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess().body(xmlResponse).contentType(MediaType.APPLICATION_XML));
 

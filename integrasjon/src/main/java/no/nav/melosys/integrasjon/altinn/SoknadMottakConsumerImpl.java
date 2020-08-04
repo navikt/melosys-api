@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
 
-    private static Logger log = LoggerFactory.getLogger(SoknadMottakConsumerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SoknadMottakConsumerImpl.class);
 
     private final RestTemplate restTemplate;
 
@@ -26,7 +26,7 @@ public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
     public MedlemskapArbeidEOSM hentSøknad(String søknadID) {
         log.info("Henter søknad med ID {}", søknadID);
 
-        return restTemplate.exchange(String.format("/soknad/%s", søknadID), HttpMethod.GET,
+        return restTemplate.exchange(String.format("/soknader/%s", søknadID), HttpMethod.GET,
             new HttpEntity<>(getXmltypeHeaders()), new ParameterizedTypeReference<MedlemskapArbeidEOSM>() {
             }
         ).getBody();
