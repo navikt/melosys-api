@@ -22,7 +22,7 @@ import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
@@ -127,7 +127,7 @@ class A1Mapper {
 
         BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
         Stream.concat(
-            hentAvklarteVirksomheterOgFlyvendeArbeidssteder(avklarteVirksomheter, arbeidssteder),
+            hentAvklarteVirksomheterOgIkkeFysiskeArbeidssteder(avklarteVirksomheter, arbeidssteder),
             Stream.generate(A1Mapper::lagTomBivirksomhetType))
             .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1)
             .forEach(bivirksomhetType -> bivirksomheterBrev.getBivirksomhet().add(bivirksomhetType));
@@ -169,15 +169,15 @@ class A1Mapper {
         return List.of(tekstMedLinjeskift.split(System.lineSeparator()));
     }
 
-    private Stream<BivirksomhetType> hentAvklarteVirksomheterOgFlyvendeArbeidssteder(
+    private Stream<BivirksomhetType> hentAvklarteVirksomheterOgIkkeFysiskeArbeidssteder(
         Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidssteder) {
 
-        Stream<FlyvendeArbeidssted> flyvendeArbeidssteder = arbeidssteder.stream()
-            .filter(FlyvendeArbeidssted.class::isInstance)
-            .map(FlyvendeArbeidssted.class::cast);
+        Stream<IkkeFysiskArbeidssted> ikkeFysiskeArbeidssteder = arbeidssteder.stream()
+            .filter(IkkeFysiskArbeidssted.class::isInstance)
+            .map(IkkeFysiskArbeidssted.class::cast);
         return Stream.concat(
             avklarteVirksomheter.stream().map(this::tilBivirksomhetType),
-            flyvendeArbeidssteder.map(this::tilBivirksomhetType)
+            ikkeFysiskeArbeidssteder.map(this::tilBivirksomhetType)
         );
     }
 
@@ -234,7 +234,7 @@ class A1Mapper {
         return bivirksomhetType;
     }
 
-    private BivirksomhetType tilBivirksomhetType(FlyvendeArbeidssted arbeidssted) {
+    private BivirksomhetType tilBivirksomhetType(IkkeFysiskArbeidssted arbeidssted) {
         BivirksomhetType bivirksomhetType = new BivirksomhetType();
         bivirksomhetType.setNavn(arbeidssted.getEnhetNavn());
         bivirksomhetType.setOrgnummer("");

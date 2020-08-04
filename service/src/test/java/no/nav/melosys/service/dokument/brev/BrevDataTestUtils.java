@@ -94,7 +94,6 @@ public class BrevDataTestUtils {
 
     private static AvklartMaritimtArbeid lagAvklartMaritimtArbeid(Maritimtyper maritimtype) {
         AvklartMaritimtArbeid avklartMaritimtArbeid = mock(AvklartMaritimtArbeid.class);
-        when(avklartMaritimtArbeid.getMaritimtype()).thenReturn(maritimtype);
         when(avklartMaritimtArbeid.getLand()).thenReturn(Landkoder.GB.getKode());
         return avklartMaritimtArbeid;
     }
