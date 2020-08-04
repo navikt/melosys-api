@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>altinn</artifactId>
+    <artifactId>soknad-altinn</artifactId>
 
     <dependencies>
         <dependency>
@@ -39,8 +39,7 @@
                     <sources>
                         <source>src/main/resources/NAV_MedlemskapArbeidEOS_M_2020-06-08_6320_45770_SERES.xsd</source>
                     </sources>
-
-                    <packageName>no.nav.melosys.altinn</packageName>
+                    <packageName>no.nav.melosys.soknad_altinn</packageName>
                 </configuration>
             </plugin>
         </plugins>

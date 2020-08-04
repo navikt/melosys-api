@@ -1,6 +1,5 @@
 package no.nav.melosys.service.altinn;
 
-import no.nav.melosys.altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -15,6 +14,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
+import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 

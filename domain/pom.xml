@@ -18,7 +18,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>altinn</artifactId>
+            <artifactId>soknad-altinn</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>

@@ -2,7 +2,6 @@ package no.nav.melosys.service.altinn;
 
 import java.util.List;
 
-import no.nav.melosys.altinn.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -15,6 +14,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
+import no.nav.melosys.soknad_altinn.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

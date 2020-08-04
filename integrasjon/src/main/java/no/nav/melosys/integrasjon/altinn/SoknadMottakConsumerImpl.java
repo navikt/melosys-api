@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.altinn;
 
 import java.util.Collections;
 
-import no.nav.melosys.altinn.MedlemskapArbeidEOSM;
+import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
