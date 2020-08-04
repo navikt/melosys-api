@@ -18,10 +18,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>soknad-altinn</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-internt-kodeverk</artifactId>
         </dependency>
 
