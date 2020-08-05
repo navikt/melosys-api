@@ -92,14 +92,12 @@ public class BehandlingsgrunnlagServiceTest {
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         BehandlingsgrunnlagData originalData = new BehandlingsgrunnlagData();
-        originalData.arbeidNorge.kontaktNavn = "Nils Nilsersenenen";
         String originalJsonData = objectMapper.writeValueAsString(originalData);
         behandlingsgrunnlag.setJsonData(originalJsonData);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         when(behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)).thenReturn(Optional.of(behandlingsgrunnlag));
 
         BehandlingsgrunnlagData nyData = new SoeknadDokument();
-        nyData.arbeidNorge.kontaktNavn = "Per Pererersen";
         JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(nyData));
 
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, jsonNode);

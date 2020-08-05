@@ -1,13 +1,12 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 
@@ -17,23 +16,22 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ArbeidsstedGrunnlag {
-    private final Behandling behandling;
-    private final BehandlingsgrunnlagData grunnlagData;
+    private final Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeidEtterSubjekt;
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
-    private final AvklartefaktaService avklartefaktaService;
+    private final BehandlingsgrunnlagData grunnlagData;
 
-    ArbeidsstedGrunnlag(Behandling behandling, BehandlingsgrunnlagData grunnlagData,
+    ArbeidsstedGrunnlag(Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid,
                         AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag,
-                        AvklartefaktaService avklartefaktaService) {
-        this.behandling = behandling;
-        this.grunnlagData = grunnlagData;
+                        BehandlingsgrunnlagData grunnlagData) {
+        this.avklarteMaritimeArbeidEtterSubjekt = avklarteMaritimeArbeid;
         this.avklarteVirksomheterGrunnlag = avklarteVirksomheterGrunnlag;
-        this.avklartefaktaService = avklartefaktaService;
+        this.grunnlagData = grunnlagData;
     }
 
     public List<Arbeidssted> hentArbeidssteder() {
         List<Arbeidssted> arbeidssteder = hentFysiskearbeidssteder();
         arbeidssteder.addAll(hentMaritimeArbeidssteder());
+        arbeidssteder.addAll(hentFlyvendeArbeidssteder());
         return arbeidssteder;
     }
 
@@ -51,18 +49,21 @@ public class ArbeidsstedGrunnlag {
     }
 
     private List<MaritimtArbeidssted> hentMaritimeArbeidssteder() {
-        Map<String, AvklartMaritimtArbeid> avklartMaritimtArbeid =
-            avklartefaktaService.hentAlleMaritimeAvklartfakta(behandling.getId());
-
         // Arbeidssted for maritimt arbeid benytter foretakNavn og foretakOrgnr fra søknad, og arbeidsland fra avklartfakta
         return grunnlagData.maritimtArbeid.stream()
-            .map(ma -> lagMaritimtArbeidssted(ma, avklartMaritimtArbeid))
+            .map(this::lagMaritimtArbeidssted)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
 
-    private MaritimtArbeidssted lagMaritimtArbeidssted(MaritimtArbeid maritimtArbeid, Map<String, AvklartMaritimtArbeid> alleAvklarteMaritimeArbeid) {
-        AvklartMaritimtArbeid avklartMaritimtArbeid = alleAvklarteMaritimeArbeid.get(maritimtArbeid.enhetNavn);
+    private List<FlyvendeArbeidssted> hentFlyvendeArbeidssteder() {
+        return grunnlagData.luftfartBaser.stream()
+            .map(FlyvendeArbeidssted::new)
+            .collect(Collectors.toList());
+    }
+
+    private MaritimtArbeidssted lagMaritimtArbeidssted(MaritimtArbeid maritimtArbeid) {
+        AvklartMaritimtArbeid avklartMaritimtArbeid = avklarteMaritimeArbeidEtterSubjekt.get(maritimtArbeid.enhetNavn);
         if (avklartMaritimtArbeid != null) {
             return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);
         }

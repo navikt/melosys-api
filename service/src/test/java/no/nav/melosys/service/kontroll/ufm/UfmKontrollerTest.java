@@ -51,7 +51,7 @@ public class UfmKontrollerTest {
 
     @Test
     public void periodeEldreEnn5År_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroller.periodeEldreEnn3År(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Kontroll_begrunnelser.PERIODE_FOR_GAMMEL);
+        assertThat(UfmKontroller.periodeStarterFørFørsteJuni2012(kontrollData(LocalDate.now().minusYears(10), null))).isEqualTo(Kontroll_begrunnelser.PERIODE_FOR_GAMMEL);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class UfmKontrollerTest {
     @Test
     public void arbeidssted_erSvalbard_verifiserBegrunnelse() {
         assertThat(UfmKontroller.arbeidssted(kontrollData())).isEqualTo(Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS);
-    }    
+    }
 
     private UfmKontrollData kontrollData() {
         return kontrollData(LocalDate.now().plusMonths(15), LocalDate.now().plusYears(10));

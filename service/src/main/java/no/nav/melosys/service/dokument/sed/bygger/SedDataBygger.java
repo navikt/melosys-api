@@ -20,6 +20,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.LandvelgerService;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
@@ -121,7 +122,7 @@ public class SedDataBygger {
     }
 
     private List<Arbeidssted> hentArbeidssteder(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException {
-        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
+        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList());
 
         Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
@@ -181,10 +182,15 @@ public class SedDataBygger {
             FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arb;
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
             arbeidssted.setNavn(arb.getForetakNavn());
+        } else if (arb instanceof FlyvendeArbeidssted) {
+            FlyvendeArbeidssted flyvendeArbeidssted = (FlyvendeArbeidssted) arb;
+            arbeidssted.setNavn(flyvendeArbeidssted.getEnhetNavn());
+            arbeidssted.setAdresse(Adresse.lagAdresseMedBareLandkode(flyvendeArbeidssted.getLandkode()));
+            arbeidssted.setHjemmebase(flyvendeArbeidssted.getLandkode());
         } else {
             MaritimtArbeidssted maritimtArbeidssted = (MaritimtArbeidssted) arb;
             arbeidssted.setNavn(maritimtArbeidssted.getEnhetNavn() + (maritimtArbeidssted.erSokkel() ? " offshore" : ""));
-            arbeidssted.setAdresse(Adresse.lagMaritimAdresse(maritimtArbeidssted.getLandkode()));
+            arbeidssted.setAdresse(Adresse.lagAdresseMedBareLandkode(maritimtArbeidssted.getLandkode()));
             arbeidssted.setHjemmebase(maritimtArbeidssted.getFlaggLandKode());
         }
         return arbeidssted;

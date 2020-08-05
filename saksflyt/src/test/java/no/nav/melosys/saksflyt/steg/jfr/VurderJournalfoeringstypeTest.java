@@ -12,18 +12,19 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,10 +39,12 @@ public class VurderJournalfoeringstypeTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
+    @Mock
+    private FagsakService fagsakService;
+
     @Before
-    public void setUp() {
-        FagsakRepository fagsakRepository = mock(FagsakRepository.class);
-        agent = new VurderJournalfoeringstype(fagsakRepository);
+    public void setUp() throws IkkeFunnetException {
+        agent = new VurderJournalfoeringstype(fagsakService);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setBehandlinger(Collections.emptyList());
@@ -57,9 +60,9 @@ public class VurderJournalfoeringstypeTest {
         fagsakMedInaktivBehandling.setBehandlinger(Collections.singletonList(inaktivBehandling));
         fagsakMedInaktivOgAktivBehandling.setBehandlinger(Arrays.asList(aktivBehandling, inaktivBehandling));
 
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_UTEN_BEHANDLING)).thenReturn(fagsak);
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_MED_AKTIV_BEHANDLING)).thenReturn(fagsakMedAktivBehandling);
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING)).thenReturn(fagsakMedInaktivBehandling);
+        when(fagsakService.hentFagsak(SAKSNUMMER_UTEN_BEHANDLING)).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(SAKSNUMMER_MED_AKTIV_BEHANDLING)).thenReturn(fagsakMedAktivBehandling);
+        when(fagsakService.hentFagsak(SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING)).thenReturn(fagsakMedInaktivBehandling);
     }
 
     @Test

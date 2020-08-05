@@ -45,6 +45,7 @@ public class VilkaarsresultatService {
             vilkaarDto.setOppfylt(vilkaarsresultat.isOppfylt());
             vilkaarDto.setBegrunnelseKoder(vilkaarsresultat.getBegrunnelser().stream().map(VilkaarBegrunnelse::getKode).collect(Collectors.toList()));
             vilkaarDto.setBegrunnelseFritekst(vilkaarsresultat.getBegrunnelseFritekst());
+            vilkaarDto.setBegrunnelseFritekstEngelsk(vilkaarsresultat.getBegrunnelseFritekstEessi());
             vilkaarDtoListe.add(vilkaarDto);
         }
 
@@ -86,7 +87,8 @@ public class VilkaarsresultatService {
                 Vilkaar.valueOf(vilkaarDto.getVilkaar()),
                 vilkaarDto.isOppfylt(),
                 vilkaarDto.getBegrunnelseKoder(),
-                vilkaarDto.getBegrunnelseFritekst());
+                vilkaarDto.getBegrunnelseFritekst(),
+                vilkaarDto.getBegrunnelseFritekstEngelsk());
             vilkaarsresultatRepo.save(vilkaarsresultat);
         }
     }
@@ -116,14 +118,23 @@ public class VilkaarsresultatService {
         vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
         vilkaarsresultatRepo.flush();
         List<String> begrunnelseKoder = begrunnelseKode == null ? List.of() : List.of(begrunnelseKode.getKode());
-        vilkaarsresultatRepo.save(lagVilkaarsresultat(behandlingsresultat, vilkaar, oppfylt, begrunnelseKoder, null));
+        vilkaarsresultatRepo.save(lagVilkaarsresultat(behandlingsresultat, vilkaar, oppfylt, begrunnelseKoder));
+    }
+
+    private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
+                                                 Vilkaar vilkaar,
+                                                 boolean oppfylt,
+                                                 List<String> begrunnelseKoder) {
+        return lagVilkaarsresultat(behandlingsresultat, vilkaar, oppfylt, begrunnelseKoder,
+            null, null);
     }
 
     private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
                                                  Vilkaar vilkaar,
                                                  boolean oppfylt,
                                                  List<String> begrunnelseKoder,
-                                                 String begrunnelseFritekst) {
+                                                 String begrunnelseFritekst,
+                                                 String begrunnelseFritekstEngelsk) {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         vilkaarsresultat.setBehandlingsresultat(behandlingsresultat);
         vilkaarsresultat.setVilkaar(vilkaar);
@@ -131,6 +142,7 @@ public class VilkaarsresultatService {
         vilkaarsresultat.setBegrunnelser(begrunnelseKoder.stream().map(kode -> lagBegrunnelse(vilkaarsresultat, kode))
             .collect(Collectors.toSet()));
         vilkaarsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
+        vilkaarsresultat.setBegrunnelseFritekstEessi(begrunnelseFritekstEngelsk);
         return vilkaarsresultat;
     }
 

@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.soeknad.Bosted;
+import no.nav.melosys.domain.dokument.soeknad.LuftfartBase;
 import no.nav.melosys.domain.eessi.sed.Adresse;
 import no.nav.melosys.domain.eessi.sed.Arbeidssted;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
@@ -263,7 +264,7 @@ public class SedDataByggerTest {
         AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("navn", Collections.singletonList(maritimtFakta));
         alleAvklarteMaritimeArbeid.put("enhet", avklartMaritimtArbeid);
 
-        when(avklartefaktaService.hentAlleMaritimeAvklartfakta(anyLong())).thenReturn(alleAvklarteMaritimeArbeid);
+        when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong())).thenReturn(alleAvklarteMaritimeArbeid);
 
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
@@ -367,6 +368,25 @@ public class SedDataByggerTest {
 
         assertThat(ikkeOppgittArbeidsstedForLand.getNavn()).isEqualTo(INGEN_FAST_ADRESSE);
         assertThat(ikkeOppgittArbeidsstedForLand.getAdresse().getPoststed()).isEqualTo(INGEN_FAST_ADRESSE);
+    }
+
+    @Test
+    public void lagUtkast_medLuftfartBase_arbeidsstedBlirSatt() throws TekniskException, FunksjonellException {
+        LuftfartBase luftfartBase = new LuftfartBase();
+        luftfartBase.hjemmebaseNavn = "hjemmebaseNavn";
+        luftfartBase.hjemmebaseLand = "GB";
+
+        SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
+        dataGrunnlag.getBehandlingsgrunnlagData().luftfartBaser = List.of(luftfartBase);
+        SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidssteder().size()).isEqualTo(2);
+
+        Arbeidssted arbeidssted = sedData.getArbeidssteder().get(1);
+
+        assertThat(arbeidssted.getNavn()).isEqualTo(luftfartBase.hjemmebaseNavn);
+        assertThat(arbeidssted.getAdresse().getGateadresse()).isEqualTo("N/A");
+        assertThat(arbeidssted.getAdresse().getLand()).isEqualTo(luftfartBase.hjemmebaseLand);
     }
 
     private void lagUtkastAssertions(SedDataDto sedData) {

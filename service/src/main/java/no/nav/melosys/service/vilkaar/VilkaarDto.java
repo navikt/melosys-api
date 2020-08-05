@@ -8,6 +8,7 @@ public class VilkaarDto {
     private boolean oppfylt;
     private List<String> begrunnelseKoder;
     private String begrunnelseFritekst;
+    private String begrunnelseFritekstEngelsk;
 
     public VilkaarDto() {
         this.begrunnelseKoder = new ArrayList<>();
@@ -43,5 +44,13 @@ public class VilkaarDto {
 
     public void setBegrunnelseFritekst(String begrunnelseFritekst) {
         this.begrunnelseFritekst = begrunnelseFritekst;
+    }
+
+    public String getBegrunnelseFritekstEngelsk() {
+        return begrunnelseFritekstEngelsk;
+    }
+
+    public void setBegrunnelseFritekstEngelsk(String begrunnelseFritekstEngelsk) {
+        this.begrunnelseFritekstEngelsk = begrunnelseFritekstEngelsk;
     }
 }

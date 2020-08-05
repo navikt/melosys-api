@@ -127,4 +127,14 @@ public class PeriodeKontrollerTest {
             PeriodeKontroller.periodeErLik(LocalDate.now(), LocalDate.now(), LocalDate.now(), null)
         ).isFalse();
     }
+
+    @Test
+    public void datoErFørFørsteJuni2012_datoI2020_false() {
+        assertThat(PeriodeKontroller.datoErFørFørsteJuni2012(LocalDate.of(2020, 1, 1))).isFalse();
+    }
+
+    @Test
+    public void datoErFørFørsteJuni2012_dato01012012_true() {
+        assertThat(PeriodeKontroller.datoErFørFørsteJuni2012(LocalDate.of(2012, 1, 1))).isTrue();
+    }
 }

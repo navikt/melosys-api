@@ -63,7 +63,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
                             dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
         brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
-        brevData.arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
+        brevData.arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
 
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
         brevData.anmodningsperioder = anmodningsperioder;
@@ -81,7 +81,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         }
 
         if (harSærligGrunn(art16VilkaarBegrunnelser)) {
-            brevData.anmodningFritekst = art16Vilkaar.getBegrunnelseFritekst();
+            brevData.anmodningFritekst = art16Vilkaar.getBegrunnelseFritekstEessi();
         }
 
         return brevData;

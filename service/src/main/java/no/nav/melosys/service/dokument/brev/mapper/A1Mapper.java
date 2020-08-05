@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -23,11 +22,12 @@ import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
-import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.brekkTekstTilListe;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 class A1Mapper {
@@ -56,7 +56,7 @@ class A1Mapper {
 
         a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.hovedvirksomhet));
 
-        a1.setBivirksomhetListe(mapBivirksomheter(brevData.bivirksomheter));
+        a1.setBivirksomhetListe(mapBivirksomheter(brevData.bivirksomheter, brevData.arbeidssteder));
 
         a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder, brevData.arbeidsland));
 
@@ -118,16 +118,19 @@ class A1Mapper {
         return hovedvirksomhetBrev;
     }
 
-    private BivirksomhetListeType mapBivirksomheter(Collection<AvklartVirksomhet> avklarteVirksomheter) {
-        avklarteVirksomheter = fyllMinimumAntallArbeidsgiverOppdragsgiverMedDummyVerdier(avklarteVirksomheter);
+    /**
+     * Brevtjenesten trenger et fast antall enheter i listen.
+     * Fyller derfor opp med tomme elementer for resterende felter
+     */
+    private BivirksomhetListeType mapBivirksomheter(
+        Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidssteder) {
 
         BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
-        for (AvklartVirksomhet arbeidssted : avklarteVirksomheter) {
-            BivirksomhetType bivirksomhetType = new BivirksomhetType();
-            bivirksomhetType.setNavn(arbeidssted.navn);
-            bivirksomhetType.setOrgnummer(arbeidssted.orgnr);
-            bivirksomheterBrev.getBivirksomhet().add(bivirksomhetType);
-        }
+        Stream.concat(
+            hentAvklarteVirksomheterOgIkkeFysiskeArbeidssteder(avklarteVirksomheter, arbeidssteder),
+            Stream.generate(A1Mapper::lagTomBivirksomhetType))
+            .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1)
+            .forEach(bivirksomhetType -> bivirksomheterBrev.getBivirksomhet().add(bivirksomhetType));
         return bivirksomheterBrev;
     }
 
@@ -135,21 +138,46 @@ class A1Mapper {
      * Brevtjenesten trenger et fast antall enheter i listen.
      * Fyller derfor opp med tomme elementer for resterende felter
      */
-    private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
+    private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder,
+                                                                 Collection<Landkoder> arbeidsland) {
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         Stream.concat(
-            hentArbeidsstederOgLandUtenOppgittArbeidssted(arbeidssteder, arbeidsland),
-            Stream.generate(A1Mapper::lagTomAdresseType))
+            lagAdresserForArbeidsstederOgLandUtenArbeidssted(arbeidssteder, arbeidsland),
+            Stream.generate(A1Mapper::lagTomAdresseType)
+        )
             .limit(ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2)
             .forEach(adresseType -> fysiskeAdresserBrev.getAdresse().add(adresseType));
         return fysiskeAdresserBrev;
     }
 
-    private Stream<AdresseType> hentArbeidsstederOgLandUtenOppgittArbeidssted(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
-        List<String> landUtenOppgittArbeidssted = hentLandUtenOppgittArbeidssted(arbeidssteder, arbeidsland);
+    private Stream<AdresseType> lagAdresserForArbeidsstederOgLandUtenArbeidssted(List<Arbeidssted> arbeidssteder,
+                                                                                 Collection<Landkoder> arbeidsland) {
+        String landUtenOppgittArbeidsstedBeskrivelse = hentLandUtenOppgittArbeidssted(arbeidsland, arbeidssteder)
+            .stream()
+            .map(Landkoder::getBeskrivelse)
+            .sorted()
+            .collect(Collectors.joining(", "));
+
         return Stream.concat(
             arbeidssteder.stream().map(this::tilAdresseType),
-            landUtenOppgittArbeidssted.stream().map(this::tilAdresseType)
+            brekkTekstTilListe(landUtenOppgittArbeidsstedBeskrivelse).stream().map(this::tilAdresseType)
+        );
+    }
+
+    private static List<String> brekkTekstTilListe(String tekst) {
+        String tekstMedLinjeskift = WordUtils.wrap(tekst, MAKS_ANTALL_TEGN_PER_LINJE_5_2);
+        return List.of(tekstMedLinjeskift.split(System.lineSeparator()));
+    }
+
+    private Stream<BivirksomhetType> hentAvklarteVirksomheterOgIkkeFysiskeArbeidssteder(
+        Collection<AvklartVirksomhet> avklarteVirksomheter, List<Arbeidssted> arbeidssteder) {
+
+        Stream<IkkeFysiskArbeidssted> ikkeFysiskeArbeidssteder = arbeidssteder.stream()
+            .filter(IkkeFysiskArbeidssted.class::isInstance)
+            .map(IkkeFysiskArbeidssted.class::cast);
+        return Stream.concat(
+            avklarteVirksomheter.stream().map(this::tilBivirksomhetType),
+            ikkeFysiskeArbeidssteder.map(this::tilBivirksomhetType)
         );
     }
 
@@ -158,20 +186,6 @@ class A1Mapper {
         String adresselinje = arbeidssted.lagAdresselinje();
         adresseType.setAdresselinje1(adresselinje.isBlank() ? "" : adresselinje); //uten dette viser ikke brev alle linjene i en A1
         return adresseType;
-    }
-
-    /**
-     * Brevtjenesten trenger et fast antall enheter i listen.
-     * Fyller derfor opp med tomme elementer for resterende felter
-     */
-    private List<AvklartVirksomhet> fyllMinimumAntallArbeidsgiverOppdragsgiverMedDummyVerdier(Collection<AvklartVirksomhet> avklarteVirksomheter) {
-        List<AvklartVirksomhet> utfylltListe = new ArrayList<>(avklarteVirksomheter);
-        int antallAdresserIListe = avklarteVirksomheter.size();
-        int gjenståendeAdresser = ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 - antallAdresserIListe;
-        for (int i = 0; i < gjenståendeAdresser; i++) {
-            utfylltListe.add(new AvklartVirksomhet("", "", null, null));
-        }
-        return utfylltListe;
     }
 
     /**
@@ -184,14 +198,14 @@ class A1Mapper {
                antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
     }
 
-    private List<String> hentLandUtenOppgittArbeidssted(List<Arbeidssted> arbeidssteder, Collection<Landkoder> arbeidsland) {
-        Set<String> utfylteArbeidsland = arbeidssteder.stream()
+    private Set<Landkoder> hentLandUtenOppgittArbeidssted(Collection<Landkoder> arbeidsland,
+                                                          List<Arbeidssted> arbeidssteder) {
+        final Set<String> arbeidslandMedArbeidsted = arbeidssteder.stream()
             .map(Arbeidssted::getLandkode).collect(Collectors.toSet());
-        String beskrivelser = arbeidsland.stream()
-            .filter(a -> !utfylteArbeidsland.contains(a.getKode()))
-            .map(Landkoder::getBeskrivelse)
-            .collect(Collectors.joining(", "));
-        return brekkTekstTilListe(beskrivelser, MAKS_ANTALL_TEGN_PER_LINJE_5_2);
+
+        return arbeidsland.stream()
+            .filter(a -> !arbeidslandMedArbeidsted.contains(a.getKode()))
+            .collect(Collectors.toSet());
     }
 
     private static AdresseType lagTomAdresseType() {
@@ -204,5 +218,26 @@ class A1Mapper {
         AdresseType adresseType = new AdresseType();
         adresseType.setAdresselinje1(tekst);
         return adresseType;
+    }
+
+    private static BivirksomhetType lagTomBivirksomhetType() {
+        BivirksomhetType bivirksomhetType = new BivirksomhetType();
+        bivirksomhetType.setNavn("");
+        bivirksomhetType.setOrgnummer("");
+        return bivirksomhetType;
+    }
+
+    private BivirksomhetType tilBivirksomhetType(AvklartVirksomhet avklartVirksomhet) {
+        BivirksomhetType bivirksomhetType = new BivirksomhetType();
+        bivirksomhetType.setNavn(avklartVirksomhet.navn);
+        bivirksomhetType.setOrgnummer(avklartVirksomhet.orgnr);
+        return bivirksomhetType;
+    }
+
+    private BivirksomhetType tilBivirksomhetType(IkkeFysiskArbeidssted arbeidssted) {
+        BivirksomhetType bivirksomhetType = new BivirksomhetType();
+        bivirksomhetType.setNavn(arbeidssted.getEnhetNavn());
+        bivirksomhetType.setOrgnummer("");
+        return bivirksomhetType;
     }
 }
