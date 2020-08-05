@@ -19,11 +19,6 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     }
 
     @Override
-    public String getOmråde() {
-        return landkode;
-    }
-
-    @Override
     public Yrkesgrupper getYrkesgruppe() {
         return Yrkesgrupper.SOKKEL_ELLER_SKIP;
     }
