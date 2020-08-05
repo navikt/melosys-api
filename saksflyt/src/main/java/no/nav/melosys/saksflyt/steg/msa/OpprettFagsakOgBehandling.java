@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.MOTTATT_SOKNAD_ID;
 
-@Component
+@Component("MottakSoknadAltinnOpprettFagsakOgBehandling")
 public class OpprettFagsakOgBehandling implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
@@ -32,7 +32,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         final String søknadID = prosessinstans.getData(MOTTATT_SOKNAD_ID);
-        log.info("Oppretter fagsak og behandling for Altinn-søknad med refernase {}", søknadID);
+        log.info("Oppretter fagsak og behandling for Altinn-søknad med referanse {}", søknadID);
 
         Behandling behandling = altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID);
         prosessinstans.setBehandling(behandling);
