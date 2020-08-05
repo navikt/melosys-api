@@ -35,10 +35,7 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
 
     @Override
     public String lagAdresselinje() {
-        if (erSokkel()) {
-            return Landkoder.valueOf(landkode).getBeskrivelse();
-        }
-        return String.join(" ", getEnhetNavn(), getFlaggLandKode());
+        return Landkoder.valueOf(landkode).getBeskrivelse();
     }
 
     public String getFlaggLandKode() {
