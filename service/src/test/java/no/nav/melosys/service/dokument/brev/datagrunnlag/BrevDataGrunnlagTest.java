@@ -129,7 +129,6 @@ public class BrevDataGrunnlagTest {
         assertThat(arbeidssted.getForetakNavn()).isEqualTo(maritimtArbeidISøknad.foretakNavn);
         assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);
         assertThat(arbeidssted.getIdnummer()).isEqualTo(maritimtArbeidISøknad.foretakOrgnr);
-        assertThat(arbeidssted.getOmråde()).isEqualTo(lagAvklartMaritimtArbeid().getLand());
         assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
     }
 
@@ -147,7 +146,6 @@ public class BrevDataGrunnlagTest {
         assertThat(arbeidssted.getForetakNavn()).isNullOrEmpty();
         assertThat(arbeidssted.getEnhetNavn()).isEqualTo("Dunfjæder");
         assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
-        assertThat(arbeidssted.getOmråde()).isEqualTo("GB");
     }
 
     @Test
