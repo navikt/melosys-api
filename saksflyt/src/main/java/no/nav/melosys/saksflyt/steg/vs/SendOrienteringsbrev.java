@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_ORIENTERINGSBREV;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_SOKNAD;
@@ -50,12 +51,14 @@ public class SendOrienteringsbrev implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        String fritekst = prosessinstans.getData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder()
             .medAvsender(saksbehandler)
             .medDokumentType(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)
+            .medFritekst(fritekst)
             .build();
         brevBestiller.bestill(brevbestilling);
 

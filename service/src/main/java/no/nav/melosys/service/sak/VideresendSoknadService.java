@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class VideresendSoknadService {
-
     private static final Logger log = LoggerFactory.getLogger(VideresendSoknadService.class);
 
     private final FagsakService fagsakService;
@@ -45,7 +44,9 @@ public class VideresendSoknadService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void henleggOgVideresend(String saksnummer, String mottakerinstitusjon) throws MelosysException {
+    public void videresend(String saksnummer,
+                           String mottakerinstitusjon,
+                           String fritekst) throws MelosysException {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
         final long behandlingId = fagsak.hentAktivBehandling().getId();
@@ -64,7 +65,10 @@ public class VideresendSoknadService {
             BucType.LA_BUC_03
         );
 
-        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, avklarteEessiMottakere.stream().findFirst().orElse(null));
+        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling,
+            avklarteEessiMottakere.stream().findFirst().orElse(null),
+            fritekst
+        );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 

@@ -102,10 +102,11 @@ public class VideresendSoknadServiceTest {
 
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "fritekst");
 
         verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.VIDERESENDT);
-        verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling), eq(validerteMottakere.iterator().next()));
+        verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling),
+            eq(validerteMottakere.iterator().next()), eq("fritekst"));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(saksnummer));
     }
 
@@ -117,7 +118,7 @@ public class VideresendSoknadServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("er ikke behandling av en søknad");
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "");
     }
 
     @Test
@@ -128,7 +129,7 @@ public class VideresendSoknadServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("til Norge");
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "");
     }
 
     @Test
@@ -139,7 +140,7 @@ public class VideresendSoknadServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Bostedsland ikke avklart");
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "");
     }
 
     @Test
@@ -151,7 +152,7 @@ public class VideresendSoknadServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("mangler bostedsadresse");
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "");
     }
 
 }
