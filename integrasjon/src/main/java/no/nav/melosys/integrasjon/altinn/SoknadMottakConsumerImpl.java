@@ -37,7 +37,7 @@ public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
             .toUriString();
 
         return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders(MediaType.APPLICATION_XML)),
-            new ParameterizedTypeReference<MedlemskapArbeidEOSM>() {}).getBody();
+            MedlemskapArbeidEOSM.class).getBody();
     }
 
     @Override
