@@ -1,14 +1,16 @@
 package no.nav.melosys.domain.arkiv;
 
-import no.nav.melosys.domain.eessi.SedType;
-
 import java.util.Collections;
 import java.util.List;
+
+import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.msm.AltinnDokument;
 
 import static no.nav.melosys.domain.arkiv.DokumentVariant.lagArkivVariant;
 
 public class FysiskDokument extends ArkivDokument {
     private static final String DOKUMENT_KATEGORI_SED = "SED";
+    private static final String DOKUMENT_KATEGORI_SOKNAD = "SOK";
 
     private List<DokumentVariant> dokumentVarianter;
     private String brevkode;
@@ -20,6 +22,14 @@ public class FysiskDokument extends ArkivDokument {
         fysiskDokument.setTittel(hentTittelForSedType(sedType));
         fysiskDokument.setBrevkode(sedType.name());
         fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(sedPdf)));
+        return fysiskDokument;
+    }
+
+    static FysiskDokument lagFysiskDokumentAltinn(AltinnDokument altinnDokument) {
+        FysiskDokument fysiskDokument = new FysiskDokument();
+        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
+        fysiskDokument.setTittel(hentTittelForAltinnDokument(altinnDokument.getDokumentType()));
+        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(altinnDokument.getInnhold().getBytes())));
         return fysiskDokument;
     }
 
@@ -35,6 +45,18 @@ public class FysiskDokument extends ArkivDokument {
                 return "Innvilgelse av søknad om unntak";
             default:
                 throw new IllegalArgumentException("Kan ikke opprette journalpost av sed-type " + sedType);
+        }
+    }
+
+    private static String hentTittelForAltinnDokument(AltinnDokument.AltinnDokumentType dokumentType) {
+        switch (dokumentType) {
+            case SOKNAD:
+                return "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits";
+            case FULLMAKT:
+                return "Fullmakt";
+            default:
+                throw new IllegalArgumentException("Ukjent AltinnDokumentType " + dokumentType);
+
         }
     }
 

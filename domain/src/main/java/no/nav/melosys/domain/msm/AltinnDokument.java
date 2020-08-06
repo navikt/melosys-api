@@ -43,6 +43,10 @@ public final class AltinnDokument {
         return innhold;
     }
 
+    public boolean erSøknad() {
+        return dokumentType == AltinnDokumentType.SOKNAD;
+    }
+
     public enum AltinnDokumentType {
         SOKNAD, FULLMAKT
     }

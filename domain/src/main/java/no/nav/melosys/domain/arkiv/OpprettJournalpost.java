@@ -1,9 +1,16 @@
 package no.nav.melosys.domain.arkiv;
 
-import no.nav.melosys.domain.eessi.SedType;
-
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.google.common.collect.MoreCollectors;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.msm.AltinnDokument;
+
+import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentAltinn;
 import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentSed;
 
 public class OpprettJournalpost extends Journalpost {
@@ -11,7 +18,11 @@ public class OpprettJournalpost extends Journalpost {
     private static final String SENTRAL_UTSKRIFT = "S";
     private static final String MEDLEMSKAP_OG_AVGIFT = "4530";
     private static final String UNNTAK_FRA_MEDLEMSKAP = "UFM";
+    private static final String MEDLEMSKAP = "MED";
+    private static final String ALTINN = "ALTINN";
     private static final String UTENLANDSK_ORGANISASJON = "UTL_ORG";
+    private static final String ORGNR = "ORGNR";
+    private static final String FNR = "FNR";
 
     private String journalførendeEnhet;
     private String korrespondansepartIdType;
@@ -24,13 +35,13 @@ public class OpprettJournalpost extends Journalpost {
     }
 
     public static OpprettJournalpost lagJournalpostForSendingAvSedSomBrev(
-        Long gsakSaksnummer, String brukerFnr, SedType sedType, byte[] sedPdf,
+        Long arkivsakID, String brukerFnr, SedType sedType, byte[] sedPdf,
         String institusjonID, String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg) {
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokumentSed(sedType, sedPdf));
         opprettJournalpost.setVedlegg(vedlegg);
-        opprettJournalpost.setArkivSakId(gsakSaksnummer.toString());
+        opprettJournalpost.setArkivSakId(arkivsakID.toString());
         opprettJournalpost.setMottaksKanal(SENTRAL_UTSKRIFT);
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
@@ -43,6 +54,37 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setBrukerId(brukerFnr);
 
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
+
+        return opprettJournalpost;
+    }
+
+    public static OpprettJournalpost lagJournalpostForMottakAltinnSøknad(Fagsak fagsak,
+                                                                          Collection<AltinnDokument> dokumenter,
+                                                                          String brukerID) {
+
+        AltinnDokument hovedDokument = dokumenter.stream().filter(AltinnDokument::erSøknad).collect(MoreCollectors.onlyElement());
+        dokumenter.remove(hovedDokument);
+
+        OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
+        opprettJournalpost.setHoveddokument(lagFysiskDokumentAltinn(hovedDokument));
+        opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).collect(Collectors.toList()));
+        opprettJournalpost.setArkivSakId(fagsak.getGsakSaksnummer().toString());
+        opprettJournalpost.setMottaksKanal(ALTINN);
+        opprettJournalpost.setJournalposttype(Journalposttype.INN);
+        opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
+        opprettJournalpost.setTema(MEDLEMSKAP);
+        opprettJournalpost.setBrukerId(brukerID);
+
+        fagsak.hentRepresentant(Representerer.BRUKER).ifPresentOrElse(
+            r -> {
+                opprettJournalpost.setKorrespondansepartId(r.getOrgnr());
+                opprettJournalpost.setKorrespondansepartIdType(ORGNR);
+            },
+            () -> {
+                opprettJournalpost.setKorrespondansepartId(brukerID);
+                opprettJournalpost.setKorrespondansepartIdType(FNR);
+            }
+        );
 
         return opprettJournalpost;
     }
