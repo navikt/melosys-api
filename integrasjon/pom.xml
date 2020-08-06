@@ -24,6 +24,10 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>sikkerhet</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>soknad-altinn</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>

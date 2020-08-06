@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.altinn;
 
 import java.util.Collections;
 
+import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -13,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
 
-    private static Logger log = LoggerFactory.getLogger(SoknadMottakConsumerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SoknadMottakConsumerImpl.class);
 
     private final RestTemplate restTemplate;
 
@@ -22,15 +23,13 @@ public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
     }
 
     @Override
-    public String hentSøknad(String søknadID) {
-        String xml = restTemplate.exchange(String.format("/soknad/%s", søknadID), HttpMethod.GET,
-            new HttpEntity<>(getXmltypeHeaders()), new ParameterizedTypeReference<String>() {
+    public MedlemskapArbeidEOSM hentSøknad(String søknadID) {
+        log.info("Henter søknad med ID {}", søknadID);
+
+        return restTemplate.exchange(String.format("/soknader/%s", søknadID), HttpMethod.GET,
+            new HttpEntity<>(getXmltypeHeaders()), new ParameterizedTypeReference<MedlemskapArbeidEOSM>() {
             }
         ).getBody();
-        log.debug("{}", xml);
-
-        // todo Legge inn avhengighet til XSD (når den er klar) - MELOSYS-3572
-        return xml;
     }
 
     private HttpHeaders getXmltypeHeaders() {
