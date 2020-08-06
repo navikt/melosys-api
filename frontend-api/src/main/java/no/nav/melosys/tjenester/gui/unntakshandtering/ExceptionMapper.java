@@ -28,7 +28,7 @@ public class ExceptionMapper {
 
     @ExceptionHandler(value = FunksjonellException.class)
     public ResponseEntity<Map<String, Object>> håndter(FunksjonellException e) {
-        return håndter(e, HttpStatus.BAD_REQUEST, Level.ERROR);
+        return håndter(e, HttpStatus.BAD_REQUEST, Level.WARN);
     }
 
     @ExceptionHandler(value = TekniskException.class)
