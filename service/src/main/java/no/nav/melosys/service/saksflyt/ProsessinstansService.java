@@ -342,7 +342,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
-            .medSteg(ProsessSteg.MSA_HENT_INNHOLD)
+            .medSteg(ProsessSteg.MSA_OPPRETT_SAK_OG_BEHANDLING)
             .build();
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadMottatt.getSoknadID());
 

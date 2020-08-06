@@ -4,10 +4,10 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import no.nav.melosys.altinn.Innhold;
-import no.nav.melosys.altinn.MedlemskapArbeidEOSM;
-import no.nav.melosys.altinn.MidlertidigUtsendt;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.soknad_altinn.Innhold;
+import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
+import no.nav.melosys.soknad_altinn.MidlertidigUtsendt;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
@@ -40,7 +40,7 @@ public class SoknadMottakConsumerImplTest {
         URI søknadURI = (getClass().getClassLoader().getResource("soknad_altinn.xml")).toURI();
         String xmlResponse = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
-        server.expect(requestTo("/soknad/" + soknadID))
+        server.expect(requestTo("/soknader/" + soknadID))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess().body(xmlResponse).contentType(MediaType.APPLICATION_XML));
 
