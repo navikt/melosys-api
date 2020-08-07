@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
@@ -14,6 +15,15 @@ import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 public final class MedlemskapKontroller {
 
     private static final String STATSLØS = "XS";
+    private static final Set<Landkoder> NORDISK_ELLER_AVTALELAND = Set.of(
+        Landkoder.SE,
+        Landkoder.DK,
+        Landkoder.FI,
+        Landkoder.IS,
+        Landkoder.AT,
+        Landkoder.NL,
+        Landkoder.LU
+    );
 
     private MedlemskapKontroller() {
     }
@@ -49,19 +59,13 @@ public final class MedlemskapKontroller {
         return !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status);
     }
 
-    public static boolean statsborgerskapIkkeMedlemsland(Collection<String> statsborgerskapLandkoder) {
+    public static boolean statsborgerskapErMedlemsland(Collection<String> statsborgerskapLandkoder) {
         return !statsborgerskapLandkoder.isEmpty() && Arrays.stream(Landkoder.values())
-            .noneMatch(landkode -> statsborgerskapLandkoder.contains(landkode.getKode()));
+            .anyMatch(landkode -> statsborgerskapLandkoder.contains(landkode.getKode()));
     }
 
-    public static boolean statsborgerskapSkalIkkeSjekkes(Landkoder avsenderLandkode) {
-        return avsenderLandkode == Landkoder.SE
-            || avsenderLandkode == Landkoder.DK
-            || avsenderLandkode == Landkoder.FI
-            || avsenderLandkode == Landkoder.IS
-            || avsenderLandkode == Landkoder.AT
-            || avsenderLandkode == Landkoder.NL
-            || avsenderLandkode == Landkoder.LU;
+    public static boolean avsenderErNordiskEllerAvtaleland(Landkoder avsenderLandkode) {
+        return avsenderLandkode != null && NORDISK_ELLER_AVTALELAND.contains(avsenderLandkode);
     }
 
     public static boolean erStatsløs(Collection<String> statsborgerskapLandkoder) {
