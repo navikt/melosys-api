@@ -8,6 +8,7 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
@@ -65,5 +66,6 @@ public class HentRegisteropplysningerTest {
             .extracting(RegisteropplysningerRequest::getFnr, RegisteropplysningerRequest::getFom, RegisteropplysningerRequest::getTom)
             .containsExactly(fnr, LocalDate.now(), LocalDate.now().plusYears(1));
 
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.MSA_VURDER_INNGANGSVILKÅR);
     }
 }
