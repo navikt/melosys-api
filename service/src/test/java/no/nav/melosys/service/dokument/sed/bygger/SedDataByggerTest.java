@@ -321,7 +321,7 @@ public class SedDataByggerTest {
         throws FunksjonellException, TekniskException {
         SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.INGEN);
 
-        lagUtkastAssertions(sedData);
+        lagUtkastAssertions(sedData, true);
         assertThat(sedData.getLovvalgsperioder().isEmpty()).isTrue();
     }
 
@@ -340,7 +340,7 @@ public class SedDataByggerTest {
         throws FunksjonellException, TekniskException {
         SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
-        lagUtkastAssertions(sedData);
+        lagUtkastAssertions(sedData, true);
         assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
         assertThat(sedData.getLovvalgsperioder().get(0).getFom()).isEqualTo(lovvalgsperiode.getFom());
     }
@@ -352,8 +352,8 @@ public class SedDataByggerTest {
 
         SedDataDto sedData = dataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
-        lagUtkastAssertions(sedData);
-        assertThat(sedData.getBostedsadresse()).isEqualToComparingFieldByField(Adresse.lagTomAdresse());
+        lagUtkastAssertions(sedData, false);
+        assertThat(sedData.getBostedsadresse()).isNull();
     }
 
     @Test
@@ -389,12 +389,14 @@ public class SedDataByggerTest {
         assertThat(arbeidssted.getAdresse().getLand()).isEqualTo(luftfartBase.hjemmebaseLand);
     }
 
-    private void lagUtkastAssertions(SedDataDto sedData) {
+    private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {
         assertThat(sedData).isNotNull();
         assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotEmpty();
         assertThat(sedData.getArbeidssteder()).isNotEmpty();
         assertThat(sedData.getBruker()).isNotNull();
-        assertThat(sedData.getBostedsadresse()).isNotNull();
+        if (forventAdresse) {
+            assertThat(sedData.getBostedsadresse()).isNotNull();
+        }
         assertThat(sedData.getFamilieMedlem()).isNotEmpty();
         assertThat(sedData.getUtenlandskIdent()).isNotEmpty();
         assertThat(sedData.getSelvstendigeVirksomheter()).isNotEmpty();

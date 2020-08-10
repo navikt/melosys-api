@@ -2,10 +2,10 @@ package no.nav.melosys.service.unntaksperiode;
 
 import java.util.Collections;
 
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -70,7 +70,9 @@ public class AnmodningUnntakServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        behandling.getSaksopplysninger().add(lagPersonSaksopplysning(true));
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed);
@@ -85,10 +87,12 @@ public class AnmodningUnntakServiceTest {
         final long behandlingID = 1L;
         final String fritekstSed = "friteksssst";
         Behandling behandling = new Behandling();
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
         behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+        behandling.getSaksopplysninger().add(lagPersonSaksopplysning(true));
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed);
@@ -96,6 +100,27 @@ public class AnmodningUnntakServiceTest {
         verify(anmodningsperiodeService).validerAnmodningsperiodeForBehandling(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
+    }
+
+    @Test
+    public void anmodningOmUnntak_ikkeBostedsadresse_kasterException() throws MelosysException {
+        final long behandlingID = 1L;
+        final String fritekstSed = "friteksssst";
+        Behandling behandling = new Behandling();
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-111");
+        behandling.setFagsak(fagsak);
+        behandling.getSaksopplysninger().add(lagPersonSaksopplysning(false));
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("bostedsadresse");
+
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed);
     }
 
     @Test
@@ -193,5 +218,16 @@ public class AnmodningUnntakServiceTest {
         behandling.setId(1L);
 
         return behandling;
+    }
+
+    private static Saksopplysning lagPersonSaksopplysning(boolean medAdresse) {
+        PersonDokument personDokument = new PersonDokument();
+        if (medAdresse) {
+            personDokument.bostedsadresse.setPostnr("2123");
+        }
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+        saksopplysning.setDokument(personDokument);
+        return saksopplysning;
     }
 }
