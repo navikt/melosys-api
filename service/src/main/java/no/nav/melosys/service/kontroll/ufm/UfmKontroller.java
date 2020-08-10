@@ -72,8 +72,10 @@ final class UfmKontroller {
     }
 
     static Kontroll_begrunnelser statsborgerskapIkkeMedlemsland(UfmKontrollData kontrollData) {
-        return MedlemskapKontroller.statsborgerskapIkkeMedlemsland(kontrollData.getSedDokument().getStatsborgerskapKoder()) ?
-            Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND : null;
+        return MedlemskapKontroller.avsenderErNordiskEllerAvtaleland(kontrollData.getSedDokument().getAvsenderLandkode())
+            || MedlemskapKontroller.erStatsløs(kontrollData.getSedDokument().getStatsborgerskapKoder())
+            || MedlemskapKontroller.statsborgerskapErMedlemsland(kontrollData.getSedDokument().getStatsborgerskapKoder()) ?
+            null : Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND;
     }
 
     static Kontroll_begrunnelser personDød(UfmKontrollData kontrollData) {
