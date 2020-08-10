@@ -10,6 +10,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
@@ -21,6 +22,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -42,12 +44,13 @@ public class UtpekingService {
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
+    private final VedtakKontrollService vedtakKontrollService;
 
     public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                            EessiService eessiService, LandvelgerService landvelgerService,
                            LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
-                           UtpekingsperiodeRepository utpekingsperiodeRepository) {
+                           UtpekingsperiodeRepository utpekingsperiodeRepository, VedtakKontrollService vedtakKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
@@ -56,6 +59,7 @@ public class UtpekingService {
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
+        this.vedtakKontrollService = vedtakKontrollService;
     }
 
     public Collection<Utpekingsperiode> hentUtpekingsperioder(long behandlingID) {
@@ -110,6 +114,7 @@ public class UtpekingService {
             behandlingID, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
         );
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
+        vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
         );
