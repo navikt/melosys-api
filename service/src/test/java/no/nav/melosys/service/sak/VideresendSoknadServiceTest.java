@@ -14,8 +14,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -50,8 +50,8 @@ public class VideresendSoknadServiceTest {
 
     private VideresendSoknadService videresendSoknadService;
 
-    private Fagsak fagsak = new Fagsak();
-    private Behandling behandling = new Behandling();
+    private final Fagsak fagsak = new Fagsak();
+    private final Behandling behandling = new Behandling();
 
     private final String saksnummer = "MEL-2222";
 

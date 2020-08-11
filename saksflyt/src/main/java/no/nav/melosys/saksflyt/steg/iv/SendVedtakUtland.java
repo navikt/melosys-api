@@ -21,7 +21,6 @@ import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
@@ -43,7 +42,6 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final BrevBestiller brevBestiller;
     private final SaksopplysningerService saksopplysningerService;
     private final SedSomBrevService sedSomBrevService;
-    private final LandvelgerService landvelgerService;
 
     @Autowired
     public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
@@ -51,14 +49,12 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
                             SaksopplysningerService saksopplysningerService,
-                            SedSomBrevService sedSomBrevService,
-                            LandvelgerService landvelgerService) {
+                            SedSomBrevService sedSomBrevService) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
         this.saksopplysningerService = saksopplysningerService;
         this.sedSomBrevService = sedSomBrevService;
-        this.landvelgerService = landvelgerService;
     }
 
     @Override
@@ -126,20 +122,10 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     @Override
-    protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException {
-        if (behandlingsresultat.erInnvilgelseFlereLand()) {
-            final long behandlingID = behandlingsresultat.getId();
-            final boolean skalSendesUtland = !landvelgerService.alleArbeidslandHarMarginaltArbeid(behandlingID);
-            if (!skalSendesUtland) {
-                log.info("Alle oppgitte arbeidsland i behandling {} har marginalt arbeid. Vedtak blir ikke sendt til utlandet.", behandlingID);
-                return false;
-            }
-
-            return true;
-        }
-
+    protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.erInnvilgelse()
-            && behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse() != Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
+            && behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse() != Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+            || behandlingsresultat.erUtpeking();
     }
 
     private BucType avklarBucType(Behandling behandling) throws IkkeFunnetException, TekniskException {

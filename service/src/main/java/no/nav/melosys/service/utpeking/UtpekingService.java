@@ -5,21 +5,25 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -98,7 +102,7 @@ public class UtpekingService {
 
         mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjoner,
-            landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID),
+            hentLandSomSkalMottaSed(behandlingID),
             BucType.LA_BUC_02
         );
 
@@ -114,6 +118,16 @@ public class UtpekingService {
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+    }
+
+    private Collection<Landkoder> hentLandSomSkalMottaSed(long behandlingID) throws IkkeFunnetException {
+        Stream<Landkoder> utenlandskeTrygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream();
+        Stream<Landkoder> lovvalgsland = hentUtpekingsperioder(behandlingID).stream().map(Utpekingsperiode::getLovvalgsland);
+
+        return Stream.concat(
+            utenlandskeTrygdemyndighetsland,
+            lovvalgsland
+        ).collect(Collectors.toSet());
     }
 
     private void opprettLovvalgsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {

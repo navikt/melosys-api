@@ -1,13 +1,16 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -78,23 +81,40 @@ public class LandvelgerService {
         }
     }
 
-    public boolean alleArbeidslandHarMarginaltArbeid(long behandlingID) throws IkkeFunnetException {
-        Set<Landkoder> marginaleArbeidsland = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
-        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
-        alleArbeidsland.removeAll(marginaleArbeidsland);
-
-        return alleArbeidsland.isEmpty();
-    }
-
     private boolean erVideresendt(Behandlingsresultat behandlingsresultat) {
         Fagsak fagsak = behandlingsresultat.getBehandling().getFagsak();
         return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
+        if (erArtikkel13(behandlingID)) {
+            return hentUtenlandskTrygdemyndighetslandArtikkel13(behandlingID);
+        }
+
         Collection<Landkoder> trygdemyndighetsland = hentTrygdemyndighetsland(behandlingID);
         trygdemyndighetsland.remove(Landkoder.NO);
         return trygdemyndighetsland;
+    }
+
+    private Collection<Landkoder> hentUtenlandskTrygdemyndighetslandArtikkel13(long behandlingID) throws IkkeFunnetException {
+        Set<Landkoder> landkoderMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
+        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
+
+        Stream<Landkoder> utenlandskeArbeidsstederLandkoder = behandlingsgrunnlag.getBehandlingsgrunnlagdata()
+            .hentUtenlandskeArbeidsstederLandkode().stream()
+            .map(Landkoder::valueOf)
+            .filter(landkoderMedMarginaltArbeid::contains);
+
+        Stream<Landkoder> utenlandskeArbeidsgivereLandkoder = behandlingsgrunnlag.getBehandlingsgrunnlagdata()
+            .hentUtenlandskeArbeidsgivereLandkode().stream()
+            .map(Landkoder::valueOf)
+            .filter(landkoderMedMarginaltArbeid::contains);
+
+        return Streams.concat(
+            utenlandskeArbeidsgivereLandkoder,
+            utenlandskeArbeidsstederLandkoder,
+            hentTrygdemyndighetsland(behandlingID).stream()
+        ).filter(landkoder -> landkoder != Landkoder.NO).collect(Collectors.toSet());
     }
 
     private Collection<Landkoder> hentTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {

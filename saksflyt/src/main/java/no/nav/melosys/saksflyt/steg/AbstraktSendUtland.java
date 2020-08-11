@@ -53,7 +53,7 @@ public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
 
     protected abstract void sendBrev(Prosessinstans prosessinstans) throws MelosysException;
 
-    protected abstract boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) throws MelosysException;
+    protected abstract boolean skalSendesUtland(Behandlingsresultat behandlingsresultat);
 
     protected String hentBegrunnelseKode(Prosessinstans prosessinstans) {
         Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);

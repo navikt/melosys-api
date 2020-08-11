@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -11,7 +10,6 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -23,10 +21,10 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
@@ -89,7 +87,7 @@ public class SendVedtakUtlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService,
-            brevBestiller, saksopplysningerService, sedSomBrevService, landvelgerService);
+            brevBestiller, saksopplysningerService, sedSomBrevService);
     }
 
     @Test
@@ -171,19 +169,5 @@ public class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans);
 
         verify(eessiService).sendGodkjenningArbeidFlereLand(eq(behandling.getId()), eq("Hei"));
-    }
-
-    @Test
-    public void utfør_art13AlleLandMarginaltArbeid_ikkeSendUtland() throws MelosysException {
-        when(landvelgerService.alleArbeidslandHarMarginaltArbeid(eq(behandling.getId()))).thenReturn(true);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, Collections.emptyList());
-
-        sendVedtakUtland.utfør(prosessinstans);
-
-        verify(brevBestiller, never()).bestill(any(Brevbestilling.class));
-        verify(eessiService, never()).opprettOgSendSed(anyLong(), anyList(), any(BucType.class), any(Vedlegg.class), anyString());
-
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
     }
 }

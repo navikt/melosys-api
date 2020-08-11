@@ -10,9 +10,9 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktDistribuerJournalpost;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
