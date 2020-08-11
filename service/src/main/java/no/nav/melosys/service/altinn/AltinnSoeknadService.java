@@ -1,11 +1,14 @@
 package no.nav.melosys.service.altinn;
 
+import java.util.Collection;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -53,6 +56,10 @@ public class AltinnSoeknadService {
         behandlingsgrunnlagService.opprettBehandlingsgrunnlag(1L, new BehandlingsgrunnlagData()); //TODO: MELSOYS-3527
 
         return fagsak.hentAktivBehandling();
+    }
+
+    public Collection<AltinnDokument> hentDokumenterTilknyttetSoknad(String søknadReferanse) {
+        return soknadMottakConsumer.hentDokumenter(søknadReferanse);
     }
 
     private String hentAktørID(MedlemskapArbeidEOSM søknad) throws IkkeFunnetException {
