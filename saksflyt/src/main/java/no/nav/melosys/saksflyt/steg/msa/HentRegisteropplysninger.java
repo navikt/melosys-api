@@ -1,14 +1,26 @@
 package no.nav.melosys.saksflyt.steg.msa;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import org.apache.commons.lang3.NotImplementedException;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
 @Component("MottakSoknadAltinnHentRegisteropplysninger")
 public class HentRegisteropplysninger implements StegBehandler {
+
+    private final RegisteropplysningerService registeropplysningerService;
+
+    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService) {
+        this.registeropplysningerService = registeropplysningerService;
+    }
 
     @Override
     public ProsessSteg inngangsSteg() {
@@ -17,6 +29,20 @@ public class HentRegisteropplysninger implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        throw new NotImplementedException("Ikke implementert å hente registeropplysnigner for altinn-søknad");
+
+        final Behandling behandling = prosessinstans.getBehandling();
+        final Periode periode = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().periode;
+        final String fnr = prosessinstans.getData(ProsessDataKey.BRUKER_ID);
+
+        registeropplysningerService.hentOgLagreOpplysninger(
+            RegisteropplysningerRequest.builder()
+                .behandlingID(behandling.getId())
+                .saksopplysningTyper(utledSaksopplysningTyper(behandling.getTema()))
+                .fom(periode.getFom())
+                .tom(periode.getTom())
+                .fnr(fnr)
+                .build());
+
+        prosessinstans.setSteg(ProsessSteg.MSA_VURDER_INNGANGSVILKÅR);
     }
 }
