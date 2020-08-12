@@ -16,11 +16,11 @@ import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
@@ -32,14 +32,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static java.util.function.Predicate.not;
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
+import static no.nav.melosys.domain.eessi.sed.Adresse.fraStrukturertAdresse;
+import static no.nav.melosys.domain.eessi.sed.Adresse.lagAdresse;
 
 @Service
 public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final LandvelgerService landvelgerService;
-
-    static final String INGEN_FAST_ADRESSE = "No fixed address";
 
     @Autowired
     public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService, LandvelgerService landvelgerService) {
@@ -50,22 +49,29 @@ public class SedDataBygger {
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
                           Behandlingsresultat behandlingsresultat,
                           MedlemsperiodeType medlemsperiodeType) throws TekniskException, FunksjonellException {
-        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
-        sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
-            .orElseThrow(() -> new FunksjonellException("Finner ingen adresse på person i behandling " + behandlingsresultat.getId())));
-        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
-        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
-        sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
-        return sedDataDto;
+        return lagSedDataDto(dataGrunnlag, behandlingsresultat, medlemsperiodeType, false);
     }
 
-    public SedDataDto lagUtkast(SedDataGrunnlag sedDataGrunnlag,
+    public SedDataDto lagUtkast(SedDataGrunnlag dataGrunnlag,
                                 Behandlingsresultat behandlingsresultat,
                                 MedlemsperiodeType medlemsperiodeType) throws FunksjonellException, TekniskException {
-        SedDataDto sedDataDto = lagPersonopplysninger(sedDataGrunnlag);
-        sedDataDto.setBostedsadresse(finnAdresse(sedDataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::new));
-        sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
-        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(sedDataGrunnlag.getBehandling()));
+        return lagSedDataDto(dataGrunnlag, behandlingsresultat, medlemsperiodeType, true);
+    }
+
+    private SedDataDto lagSedDataDto(SedDataGrunnlag dataGrunnlag,
+                                     Behandlingsresultat behandlingsresultat,
+                                     MedlemsperiodeType medlemsperiodeType,
+                                     boolean erUtkast) throws FunksjonellException, TekniskException {
+        SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        if (erUtkast) {
+            sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElseGet(Adresse::lagTomAdresse));
+            sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
+        } else {
+            sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag())
+                .orElseThrow(() -> new FunksjonellException("Finner ingen bostedsadresse på person i behandling " + behandlingsresultat.getId())));
+            sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, medlemsperiodeType));
+        }
+        sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
@@ -116,7 +122,7 @@ public class SedDataBygger {
     }
 
     private List<Arbeidssted> hentArbeidssteder(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException {
-        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder().stream()
+        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList());
 
         Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
@@ -125,13 +131,14 @@ public class SedDataBygger {
             .map(Landkoder::getKode)
             .distinct()
             .filter(not(arbeidsland::contains))
-            .map(SedDataBygger::lagTomtArbeidssted)
+            .map(Arbeidssted::lagIkkeFastArbeidssted)
             .forEach(arbeidssteder::add);
 
         return arbeidssteder;
     }
 
-    private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag)
+        throws IkkeFunnetException, TekniskException {
         Collection<AvklartVirksomhet> avklarteVirksomheter = new ArrayList<>();
         avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere());
         avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter());
@@ -141,8 +148,9 @@ public class SedDataBygger {
             .collect(Collectors.toList());
     }
 
-    private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Collection<AvklartVirksomhet> avklarteSelvstendigeVirksomheter = new ArrayList();
+    private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad)
+        throws IkkeFunnetException, TekniskException {
+        Collection<AvklartVirksomhet> avklarteSelvstendigeVirksomheter = new ArrayList<>();
         avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige());
         avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
@@ -157,27 +165,7 @@ public class SedDataBygger {
     }
 
     private static Optional<Adresse> finnAdresse(BostedGrunnlag bostedGrunnlag) {
-        Optional<StrukturertAdresse> bostedsadresse = bostedGrunnlag.finnBostedsadresse();
-        if (bostedsadresse.isPresent()) {
-            return Optional.of(lagAdresse(bostedsadresse.get(), Adressetype.BOSTEDSADRESSE));
-        } else {
-            Optional<StrukturertAdresse> postadresse = bostedGrunnlag.finnPostadresse();
-            return postadresse.map(strukturertAdresse -> lagAdresse(strukturertAdresse, Adressetype.POSTADRESSE));
-        }
-    }
-
-    private static Adresse lagAdresse(StrukturertAdresse bostedsadresse, Adressetype adressetype) {
-        if (bostedsadresse == null) {
-            return new Adresse();
-        }
-
-        Adresse adresse = new Adresse();
-        adresse.setAdressetype(adressetype);
-        adresse.setPoststed(bostedsadresse.poststed);
-        adresse.setPostnr(bostedsadresse.postnummer);
-        adresse.setLand(tilIso3(bostedsadresse.landkode));
-        adresse.setGateadresse(lagGateadresse(bostedsadresse.gatenavn, bostedsadresse.husnummer));
-        return adresse;
+        return bostedGrunnlag.finnBostedsadresse().map(b -> lagAdresse(Adressetype.BOSTEDSADRESSE, b));
     }
 
     private static Ident tilUtenlandskIdentDto(UtenlandskIdent ui) {
@@ -194,16 +182,15 @@ public class SedDataBygger {
             FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arb;
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
             arbeidssted.setNavn(arb.getForetakNavn());
+        } else if (arb instanceof FlyvendeArbeidssted) {
+            FlyvendeArbeidssted flyvendeArbeidssted = (FlyvendeArbeidssted) arb;
+            arbeidssted.setNavn(flyvendeArbeidssted.getEnhetNavn());
+            arbeidssted.setAdresse(Adresse.lagAdresseMedBareLandkode(flyvendeArbeidssted.getLandkode()));
+            arbeidssted.setHjemmebase(flyvendeArbeidssted.getLandkode());
         } else {
             MaritimtArbeidssted maritimtArbeidssted = (MaritimtArbeidssted) arb;
             arbeidssted.setNavn(maritimtArbeidssted.getEnhetNavn() + (maritimtArbeidssted.erSokkel() ? " offshore" : ""));
-
-            Adresse adresse = new Adresse();
-            adresse.setLand(maritimtArbeidssted.getLandkode());
-            adresse.setPoststed("N/A");
-            adresse.setGateadresse("N/A");
-
-            arbeidssted.setAdresse(adresse);
+            arbeidssted.setAdresse(Adresse.lagAdresseMedBareLandkode(maritimtArbeidssted.getLandkode()));
             arbeidssted.setHjemmebase(maritimtArbeidssted.getFlaggLandKode());
         }
         return arbeidssted;
@@ -229,24 +216,6 @@ public class SedDataBygger {
         }
 
         return diskresjonskode.erKode6();
-    }
-
-    private static Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
-        Adresse adresse = new Adresse();
-        adresse.setGateadresse(lagGateadresse(strukturertAdresse.gatenavn, strukturertAdresse.husnummer));
-        adresse.setLand(strukturertAdresse.landkode);
-        adresse.setPostnr(strukturertAdresse.postnummer);
-        adresse.setPoststed(strukturertAdresse.poststed);
-        adresse.setRegion(strukturertAdresse.region);
-        return adresse;
-    }
-
-    private static String lagGateadresse(String gatenavn, String husnummer) {
-        if (StringUtils.isBlank(gatenavn)) {
-            return "N/A";
-        }
-
-        return gatenavn + (StringUtils.isEmpty(husnummer) ? "" : String.format(" %s", husnummer));
     }
 
     private static List<no.nav.melosys.domain.eessi.sed.Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, MedlemsperiodeType medlemsperiodeType) {
@@ -347,24 +316,5 @@ public class SedDataBygger {
         familieMedlem.setEtternavn(navn[1]);
         familieMedlem.setRelasjon(f.familierelasjon == Familierelasjon.FARA ? "FAR" : "MOR");
         return familieMedlem;
-    }
-
-    private static Virksomhet tilUtenlandsVirksomhetDto(AvklartVirksomhet uVirksomhet) {
-        Virksomhet virksomhet = new Virksomhet();
-        virksomhet.setNavn(uVirksomhet.navn);
-        virksomhet.setOrgnr(uVirksomhet.orgnr);
-        virksomhet.setType("registrering");
-        virksomhet.setAdresse(fraStrukturertAdresse((StrukturertAdresse) uVirksomhet.adresse));
-        return virksomhet;
-    }
-
-    private static Arbeidssted lagTomtArbeidssted(String landkode) {
-        Adresse adresse = new Adresse();
-        adresse.setPoststed(INGEN_FAST_ADRESSE);
-        adresse.setLand(landkode);
-        Arbeidssted arbeidssted = new Arbeidssted();
-        arbeidssted.setNavn(INGEN_FAST_ADRESSE);
-        arbeidssted.setAdresse(adresse);
-        return arbeidssted;
     }
 }

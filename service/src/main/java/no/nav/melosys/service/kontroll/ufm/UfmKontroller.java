@@ -33,9 +33,9 @@ final class UfmKontroller {
                 Kontroll_begrunnelser.PERIODEN_OVER_5_AR : null;
     }
 
-    static Kontroll_begrunnelser periodeEldreEnn3År(UfmKontrollData kontrollData) {
-        return PeriodeKontroller.datoEldreEnn3År(kontrollData.getSedDokument().getLovvalgsperiode().getFom()) ?
-            Kontroll_begrunnelser.PERIODE_FOR_GAMMEL : null;
+    static Kontroll_begrunnelser periodeStarterFørFørsteJuni2012(UfmKontrollData kontrollData) {
+        return PeriodeKontroller.datoErFørFørsteJuni2012(kontrollData.getSedDokument().getLovvalgsperiode().getFom())
+            ? Kontroll_begrunnelser.PERIODE_FOR_GAMMEL : null;
     }
 
     static Kontroll_begrunnelser periodeOver1ÅrFremITid(UfmKontrollData kontrollData) {
@@ -72,8 +72,10 @@ final class UfmKontroller {
     }
 
     static Kontroll_begrunnelser statsborgerskapIkkeMedlemsland(UfmKontrollData kontrollData) {
-        return MedlemskapKontroller.statsborgerskapIkkeMedlemsland(kontrollData.getSedDokument().getStatsborgerskapKoder()) ?
-            Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND : null;
+        return MedlemskapKontroller.avsenderErNordiskEllerAvtaleland(kontrollData.getSedDokument().getAvsenderLandkode())
+            || MedlemskapKontroller.erStatsløs(kontrollData.getSedDokument().getStatsborgerskapKoder())
+            || MedlemskapKontroller.statsborgerskapErMedlemsland(kontrollData.getSedDokument().getStatsborgerskapKoder()) ?
+            null : Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND;
     }
 
     static Kontroll_begrunnelser personDød(UfmKontrollData kontrollData) {

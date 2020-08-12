@@ -19,7 +19,7 @@ import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 
-public abstract class AbstraktSendUtland extends AbstraktStegBehandler {
+public abstract class AbstraktSendUtland implements StegBehandler {
     protected final EessiService eessiService;
     protected final BehandlingsresultatService behandlingsresultatService;
 

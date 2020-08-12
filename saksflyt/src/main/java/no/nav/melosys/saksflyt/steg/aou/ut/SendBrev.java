@@ -1,23 +1,23 @@
 package no.nav.melosys.saksflyt.steg.aou.ut;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_SEND_BREV;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_SEND_BREV;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
@@ -27,7 +27,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTE
  *  AOU_SEND_BREV -> AOU_SEND_SED eller FEILET_MASKINELT hvis feil
  */
 @Component("AnmodningOmUnntakSendBrev")
-public class SendBrev extends AbstraktStegBehandler {
+public class SendBrev implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendBrev.class);
 

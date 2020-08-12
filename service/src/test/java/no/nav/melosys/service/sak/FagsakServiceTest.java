@@ -81,7 +81,7 @@ public class FagsakServiceTest {
     @Test
     public void hentFagsak() throws IkkeFunnetException {
         String saksnummer = "saksnummer";
-        when(fagsakRepo.findBySaksnummer(anyString())).thenReturn(new Fagsak());
+        when(fagsakRepo.findBySaksnummer(anyString())).thenReturn(Optional.of(new Fagsak()));
         fagsakService.hentFagsak(saksnummer);
         verify(fagsakRepo).findBySaksnummer(eq(saksnummer));
     }
@@ -274,7 +274,7 @@ public class FagsakServiceTest {
         andreBehandling.setRegistrertDato(registrertDatoForSisteBehandling);
         fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
 
-        doReturn(fagsak).when(fagsakRepo).findBySaksnummer(saksnummer);
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(fagsak));
     }
 
     @Test
@@ -349,7 +349,7 @@ public class FagsakServiceTest {
     public void leggTilFjernAktørerForMyndighet() throws IkkeFunnetException {
         String saksnummer = "1234";
         Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
-        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(eksisterendeFagsak);
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(eksisterendeFagsak));
 
         List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
         fagsakService.oppdaterMyndigheter(saksnummer, nyeInstitusjonsIder);
@@ -366,7 +366,7 @@ public class FagsakServiceTest {
     public void oppdaterMyndigheter_harBruker_fjernerIkkeBruker() throws IkkeFunnetException {
         String saksnummer = "1234";
         Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
-        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(eksisterendeFagsak);
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(eksisterendeFagsak));
 
         Aktoer bruker = new Aktoer();
         bruker.setFagsak(eksisterendeFagsak);
@@ -434,7 +434,7 @@ public class FagsakServiceTest {
         behandling.setEndretDato(Instant.now());
         fagsak.setBehandlinger(List.of(behandling));
 
-        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(fagsak));
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
@@ -452,7 +452,7 @@ public class FagsakServiceTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.setBehandlinger(List.of(behandling));
 
-        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(fagsak));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(new Behandlingsresultat());
 
         expectedException.expect(FunksjonellException.class);
@@ -476,7 +476,7 @@ public class FagsakServiceTest {
         anmodningsperiode.setSendtUtland(false);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
 
-        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(fagsak));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(behandlingsresultat);
 
         expectedException.expect(FunksjonellException.class);
@@ -504,7 +504,7 @@ public class FagsakServiceTest {
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
 
-        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(fagsak));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(behandlingsresultat);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
 
@@ -542,7 +542,7 @@ public class FagsakServiceTest {
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
 
-        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(fagsak);
+        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(fagsak));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(sistOppdaterteBehandling.getId()))).thenReturn(behandlingsresultat);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any(), any())).thenReturn(replikertBehandling);
 

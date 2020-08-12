@@ -66,6 +66,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String FAGSAKER_SCHEMA = "fagsaker-schema.json";
     private static final String FAGSAKER_OPPRETT_SCHEMA = "fagsaker-opprett-post-schema.json";
     private static final String SOK_FAGSAKER_SCHEMA = "fagsaker-sok-schema.json";
+    private static final String SOK_FAGSAKER_POST_SCHEMA = "fagsaker-sok-post-schema.json";
     private static final String FAGSAKER_UTPEK_POST_SCHEMA = "fagsaker-utpek-post-schema.json";
 
     private static final String FNR = "12345678901";
@@ -119,6 +120,8 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void fagsakSøkSchemaValidering() throws IOException, JSONException {
+        valider(new FagsakSokDto("123", "MEL-123"), SOK_FAGSAKER_POST_SCHEMA);
+
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());
         List<BehandlingOversiktDto> behandlingOversiktDtoer = random.objects(BehandlingOversiktDto.class, 1).collect(Collectors.toList());
         behandlingOversiktDtoer.get(0).setLand(Collections.singletonList(Landkoder.NO.getKode()));
@@ -146,13 +149,14 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public final void hentFagsakerGirIkkeTomListe() throws Exception {
+    public final void hentFagsaker_medFnr_verifiserErMappetKorrekt() throws Exception {
         Fagsak fagsak = lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
-        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(FNR);
+        FagsakSokDto søkDto = new FagsakSokDto(FNR, null);
+        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(søkDto);
         List<FagsakOppsummeringDto> forventet = Collections.singletonList(lagFagsakOppsummeringDto(behandling));
         assertThat(forventet.size()).isEqualTo(resultat.size());
         for (int i = 0; i < forventet.size(); i++) {
@@ -161,10 +165,58 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public final void hentFagsaker_utenFnr_girBadRequest() throws Exception {
-        FagsakTjeneste instans = lagFagsakTjeneste(lagFagsak());
-        Throwable unntak = catchThrowable(() -> instans.hentFagsaker(null));
-        assertThat(unntak).isInstanceOf(FunksjonellException.class);
+    public void hentFagsaker_medSaksnummer_finnerSakMottarListeMedEttElement() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        when(fagsakService.finnFagsakFraSaksnummer("123")).thenReturn(Optional.of(fagsak));
+
+        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, "123"));
+        assertThat(resultat).hasSize(1).element(0).extracting(FagsakOppsummeringDto::getSaksnummer).isEqualTo(fagsak.getSaksnummer());
+    }
+
+    @Test
+    public void hentFagsaker_medSaksnummer_finnerIkkeSakMottarTomListe() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+
+        List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(new FagsakSokDto(null, "NEI-123"));
+        assertThat(resultat).isEmpty();
+    }
+
+    @Test
+    public final void fagsakogbehandling_tilFagsakOppsummeringOgBehandlingOversiktDtoer() throws Exception {
+        Fagsak fagsak = fagsakMedBehandlinger(Behandlingsstatus.UNDER_BEHANDLING,
+            Behandlingsstatus.AVSLUTTET,
+            Behandlingsstatus.AVSLUTTET);
+
+        fagsak.setSaksnummer("MEL-13");
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        Instant reqDateInstant = Instant.parse("2019-01-01T10:15:30.00Z");
+        Instant endretDateInstant = Instant.parse("2019-01-01T10:15:30.00Z");
+
+        fagsak.setRegistrertDato(reqDateInstant);
+        fagsak.setEndretDato(endretDateInstant);
+
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        List<FagsakOppsummeringDto> fagsakOppsummeringDtoer = instans.hentFagsaker(new FagsakSokDto(FNR, null));
+        assertThat(fagsakOppsummeringDtoer.size()).isEqualTo(1);
+        FagsakOppsummeringDto fagsakOppsummeringDto = fagsakOppsummeringDtoer.get(0);
+        assertThat(fagsakOppsummeringDto.getBehandlingOversikter().size()).isEqualTo(3);
+
+        assertThat(fagsakOppsummeringDto.getSaksnummer()).isEqualTo("MEL-13");
+        assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(reqDateInstant);
+        assertThat(fagsakOppsummeringDto.getSammensattNavn()).isEqualTo("Joe Moe");
+
+        BehandlingOversiktDto behandlingFørst = fagsakOppsummeringDto.getBehandlingOversikter().get(0);
+        assertThat(behandlingFørst.getBehandlingID()).isEqualTo(1L);
+        assertThat(behandlingFørst.getBehandlingsstatus().getKode()).isEqualTo("UNDER_BEHANDLING");
+        assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
+        assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
+        assertThat(behandlingFørst.getLand().get(0)).isEqualTo("DK");
+
+        assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
+        assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
     }
 
     @Test
@@ -226,42 +278,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public final void fagsakogbehandling_tilFagsakOppsummeringOgBehandlingOversiktDtoer() throws Exception {
-        Fagsak fagsak = fagsakMedBehandlinger(Behandlingsstatus.UNDER_BEHANDLING,
-            Behandlingsstatus.AVSLUTTET,
-            Behandlingsstatus.AVSLUTTET);
-
-        fagsak.setSaksnummer("MEL-13");
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-        Instant reqDateInstant = Instant.parse("2019-01-01T10:15:30.00Z");
-        Instant endretDateInstant = Instant.parse("2019-01-01T10:15:30.00Z");
-
-        fagsak.setRegistrertDato(reqDateInstant);
-        fagsak.setEndretDato(endretDateInstant);
-
-        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
-        List<FagsakOppsummeringDto> fagsakOppsummeringDtoer = instans.hentFagsaker(FNR);
-        assertThat(fagsakOppsummeringDtoer.size()).isEqualTo(1);
-        FagsakOppsummeringDto fagsakOppsummeringDto = fagsakOppsummeringDtoer.get(0);
-        assertThat(fagsakOppsummeringDto.getBehandlingOversikter().size()).isEqualTo(3);
-
-        assertThat(fagsakOppsummeringDto.getSaksnummer()).isEqualTo("MEL-13");
-        assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(reqDateInstant);
-        assertThat(fagsakOppsummeringDto.getSammensattNavn()).isEqualTo("Joe Moe");
-
-        BehandlingOversiktDto behandlingFørst = fagsakOppsummeringDto.getBehandlingOversikter().get(0);
-        assertThat(behandlingFørst.getBehandlingID()).isEqualTo(1L);
-        assertThat(behandlingFørst.getBehandlingsstatus().getKode()).isEqualTo("UNDER_BEHANDLING");
-        assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
-        assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
-        assertThat(behandlingFørst.getLand().get(0)).isEqualTo("DK");
-
-        assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
-        assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
-    }
-
-    @Test
     public final void avsluttSakSomBortfalt_sakEksisterer_kallerFagservice() throws Exception {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
@@ -289,7 +305,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         instans.avsluttSakManuelt("123");
-        verify(fagsakService).avsluttFagsakOgBehandlingValiderBehandlingstype(eq(fagsak), eq(fagsak.getAktivBehandling()));
+        verify(fagsakService).avsluttFagsakOgBehandlingValiderBehandlingstype(eq(fagsak), eq(fagsak.hentAktivBehandling()));
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {

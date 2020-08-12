@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -64,7 +63,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
                             dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
         brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
-        brevData.arbeidssteder = dataGrunnlag.getArbeidssteder().hentArbeidssteder();
+        brevData.arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
 
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
         brevData.anmodningsperioder = anmodningsperioder;
@@ -82,7 +81,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         }
 
         if (harSærligGrunn(art16VilkaarBegrunnelser)) {
-            brevData.anmodningFritekst = art16Vilkaar.getBegrunnelseFritekst();
+            brevData.anmodningFritekst = art16Vilkaar.getBegrunnelseFritekstEessi();
         }
 
         return brevData;
@@ -132,7 +131,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
-        ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
+        ArbeidsforholdDokument arbeidsforholdDok = behandling.hentArbeidsforholdDokument();
 
         Set<String> avklarteOrgnumre = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivendeOrgnumre();
         Stream<Periode> avklarteAnsettelsesPerioder =

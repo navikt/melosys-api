@@ -18,6 +18,7 @@
 
     <modules>
         <module>app</module>
+        <module>soknad-altinn</module>
         <module>config</module>
         <module>domain</module>
         <module>feil</module>
@@ -37,16 +38,15 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.42-118</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.26</melosys.internt.kodeverk.version>
-        <melosys.regler.version>0.43.0</melosys.regler.version>
+        <melosys.jsonschema.version>1.35.49-126</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.29</melosys.internt.kodeverk.version>
+        <melosys.brev.version>1.2.46</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2020.01.09-12.44-3713b7c04e1c</nav.tjenestespesifikasjoner.version>
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.2.42</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <joark.journalfoerinngaaende.version>0.0.21</joark.journalfoerinngaaende.version>
         <sakogbehandling.version>1.0.0-alpha011</sakogbehandling.version>
@@ -59,6 +59,7 @@
         <cxf.version>3.3.4</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.9</commons-lang.version>
+        <commons-text.version>1.8</commons-text.version>
         <everit.jsonschema.validator.version>1.9.1</everit.jsonschema.validator.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>28.2-jre</guava.version>
@@ -101,6 +102,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>app</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>soknad-altinn</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -178,6 +184,16 @@
                 <version>${findbugs.jsr305.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ibm.mq</groupId>
+                <artifactId>com.ibm.mq.allclient</artifactId>
+                <version>${ibmmq.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.oracle</groupId>
                 <artifactId>xdb6</artifactId>
                 <version>${oracle.version}</version>
@@ -206,6 +222,32 @@
                 <groupId>io.github.mweirauch</groupId>
                 <artifactId>micrometer-jvm-extras</artifactId>
                 <version>${micrometer-jvm-extras.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-jaxrs</artifactId>
+                <version>${swagger.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.ws.rs</groupId>
+                        <artifactId>jsr311-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${springfox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${springfox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.jms</groupId>
@@ -248,6 +290,11 @@
                 <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-core</artifactId>
                 <version>${cxf.version}</version>
@@ -283,40 +330,29 @@
                 <version>${hibernate.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-jaxrs</artifactId>
-                <version>${swagger.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>jsr311-api</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${apache-httpclients.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${springfox.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-aop</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${springfox.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
+                <groupId>org.springframework.kafka</groupId>
+                <artifactId>spring-kafka</artifactId>
+                <version>${spring-kafka.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.ibm.mq</groupId>
-                <artifactId>com.ibm.mq.allclient</artifactId>
-                <version>${ibmmq.version}</version>
+                <groupId>org.springframework.retry</groupId>
+                <artifactId>spring-retry</artifactId>
+                <version>${spring-retry.version}</version>
             </dependency>
 
             <!-- Transitive avhengiheter med konflikter -->
@@ -361,6 +397,11 @@
                 <groupId>no.nav.freg</groupId>
                 <artifactId>abac-spring</artifactId>
                 <version>${abac.spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.security</groupId>
+                <artifactId>token-validation-spring</artifactId>
+                <version>${token-support.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
@@ -435,19 +476,19 @@
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
-                <version>${dokprod.melosysbrev.version}</version>
+                <version>${melosys.brev.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb</classifier>
-                <version>${dokprod.melosysbrev.version}</version>
+                <version>${melosys.brev.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb-sources</classifier>
-                <version>${dokprod.melosysbrev.version}</version>
+                <version>${melosys.brev.version}</version>
             </dependency>
             <!-- Utbetaling -->
             <dependency>
@@ -501,25 +542,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.kafka</groupId>
-                <artifactId>spring-kafka</artifactId>
-                <version>${spring-kafka.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.security</groupId>
-                <artifactId>token-validation-spring</artifactId>
-                <version>${token-support.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.security</groupId>
                 <artifactId>token-validation-test-support</artifactId>
                 <version>${token-support.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.awaitility</groupId>
@@ -531,11 +556,6 @@
                 <groupId>io.qameta.allure</groupId>
                 <artifactId>allure-junit5</artifactId>
                 <version>${allure.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${apache-httpclients.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,12 +1,14 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
+public class TildelBehandlingsoppgave implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(TildelBehandlingsoppgave.class);
 
@@ -27,25 +29,27 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_TILDEL_BEHANDLINGSOPPGAVE;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
 
         log.info("Henter behandlingsoppgave for fagsak {}", saksnummer);
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
-        String behandlingsoppgaveId = oppgave.getOppgaveId();
-
-        log.info("Tildeler behandlingsoppgave {} til saksbehandler {}", behandlingsoppgaveId, saksbehandler);
-        oppgaveService.tildelOppgave(behandlingsoppgaveId, saksbehandler);
+        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer);
+        if (oppgave.isPresent()) {
+            String behandlingsoppgaveId = oppgave.get().getOppgaveId();
+            oppgaveService.tildelOppgave(behandlingsoppgaveId, saksbehandler);
+            log.info("Prosessinstans {} har tildelt behandlingsoppgave {} for fagsak {}",
+                prosessinstans.getId(), behandlingsoppgaveId, saksnummer);
+        } else {
+            log.warn("Behandlingsoppgave for saksnummer {} finnes ikke og kan ikke tildeles.", saksnummer);
+        }
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
-        log.info("Prosessinstans {} har tildelt behandlingsoppgave for fagsak {} til saksbehandler {}",
-            prosessinstans.getId(), saksnummer, saksbehandler);
     }
 }

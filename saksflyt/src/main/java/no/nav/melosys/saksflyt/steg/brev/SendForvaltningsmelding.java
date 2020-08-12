@@ -7,7 +7,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDIN
  * SEND_FORVALTNINGSMELDING -> null eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class SendForvaltningsmelding extends AbstraktStegBehandler {
+public class SendForvaltningsmelding implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendForvaltningsmelding.class);
 
@@ -41,12 +41,12 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return SEND_FORVALTNINGSMELDING;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         // Henter ut behandling med saksopplysninger

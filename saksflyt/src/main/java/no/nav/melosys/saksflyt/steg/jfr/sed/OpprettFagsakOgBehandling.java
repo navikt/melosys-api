@@ -11,7 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 
 @Component("RegistreringUnntakOpprettFagsakOgBehandling")
-public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
+public class OpprettFagsakOgBehandling implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
 
@@ -34,12 +34,12 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(EESSI_MELDING, MelosysEessiMelding.class);
 
@@ -62,7 +62,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
 
-        Behandling behandling = fagsak.getAktivBehandling();
+        Behandling behandling = fagsak.hentAktivBehandling();
         prosessinstans.setBehandling(behandling);
 
         log.info("Fagsak {} opprettet med behandling {} for RINA-sak {}",

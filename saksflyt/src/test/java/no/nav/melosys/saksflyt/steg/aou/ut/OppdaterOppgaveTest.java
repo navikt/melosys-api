@@ -61,7 +61,7 @@ public class OppdaterOppgaveTest {
 
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
 
-        agent.utførSteg(prosessinstans);
+        agent.utfør(prosessinstans);
         verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(toMånederFremITid);
@@ -78,7 +78,7 @@ public class OppdaterOppgaveTest {
         Oppgave oppgave = lagOppgave(treMånederFremITid, eksisterendeBeskrivelse);
         when(oppgaveService.hentOppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
 
-        agent.utførSteg(prosessinstans);
+        agent.utfør(prosessinstans);
         verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isNull();

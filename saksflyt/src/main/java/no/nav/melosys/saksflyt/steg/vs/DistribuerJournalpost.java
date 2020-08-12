@@ -33,12 +33,12 @@ public class DistribuerJournalpost extends AbstraktDistribuerJournalpost {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.VS_DISTRIBUER_JOURNALPOST;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         bestillDistribuering(journalpostId, hentUtenlandskMyndighet(prosessinstans.getBehandling()));
 

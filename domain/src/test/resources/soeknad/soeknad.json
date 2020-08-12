@@ -66,20 +66,6 @@
       "landkode": "DE"
     }
   },
-  "arbeidNorge": {
-    "arbeidsforholdOpprettholdIHelePerioden": true,
-    "arbeidsforholdVikarNavn": "Vikarbyrået AS",
-    "vikarOrgnr": "22334455",
-    "flyendePersonellHjemmebase": "Flybasen Int. Airport, ....",
-    "kontaktNavn": "Ola Nordmann",
-    "kontaktEpost": "ola.nordmann@fullmektigfirma.no",
-    "fullmektigFirma": "Advokatfullmektig AS",
-    "fullmektigGateadresse": "Adresseveien 123",
-    "fullmektigPostnr": "1234",
-    "fullmektigPoststed": "Byensvik",
-    "fullmektigRegion": "Østlandsregionen",
-    "fullmektigLandkode": "NO"
-  },
   "selvstendigArbeid": {
     "erSelvstendig": true,
     "selvstendigForetak": [

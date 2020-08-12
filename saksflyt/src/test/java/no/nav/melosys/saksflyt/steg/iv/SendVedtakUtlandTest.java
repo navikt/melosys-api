@@ -107,7 +107,7 @@ public class SendVedtakUtlandTest {
     }
 
     @Test
-    public void utførStegForArtikkel11Suksessfull_statusErOppdaterResultat() throws Exception {
+    public void utfør_ForArtikkel11Suksessfull_statusErOppdaterResultat() throws Exception {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B);
         sendVedtakUtland.utfør(prosessinstans);
@@ -138,7 +138,7 @@ public class SendVedtakUtlandTest {
     }
 
     @Test
-    public void utførSteg_utpekAnnetLandUtenEessiMottakere_lagerBrev() throws MelosysException {
+    public void utfør_utpekAnnetLandUtenEessiMottakere_lagerBrev() throws MelosysException {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);

@@ -166,22 +166,24 @@ public class AvklartefaktaServiceTest {
     public void hentMaritimType_medSokkelTekst_foventerSokkelType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL");
-        Optional<Avklartefakta> avklartefaktaFraDb = Optional.of(avklartefakta);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
+        Set<Avklartefakta> avklartefaktaFraDb = Set.of(avklartefakta);
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
-        assertThat(maritimType).isPresent().get().isEqualTo(Maritimtyper.SOKKEL);
+        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimTyper(1L);
+        assertThat(maritimTyper).isNotEmpty();
+        assertThat(maritimTyper.iterator().next()).isEqualTo(Maritimtyper.SOKKEL);
     }
 
     @Test
     public void hentMaritimType_medSkipTekst_foventerSkipType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SKIP");
-        Optional<Avklartefakta> avklartefaktaFraDb = Optional.of(avklartefakta);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
+        Set<Avklartefakta> avklartefaktaFraDb = Set.of(avklartefakta);
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
-        assertThat(maritimType).isPresent().get().isEqualTo(Maritimtyper.SKIP);
+        Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimTyper(1L);
+        assertThat(maritimTyper).isNotEmpty();
+        assertThat(maritimTyper.iterator().next()).isEqualTo(Maritimtyper.SKIP);
     }
 
     public static Set<Avklartefakta> lagAlleMaritimeAvklartefakta(String navn, String maritimType, String landkode) {
@@ -194,7 +196,7 @@ public class AvklartefaktaServiceTest {
     public void hentAvklartMaritimeAvklartfakta_medAvklartSokkel_girAvklartMaritimtArbeid() {
         Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "GB");
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
-        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentAlleMaritimeAvklartfakta(1L);
+        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(1L);
         assertThat(avklarteMaritimeArbeid).hasSize(1);
 
         avklarteMaritimeArbeid.values().forEach(maritimtArbeid -> {
@@ -210,7 +212,7 @@ public class AvklartefaktaServiceTest {
         alleMaritimeFakta.addAll(lagAlleMaritimeAvklartefakta("Seven Kestrel", "SKIP", "GB"));
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
 
-        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentAlleMaritimeAvklartfakta(1L);
+        Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(1L);
         assertThat(avklarteMaritimeArbeid).hasSize(2);
     }
 

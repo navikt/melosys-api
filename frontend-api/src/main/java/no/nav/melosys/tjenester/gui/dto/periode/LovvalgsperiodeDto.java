@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import org.apache.commons.lang3.StringUtils;
 
 public final class LovvalgsperiodeDto {
 
@@ -48,7 +49,7 @@ public final class LovvalgsperiodeDto {
     @JsonCreator
     LovvalgsperiodeDto(Map<String, String> json) {
         this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
-                LocalDate.parse(json.get("tomDato"))),
+                StringUtils.isEmpty(json.get("tomDato")) ? null : LocalDate.parse(json.get("tomDato"))),
                 konverterLovvalgsBestemmelse(json.get("lovvalgsbestemmelse")),
                 konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
                 enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),

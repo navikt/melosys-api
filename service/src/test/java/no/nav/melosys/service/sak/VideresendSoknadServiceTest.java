@@ -6,6 +6,12 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.Bosted;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -52,6 +58,8 @@ public class VideresendSoknadServiceTest {
 
     private final Fagsak fagsak = new Fagsak();
     private final Behandling behandling = new Behandling();
+    private BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+    private PersonDokument personDokument = new PersonDokument();
 
     private final String saksnummer = "MEL-2222";
 
@@ -71,6 +79,16 @@ public class VideresendSoknadServiceTest {
         fagsak.setStatus(Saksstatuser.OPPRETTET);
         fagsak.setSaksnummer(saksnummer);
 
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
+        behandlingsgrunnlagData.bosted.oppgittAdresse.gatenavn = "gate 123";
+
+        Saksopplysning personOpplysning = new Saksopplysning();
+        personOpplysning.setType(SaksopplysningType.PERSOPL);
+        personOpplysning.setDokument(personDokument);
+        behandling.getSaksopplysninger().add(personOpplysning);
+
         when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(behandling.getId()))).thenReturn(behandling);
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
     }
@@ -84,11 +102,11 @@ public class VideresendSoknadServiceTest {
 
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-         videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.henleggOgVideresend(saksnummer, "");
 
-         verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.VIDERESENDT);
-         verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling), eq(validerteMottakere.iterator().next()));
-         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(saksnummer));
+        verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.VIDERESENDT);
+        verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling), eq(validerteMottakere.iterator().next()));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(saksnummer));
     }
 
     @Test
@@ -120,6 +138,18 @@ public class VideresendSoknadServiceTest {
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Bostedsland ikke avklart");
+
+        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+    }
+
+    @Test
+    public void henleggOgVideresend_ikkeLagretBostedsadresseISøknadEllerTPS_kasterException() throws MelosysException {
+        when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.SE);
+        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
+        behandlingsgrunnlagData.bosted = new Bosted();
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("mangler bostedsadresse");
 
         videresendSoknadService.henleggOgVideresend(saksnummer, "");
     }

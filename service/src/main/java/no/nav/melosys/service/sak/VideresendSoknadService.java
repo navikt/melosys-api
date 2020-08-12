@@ -11,9 +11,11 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.PersonKontroller;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -46,7 +48,7 @@ public class VideresendSoknadService {
     public void henleggOgVideresend(String saksnummer, String mottakerinstitusjon) throws MelosysException {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
-        final long behandlingId = fagsak.getAktivBehandling().getId();
+        final long behandlingId = fagsak.hentAktivBehandling().getId();
         final Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingId);
 
@@ -66,7 +68,7 @@ public class VideresendSoknadService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerBehandlingOgBosted(Behandling behandling, Landkoder bostedsland) throws FunksjonellException {
+    private void validerBehandlingOgBosted(Behandling behandling, Landkoder bostedsland) throws FunksjonellException, TekniskException {
         if (!behandling.erBehandlingAvSøknad()) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke behandling av en søknad!");
         }
@@ -75,6 +77,9 @@ public class VideresendSoknadService {
         }
         if (bostedsland == Landkoder.NO) {
             throw new FunksjonellException("Kan ikke videresende søknad tilknyttet behandling " + behandling.getId() + " til Norge");
+        }
+        if (!PersonKontroller.harRegistrertBostedsadresse(behandling.hentPersonDokument(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata())) {
+            throw new FunksjonellException("Behandlingen mangler bostedsadresse!");
         }
     }
 

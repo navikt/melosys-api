@@ -3,13 +3,22 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -167,6 +176,54 @@ public class Behandling extends RegistreringsInfo {
 
     public void setBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
         this.behandlingsgrunnlag = behandlingsgrunnlag;
+    }
+
+    public PersonDokument hentPersonDokument() throws TekniskException {
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.PERSOPL);
+        return (PersonDokument) saksopplysning
+            .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
+    }
+
+    public Optional<PersonDokument> finnPersonDokument() {
+        return hentDokument(SaksopplysningType.PERSOPL).map(s -> (PersonDokument) s);
+    }
+
+    public MedlemskapDokument hentMedlemskapDokument() throws TekniskException {
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.MEDL);
+        return (MedlemskapDokument) saksopplysning
+            .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
+    }
+
+    public ArbeidsforholdDokument hentArbeidsforholdDokument() throws TekniskException {
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.ARBFORH);
+        return (ArbeidsforholdDokument) saksopplysning
+            .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
+    }
+
+    public SedDokument hentSedDokument() throws TekniskException {
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.SEDOPPL);
+        return (SedDokument) saksopplysning
+            .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
+    }
+
+    public Optional<SedDokument> finnSedDokument() {
+        return hentDokument(SaksopplysningType.SEDOPPL).map(s -> (SedDokument) s);
+    }
+
+    public InntektDokument hentInntektDokument() throws TekniskException {
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.INNTK);
+        return (InntektDokument) saksopplysning
+            .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
+    }
+
+    public Optional<UtbetalingDokument> finnUtbetalingDokument() {
+        return hentDokument(SaksopplysningType.UTBETAL).map(d -> (UtbetalingDokument) d);
+    }
+
+    private Optional<SaksopplysningDokument> hentDokument(SaksopplysningType saksopplysningType) {
+        return getSaksopplysninger().stream()
+            .filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType))
+            .findFirst().map(Saksopplysning::getDokument);
     }
 
     @Override

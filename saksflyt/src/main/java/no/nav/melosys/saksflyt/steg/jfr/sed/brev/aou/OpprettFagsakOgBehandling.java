@@ -15,7 +15,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import no.nav.melosys.service.sak.SakService;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.kodeverk.Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET;
 
 @Component("JournalførAouBrevOpprettFagsakOgBehandling")
-public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
+public class OpprettFagsakOgBehandling implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
 
     private final FagsakService fagsakService;
@@ -45,12 +45,12 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         validerAvsender(prosessinstans);
         String aktørId = hentAktørId(prosessinstans);
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(new OpprettSakRequest.Builder()
@@ -62,7 +62,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             .medInitierendeJournalpostId(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID))
             .build());
 
-        Behandling behandling = fagsak.getAktivBehandling();
+        Behandling behandling = fagsak.hentAktivBehandling();
         log.info("Fagsak {} opprettet med behandling {}", fagsak.getSaksnummer(), behandling.getId());
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(behandling);

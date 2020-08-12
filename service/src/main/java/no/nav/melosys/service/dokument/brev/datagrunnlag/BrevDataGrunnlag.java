@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.datagrunnlag;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -15,10 +14,9 @@ public class BrevDataGrunnlag implements DataGrunnlag {
     private final Behandling behandling;
     private final BehandlingsgrunnlagData behandlingsgrunnlagData;
     private final PersonDokument person;
-
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final BostedGrunnlag bostedGrunnlag;
-    private final ArbeidsstedGrunnlag arbeidssteder;
+    private final ArbeidsstedGrunnlag arbeidsstedGrunnlag;
 
     public BrevDataGrunnlag(Behandling behandling,
                             KodeverkService kodeverkService,
@@ -26,10 +24,14 @@ public class BrevDataGrunnlag implements DataGrunnlag {
                             AvklartefaktaService avklartefaktaService) throws TekniskException {
         this.behandling = behandling;
         this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
+        this.person = behandling.hentPersonDokument();
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService, kodeverkService);
         this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, getPerson(), kodeverkService);
-        this.arbeidssteder = new ArbeidsstedGrunnlag(behandling, behandlingsgrunnlagData, getAvklarteVirksomheterGrunnlag(), avklartefaktaService);
+        this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
+            avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),
+            getAvklarteVirksomheterGrunnlag(),
+            behandlingsgrunnlagData
+        );
     }
 
     @Override
@@ -54,7 +56,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         return bostedGrunnlag;
     }
 
-    public ArbeidsstedGrunnlag getArbeidssteder() {
-        return arbeidssteder;
+    public ArbeidsstedGrunnlag getArbeidsstedGrunnlag() {
+        return arbeidsstedGrunnlag;
     }
 }

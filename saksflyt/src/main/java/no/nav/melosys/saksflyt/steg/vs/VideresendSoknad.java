@@ -63,12 +63,12 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return VS_SEND_SOKNAD;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         SendUtlandStatus sendtStatus = sendUtland(BucType.LA_BUC_03, prosessinstans, hentSøknadSomVedlegg(prosessinstans.getBehandling()));

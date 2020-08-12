@@ -34,6 +34,23 @@
                     </arbeidsforholdListe>
                 </arbeidsInntektInformasjon>
             </arbeidsInntektMaaned>
+            <arbeidsInntektMaaned>
+                <aarMaaned>2020-06+02:00</aarMaaned>
+                <avvikListe>
+                    <ident xsi:type="ns7:PersonIdent" xmlns:ns7="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <personIdent>99999999992</personIdent>
+                    </ident>
+                    <opplysningspliktig xsi:type="ns7:Organisasjon" xmlns:ns7="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <orgnummer>987654321</orgnummer>
+                    </opplysningspliktig>
+                    <virksomhet xsi:type="ns7:Organisasjon" xmlns:ns7="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <orgnummer>987654321</orgnummer>
+                    </virksomhet>
+                    <avvikPeriode>2020-06+02:00</avvikPeriode>
+                    <tekst>Feil på innsendt a-melding.</tekst>
+                </avvikListe>
+                <arbeidsInntektInformasjon/>
+            </arbeidsInntektMaaned>
             <ident xsi:type="ns4:PersonIdent" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 <personIdent>99999999992</personIdent>
             </ident>

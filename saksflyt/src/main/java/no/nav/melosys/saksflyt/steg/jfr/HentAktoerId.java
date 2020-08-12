@@ -1,12 +1,12 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_AKTØR_ID;
  * JFR_AKTOER_ID -> JFR_OPPRETT_SAK_OG_BEH eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class HentAktoerId extends AbstraktStegBehandler {
+public class HentAktoerId implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentAktoerId.class);
 

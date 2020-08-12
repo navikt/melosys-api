@@ -38,7 +38,7 @@ public class OppdaterStatusBehandlingOpprettetTest {
     }
 
     @Test
-    public void utførSteg_alltid_kallerSakOgBehandling() throws TekniskException, FunksjonellException {
+    public void utfør_alltid_kallerSakOgBehandling() throws TekniskException, FunksjonellException {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling b = lagBehandling();
         prosessinstans.setBehandling(b);
@@ -52,7 +52,7 @@ public class OppdaterStatusBehandlingOpprettetTest {
     }
 
     @Test
-    public void utførSteg_typeNySakFraDok_tilHentSaksopplysninger() throws TekniskException, FunksjonellException {
+    public void utfør_typeNySakFraDok_tilHentSaksopplysninger() throws TekniskException, FunksjonellException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
         Behandling b = lagBehandling();

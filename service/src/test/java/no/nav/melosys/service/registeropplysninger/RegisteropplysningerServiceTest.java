@@ -84,7 +84,7 @@ public class RegisteropplysningerServiceTest {
 
         when(registeropplysningerPeriodeFactory.hentPeriodeForArbeidsforhold(anyLocalDate(), anyLocalDate(), anyBehandling())).thenReturn(hentDatoPeriode());
         when(registeropplysningerPeriodeFactory.hentPeriodeForMedlemskap(anyLocalDate(), anyLocalDate(), anyBehandling())).thenReturn(hentDatoPeriode());
-        when(registeropplysningerPeriodeFactory.hentPeriodeForYtelser(anyLocalDate(), anyLocalDate(), anyBehandling())).thenReturn(hentPeriode());
+        when(registeropplysningerPeriodeFactory.hentPeriodeForInntekt(anyLocalDate(), anyLocalDate(), anyBehandling())).thenReturn(hentPeriode());
     }
 
     @Test

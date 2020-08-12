@@ -9,9 +9,8 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.saksflyt.feil.Feilkategori;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,25 +37,24 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_JOURNALPOS
  *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class VurderJournalfoeringstype extends AbstraktStegBehandler {
+public class VurderJournalfoeringstype implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(VurderJournalfoeringstype.class);
 
-    private final FagsakRepository fagsakRepository;
+    private final FagsakService fagsakService;
 
     @Autowired
-    public VurderJournalfoeringstype(FagsakRepository fagsakRepository) {
-        this.fagsakRepository = fagsakRepository;
-        log.info("VurderJournalfoeringstype initialisert");
+    public VurderJournalfoeringstype(FagsakService fagsakService) {
+        this.fagsakService = fagsakService;
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         switch (prosessinstans.getType()) {
@@ -67,10 +65,7 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
                 knyttDokumentTilEksisterendeBehandlingEllerOpprettNyBehandling(prosessinstans);
                 break;
             default:
-                String feilmelding = "Ukjent prosesstype: " + prosessinstans.getType();
-                log.error("{}: {}", prosessinstans.getId(), feilmelding);
-                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-                return;
+                throw new TekniskException("Ukjent prosesstype: " + prosessinstans.getType());
         }
 
         log.info("Prosessinstans {} har vurdert journalpost {}", prosessinstans.getId(), prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));
@@ -81,8 +76,8 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Behandlingstyper nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
 
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        Behandling aktivBehandling = fagsak.getAktivBehandling();
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
         if (Behandlingstyper.ENDRET_PERIODE.equals(nyBehandlingstype) && aktivBehandling != null) {
             throw new FunksjonellException("Man kan ikke endre lovvalgsperiode på en fagsak med en aktiv behandling");

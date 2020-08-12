@@ -15,7 +15,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -71,7 +70,8 @@ public class InnvilgelsesbrevFlereLandMapperTest {
 
         BrevDataInnvilgelseFlereLand brevdataInnvilgelse = new BrevDataInnvilgelseFlereLand(new BrevbestillingDto(), "SAKSBEHANDLER");
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
+        brevdataInnvilgelse.harAvklartMaritimTypeSkip = true;
+        brevdataInnvilgelse.harAvklartMaritimTypeSokkel = false;
         brevdataInnvilgelse.arbeidsgivere = norskeVirksomheter;
         brevdataInnvilgelse.bostedsland = "Norge";
         brevdataInnvilgelse.trydemyndighetsland = Landkoder.DE;

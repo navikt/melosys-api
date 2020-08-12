@@ -9,7 +9,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
  * JFR_VURDER_INNGANGSVILKÅR → HENT_ARBF_OPPL (eller til FEILET_MASKINELT hvis feil)
  */
 @Component
-public class VurderInngangsvilkaar extends AbstraktStegBehandler {
+public class VurderInngangsvilkaar implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
 
     private final InngangsvilkaarService inngangsvilkaarService;
@@ -38,7 +38,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
     }
 

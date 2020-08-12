@@ -21,7 +21,7 @@ public class FellesBrevtypeMappingTest {
     @Test
     public void testLovvalgsbestemmelseKode() throws Exception {
         List<String> uimplementerteEllerUgyldigeKoder = List.of(
-            "FO_883_2004_ART11_3D", "FO_883_2004_ART15"
+            "FO_883_2004_ART11_3D", "FO_883_2004_ART11_4", "FO_883_2004_ART15"
         );
 
         Stream<String> koder;

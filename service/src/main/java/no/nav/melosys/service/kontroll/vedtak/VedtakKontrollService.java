@@ -13,7 +13,6 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -45,8 +44,8 @@ public class VedtakKontrollService {
         Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> kontroller
     ) throws TekniskException {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        MedlemskapDokument medlemskapDokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
-        PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
+        MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
+        PersonDokument personDokument = behandling.hentPersonDokument();
         VedtakKontrollData vedtakKontrollData = new VedtakKontrollData(medlemskapDokument,
             personDokument, behandlingsgrunnlagData, lovvalgsperiode);
         return kontroller.stream()

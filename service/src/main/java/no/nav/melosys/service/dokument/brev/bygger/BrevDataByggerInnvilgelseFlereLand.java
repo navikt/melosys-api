@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -61,8 +61,9 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
 
         brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, grunnlagData).getBeskrivelse();
 
-        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandlingID);
-        maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
+        Set<Maritimtyper> maritimType = avklartefaktaService.hentMaritimTyper(behandlingID);
+        brevdata.harAvklartMaritimTypeSokkel = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SOKKEL);
+        brevdata.harAvklartMaritimTypeSkip = maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SKIP);
 
         brevdata.erMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(behandlingID);
         brevdata.erBegrensetPeriode = !PeriodeKontroller.periodeErLik(

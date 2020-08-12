@@ -7,13 +7,13 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
+public class OppdaterSaksrelasjon implements StegBehandler {
 
     private final JoarkFasade joarkFasade;
     private final EessiService eessiService;
@@ -24,12 +24,12 @@ public class OppdaterSaksrelasjon extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_OPPDATER_SAKSRELASJON;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
         if (journalpost.mottaksKanalErEessi()) {

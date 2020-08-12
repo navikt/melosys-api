@@ -5,20 +5,17 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
@@ -27,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("AnmodningUnntakMottakOpprettAnmodningsperiode")
-public class OpprettAnmodningsperiode extends AbstraktStegBehandler {
+public class OpprettAnmodningsperiode implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettAnmodningsperiode.class);
 
     private final AnmodningsperiodeService anmodningsperiodeService;
@@ -44,12 +41,12 @@ public class OpprettAnmodningsperiode extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         if (prosessinstans.getBehandling() == null) {
             throw new FunksjonellException("Ingen behandling finnes for prosessinstans " + prosessinstans.getId());
@@ -65,10 +62,10 @@ public class OpprettAnmodningsperiode extends AbstraktStegBehandler {
 
     private SedDokument hentEllerOpprettSedDokument(Prosessinstans prosessinstans) throws IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        Optional<SaksopplysningDokument> sedDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.SEDOPPL);
+        Optional<SedDokument> sedDokument = behandling.finnSedDokument();
 
         if (sedDokument.isPresent()) {
-            return (SedDokument) sedDokument.get();
+            return sedDokument.get();
         }
 
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);

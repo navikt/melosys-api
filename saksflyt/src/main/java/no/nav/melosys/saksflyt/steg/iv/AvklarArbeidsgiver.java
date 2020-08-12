@@ -16,7 +16,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
@@ -27,14 +27,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_AVKLAR_ARBEIDSGIVER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_MEDL;
 import static no.nav.melosys.domain.saksflyt.ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE;
 
 /**
  * Oppdaterer aktør med avklart arbeidsgiver i saken.
  */
 @Component
-public class AvklarArbeidsgiver extends AbstraktStegBehandler {
+public class AvklarArbeidsgiver implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(AvklarArbeidsgiver.class);
     private static final Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
 

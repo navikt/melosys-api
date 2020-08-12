@@ -7,7 +7,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
  * IV_STATUS_BEH_AVSL → FEILET_MASKINELT hvis oppdatering av status feilet
  */
 @Component
-public class OppdaterStatusBehandlingAvsluttet extends AbstraktStegBehandler {
+public class OppdaterStatusBehandlingAvsluttet implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingAvsluttet.class);
 
@@ -36,7 +36,7 @@ public class OppdaterStatusBehandlingAvsluttet extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return IV_STATUS_BEH_AVSL;
     }
 

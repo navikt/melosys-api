@@ -162,7 +162,7 @@ public class OppgaveplukkerTest {
 
         assertThat(oppgave.isPresent()).isTrue();
         oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
-        assertThat(fagsak.getAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.AVVENT_DOK_PART);
+        assertThat(fagsak.hentAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.AVVENT_DOK_PART);
     }
 
     @Test

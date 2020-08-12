@@ -15,7 +15,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -82,10 +81,10 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         }
         fag.setVirksomhetslandListe(mapVirksomhetsListe(brevdata.alleArbeidsland));
 
-        if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
+        if (brevdata.harAvklartMaritimTypeSkip) {
             fag.setArbeidPåSkip(JA);
         }
-        if (brevdata.avklartMaritimType == Maritimtyper.SOKKEL) {
+        if (brevdata.harAvklartMaritimTypeSokkel) {
             fag.setArbeidPåSokkel(JA);
         }
 

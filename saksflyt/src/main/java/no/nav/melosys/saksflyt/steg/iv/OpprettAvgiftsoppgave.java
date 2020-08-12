@@ -9,7 +9,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
+public class OpprettAvgiftsoppgave implements StegBehandler {
     private static final long FRIST_AVGIFTSVURDERING_MD = 1;
     static final String AVGIFTSVURDERING_BESKRIVELSE = "Vurderes for innregistrering i Avgiftssystemet";
 
@@ -36,12 +36,12 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         final Behandling behandling = prosessinstans.getBehandling();
         final long behandlingID = behandling.getId();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -52,7 +52,7 @@ public class OpprettAvgiftsoppgave extends AbstraktStegBehandler {
                 oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling));
             }
         }
-        
+
         prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 

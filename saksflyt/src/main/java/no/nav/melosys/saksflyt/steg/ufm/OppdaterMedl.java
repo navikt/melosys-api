@@ -8,10 +8,9 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.steg.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -21,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("RegistreringUnntakOppdaterMedl")
-public class OppdaterMedl extends AbstraktStegBehandler {
+public class OppdaterMedl implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
@@ -37,18 +36,18 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.REG_UNNTAK_OPPDATER_MEDL;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         final long behandlingId = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
-        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+        SedDokument sedDokument = behandling.hentSedDokument();
 
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandlingId);
 
@@ -70,7 +69,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     }
 
     private void opprettPeriode(Behandling behandling, Collection<Lovvalgsperiode> lovvalgsperioder, boolean erEndelig) throws TekniskException, FunksjonellException {
-        String ident = SaksopplysningerUtils.hentPersonDokument(behandling).fnr;
+        String ident = behandling.hentPersonDokument().fnr;
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
         if (erEndelig) {
             medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId(), true, ident);

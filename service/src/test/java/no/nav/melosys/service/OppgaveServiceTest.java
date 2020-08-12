@@ -106,7 +106,7 @@ public class OppgaveServiceTest {
 
         Set<Oppgave> oppgaver = Set.of(oppgave1.build(), oppgave2.build());
 
-        when(oppgaveFasade.finnOppgaveListeMedAnsvarlig(eq(tilordnetRessurs))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnOppgaverMedAnsvarlig(eq(tilordnetRessurs))).thenReturn(oppgaver);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
@@ -142,12 +142,7 @@ public class OppgaveServiceTest {
     @Test
     public void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() throws MelosysException {
         Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
-        assertThat(oppgave.erBehandling()).isEqualTo(true);
-    }
-
-    @Test(expected = TekniskException.class)
-    public void hentOppgaveForFagsaksnummer_medOppgaveSomIkkeFinnes_forventException() throws MelosysException {
-        oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12346");
+        assertThat(oppgave.erBehandling()).isTrue();
     }
 
     @Test

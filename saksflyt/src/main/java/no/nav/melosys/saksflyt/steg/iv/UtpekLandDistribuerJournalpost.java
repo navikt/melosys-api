@@ -26,12 +26,12 @@ public class UtpekLandDistribuerJournalpost extends AbstraktDistribuerJournalpos
     }
 
     @Override
-    protected ProsessSteg inngangsSteg() {
+    public ProsessSteg inngangsSteg() {
         return ProsessSteg.UL_DISTRIBUER_JOURNALPOST;
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
         UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(utpektLand);

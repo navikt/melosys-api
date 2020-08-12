@@ -75,7 +75,10 @@ public class EessiConsumerImpl implements EessiConsumer {
             if (!vedlegg.erGyldig()) {
                 throw new TekniskException("Vedlegget er ikke gyldig, kan ikke opprette buc " + bucType);
             }
-            formData.add("vedlegg", lagByteArrayResource(vedlegg.getInnhold(), vedlegg.getTittel()));
+            ByteArrayResource vedleggRessurs = lagByteArrayResource(vedlegg.getInnhold(), vedlegg.getTittel());
+            log.info("Sender vedlegg med størrelse {} for arkivsakID {}",
+                vedleggRessurs.contentLength(), sedDataDto.getGsakSaksnummer());
+            formData.add("vedlegg", vedleggRessurs);
         }
 
         return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(formData, httpHeaders),

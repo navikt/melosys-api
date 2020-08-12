@@ -89,11 +89,11 @@ public class UtpekingService {
                                   String ytterligereInformasjonSed,
                                   String fritekstBrev)
         throws MelosysException {
-        Behandling behandling = fagsak.getAktivBehandling();
+        Behandling behandling = fagsak.hentAktivBehandling();
         if (behandling.getTema() != Behandlingstema.ARBEID_FLERE_LAND) {
             throw new FunksjonellException("Utpeking kan ikke skje for en behandling med tema " + behandling.getTema());
         }
-        long behandlingID = fagsak.getAktivBehandling().getId();
+        long behandlingID = fagsak.hentAktivBehandling().getId();
 
         if (log.isInfoEnabled()) {
             log.info("Utpeking av annet land for sak: {}, behandling: {}, mottakerinstitusjoner: {}",

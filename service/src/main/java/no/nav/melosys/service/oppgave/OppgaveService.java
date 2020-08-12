@@ -66,7 +66,7 @@ public class OppgaveService {
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
-        Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
+        Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
@@ -92,7 +92,6 @@ public class OppgaveService {
     }
 
     public Optional<Oppgave> finnOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-
         List<Oppgave> oppgaver = oppgaveFasade.finnOppgaverMedSaksnummer(saksnummer);
 
         if (!oppgaver.isEmpty()) {
@@ -107,7 +106,7 @@ public class OppgaveService {
 
     public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         return finnOppgaveMedFagsaksnummer(saksnummer)
-            .orElseThrow(() -> new TekniskException("Finner ingen oppgave med saksnummer " + saksnummer));
+            .orElseThrow(() -> new IkkeFunnetException("Finner ingen oppgave med saksnummer " + saksnummer));
     }
 
     public Oppgave hentOppgaveMedOppgaveID(String oppgaveID) throws FunksjonellException, TekniskException {

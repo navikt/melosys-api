@@ -1,0 +1,1 @@
+ALTER TABLE VILKAARSRESULTAT ADD begrunnelse_fritekst_eessi VARCHAR2(4000) NULL;

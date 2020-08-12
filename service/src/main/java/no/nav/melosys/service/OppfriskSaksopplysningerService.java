@@ -9,7 +9,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -71,7 +70,7 @@ public class OppfriskSaksopplysningerService {
             fom = grunnlagData.periode.getFom();
             tom = grunnlagData.periode.getTom();
         } else if (behandling.erBehandlingAvSed()) {
-            SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+            SedDokument sedDokument = behandling.hentSedDokument();
             fom = sedDokument.getLovvalgsperiode().getFom();
             tom = sedDokument.getLovvalgsperiode().getTom();
         }

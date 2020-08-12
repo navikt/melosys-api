@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Collections;
-import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -110,7 +110,7 @@ public class BrevDataByggerInnvilgelseTest {
     @Test
     public void lag_medSokkel_setterMaritimtypeSokkel() throws FunksjonellException, TekniskException {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
-        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.of(maritimType));
+        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
@@ -119,7 +119,7 @@ public class BrevDataByggerInnvilgelseTest {
 
     @Test
     public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
-        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.empty());
+        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.avklartMaritimType).isNull();
