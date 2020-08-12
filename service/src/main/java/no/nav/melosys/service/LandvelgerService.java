@@ -72,7 +72,10 @@ public class LandvelgerService {
     }
 
     private boolean erArtikkel13(long behandlingId) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        return erArtikkel13(behandlingsresultatService.hentBehandlingsresultat(behandlingId));
+    }
+
+    private boolean erArtikkel13(Behandlingsresultat behandlingsresultat) {
         if (behandlingsresultat.harMedlemskapsperiode()) {
             Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsperiode();
             return medlemskapsperiode.erArtikkel13();
@@ -86,8 +89,24 @@ public class LandvelgerService {
         return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
     }
 
+    private Stream<Landkoder> hentUtpekteLandkoder(long behandlingID) throws IkkeFunnetException {
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingID).getUtpekingsperioder()
+            .stream().map(Utpekingsperiode::getLovvalgsland);
+    }
+
+    public Collection<Landkoder> hentLandSomSkalMottaSed(long behandlingID) throws IkkeFunnetException {
+        Stream<Landkoder> lovvalgsland = hentUtpekteLandkoder(behandlingID);
+
+        return Stream.concat(
+            lovvalgsland,
+            hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
+        ).collect(Collectors.toSet());
+    }
+
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
-        if (erArtikkel13(behandlingID)) {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+
+        if (erArtikkel13(behandlingsresultat) && !erVideresendt(behandlingsresultat)) {
             return hentUtenlandskTrygdemyndighetslandArtikkel13(behandlingID);
         }
 
@@ -100,19 +119,13 @@ public class LandvelgerService {
         Set<Landkoder> landkoderMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
 
-        Stream<Landkoder> utenlandskeArbeidsstederLandkoder = behandlingsgrunnlag.getBehandlingsgrunnlagdata()
-            .hentUtenlandskeArbeidsstederLandkode().stream()
-            .map(Landkoder::valueOf)
-            .filter(landkoderMedMarginaltArbeid::contains);
-
-        Stream<Landkoder> utenlandskeArbeidsgivereLandkoder = behandlingsgrunnlag.getBehandlingsgrunnlagdata()
-            .hentUtenlandskeArbeidsgivereLandkode().stream()
-            .map(Landkoder::valueOf)
-            .filter(landkoderMedMarginaltArbeid::contains);
+        Stream<Landkoder> marginaleArbeidslandMedUtenlandskArbeid = Stream.concat(
+            behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode().stream(),
+            behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsgivereLandkode().stream()
+        ).map(Landkoder::valueOf).filter(landkoderMedMarginaltArbeid::contains);
 
         return Streams.concat(
-            utenlandskeArbeidsgivereLandkoder,
-            utenlandskeArbeidsstederLandkoder,
+            marginaleArbeidslandMedUtenlandskArbeid,
             hentTrygdemyndighetsland(behandlingID).stream()
         ).filter(landkoder -> landkoder != Landkoder.NO).collect(Collectors.toSet());
     }

@@ -292,10 +292,11 @@ public class LandvelgerServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
 
+        søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.FR));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(Landkoder.DE));
 
-        søknad.soeknadsland.landkoder.add(søknadsland.getKode());
+        søknad.soeknadsland.landkoder = List.of(Landkoder.DE.getKode(), Landkoder.FR.getKode());
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         assertThat(land).containsExactly(søknadsland);
     }

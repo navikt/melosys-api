@@ -84,7 +84,6 @@ public class UtpekingServiceTest {
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(behandlingID))).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(List.of(Landkoder.SE));
     }
 
     @Test
@@ -96,10 +95,12 @@ public class UtpekingServiceTest {
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         final Set<String> mottakerInstitusjoner = Set.of("SE:123");
-        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), eq(List.of(Landkoder.SE)), eq(BucType.LA_BUC_02)))
+        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), eq(Set.of(Landkoder.SE)), eq(BucType.LA_BUC_02)))
             .thenReturn(mottakerInstitusjoner);
         when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
             .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
+        when(landvelgerService.hentLandSomSkalMottaSed(eq(behandlingID)))
+            .thenReturn(Set.of(Landkoder.SE));
 
         utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
 
@@ -143,10 +144,8 @@ public class UtpekingServiceTest {
             .thenReturn(mottakerInstitusjoner);
         when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
             .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID)))
-            .thenReturn(List.of(Landkoder.DK, Landkoder.FI));
-        when(utpekingsperiodeRepository.findByBehandlingsresultat_Id(eq(behandlingID)))
-            .thenReturn(List.of(utpekingsperiode));
+        when(landvelgerService.hentLandSomSkalMottaSed(eq(behandlingID)))
+            .thenReturn(List.of(Landkoder.SE, Landkoder.DK, Landkoder.FI));
 
         utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
 
