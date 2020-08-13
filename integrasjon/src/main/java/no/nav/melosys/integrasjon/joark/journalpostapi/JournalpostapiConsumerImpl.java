@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
     private static final Logger log = LoggerFactory.getLogger(JournalpostapiConsumerImpl.class);
@@ -38,10 +37,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
                 request.getJournalpostType().name(), request.getSak() != null ? request.getSak().getArkivsaksnummer() : "ukjent");
         }
 
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath("/journalpost")
-            .queryParam("forsoekFerdigstill", forsøkEndeligJfr);
-
-        return restTemplate.postForObject(uriBuilder.toUriString(), new HttpEntity<>(request, getHttpHeaders()), OpprettJournalpostResponse.class);
+        return restTemplate.postForObject("/journalpost?forsoekFerdigstill={forsoekFerdigstill}", new HttpEntity<>(request, getHttpHeaders()), OpprettJournalpostResponse.class, forsøkEndeligJfr);
     }
 
     @Override
@@ -49,7 +45,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
         if (log.isInfoEnabled()) {
             log.info("Oppdaterer journalpost med id {}", journalpostId);
         }
-        exchange(String.format("/journalpost/%s", journalpostId), HttpMethod.PUT, new HttpEntity<>(request, getHttpHeaders()), Void.class);
+        exchange("/journalpost/{journalpostID}", HttpMethod.PUT, new HttpEntity<>(request, getHttpHeaders()), journalpostId);
     }
 
     @Override
@@ -59,7 +55,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
         }
 
         LogiskVedleggRequest request = new LogiskVedleggRequest(tittel);
-        exchange(String.format("/dokumentInfo/%s/logiskVedlegg/", dokumentInfoId), HttpMethod.POST, new HttpEntity<>(request, getHttpHeaders()), Void.class);
+        exchange("/dokumentInfo/{dokumentInfoId}/logiskVedlegg", HttpMethod.POST, new HttpEntity<>(request, getHttpHeaders()), dokumentInfoId);
     }
 
     @Override
@@ -68,7 +64,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
             log.info("Fjerner logisk vedlegg {} for dokument med id {}", logiskVedleggId, dokumentInfoId);
         }
 
-        exchange(String.format("/dokumentInfo/%s/logiskVedlegg/%s", dokumentInfoId, logiskVedleggId), HttpMethod.DELETE, new HttpEntity<>(getHttpHeaders()), Void.class);
+        exchange("/dokumentInfo/{dokumentInfoId}/logiskVedlegg/{logiskVedleggId}", HttpMethod.DELETE, new HttpEntity<>(getHttpHeaders()), dokumentInfoId, logiskVedleggId);
     }
 
     @Override
@@ -76,7 +72,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
         if (log.isInfoEnabled()) {
             log.info("Ferdigstill journalpost med id {}", journalpostId);
         }
-        exchange(String.format("/journalpost/%s/ferdigstill", journalpostId), HttpMethod.PATCH, new HttpEntity<>(request, getHttpHeaders()), Void.class);
+        exchange("/journalpost/{journalpostID}/ferdigstill", HttpMethod.PATCH, new HttpEntity<>(request, getHttpHeaders()), journalpostId);
     }
 
     private HttpHeaders getHttpHeaders() {
@@ -86,9 +82,9 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
         return headers;
     }
 
-    private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, Class<T> clazz) throws SikkerhetsbegrensningException, IntegrasjonException {
+    private void exchange(String uri, HttpMethod method, HttpEntity<?> entity, Object... variabler) throws SikkerhetsbegrensningException, IntegrasjonException {
         try {
-            return restTemplate.exchange(uri, method, entity, clazz).getBody();
+            restTemplate.exchange(uri, method, entity, Void.class, variabler).getBody();
         } catch (HttpStatusCodeException ex) {
             String feilmelding = hentFeilmelding(ex);
             switch (ex.getStatusCode()) {
