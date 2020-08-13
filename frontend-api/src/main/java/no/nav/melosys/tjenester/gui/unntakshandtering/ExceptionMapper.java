@@ -65,6 +65,7 @@ public class ExceptionMapper {
         entity.put("error", httpStatus.getReasonPhrase());
         entity.put("message", e.getMessage());
         if (begrunnelser != null && !begrunnelser.isEmpty()) {
+            // For ValideringException, kan dette bli ei liste med FeilKode i stedet for String
             entity.put("feilkoder", begrunnelser);
         }
         return new ResponseEntity<>(entity, httpStatus);
