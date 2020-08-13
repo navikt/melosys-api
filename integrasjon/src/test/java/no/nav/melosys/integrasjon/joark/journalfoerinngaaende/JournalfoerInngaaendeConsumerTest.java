@@ -18,9 +18,7 @@ public class JournalfoerInngaaendeConsumerTest {
     private RestTemplate restTemplate = new RestTemplate();
     private MockRestServiceServer server;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-    private final String JOURNALPOST_ID = "j123";
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
     public void setup() {
@@ -30,11 +28,10 @@ public class JournalfoerInngaaendeConsumerTest {
 
     @Test
     public void hentJournalpost_verifiserUrlOgJson() throws Exception {
-        String url = String.format("/journalposter/%s", JOURNALPOST_ID);
-
-        server.expect(requestTo(url))
+        String journalpostID = "j123";
+        server.expect(requestTo(String.format("/journalposter/%s", journalpostID)))
             .andRespond(withSuccess(objectMapper.writeValueAsString(new GetJournalpostResponse()), APPLICATION_JSON));
 
-        journalfoerInngaaendeConsumer.hentJournalpost(JOURNALPOST_ID);
+        journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
     }
 }
