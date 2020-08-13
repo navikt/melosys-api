@@ -99,7 +99,7 @@ public class UtpekingServiceTest {
             .thenReturn(mottakerInstitusjoner);
         when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
             .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
-        when(landvelgerService.hentLandSomSkalMottaSed(eq(behandlingID)))
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID)))
             .thenReturn(Set.of(Landkoder.SE));
 
         utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
@@ -144,7 +144,7 @@ public class UtpekingServiceTest {
             .thenReturn(mottakerInstitusjoner);
         when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
             .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
-        when(landvelgerService.hentLandSomSkalMottaSed(eq(behandlingID)))
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID)))
             .thenReturn(List.of(Landkoder.SE, Landkoder.DK, Landkoder.FI));
 
         utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);

@@ -98,7 +98,7 @@ public class UtpekingService {
 
         mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjoner,
-            landvelgerService.hentLandSomSkalMottaSed(behandlingID),
+            landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID),
             BucType.LA_BUC_02
         );
 

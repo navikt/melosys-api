@@ -68,6 +68,7 @@ public class LandvelgerServiceTest {
         lovvalgsperiode = new Lovvalgsperiode();
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+        behandlingsresultat.setId(behandlingID);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(vilkaar);
@@ -93,6 +94,7 @@ public class LandvelgerServiceTest {
         behandling.setFagsak(fagsak);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.setId(behandlingID);
         if (periode instanceof Lovvalgsperiode) {
             behandlingsresultat.setLovvalgsperioder(Collections.singleton((Lovvalgsperiode) periode));
         } else if (periode instanceof Anmodningsperiode) {
@@ -291,6 +293,7 @@ public class LandvelgerServiceTest {
         behandling.setFagsak(fagsak);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.setId(behandlingID);
 
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.FR));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
@@ -317,7 +320,7 @@ public class LandvelgerServiceTest {
             .doesNotContain(Landkoder.NO)
             .contains(Landkoder.SE, Landkoder.DK);
 
-        verify(behandlingsresultatService, times(2)).hentBehandlingsresultat(eq(behandlingID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(eq(behandlingID));
         verify(behandlingsgrunnlagService, times(3)).hentBehandlingsgrunnlag(eq(behandlingID));
     }
 
@@ -337,7 +340,7 @@ public class LandvelgerServiceTest {
             .doesNotContain(Landkoder.NO, Landkoder.DE, Landkoder.ES)
             .containsExactlyInAnyOrder(Landkoder.SE, Landkoder.DK);
 
-        verify(behandlingsresultatService, times(2)).hentBehandlingsresultat(eq(behandlingID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(eq(behandlingID));
         verify(behandlingsgrunnlagService, times(3)).hentBehandlingsgrunnlag(eq(behandlingID));
     }
 
@@ -360,7 +363,7 @@ public class LandvelgerServiceTest {
             .doesNotContain(Landkoder.NO, Landkoder.DK, Landkoder.DE)
             .containsExactlyInAnyOrder(Landkoder.SE, Landkoder.ES);
 
-        verify(behandlingsresultatService, times(2)).hentBehandlingsresultat(eq(behandlingID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(eq(behandlingID));
         verify(behandlingsgrunnlagService, times(3)).hentBehandlingsgrunnlag(eq(behandlingID));
     }
 
