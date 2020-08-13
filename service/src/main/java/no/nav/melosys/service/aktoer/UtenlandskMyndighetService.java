@@ -13,7 +13,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.service.dokument.LandvelgerService;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
