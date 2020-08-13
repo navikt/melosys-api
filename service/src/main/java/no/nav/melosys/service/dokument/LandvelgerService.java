@@ -71,12 +71,23 @@ public class LandvelgerService {
         }
     }
 
+    private boolean erArtikkel11_5(long behandlingID) throws IkkeFunnetException {
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+            .finnValidertLovvalgsperiode()
+            .filter(Lovvalgsperiode::erArtikkel11_5)
+            .isPresent();
+    }
+
     private boolean erVideresendt(Behandlingsresultat behandlingsresultat) {
         Fagsak fagsak = behandlingsresultat.getBehandling().getFagsak();
         return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
+        if (erArtikkel11_5(behandlingID)) {
+            return avklartefaktaService.hentInformertMyndighet(behandlingID).stream()
+                .filter(landkode -> landkode != Landkoder.NO).collect(Collectors.toList());
+        }
         Collection<Landkoder> trygdemyndighetsland = hentTrygdemyndighetsland(behandlingID);
         trygdemyndighetsland.remove(Landkoder.NO);
         return trygdemyndighetsland;
