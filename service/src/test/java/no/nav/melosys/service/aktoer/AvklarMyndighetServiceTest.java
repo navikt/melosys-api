@@ -5,7 +5,7 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.service.dokument.LandvelgerService;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;

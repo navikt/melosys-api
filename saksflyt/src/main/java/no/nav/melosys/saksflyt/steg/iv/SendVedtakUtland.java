@@ -123,9 +123,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     @Override
     protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
-        return (behandlingsresultat.erInnvilgelse() && behandlingsresultat.hentValidertLovvalgsperiode()
-            .getBestemmelse() != Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)
-            || behandlingsresultat.erInnvilgelseFlereLand();
+        return (behandlingsresultat.erInnvilgelse() && !erArtikkel16_1(behandlingsresultat))
+            || behandlingsresultat.erInnvilgelseFlereLand()
+            || behandlingsresultat.erUtpeking();
+    }
+
+    private boolean erArtikkel16_1(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
     }
 
     private BucType avklarBucType(Behandling behandling) throws IkkeFunnetException, TekniskException {

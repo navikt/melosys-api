@@ -21,6 +21,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -51,6 +52,8 @@ public class SendVedtakUtlandTest {
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private SedSomBrevService sedSomBrevService;
+    @Mock
+    private LandvelgerService landvelgerService;
 
     private SendVedtakUtland sendVedtakUtland;
 
@@ -92,15 +95,6 @@ public class SendVedtakUtlandTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), isNull(), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
-    }
-
-    @Test
-    public void utfør_artikkel13Suksessfull_statusErOppdaterResultat() throws Exception {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_02), isNull(), isNull());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
     }
 
@@ -149,6 +143,7 @@ public class SendVedtakUtlandTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
+        behandlingsresultat.setId(BEHANDLING_ID);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
         lovvalgsperiode.setLovvalgsland(Landkoder.AT);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);

@@ -212,7 +212,7 @@ public class OpprettJournalpostRequest {
         private Sak sak;
         private List<Dokument> dokumenter;
 
-        OpprettJournalpostRequestBuilder() {
+        public OpprettJournalpostRequestBuilder() {
         }
 
         public OpprettJournalpostRequest.OpprettJournalpostRequestBuilder journalpostType(JournalpostType journalpostType) {

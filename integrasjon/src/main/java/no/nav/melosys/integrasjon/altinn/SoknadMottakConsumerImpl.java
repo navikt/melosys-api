@@ -13,14 +13,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(SoknadMottakConsumerImpl.class);
-
-    private static final String SOKNADER_PATH = "soknader";
-    private static final String DOKUMENTER_PATH = "dokumenter";
 
     private final RestTemplate restTemplate;
 
@@ -29,26 +25,27 @@ public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
     }
 
     @Override
-    public MedlemskapArbeidEOSM hentSøknad(String søknadID) {
+    public MedlemskapArbeidEOSM hentSøknad(final String søknadID) {
         log.info("Henter søknad med ID {}", søknadID);
 
-        String url = UriComponentsBuilder.fromPath(SOKNADER_PATH)
-            .pathSegment(søknadID)
-            .toUriString();
-
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders(MediaType.APPLICATION_XML)),
-            MedlemskapArbeidEOSM.class).getBody();
+        return restTemplate.exchange(
+            "/soknader/{søknadID}",
+            HttpMethod.GET,
+            new HttpEntity<>(getHeaders(MediaType.APPLICATION_XML)),
+            MedlemskapArbeidEOSM.class,
+            søknadID).getBody();
     }
 
     @Override
-    public Collection<AltinnDokument> hentDokumenter(String søknadID) {
+    public Collection<AltinnDokument> hentDokumenter(final String søknadID) {
         log.info("Henter dokumenter tilknyttet altinn-søknad {}", søknadID);
-        String url = UriComponentsBuilder.fromPath(SOKNADER_PATH)
-            .pathSegment(søknadID, DOKUMENTER_PATH)
-            .toUriString();
 
-        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(getHeaders(MediaType.APPLICATION_JSON)),
-            new ParameterizedTypeReference<Collection<AltinnDokument>>() {}).getBody();
+        return restTemplate.exchange(
+            "/soknader/{søknadID}/dokumenter",
+            HttpMethod.GET,
+            new HttpEntity<>(getHeaders(MediaType.APPLICATION_JSON)),
+            new ParameterizedTypeReference<Collection<AltinnDokument>>() {},
+            søknadID).getBody();
     }
 
     private HttpHeaders getHeaders(MediaType mediaType) {

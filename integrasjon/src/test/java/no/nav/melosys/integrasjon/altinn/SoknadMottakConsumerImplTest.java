@@ -14,6 +14,7 @@ import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.soknad_altinn.MidlertidigUtsendt;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -26,7 +27,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 public class SoknadMottakConsumerImplTest {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplateBuilder().rootUri("http://melosys-soknad-mottak").build();
     private SoknadMottakConsumer soknadMottakConsumer;
     private MockRestServiceServer server;
 
@@ -44,7 +45,7 @@ public class SoknadMottakConsumerImplTest {
         URI søknadURI = (getClass().getClassLoader().getResource("soknad_altinn.xml")).toURI();
         String xmlResponse = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
-        server.expect(requestTo("/soknader/" + søknadID))
+        server.expect(requestTo("http://melosys-soknad-mottak/soknader/" + søknadID))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess().body(xmlResponse).contentType(MediaType.APPLICATION_XML));
 
@@ -61,7 +62,7 @@ public class SoknadMottakConsumerImplTest {
 
         String json = new ObjectMapper().writeValueAsString(Collections.singleton(altinnDokument));
 
-        server.expect(requestTo("/soknader/" + søknadID + "/dokumenter"))
+        server.expect(requestTo("http://melosys-soknad-mottak/soknader/" + søknadID + "/dokumenter"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess().body(json).contentType(MediaType.APPLICATION_JSON));
 
