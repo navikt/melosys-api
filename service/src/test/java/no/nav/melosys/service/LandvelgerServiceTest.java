@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
@@ -365,6 +366,30 @@ public class LandvelgerServiceTest {
 
         verify(behandlingsresultatService).hentBehandlingsresultat(eq(behandlingID));
         verify(behandlingsgrunnlagService, times(3)).hentBehandlingsgrunnlag(eq(behandlingID));
+    }
+
+    @Test
+    public void hentUtenlandskTrygdemyndighetsland_artikkel11_5DanmarkValgtAvSaksbehandler_forventEttLandDanmark() throws IkkeFunnetException {
+        lagBehandlingsresultat(lovvalgsperiode);
+        lovvalgsperiode.setBestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
+
+        when(avklartefaktaService.hentInformertMyndighet(eq(behandlingID))).thenReturn(Optional.of(Landkoder.DK));
+
+        Collection<Landkoder> utenlandskeTrygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
+
+        assertThat(utenlandskeTrygdemyndighetsland).containsExactly(Landkoder.DK);
+    }
+
+    @Test
+    public void hentUtenlandskTrygdemyndighetsland_artikkel11_5SaksbehandlerIkkeValgLand_forventTomListe() throws IkkeFunnetException {
+        lagBehandlingsresultat(lovvalgsperiode);
+        lovvalgsperiode.setBestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
+
+        when(avklartefaktaService.hentInformertMyndighet(eq(behandlingID))).thenReturn(Optional.empty());
+
+        Collection<Landkoder> utenlandskeTrygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
+
+        assertThat(utenlandskeTrygdemyndighetsland).isEmpty();
     }
 
     private static StrukturertAdresse lagUtenlandskAdresse(Landkoder landkode) {
