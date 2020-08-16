@@ -186,6 +186,18 @@ public class AvklartefaktaServiceTest {
         assertThat(maritimTyper.iterator().next()).isEqualTo(Maritimtyper.SKIP);
     }
 
+    @Test
+    public void hentInformertMyndighet_avklartFaktaErSverige_forventSverige() {
+        Avklartefakta valgtMyndighetFakta = new Avklartefakta();
+        valgtMyndighetFakta.setFakta(Landkoder.SE.getKode());
+        valgtMyndighetFakta.setType(Avklartefaktatyper.INFORMERT_MYNDIGHET);
+
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.INFORMERT_MYNDIGHET)))
+            .thenReturn(Optional.of(valgtMyndighetFakta));
+
+        assertThat(avklartefaktaService.hentInformertMyndighet(1L)).isPresent().hasValue(Landkoder.SE);
+    }
+
     public static Set<Avklartefakta> lagAlleMaritimeAvklartefakta(String navn, String maritimType, String landkode) {
         Avklartefakta avklartSokkel = AvklartMaritimtArbeidTest.lagAvklartefaktaSokkelSkip(navn, maritimType);
         Avklartefakta avklartArbeidsland = AvklartMaritimtArbeidTest.lagAvklartefaktaArbeidsland(navn, landkode);
