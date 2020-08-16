@@ -84,7 +84,7 @@ public class LandvelgerService {
         }
     }
 
-    private boolean erArtikkel11_5(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException {
+    private boolean erArtikkel11_5(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.finnValidertLovvalgsperiode()
             .filter(Lovvalgsperiode::erArtikkel11_5)
             .isPresent();
@@ -102,7 +102,7 @@ public class LandvelgerService {
             return hentUtenlandskTrygdemyndighetslandArtikkel13(behandlingsresultat);
         } else if (erArtikkel11_5(behandlingsresultat)) {
             return avklartefaktaService.hentInformertMyndighet(behandlingID).stream()
-                .filter(landkode -> landkode != Landkoder.NO).collect(Collectors.toList());
+                .filter(landkode -> landkode != Landkoder.NO).collect(Collectors.toSet());
         }
 
         Collection<Landkoder> trygdemyndighetsland = hentTrygdemyndighetsland(behandlingsresultat);
