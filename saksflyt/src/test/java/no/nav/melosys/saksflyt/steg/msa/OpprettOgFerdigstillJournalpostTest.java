@@ -63,8 +63,8 @@ public class OpprettOgFerdigstillJournalpostTest {
         opprettOgFerdigstillJournalpost = new OpprettOgFerdigstillJournalpost(
             altinnSoeknadService, tpsFasade, joarkFasade, behandlingService);
 
-        AltinnDokument søknadDokument = new AltinnDokument(søknadID, "dokumentid1", "tittel1", AltinnDokument.AltinnDokumentType.SOKNAD, "pdf");
-        AltinnDokument fullmaktDokument = new AltinnDokument(søknadID, "dokumentid2", "tittel2", AltinnDokument.AltinnDokumentType.FULLMAKT, "pdf");
+        AltinnDokument søknadDokument = new AltinnDokument(søknadID, "dokumentid1", "tittel1", AltinnDokument.AltinnDokumentType.SOKNAD.name(), "pdf");
+        AltinnDokument fullmaktDokument = new AltinnDokument(søknadID, "dokumentid2", "tittel2", AltinnDokument.AltinnDokumentType.FULLMAKT.name(), "pdf");
 
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
