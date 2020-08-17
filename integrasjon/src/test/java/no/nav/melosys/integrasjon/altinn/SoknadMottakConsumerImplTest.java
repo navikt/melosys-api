@@ -58,7 +58,7 @@ public class SoknadMottakConsumerImplTest {
     @Test
     public void hentDokumenter_mottarListeAvDokumenter_blirMappet() throws JsonProcessingException {
         AltinnDokument altinnDokument = new AltinnDokument(
-            søknadID, "dokID123", "tittel", AltinnDokument.AltinnDokumentType.SOKNAD, "Base64EncodedPdf");
+            søknadID, "dokID123", "tittel", "Fullmakt", "Base64EncodedPdf");
 
         String json = new ObjectMapper().writeValueAsString(Collections.singleton(altinnDokument));
 
