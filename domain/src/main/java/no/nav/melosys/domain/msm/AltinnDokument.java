@@ -9,17 +9,16 @@ public final class AltinnDokument {
     private final AltinnDokumentType dokumentType;
     private final String innhold;
 
-
     public AltinnDokument(
         @JsonProperty("soknadID") String soknadID,
         @JsonProperty("dokumentID") String dokumentID,
         @JsonProperty("tittel") String tittel,
-        @JsonProperty("dokumentType") AltinnDokumentType dokumentType,
+        @JsonProperty("dokumentType") String dokumentType,
         @JsonProperty("innhold") String innhold) {
         this.soknadID = soknadID;
         this.dokumentID = dokumentID;
         this.tittel = tittel;
-        this.dokumentType = dokumentType;
+        this.dokumentType = AltinnDokumentType.valueOf(dokumentType.toUpperCase());
         this.innhold = innhold;
     }
 
