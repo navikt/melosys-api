@@ -189,11 +189,11 @@ public class AvklartefaktaServiceTest {
     @Test
     public void hentInformertMyndighet_avklartFaktaErSverige_forventSverige() {
         Avklartefakta valgtMyndighetFakta = new Avklartefakta();
-        valgtMyndighetFakta.setFakta(Landkoder.SE.getKode());
+        valgtMyndighetFakta.setSubjekt(Landkoder.SE.getKode());
         valgtMyndighetFakta.setType(Avklartefaktatyper.INFORMERT_MYNDIGHET);
 
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.INFORMERT_MYNDIGHET)))
-            .thenReturn(Optional.of(valgtMyndighetFakta));
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), eq(Avklartefaktatyper.INFORMERT_MYNDIGHET), eq("TRUE")))
+            .thenReturn(Set.of(valgtMyndighetFakta));
 
         assertThat(avklartefaktaService.hentInformertMyndighet(1L)).isPresent().hasValue(Landkoder.SE);
     }

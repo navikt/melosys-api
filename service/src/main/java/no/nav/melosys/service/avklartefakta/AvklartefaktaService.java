@@ -107,9 +107,11 @@ public class AvklartefaktaService {
     }
 
     public Optional<Landkoder> hentInformertMyndighet(long behandlingID) {
-        return avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.INFORMERT_MYNDIGHET)
-            .map(Avklartefakta::getFakta)
-            .map(Landkoder::valueOf);
+        return avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingID, Avklartefaktatyper.INFORMERT_MYNDIGHET, VALGT_FAKTA)
+            .stream()
+            .map(Avklartefakta::getSubjekt)
+            .map(Landkoder::valueOf)
+            .findFirst();
     }
 
     public Map<String, AvklartMaritimtArbeid> hentMaritimeAvklartfaktaEtterSubjekt(long behandlingsid) {
