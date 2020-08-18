@@ -146,8 +146,7 @@ public class LandvelgerServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
         Collection<Landkoder> arbeidsland = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
-        assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK, Landkoder.SE);
-        assertThat(arbeidsland).containsOnlyOnce(Landkoder.DK);
+        assertThat(arbeidsland).containsExactlyInAnyOrder(Landkoder.NO, Landkoder.DK, Landkoder.SE).containsOnlyOnce(Landkoder.DK);
     }
 
     @Test
@@ -371,7 +370,8 @@ public class LandvelgerServiceTest {
     @Test
     public void hentUtenlandskTrygdemyndighetsland_artikkel11_5DanmarkValgtAvSaksbehandler_forventEttLandDanmark() throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
-        lovvalgsperiode.setBestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
 
         when(avklartefaktaService.hentInformertMyndighet(eq(behandlingID))).thenReturn(Optional.of(Landkoder.DK));
 
@@ -383,7 +383,8 @@ public class LandvelgerServiceTest {
     @Test
     public void hentUtenlandskTrygdemyndighetsland_artikkel11_5SaksbehandlerIkkeValgLand_forventTomListe() throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
-        lovvalgsperiode.setBestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
 
         when(avklartefaktaService.hentInformertMyndighet(eq(behandlingID))).thenReturn(Optional.empty());
 
