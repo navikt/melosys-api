@@ -50,7 +50,7 @@ public interface Medlemskapsperiode extends ErPeriode {
             || getTilleggsbestemmelse() == FO_883_2004_ART11_4_1;
     }
 
-    default boolean erArtikkel11_5() {
-        return getBestemmelse() == FO_883_2004_ART11_5;
+    default boolean erArtikkel11_3aMed11_5Tilleggsbestemmelse() {
+        return getBestemmelse() == FO_883_2004_ART11_3A && getTilleggsbestemmelse() == FO_883_2004_ART11_5;
     }
 }
