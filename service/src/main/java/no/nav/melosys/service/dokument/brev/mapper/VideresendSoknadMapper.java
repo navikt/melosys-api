@@ -27,6 +27,7 @@ public class VideresendSoknadMapper implements BrevDataMapper {
         StrukturertAdresse myndighetensAdresse = brevDataVideresend.trygdemyndighet.getAdresse();
         String utenlandskMyndighetsNavnOgAdresse = brevDataVideresend.trygdemyndighet.navn + ", " + myndighetensAdresse.toString();
         fag.setTrygdemyndighet(utenlandskMyndighetsNavnOgAdresse);
+        fag.setFritekst(brevData.fritekst);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
