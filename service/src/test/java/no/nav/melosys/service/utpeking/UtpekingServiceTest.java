@@ -24,6 +24,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
@@ -58,6 +59,8 @@ public class UtpekingServiceTest {
     private ProsessinstansService prosessinstansService;
     @Mock
     private UtpekingsperiodeRepository utpekingsperiodeRepository;
+    @Mock
+    private VedtakKontrollService vedtakKontrollService;
 
     @Captor
     private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperiodeCaptor;
@@ -71,11 +74,10 @@ public class UtpekingServiceTest {
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Fagsak fagsak = new Fagsak();
 
-
     @Before
     public void setup() throws FunksjonellException {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
-            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository);
+            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService);
 
         fagsak.setBehandlinger(List.of(behandling));
         behandling.setId(behandlingID);

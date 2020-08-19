@@ -84,6 +84,12 @@ public class LandvelgerService {
         }
     }
 
+    private boolean erArtikkel11_3aMed11_5Tilleggsbestemmelse(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.finnValidertLovvalgsperiode()
+            .filter(Lovvalgsperiode::erArtikkel11_3aMed11_5Tilleggsbestemmelse)
+            .isPresent();
+    }
+
     private boolean erVideresendt(Behandlingsresultat behandlingsresultat) {
         Fagsak fagsak = behandlingsresultat.getBehandling().getFagsak();
         return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
@@ -94,6 +100,9 @@ public class LandvelgerService {
 
         if (erArtikkel13(behandlingsresultat) && !erVideresendt(behandlingsresultat)) {
             return hentUtenlandskTrygdemyndighetslandArtikkel13(behandlingsresultat);
+        } else if (erArtikkel11_3aMed11_5Tilleggsbestemmelse(behandlingsresultat)) {
+            return avklartefaktaService.hentInformertMyndighet(behandlingID).stream()
+                .filter(landkode -> landkode != Landkoder.NO).collect(Collectors.toSet());
         }
 
         Collection<Landkoder> trygdemyndighetsland = hentTrygdemyndighetsland(behandlingsresultat);

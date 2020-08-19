@@ -68,6 +68,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String SOK_FAGSAKER_SCHEMA = "fagsaker-sok-schema.json";
     private static final String SOK_FAGSAKER_POST_SCHEMA = "fagsaker-sok-post-schema.json";
     private static final String FAGSAKER_UTPEK_POST_SCHEMA = "fagsaker-utpek-post-schema.json";
+    private static final String FAGSAKER_VIDERESEND_POST_SCHEMA = "fagsaker-henleggvideresend-post-schema.json";
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
@@ -92,6 +93,14 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
             .randomize(MidlertidigPostadresse.class, () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
             .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9)));
+    }
+
+    @Test
+    public void videresendSchemaValidering() throws IOException, JSONException {
+        VideresendDto fagsakDto = random.nextObject(VideresendDto.class);
+
+        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
+        valider(jsonString, FAGSAKER_VIDERESEND_POST_SCHEMA, log);
     }
 
     @Test
@@ -254,6 +263,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(fagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
     }
+
     @Test
     public final void henleggFagsak_ingenSakFinnes_kasterIkkeFunnet() throws Exception {
         FagsakTjeneste instans = lagFagsakTjeneste(null);
