@@ -8,10 +8,10 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
@@ -55,7 +55,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
                             dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
 
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
-        brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID).stream()
+        brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID).stream()
             .map(Landkoder::getBeskrivelse)
             .collect(Collectors.toList());
 

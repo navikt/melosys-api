@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -81,10 +80,10 @@ public class EessiConsumerTest {
         URI uri = (getClass().getClassLoader().getResource("mock/eux/bucer.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(uri)));
 
-        server.expect(requestTo("/sak/1/bucer/?statuser=utkast"))
+        server.expect(requestTo("/sak/1/bucer?statuser=UTKAST"))
             .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-        List<BucInformasjon> bucInformasjonListe = eessiConsumer.hentTilknyttedeBucer(1L, Collections.singletonList("utkast"));
+        List<BucInformasjon> bucInformasjonListe = eessiConsumer.hentTilknyttedeBucer(1L, Collections.singletonList("UTKAST"));
         assertThat(bucInformasjonListe)
             .extracting(BucInformasjon::getId, BucInformasjon::getBucType)
             .contains(
@@ -106,18 +105,18 @@ public class EessiConsumerTest {
 
     @Test
     public void hentTilknyttedeBucer_medFlereStatuser_forventRettSti() throws MelosysException {
-        server.expect(requestTo("/sak/1/bucer/?statuser=utkast&statuser=mottatt&statuser=sendt"))
+        server.expect(requestTo("/sak/1/bucer?statuser=UTKAST,MOTTATT,SENDT"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
-        eessiConsumer.hentTilknyttedeBucer(1L, Arrays.asList("utkast", "mottatt", "sendt"));
+        eessiConsumer.hentTilknyttedeBucer(1L, List.of("UTKAST", "MOTTATT", "SENDT"));
     }
 
     @Test
     public void hentTilknyttedeBucer_medIngenStatuser_forventRettSti() throws MelosysException {
-        server.expect(requestTo("/sak/1/bucer/?statuser"))
+        server.expect(requestTo("/sak/1/bucer?statuser=SENDT,UTKAST"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
-        eessiConsumer.hentTilknyttedeBucer(1L, Collections.emptyList());
+        eessiConsumer.hentTilknyttedeBucer(1L, List.of("SENDT", "UTKAST"));
     }
 
     @Test

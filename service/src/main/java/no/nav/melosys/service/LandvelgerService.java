@@ -1,12 +1,16 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -42,27 +46,36 @@ public class LandvelgerService {
     }
 
     public Landkoder hentArbeidsland(long behandlingID) throws FunksjonellException {
-        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         if (alleArbeidsland.size() != 1) {
             throw new FunksjonellException("Fant ingen eller flere enn ett arbeidsland");
         }
         return alleArbeidsland.iterator().next();
     }
 
-    public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
+    private Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
             BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
             alleArbeidsland.addAll(hentSøknadslandkoder(grunnlagData));
         }
 
+        return alleArbeidsland;
+    }
+
+    public Collection<Landkoder> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) throws IkkeFunnetException {
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
         Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         alleArbeidsland.removeAll(landMedMarginaltArbeid);
+
         return alleArbeidsland;
     }
 
     private boolean erArtikkel13(long behandlingId) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        return erArtikkel13(behandlingsresultatService.hentBehandlingsresultat(behandlingId));
+    }
+
+    private boolean erArtikkel13(Behandlingsresultat behandlingsresultat) {
         if (behandlingsresultat.harMedlemskapsperiode()) {
             Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsperiode();
             return medlemskapsperiode.erArtikkel13();
@@ -71,30 +84,65 @@ public class LandvelgerService {
         }
     }
 
+    private boolean erArtikkel11_3aMed11_5Tilleggsbestemmelse(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.finnValidertLovvalgsperiode()
+            .filter(Lovvalgsperiode::erArtikkel11_3aMed11_5Tilleggsbestemmelse)
+            .isPresent();
+    }
+
     private boolean erVideresendt(Behandlingsresultat behandlingsresultat) {
         Fagsak fagsak = behandlingsresultat.getBehandling().getFagsak();
         return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
-        Collection<Landkoder> trygdemyndighetsland = hentTrygdemyndighetsland(behandlingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+
+        if (erArtikkel13(behandlingsresultat) && !erVideresendt(behandlingsresultat)) {
+            return hentUtenlandskTrygdemyndighetslandArtikkel13(behandlingsresultat);
+        } else if (erArtikkel11_3aMed11_5Tilleggsbestemmelse(behandlingsresultat)) {
+            return avklartefaktaService.hentInformertMyndighet(behandlingID).stream()
+                .filter(landkode -> landkode != Landkoder.NO).collect(Collectors.toSet());
+        }
+
+        Collection<Landkoder> trygdemyndighetsland = hentTrygdemyndighetsland(behandlingsresultat);
         trygdemyndighetsland.remove(Landkoder.NO);
         return trygdemyndighetsland;
     }
 
-    private Collection<Landkoder> hentTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
+    private Collection<Landkoder> hentUtenlandskTrygdemyndighetslandArtikkel13(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException {
+        final long behandlingID = behandlingsresultat.getId();
+        Set<Landkoder> landkoderMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
+        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
+
+        Stream<Landkoder> marginaleArbeidslandMedUtenlandskArbeid = Stream.concat(
+            behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode().stream(),
+            behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsgivereLandkode().stream()
+        ).map(Landkoder::valueOf).filter(landkoderMedMarginaltArbeid::contains);
+
+        Stream<Landkoder> utpektLovvalgsland = behandlingsresultat.getUtpekingsperioder().stream()
+            .map(Utpekingsperiode::getLovvalgsland);
+
+        return Streams.concat(
+            marginaleArbeidslandMedUtenlandskArbeid,
+            utpektLovvalgsland,
+            hentTrygdemyndighetsland(behandlingsresultat).stream()
+        ).filter(landkoder -> landkoder != Landkoder.NO).collect(Collectors.toSet());
+    }
+
+    private Collection<Landkoder> hentTrygdemyndighetsland(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException {
+        final long behandlingID = behandlingsresultat.getId();
         Collection<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandlingID);
         BehandlingsgrunnlagData grunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
         if (oppfylteVilkår.contains(FO_883_2004_ART11_3A)) {
             return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata));
         }
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (erVideresendt(behandlingsresultat)) {
             return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata));
         }
 
-        Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
+        Collection<Landkoder> alleArbeidsland = hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         return new ArrayList<>(alleArbeidsland);
     }
 
