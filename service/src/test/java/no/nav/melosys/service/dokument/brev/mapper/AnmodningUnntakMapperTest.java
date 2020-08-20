@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
+import no.nav.dok.melosysbrev._000084.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
@@ -17,11 +18,15 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,12 +85,46 @@ public class AnmodningUnntakMapperTest {
         }
     }
 
+    @Test
+    public void mapFag_unntakFraBestemmelseArtikkel13_forventIkkeNull() throws TekniskException {
+        Behandling behandling = lagBehandling();
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3);
+
+        Fag fag = mapper.mapFag(behandling, behandlingsresultat, brevData);
+        assertThat(fag.getBestemmelseDetSoekesUnntakFra()).isNotNull();
+    }
+
+    @Test
+    public void mapFag_unntakFraBestemmelseIkkeArtikkel13_forventNull() throws TekniskException {
+        Behandling behandling = lagBehandling();
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11);
+
+        Fag fag = mapper.mapFag(behandling, behandlingsresultat, brevData);
+        assertThat(fag.getBestemmelseDetSoekesUnntakFra()).isNull();
+    }
+
+    @Test
+    public void mapFag_unntakFraBestemmelseNull_forventNull() throws TekniskException {
+        Behandling behandling = lagBehandling();
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat);
+
+        Fag fag = mapper.mapFag(behandling, behandlingsresultat, brevData);
+        assertThat(fag.getBestemmelseDetSoekesUnntakFra()).isNull();
+    }
+
     private BrevDataAnmodningUnntak lagBrevData(Behandlingsresultat resultat) {
+        return lagBrevData(resultat, null);
+    }
+
+    private BrevDataAnmodningUnntak lagBrevData(Behandlingsresultat resultat, LovvalgBestemmelse unntakFraBestemmelse) {
         BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak("Z999999");
         Anmodningsperiode anmodningsperiode =
             new Anmodningsperiode(LocalDate.now(), LocalDate.now(),
                 Landkoder.NO, null, null, Landkoder.DK,
-                null, null);
+                unntakFraBestemmelse, null);
         resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
 
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);

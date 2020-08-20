@@ -9,8 +9,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
-
 @Entity
 @Table(name = "anmodningsperiode")
 public class Anmodningsperiode implements Medlemskapsperiode {
@@ -205,14 +203,5 @@ public class Anmodningsperiode implements Medlemskapsperiode {
         return lovvalgsland == periode2.getLovvalgsland() &&
             unntakFraBestemmelse == periode2.getUnntakFraBestemmelse() &&
             unntakFraLovvalgsland == periode2.getUnntakFraLovvalgsland();
-    }
-
-    public boolean erUnntakFraArtikkel13() {
-        return getUnntakFraBestemmelse() == FO_883_2004_ART13_1A
-            || getUnntakFraBestemmelse() == FO_883_2004_ART13_1B1 || getUnntakFraBestemmelse() == FO_883_2004_ART13_1B2
-            || getUnntakFraBestemmelse() == FO_883_2004_ART13_1B3 || getUnntakFraBestemmelse() == FO_883_2004_ART13_1B4
-            || getUnntakFraBestemmelse() == FO_883_2004_ART13_2A || getUnntakFraBestemmelse() == FO_883_2004_ART13_2B
-            || getUnntakFraBestemmelse() == FO_883_2004_ART13_3
-            || getUnntakFraBestemmelse() == FO_883_2004_ART13_4;
     }
 }

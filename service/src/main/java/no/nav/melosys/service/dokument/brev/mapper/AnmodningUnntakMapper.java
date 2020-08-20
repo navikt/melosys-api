@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -34,6 +36,19 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000084.xsd";
 
+    private static final Map<LovvalgBestemmelse, BestemmelseDetSoekesUnntakFraKode> BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP =
+        Map.of(
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_A,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_1,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_2,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_3,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_4,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_A,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_B,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_3,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_4
+        );
+
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
                                 BrevData brevDataFelles) throws JAXBException, SAXException, TekniskException {
@@ -55,8 +70,9 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         fag.setForetakNavn(brevData.hovedvirksomhet.navn);
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(brevData.yrkesaktivitet.getKode()));
 
+        Anmodningsperiode anmodningsperiode = resultat.hentValidertAnmodningsperiode();
         fag.setArbeidsland(brevData.arbeidsland);
-        fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
+        fag.setLovvalgsperiode(lagLovvalgsperiodeType(anmodningsperiode));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
@@ -78,49 +94,14 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
         fag.setBegrunnelseFritekst(brevData.fritekst);
 
-        Anmodningsperiode anmodningsperiode = resultat.hentValidertAnmodningsperiode();
-        if (anmodningsperiode.erUnntakFraArtikkel13()) {
-            fag.setBestemmelseDetSoekesUnntakFra(tilBestemmelseBrev(anmodningsperiode.getUnntakFraBestemmelse()));
-        }
+        Optional.ofNullable(anmodningsperiode.getUnntakFraBestemmelse())
+            .map(BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP::get)
+            .ifPresent(fag::setBestemmelseDetSoekesUnntakFra);
 
         return fag;
     }
 
-    private static BestemmelseDetSoekesUnntakFraKode tilBestemmelseBrev(LovvalgBestemmelse bestemmelse) {
-        if (bestemmelse instanceof Lovvalgbestemmelser_883_2004) {
-            switch ((Lovvalgbestemmelser_883_2004) bestemmelse) {
-                case FO_883_2004_ART13_1A:
-                    return BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_A;
-                case FO_883_2004_ART13_1B1:
-                    return BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_1;
-                case FO_883_2004_ART13_1B2:
-                    return BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_2;
-                case FO_883_2004_ART13_1B3:
-                    return BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_3;
-                case FO_883_2004_ART13_1B4:
-                    return BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_4;
-                case FO_883_2004_ART13_2A:
-                    return BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_A;
-                case FO_883_2004_ART13_2B:
-                    return BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_B;
-                case FO_883_2004_ART13_3:
-                    return BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_3;
-                case FO_883_2004_ART13_4:
-                    return BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_4;
-                default:
-                    throw new UnsupportedOperationException(
-                        String.format("BestemmelseDetSoekesUnntakFraKode støtter ikke %s", bestemmelse)
-                    );
-            }
-        }
-
-        throw new UnsupportedOperationException(
-            String.format("Kan ikke konvertere bestemmelse av type %s til BestemmelseDetSoekesUnntakFraKode", bestemmelse)
-        );
-    }
-
-    LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) {
-        Anmodningsperiode anmodningsperiode = resultat.hentValidertAnmodningsperiode();
+    LovvalgsperiodeType lagLovvalgsperiodeType(Anmodningsperiode anmodningsperiode) {
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
 
         try {
