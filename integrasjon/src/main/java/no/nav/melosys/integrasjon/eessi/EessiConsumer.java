@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.eessi;
 
+import java.util.Collection;
 import java.util.List;
 
 import no.nav.melosys.domain.eessi.*;
@@ -12,7 +13,7 @@ import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 
 public interface EessiConsumer {
 
-    OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, Vedlegg vedlegg, BucType bucType, boolean forsøkSend) throws MelosysException;
+    OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, Collection<Vedlegg> vedlegg, BucType bucType, boolean forsøkSend) throws MelosysException;
 
     void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) throws MelosysException;
 
