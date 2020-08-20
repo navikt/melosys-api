@@ -19,6 +19,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,7 +71,7 @@ public class VedtakKontrollServiceTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat).isEmpty();
     }
 
@@ -79,7 +80,7 @@ public class VedtakKontrollServiceTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat).isEmpty();
     }
 
@@ -96,8 +97,8 @@ public class VedtakKontrollServiceTest {
         medlemsperiode.status = PeriodestatusMedl.GYLD.getKode();
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
-        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
-        assertThat(resultat).containsExactlyInAnyOrder(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        assertThat(resultat).extracting(Kontrollfeil::getKode).containsExactlyInAnyOrder(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, Kontroll_begrunnelser.PERIODEN_OVER_24_MD);
     }
 
     @Test
@@ -107,8 +108,8 @@ public class VedtakKontrollServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         personDokument.bostedsadresse = new Bostedsadresse();
 
-        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
-        assertThat(resultat).contains(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
     }
 
     @Test
@@ -117,7 +118,7 @@ public class VedtakKontrollServiceTest {
         lovvalgsperiode.setTom(null);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
-        Collection<Kontroll_begrunnelser> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
-        assertThat(resultat).contains(Kontroll_begrunnelser.INGEN_SLUTTDATO);
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.INGEN_SLUTTDATO);
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.aou.ut.svar;
 
 import java.util.Collections;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Metrics;
@@ -19,6 +20,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -107,7 +109,7 @@ public class FattVedtakEllerOppdaterBehandling implements StegBehandler {
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
         } catch (ValideringException e) {
             log.info("Kan ikke fatte vedtak automatisk pga. treff i vedtakkontroller: {}. Endrer behandlingsstatus til {}",
-                String.join(", ", e.getFeilkoder()),
+                e.getFeilkoder().stream().map(KontrollfeilDto::getKode).collect(Collectors.joining(", ")),
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         }

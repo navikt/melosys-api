@@ -16,6 +16,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -151,9 +152,12 @@ public class FattVedtakEllerOppdaterBehandlingTest {
 
     @Test
     public void utfør_valideringsfeilFattVedtak_statusSvarAouMottattBehandling() throws MelosysException {
+        KontrollfeilDto kontrollfeilDto = new KontrollfeilDto();
+        kontrollfeilDto.setKode(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
+
         doThrow(new ValideringException(
             "Kunne ikke fatte vedtak",
-            Set.of(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode()))
+            Set.of(kontrollfeilDto))
         ).when(vedtakService).fattVedtak(anyLong(), any(Behandlingsresultattyper.class));
 
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
