@@ -1,14 +1,13 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000084.BrevdataType;
-import no.nav.dok.melosysbrev._000084.Fag;
-import no.nav.dok.melosysbrev._000084.LovvalgsperiodeType;
-import no.nav.dok.melosysbrev._000084.ObjectFactory;
+import no.nav.dok.melosysbrev._000084.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
@@ -17,7 +16,9 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
@@ -34,6 +35,19 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
     private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakMapper.class);
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000084.xsd";
+
+    private static final Map<LovvalgBestemmelse, BestemmelseDetSoekesUnntakFraKode> BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP =
+        Map.of(
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_A,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_1,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_2,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_3,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_1_B_4,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_A,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2B, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_2_B,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_3,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, BestemmelseDetSoekesUnntakFraKode.FO_883_2004_ART_13_4
+        );
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
@@ -56,8 +70,9 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         fag.setForetakNavn(brevData.hovedvirksomhet.navn);
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(brevData.yrkesaktivitet.getKode()));
 
+        Anmodningsperiode anmodningsperiode = resultat.hentValidertAnmodningsperiode();
         fag.setArbeidsland(brevData.arbeidsland);
-        fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
+        fag.setLovvalgsperiode(lagLovvalgsperiodeType(anmodningsperiode));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = resultat.hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
@@ -79,11 +94,14 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
         fag.setBegrunnelseFritekst(brevData.fritekst);
 
+        Optional.ofNullable(anmodningsperiode.getUnntakFraBestemmelse())
+            .map(BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP::get)
+            .ifPresent(fag::setBestemmelseDetSoekesUnntakFra);
+
         return fag;
     }
 
-    LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) {
-        Anmodningsperiode anmodningsperiode = resultat.hentValidertAnmodningsperiode();
+    LovvalgsperiodeType lagLovvalgsperiodeType(Anmodningsperiode anmodningsperiode) {
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
 
         try {
