@@ -48,7 +48,7 @@ public class AltinnSoeknadService {
             .medRepresentant(hentRepresentant(søknad))
             .medRepresentantKontaktperson(hentRepresentantKontaktPerson(søknad))
             .medRepresentantRepresenterer(hentRepresenterer(søknad))
-            .medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medBehandlingstema(avklarBehandlingstema(søknad))
             .medBehandlingstype(Behandlingstyper.SOEKNAD)
             .build();
 
@@ -56,6 +56,12 @@ public class AltinnSoeknadService {
         behandlingsgrunnlagService.opprettBehandlingsgrunnlag(1L, new BehandlingsgrunnlagData()); //TODO: MELSOYS-3527
 
         return fagsak.hentAktivBehandling();
+    }
+
+    private Behandlingstema avklarBehandlingstema(MedlemskapArbeidEOSM søknad) {
+        return søknad.getInnhold().getArbeidsgiver().isOffentligVirksomhet()
+            ? Behandlingstema.ARBEID_ETT_LAND_ØVRIG
+            : Behandlingstema.UTSENDT_ARBEIDSTAKER;
     }
 
     public Collection<AltinnDokument> hentDokumenterTilknyttetSoknad(String søknadReferanse) {
