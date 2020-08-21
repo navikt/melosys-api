@@ -71,6 +71,27 @@ public class AltinnSoeknadServiceTest {
         assertThat(req.getAktørID()).isEqualTo(aktørID);
     }
 
+    @Test
+    public void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserBehandlingstemaArbeidsEttLandØvrig() throws FunksjonellException, TekniskException {
+        final Fagsak fagsak = lagFagsak();
+        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
+        final String aktørID = "123321123";
+
+        søknad.getInnhold().getArbeidsgiver().setOffentligVirksomhet(Boolean.TRUE);
+
+        when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
+        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
+        when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+
+        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID)).isEqualTo(fagsak.hentAktivBehandling());
+
+        OpprettSakRequest req = captor.getValue();
+        assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
+        assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD);
+        assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
+        assertThat(req.getAktørID()).isEqualTo(aktørID);
+    }
+
     private MedlemskapArbeidEOSM lagMedlemskapArbeidEOSM() {
         MedlemskapArbeidEOSM medlemskapArbeidEOSM = new MedlemskapArbeidEOSM();
         Innhold innhold = new Innhold();
@@ -80,6 +101,7 @@ public class AltinnSoeknadServiceTest {
         innhold.getFullmakt().setFullmektigVirksomhetsnummer("123333");
 
         innhold.setArbeidsgiver(new Arbeidsgiver());
+        innhold.getArbeidsgiver().setOffentligVirksomhet(Boolean.FALSE);
         innhold.getArbeidsgiver().setVirksomhetsnummer("53254352");
         innhold.getArbeidsgiver().setKontaktperson(new Kontaktperson());
         innhold.getArbeidsgiver().getKontaktperson().setKontaktpersonNavn("Navne Navnesen");
