@@ -103,6 +103,7 @@ public class RegisteropplysningerService {
             lagreSaksopplysninger(saksopplysninger, behandling);
         }
 
+        behandling.setSisteOpplysningerHentetDato(Instant.now());
         behandlingService.lagre(behandling);
     }
 
