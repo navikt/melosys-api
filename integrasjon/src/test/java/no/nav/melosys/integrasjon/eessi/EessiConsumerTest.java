@@ -18,7 +18,6 @@ import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
-import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,11 +58,11 @@ public class EessiConsumerTest {
         BucType bucType = BucType.LA_BUC_01;
         server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true"))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header(HttpHeaders.CONTENT_TYPE, StringContains.containsString(MediaType.MULTIPART_FORM_DATA_VALUE)))
+            .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andRespond(withSuccess("{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}", MediaType.APPLICATION_JSON));
 
-        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, new Vedlegg("pdf".getBytes(), "tittel"), bucType, true);
+        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, Collections.singleton(new Vedlegg("pdf".getBytes(), "tittel")), bucType, true);
         assertThat(opprettSedDto.getRinaSaksnummer()).isEqualTo("12345");
     }
 
@@ -193,7 +192,7 @@ public class EessiConsumerTest {
     }
 
     @Test
-    public void hentSedGrunnlag_medSedType_rettInstans() throws MelosysException, URISyntaxException, IOException {
+    public void hentSedGrunnlag_medSedType_rettInstans() throws MelosysException {
         server.expect(requestTo("/buc/1234/sed/abcdef/grunnlag"))
             .andRespond(withSuccess("{\"sedType\": \"A003\"}", MediaType.APPLICATION_JSON));
 
@@ -201,7 +200,6 @@ public class EessiConsumerTest {
         String rinaDokumentID = "abcdef";
         SedGrunnlagDto response = eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID);
 
-        assertThat(response).isNotNull();
         assertThat(response).isInstanceOf(SedGrunnlagA003Dto.class);
     }
 }
