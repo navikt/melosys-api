@@ -97,7 +97,7 @@ public class FagsakTest {
 
     @Test(expected = FunksjonellException.class)
     public void getSistOppdaterteBehandling_ingenBehandlinger_kasterException() throws FunksjonellException {
-        assertThat(new Fagsak().getSistOppdaterteBehandling()).isNull();
+        new Fagsak().getSistOppdaterteBehandling();
     }
 
     @Test
