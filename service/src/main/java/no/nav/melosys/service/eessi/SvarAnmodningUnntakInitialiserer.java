@@ -67,10 +67,9 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
             RutingResultat.INGEN_BEHANDLING : RutingResultat.OPPDATER_BEHANDLING;
     }
 
-    private Behandling hentBehandling(Long gsakSaksnummer) throws TekniskException, FunksjonellException {
+    private Behandling hentBehandling(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
         return fagsakService
-            .finnFagsakFraGsakSaksnummer(gsakSaksnummer)
-            .orElseThrow(() -> new TekniskException("Finner ikke fagsak fra gsakSaksnummer " + gsakSaksnummer))
+            .hentFagsakFraGsakSaksnummer(gsakSaksnummer)
             .hentSistAktiveBehandling();
     }
 
