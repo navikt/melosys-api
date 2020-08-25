@@ -37,7 +37,7 @@ public class HentEessiMelding implements StegBehandler {
         String aktørID = tpsService.hentAktørIdForIdent(brukerID);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
 
-        if (prosessinstans.getType() == ProsessType.SED_GENERELL_SAK) {
+        if (prosessinstans.getType() == ProsessType.SED_GENERELL_SAK || prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
             //SED'er journalført manuelt - oppretter ny generell sak
             prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH);
         } else {

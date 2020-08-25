@@ -167,13 +167,19 @@ public class FagsakService {
             throw new FunksjonellException("OppgaveID mangler.");
         }
         final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
-        if (oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK_MK && oppgave.getOppgavetype() != Oppgavetyper.BEH_SAK) {
-            throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype());
+        if (!erGyldigOppgavetype(oppgave.getOppgavetype())) {
+            throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
         }
         if (StringUtils.isEmpty(oppgave.getJournalpostId())) {
             throw new FunksjonellException("Ny sak kan ikke opprettes fordi oppgave " + oppgaveID + " mangler journalpost med søknad.");
         }
         return oppgave;
+    }
+
+    private static boolean erGyldigOppgavetype(Oppgavetyper oppgavetype) {
+        return oppgavetype == Oppgavetyper.BEH_SAK_MK
+            || oppgavetype == Oppgavetyper.BEH_SAK
+            || oppgavetype == Oppgavetyper.BEH_SED;
     }
 
     // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.

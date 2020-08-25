@@ -318,7 +318,7 @@ public class ProsessinstansServiceTest {
     @Test
     public void opprettProsessinstansNySak_behandlingstypeIkkeStøttet_feiler() throws FunksjonellException {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         expectedException.expect(FunksjonellException.class);
         prosessinstansService.opprettProsessinstansNySak("journalpostID", opprettSakDto);
     }
@@ -335,6 +335,26 @@ public class ProsessinstansServiceTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.IKKE_YRKESAKTIV);
+        assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
+        assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.getOppgaveID());
+        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
+        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.getSoknadDto().getPeriode());
+        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class)).isEqualTo(opprettSakDto.getSoknadDto().getLand());
+        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakDto.isSkalTilordnes());
+    }
+
+    @Test
+    public void opprettProsessinstansNySak_behandlingstypeSedTemaTrygdetid() throws FunksjonellException {
+        OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
+        opprettSakDto.setBehandlingstema(Behandlingstema.TRYGDETID);
+        String journalpostID = "journalpostID";
+        prosessinstansService.opprettProsessinstansNySak(journalpostID, opprettSakDto);
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SED);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.TRYGDETID);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
         assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.getOppgaveID());
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
