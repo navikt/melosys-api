@@ -2,7 +2,6 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -131,6 +130,13 @@ public class Arbeidsforhold implements HarPeriode {
     }
 
     public List<String> hentOrgnumre() {
-        return Arrays.asList(getArbeidsgiverID(), getOpplysningspliktigID());
+        ArrayList<String> orgnr = new ArrayList<>();
+        if (getArbeidsgivertype() != Aktoertype.PERSON) {
+            orgnr.add(getArbeidsgiverID());
+        }
+        if (getOpplysningspliktigtype() != Aktoertype.PERSON) {
+            orgnr.add(getOpplysningspliktigID());
+        }
+        return orgnr;
     }
 }
