@@ -131,8 +131,12 @@ public class Arbeidsforhold implements HarPeriode {
 
     public List<String> hentOrgnumre() {
         ArrayList<String> orgnr = new ArrayList<>();
-        if (getArbeidsgivertype() != Aktoertype.PERSON) orgnr.add(getArbeidsgiverID());
-        if (getOpplysningspliktigtype() != Aktoertype.PERSON) orgnr.add(getOpplysningspliktigID());
+        if (getArbeidsgivertype() != Aktoertype.PERSON) {
+            orgnr.add(getArbeidsgiverID());
+        }
+        if (getOpplysningspliktigtype() != Aktoertype.PERSON) {
+            orgnr.add(getOpplysningspliktigID());
+        }
         return orgnr;
     }
 }
