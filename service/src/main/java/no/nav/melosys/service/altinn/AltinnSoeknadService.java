@@ -18,12 +18,12 @@ import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AltinnSoeknadService {
-
     private final SoknadMottakConsumer soknadMottakConsumer;
     private final FagsakService fagsakService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
@@ -58,10 +58,12 @@ public class AltinnSoeknadService {
         return fagsak.hentAktivBehandling();
     }
 
-    private Behandlingstema avklarBehandlingstema(MedlemskapArbeidEOSM søknad) {
-        return søknad.getInnhold().getArbeidsgiver().isOffentligVirksomhet()
-            ? Behandlingstema.ARBEID_ETT_LAND_ØVRIG
-            : Behandlingstema.UTSENDT_ARBEIDSTAKER;
+    private static Behandlingstema avklarBehandlingstema(MedlemskapArbeidEOSM søknad) {
+        if (Boolean.TRUE.equals(søknad.getInnhold().getArbeidsgiver().isOffentligVirksomhet())) {
+            return Behandlingstema.ARBEID_ETT_LAND_ØVRIG;
+        } else {
+            return Behandlingstema.UTSENDT_ARBEIDSTAKER;
+        }
     }
 
     public Collection<AltinnDokument> hentDokumenterTilknyttetSoknad(String søknadReferanse) {
@@ -72,20 +74,23 @@ public class AltinnSoeknadService {
         return tpsFasade.hentAktørIdForIdent(søknad.getInnhold().getArbeidstaker().getFoedselsnummer());
     }
 
-    private String hentArbeidsgiver(MedlemskapArbeidEOSM søknad) {
+    private static String hentArbeidsgiver(MedlemskapArbeidEOSM søknad) {
         return søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
     }
 
-    private String hentRepresentant(MedlemskapArbeidEOSM søknad) {
+    private static String hentRepresentant(MedlemskapArbeidEOSM søknad) {
         return søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
     }
 
-    private Representerer hentRepresenterer(MedlemskapArbeidEOSM søknad) {
-        if(søknad.getInnhold().getFullmakt().isFullmaktFraArbeidstaker() == null) return null;
-        return søknad.getInnhold().getFullmakt().isFullmaktFraArbeidstaker() ? Representerer.BRUKER : Representerer.ARBEIDSGIVER; //FIXME: BRUKER eller BEGGE?
+    private static Representerer hentRepresenterer(MedlemskapArbeidEOSM søknad) {
+        if (Boolean.TRUE.equals(søknad.getInnhold().getFullmakt().isFullmaktFraArbeidstaker())) {
+            return Representerer.BEGGE;
+        } else {
+            return StringUtils.isNotBlank(hentRepresentant(søknad)) ? Representerer.ARBEIDSGIVER : null;
+        }
     }
 
-    private String hentRepresentantKontaktPerson(MedlemskapArbeidEOSM søknad) {
+    private static String hentRepresentantKontaktPerson(MedlemskapArbeidEOSM søknad) {
         return søknad.getInnhold().getArbeidsgiver().getKontaktperson().getKontaktpersonNavn();
     }
 }
