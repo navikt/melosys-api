@@ -1,0 +1,1 @@
+UPDATE UTENLANDSK_MYNDIGHET SET NAVN = 'Eläketurvakeskus', GATEADRESSE = ' ', POSTSTED = 'Eläketurvakeskus' WHERE LANDKODE = 'FI';
