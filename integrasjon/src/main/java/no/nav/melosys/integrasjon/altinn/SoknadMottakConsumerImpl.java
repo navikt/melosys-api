@@ -1,7 +1,10 @@
 package no.nav.melosys.integrasjon.altinn;
 
+import java.util.Collection;
 import java.util.Collections;
 
+import no.nav.melosys.domain.msm.AltinnDokument;
+import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -13,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
 
-    private static Logger log = LoggerFactory.getLogger(SoknadMottakConsumerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SoknadMottakConsumerImpl.class);
 
     private final RestTemplate restTemplate;
 
@@ -22,20 +25,32 @@ public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
     }
 
     @Override
-    public String hentSøknad(String søknadID) {
-        String xml = restTemplate.exchange(String.format("/soknad/%s", søknadID), HttpMethod.GET,
-            new HttpEntity<>(getXmltypeHeaders()), new ParameterizedTypeReference<String>() {
-            }
-        ).getBody();
-        log.debug("{}", xml);
+    public MedlemskapArbeidEOSM hentSøknad(final String søknadID) {
+        log.info("Henter søknad med ID {}", søknadID);
 
-        // todo Legge inn avhengighet til XSD (når den er klar) - MELOSYS-3572
-        return xml;
+        return restTemplate.exchange(
+            "/soknader/{søknadID}",
+            HttpMethod.GET,
+            new HttpEntity<>(getHeaders(MediaType.APPLICATION_XML)),
+            MedlemskapArbeidEOSM.class,
+            søknadID).getBody();
     }
 
-    private HttpHeaders getXmltypeHeaders() {
+    @Override
+    public Collection<AltinnDokument> hentDokumenter(final String søknadID) {
+        log.info("Henter dokumenter tilknyttet altinn-søknad {}", søknadID);
+
+        return restTemplate.exchange(
+            "/soknader/{søknadID}/dokumenter",
+            HttpMethod.GET,
+            new HttpEntity<>(getHeaders(MediaType.APPLICATION_JSON)),
+            new ParameterizedTypeReference<Collection<AltinnDokument>>() {},
+            søknadID).getBody();
+    }
+
+    private HttpHeaders getHeaders(MediaType mediaType) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+        headers.setAccept(Collections.singletonList(mediaType));
         return headers;
     }
 }

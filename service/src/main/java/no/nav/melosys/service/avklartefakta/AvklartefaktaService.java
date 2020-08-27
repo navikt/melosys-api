@@ -106,6 +106,14 @@ public class AvklartefaktaService {
             .collect(Collectors.toSet());
     }
 
+    public Optional<Landkoder> hentInformertMyndighet(long behandlingID) {
+        return avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingID, Avklartefaktatyper.INFORMERT_MYNDIGHET, VALGT_FAKTA)
+            .stream()
+            .map(Avklartefakta::getSubjekt)
+            .map(Landkoder::valueOf)
+            .findFirst();
+    }
+
     public Map<String, AvklartMaritimtArbeid> hentMaritimeAvklartfaktaEtterSubjekt(long behandlingsid) {
         Set<Avklartefakta> maritimeAvklartefakta =
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(behandlingsid, MARITIME_FAKTATYPER);

@@ -20,8 +20,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -56,8 +56,8 @@ public class VideresendSoknadServiceTest {
 
     private VideresendSoknadService videresendSoknadService;
 
-    private Fagsak fagsak = new Fagsak();
-    private Behandling behandling = new Behandling();
+    private final Fagsak fagsak = new Fagsak();
+    private final Behandling behandling = new Behandling();
     private BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
     private PersonDokument personDokument = new PersonDokument();
 
@@ -102,10 +102,11 @@ public class VideresendSoknadServiceTest {
 
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "fritekst");
 
         verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.VIDERESENDT);
-        verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling), eq(validerteMottakere.iterator().next()));
+        verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling),
+            eq(validerteMottakere.iterator().next()), eq("fritekst"));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(saksnummer));
     }
 
@@ -117,7 +118,7 @@ public class VideresendSoknadServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("er ikke behandling av en søknad");
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "");
     }
 
     @Test
@@ -128,7 +129,7 @@ public class VideresendSoknadServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("til Norge");
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "");
     }
 
     @Test
@@ -139,7 +140,7 @@ public class VideresendSoknadServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Bostedsland ikke avklart");
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "");
     }
 
     @Test
@@ -151,7 +152,7 @@ public class VideresendSoknadServiceTest {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("mangler bostedsadresse");
 
-        videresendSoknadService.henleggOgVideresend(saksnummer, "");
+        videresendSoknadService.videresend(saksnummer, "", "");
     }
 
 }

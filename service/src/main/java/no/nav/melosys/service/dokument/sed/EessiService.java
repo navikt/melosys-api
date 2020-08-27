@@ -76,7 +76,7 @@ public class EessiService {
         sedData.setYtterligereInformasjon(ytterligereInformasjon);
 
         log.info("Oppretter buc og sed for fagsak {}", fagsak.getSaksnummer());
-        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedData, vedlegg, bucType, true);
+        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedData, vedlegg != null ? Collections.singleton(vedlegg) : Collections.emptyList(), bucType, true);
 
         log.info("Buc opprettet med id {} for behandling {}", opprettSedDto.getRinaSaksnummer(), behandling.getId());
     }
@@ -90,7 +90,7 @@ public class EessiService {
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
-        return eessiConsumer.opprettBucOgSed(sedDataDto, null, bucType, false).getRinaUrl();
+        return eessiConsumer.opprettBucOgSed(sedDataDto, Collections.emptyList(), bucType, false).getRinaUrl();
     }
 
     public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, String landkode) throws MelosysException {

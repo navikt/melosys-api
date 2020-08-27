@@ -308,12 +308,15 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansVideresendSoknad(Behandling behandling, @Nullable String mottakerInstitusjoner) {
+    public void opprettProsessinstansVideresendSoknad(Behandling behandling,
+                                                      @Nullable String mottakerInstitusjoner,
+                                                      String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjoner != null ? Set.of(mottakerInstitusjoner) : null)
+            .medBegrunnelseFritekst(fritekstBrev)
             .build();
 
         lagre(prosessinstans);
@@ -342,7 +345,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
-            .medSteg(ProsessSteg.MSA_HENT_INNHOLD)
+            .medSteg(ProsessSteg.MSA_OPPRETT_SAK_OG_BEHANDLING)
             .build();
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadMottatt.getSoknadID());
 

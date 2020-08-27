@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,7 +18,6 @@ import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
-import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,11 +58,11 @@ public class EessiConsumerTest {
         BucType bucType = BucType.LA_BUC_01;
         server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true"))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header(HttpHeaders.CONTENT_TYPE, StringContains.containsString(MediaType.MULTIPART_FORM_DATA_VALUE)))
+            .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andRespond(withSuccess("{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}", MediaType.APPLICATION_JSON));
 
-        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, new Vedlegg("pdf".getBytes(), "tittel"), bucType, true);
+        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, Collections.singleton(new Vedlegg("pdf".getBytes(), "tittel")), bucType, true);
         assertThat(opprettSedDto.getRinaSaksnummer()).isEqualTo("12345");
     }
 
@@ -81,10 +79,10 @@ public class EessiConsumerTest {
         URI uri = (getClass().getClassLoader().getResource("mock/eux/bucer.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(uri)));
 
-        server.expect(requestTo("/sak/1/bucer/?statuser=utkast"))
+        server.expect(requestTo("/sak/1/bucer?statuser=UTKAST"))
             .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-        List<BucInformasjon> bucInformasjonListe = eessiConsumer.hentTilknyttedeBucer(1L, Collections.singletonList("utkast"));
+        List<BucInformasjon> bucInformasjonListe = eessiConsumer.hentTilknyttedeBucer(1L, Collections.singletonList("UTKAST"));
         assertThat(bucInformasjonListe)
             .extracting(BucInformasjon::getId, BucInformasjon::getBucType)
             .contains(
@@ -106,18 +104,18 @@ public class EessiConsumerTest {
 
     @Test
     public void hentTilknyttedeBucer_medFlereStatuser_forventRettSti() throws MelosysException {
-        server.expect(requestTo("/sak/1/bucer/?statuser=utkast&statuser=mottatt&statuser=sendt"))
+        server.expect(requestTo("/sak/1/bucer?statuser=UTKAST,MOTTATT,SENDT"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
-        eessiConsumer.hentTilknyttedeBucer(1L, Arrays.asList("utkast", "mottatt", "sendt"));
+        eessiConsumer.hentTilknyttedeBucer(1L, List.of("UTKAST", "MOTTATT", "SENDT"));
     }
 
     @Test
     public void hentTilknyttedeBucer_medIngenStatuser_forventRettSti() throws MelosysException {
-        server.expect(requestTo("/sak/1/bucer/?statuser"))
+        server.expect(requestTo("/sak/1/bucer?statuser=SENDT,UTKAST"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
-        eessiConsumer.hentTilknyttedeBucer(1L, Collections.emptyList());
+        eessiConsumer.hentTilknyttedeBucer(1L, List.of("SENDT", "UTKAST"));
     }
 
     @Test
@@ -194,7 +192,7 @@ public class EessiConsumerTest {
     }
 
     @Test
-    public void hentSedGrunnlag_medSedType_rettInstans() throws MelosysException, URISyntaxException, IOException {
+    public void hentSedGrunnlag_medSedType_rettInstans() throws MelosysException {
         server.expect(requestTo("/buc/1234/sed/abcdef/grunnlag"))
             .andRespond(withSuccess("{\"sedType\": \"A003\"}", MediaType.APPLICATION_JSON));
 
@@ -202,7 +200,6 @@ public class EessiConsumerTest {
         String rinaDokumentID = "abcdef";
         SedGrunnlagDto response = eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID);
 
-        assertThat(response).isNotNull();
         assertThat(response).isInstanceOf(SedGrunnlagA003Dto.class);
     }
 }

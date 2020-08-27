@@ -21,9 +21,9 @@ public class JournalfoerInngaaendeConsumer {
         this.restTemplate = restTemplate;
     }
 
-    public GetJournalpostResponse hentJournalpost(String journalpostId) throws SikkerhetsbegrensningException, IntegrasjonException {
-        return exchange(String.format("/journalposter/%s", journalpostId), HttpMethod.GET,
-            new HttpEntity<>(getHttpHeaders()), GetJournalpostResponse.class);
+    public GetJournalpostResponse hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+        return exchange("/journalposter/{journalpostID}", HttpMethod.GET,
+            new HttpEntity<>(getHttpHeaders()), GetJournalpostResponse.class, journalpostID);
     }
 
     private HttpHeaders getHttpHeaders() {
@@ -33,9 +33,9 @@ public class JournalfoerInngaaendeConsumer {
         return headers;
     }
 
-    private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, Class<T> clazz) throws SikkerhetsbegrensningException, IntegrasjonException {
+    private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, Class<T> clazz, Object... variabler) throws SikkerhetsbegrensningException, IntegrasjonException {
         try {
-            return restTemplate.exchange(uri, method, entity, clazz).getBody();
+            return restTemplate.exchange(uri, method, entity, clazz, variabler).getBody();
         } catch (HttpStatusCodeException ex) {
                 switch (ex.getStatusCode()) {
                     case UNAUTHORIZED:

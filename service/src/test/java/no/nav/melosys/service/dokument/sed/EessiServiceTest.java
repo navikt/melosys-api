@@ -148,7 +148,7 @@ public class EessiServiceTest {
         when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean())).thenReturn(opprettSedDto);
 
         eessiService.opprettBucOgSed(behandling, BucType.LA_BUC_01, List.of("SE:001"));
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), isNull(), eq(BucType.LA_BUC_01), eq(false));
+        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), anyCollection(), eq(BucType.LA_BUC_01), eq(false));
     }
 
     @Test
@@ -161,8 +161,7 @@ public class EessiServiceTest {
         List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", "FR");
 
         verify(eessiConsumer).hentMottakerinstitusjoner(anyString(), anyString());
-        assertThat(mottakerinstitusjoner).hasSize(2);
-        assertThat(mottakerinstitusjoner).hasOnlyElementsOfType(Institusjon.class);
+        assertThat(mottakerinstitusjoner).hasSize(2).hasOnlyElementsOfType(Institusjon.class);
     }
 
     @Test
@@ -176,8 +175,7 @@ public class EessiServiceTest {
         List<BucInformasjon> tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, Arrays.asList("utkast", "sendt"));
 
         verify(eessiConsumer).hentTilknyttedeBucer(anyLong(), anyList());
-        assertThat(tilknyttedeBucer).hasSize(3);
-        assertThat(tilknyttedeBucer).hasOnlyElementsOfType(BucInformasjon.class);
+        assertThat(tilknyttedeBucer).hasSize(3).hasOnlyElementsOfType(BucInformasjon.class);
     }
 
     @Test(expected = MelosysException.class)

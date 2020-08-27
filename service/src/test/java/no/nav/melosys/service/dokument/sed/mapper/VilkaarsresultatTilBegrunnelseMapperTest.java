@@ -25,7 +25,7 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(Collections.singletonList(UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode()));
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo("Ongoing contract for a period longer than 2 and shorter than 5 years.");
+            .isEqualTo(Art16_1_anmodning_engelsk.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse());
     }
 
     @Test
@@ -78,8 +78,8 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         ));
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo("Ongoing contract for a period longer than 2 and shorter than 5 years.\n"
-                + "Working for a non-profit organization.");
+            .isEqualTo(Art16_1_anmodning_engelsk.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse() + "\n"
+                + Art16_1_anmodning_engelsk.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.getBeskrivelse());
     }
 
     @Test
@@ -102,9 +102,9 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         vilkaarsresultat.setBegrunnelseFritekstEessi(fritekstEngelsk);
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo("Ongoing contract for a period longer than 2 and shorter than 5 years.\n"
+            .isEqualTo(Art16_1_anmodning_engelsk.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse() + "\n"
                 + fritekstEngelsk + "\n"
-                + "Working for a non-profit organization.");
+                + Art16_1_anmodning_engelsk.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.getBeskrivelse());
     }
 
     @Test

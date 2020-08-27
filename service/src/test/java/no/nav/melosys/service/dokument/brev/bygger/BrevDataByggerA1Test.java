@@ -16,8 +16,7 @@ import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.service.dokument.LandvelgerService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -25,6 +24,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,9 +58,9 @@ public class BrevDataByggerA1Test {
 
     private BrevDataByggerA1 brevDataByggerA1;
 
-    private String saksbehandler = "";
+    private final String saksbehandler = "";
 
-    private String orgnr2 = "10987654321";
+    private final String orgnr2 = "10987654321";
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {

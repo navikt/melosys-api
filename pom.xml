@@ -18,6 +18,7 @@
 
     <modules>
         <module>app</module>
+        <module>soknad-altinn</module>
         <module>config</module>
         <module>domain</module>
         <module>feil</module>
@@ -37,15 +38,15 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.49-126</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.29</melosys.internt.kodeverk.version>
+        <melosys.jsonschema.version>1.35.52-129</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.32</melosys.internt.kodeverk.version>
+        <melosys.brev.version>1.2.50</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2020.01.09-12.44-3713b7c04e1c</nav.tjenestespesifikasjoner.version>
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.2.42</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <joark.journalfoerinngaaende.version>0.0.21</joark.journalfoerinngaaende.version>
         <sakogbehandling.version>1.0.0-alpha011</sakogbehandling.version>
@@ -101,6 +102,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>app</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>soknad-altinn</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -470,19 +476,19 @@
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
-                <version>${dokprod.melosysbrev.version}</version>
+                <version>${melosys.brev.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb</classifier>
-                <version>${dokprod.melosysbrev.version}</version>
+                <version>${melosys.brev.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb-sources</classifier>
-                <version>${dokprod.melosysbrev.version}</version>
+                <version>${melosys.brev.version}</version>
             </dependency>
             <!-- Utbetaling -->
             <dependency>

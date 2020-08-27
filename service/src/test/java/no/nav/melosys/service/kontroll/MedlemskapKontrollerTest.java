@@ -115,21 +115,21 @@ public class MedlemskapKontrollerTest {
     }
 
     @Test
-    public void statsborgerskapIkkeMedlemsland_statsborgerSE_ingenTreff() {
-        assertThat(MedlemskapKontroller.statsborgerskapIkkeMedlemsland(Lists.newArrayList(Landkoder.SE.getKode())))
-            .isFalse();
-    }
-
-    @Test
-    public void statsborgerskapIkkeMedlemsland_statsborgerSEOgUS_ingenTreff() {
-        assertThat(MedlemskapKontroller.statsborgerskapIkkeMedlemsland(Lists.newArrayList(Landkoder.SE.getKode(), "US")))
-            .isFalse();
-    }
-
-    @Test
-    public void statsborgerskapIkkeMedlemsland_statsborgerUS_registrerTreff() {
-        assertThat(MedlemskapKontroller.statsborgerskapIkkeMedlemsland(Lists.newArrayList("US")))
+    public void statsborgerskapErMedlemsland_statsborgerSE_registrerTreff() {
+        assertThat(MedlemskapKontroller.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.getKode())))
             .isTrue();
+    }
+
+    @Test
+    public void statsborgerskapErMedlemsland_statsborgerSEOgUS_registrerTreff() {
+        assertThat(MedlemskapKontroller.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.getKode(), "US")))
+            .isTrue();
+    }
+
+    @Test
+    public void statsborgerskapErMedlemsland_statsborgerUS_ingenTreff() {
+        assertThat(MedlemskapKontroller.statsborgerskapErMedlemsland(Lists.newArrayList("US")))
+            .isFalse();
     }
 
     private MedlemskapDokument hentMedlemskapsDokument() {
