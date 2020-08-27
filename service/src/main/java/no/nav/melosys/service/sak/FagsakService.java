@@ -167,7 +167,7 @@ public class FagsakService {
             throw new FunksjonellException("OppgaveID mangler.");
         }
         final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
-        if (!erGyldigOppgavetype(oppgave.getOppgavetype())) {
+        if (!nySakKanOpprettesFraOppgavetype(oppgave.getOppgavetype())) {
             throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
         }
         if (StringUtils.isEmpty(oppgave.getJournalpostId())) {
@@ -176,7 +176,7 @@ public class FagsakService {
         return oppgave;
     }
 
-    private static boolean erGyldigOppgavetype(Oppgavetyper oppgavetype) {
+    private static boolean nySakKanOpprettesFraOppgavetype(Oppgavetyper oppgavetype) {
         return oppgavetype == Oppgavetyper.BEH_SAK_MK
             || oppgavetype == Oppgavetyper.BEH_SAK
             || oppgavetype == Oppgavetyper.BEH_SED;

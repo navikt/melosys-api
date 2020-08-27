@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.jfr.sed;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -40,10 +39,6 @@ public class OppdaterSaksrelasjon implements StegBehandler {
         log.info("Lagrer saksrelasjon: gsakSaksnummer {}, rinasaksnummer {}, buctype {}", gsakSaksnummer, rinaSaksnummer, bucType);
         eessiService.lagreSaksrelasjon(gsakSaksnummer, rinaSaksnummer, bucType);
 
-        if (prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
-            prosessinstans.setSteg(ProsessSteg.SED_GENERELL_SAK_HENT_PERSON);
-        } else {
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
-        }
     }
 }

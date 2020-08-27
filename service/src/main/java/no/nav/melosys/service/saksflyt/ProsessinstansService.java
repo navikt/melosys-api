@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import static no.nav.melosys.domain.Behandling.erBehandlingAvGenerellSed;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 
 @Service
@@ -217,7 +217,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto) throws FunksjonellException {
         if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema().getKode())) {
             lagre(lagProsessinstansNySakBehandlingAvSøknad(opprettSakDto, journalpostID));
-        } else if (erBehandlingAvGenerellSed(opprettSakDto.getBehandlingstema().getKode())) {
+        } else if (erBehandlingAvSedForespørsler(opprettSakDto.getBehandlingstema().getKode())) {
             lagre(lagProsessinstansNySakBehandlingAvGenerellSed(opprettSakDto, journalpostID));
         } else {
             throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.getBehandlingstema()
@@ -226,7 +226,7 @@ public class ProsessinstansService {
     }
 
     private Prosessinstans lagProsessinstansNySakBehandlingAvSøknad(OpprettSakDto opprettSakDto, String journalpostID) {
-        Prosessinstans prosessinstans = opprettSakDtoTilProsessinstans(opprettSakDto);
+        Prosessinstans prosessinstans = lagProsessinstansFraOpprettSakDto(opprettSakDto);
 
         prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
@@ -236,7 +236,7 @@ public class ProsessinstansService {
     }
 
     private Prosessinstans lagProsessinstansNySakBehandlingAvGenerellSed(OpprettSakDto opprettSakDto, String journalpostID) {
-        Prosessinstans prosessinstans = opprettSakDtoTilProsessinstans(opprettSakDto);
+        Prosessinstans prosessinstans = lagProsessinstansFraOpprettSakDto(opprettSakDto);
 
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SED);
@@ -245,7 +245,7 @@ public class ProsessinstansService {
         return prosessinstans;
     }
 
-    private Prosessinstans opprettSakDtoTilProsessinstans(OpprettSakDto opprettSakDto) {
+    private Prosessinstans lagProsessinstansFraOpprettSakDto(OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
 

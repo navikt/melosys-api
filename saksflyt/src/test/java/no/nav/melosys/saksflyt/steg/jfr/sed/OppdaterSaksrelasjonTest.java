@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.jfr.sed;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -54,19 +53,5 @@ public class OppdaterSaksrelasjonTest {
             eq(bucType)
         );
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
-    }
-
-    @Test
-    public void utfør_prosessTypeOpprettNySak_forventSteg() throws MelosysException {
-        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
-
-        oppdaterSaksrelasjon.utfør(prosessinstans);
-
-        verify(eessiService).lagreSaksrelasjon(
-            eq(gsakSaksnummer),
-            eq(rinaSaksnummer),
-            eq(bucType)
-        );
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_GENERELL_SAK_HENT_PERSON);
     }
 }

@@ -347,7 +347,7 @@ public class Behandling extends RegistreringsInfo {
             || Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
-    public static boolean erBehandlingAvGenerellSed(String behandlingstemaKode) {
+    public static boolean erBehandlingAvSedForespørsler(String behandlingstemaKode) {
         return Behandlingstema.ØVRIGE_SED_MED.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.ØVRIGE_SED_UFM.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.TRYGDETID.getKode().equalsIgnoreCase(behandlingstemaKode);

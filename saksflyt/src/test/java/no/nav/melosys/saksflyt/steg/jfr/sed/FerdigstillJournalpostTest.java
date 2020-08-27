@@ -1,10 +1,12 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -16,8 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FerdigstillJournalpostTest {
@@ -68,6 +69,17 @@ public class FerdigstillJournalpostTest {
             .medBrukerID(BRUKER_ID).medArkivSakID(GSAK_SAKSNUMMER).medHovedDokumentID(DOKUMENT_ID).medTittel(TITTEL).build();
         verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(forventetOppdatering), eq(true));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+    }
+
+    @Test
+    public void utfør_prosesstypeOpprettNySak_skalIkkeFerdigstilleJournalpost() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = hentProsessinstans();
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
+
+        ferdigstillJournalpost.utfør(prosessinstans);
+
+        verify(tpsFasade, never()).hentIdentForAktørId(anyString());
+        verify(joarkFasade, never()).oppdaterJournalpost(anyString(), any(JournalpostOppdatering.class), anyBoolean());
     }
 
     private static Prosessinstans hentProsessinstans() {
