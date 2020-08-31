@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component("oppdaterSaksrelasjonSedMottak")
 public class OppdaterSaksrelasjon implements StegBehandler {
 
-    private static Logger log = LoggerFactory.getLogger(OppdaterSaksrelasjon.class);
+    private static final Logger log = LoggerFactory.getLogger(OppdaterSaksrelasjon.class);
 
     private final EessiService eessiService;
 
@@ -38,6 +38,7 @@ public class OppdaterSaksrelasjon implements StegBehandler {
 
         log.info("Lagrer saksrelasjon: gsakSaksnummer {}, rinasaksnummer {}, buctype {}", gsakSaksnummer, rinaSaksnummer, bucType);
         eessiService.lagreSaksrelasjon(gsakSaksnummer, rinaSaksnummer, bucType);
+
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
     }
 }

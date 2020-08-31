@@ -23,6 +23,7 @@ public enum ProsessType implements Kodeverk {
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
     MOTTAK_SOKNAD_ALTINN("MOTTAK_SOKNAD_ALTINN", "Mottak av elektronisk søknad fra altinn"),
     OPPRETT_NY_SAK("OPPRETT_NY_SAK", "Oppretter ny sak (fra journalført dokument)"),
+    OPPRETT_NY_SAK_SED_FORESPØRSEL("OPPRETT_NY_SAK_SED_FORESPØRSEL", "Oppretter ny sak for behandling av SED-forespørsel"),
     REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak"),
     SED_GENERELL_SAK("SED_OPPRETT_SAK", "Oppretter sak for SED for generell behandling"),
     VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
