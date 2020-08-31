@@ -41,7 +41,7 @@ public class FerdigstillJournalpost implements StegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessSteg nesteSteg;
-        if (prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
+        if (prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL) {
             prosessinstans.setSteg(ProsessSteg.SED_GENERELL_SAK_HENT_PERSON);
             return;
         } else if (prosessinstans.getType() != ProsessType.MOTTAK_SED_JOURNALFØRING) {

@@ -72,9 +72,9 @@ public class FerdigstillJournalpostTest {
     }
 
     @Test
-    public void utfør_prosesstypeOpprettNySak_skalIkkeFerdigstilleJournalpost() throws FunksjonellException, TekniskException {
+    public void utfør_prosesstypeOpprettNySakSedForespørsel_skalIkkeFerdigstilleJournalpost() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = hentProsessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL);
 
         ferdigstillJournalpost.utfør(prosessinstans);
 

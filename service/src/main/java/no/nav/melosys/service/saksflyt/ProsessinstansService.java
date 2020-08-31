@@ -218,7 +218,7 @@ public class ProsessinstansService {
         if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema().getKode())) {
             lagre(lagProsessinstansNySakBehandlingAvSøknad(opprettSakDto, journalpostID));
         } else if (erBehandlingAvSedForespørsler(opprettSakDto.getBehandlingstema().getKode())) {
-            lagre(lagProsessinstansNySakBehandlingAvGenerellSed(opprettSakDto, journalpostID));
+            lagre(lagProsessinstansNySakBehandlingAvSedForespørsler(opprettSakDto, journalpostID));
         } else {
             throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.getBehandlingstema()
                 + " på bakgrunn av journalførte dokumenter er ikke støttet.");
@@ -228,6 +228,7 @@ public class ProsessinstansService {
     private Prosessinstans lagProsessinstansNySakBehandlingAvSøknad(OpprettSakDto opprettSakDto, String journalpostID) {
         Prosessinstans prosessinstans = lagProsessinstansFraOpprettSakDto(opprettSakDto);
 
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
@@ -235,9 +236,10 @@ public class ProsessinstansService {
         return prosessinstans;
     }
 
-    private Prosessinstans lagProsessinstansNySakBehandlingAvGenerellSed(OpprettSakDto opprettSakDto, String journalpostID) {
+    private Prosessinstans lagProsessinstansNySakBehandlingAvSedForespørsler(OpprettSakDto opprettSakDto, String journalpostID) {
         Prosessinstans prosessinstans = lagProsessinstansFraOpprettSakDto(opprettSakDto);
 
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL);
         prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SED);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
@@ -247,7 +249,6 @@ public class ProsessinstansService {
 
     private Prosessinstans lagProsessinstansFraOpprettSakDto(OpprettSakDto opprettSakDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
