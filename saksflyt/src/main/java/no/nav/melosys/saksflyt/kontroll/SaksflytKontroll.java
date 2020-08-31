@@ -27,7 +27,7 @@ public class SaksflytKontroll {
     }
 
     @Scheduled(fixedRateString = "${melosys.saksflyt.kontroll.intervall}",
-        initialDelayString = "${melosys.saksflyt.kontroll.intervall}")
+        initialDelayString = "${melosys.saksflyt.kontroll.initDelay}")
     public void sjekkProsessinstansFinnesISaksflyt() {
         log.debug("Kjører kontroll for prosessinstanser");
         Map<UUID, Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStegIsNotAndStegIsNot(ProsessSteg.FERDIG, ProsessSteg.FEILET_MASKINELT)
