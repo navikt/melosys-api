@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -68,11 +67,10 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
             RutingResultat.INGEN_BEHANDLING : RutingResultat.OPPDATER_BEHANDLING;
     }
 
-    private Behandling hentBehandling(Long gsakSaksnummer) throws TekniskException {
-        Fagsak fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)
-            .orElseThrow(() -> new TekniskException("Finner ikke fagsak fra gsakSaksnummer " + gsakSaksnummer));
-
-        return fagsak.hentAktivBehandling();
+    private Behandling hentBehandling(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
+        return fagsakService
+            .hentFagsakFraGsakSaksnummer(gsakSaksnummer)
+            .hentSistAktiveBehandling();
     }
 
     private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
