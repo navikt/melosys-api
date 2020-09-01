@@ -18,6 +18,9 @@ public class SaksflytKontroll {
 
     private static final Logger log = LoggerFactory.getLogger(SaksflytKontroll.class);
 
+    private static final long SYV_MINUTTER = 420000;
+    private static final long FEM_MINUTTER = 300000;
+
     private final Binge binge;
     private final ProsessinstansRepository prosessinstansRepository;
 
@@ -26,8 +29,10 @@ public class SaksflytKontroll {
         this.prosessinstansRepository = prosessinstansRepository;
     }
 
-    @Scheduled(fixedRateString = "${melosys.saksflyt.kontroll.intervall}",
-        initialDelayString = "${melosys.saksflyt.kontroll.intervall}")
+    @Scheduled(
+        fixedRate = SYV_MINUTTER,
+        initialDelay = FEM_MINUTTER
+    )
     public void sjekkProsessinstansFinnesISaksflyt() {
         log.debug("Kjører kontroll for prosessinstanser");
         Map<UUID, Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStegIsNotAndStegIsNot(ProsessSteg.FERDIG, ProsessSteg.FEILET_MASKINELT)
