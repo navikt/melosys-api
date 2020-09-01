@@ -55,7 +55,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
         }
 
         LogiskVedleggRequest request = new LogiskVedleggRequest(tittel);
-        exchange("/dokumentInfo/{dokumentInfoId}/logiskVedlegg", HttpMethod.POST, new HttpEntity<>(request, getHttpHeaders()), dokumentInfoId);
+        exchange("/dokumentInfo/{dokumentInfoId}/logiskVedlegg/", HttpMethod.POST, new HttpEntity<>(request, getHttpHeaders()), dokumentInfoId);
     }
 
     @Override
