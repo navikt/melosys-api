@@ -22,4 +22,9 @@ public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
     Behandling findWithSaksopplysningerById(Long behandlingID);
 
     Collection<Behandling> findAllByStatus(Behandlingsstatus behandlingsstatus);
+
+    @Query("SELECT NEW no.nav.melosys.repository.BehandlingStatistikk(b.tema, COUNT(b)) FROM Behandling b "
+        + "WHERE b.status NOT IN (no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET, " +
+        "no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) GROUP BY b.tema")
+    List<BehandlingStatistikk> antallÅpneBehandlingerPerBehandlingstema();
 }
