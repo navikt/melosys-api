@@ -55,7 +55,7 @@ public class JournalpostapiConsumerImplTest {
     @Test
     public void leggTilLogiskVedlegg_verifiserUrl() throws SikkerhetsbegrensningException, IntegrasjonException {
         final String dokumentInfoId = "532";
-        server.expect(requestTo("/dokumentInfo/" + dokumentInfoId + "/logiskVedlegg"))
+        server.expect(requestTo("/dokumentInfo/" + dokumentInfoId + "/logiskVedlegg/"))
             .andExpect(method(HttpMethod.POST))
             .andRespond(withSuccess());
 
