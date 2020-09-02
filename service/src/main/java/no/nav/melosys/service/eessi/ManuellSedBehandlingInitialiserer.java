@@ -75,7 +75,7 @@ public class ManuellSedBehandlingInitialiserer {
     }
 
     private boolean skalOppdatereOppgaveForSedType(SedType sedType) {
-        return sedType != SedType.A012 && sedType != SedType.X001;
+        return sedType != SedType.A012 && sedType != SedType.X001 && sedType != SedType.X007;
     }
 
     private void oppdaterOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) throws FunksjonellException, TekniskException {
