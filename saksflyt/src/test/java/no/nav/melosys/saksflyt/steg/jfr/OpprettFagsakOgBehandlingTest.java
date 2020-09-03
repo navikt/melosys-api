@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
-import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -47,7 +46,6 @@ public class OpprettFagsakOgBehandlingTest {
 
     @Before
     public void setUp() {
-        AuditorProvider auditorAware = mock(AuditorProvider.class);
         agent = new OpprettFagsakOgBehandling(fagsakService, behandlingService);
     }
 
@@ -80,8 +78,10 @@ public class OpprettFagsakOgBehandlingTest {
         assertThat(opprettSakRequestArgumentCaptor.getValue().getArbeidsgiver()).isEqualTo(arbeidsgiver);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeJournalpostId()).isEqualTo(journalpostId);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeDokumentId()).isEqualTo(dokumentId);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getRepresentant()).isEqualTo(representant);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getRepresentantKontaktperson()).isEqualTo(representantKontaktperson);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getFullmektig().getRepresentantID())
+            .isEqualTo(representant);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getKontaktopplysninger().get(0).getKontaktNavn())
+            .isEqualTo(representantKontaktperson);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
     }

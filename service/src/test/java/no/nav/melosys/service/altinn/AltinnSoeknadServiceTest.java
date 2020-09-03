@@ -4,6 +4,8 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -30,7 +32,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AltinnSoeknadServiceTest {
-
     @Mock
     private SoknadMottakConsumer soknadMottakConsumer;
     @Mock
@@ -43,6 +44,7 @@ public class AltinnSoeknadServiceTest {
     private AltinnSoeknadService altinnSoeknadService;
 
     private final String soknadID = "13423";
+    private final String aktørID = "123321123";
 
     @Captor
     private ArgumentCaptor<OpprettSakRequest> captor;
@@ -53,10 +55,10 @@ public class AltinnSoeknadServiceTest {
     }
 
     @Test
-    public void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet() throws FunksjonellException, TekniskException {
+    public void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet()
+        throws FunksjonellException, TekniskException {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-        final String aktørID = "123321123";
 
         when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
@@ -72,10 +74,10 @@ public class AltinnSoeknadServiceTest {
     }
 
     @Test
-    public void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserBehandlingstemaArbeidsEttLandØvrig() throws FunksjonellException, TekniskException {
+    public void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserBehandlingstemaArbeidsEttLandØvrig()
+        throws FunksjonellException, TekniskException {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-        final String aktørID = "123321123";
 
         søknad.getInnhold().getArbeidsgiver().setOffentligVirksomhet(Boolean.TRUE);
 
@@ -90,6 +92,64 @@ public class AltinnSoeknadServiceTest {
         assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
         assertThat(req.getAktørID()).isEqualTo(aktørID);
+    }
+
+    @Test
+    public void opprettSakFraAltinnSøknad_rådgivningsfirmaErFullmektig_lagerFullmektig()
+        throws FunksjonellException, TekniskException {
+        final Fagsak fagsak = lagFagsak();
+        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
+
+        when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
+        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
+        when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
+        OpprettSakRequest req = captor.getValue();
+        String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
+        assertThat(req.getFullmektig().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
+        assertThat(req.getFullmektig().getRepresenterer()).isEqualTo(Representerer.ARBEIDSGIVER);
+    }
+
+    @Test
+    public void opprettSakFraAltinnSøknad_fullmaktUtenRådgivningsfirma_lagerArbeidsgiverSomFullmektig()
+        throws FunksjonellException, TekniskException {
+        final Fagsak fagsak = lagFagsak();
+        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
+        søknad.getInnhold().getFullmakt().setFullmektigVirksomhetsnummer(null);
+        søknad.getInnhold().getFullmakt().setFullmaktFraArbeidstaker(true);
+
+        when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
+        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
+        when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
+        OpprettSakRequest req = captor.getValue();
+        String fullmektigVirksomhetsnummer = søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
+        assertThat(req.getFullmektig().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
+        assertThat(req.getFullmektig().getRepresenterer()).isEqualTo(Representerer.BEGGE);
+    }
+
+    @Test
+    public void opprettSakFraAltinnSøknad_kontaktpersonNavnFinnes_lagerKontaktopplysninger()
+        throws FunksjonellException, TekniskException {
+        final Fagsak fagsak = lagFagsak();
+        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
+        søknad.getInnhold().getArbeidsgiver().getKontaktperson().setKontaktpersonNavn("Ola");
+
+        when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
+        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
+        when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
+        OpprettSakRequest req = captor.getValue();
+        assertThat(req.getKontaktopplysninger()).isNotEmpty();
+        Kontaktopplysning kontaktopplysning = req.getKontaktopplysninger().iterator().next();
+        assertThat(kontaktopplysning.getKontaktNavn())
+            .isEqualTo(søknad.getInnhold().getArbeidsgiver().getKontaktperson().getKontaktpersonNavn());
     }
 
     private MedlemskapArbeidEOSM lagMedlemskapArbeidEOSM() {

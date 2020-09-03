@@ -1,9 +1,10 @@
 package no.nav.melosys.service.altinn;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -17,6 +18,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
+import no.nav.melosys.soknad_altinn.Kontaktperson;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,10 +46,9 @@ public class AltinnSoeknadService {
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(hentAktørID(søknad))
-            .medArbeidsgiver(hentArbeidsgiver(søknad))
-            .medRepresentant(hentRepresentant(søknad))
-            .medRepresentantKontaktperson(hentRepresentantKontaktPerson(søknad))
-            .medRepresentantRepresenterer(hentRepresenterer(søknad))
+            .medArbeidsgiver(hentArbeidsgiverID(søknad))
+            .medFullmektig(hentFullmektig(søknad))
+            .medKontaktopplysninger(hentKontaktopplysninger(søknad))
             .medBehandlingstema(avklarBehandlingstema(søknad))
             .medBehandlingstype(Behandlingstyper.SOEKNAD)
             .build();
@@ -74,23 +75,55 @@ public class AltinnSoeknadService {
         return tpsFasade.hentAktørIdForIdent(søknad.getInnhold().getArbeidstaker().getFoedselsnummer());
     }
 
-    private static String hentArbeidsgiver(MedlemskapArbeidEOSM søknad) {
+    private static String hentArbeidsgiverID(MedlemskapArbeidEOSM søknad) {
         return søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
     }
 
-    private static String hentRepresentant(MedlemskapArbeidEOSM søknad) {
-        return søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
-    }
-
-    private static Representerer hentRepresenterer(MedlemskapArbeidEOSM søknad) {
-        if (Boolean.TRUE.equals(søknad.getInnhold().getFullmakt().isFullmaktFraArbeidstaker())) {
-            return Representerer.BEGGE;
+    private static Fullmektig hentFullmektig(MedlemskapArbeidEOSM søknad) {
+        if (rådgivningsfirmaErFullmektig(søknad)) {
+            String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
+            return new Fullmektig(fullmektigVirksomhetsnummer, hentRepresenterer(søknad));
         } else {
-            return StringUtils.isNotBlank(hentRepresentant(søknad)) ? Representerer.ARBEIDSGIVER : null;
+            return arbeidstakerHarGittFullmakt(søknad)
+                ? new Fullmektig(hentArbeidsgiverID(søknad), hentRepresenterer(søknad)) : null;
         }
     }
 
-    private static String hentRepresentantKontaktPerson(MedlemskapArbeidEOSM søknad) {
-        return søknad.getInnhold().getArbeidsgiver().getKontaktperson().getKontaktpersonNavn();
+    private static boolean rådgivningsfirmaErFullmektig(MedlemskapArbeidEOSM søknad) {
+        return StringUtils.isNotBlank(søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer());
+    }
+
+    private static Representerer hentRepresenterer(MedlemskapArbeidEOSM søknad) {
+        if (arbeidstakerHarGittFullmakt(søknad)) {
+            return Representerer.BEGGE;
+        } else {
+            return Representerer.ARBEIDSGIVER;
+        }
+    }
+
+    private static boolean arbeidstakerHarGittFullmakt(MedlemskapArbeidEOSM søknad) {
+        return Boolean.TRUE.equals(søknad.getInnhold().getFullmakt().isFullmaktFraArbeidstaker());
+    }
+
+    private static List<Kontaktopplysning> hentKontaktopplysninger(MedlemskapArbeidEOSM søknad) {
+        Kontaktopplysning kontaktopplysning = hentKontaktopplysning(søknad);
+        return kontaktopplysning != null ? List.of(kontaktopplysning) : Collections.emptyList();
+    }
+
+    private static Kontaktopplysning hentKontaktopplysning(MedlemskapArbeidEOSM søknad) {
+        Kontaktperson kontaktperson = søknad.getInnhold().getArbeidsgiver().getKontaktperson();
+        if (kontaktperson == null) {
+            return null;
+        }
+        String kontaktpersonNavn = kontaktperson.getKontaktpersonNavn();
+        return StringUtils.isNotBlank(kontaktpersonNavn)
+            ? Kontaktopplysning.av(hentKontaktVirksomhetsnummer(søknad), kontaktpersonNavn) : null;
+    }
+
+    private static String hentKontaktVirksomhetsnummer(MedlemskapArbeidEOSM søknad){
+        if (rådgivningsfirmaErFullmektig(søknad)) {
+            return søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
+        }
+        return søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
     }
 }
