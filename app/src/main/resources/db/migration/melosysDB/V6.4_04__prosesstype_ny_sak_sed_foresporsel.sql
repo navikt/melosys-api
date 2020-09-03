@@ -1,0 +1,1 @@
+INSERT INTO prosess_type (kode, navn) VALUES ('OPPRETT_NY_SAK_SED_FORESPØRSEL', 'Oppretter ny sak for behandling av SED-forespørsel');

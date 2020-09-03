@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 
 @Service
@@ -171,11 +172,11 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansHenleggSak(Behandling behandling, Henleggelsesgrunner begrunnelseKode, String fritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-        .medBehandling(behandling)
-        .medType(ProsessType.HENLEGG_SAK)
-        .medSteg(ProsessSteg.HS_OPPDATER_RESULTAT)
-        .medBegrunnelseFritekst(fritekst)
-        .build();
+            .medBehandling(behandling)
+            .medType(ProsessType.HENLEGG_SAK)
+            .medSteg(ProsessSteg.HS_OPPDATER_RESULTAT)
+            .medBegrunnelseFritekst(fritekst)
+            .build();
 
         prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, begrunnelseKode);
         lagre(prosessinstans);
@@ -214,23 +215,49 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto) throws FunksjonellException {
-        if (!erBehandlingAvSøknad(opprettSakDto.getBehandlingstema().getKode())) {
+        if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema().getKode())) {
+            lagre(lagProsessinstansNySakBehandlingAvSøknad(opprettSakDto, journalpostID));
+        } else if (erBehandlingAvSedForespørsler(opprettSakDto.getBehandlingstema().getKode())) {
+            lagre(lagProsessinstansNySakBehandlingAvSedForespørsler(opprettSakDto, journalpostID));
+        } else {
             throw new FunksjonellException("Opprettelse av behandling " + opprettSakDto.getBehandlingstema()
                 + " på bakgrunn av journalførte dokumenter er ikke støttet.");
         }
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.OPPRETT_NY_SAK)
-            .medSteg(ProsessSteg.JFR_AKTØR_ID)
-            .build();
+    }
+
+    private Prosessinstans lagProsessinstansNySakBehandlingAvSøknad(OpprettSakDto opprettSakDto, String journalpostID) {
+        Prosessinstans prosessinstans = lagProsessinstansFraOpprettSakDto(opprettSakDto);
+
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
+        prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+
+        return prosessinstans;
+    }
+
+    private Prosessinstans lagProsessinstansNySakBehandlingAvSedForespørsler(OpprettSakDto opprettSakDto, String journalpostID) {
+        Prosessinstans prosessinstans = lagProsessinstansFraOpprettSakDto(opprettSakDto);
+
+        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL);
+        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SED);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+
+        return prosessinstans;
+    }
+
+    private Prosessinstans lagProsessinstansFraOpprettSakDto(OpprettSakDto opprettSakDto) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
         prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
-        lagre(prosessinstans);
+
+        return prosessinstans;
     }
 
     public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {

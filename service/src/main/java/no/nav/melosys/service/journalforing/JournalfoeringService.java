@@ -30,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
+
 @Service
 public class JournalfoeringService {
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringService.class);
@@ -157,9 +159,7 @@ public class JournalfoeringService {
     }
 
     private void validerBehandlingstemaForSed(String behandlingstypeKode) throws FunksjonellException {
-        if (!Behandlingstema.TRYGDETID.getKode().equals(behandlingstypeKode)
-            && !Behandlingstema.ØVRIGE_SED_MED.getKode().equalsIgnoreCase(behandlingstypeKode)
-            && !Behandlingstema.ØVRIGE_SED_UFM.getKode().equalsIgnoreCase(behandlingstypeKode)) {
+        if (!erBehandlingAvSedForespørsler(behandlingstypeKode)) {
             throw new FunksjonellException(String.format("Opprettelse av behandling med tema %s støttes ikke", behandlingstypeKode));
         }
     }
