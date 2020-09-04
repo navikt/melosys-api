@@ -53,7 +53,7 @@ public class LandvelgerService {
         return alleArbeidsland.iterator().next();
     }
 
-    private Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
+    public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
             BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
