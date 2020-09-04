@@ -92,10 +92,6 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
             fag.setBegrensetPeriode(JA);
         }
 
-        if (brevdata.erMarginaltArbeid) {
-            fag.setMarginaltArbeid(JA);
-        }
-
         Lovvalgsperiode periode = brevdata.lovvalgsperiode;
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
         fag.setLovvalgsperiode(LovvalgsperiodeType.builder()

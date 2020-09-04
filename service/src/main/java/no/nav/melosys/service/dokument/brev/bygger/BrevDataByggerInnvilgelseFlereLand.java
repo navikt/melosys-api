@@ -55,7 +55,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
                             dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
 
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
-        brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID).stream()
+        brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID).stream()
             .map(Landkoder::getBeskrivelse)
             .collect(Collectors.toList());
 
