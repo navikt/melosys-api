@@ -5,15 +5,18 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.soeknad.Bosted;
+import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.LuftfartBase;
 import no.nav.melosys.domain.eessi.sed.Adresse;
 import no.nav.melosys.domain.eessi.sed.Arbeidssted;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
+import no.nav.melosys.domain.eessi.sed.Virksomhet;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -387,6 +390,30 @@ public class SedDataByggerTest {
         assertThat(arbeidssted.getNavn()).isEqualTo(luftfartBase.hjemmebaseNavn);
         assertThat(arbeidssted.getAdresse().getGateadresse()).isEqualTo("N/A");
         assertThat(arbeidssted.getAdresse().getLand()).isEqualTo(luftfartBase.hjemmebaseLand);
+    }
+
+    @Test
+    public void lagUtkast_medUtenlandskSelvstendigForetak_forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet() throws TekniskException, FunksjonellException {
+        ForetakUtland utenlandskSelvstendigForetak = new ForetakUtland();
+        utenlandskSelvstendigForetak.adresse = new StrukturertAdresse();
+        utenlandskSelvstendigForetak.selvstendigNæringsvirksomhet = true;
+        utenlandskSelvstendigForetak.navn = "selvstendig";
+        utenlandskSelvstendigForetak.uuid = "123";
+
+        SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
+        dataGrunnlag.getBehandlingsgrunnlagData().foretakUtland = List.of(utenlandskSelvstendigForetak);
+
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("123"));
+
+        SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getSelvstendigeVirksomheter())
+            .extracting(Virksomhet::getNavn)
+            .contains("selvstendig");
+
+        assertThat(sedData.getArbeidsgivendeVirksomheter())
+            .extracting(Virksomhet::getNavn)
+            .doesNotContain("selvstendig");
     }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {
