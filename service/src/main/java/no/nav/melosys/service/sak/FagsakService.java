@@ -8,7 +8,10 @@ import java.util.stream.Stream;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -26,6 +29,7 @@ import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -234,7 +238,7 @@ public class FagsakService {
      * - Oppretter tom behandlingsresultat.
      */
     @Transactional(rollbackFor = MelosysException.class)
-    public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) throws FunksjonellException {
+    public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
         Fagsak fagsak = new Fagsak();
         String saksnummer = hentNesteSaksnummer();
         fagsak.setSaksnummer(saksnummer);
@@ -256,15 +260,14 @@ public class FagsakService {
             aktører.add(aktørArbeidsgiver);
         }
 
-        String representant = opprettSakRequest.getRepresentant();
-        Representerer representantRepresenterer = opprettSakRequest.getRepresentantRepresenterer();
-        if (representant != null) {
-            Aktoer aktørRepresentant = new Aktoer();
-            aktørRepresentant.setOrgnr(representant);
-            aktørRepresentant.setFagsak(fagsak);
-            aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
-            aktørRepresentant.setRepresenterer(representantRepresenterer);
-            aktører.add(aktørRepresentant);
+        Fullmektig fullmektig = opprettSakRequest.getFullmektig();
+        if (fullmektig != null) {
+            Aktoer aktørFullmektig = new Aktoer();
+            aktørFullmektig.setOrgnr(fullmektig.getRepresentantID());
+            aktørFullmektig.setFagsak(fagsak);
+            aktørFullmektig.setRolle(Aktoersroller.REPRESENTANT);
+            aktørFullmektig.setRepresenterer(fullmektig.getRepresenterer());
+            aktører.add(aktørFullmektig);
         }
 
         Instant nå = Instant.now();
@@ -277,20 +280,20 @@ public class FagsakService {
 
         lagre(fagsak);
 
-        String representantKontaktperson = opprettSakRequest.getRepresentantKontaktperson();
-        if (representantKontaktperson != null) {
-            if (representant == null) {
-                throw new FunksjonellException("Kontaktopplysninger kan ikke lagres uten orgnr.");
-            } else {
-                kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, representant, null, representantKontaktperson);
-            }
+        List<Kontaktopplysning> kontaktopplysninger = opprettSakRequest.getKontaktopplysninger();
+        if (CollectionUtils.isNotEmpty(kontaktopplysninger)) {
+            kontaktopplysninger.forEach(opplysning -> kontaktopplysningService
+                .lagEllerOppdaterKontaktopplysning(saksnummer, opplysning.getKontaktopplysningID().getOrgnr(),
+                    opplysning.getKontaktOrgnr(), opplysning.getKontaktNavn()));
         }
 
         Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();
         Behandlingstema behandlingstema = opprettSakRequest.getBehandlingstema();
         String initierendeJournalpostId = opprettSakRequest.getInitierendeJournalpostId();
         String initierendeDokumentId = opprettSakRequest.getInitierendeDokumentId();
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema, initierendeJournalpostId, initierendeDokumentId);
+        Behandling behandling = behandlingService.nyBehandling(fagsak,
+            Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema,
+            initierendeJournalpostId, initierendeDokumentId);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
         sakerOpprettet.increment();

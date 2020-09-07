@@ -1,7 +1,12 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.util.Collections;
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Fullmektig;
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -34,7 +39,6 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
  */
 @Component
 public class OpprettFagsakOgBehandling implements StegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
 
     private final FagsakService fagsakService;
@@ -72,7 +76,8 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
             Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
             Behandling sistOppdaterteBehandling = fagsak.getSistOppdaterteBehandling();
-            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, sistOppdaterteBehandling.getTema(), initierendeJournalpostId, initierendeDokumentId);
+            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT,
+                behandlingstype, sistOppdaterteBehandling.getTema(), initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setBehandling(behandling);
 
             prosessinstans.setSteg(STATUS_BEH_OPPR);
@@ -81,9 +86,8 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
                 .medAktørID(aktørId)
                 .medArbeidsgiver(arbeidsgiver)
-                .medRepresentant(representant)
-                .medRepresentantKontaktperson(representantKontakperson)
-                .medRepresentantRepresenterer(representantRepresenterer)
+                .medFullmektig(representant != null ? new Fullmektig(representant, representantRepresenterer) : null)
+                .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
                 .medBehandlingstema(behandlingstema)
                 .medBehandlingstype(behandlingstype)
                 .medInitierendeJournalpostId(initierendeJournalpostId)
@@ -98,5 +102,13 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         } else {
             throw new TekniskException("ProsessType " + prosessinstans.getType() + " er ikke støttet");
         }
+    }
+
+    private List<Kontaktopplysning> lagKontaktopplysningerForRepresentant(String representant,
+                                                                          String kontaktperson) {
+        if (representant == null || kontaktperson == null) {
+            return Collections.emptyList();
+        }
+        return Collections.singletonList(Kontaktopplysning.av(representant, kontaktperson));
     }
 }

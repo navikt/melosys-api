@@ -5,10 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -65,7 +62,7 @@ public class FagsakServiceTest {
 
     private FagsakService fagsakService;
 
-    private static EasyRandom random = new EasyRandom(getRandomConfig());
+    private static final EasyRandom random = new EasyRandom(getRandomConfig());
 
     private static EasyRandomParameters getRandomConfig() {
         return new EasyRandomParameters().collectionSizeRange(1, 4)
@@ -177,30 +174,44 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void nyFagsakOgBehandling() throws FunksjonellException {
+    public void nyFagsakOgBehandling() {
         Behandling behandling = mock(Behandling.class);
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), any(), anyString(), anyString());
 
-        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("AKTOER_ID").medAktørID("123456789")
+        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("123456789")
             .medBehandlingstype(Behandlingstyper.SOEKNAD).medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medInitierendeJournalpostId(initierendeJournalpostId).medInitierendeDokumentId(initierendeDokumentId).build();
+            .medInitierendeJournalpostId(initierendeJournalpostId).medInitierendeDokumentId(initierendeDokumentId)
+            .medArbeidsgiver("arbeidsgiver")
+            .medFullmektig(new Fullmektig("orgnr", Representerer.ARBEIDSGIVER)).build();
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         verify(fagsakRepo).save(any(Fagsak.class));
-        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.SOEKNAD), eq(Behandlingstema.UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId));
+        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.SOEKNAD),
+            eq(Behandlingstema.UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
         assertThat(fagsak.getType()).isEqualTo(Sakstyper.UKJENT);
+        Aktoer forventetFullmektig = new Aktoer();
+        forventetFullmektig.setFagsak(fagsak);
+        forventetFullmektig.setRolle(Aktoersroller.REPRESENTANT);
+        forventetFullmektig.setOrgnr("orgnr");
+        forventetFullmektig.setRepresenterer(Representerer.ARBEIDSGIVER);
+        assertThat(fagsak.hentRepresentant(Representerer.ARBEIDSGIVER)).isPresent().get()
+            .isEqualToComparingFieldByField(forventetFullmektig);
     }
 
     @Test
-    public void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() throws FunksjonellException {
-        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("AKTOER_ID").medAktørID("123456789")
-            .medBehandlingstype(Behandlingstyper.SOEKNAD).medRepresentant("RepresentantOrgnr").medRepresentantKontaktperson("Kontaktperson").build();
+    public void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() {
+        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("RepresentantOrgnr", "Kontaktperson");
+        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("123456789")
+            .medBehandlingstype(Behandlingstyper.SOEKNAD)
+            .medKontaktopplysninger(List.of(kontaktopplysning)).build();
 
         fagsakService.nyFagsakOgBehandling(opprettSakRequest);
 
-        verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(any(), eq("RepresentantOrgnr"), eq(null), eq("Kontaktperson"));
+        verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
+            any(), eq("RepresentantOrgnr"), eq(null), eq("Kontaktperson")
+        );
     }
 
     @Test

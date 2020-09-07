@@ -1,28 +1,31 @@
 package no.nav.melosys.service.sak;
 
-import no.nav.melosys.domain.kodeverk.Representerer;
+import java.util.ArrayList;
+import java.util.List;
+
+import no.nav.melosys.domain.Fullmektig;
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import org.apache.commons.collections4.CollectionUtils;
 
 public class OpprettSakRequest {
-    private String aktørID;
-    private String arbeidsgiver;
-    private String representant;
-    private String representantKontaktperson;
-    private Representerer representantRepresenterer;
-    private Behandlingstyper behandlingstype;
-    private Behandlingstema behandlingstema;
-    private String initierendeJournalpostId;
-    private String initierendeDokumentId;
-    private Sakstyper sakstype;
+    private final String aktørID;
+    private final String arbeidsgiver;
+    private final Fullmektig fullmektig;
+    private final List<Kontaktopplysning> kontaktopplysninger;
+    private final Behandlingstyper behandlingstype;
+    private final Behandlingstema behandlingstema;
+    private final String initierendeJournalpostId;
+    private final String initierendeDokumentId;
+    private final Sakstyper sakstype;
 
     private OpprettSakRequest(OpprettSakRequest.Builder builder) {
         this.aktørID = builder.aktørID;
         this.arbeidsgiver = builder.arbeidsgiver;
-        this.representant = builder.representant;
-        this.representantKontaktperson = builder.representantKontaktperson;
-        this.representantRepresenterer = builder.representantRepresenterer;
+        this.fullmektig = builder.fullmektig;
+        this.kontaktopplysninger = builder.kontaktopplysninger;
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
         this.initierendeJournalpostId = builder.initierendeJournalpostId;
@@ -38,16 +41,12 @@ public class OpprettSakRequest {
         return arbeidsgiver;
     }
 
-    public String getRepresentant() {
-        return representant;
+    public Fullmektig getFullmektig() {
+        return fullmektig;
     }
 
-    public String getRepresentantKontaktperson() {
-        return representantKontaktperson;
-    }
-
-    public Representerer getRepresentantRepresenterer() {
-        return representantRepresenterer;
+    public List<Kontaktopplysning> getKontaktopplysninger() {
+        return kontaktopplysninger;
     }
 
     public Behandlingstyper getBehandlingstype() {
@@ -73,9 +72,8 @@ public class OpprettSakRequest {
     public static class Builder {
         private String aktørID;
         private String arbeidsgiver;
-        private String representant;
-        private String representantKontaktperson;
-        private Representerer representantRepresenterer;
+        private Fullmektig fullmektig;
+        private List<Kontaktopplysning> kontaktopplysninger = new ArrayList<>();
         private Behandlingstyper behandlingstype;
         private Behandlingstema behandlingstema;
         private String initierendeJournalpostId;
@@ -92,18 +90,15 @@ public class OpprettSakRequest {
             return this;
         }
 
-        public Builder medRepresentant(String representant) {
-            this.representant = representant;
+        public Builder medFullmektig(Fullmektig fullmektig) {
+            this.fullmektig = fullmektig;
             return this;
         }
 
-        public Builder medRepresentantKontaktperson(String representantKontaktperson) {
-            this.representantKontaktperson = representantKontaktperson;
-            return this;
-        }
-
-        public Builder medRepresentantRepresenterer(Representerer representantRepresenterer) {
-            this.representantRepresenterer = representantRepresenterer;
+        public Builder medKontaktopplysninger(List<Kontaktopplysning> kontaktopplysninger) {
+            if (CollectionUtils.isNotEmpty(kontaktopplysninger)) {
+                this.kontaktopplysninger = kontaktopplysninger;
+            }
             return this;
         }
 
