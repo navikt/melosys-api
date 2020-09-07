@@ -9,7 +9,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "kontaktopplysning")
 public class Kontaktopplysning {
-
     @EmbeddedId
     private KontaktopplysningID kontaktopplysningID;
 
@@ -41,6 +40,15 @@ public class Kontaktopplysning {
 
     public void setKontaktOrgnr(String kontaktOrgnr) {
         this.kontaktOrgnr = kontaktOrgnr;
+    }
+
+    public static Kontaktopplysning av(String orgnr, String kontaktNavn) {
+        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
+        KontaktopplysningID kontaktopplysningID = new KontaktopplysningID();
+        kontaktopplysningID.setOrgnr(orgnr);
+        kontaktopplysning.setKontaktopplysningID(kontaktopplysningID);
+        kontaktopplysning.setKontaktNavn(kontaktNavn);
+        return kontaktopplysning;
     }
 
     @Override
