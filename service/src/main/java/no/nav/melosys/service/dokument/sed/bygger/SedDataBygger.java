@@ -141,7 +141,7 @@ public class SedDataBygger {
         throws IkkeFunnetException, TekniskException {
         Collection<AvklartVirksomhet> avklarteVirksomheter = new ArrayList<>();
         avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere());
-        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter());
+        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
 
         return avklarteVirksomheter.stream()
             .map(SedDataBygger::lagVirksomhet)
