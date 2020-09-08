@@ -49,25 +49,29 @@ public class Prosessinstans {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "steg", nullable = false)
-    private ProsessSteg steg;
+    private ProsessSteg steg; //TODO: erstattes av sistFullførteSteg
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "steg", nullable = false)
+    private ProsessSteg sistFullførteSteg; //todo
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
     @Column(name = "antall_retry", nullable = false)
-    private int antallRetry;
+    private int antallRetry; //todo: fjerne?
 
     @Column(name = "sist_forsoekt")
     private LocalDateTime sistForsøkt;
 
     @Column(name = "sover_til")
-    private Instant soverTil;
+    private Instant soverTil; //todo: fjerne?
 
     @Column(name = "endret_dato", nullable = false)
     private LocalDateTime endretDato;
 
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<ProsessinstansHendelse> hendelser;
+    private List<ProsessinstansHendelse> hendelser = new ArrayList<>();
 
     private static final ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
@@ -166,6 +170,14 @@ public class Prosessinstans {
         this.steg = steg;
     }
 
+    public ProsessSteg getSistFullførteSteg() {
+        return sistFullførteSteg;
+    }
+
+    public void setSistFullførteSteg(ProsessSteg sistFullførteSteg) {
+        this.sistFullførteSteg = sistFullførteSteg;
+    }
+
     public LocalDateTime getRegistrertDato() {
         return registrertDato;
     }
@@ -223,6 +235,10 @@ public class Prosessinstans {
         hendelser.add(piHend);
     }
 
+    public void leggTilHendelse(ProsessSteg steg, Throwable t) {
+        this.hendelser.add(new ProsessinstansHendelse(this, LocalDateTime.now(), steg, t.getClass().getSimpleName(), ExceptionUtils.getStackTrace(t)));
+    }
+
     public void leggTilHendelse(String type, String melding) {
         ProsessinstansHendelse pih = new ProsessinstansHendelse(this, LocalDateTime.now(), steg, type, melding);
         leggTilHendelse(pih);
@@ -234,6 +250,10 @@ public class Prosessinstans {
         } else {
             leggTilHendelse(type, melding);
         }
+    }
+
+    public boolean statusErKlar() {
+        return status == ProsessStatus.KLAR;
     }
 
     @Override
