@@ -35,6 +35,10 @@ public class Prosessinstans {
     @Column(name = "prosess_type", nullable = false)
     private ProsessType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ProsessStatus status;
+
     @ManyToOne()
     @JoinColumn(name = "behandling_id")
     private Behandling behandling;
@@ -78,6 +82,14 @@ public class Prosessinstans {
 
     public void setType(ProsessType type) {
         this.type = type;
+    }
+
+    public ProsessStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProsessStatus status) {
+        this.status = status;
     }
 
     public Behandling getBehandling() {
