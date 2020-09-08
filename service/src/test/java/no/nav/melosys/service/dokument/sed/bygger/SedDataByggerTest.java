@@ -36,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.eessi.sed.Adresse.*;
+import static no.nav.melosys.domain.eessi.sed.Virksomhet.PERSONNUMMER;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -110,7 +111,7 @@ public class SedDataByggerTest {
         return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService);
     }
 
-    private SedDataGrunnlagMedSoknad lagDokumentressurserMedManglendeAdressefelter() throws TekniskException {
+    private SedDataGrunnlagMedSoknad lagDokumentressurserMedManglendeAdressefelter() throws TekniskException, IkkeFunnetException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
 
@@ -413,18 +414,29 @@ public class SedDataByggerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void lagVirksomhet_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getArbeidsgivendeVirksomheter())
-            .filteredOn(virksomhet -> "orgnr".equals(virksomhet.getOrgnr()))
+            .filteredOn(virksomhet -> UKJENT.equals(virksomhet.getOrgnr()))
+            .extracting(Virksomhet::getType)
+            .contains(PERSONNUMMER);
+
+        assertThat(sedData.getArbeidsgivendeVirksomheter())
+            .filteredOn(virksomhet -> UKJENT.equals(virksomhet.getOrgnr()))
             .extracting(Virksomhet::getAdresse)
             .extracting(Adresse::getPoststed)
             .contains(UKJENT);
     }
 
-    // TODO: Legg til test for manglende orgnummer i virksomhet
+    @Test
+    public void lagVirksomhet_harObligatoriskeFelter_blirSatt() throws TekniskException, FunksjonellException {
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidsgivendeVirksomheter())
+            .extracting(Virksomhet::getOrgnr, Virksomhet::getType)
+            .contains(tuple("orgnr", null));
+    }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {
         assertThat(sedData).isNotNull();

@@ -18,6 +18,11 @@ final class VedtakKontroller {
 
     private VedtakKontroller() {}
 
+    public static final String ARBEID_UTLAND_NAVN = "arbeidUtland[%d].foretakNavn";
+    public static final String ARBEID_UTLAND_LAND = "arbeidUtland[%d].adresse.landkode";
+    public static final String FORETAK_UTLAND_NAVN = "foretakUtland[%d].navn";
+    public static final String FORETAK_UTLAND_LAND = "foretakUtland[%d].adresse.landkode";
+
     static Kontrollfeil bostedsadresseForA1(VedtakKontrollData kontrollData) {
         return PersonKontroller.harRegistrertBostedsadresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
@@ -52,10 +57,10 @@ final class VedtakKontroller {
         for (int i = 0; i < arbeidUtlandListe.size(); i++) {
             ArbeidUtland arbeidUtland = arbeidUtlandListe.get(i);
             if (arbeidUtland.foretakNavn == null) {
-                felter.add(String.format("arbeidUtland[%d].foretakNavn", i));
+                felter.add(String.format(ARBEID_UTLAND_NAVN, i));
             }
             if (arbeidUtland.adresse.landkode == null) {
-                felter.add(String.format("arbeidUtland[%d].adresse.landkode", i));
+                felter.add(String.format(ARBEID_UTLAND_LAND, i));
             }
         }
         return felter.size() == 0 ? null
@@ -69,10 +74,10 @@ final class VedtakKontroller {
         for (int i = 0; i < foretakUtlandListe.size(); i++) {
             ForetakUtland foretakUtland = foretakUtlandListe.get(i);
             if (foretakUtland.navn == null) {
-                felter.add(String.format("foretakUtland[%d].navn", i));
+                felter.add(String.format(FORETAK_UTLAND_NAVN, i));
             }
             if (foretakUtland.adresse.landkode == null) {
-                felter.add(String.format("foretakUtland[%d].adresse.landkode", i));
+                felter.add(String.format(FORETAK_UTLAND_LAND, i));
             }
         }
         return felter.size() == 0 ? null

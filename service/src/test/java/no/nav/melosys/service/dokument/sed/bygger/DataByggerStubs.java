@@ -42,7 +42,6 @@ class DataByggerStubs {
 
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.adresse = hentStrukturertAddresseStub();
-        foretakUtland.orgnr = "orgnr";
         foretakUtland.navn = "navn foretak";
         foretakUtland.uuid = "uuid";
 
@@ -109,7 +108,6 @@ class DataByggerStubs {
         strukturertAdresse.husnummer = "25";
         strukturertAdresse.gatenavn = "Gatenavn";
         strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
         strukturertAdresse.landkode = Landkoder.NO.getKode();
         return strukturertAdresse;
@@ -119,6 +117,7 @@ class DataByggerStubs {
         HashSet<OrganisasjonDokument> orgDokumentHashSet = new HashSet<>();
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.organisasjonDetaljer = mock(OrganisasjonsDetaljer.class);
+        organisasjonDokument.setOrgnummer("orgnr");
         when(organisasjonDokument.organisasjonDetaljer.hentStrukturertForretningsadresse()).thenReturn(hentStrukturertAddresseStub());
         orgDokumentHashSet.add(organisasjonDokument);
 

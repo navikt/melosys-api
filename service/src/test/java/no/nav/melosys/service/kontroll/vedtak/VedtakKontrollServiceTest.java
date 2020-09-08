@@ -29,7 +29,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.service.kontroll.vedtak.VedtakKontroller.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -133,7 +135,12 @@ public class VedtakKontrollServiceTest {
         behandlingsgrunnlagData.arbeidUtland = List.of(new ArbeidUtland());
 
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
-        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED);
+        assertThat(resultat)
+            .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
+            .contains(tuple(
+                Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED,
+                List.of(String.format(ARBEID_UTLAND_NAVN, 0), String.format(ARBEID_UTLAND_LAND, 0))
+            ));
     }
 
     @Test
@@ -143,6 +150,11 @@ public class VedtakKontrollServiceTest {
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
 
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
-        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL);
+        assertThat(resultat)
+            .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
+            .contains(tuple(
+                Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL,
+                List.of(String.format(FORETAK_UTLAND_NAVN, 0), String.format(FORETAK_UTLAND_LAND, 0))
+            ));
     }
 }

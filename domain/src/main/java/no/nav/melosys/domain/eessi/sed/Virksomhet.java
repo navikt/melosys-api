@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class Virksomhet {
     private static final String UKJENT = "Unknown";
+    public static final String PERSONNUMMER = "registrering";
 
     private String navn;
     private Adresse adresse;
@@ -19,7 +20,7 @@ public class Virksomhet {
         this.navn = navn;
         this.orgnr = StringUtils.isBlank(orgnr) ? UKJENT : orgnr;
         this.adresse = adresse;
-        this.type = StringUtils.isBlank(orgnr) ? "01" : null; // FIXME: Sjekk riktig verdi for mapping i melosys-eessi/EUX funker
+        this.type = StringUtils.isBlank(orgnr) ? PERSONNUMMER : null;
     }
 
     public ForetakUtland tilForetakUtland() {
