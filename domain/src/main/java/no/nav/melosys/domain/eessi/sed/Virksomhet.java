@@ -2,21 +2,24 @@ package no.nav.melosys.domain.eessi.sed;
 
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.eessi.SedOrganisasjon;
+import org.apache.commons.lang3.StringUtils;
 
 public class Virksomhet {
+    private static final String UKJENT = "Unknown";
 
     private String navn;
     private Adresse adresse;
     private String orgnr;
-    private String type; //Trenger kanskje ikke denne?
+    private String type;
 
     public Virksomhet() {
     }
 
     public Virksomhet(String navn, String orgnr, Adresse adresse) {
         this.navn = navn;
-        this.orgnr = orgnr;
+        this.orgnr = StringUtils.isBlank(orgnr) ? UKJENT : orgnr;
         this.adresse = adresse;
+        this.type = StringUtils.isBlank(orgnr) ? "01" : null; // FIXME: Sjekk riktig verdi for mapping i melosys-eessi/EUX funker
     }
 
     public ForetakUtland tilForetakUtland() {

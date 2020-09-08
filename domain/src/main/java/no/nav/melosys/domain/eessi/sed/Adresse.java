@@ -7,6 +7,7 @@ import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 public class Adresse {
     public static final String IKKE_TILGJENGELIG = "N/A";
+    public static final String UKJENT = "Unknown";
     public static final String INGEN_FAST_ADRESSE = "No fixed address";
 
     private Adressetype adressetype;
@@ -54,7 +55,7 @@ public class Adresse {
         adresse.setGateadresse(lagGateadresse(strukturertAdresse.gatenavn, strukturertAdresse.husnummer));
         adresse.setLand(strukturertAdresse.landkode);
         adresse.setPostnr(strukturertAdresse.postnummer);
-        adresse.setPoststed(strukturertAdresse.poststed);
+        adresse.setPoststed(StringUtils.isBlank(strukturertAdresse.poststed) ? UKJENT : strukturertAdresse.poststed);
         adresse.setRegion(strukturertAdresse.region);
         return adresse;
     }

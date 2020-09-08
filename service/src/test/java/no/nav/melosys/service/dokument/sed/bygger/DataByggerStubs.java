@@ -44,6 +44,7 @@ class DataByggerStubs {
         foretakUtland.adresse = hentStrukturertAddresseStub();
         foretakUtland.orgnr = "orgnr";
         foretakUtland.navn = "navn foretak";
+        foretakUtland.uuid = "uuid";
 
         SoeknadDokument søknadDokument = new SoeknadDokument();
         søknadDokument.selvstendigArbeid = new SelvstendigArbeid();

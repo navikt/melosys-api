@@ -59,7 +59,7 @@ final class VedtakKontroller {
             }
         }
         return felter.size() == 0 ? null
-            : new Kontrollfeil(Kontroll_begrunnelser.PERSON_DOD, felter); // FIXME: Riktig kode
+            : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED, felter);
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(VedtakKontrollData kontrollData) {
@@ -76,6 +76,6 @@ final class VedtakKontroller {
             }
         }
         return felter.size() == 0 ? null
-            : new Kontrollfeil(Kontroll_begrunnelser.PERSON_DOD, felter); // FIXME: Riktig kode
+            : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL, felter);
     }
 }

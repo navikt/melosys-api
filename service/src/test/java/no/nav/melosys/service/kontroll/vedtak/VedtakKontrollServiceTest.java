@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.vedtak;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -11,6 +12,8 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -41,6 +44,7 @@ public class VedtakKontrollServiceTest {
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
     private final PersonDokument personDokument = new PersonDokument();
+    private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
 
     private VedtakKontrollService vedtakKontrollService;
 
@@ -57,7 +61,7 @@ public class VedtakKontrollServiceTest {
 
         Behandling behandling = new Behandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         behandling.getSaksopplysninger().add(medlSaksopplysning);
         behandling.getSaksopplysninger().add(persopplysning);
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
@@ -120,5 +124,25 @@ public class VedtakKontrollServiceTest {
 
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.INGEN_SLUTTDATO);
+    }
+
+    @Test
+    public void utførKontroller_arbeidsstedManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
+        behandlingsgrunnlagData.arbeidUtland = List.of(new ArbeidUtland());
+
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED);
+    }
+
+    @Test
+    public void utførKontroller_foretakUtlandManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
+        behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
+
+        Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL);
     }
 }
