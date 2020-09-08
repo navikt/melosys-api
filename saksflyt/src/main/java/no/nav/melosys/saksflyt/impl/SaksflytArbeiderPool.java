@@ -24,17 +24,17 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
 
 /**
  * Komponent med arbeidertråder som schedulerer arbeid som utføres av de maskinelle stegene.
- * 
+ *
  * Dette er en passe dum implementasjon, der x tråder hver for seg looper gjennom alle agenter og aktiverer dem. Dette gjentas i det uendelige.
- * 
+ *
  * Konfigurasjon:
  *     melosys.saksflyt.arbeider.antallTråder – Antall tråder (default 1)
  *
  */
 @Component
 @Scope(SCOPE_SINGLETON)
-public class Saksflyt {
-    private static final Logger logger = LoggerFactory.getLogger(Saksflyt.class);
+public class SaksflytArbeiderPool {
+    private static final Logger logger = LoggerFactory.getLogger(SaksflytArbeiderPool.class);
 
     private final ExecutorService taskExecutor;
     // Liste med arbeidstråder. Disse er prototype bønner med tilstand og tråd.
@@ -44,7 +44,7 @@ public class Saksflyt {
     private int antallTråder;
 
     @Autowired
-    public Saksflyt(
+    public SaksflytArbeiderPool(
         ApplicationContext context,
         @Qualifier("applicationTaskExecutor") ThreadPoolTaskExecutor taskExecutor,
         MeterRegistry registry,
@@ -58,7 +58,7 @@ public class Saksflyt {
             tråder[i] = context.getBean(ArbeiderTraad.class);
         }
     }
-    
+
     /**
      * Starter prosessering.
      */
