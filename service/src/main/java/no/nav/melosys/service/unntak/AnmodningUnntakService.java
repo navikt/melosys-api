@@ -72,7 +72,7 @@ public class AnmodningUnntakService {
             behandling.hentPersonDokument(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
 
         if (!harBostedsAdresse) {
-            throw new FunksjonellException("Søknad mangler bostedsadresse!");
+            throw new FunksjonellException("Bostedsadressen finnes ikke eller mangler landkode");
         }
     }
 

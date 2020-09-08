@@ -118,7 +118,7 @@ public class AnmodningUnntakServiceTest {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("bostedsadresse");
+        expectedException.expectMessage("Bostedsadresse");
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed);
     }
