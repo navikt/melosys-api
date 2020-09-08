@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.impl.BingeImpl;
+import no.nav.melosys.saksflyt.impl.ProsessinstansBingeImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ public class SaksflytKontrollTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Spy
-    private BingeImpl binge;
+    private ProsessinstansBingeImpl binge;
 
     private SaksflytKontroll saksflytKontroll;
 
@@ -36,7 +36,7 @@ public class SaksflytKontrollTest {
     public void setup() {
         saksflytKontroll = new SaksflytKontroll(binge, prosessinstansRepository);
         prosessinstanser = lagProsessInstanser();
-        when(prosessinstansRepository.findAllByStegIsNotAndStegIsNot(any(ProsessSteg.class),any(ProsessSteg.class))).thenReturn(prosessinstanser);
+        when(prosessinstansRepository.findAllByStatus(eq(ProsessStatus.KLAR))).thenReturn(prosessinstanser);
     }
 
     @Test

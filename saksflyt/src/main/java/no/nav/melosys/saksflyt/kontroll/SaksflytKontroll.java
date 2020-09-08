@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.api.ProsessinstansBinge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,10 +21,10 @@ public class SaksflytKontroll {
     private static final long SYV_MINUTTER = 420000;
     private static final long FEM_MINUTTER = 300000;
 
-    private final Binge binge;
+    private final ProsessinstansBinge binge;
     private final ProsessinstansRepository prosessinstansRepository;
 
-    public SaksflytKontroll(Binge binge, ProsessinstansRepository prosessinstansRepository) {
+    public SaksflytKontroll(ProsessinstansBinge binge, ProsessinstansRepository prosessinstansRepository) {
         this.binge = binge;
         this.prosessinstansRepository = prosessinstansRepository;
     }
@@ -35,7 +35,7 @@ public class SaksflytKontroll {
     )
     public void sjekkProsessinstansFinnesISaksflyt() {
         log.debug("Kjører kontroll for prosessinstanser");
-        Map<UUID, Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStegIsNotAndStegIsNot(ProsessSteg.FERDIG, ProsessSteg.FEILET_MASKINELT)
+        Map<UUID, Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStatus(ProsessStatus.KLAR)
             .stream().collect(Collectors.toMap(Prosessinstans::getId, p -> p));
 
         binge.hentProsessinstanser().forEach(p -> prosessinstanser.remove(p.getId()));
