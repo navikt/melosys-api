@@ -29,6 +29,6 @@ public class ProsessFlyt {
             if (s == forrigeSteg) return iter.hasNext() ? iter.next() : null;
         }
 
-        throw new IllegalStateException("Forrige steg " + forrigeSteg + " er ikke gyldig for prosesstype" + prosessType);
+        throw new IllegalArgumentException("Forrige steg " + forrigeSteg + " er ikke gyldig for prosesstype " + prosessType);
     }
 }
