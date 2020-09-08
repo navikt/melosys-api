@@ -1,10 +1,11 @@
-package no.nav.melosys.saksflyt.api;
+package no.nav.melosys.saksflyt.impl;
 
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflyt.api.ProsessinstansBinge;
 import org.springframework.stereotype.Component;
 
 @Component

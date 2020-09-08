@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.api;
 
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflyt.impl.ProsessinstansBingeImpl;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
