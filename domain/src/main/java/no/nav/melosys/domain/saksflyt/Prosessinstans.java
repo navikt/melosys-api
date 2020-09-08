@@ -52,7 +52,7 @@ public class Prosessinstans {
     private ProsessSteg steg; //TODO: erstattes av sistFullførteSteg
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "steg", nullable = false)
+    @Column(name = "sist_fullforte_steg", nullable = false)
     private ProsessSteg sistFullførteSteg; //todo
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
