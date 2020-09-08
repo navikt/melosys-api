@@ -1,26 +1,25 @@
 package no.nav.melosys.tjenester.gui.dto.statistikk;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.repository.BehandlingStatistikk;
 
 public class StatistikkDto {
-    private Map<String, Long> aapneBehandlinger;
+    private final Map<Behandlingstema, Long> aapneBehandlinger;
 
-    private StatistikkDto() {
-        aapneBehandlinger = new HashMap<>();
+    private StatistikkDto(Map<Behandlingstema, Long> antallÅpneBehandlingerPerTema) {
+        aapneBehandlinger = antallÅpneBehandlingerPerTema;
     }
 
     public static StatistikkDto av(List<BehandlingStatistikk> behandlingStatistikk) {
-        StatistikkDto statistikkDto = new StatistikkDto();
-        behandlingStatistikk.stream()
-            .forEach(s -> statistikkDto.getAapneBehandlinger().put(s.getBehandlingstema().getKode(), s.getAntall()));
-        return statistikkDto;
+        return new StatistikkDto(behandlingStatistikk.stream()
+            .collect(Collectors.toMap(BehandlingStatistikk::getBehandlingstema, BehandlingStatistikk::getAntall)));
     }
 
-    public Map<String, Long> getAapneBehandlinger() {
+    public Map<Behandlingstema, Long> getAapneBehandlinger() {
         return aapneBehandlinger;
     }
 }

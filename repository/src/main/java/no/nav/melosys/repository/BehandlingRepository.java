@@ -25,5 +25,5 @@ public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
 
     @Query("SELECT NEW no.nav.melosys.repository.BehandlingStatistikk(b.tema, COUNT(b)) FROM Behandling b "
         + "WHERE b.status NOT IN (?1) GROUP BY b.tema")
-    List<BehandlingStatistikk> antallÅpneBehandlingerPerBehandlingstema(Collection<Behandlingsstatus> lukkedeStatuser);
+    List<BehandlingStatistikk> antallBehandlingerPerTemaUtenStatuser(Collection<Behandlingsstatus> lukkedeStatuser);
 }

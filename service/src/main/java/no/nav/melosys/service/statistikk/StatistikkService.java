@@ -21,7 +21,7 @@ public class StatistikkService {
     }
 
     public List<BehandlingStatistikk> hentBehandlingstatistikk() {
-        return behandlingRepository.antallÅpneBehandlingerPerBehandlingstema(
+        return behandlingRepository.antallBehandlingerPerTemaUtenStatuser(
             Set.of(AVSLUTTET, MIDLERTIDIG_LOVVALGSBESLUTNING)
         );
     }
