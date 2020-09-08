@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonConsumer;
@@ -56,6 +57,12 @@ public class EregService implements EregFasade {
         dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
+    }
+
+    @Override
+    public String hentOrganisasjonNavn(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
+        OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) hentOrganisasjon(orgnummer).getDokument();
+        return organisasjonDokument.getNavn();
     }
 
     @Override
