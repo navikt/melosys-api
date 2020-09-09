@@ -184,9 +184,11 @@ public class BrevDataService {
         navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
         navFelles.setSakspart(lagSakspart(behandling));
 
-        Saksbehandler saksbehandler = lagSaksbehandler(brevData.saksbehandler);
-        navFelles.setSignerendeBeslutter(saksbehandler);
-        navFelles.setSignerendeSaksbehandler(saksbehandler);
+        if (brevData.saksbehandler != null) {
+            Saksbehandler saksbehandler = lagSaksbehandler(brevData.saksbehandler);
+            navFelles.setSignerendeBeslutter(saksbehandler);
+            navFelles.setSignerendeSaksbehandler(saksbehandler);
+        }
         return navFelles;
     }
 
