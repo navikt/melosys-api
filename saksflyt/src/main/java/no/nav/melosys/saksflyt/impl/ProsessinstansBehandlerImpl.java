@@ -17,6 +17,8 @@ import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
@@ -31,6 +33,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         this.prosessinstansRepository = prosessinstansRepository;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void behandleProsessinstans(@NotNull Prosessinstans prosessinstans) {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
