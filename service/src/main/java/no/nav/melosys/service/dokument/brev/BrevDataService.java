@@ -184,11 +184,9 @@ public class BrevDataService {
         navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
         navFelles.setSakspart(lagSakspart(behandling));
 
-        if (brevData.saksbehandler != null) {
-            Saksbehandler saksbehandler = lagSaksbehandler(brevData.saksbehandler);
-            navFelles.setSignerendeBeslutter(saksbehandler);
-            navFelles.setSignerendeSaksbehandler(saksbehandler);
-        }
+        Saksbehandler saksbehandler = lagSaksbehandler(brevData.saksbehandler);
+        navFelles.setSignerendeBeslutter(saksbehandler);
+        navFelles.setSignerendeSaksbehandler(saksbehandler);
         return navFelles;
     }
 
@@ -263,7 +261,7 @@ public class BrevDataService {
     private Saksbehandler lagSaksbehandler(String ident) throws IkkeFunnetException, TekniskException {
         Saksbehandler saksbehandler = new Saksbehandler();
         saksbehandler.setNavEnhet(lagNavEnhet());
-        var saksbehandlerNavn = saksbehandlerService.hentNavnForIdent(ident);
+        var saksbehandlerNavn = ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
         saksbehandler.setNavAnsatt(lagNavAnsatt(ident, saksbehandlerNavn));
         return saksbehandler;
     }
