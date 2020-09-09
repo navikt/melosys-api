@@ -78,7 +78,7 @@ public class VedtakService {
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstypeFattVedtak(behandling);
-        
+
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
@@ -89,8 +89,8 @@ public class VedtakService {
 
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, mottakerinstitusjoner, behandlingsresultat);
 
-        if (prosessinstansService.harAktivVedtakInstans(behandlingID)) {
-            throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
+        if (prosessinstansService.harVedtakInstans(behandlingID)) {
+            throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);

@@ -21,10 +21,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -72,7 +69,7 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void harAktivProsessinstans() {
-        when(prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(anyLong(), eq(ProsessSteg.FEILET_MASKINELT), eq(ProsessSteg.FERDIG)))
+        when(prosessinstansRepo.findByBehandling_IdAndStatusIs(anyLong(), eq(ProsessStatus.KLAR)))
             .thenReturn(Optional.of(new Prosessinstans()));
         assertThat(prosessinstansService.harAktivProsessinstans(1L)).isTrue();
     }
