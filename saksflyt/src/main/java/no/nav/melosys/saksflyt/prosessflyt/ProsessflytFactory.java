@@ -9,6 +9,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.MANGELBREV;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
 public final class ProsessflytFactory {
 
@@ -20,6 +21,11 @@ public final class ProsessflytFactory {
         PROSESS_FLYT_MAP.put(
             ProsessType.MANGELBREV,
             List.of(MANGELBREV)
+        );
+
+        PROSESS_FLYT_MAP.put(
+            ProsessType.FORVALTNINGSMELDING_SEND,
+            List.of(SEND_FORVALTNINGSMELDING)
         );
     }
 
