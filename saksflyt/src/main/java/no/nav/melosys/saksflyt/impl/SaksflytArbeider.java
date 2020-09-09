@@ -27,10 +27,9 @@ public class SaksflytArbeider implements Runnable {
         this.prosessinstansBehandler = prosessinstansBehandler;
     }
 
-    @SuppressWarnings("java:S2189")
+    @SuppressWarnings({"java:S2189", "InfiniteLoopStatement", "BusyWait"})
     @Override
     public void run() {
-        //noinspection InfiniteLoopStatement
         while (true) {
             Optional<Prosessinstans> plukketProsessinstans = binge.plukkNeste();
             try {
