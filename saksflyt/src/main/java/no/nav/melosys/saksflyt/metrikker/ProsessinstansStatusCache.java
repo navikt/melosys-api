@@ -1,11 +1,11 @@
 package no.nav.melosys.saksflyt.metrikker;
 
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.repository.ProsessinstansAntall;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ProsessinstansStatusCache {
-    private ProsessinstansRepository prosessinstansRepository;
+    private final ProsessinstansRepository prosessinstansRepository;
     private final long MAX_DATA_LEVETID_MS;
 
-    private Map<Pair<ProsessType, ProsessSteg>, Long> antallPerTypeOgSteg;
+    private Map<Pair<ProsessType, ProsessStatus>, Long> antallPerTypeOgStatus;
     private long sistLestTidspunkt = 0;
 
-    private static final EnumSet<ProsessSteg> STEG_FEILET = EnumSet.of(ProsessSteg.FEILET_MASKINELT);
+    private static final EnumSet<ProsessStatus> STATUS_FEILET = EnumSet.of(ProsessStatus.FEILET);
 
     @Autowired
     public ProsessinstansStatusCache(ProsessinstansRepository prosessinstansRepository,
@@ -32,16 +32,16 @@ public class ProsessinstansStatusCache {
     }
 
     double antallProsessinstanserFeilet(ProsessType type) {
-        return (double) antallProsessinstanserMedTypeSteg(type, STEG_FEILET);
+        return (double) antallProsessinstanserMedTypeOgStatus(type, STATUS_FEILET);
     }
 
-    private long antallProsessinstanserMedTypeSteg(ProsessType prosessType, EnumSet<ProsessSteg> steg) {
+    private long antallProsessinstanserMedTypeOgStatus(ProsessType prosessType, EnumSet<ProsessStatus> statuser) {
         oppfriskCacheHvisUtløpt();
 
         long sumAntall = 0;
-        for (ProsessSteg prosessSteg : steg) {
-            Pair<ProsessType, ProsessSteg> prosessTypeOgSteg = Pair.of(prosessType, prosessSteg);
-            Long antall = antallPerTypeOgSteg.get(prosessTypeOgSteg);
+        for (ProsessStatus prosessStatus : statuser) {
+            Pair<ProsessType, ProsessStatus> prosessTypeOgSteg = Pair.of(prosessType, prosessStatus);
+            Long antall = antallPerTypeOgStatus.get(prosessTypeOgSteg);
             if (antall != null) {
                 sumAntall = sumAntall + antall;
             }
@@ -59,12 +59,12 @@ public class ProsessinstansStatusCache {
     }
 
     private void oppfriskCache() {
-        List<ProsessinstansAntall> prosessinstansMetrikker = prosessinstansRepository.antallAktiveOgFeiletPerTypeOgSteg();
+        Collection<ProsessinstansAntall> prosessinstansMetrikker = prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus();
 
-        antallPerTypeOgSteg = new HashMap<>();
+        antallPerTypeOgStatus = new HashMap<>();
         for (ProsessinstansAntall prosessinstansAntall : prosessinstansMetrikker) {
-            Pair<ProsessType, ProsessSteg> typeOgStatus = Pair.of(prosessinstansAntall.getProsessType(), prosessinstansAntall.getProsessSteg());
-            antallPerTypeOgSteg.put(typeOgStatus, prosessinstansAntall.getAntall());
+            Pair<ProsessType, ProsessStatus> typeOgStatus = Pair.of(prosessinstansAntall.getProsessType(), prosessinstansAntall.getProsessStatus());
+            antallPerTypeOgStatus.put(typeOgStatus, prosessinstansAntall.getAntall());
         }
     }
 }
