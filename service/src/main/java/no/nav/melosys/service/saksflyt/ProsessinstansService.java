@@ -137,6 +137,7 @@ public class ProsessinstansService {
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
+        prosessinstans.setStatus(ProsessStatus.KLAR);
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
         }
@@ -207,7 +208,6 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.MANGELBREV);
-        prosessinstans.setSteg(ProsessSteg.MANGELBREV);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker);
         prosessinstans.setData(ProsessDataKey.BREVDATA, brevData);
 

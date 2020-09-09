@@ -25,12 +25,6 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.MANGELBREV;
 
-/**
- * Sender mangelbrev til søker/arbeidsgiver
- *
- * Transisjoner:
- * MANGELBREV -> null eller FEILET_MASKINELT hvis feil
- */
 @Component
 public class SendMangelbrev implements StegBehandler {
 
@@ -41,6 +35,7 @@ public class SendMangelbrev implements StegBehandler {
     private static final int DOKUMENTASJON_SVARFRIST_UKER = 4;
 
     private final BrevBestiller brevBestiller;
+
     @Autowired
     public SendMangelbrev(BehandlingRepository behandlingRepo, BrevBestiller brevBestiller) {
         this.behandlingRepo = behandlingRepo;
@@ -54,8 +49,6 @@ public class SendMangelbrev implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
         Behandling behandling = prosessinstans.getBehandling();
         Aktoersroller mottaker = prosessinstans.getData(ProsessDataKey.MOTTAKER, Aktoersroller.class);
         BrevData brevData = prosessinstans.getData(ProsessDataKey.BREVDATA, BrevData.class);
@@ -74,7 +67,6 @@ public class SendMangelbrev implements StegBehandler {
         behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER)));
         behandlingRepo.save(behandling);
 
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Sendt mangelbrev for prosessinstans {}", prosessinstans.getId());
     }
 }

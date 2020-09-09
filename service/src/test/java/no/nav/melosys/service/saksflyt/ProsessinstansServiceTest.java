@@ -21,10 +21,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -83,6 +80,7 @@ public class ProsessinstansServiceTest {
         String saksbehandler = "Z123456";
         prosessinstansService.lagre(prosessinstans, saksbehandler);
 
+        verify(prosessinstans).setStatus(eq(ProsessStatus.KLAR));
         verify(prosessinstans).setEndretDato(any());
         verify(prosessinstans).setRegistrertDato(any());
         verify(prosessinstans).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
