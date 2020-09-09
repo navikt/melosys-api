@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, Long> {
     @Query("SELECT NEW no.nav.melosys.repository.ProsessinstansAntall(p.type, p.status, COUNT(p)) FROM Prosessinstans p "
-        + "WHERE p.status = no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG GROUP BY p.type, p.status")
+        + "WHERE p.status <> no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG GROUP BY p.type, p.status")
     Collection<ProsessinstansAntall> antallAktiveOgFeiletPerTypeOgStatus();
     Optional<Prosessinstans> findByBehandling_IdAndStegIsNotAndStegIsNot(long id, ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
     Optional<Prosessinstans> findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(ProsessType prosessType, long id, ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
