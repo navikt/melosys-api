@@ -31,6 +31,10 @@ public class DokumentVisningService {
         return joarkFasade.hentDokument(journalpostID, dokumentID);
     }
 
+    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+       return joarkFasade.hentJournalpost(journalpostID);
+    }
+
     /**
      * Henter dokumenter knyttet til en sak med et gitt saksnummer
      */
