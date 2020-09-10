@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.saksflyt;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import javax.persistence.*;
@@ -58,14 +57,8 @@ public class Prosessinstans {
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
-    @Column(name = "antall_retry", nullable = false)
-    private int antallRetry; //todo: fjerne?
-
     @Column(name = "sist_forsoekt")
     private LocalDateTime sistForsøkt;
-
-    @Column(name = "sover_til")
-    private Instant soverTil; //todo: fjerne?
 
     @Column(name = "endret_dato", nullable = false)
     private LocalDateTime endretDato;
@@ -186,24 +179,8 @@ public class Prosessinstans {
         this.registrertDato = registrertDato;
     }
 
-    public int getAntallRetry() {
-        return antallRetry;
-    }
-
-    public void setAntallRetry(int antallRetry) {
-        this.antallRetry = antallRetry;
-    }
-
     public void setSistForsøkt(LocalDateTime sistForsøkt) {
         this.sistForsøkt = sistForsøkt;
-    }
-
-    public Instant getSoverTil() {
-        return soverTil;
-    }
-
-    public void setSoverTil(Instant soverTil) {
-        this.soverTil = soverTil;
     }
 
     public void setEndretDato(LocalDateTime endretDato) {
@@ -282,9 +259,7 @@ public class Prosessinstans {
             ", data=" + data +
             ", steg=" + steg +
             ", registrertDato=" + registrertDato +
-            ", antallRetry=" + antallRetry +
             ", sistForsøkt=" + sistForsøkt +
-            ", soverTil=" + soverTil +
             ", endretDato=" + endretDato +
             ", hendelser=" + hendelser +
             '}';
