@@ -6,7 +6,10 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 
-import no.nav.melosys.domain.saksflyt.*;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessStatus;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
@@ -42,16 +45,10 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
             return;
         }
 
-        ProsessFlyt prosessFlyt;
-
-        try {
-            prosessFlyt = finnFlytForType(prosessinstans.getType());
-        } catch (Exception e) {
-            behandleFeilFlytIkkeFunnet(prosessinstans, e);
-            return;
-        }
-
-        utførSteg(prosessinstans, prosessFlyt);
+        ProsessflytFactory.lag(prosessinstans.getType()).ifPresentOrElse(
+            prosessFlyt -> this.utførSteg(prosessinstans, prosessFlyt),
+            () -> this.behandleFeilFlytIkkeFunnet(prosessinstans)
+        );
     }
 
     private void utførSteg(Prosessinstans prosessinstans, ProsessFlyt prosessFlyt) {
@@ -71,8 +68,8 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         }
     }
 
-    private void behandleFeilFlytIkkeFunnet(Prosessinstans prosessinstans, Exception e) {
-        log.error("Feil ved henting av flyt for prosessinstans {} med type {}", prosessinstans.getId(), prosessinstans.getType(), e);
+    private void behandleFeilFlytIkkeFunnet(Prosessinstans prosessinstans) {
+        log.error("Finner ingen definert flyt for ProsessType {}", prosessinstans.getType());
         prosessinstans.setStatus(ProsessStatus.FEILET);
         lagreProsessinstans(prosessinstans);
     }
@@ -100,11 +97,6 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
     private void lagreProsessinstans(Prosessinstans prosessinstans) {
         prosessinstans.setEndretDato(LocalDateTime.now());
         prosessinstansRepository.save(prosessinstans);
-    }
-
-    private ProsessFlyt finnFlytForType(ProsessType type) {
-        return ProsessflytFactory.lag(type)
-            .orElseThrow(() -> new IllegalArgumentException("Finner ikke ProsessFlyt for type " + type));
     }
 
     private StegBehandler finnStegBehandler(ProsessSteg prosessSteg) {
