@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
-import no.nav.melosys.saksflyt.api.ProsessinstansBinge;
+import no.nav.melosys.saksflyt.api.ProsessinstansKø;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -19,10 +19,10 @@ public class SaksflytArbeider implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(SaksflytArbeider.class);
     private static final long SOV_MELLOM_OPPGAVER = 200;
 
-    private final ProsessinstansBinge binge;
+    private final ProsessinstansKø binge;
     private final ProsessinstansBehandler prosessinstansBehandler;
 
-    public SaksflytArbeider(ProsessinstansBinge binge, ProsessinstansBehandler prosessinstansBehandler) {
+    public SaksflytArbeider(ProsessinstansKø binge, ProsessinstansBehandler prosessinstansBehandler) {
         this.binge = binge;
         this.prosessinstansBehandler = prosessinstansBehandler;
     }

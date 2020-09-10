@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.ProsessinstansBinge;
+import no.nav.melosys.saksflyt.api.ProsessinstansKø;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,10 +21,10 @@ public class SaksflytKontroll {
     private static final long SYV_MINUTTER = 420000;
     private static final long FEM_MINUTTER = 300000;
 
-    private final ProsessinstansBinge binge;
+    private final ProsessinstansKø binge;
     private final ProsessinstansRepository prosessinstansRepository;
 
-    public SaksflytKontroll(ProsessinstansBinge binge, ProsessinstansRepository prosessinstansRepository) {
+    public SaksflytKontroll(ProsessinstansKø binge, ProsessinstansRepository prosessinstansRepository) {
         this.binge = binge;
         this.prosessinstansRepository = prosessinstansRepository;
     }

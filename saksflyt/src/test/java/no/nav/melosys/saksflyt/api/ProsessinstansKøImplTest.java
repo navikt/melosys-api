@@ -1,14 +1,14 @@
 package no.nav.melosys.saksflyt.api;
 
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.saksflyt.impl.ProsessinstansBingeImpl;
+import no.nav.melosys.saksflyt.impl.ProsessinstansKøImpl;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ProsessinstansBingeImplTest {
+public class ProsessinstansKøImplTest {
 
-    private ProsessinstansBinge binge = new ProsessinstansBingeImpl();
+    private ProsessinstansKø binge = new ProsessinstansKøImpl();
 
     @Test
     public void leggTil_prosessinstansEksisterer_forventFalse() {

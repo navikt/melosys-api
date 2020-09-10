@@ -3,11 +3,11 @@ package no.nav.melosys.saksflyt.impl;
 import java.util.*;
 
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.saksflyt.api.ProsessinstansBinge;
+import no.nav.melosys.saksflyt.api.ProsessinstansKø;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProsessinstansBingeImpl implements ProsessinstansBinge {
+public class ProsessinstansKøImpl implements ProsessinstansKø {
 
     private final Queue<Prosessinstans> prosessinstansKø = new LinkedList<>();
 

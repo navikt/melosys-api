@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 
-public interface ProsessinstansBinge {
+public interface ProsessinstansKø {
 
     /**
      * Henter alle prosessinstanser - både de som venter og som blir utført

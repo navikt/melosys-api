@@ -7,7 +7,7 @@ import java.util.UUID;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.impl.ProsessinstansBingeImpl;
+import no.nav.melosys.saksflyt.impl.ProsessinstansKøImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ public class SaksflytKontrollTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Spy
-    private ProsessinstansBingeImpl binge;
+    private ProsessinstansKøImpl binge;
 
     private SaksflytKontroll saksflytKontroll;
 
