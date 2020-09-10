@@ -27,7 +27,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEGRUNNELSEKODE;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -85,7 +84,5 @@ public class SendHenleggelsesbrevTest {
         assertThat(brevbestilling.getDokumentType()).isEqualTo(Produserbaredokumenter.MELDING_HENLAGT_SAK);
         assertThat(brevbestilling.getMottakere().iterator().next().getRolle()).isEqualTo(Aktoersroller.BRUKER);
         assertThat(brevbestilling.getFritekst()).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
-
-        assertThat(prosessinstans.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
     }
 }

@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_HENLAGT_SAK;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HS_SEND_BREV;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
 
 /**
  * Sender henleggelsesbrev til bruker og arbeidsgiver
@@ -80,7 +79,5 @@ public class SendHenleggelsesbrev implements StegBehandler {
             .medFritekst(fritekst)
             .build();
         brevBestiller.bestill(brevbestilling);
-
-        prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
     }
 }
