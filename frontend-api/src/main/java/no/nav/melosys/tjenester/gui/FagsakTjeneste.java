@@ -17,6 +17,7 @@ import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.HenleggFagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.VideresendSoknadService;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -46,6 +47,7 @@ public class FagsakTjeneste {
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
+    private final HenleggFagsakService henleggFagsakService;
     private final SaksopplysningerService saksopplysningerService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final TilgangService tilgangService;
@@ -54,10 +56,11 @@ public class FagsakTjeneste {
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService,
-                          SaksopplysningerService saksopplysningerService,
+                          HenleggFagsakService henleggFagsakService, SaksopplysningerService saksopplysningerService,
                           BehandlingsgrunnlagService behandlingsgrunnlagService, TilgangService tilgangService,
                           UtpekingService utpekingService, VideresendSoknadService videresendSoknadService) {
         this.fagsakService = fagsakService;
+        this.henleggFagsakService = henleggFagsakService;
         this.saksopplysningerService = saksopplysningerService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.tilgangService = tilgangService;
@@ -66,7 +69,7 @@ public class FagsakTjeneste {
     }
 
     @GetMapping("{saksnr}")
-    @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."), response = Fagsak.class)
+    @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public ResponseEntity<FagsakDto> hentFagsak(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
@@ -129,10 +132,8 @@ public class FagsakTjeneste {
     @PostMapping("{saksnr}/henlegg")
     @ApiOperation(value = "Henlegger en fagsak")
     public ResponseEntity henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
-        Fagsak sak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(sak);
-
-        fagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
+        tilgangService.sjekkSak(saksnummer);
+        henleggFagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
         return ResponseEntity.ok().build();
     }
 

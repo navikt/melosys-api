@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -136,17 +135,16 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansHenleggeSak() {
+    public void opprettProsessinstansFagsakHenlagt() {
         settInnloggetSaksbehandler();
 
         Behandling behandling = new Behandling();
-        prosessinstansService.opprettProsessinstansHenleggSak(behandling, Henleggelsesgrunner.ANNET, "");
+        prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.HENLEGG_SAK);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.HS_OPPDATER_RESULTAT);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
     }
 

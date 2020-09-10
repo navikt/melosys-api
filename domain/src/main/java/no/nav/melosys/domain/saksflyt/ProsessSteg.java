@@ -81,8 +81,6 @@ public enum ProsessSteg implements Kodeverk {
     UL_DISTRIBUER_JOURNALPOST("UL_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),
 
     //Henlegg sak
-    HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
-    HS_HENLEGG_SAK("HS_HENLEGG_SAK", "Henlegg en sak"),
     HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
 
     // Videresend søknad

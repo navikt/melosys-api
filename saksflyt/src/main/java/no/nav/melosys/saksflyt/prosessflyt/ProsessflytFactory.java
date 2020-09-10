@@ -8,8 +8,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.MANGELBREV;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDING;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 public final class ProsessflytFactory {
 
@@ -26,6 +25,14 @@ public final class ProsessflytFactory {
         PROSESS_FLYT_MAP.put(
             ProsessType.FORVALTNINGSMELDING_SEND,
             List.of(SEND_FORVALTNINGSMELDING)
+        );
+
+        PROSESS_FLYT_MAP.put(
+            ProsessType.HENLEGG_SAK,
+            List.of(
+                HS_SEND_BREV,
+                IV_STATUS_BEH_AVSL
+            )
         );
     }
 

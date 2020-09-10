@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -171,15 +170,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansHenleggSak(Behandling behandling, Henleggelsesgrunner begrunnelseKode, String fritekst) {
+    public void opprettProsessinstansFagsakHenlagt(Behandling sistAktiveBehandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medBehandling(behandling)
+            .medBehandling(sistAktiveBehandling)
             .medType(ProsessType.HENLEGG_SAK)
-            .medSteg(ProsessSteg.HS_OPPDATER_RESULTAT)
-            .medBegrunnelseFritekst(fritekst)
             .build();
 
-        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, begrunnelseKode);
         lagre(prosessinstans);
     }
 

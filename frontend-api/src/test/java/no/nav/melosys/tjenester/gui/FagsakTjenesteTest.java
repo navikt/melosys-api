@@ -28,12 +28,12 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.HenleggFagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.VideresendSoknadService;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -72,6 +72,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
+    private static HenleggFagsakService henleggFagsakService;
     private static TilgangService tilgangService;
     private static UtpekingService utpekingService;
     private static VideresendSoknadService videresendSoknadService;
@@ -261,17 +262,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         ResponseEntity resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
 
         assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(fagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
-    }
-
-    @Test
-    public final void henleggFagsak_ingenSakFinnes_kasterIkkeFunnet() throws Exception {
-        FagsakTjeneste instans = lagFagsakTjeneste(null);
-        expectedException.expect(IkkeFunnetException.class);
-
-        instans.henleggFagsak("Finnes ikke", new HenleggelseDto());
-
-        verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
+        verify(henleggFagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
     }
 
     @Test
@@ -279,12 +270,12 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
-        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkSak(fagsak);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkSak(fagsak.getSaksnummer());
 
         expectedException.expect(SikkerhetsbegrensningException.class);
-        instans.henleggFagsak("123", new HenleggelseDto());
+        instans.henleggFagsak(fagsak.getSaksnummer(), new HenleggelseDto());
 
-        verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
+        verify(henleggFagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -307,7 +298,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         expectedException.expect(SikkerhetsbegrensningException.class);
         instans.avsluttSakSomBortfalt("123");
 
-        verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
+        verify(henleggFagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -321,6 +312,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
         tilgangService = mock(TilgangService.class);
         fagsakService = mock(FagsakService.class);
+        henleggFagsakService = mock(HenleggFagsakService.class);
         utpekingService = mock(UtpekingService.class);
         videresendSoknadService = mock(VideresendSoknadService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
@@ -332,15 +324,15 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(eq(1L))).thenReturn(Optional.of(behandlingsgrunnlag));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
-        when(fagsakService.hentFagsak("Finnes ikke")).thenThrow(new IkkeFunnetException("Finnes ikke"));
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, saksopplysningerService, behandlingsgrunnlagService, tilgangService, utpekingService, videresendSoknadService);
+        return new FagsakTjeneste(fagsakService, henleggFagsakService, saksopplysningerService, behandlingsgrunnlagService, tilgangService, utpekingService, videresendSoknadService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {
         FagsakOppsummeringDto result = new FagsakOppsummeringDto();
+        result.setSaksnummer("MEL-1");
         result.setSammensattNavn("UKJENT");
         BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
         behandlingOversiktDto.setBehandlingID(behandling.getId());
@@ -350,6 +342,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private static Fagsak lagFagsak() {
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-1");
         fagsak.setBehandlinger(Collections.emptyList());
         return fagsak;
     }
