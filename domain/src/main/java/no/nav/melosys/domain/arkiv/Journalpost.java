@@ -35,12 +35,12 @@ public class Journalpost {
     }
 
     public Optional<ArkivDokument> finnArkivDokument(String dokumentID) {
-        if (hoveddokument.getDokumentId().equalsIgnoreCase(dokumentID)) {
+        if (hoveddokument.getDokumentId().equals(dokumentID)) {
             return Optional.of(hoveddokument);
         }
 
         return vedleggListe.stream()
-            .filter(arkivDokument -> arkivDokument.getDokumentId().equalsIgnoreCase(dokumentID))
+            .filter(arkivDokument -> arkivDokument.getDokumentId().equals(dokumentID))
             .findFirst();
     }
 

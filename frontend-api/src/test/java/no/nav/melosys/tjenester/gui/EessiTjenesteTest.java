@@ -62,10 +62,12 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     public void setup() throws IkkeFunnetException, SikkerhetsbegrensningException {
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("321");
         fagsak.setGsakSaksnummer(123L);
         behandling.setFagsak(fagsak);
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(123L))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(eq(123L))).thenReturn(behandling);
         when(dokumentVisningService.hentDokument(anyString(), anyString())).thenReturn(new byte[0]);
 
         eessiTjeneste = new EessiTjeneste(eessiService, behandlingService, dokumentVisningService);
@@ -121,9 +123,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
                     lagArkivDokument("1")
                 )));
 
-        when(dokumentVisningService.hentJournalpost(eq("1"))).thenReturn(journalposter.get(0));
-        when(dokumentVisningService.hentJournalpost(eq("2"))).thenReturn(journalposter.get(1));
-        when(dokumentVisningService.hentJournalpost(eq("3"))).thenReturn(journalposter.get(2));
+        when(dokumentVisningService.hentDokumenter(eq("321"))).thenReturn(journalposter);
 
         List<VedleggDto> vedleggDtoList = List.of(
             new VedleggDto("1", "1"),
@@ -140,7 +140,6 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         assertThat(opprettBucSvarDto).isNotNull()
             .extracting(OpprettBucSvarDto::getRinaUrl).isEqualTo(MOCK_RINA_URL);
 
-        verify(dokumentVisningService, times(3)).hentJournalpost(anyString());
         verify(dokumentVisningService, times(3)).hentDokument(eq("1"), anyString());
         verify(dokumentVisningService).hentDokument(eq("2"), anyString());
         verify(dokumentVisningService).hentDokument(eq("3"), anyString());

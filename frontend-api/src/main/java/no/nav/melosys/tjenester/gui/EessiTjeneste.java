@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
@@ -67,7 +69,7 @@ public class EessiTjeneste {
                                                         @PathVariable("behandlingID") long behandlingID)
         throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        Collection<Vedlegg> vedlegg = lagVedlegg(nyBucDto.getVedlegg());
+        Collection<Vedlegg> vedlegg = lagVedlegg(behandling.getFagsak().getSaksnummer(), nyBucDto.getVedlegg());
 
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
             eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), List.of(nyBucDto.getMottakerId()), vedlegg)
@@ -76,27 +78,24 @@ public class EessiTjeneste {
         return ResponseEntity.ok(opprettBucSvarDto);
     }
 
-    private Collection<Vedlegg> lagVedlegg(Collection<VedleggDto> vedleggDto) throws FunksjonellException, IntegrasjonException {
-        final Collection<Vedlegg> vedlegg = new ArrayList<>();
+    private Collection<Vedlegg> lagVedlegg(String saksnummer, Collection<VedleggDto> vedleggDto) throws FunksjonellException, IntegrasjonException {
+        Collection<Journalpost> journalposter = dokumentVisningService.hentDokumenter(saksnummer);
 
-        for (Map.Entry<String, List<VedleggDto>> journalpostIDPerVedleggDto : hentJournalpostIDPerVedleggDto(vedleggDto)) {
-            final String journalpostID = journalpostIDPerVedleggDto.getKey();
-            final Journalpost journalpost = dokumentVisningService.hentJournalpost(journalpostID);
-
-            final List<String> dokumentIDListe = journalpostIDPerVedleggDto.getValue()
-                .stream().map(VedleggDto::getDokumentID).collect(Collectors.toList());
-
-            for (String dokumentID : dokumentIDListe) {
-                vedlegg.add(lagVedlegg(journalpost, dokumentID));
-            }
+        Collection<Vedlegg> vedlegg = new ArrayList<>();
+        for (VedleggDto dto : vedleggDto) {
+            Journalpost journalpost = hentJournalpostForVedleggDto(dto, journalposter, saksnummer);
+            vedlegg.add(lagVedlegg(journalpost, dto.getDokumentID()));
         }
 
         return vedlegg;
     }
 
-    // returnerer maps med journalpostID og alle vedleggDto med den journalpostIDen
-    private static Set<Map.Entry<String, List<VedleggDto>>> hentJournalpostIDPerVedleggDto(Collection<VedleggDto> vedleggDto) {
-        return vedleggDto.stream().collect(Collectors.groupingBy(VedleggDto::getJournalpostID)).entrySet();
+    private Journalpost hentJournalpostForVedleggDto(VedleggDto vedleggDto, Collection<Journalpost> journalposter, String saksnummer) throws FunksjonellException {
+        return journalposter.stream()
+            .filter(journalpost -> journalpost.getJournalpostId().equals(vedleggDto.getJournalpostID()))
+            .findFirst().orElseThrow(() ->
+                new FunksjonellException(String.format(
+                    "Journalpost %s er ikke knyttet til fagsak %s", vedleggDto.getJournalpostID(), saksnummer)));
     }
 
     private Vedlegg lagVedlegg(Journalpost journalpost, String dokumentID) throws FunksjonellException {
