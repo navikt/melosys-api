@@ -42,7 +42,7 @@ public class ProsessinstansBehandlerImplTest {
     @Test
     public void behandleProsessinstans_nyProsessinstansStegNull_blirBehandlet() throws MelosysException {
         prosessinstansBehandler.behandleProsessinstans(prosessinstans);
-        assertThat(prosessinstans.getSistFullførteSteg()).isEqualTo(ProsessSteg.MANGELBREV);
+        assertThat(prosessinstans.getSistFullførtSteg()).isEqualTo(ProsessSteg.MANGELBREV);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.FERDIG);
         verify(mangelBrevStebehandler).utfør(eq(prosessinstans));
         verify(prosessinstansRepository, times(2)).save(eq(prosessinstans));
@@ -53,7 +53,7 @@ public class ProsessinstansBehandlerImplTest {
         doThrow(new FunksjonellException("FEIL!")).when(mangelBrevStebehandler).utfør(eq(prosessinstans));
 
         prosessinstansBehandler.behandleProsessinstans(prosessinstans);
-        assertThat(prosessinstans.getSistFullførteSteg()).isNull();
+        assertThat(prosessinstans.getSistFullførtSteg()).isNull();
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.FEILET);
         assertThat(prosessinstans.getHendelser()).hasSize(1)
             .flatExtracting(ProsessinstansHendelse::getSteg, ProsessinstansHendelse::getProsessinstans)

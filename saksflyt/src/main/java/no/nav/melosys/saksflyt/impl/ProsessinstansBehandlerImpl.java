@@ -59,7 +59,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
 
         try {
             SaksflytSubjektHolder.set(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
-            while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførteSteg())) != null) {
+            while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførtSteg())) != null) {
                 utførSteg(finnStegBehandler(nesteSteg), prosessinstans);
             }
 
@@ -80,7 +80,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
     private void utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) throws MelosysException {
         log.info("Utfører steg {} for prosessinstans {}", stegBehandler.inngangsSteg(), prosessinstans.getId());
         stegBehandler.utfør(prosessinstans);
-        prosessinstans.setSistFullførteSteg(stegBehandler.inngangsSteg());
+        prosessinstans.setSistFullførtSteg(stegBehandler.inngangsSteg());
         lagreProsessinstans(prosessinstans);
     }
 

@@ -51,8 +51,8 @@ public class Prosessinstans {
     private ProsessSteg steg; //TODO: erstattes av sistFullførteSteg
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "sist_fullforte_steg", nullable = false)
-    private ProsessSteg sistFullførteSteg; //todo
+    @Column(name = "sist_fullfort_steg")
+    private ProsessSteg sistFullførtSteg; //todo
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
@@ -163,12 +163,12 @@ public class Prosessinstans {
         this.steg = steg;
     }
 
-    public ProsessSteg getSistFullførteSteg() {
-        return sistFullførteSteg;
+    public ProsessSteg getSistFullførtSteg() {
+        return sistFullførtSteg;
     }
 
-    public void setSistFullførteSteg(ProsessSteg sistFullførteSteg) {
-        this.sistFullførteSteg = sistFullførteSteg;
+    public void setSistFullførtSteg(ProsessSteg sistFullførteSteg) {
+        this.sistFullførtSteg = sistFullførteSteg;
     }
 
     public LocalDateTime getRegistrertDato() {
