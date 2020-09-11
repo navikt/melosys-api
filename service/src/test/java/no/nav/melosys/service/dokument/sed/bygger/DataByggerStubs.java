@@ -8,6 +8,7 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -56,7 +57,7 @@ class DataByggerStubs {
         arbeidUtland.adresse = hentStrukturertAddresseStub();
         arbeidUtland.foretakNavn = "foretaknavn";
         arbeidUtland.foretakOrgnr = "32132133";
-        søknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
+        søknadDokument.arbeidUtland = Lists.newArrayList(arbeidUtland);
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
         utenlandskIdent.ident = "439205843";
         utenlandskIdent.landkode = "SE";
@@ -99,6 +100,22 @@ class DataByggerStubs {
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setDokument(personDokument);
         saksopplysninger.add(saksopplysning);
+
+        return behandling;
+    }
+
+    static Behandling hentBehandlingMedManglendeAdressefelterStub() {
+        Behandling behandling = hentBehandlingStub();
+        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+
+        ArbeidUtland arbeidUtland = behandlingsgrunnlagData.arbeidUtland.remove(0);
+        arbeidUtland.adresse.poststed = null;
+        behandlingsgrunnlagData.arbeidUtland.add(arbeidUtland);
+
+        ForetakUtland foretakUtland = behandlingsgrunnlagData.foretakUtland.remove(0);
+        foretakUtland.adresse.postnummer = null;
+        foretakUtland.adresse.poststed = null;
+        behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
 
         return behandling;
     }

@@ -112,17 +112,7 @@ public class SedDataByggerTest {
 
     private SedDataGrunnlagMedSoknad lagDokumentressurserMedManglendeAdressefelter() throws TekniskException, IkkeFunnetException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
-
-        Behandling behandling = DataByggerStubs.hentBehandlingStub();
-        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().arbeidUtland.forEach(arbeidUtland ->
-            arbeidUtland.adresse.poststed = null
-        );
-        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.forEach(foretakUtland -> {
-            foretakUtland.adresse.postnummer = null;
-            foretakUtland.adresse.poststed = null;
-        });
-        return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new SedDataGrunnlagMedSoknad(DataByggerStubs.hentBehandlingMedManglendeAdressefelterStub(), kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test
@@ -414,6 +404,7 @@ public class SedDataByggerTest {
 
     @Test
     public void lagVirksomhet_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
         SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getArbeidsgivendeVirksomheter())
