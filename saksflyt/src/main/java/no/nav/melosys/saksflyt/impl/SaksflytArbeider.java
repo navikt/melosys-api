@@ -19,11 +19,11 @@ public class SaksflytArbeider implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(SaksflytArbeider.class);
     private static final long PAUSE_MELLOM_OPPGAVER_MS = 200;
 
-    private final ProsessinstansKø binge;
+    private final ProsessinstansKø prosessinstansKø;
     private final ProsessinstansBehandler prosessinstansBehandler;
 
-    public SaksflytArbeider(ProsessinstansKø binge, ProsessinstansBehandler prosessinstansBehandler) {
-        this.binge = binge;
+    public SaksflytArbeider(ProsessinstansKø prosessinstansKø, ProsessinstansBehandler prosessinstansBehandler) {
+        this.prosessinstansKø = prosessinstansKø;
         this.prosessinstansBehandler = prosessinstansBehandler;
     }
 
@@ -32,7 +32,7 @@ public class SaksflytArbeider implements Runnable {
     public void run() {
         //noinspection InfiniteLoopStatement
         while (true) {
-            Optional<Prosessinstans> plukketProsessinstans = binge.plukkNeste();
+            Optional<Prosessinstans> plukketProsessinstans = prosessinstansKø.plukkNeste();
             try {
                 plukketProsessinstans.ifPresent(prosessinstansBehandler::behandleProsessinstans);
                 Thread.sleep(PAUSE_MELLOM_OPPGAVER_MS);

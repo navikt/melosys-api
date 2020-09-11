@@ -8,16 +8,16 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 public class ProsessInstansEventListener {
 
-    private final ProsessinstansKø binge;
+    private final ProsessinstansKø prosessinstansKø;
 
-    public ProsessInstansEventListener(ProsessinstansKø binge) {
-        this.binge = binge;
+    public ProsessInstansEventListener(ProsessinstansKø prosessinstansKø) {
+        this.prosessinstansKø = prosessinstansKø;
     }
 
     @TransactionalEventListener
     @SuppressWarnings("unused")
     public void settIBingen(ProsessinstansOpprettetEvent event) {
-        binge.leggTil(event.getProsessInstans());
+        prosessinstansKø.leggTil(event.getProsessInstans());
     }
 
 }

@@ -21,11 +21,11 @@ public class SaksflytKontroll {
     private static final long SYV_MINUTTER = 420000;
     private static final long FEM_MINUTTER = 300000;
 
-    private final ProsessinstansKø binge;
+    private final ProsessinstansKø prosessinstansKø;
     private final ProsessinstansRepository prosessinstansRepository;
 
-    public SaksflytKontroll(ProsessinstansKø binge, ProsessinstansRepository prosessinstansRepository) {
-        this.binge = binge;
+    public SaksflytKontroll(ProsessinstansKø prosessinstansKø, ProsessinstansRepository prosessinstansRepository) {
+        this.prosessinstansKø = prosessinstansKø;
         this.prosessinstansRepository = prosessinstansRepository;
     }
 
@@ -38,11 +38,11 @@ public class SaksflytKontroll {
         Map<UUID, Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStatus(ProsessStatus.KLAR)
             .stream().collect(Collectors.toMap(Prosessinstans::getId, p -> p));
 
-        binge.hentProsessinstanser().forEach(p -> prosessinstanser.remove(p.getId()));
+        prosessinstansKø.hentProsessinstanser().forEach(p -> prosessinstanser.remove(p.getId()));
 
         prosessinstanser.values().forEach(prosessinstans -> {
             log.info("Prosessinstans {} lagt inn i binge etter kontroll", prosessinstans.getId());
-            binge.leggTil(prosessinstans);
+            prosessinstansKø.leggTil(prosessinstans);
         });
     }
 }

@@ -23,33 +23,33 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
 
 @Component
 @Scope(SCOPE_SINGLETON)
-public class SaksflytArbeiderPool {
-    private static final Logger logger = LoggerFactory.getLogger(SaksflytArbeiderPool.class);
+public class SaksflytArbeiderPoolExecutor {
+    private static final Logger logger = LoggerFactory.getLogger(SaksflytArbeiderPoolExecutor.class);
 
     private final ExecutorService taskExecutor;
-    private final SaksflytArbeider[] tråder;
+    private final SaksflytArbeider[] arbeidere;
     private final List<Future<?>> futures;
 
     private static final int ANTALL_TRÅDER = 1;
 
     @Autowired
-    public SaksflytArbeiderPool(
+    public SaksflytArbeiderPoolExecutor(
         ApplicationContext context,
         @Qualifier("applicationTaskExecutor") ThreadPoolTaskExecutor taskExecutor,
         MeterRegistry registry
     ) {
         this.taskExecutor = ExecutorServiceMetrics.monitor(registry, taskExecutor.getThreadPoolExecutor(), "saksflyt");
-        tråder = new SaksflytArbeider[ANTALL_TRÅDER];
+        arbeidere = new SaksflytArbeider[ANTALL_TRÅDER];
         futures = new ArrayList<>();
         for (int i = 0; i < ANTALL_TRÅDER; i++) {
-            tråder[i] = context.getBean(SaksflytArbeider.class);
+            arbeidere[i] = context.getBean(SaksflytArbeider.class);
         }
     }
 
     @EventListener
     public void start(ApplicationReadyEvent event) {
         for (int i = 0; i < ANTALL_TRÅDER; i++) {
-            futures.add(taskExecutor.submit(tråder[i]));
+            futures.add(taskExecutor.submit(arbeidere[i]));
         }
         logger.info("Startet {} arbeidertråder", ANTALL_TRÅDER);
     }

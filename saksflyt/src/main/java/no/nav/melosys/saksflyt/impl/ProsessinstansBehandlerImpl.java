@@ -1,9 +1,7 @@
 package no.nav.melosys.saksflyt.impl;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 import javax.validation.constraints.NotNull;
 
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -46,18 +44,18 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         }
 
         ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType()).ifPresentOrElse(
-            prosessFlyt -> this.utførSteg(prosessinstans, prosessFlyt),
-            () -> this.behandleFeilFlytIkkeFunnet(prosessinstans)
+            prosessFlyt -> this.utførFlyt(prosessinstans, prosessFlyt),
+            () -> this.behandleFlytIkkeFunnet(prosessinstans)
         );
     }
 
-    private void utførSteg(Prosessinstans prosessinstans, ProsessFlyt prosessFlyt) {
+    private void utførFlyt(Prosessinstans prosessinstans, ProsessFlyt prosessFlyt) {
         ProsessSteg nesteSteg = null;
 
         try {
             SaksflytSubjektHolder.set(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
             while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførtSteg())) != null) {
-                utførSteg(finnStegBehandler(nesteSteg), prosessinstans);
+                utførSteg(hentStegBehandler(nesteSteg), prosessinstans);
             }
 
             settTilFerdig(prosessinstans);
@@ -68,7 +66,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         }
     }
 
-    private void behandleFeilFlytIkkeFunnet(Prosessinstans prosessinstans) {
+    private void behandleFlytIkkeFunnet(Prosessinstans prosessinstans) {
         log.error("Finner ingen definert flyt for ProsessType {}", prosessinstans.getType());
         prosessinstans.setStatus(ProsessStatus.FEILET);
         lagreProsessinstans(prosessinstans);
@@ -99,7 +97,8 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         prosessinstansRepository.save(prosessinstans);
     }
 
-    private StegBehandler finnStegBehandler(ProsessSteg prosessSteg) {
-        return stegbehandlerMap.get(prosessSteg);
+    private StegBehandler hentStegBehandler(ProsessSteg prosessSteg) {
+        return Optional.ofNullable(stegbehandlerMap.get(prosessSteg))
+            .orElseThrow(() -> new NoSuchElementException("Finner ingen stegbehandler for prosessteg " + prosessSteg));
     }
 }
