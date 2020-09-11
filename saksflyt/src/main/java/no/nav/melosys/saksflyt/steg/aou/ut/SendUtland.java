@@ -72,7 +72,6 @@ public class SendUtland extends AbstraktSendUtland {
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
 
         sendUtland(BucType.LA_BUC_01, prosessinstans);
-        prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
     }
 
     private Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {

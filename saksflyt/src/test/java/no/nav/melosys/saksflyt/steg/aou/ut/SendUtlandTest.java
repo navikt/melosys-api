@@ -20,7 +20,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -78,7 +77,6 @@ public class SendUtlandTest {
 
         sendUtland.utfør(prosessinstans);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITSJON)), eq(BucType.LA_BUC_01), isNull(), isNull());
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(BEHANDLING_ID));
     }
@@ -93,7 +91,6 @@ public class SendUtlandTest {
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
         assertThat(brevbestillingArgumentCaptor.getValue().getDokumentType()).isEqualTo(Produserbaredokumenter.ANMODNING_UNNTAK);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(BEHANDLING_ID));
     }
 
@@ -109,7 +106,6 @@ public class SendUtlandTest {
 
         sendUtland.utfør(prosessinstans);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_OPPGAVE);
         assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());
         verify(eessiService, never()).opprettOgSendSed(anyLong(), anyList(), eq(BucType.LA_BUC_01), isNull(), eq("fritekst"));
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(prosessinstans.getBehandling().getId()));
