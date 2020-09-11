@@ -4,10 +4,7 @@ package no.nav.melosys.service.sak;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -15,13 +12,14 @@ import no.nav.melosys.domain.dokument.soeknad.Bosted;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -33,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -48,7 +47,7 @@ public class VideresendSoknadServiceTest {
     @Mock
     private OppgaveService oppgaveService;
     @Mock
-    private BehandlingService behandlingService;
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
@@ -58,6 +57,7 @@ public class VideresendSoknadServiceTest {
 
     private final Fagsak fagsak = new Fagsak();
     private final Behandling behandling = new Behandling();
+    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
     private PersonDokument personDokument = new PersonDokument();
 
@@ -69,7 +69,7 @@ public class VideresendSoknadServiceTest {
     @Before
     public void setup() throws IkkeFunnetException {
         videresendSoknadService = new VideresendSoknadService(
-            fagsakService, behandlingService, prosessinstansService, landvelgerService, eessiService, oppgaveService
+            fagsakService, behandlingsresultatService, prosessinstansService, landvelgerService, eessiService, oppgaveService
         );
 
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -89,7 +89,7 @@ public class VideresendSoknadServiceTest {
         personOpplysning.setDokument(personDokument);
         behandling.getSaksopplysninger().add(personOpplysning);
 
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(behandling.getId()))).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(behandlingsresultat);
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
     }
 
@@ -104,10 +104,12 @@ public class VideresendSoknadServiceTest {
 
         videresendSoknadService.videresend(saksnummer, "", "fritekst");
 
-        verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.VIDERESENDT);
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
         verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling),
             eq(validerteMottakere.iterator().next()), eq("fritekst"));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(saksnummer));
+
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.HENLEGGELSE);
     }
 
     @Test

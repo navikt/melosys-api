@@ -335,7 +335,6 @@ public class ProsessinstansService {
                                                       String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
-            .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjoner != null ? Set.of(mottakerInstitusjoner) : null)
             .medBegrunnelseFritekst(fritekstBrev)

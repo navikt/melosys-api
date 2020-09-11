@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.saksflyt.ProsessType;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.MANGELBREV;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 public final class ProsessflytDefinisjon {
 
@@ -19,6 +19,16 @@ public final class ProsessflytDefinisjon {
             ProsessType.MANGELBREV,
             new ProsessFlyt(ProsessType.MANGELBREV,
                 MANGELBREV
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.VIDERESEND_SOKNAD,
+            new ProsessFlyt(ProsessType.VIDERESEND_SOKNAD,
+                VS_AVKLAR_MYNDIGHET,
+                VS_SEND_ORIENTERINGSBREV,
+                VS_SEND_SOKNAD,
+                VS_DISTRIBUER_JOURNALPOST,
+                IV_STATUS_BEH_AVSL
             )
         );
     }

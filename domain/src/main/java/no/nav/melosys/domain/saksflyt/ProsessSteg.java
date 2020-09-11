@@ -86,7 +86,6 @@ public enum ProsessSteg implements Kodeverk {
     HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
 
     // Videresend søknad
-    VS_OPPDATER_RESULTAT("VS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
     VS_AVKLAR_MYNDIGHET("VS_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     VS_SEND_ORIENTERINGSBREV("VS_SEND_ORIENTERINGSBREV", "Opprett orienteringsbrev og brev med vedlagt søknad"),
     VS_SEND_SOKNAD("VS_SEND_SOKNAD", "Opprett journalpost eller SED med søknad som vedlegg"),

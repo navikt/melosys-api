@@ -5,15 +5,18 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.PersonKontroller;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -28,15 +31,20 @@ public class VideresendSoknadService {
     private static final Logger log = LoggerFactory.getLogger(VideresendSoknadService.class);
 
     private final FagsakService fagsakService;
-    private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final ProsessinstansService prosessinstansService;
     private final LandvelgerService landvelgerService;
     private final EessiService eessiService;
     private final OppgaveService oppgaveService;
 
-    public VideresendSoknadService(FagsakService fagsakService, BehandlingService behandlingService, ProsessinstansService prosessinstansService, LandvelgerService landvelgerService, EessiService eessiService, OppgaveService oppgaveService) {
+    public VideresendSoknadService(FagsakService fagsakService,
+                                   BehandlingsresultatService behandlingsresultatService,
+                                   ProsessinstansService prosessinstansService,
+                                   LandvelgerService landvelgerService,
+                                   EessiService eessiService,
+                                   OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
-        this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.landvelgerService = landvelgerService;
         this.eessiService = eessiService;
@@ -47,17 +55,16 @@ public class VideresendSoknadService {
     public void videresend(String saksnummer,
                            String mottakerinstitusjon,
                            String fritekst) throws MelosysException {
-        final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
-        final long behandlingId = fagsak.hentAktivBehandling().getId();
-        final Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
-        log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingId);
+        final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        final Behandling behandling = fagsak.hentAktivBehandling();
+        log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
 
         final Landkoder bostedsland = landvelgerService.hentBostedsland(behandling);
         validerBehandlingOgBosted(behandling, bostedsland);
 
-        behandlingService.avsluttBehandling(behandlingId);
-        fagsakService.oppdaterStatus(fagsak, Saksstatuser.VIDERESENDT);
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
+        oppdaterBehandlingsresultat(behandling.getId());
 
         final Set<String> avklarteEessiMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjon != null ? Set.of(mottakerinstitusjon) : Collections.emptySet(),
@@ -70,6 +77,12 @@ public class VideresendSoknadService {
             fritekst
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    private void oppdaterBehandlingsresultat(long behandlingID) throws IkkeFunnetException {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setType(Behandlingsresultattyper.HENLEGGELSE);
+        behandlingsresultatService.lagre(behandlingsresultat);
     }
 
     private void validerBehandlingOgBosted(Behandling behandling, Landkoder bostedsland) throws FunksjonellException, TekniskException {
