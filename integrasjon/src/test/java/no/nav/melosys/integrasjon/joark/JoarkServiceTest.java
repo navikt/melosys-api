@@ -11,9 +11,9 @@ import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
@@ -334,7 +334,7 @@ public class JoarkServiceTest {
     }
 
     @Test
-    public void opprettJournalpost_ikkeValider_forventMetodekall() throws TekniskException {
+    public void opprettJournalpost_ikkeValider_forventMetodekall() throws FunksjonellException {
         when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
             .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
 
@@ -345,7 +345,7 @@ public class JoarkServiceTest {
     }
 
     @Test
-    public void opprettJournalpost_validerFelt_forventValidert() throws TekniskException {
+    public void opprettJournalpost_validerFelt_forventValidert() throws FunksjonellException {
         when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
             .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
 
@@ -355,8 +355,8 @@ public class JoarkServiceTest {
         assertThat(journalpostId).isNotEmpty();
     }
 
-    @Test(expected = TekniskException.class)
-    public void opprettJournalpost_validerFelt_forventException() throws TekniskException {
+    @Test(expected = FunksjonellException.class)
+    public void opprettJournalpost_validerFelt_forventException() throws FunksjonellException {
         OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
         opprettJournalpost.setArkivSakId(null);
         String journalpostId = joarkService.opprettJournalpost(opprettJournalpost, true);

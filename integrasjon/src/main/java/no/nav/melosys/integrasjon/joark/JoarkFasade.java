@@ -32,7 +32,7 @@ public interface JoarkFasade {
     /**
      * Oppretter en journalpost  i Joark
      */
-    String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) throws TekniskException;
+    String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) throws FunksjonellException;
 
     /**
      * Oppdaterer en journalpost og forsøker å ferdigstille hvis forsøkFerdigstill er satt

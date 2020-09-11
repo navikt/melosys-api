@@ -68,7 +68,7 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void harAktivProsessinstans() {
-        when(prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(anyLong(), eq(ProsessSteg.FEILET_MASKINELT), eq(ProsessSteg.FERDIG)))
+        when(prosessinstansRepo.findByBehandling_IdAndStatusIs(anyLong(), eq(ProsessStatus.KLAR)))
             .thenReturn(Optional.of(new Prosessinstans()));
         assertThat(prosessinstansService.harAktivProsessinstans(1L)).isTrue();
     }
