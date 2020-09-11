@@ -14,7 +14,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
-import no.nav.melosys.saksflyt.prosessflyt.ProsessflytFactory;
+import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
             return;
         }
 
-        ProsessflytFactory.lag(prosessinstans.getType()).ifPresentOrElse(
+        ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType()).ifPresentOrElse(
             prosessFlyt -> this.utførSteg(prosessinstans, prosessFlyt),
             () -> this.behandleFeilFlytIkkeFunnet(prosessinstans)
         );
