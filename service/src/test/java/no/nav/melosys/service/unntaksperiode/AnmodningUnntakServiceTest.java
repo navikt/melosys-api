@@ -8,6 +8,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
@@ -16,6 +17,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -30,6 +32,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,6 +44,8 @@ public class AnmodningUnntakServiceTest {
 
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private OppgaveService oppgaveService;
     @Mock
@@ -58,7 +63,7 @@ public class AnmodningUnntakServiceTest {
 
     @Before
     public void setUp() {
-        anmodningUnntakService = new AnmodningUnntakService(behandlingService, oppgaveService, prosessinstansService, anmodningsperiodeService, lovvalgsperiodeService, landvelgerService, eessiService);
+        anmodningUnntakService = new AnmodningUnntakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, anmodningsperiodeService, lovvalgsperiodeService, landvelgerService, eessiService);
     }
 
     @Test
@@ -72,7 +77,9 @@ public class AnmodningUnntakServiceTest {
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning(true));
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed);
@@ -80,6 +87,8 @@ public class AnmodningUnntakServiceTest {
         verify(anmodningsperiodeService).validerAnmodningsperiodeForBehandling(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
+
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
 
     @Test
@@ -92,6 +101,8 @@ public class AnmodningUnntakServiceTest {
         fagsak.setSaksnummer("MEL-111");
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning(true));
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
@@ -100,6 +111,8 @@ public class AnmodningUnntakServiceTest {
         verify(anmodningsperiodeService).validerAnmodningsperiodeForBehandling(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
+
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
 
     @Test

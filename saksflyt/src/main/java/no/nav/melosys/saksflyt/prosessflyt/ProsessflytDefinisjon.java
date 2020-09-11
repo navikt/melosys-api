@@ -25,7 +25,6 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(
             ProsessType.ANMODNING_OM_UNNTAK,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK,
-                AOU_OPPDATER_RESULTAT,
                 AOU_AVKLAR_MYNDIGHET,
                 AOU_OPPDATER_MEDL,
                 AOU_SEND_BREV,
