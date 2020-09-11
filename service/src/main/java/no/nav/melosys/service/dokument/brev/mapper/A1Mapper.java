@@ -159,9 +159,17 @@ class A1Mapper {
             .collect(Collectors.joining(", "));
 
         return Stream.concat(
-            arbeidssteder.stream().map(this::tilAdresseType),
+            lagAdresselinjerForArbeidssteder(arbeidssteder).stream().map(this::tilAdresseType),
             brekkTekstTilListe(landUtenOppgittArbeidsstedBeskrivelse).stream().map(this::tilAdresseType)
         );
+    }
+
+    private static List<String> lagAdresselinjerForArbeidssteder(List<Arbeidssted> arbeidssteder) {
+        return arbeidssteder.stream()
+            .map(Arbeidssted::lagAdresselinje)
+            .map(adresselinje -> adresselinje.isBlank() ? "" : adresselinje) //uten dette viser ikke brev alle linjene i en A1
+            .flatMap(adresselinje -> brekkTekstTilListe(adresselinje).stream())
+            .collect(Collectors.toList());
     }
 
     private static List<String> brekkTekstTilListe(String tekst) {
@@ -179,13 +187,6 @@ class A1Mapper {
             avklarteVirksomheter.stream().map(this::tilBivirksomhetType),
             ikkeFysiskeArbeidssteder.map(this::tilBivirksomhetType)
         );
-    }
-
-    private AdresseType tilAdresseType(Arbeidssted arbeidssted) {
-        AdresseType adresseType = new AdresseType();
-        String adresselinje = arbeidssted.lagAdresselinje();
-        adresseType.setAdresselinje1(adresselinje.isBlank() ? "" : adresselinje); //uten dette viser ikke brev alle linjene i en A1
-        return adresseType;
     }
 
     /**
