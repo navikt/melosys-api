@@ -399,6 +399,17 @@ public class SendVedtaksbrevInnlandTest {
     }
 
     @Test
+    public void utfør_utenlandskForetak_innvilgelseSendesTilSkatteoppkreverUtland() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
+        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        instans.utfør(prosessinstans);
+
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+    }
+
+    @Test
     public void utfør_innvilgelses13_1A_senderIkkeInnvilgelseTilArbeidsgiver() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
