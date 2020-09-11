@@ -17,6 +17,7 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
@@ -53,12 +54,16 @@ public class AnmodningUnntakServiceTest {
     private LandvelgerService landvelgerService;
     @Mock
     private EessiService eessiService;
+    @Mock
+    private AnmodningUnntakKontrollService anmodningUnntakKontrollService;
 
     private AnmodningUnntakService anmodningUnntakService;
 
     @Before
     public void setUp() {
-        anmodningUnntakService = new AnmodningUnntakService(behandlingService, oppgaveService, prosessinstansService, anmodningsperiodeService, lovvalgsperiodeService, landvelgerService, eessiService);
+        anmodningUnntakService = new AnmodningUnntakService(
+            behandlingService, oppgaveService, prosessinstansService, anmodningsperiodeService,
+            lovvalgsperiodeService, landvelgerService, eessiService, anmodningUnntakKontrollService);
     }
 
     @Test

@@ -29,9 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.kontroll.vedtak.VedtakKontroller.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -90,8 +88,6 @@ public class VedtakKontrollServiceTest {
         assertThat(resultat).isEmpty();
     }
 
-
-
     @Test
     public void utførKontroller_periodeOver24MndArt12MedOverlappendePeriode_returnererCollectionMedToKoder() throws TekniskException, FunksjonellException {
         lovvalgsperiode.setFom(LocalDate.now());
@@ -136,11 +132,8 @@ public class VedtakKontrollServiceTest {
 
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat)
-            .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
-            .contains(tuple(
-                Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED,
-                List.of(String.format(ARBEID_UTLAND_NAVN, 0), String.format(ARBEID_UTLAND_LAND, 0))
-            ));
+            .extracting(Kontrollfeil::getKode)
+            .contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED);
     }
 
     @Test
@@ -151,10 +144,7 @@ public class VedtakKontrollServiceTest {
 
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat)
-            .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
-            .contains(tuple(
-                Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL,
-                List.of(String.format(FORETAK_UTLAND_NAVN, 0), String.format(FORETAK_UTLAND_LAND, 0))
-            ));
+            .extracting(Kontrollfeil::getKode)
+            .contains(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL);
     }
 }
