@@ -17,7 +17,7 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROT
 public class SaksflytArbeider implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(SaksflytArbeider.class);
-    private static final long SOV_MELLOM_OPPGAVER = 200;
+    private static final long PAUSE_MELLOM_OPPGAVER_MS = 200;
 
     private final ProsessinstansKø binge;
     private final ProsessinstansBehandler prosessinstansBehandler;
@@ -35,7 +35,7 @@ public class SaksflytArbeider implements Runnable {
             Optional<Prosessinstans> plukketProsessinstans = binge.plukkNeste();
             try {
                 plukketProsessinstans.ifPresent(prosessinstansBehandler::behandleProsessinstans);
-                Thread.sleep(SOV_MELLOM_OPPGAVER);
+                Thread.sleep(PAUSE_MELLOM_OPPGAVER_MS);
             } catch (InterruptedException e) {
                 log.error("Arbeidertråd avbrutt", e);
                 Thread.currentThread().interrupt();
