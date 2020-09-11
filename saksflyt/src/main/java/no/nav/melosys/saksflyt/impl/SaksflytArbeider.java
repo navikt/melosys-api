@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
-import no.nav.melosys.saksflyt.api.ProsessinstansBinge;
+import no.nav.melosys.saksflyt.api.ProsessinstansKø;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -17,13 +17,13 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROT
 public class SaksflytArbeider implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(SaksflytArbeider.class);
-    private static final long SOV_MELLOM_OPPGAVER = 200;
+    private static final long PAUSE_MELLOM_OPPGAVER_MS = 200;
 
-    private final ProsessinstansBinge binge;
+    private final ProsessinstansKø prosessinstansKø;
     private final ProsessinstansBehandler prosessinstansBehandler;
 
-    public SaksflytArbeider(ProsessinstansBinge binge, ProsessinstansBehandler prosessinstansBehandler) {
-        this.binge = binge;
+    public SaksflytArbeider(ProsessinstansKø prosessinstansKø, ProsessinstansBehandler prosessinstansBehandler) {
+        this.prosessinstansKø = prosessinstansKø;
         this.prosessinstansBehandler = prosessinstansBehandler;
     }
 
@@ -32,10 +32,10 @@ public class SaksflytArbeider implements Runnable {
     public void run() {
         //noinspection InfiniteLoopStatement
         while (true) {
-            Optional<Prosessinstans> plukketProsessinstans = binge.plukkNeste();
+            Optional<Prosessinstans> plukketProsessinstans = prosessinstansKø.plukkNeste();
             try {
                 plukketProsessinstans.ifPresent(prosessinstansBehandler::behandleProsessinstans);
-                Thread.sleep(SOV_MELLOM_OPPGAVER);
+                Thread.sleep(PAUSE_MELLOM_OPPGAVER_MS);
             } catch (InterruptedException e) {
                 log.error("Arbeidertråd avbrutt", e);
                 Thread.currentThread().interrupt();

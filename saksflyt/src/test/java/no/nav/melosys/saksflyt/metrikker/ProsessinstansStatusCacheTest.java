@@ -11,7 +11,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessStatus.FEILET;
+import static no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG;
 import static no.nav.melosys.domain.saksflyt.ProsessType.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -27,15 +28,17 @@ public class ProsessinstansStatusCacheTest {
     @Before
     public void setup() {
         cache = new ProsessinstansStatusCache(prosessinstansRepository, 100);
-        ProsessinstansAntall prosessinstansAntall_1 = new ProsessinstansAntall(JFR_NY_BEHANDLING, JFR_OPPRETT_GSAK_SAK, 2);
-        ProsessinstansAntall prosessinstansAntall_2 = new ProsessinstansAntall(JFR_KNYTT, JFR_FERDIGSTILL_JOURNALPOST, 1);
-        ProsessinstansAntall prosessinstansAntall_3 = new ProsessinstansAntall(IVERKSETT_VEDTAK, FEILET_MASKINELT, 2);
+        ProsessinstansAntall prosessinstansAntall_1 = new ProsessinstansAntall(JFR_NY_BEHANDLING, FERDIG, 2);
+        ProsessinstansAntall prosessinstansAntall_2 = new ProsessinstansAntall(JFR_KNYTT, FEILET, 1);
+        ProsessinstansAntall prosessinstansAntall_3 = new ProsessinstansAntall(IVERKSETT_VEDTAK, FEILET, 2);
         prosessinstansMetrikkerList = Arrays.asList(prosessinstansAntall_1, prosessinstansAntall_2, prosessinstansAntall_3);
     }
 
     @Test
     public void antallProsessinstanserFeilet() {
-        when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgSteg()).thenReturn(prosessinstansMetrikkerList);
+        when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus()).thenReturn(prosessinstansMetrikkerList);
+        assertThat(cache.antallProsessinstanserFeilet(JFR_NY_BEHANDLING)).isEqualTo(0.0);
+        assertThat(cache.antallProsessinstanserFeilet(JFR_KNYTT)).isEqualTo(1.0);
         assertThat(cache.antallProsessinstanserFeilet(IVERKSETT_VEDTAK)).isEqualTo(2.0);
     }
 }

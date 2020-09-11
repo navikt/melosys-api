@@ -1,22 +1,25 @@
 package no.nav.melosys.saksflyt.impl;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 import javax.validation.constraints.NotNull;
 
-import no.nav.melosys.domain.saksflyt.*;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.ProsessStatus;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
-import no.nav.melosys.saksflyt.prosessflyt.ProsessflytFactory;
+import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
@@ -31,6 +34,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         this.prosessinstansRepository = prosessinstansRepository;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void behandleProsessinstans(@NotNull Prosessinstans prosessinstans) {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
@@ -39,25 +43,19 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
             return;
         }
 
-        ProsessFlyt prosessFlyt;
-
-        try {
-            prosessFlyt = finnFlytForType(prosessinstans.getType());
-        } catch (Exception e) {
-            behandleFeilFlytIkkeFunnet(prosessinstans, e);
-            return;
-        }
-
-        utførSteg(prosessinstans, prosessFlyt);
+        ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType()).ifPresentOrElse(
+            prosessFlyt -> this.utførFlyt(prosessinstans, prosessFlyt),
+            () -> this.behandleFlytIkkeFunnet(prosessinstans)
+        );
     }
 
-    private void utførSteg(Prosessinstans prosessinstans, ProsessFlyt prosessFlyt) {
+    private void utførFlyt(Prosessinstans prosessinstans, ProsessFlyt prosessFlyt) {
         ProsessSteg nesteSteg = null;
 
         try {
             SaksflytSubjektHolder.set(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
-            while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførteSteg())) != null) {
-                utførSteg(finnStegBehandler(nesteSteg), prosessinstans);
+            while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførtSteg())) != null) {
+                utførSteg(hentStegBehandler(nesteSteg), prosessinstans);
             }
 
             settTilFerdig(prosessinstans);
@@ -68,8 +66,8 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         }
     }
 
-    private void behandleFeilFlytIkkeFunnet(Prosessinstans prosessinstans, Exception e) {
-        log.error("Feil ved henting av flyt for prosessinstans {} med type {}", prosessinstans.getId(), prosessinstans.getType(), e);
+    private void behandleFlytIkkeFunnet(Prosessinstans prosessinstans) {
+        log.error("Finner ingen definert flyt for ProsessType {}", prosessinstans.getType());
         prosessinstans.setStatus(ProsessStatus.FEILET);
         lagreProsessinstans(prosessinstans);
     }
@@ -77,7 +75,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
     private void utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) throws MelosysException {
         log.info("Utfører steg {} for prosessinstans {}", stegBehandler.inngangsSteg(), prosessinstans.getId());
         stegBehandler.utfør(prosessinstans);
-        prosessinstans.setSistFullførteSteg(stegBehandler.inngangsSteg());
+        prosessinstans.setSistFullførtSteg(stegBehandler.inngangsSteg());
         lagreProsessinstans(prosessinstans);
     }
 
@@ -99,12 +97,8 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         prosessinstansRepository.save(prosessinstans);
     }
 
-    private ProsessFlyt finnFlytForType(ProsessType type) {
-        return ProsessflytFactory.lag(type)
-            .orElseThrow(() -> new IllegalArgumentException("Finner ikke ProsessFlyt for type " + type));
-    }
-
-    private StegBehandler finnStegBehandler(ProsessSteg prosessSteg) {
-        return stegbehandlerMap.get(prosessSteg);
+    private StegBehandler hentStegBehandler(ProsessSteg prosessSteg) {
+        return Optional.ofNullable(stegbehandlerMap.get(prosessSteg))
+            .orElseThrow(() -> new NoSuchElementException("Finner ingen stegbehandler for prosessteg " + prosessSteg));
     }
 }

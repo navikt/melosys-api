@@ -1,17 +1,20 @@
 package no.nav.melosys.saksflyt.impl;
 
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.saksflyt.api.ProsessinstansBinge;
+import no.nav.melosys.saksflyt.api.ProsessinstansKø;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProsessinstansBingeImpl implements ProsessinstansBinge {
+public class ProsessinstansKøImpl implements ProsessinstansKø {
 
     private final Queue<Prosessinstans> prosessinstansKø = new LinkedList<>();
+
+    @Override
+    public synchronized Collection<Prosessinstans> hentProsessinstanser() {
+        return new ArrayList<>(prosessinstansKø);
+    }
 
     @Override
     public synchronized boolean leggTil(Prosessinstans prosessinstans) {
