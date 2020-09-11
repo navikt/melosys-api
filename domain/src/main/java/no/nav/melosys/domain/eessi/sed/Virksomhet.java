@@ -6,12 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public class Virksomhet {
     private static final String UKJENT = "Unknown";
-    public static final String PERSONNUMMER = "registrering";
 
     private String navn;
     private Adresse adresse;
     private String orgnr;
-    private String type;
 
     public Virksomhet() {
     }
@@ -20,7 +18,6 @@ public class Virksomhet {
         this.navn = navn;
         this.orgnr = StringUtils.isBlank(orgnr) ? UKJENT : orgnr;
         this.adresse = adresse;
-        this.type = StringUtils.isBlank(orgnr) ? PERSONNUMMER : null;
     }
 
     public ForetakUtland tilForetakUtland() {
@@ -79,13 +76,5 @@ public class Virksomhet {
 
     public void setOrgnr(String orgnr) {
         this.orgnr = orgnr;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 }

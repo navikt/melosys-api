@@ -36,7 +36,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.eessi.sed.Adresse.*;
-import static no.nav.melosys.domain.eessi.sed.Virksomhet.PERSONNUMMER;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -419,11 +418,6 @@ public class SedDataByggerTest {
 
         assertThat(sedData.getArbeidsgivendeVirksomheter())
             .filteredOn(virksomhet -> UKJENT.equals(virksomhet.getOrgnr()))
-            .extracting(Virksomhet::getType)
-            .contains(PERSONNUMMER);
-
-        assertThat(sedData.getArbeidsgivendeVirksomheter())
-            .filteredOn(virksomhet -> UKJENT.equals(virksomhet.getOrgnr()))
             .extracting(Virksomhet::getAdresse)
             .extracting(Adresse::getPoststed)
             .contains(UKJENT);
@@ -434,8 +428,8 @@ public class SedDataByggerTest {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getArbeidsgivendeVirksomheter())
-            .extracting(Virksomhet::getOrgnr, Virksomhet::getType)
-            .contains(tuple("orgnr", null));
+            .extracting(Virksomhet::getOrgnr)
+            .contains("orgnr");
     }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {
