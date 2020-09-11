@@ -24,12 +24,14 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(
             ProsessType.FORVALTNINGSMELDING_SEND,
-            List.of(SEND_FORVALTNINGSMELDING)
+            new ProsessFlyt(ProsessType.FORVALTNINGSMELDING_SEND,
+                SEND_FORVALTNINGSMELDING
+            )
         );
 
         PROSESS_FLYT_MAP.put(
             ProsessType.HENLEGG_SAK,
-            List.of(
+            new ProsessFlyt(ProsessType.HENLEGG_SAK,
                 HS_SEND_BREV,
                 IV_STATUS_BEH_AVSL
             )
