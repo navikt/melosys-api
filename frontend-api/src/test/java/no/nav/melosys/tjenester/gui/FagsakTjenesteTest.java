@@ -26,6 +26,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -69,6 +70,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String SOK_FAGSAKER_POST_SCHEMA = "fagsaker-sok-post-schema.json";
     private static final String FAGSAKER_UTPEK_POST_SCHEMA = "fagsaker-utpek-post-schema.json";
     private static final String FAGSAKER_VIDERESEND_POST_SCHEMA = "fagsaker-henleggvideresend-post-schema.json";
+    private static final String FAGSAKSER_HENLEGG_POST_SCHEMA = "fagsaker-henlegg-post-schema.json";
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
@@ -250,32 +252,21 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public final void henleggFagsakSenderSaksnummerFritekstOgBegrunnelseTilService() throws Exception {
         HenleggelseDto henleggelseDto = new HenleggelseDto();
-        String begrunnelseKode = "GOD_GRUNN_TIL_HENLEGGELSE";
+        String begrunnelseKode = Henleggelsesgrunner.OPPHOLD_UTL_AVLYST.getKode();
         String fritekst = "Dette er fritekst";
         henleggelseDto.setBegrunnelseKode(begrunnelseKode);
         henleggelseDto.setFritekst(fritekst);
+
+        valider(henleggelseDto, FAGSAKSER_HENLEGG_POST_SCHEMA);
 
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
         String saksnummer = "123";
-        ResponseEntity resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
+        ResponseEntity<Void> resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
 
         assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(henleggFagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
-    }
-
-    @Test
-    public final void henleggFagsakKasterExceptionNårIkkeTilgangTilSak() throws Exception {
-        Fagsak fagsak = lagFagsak();
-        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
-
-        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkSak(fagsak.getSaksnummer());
-
-        expectedException.expect(SikkerhetsbegrensningException.class);
-        instans.henleggFagsak(fagsak.getSaksnummer(), new HenleggelseDto());
-
-        verify(henleggFagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
     }
 
     @Test

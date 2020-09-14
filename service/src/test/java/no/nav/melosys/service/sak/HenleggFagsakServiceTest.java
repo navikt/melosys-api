@@ -11,21 +11,22 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HenleggFagsakServiceTest {
+@ExtendWith(MockitoExtension.class)
+class HenleggFagsakServiceTest {
 
     @Mock
     private ProsessinstansService prosessinstansService;
@@ -48,10 +49,9 @@ public class HenleggFagsakServiceTest {
     private final String saksnummer = "MEL-0";
     private final long behandlingID = 11;
 
-    @Before
+    @BeforeEach
     public void setup() throws IkkeFunnetException {
         henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -60,12 +60,13 @@ public class HenleggFagsakServiceTest {
         fagsak.getBehandlinger().add(behandling);
 
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
     }
 
     @Test
-    public void henleggFagsakMedToBehandlingerHenterSisteBehandling() throws TekniskException, FunksjonellException {
+    void henleggFagsak_gyldigHenleggelsesgrunn_behandlingsresultatBlirOppdatert() throws TekniskException, FunksjonellException {
         String fritekst = "Fri tale";
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
+
         henleggFagsakService.henleggFagsak(saksnummer, "ANNET", fritekst);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
@@ -78,9 +79,7 @@ public class HenleggFagsakServiceTest {
     }
 
     @Test
-    public void henleggFagsak_ikkeGyldigHenleggelsesgrunn_kasterException() {
-        String saksnummer = "123456789";
-
+    void henleggFagsak_ikkeGyldigHenleggelsesgrunn_kasterException() {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> henleggFagsakService.henleggFagsak(saksnummer, "UGYLDIGKODE", "Fri tale"))
             .withMessageContaining("ingen gyldig henleggelsesgrunn");
