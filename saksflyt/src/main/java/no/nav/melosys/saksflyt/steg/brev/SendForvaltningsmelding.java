@@ -28,7 +28,6 @@ public class SendForvaltningsmelding implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(SendForvaltningsmelding.class);
 
     private final BrevBestiller brevBestiller;
-
     private final BehandlingService behandlingService;
 
     @Autowired
