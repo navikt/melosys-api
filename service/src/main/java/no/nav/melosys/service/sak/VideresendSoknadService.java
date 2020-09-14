@@ -5,14 +5,12 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
@@ -64,7 +62,7 @@ public class VideresendSoknadService {
         validerBehandlingOgBosted(behandling, bostedsland);
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
-        oppdaterBehandlingsresultat(behandling.getId());
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
 
         final Set<String> avklarteEessiMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjon != null ? Set.of(mottakerinstitusjon) : Collections.emptySet(),
@@ -77,12 +75,6 @@ public class VideresendSoknadService {
             fritekst
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    private void oppdaterBehandlingsresultat(long behandlingID) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(Behandlingsresultattyper.HENLEGGELSE);
-        behandlingsresultatService.lagre(behandlingsresultat);
     }
 
     private void validerBehandlingOgBosted(Behandling behandling, Landkoder bostedsland) throws FunksjonellException, TekniskException {

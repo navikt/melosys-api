@@ -4,7 +4,10 @@ package no.nav.melosys.service.sak;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -31,7 +34,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -57,7 +59,6 @@ public class VideresendSoknadServiceTest {
 
     private final Fagsak fagsak = new Fagsak();
     private final Behandling behandling = new Behandling();
-    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
     private PersonDokument personDokument = new PersonDokument();
 
@@ -89,7 +90,6 @@ public class VideresendSoknadServiceTest {
         personOpplysning.setDokument(personDokument);
         behandling.getSaksopplysninger().add(personOpplysning);
 
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(behandlingsresultat);
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
     }
 
@@ -108,8 +108,7 @@ public class VideresendSoknadServiceTest {
         verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling),
             eq(validerteMottakere.iterator().next()), eq("fritekst"));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(saksnummer));
-
-        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.HENLEGGELSE);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(eq(behandling.getId()), eq(Behandlingsresultattyper.HENLEGGELSE));
     }
 
     @Test
