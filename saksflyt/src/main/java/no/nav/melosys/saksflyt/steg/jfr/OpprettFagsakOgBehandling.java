@@ -28,15 +28,6 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
 
-/**
- * Oppretter en sak og en behandling i Melosys.
- *
- * Transisjoner:
- * 1) ProsessType.JFR_KNYTT:
- * JFR_OPPRETT_SAK_OG_BEH -> STATUS_BEH_OPPR eller FEILET_MASKINELT hvis feil
- * 2) ProsessType.JFR_NY_SAK:
- * JFR_OPPRETT_SAK_OG_BEH -> JFR_OPPRETT_SOEKNAD eller FEILET_MASKINELT hvis feil
- */
 @Component
 public class OpprettFagsakOgBehandling implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);

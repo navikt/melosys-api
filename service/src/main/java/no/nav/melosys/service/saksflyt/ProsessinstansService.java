@@ -223,7 +223,6 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = lagProsessinstansFraOpprettSakDto(opprettSakDto);
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
-        prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
 
