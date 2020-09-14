@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_ARKIVSAK;
 
 @Component
 public class OpprettSak implements StegBehandler {
@@ -33,7 +33,7 @@ public class OpprettSak implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_OPPRETT_GSAK_SAK;
+        return OPPRETT_ARKIVSAK;
     }
 
     @Override
