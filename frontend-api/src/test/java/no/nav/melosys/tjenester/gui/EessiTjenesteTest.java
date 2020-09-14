@@ -94,7 +94,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     public void opprettBuc() throws IOException, MelosysException {
         when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
 
-        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, "NAVT002", "NO", Collections.emptyList());
+        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, "NAVT002", List.of("NO"), Collections.emptyList());
         ResponseEntity<OpprettBucSvarDto> response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         OpprettBucSvarDto opprettBucSvarDto = response.getBody();
 
@@ -133,7 +133,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
             new VedleggDto("3", "1")
         );
 
-        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, "NAVT002", "NO", vedleggDtoList);
+        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, "NAVT002", List.of("NO"), vedleggDtoList);
         ResponseEntity<OpprettBucSvarDto> response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         OpprettBucSvarDto opprettBucSvarDto = response.getBody();
 

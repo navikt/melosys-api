@@ -4,17 +4,19 @@ import java.util.Collection;
 
 import no.nav.melosys.domain.eessi.BucType;
 
+import java.util.List;
+
 public class BucBestillingDto {
 
     private BucType bucType;
     private String mottakerLand;
-    private String mottakerId;
+    private List<String> mottakerIder;
     private Collection<VedleggDto> vedlegg;
 
-    public BucBestillingDto(BucType bucType, String mottakerLand, String mottakerId, Collection<VedleggDto> vedlegg) {
+    public BucBestillingDto(BucType bucType, String mottakerLand, List<String> mottakerIder, Collection<VedleggDto> vedlegg) {
         this.bucType = bucType;
         this.mottakerLand = mottakerLand;
-        this.mottakerId = mottakerId;
+        this.mottakerIder = mottakerIder;
         this.vedlegg = vedlegg;
     }
 
@@ -34,12 +36,12 @@ public class BucBestillingDto {
         this.mottakerLand = mottakerLand;
     }
 
-    public String getMottakerId() {
-        return mottakerId;
+    public List<String> getMottakerIder() {
+        return mottakerIder;
     }
 
-    public void setMottakerId(String mottakerId) {
-        this.mottakerId = mottakerId;
+    public void setMottakerIder(List<String> mottakerIder) {
+        this.mottakerIder = mottakerIder;
     }
 
     public Collection<VedleggDto> getVedlegg() {
