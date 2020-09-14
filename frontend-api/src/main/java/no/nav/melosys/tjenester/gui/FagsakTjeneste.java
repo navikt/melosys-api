@@ -17,6 +17,7 @@ import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.HenleggFagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.VideresendSoknadService;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -46,6 +47,7 @@ public class FagsakTjeneste {
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
     private final FagsakService fagsakService;
+    private final HenleggFagsakService henleggFagsakService;
     private final SaksopplysningerService saksopplysningerService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final TilgangService tilgangService;
@@ -54,10 +56,11 @@ public class FagsakTjeneste {
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService,
-                          SaksopplysningerService saksopplysningerService,
+                          HenleggFagsakService henleggFagsakService, SaksopplysningerService saksopplysningerService,
                           BehandlingsgrunnlagService behandlingsgrunnlagService, TilgangService tilgangService,
                           UtpekingService utpekingService, VideresendSoknadService videresendSoknadService) {
         this.fagsakService = fagsakService;
+        this.henleggFagsakService = henleggFagsakService;
         this.saksopplysningerService = saksopplysningerService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.tilgangService = tilgangService;
@@ -66,7 +69,7 @@ public class FagsakTjeneste {
     }
 
     @GetMapping("{saksnr}")
-    @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."), response = Fagsak.class)
+    @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public ResponseEntity<FagsakDto> hentFagsak(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
@@ -77,7 +80,7 @@ public class FagsakTjeneste {
 
     @PostMapping("/opprett")
     @ApiOperation(value = "Oppretter en sak med tilhørende behandling.")
-    public ResponseEntity opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<Void> opprettFagsak(@RequestBody OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
         if (opprettSakDto.getBrukerID() == null) {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }
@@ -128,17 +131,15 @@ public class FagsakTjeneste {
 
     @PostMapping("{saksnr}/henlegg")
     @ApiOperation(value = "Henlegger en fagsak")
-    public ResponseEntity henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
-        Fagsak sak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(sak);
-
-        fagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
+    public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
+        tilgangService.sjekkSak(saksnummer);
+        henleggFagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("{saksnr}/henlegg-videresend")
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
-    public ResponseEntity videresend(@PathVariable("saksnr") String saksnummer,
+    public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
                                      @RequestBody VideresendDto videresendDto) throws MelosysException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
@@ -151,7 +152,7 @@ public class FagsakTjeneste {
 
     @PutMapping(value = "{saksnr}/avsluttsaksombortfalt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Avslutter en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys")
-    public ResponseEntity avsluttSakSomBortfalt(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+    public ResponseEntity<Void> avsluttSakSomBortfalt(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
 
@@ -162,7 +163,7 @@ public class FagsakTjeneste {
     @PutMapping(value = "{saksnr}/avslutt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = {MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @ApiOperation(value = "Brukes for å avslutte manuelle behandlinger. " +
         "Gyldige behandlingstyper er VURDER_TRYGDETID, ØVRIGE_SED og SOEKNAD_IKKE_YRKESAKTIVE", produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity avsluttSakManuelt(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+    public ResponseEntity<Void> avsluttSakManuelt(@PathVariable("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.hentAktivBehandling());
@@ -172,7 +173,7 @@ public class FagsakTjeneste {
 
     @PostMapping("/{saksnummer}/utpek")
     @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
-    public ResponseEntity utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
+    public ResponseEntity<Void> utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
                                             @RequestBody UtpekDto utpekDto) throws MelosysException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
@@ -190,13 +191,12 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Korrigerer eller omgjør et vedtak eller en anmodning til utenlandsk myndighet " +
         "for en sak ved å opprette en ny behandling basert på den siste endrede behandling")
     @PostMapping("/{saksnummer}/revurder")
-    public ResponseEntity revurderSisteBehandling(@PathVariable("saksnummer") String saksnummer) throws FunksjonellException, TekniskException {
+    public ResponseEntity<RevurderingOpprettetDto> revurderSisteBehandling(@PathVariable("saksnummer") String saksnummer) throws FunksjonellException, TekniskException {
         tilgangService.sjekkSak(saksnummer);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         return ResponseEntity.ok(new RevurderingOpprettetDto(behandlingID));
     }
-
 
     private FagsakDto tilFagsakDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
