@@ -5,105 +5,70 @@ import java.util.Collections;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SettVurderDokumentTest {
+@ExtendWith(MockitoExtension.class)
+class SettVurderDokumentTest {
 
     @Mock
     private FagsakService fagsakService;
-
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
 
-    private SettVurderDokument agent;
+    private SettVurderDokument settVurderDokument;
 
-    private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
-    private final static String SAKSNUMMER_MED_BEHANDLING = "MELTEST-2";
+    private final String saksnummer = "MEL-12345678";
+    private final long behandlingID = 21321L;
+    private final Prosessinstans prosessinstans = new Prosessinstans();
 
-    @Captor
-    private ArgumentCaptor<Behandling> behandlingArgumentCaptor;
+    @BeforeEach
+    public void setUp() {
+        settVurderDokument = new SettVurderDokument(fagsakService, behandlingService);
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+    }
 
-    @Before
-    public void setUp() throws IkkeFunnetException {
-        agent = new SettVurderDokument(fagsakService, behandlingRepository);
+    @Test
+    void utfør_sakMedBehandling_oppdatererStatus() throws FunksjonellException, TekniskException {
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakMedBehandling());
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
+        settVurderDokument.utfør(prosessinstans);
+        verify(behandlingService).oppdaterStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+    }
 
+    @Test
+    void utfør_sakUtenBehandling_ingenStatusEndring() throws FunksjonellException, TekniskException {
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(new Fagsak());
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
+        settVurderDokument.utfør(prosessinstans);
+        verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
+    }
+
+    @Test
+    void utfør_ingenVurdering_ingenStatusEndring() throws FunksjonellException, TekniskException {
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakMedBehandling());
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, true);
+        settVurderDokument.utfør(prosessinstans);
+        verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
+    }
+
+    private Fagsak fagsakMedBehandling() {
         Fagsak fagsak = new Fagsak();
-
-        Fagsak fagsakMedBehandling = new Fagsak();
         Behandling behandling = new Behandling();
+        behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        fagsakMedBehandling.setBehandlinger(Collections.singletonList(behandling));
-
-        when(fagsakService.hentFagsak(SAKSNUMMER_UTEN_BEHANDLING)).thenReturn(fagsak);
-        when(fagsakService.hentFagsak(SAKSNUMMER_MED_BEHANDLING)).thenReturn(fagsakMedBehandling);
-    }
-
-    @Test
-    public void utfør_sakMedBehandling_oppdatererStatus() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
-        p.setData(ProsessDataKey.SKAL_TILORDNES, false);
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-        verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
-        assertThat(behandlingArgumentCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.VURDER_DOKUMENT);
-    }
-
-    @Test
-    public void utfør_sakUtenBehandling_ingenStatusEndring() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
-        p.setData(ProsessDataKey.SKAL_TILORDNES, false);
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-        verify(behandlingRepository, never()).save(any(Behandling.class));
-    }
-
-    @Test
-    public void utfør_ingenVurdering_ingenStatusEndring() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, true);
-        p.setData(ProsessDataKey.SKAL_TILORDNES, false);
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-        verify(behandlingRepository, never()).save(any(Behandling.class));
-    }
-
-    @Test
-    public void utfør_sakMedBehandling_skalTildeleBehandlingsoppgave() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
-        p.setData(ProsessDataKey.SKAL_TILORDNES, true);
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_TILDEL_BEHANDLINGSOPPGAVE);
-        verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
-        assertThat(behandlingArgumentCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.VURDER_DOKUMENT);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        return fagsak;
     }
 }
