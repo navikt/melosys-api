@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.saksflyt.ProsessType;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.MANGELBREV;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 public final class ProsessflytDefinisjon {
 
@@ -19,6 +19,78 @@ public final class ProsessflytDefinisjon {
             ProsessType.MANGELBREV,
             new ProsessFlyt(ProsessType.MANGELBREV,
                 MANGELBREV
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK,
+            new ProsessFlyt(ProsessType.JFR_NY_SAK,
+                JFR_VALIDERING,
+                JFR_VURDER_JOURNALFOERINGSTYPE,
+                JFR_AKTØR_ID,
+                JFR_OPPRETT_SAK_OG_BEH,
+                JFR_OPPRETT_SØKNAD,
+                JFR_OPPRETT_GSAK_SAK,
+                STATUS_BEH_OPPR,
+                JFR_OPPDATER_SAKSRELASJON,
+                JFR_OPPDATER_JOURNALPOST,
+                JFR_FERDIGSTILL_JOURNALPOST,
+                JFR_HENT_REGISTER_OPPL,
+                JFR_VURDER_INNGANGSVILKÅR,
+                VURDER_GJENBRUK_OPPGAVE,
+                GSAK_OPPRETT_OPPGAVE,
+                SEND_FORVALTNINGSMELDING
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_BEHANDLING,
+            new ProsessFlyt(ProsessType.JFR_NY_BEHANDLING,
+                JFR_VALIDERING,
+                JFR_VURDER_JOURNALFOERINGSTYPE,
+                JFR_AKTØR_ID,
+                JFR_OPPDATER_JOURNALPOST,
+                JFR_FERDIGSTILL_JOURNALPOST,
+                REPLIKER_BEHANDLING,
+                GSAK_OPPRETT_OPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_KNYTT,
+            new ProsessFlyt(ProsessType.JFR_KNYTT,
+                JFR_VALIDERING,
+                JFR_VURDER_JOURNALFOERINGSTYPE,
+                JFR_OPPDATER_JOURNALPOST,
+                JFR_FERDIGSTILL_JOURNALPOST,
+                JFR_SETT_VURDER_DOKUMENT,
+                JFR_TILDEL_BEHANDLINGSOPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_AOU_BREV,
+            new ProsessFlyt(ProsessType.JFR_AOU_BREV,
+                JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING,
+                JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST,
+                JFR_AOU_BREV_OPPRETT_SEDDOKUMENT,
+                AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE,
+                AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET,
+                AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE,
+                AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER,
+                AOU_MOTTAK_REGISTERKONTROLL,
+                AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
+                AOU_MOTTAK_OPPRETT_OPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK,
+                JFR_AKTØR_ID,
+                JFR_OPPRETT_SAK_OG_BEH,
+                JFR_OPPRETT_SØKNAD,
+                JFR_OPPRETT_GSAK_SAK,
+                STATUS_BEH_OPPR,
+                JFR_HENT_REGISTER_OPPL,
+                JFR_VURDER_INNGANGSVILKÅR,
+                VURDER_GJENBRUK_OPPGAVE,
+                GJENBRUK_OPPGAVE
             )
         );
     }
