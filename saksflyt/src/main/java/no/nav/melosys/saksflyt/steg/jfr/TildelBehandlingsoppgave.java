@@ -35,21 +35,23 @@ public class TildelBehandlingsoppgave implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
-        String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
+        boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class))
+            .orElse(Boolean.FALSE);
 
-        log.info("Henter behandlingsoppgave for fagsak {}", saksnummer);
-        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer);
-        if (oppgave.isPresent()) {
-            String behandlingsoppgaveId = oppgave.get().getOppgaveId();
-            oppgaveService.tildelOppgave(behandlingsoppgaveId, saksbehandler);
-            log.info("Prosessinstans {} har tildelt behandlingsoppgave {} for fagsak {}",
-                prosessinstans.getId(), behandlingsoppgaveId, saksnummer);
-        } else {
-            log.warn("Behandlingsoppgave for saksnummer {} finnes ikke og kan ikke tildeles.", saksnummer);
+        if (skalTilordnes) {
+            String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
+            String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
+
+            log.info("Henter behandlingsoppgave for fagsak {}", saksnummer);
+            Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer);
+            if (oppgave.isPresent()) {
+                String behandlingsoppgaveId = oppgave.get().getOppgaveId();
+                oppgaveService.tildelOppgave(behandlingsoppgaveId, saksbehandler);
+                log.info("Prosessinstans {} har tildelt behandlingsoppgave {} for fagsak {}",
+                    prosessinstans.getId(), behandlingsoppgaveId, saksnummer);
+            } else {
+                log.warn("Behandlingsoppgave for saksnummer {} finnes ikke og kan ikke tildeles.", saksnummer);
+            }
         }
-
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 }
