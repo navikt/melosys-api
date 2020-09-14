@@ -24,8 +24,6 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK,
             new ProsessFlyt(ProsessType.JFR_NY_SAK,
-                //JFR_VALIDERING,
-                //JFR_VURDER_JOURNALFOERINGSTYPE,
                 //JFR_AKTØR_ID,
                 JFR_OPPRETT_SAK_OG_BEH,
                 JFR_OPPRETT_SØKNAD,
@@ -43,8 +41,6 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_BEHANDLING,
             new ProsessFlyt(ProsessType.JFR_NY_BEHANDLING,
-                JFR_VALIDERING,
-                JFR_VURDER_JOURNALFOERINGSTYPE,
                 JFR_AKTØR_ID,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 REPLIKER_BEHANDLING,
@@ -54,8 +50,6 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(ProsessType.JFR_KNYTT,
             new ProsessFlyt(ProsessType.JFR_KNYTT,
-                JFR_VALIDERING,
-                JFR_VURDER_JOURNALFOERINGSTYPE,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 JFR_SETT_VURDER_DOKUMENT,
                 JFR_TILDEL_BEHANDLINGSOPPGAVE

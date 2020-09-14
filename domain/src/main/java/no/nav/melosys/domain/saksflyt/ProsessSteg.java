@@ -9,7 +9,6 @@ public enum ProsessSteg implements Kodeverk {
     MOT_VURDER_AUTOMATISK_JFR("MOT_VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
 
     // Journalføring
-    JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
     JFR_VURDER_JOURNALFOERINGSTYPE("JFR_VURDER_JOURNALFOERINGSTYPE", "Nytt innkommende dokument. Saksbehandler vurderer behov for opprettelse av ny behandling."),
     JFR_AKTØR_ID("JFR_AKTØR_ID", "Henter aktørID"),
     JFR_OPPRETT_SAK_OG_BEH("JFR_OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
