@@ -56,6 +56,5 @@ public class HentAktoerIdTest {
         agent.utfør(p);
 
         verify(tpsFasade).hentAktørIdForIdent(brukerID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
     }
 }

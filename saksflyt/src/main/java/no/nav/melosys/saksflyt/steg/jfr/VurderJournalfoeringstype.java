@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_AKTØR_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
 
 /**
  * Journalføring av nytt dokument på eksisterende sak.
@@ -88,7 +88,7 @@ public class VurderJournalfoeringstype implements StegBehandler {
             prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
         } else {
             // Dokumentet journalføres direkte.
-            prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+            prosessinstans.setSteg(OPPDATER_OG_FERDIGSTILL_JOURNALPOST);
         }
     }
 }

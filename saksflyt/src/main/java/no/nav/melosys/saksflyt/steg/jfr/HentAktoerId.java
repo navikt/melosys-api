@@ -53,7 +53,7 @@ public class HentAktoerId implements StegBehandler {
 
         Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
         if (behandlingstype.equals(Behandlingstyper.ENDRET_PERIODE)) {
-            prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
+            prosessinstans.setSteg(ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST);
         } else {
             prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
         }

@@ -32,11 +32,10 @@ public final class ProsessflytDefinisjon {
                 JFR_OPPRETT_GSAK_SAK,
                 STATUS_BEH_OPPR,
                 JFR_OPPDATER_SAKSRELASJON,
-                JFR_OPPDATER_JOURNALPOST,
-                JFR_FERDIGSTILL_JOURNALPOST,
+                OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 JFR_HENT_REGISTER_OPPL,
                 JFR_VURDER_INNGANGSVILKÅR,
-                VURDER_GJENBRUK_OPPGAVE,
+                //VURDER_GJENBRUK_OPPGAVE,
                 GSAK_OPPRETT_OPPGAVE,
                 SEND_FORVALTNINGSMELDING
             )
@@ -47,8 +46,7 @@ public final class ProsessflytDefinisjon {
                 JFR_VALIDERING,
                 JFR_VURDER_JOURNALFOERINGSTYPE,
                 JFR_AKTØR_ID,
-                JFR_OPPDATER_JOURNALPOST,
-                JFR_FERDIGSTILL_JOURNALPOST,
+                OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 REPLIKER_BEHANDLING,
                 GSAK_OPPRETT_OPPGAVE
             )
@@ -58,8 +56,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.JFR_KNYTT,
                 JFR_VALIDERING,
                 JFR_VURDER_JOURNALFOERINGSTYPE,
-                JFR_OPPDATER_JOURNALPOST,
-                JFR_FERDIGSTILL_JOURNALPOST,
+                OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 JFR_SETT_VURDER_DOKUMENT,
                 JFR_TILDEL_BEHANDLINGSOPPGAVE
             )
