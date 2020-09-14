@@ -5,9 +5,6 @@ import no.nav.melosys.exception.TekniskException;
 
 public enum ProsessSteg implements Kodeverk {
 
-    // NB! Disse skal være i logisk rekkefølge
-    MOT_VURDER_AUTOMATISK_JFR("MOT_VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
-
     // Journalføring
     JFR_OPPRETT_SAK_OG_BEH("JFR_OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
     REPLIKER_BEHANDLING("REPLIKER_BEHANDLING", "Replikerer den første, avsluttede behandlingen i Melosys og setter den til OPPRETTET"),

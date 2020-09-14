@@ -22,18 +22,18 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OpprettSakTest {
+class OpprettArkivsakTest {
 
     @Mock
     private SakService sakService;
     @Mock
     private FagsakService fagsakService;
 
-    private OpprettSak opprettSak;
+    private OpprettArkivsak opprettArkivsak;
 
     @BeforeEach
     public void setUp() {
-        opprettSak = new OpprettSak(fagsakService, sakService);
+        opprettArkivsak = new OpprettArkivsak(fagsakService, sakService);
     }
 
     @Test
@@ -57,7 +57,7 @@ class OpprettSakTest {
         prosessinstans.setBehandling(behandling);
 
         when(sakService.opprettSak(eq(fagsak.getSaksnummer()), eq(behandling.getTema()), eq(aktørID))).thenReturn(forventetArkivsakID);
-        opprettSak.utfør(prosessinstans);
+        opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
     }
@@ -75,7 +75,7 @@ class OpprettSakTest {
         prosessinstans.setBehandling(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettSak.utfør(prosessinstans))
+            .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))
             .withMessageContaining("allerede knyttet til");
 
     }

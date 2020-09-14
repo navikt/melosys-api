@@ -18,15 +18,15 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_ARKIVSAK;
 
 @Component
-public class OpprettSak implements StegBehandler {
+public class OpprettArkivsak implements StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OpprettSak.class);
+    private static final Logger log = LoggerFactory.getLogger(OpprettArkivsak.class);
 
     private final FagsakService fagsakService;
     private final SakService sakService;
 
     @Autowired
-    public OpprettSak(FagsakService fagsakService, SakService sakService) {
+    public OpprettArkivsak(FagsakService fagsakService, SakService sakService) {
         this.fagsakService = fagsakService;
         this.sakService = sakService;
     }
@@ -43,7 +43,7 @@ public class OpprettSak implements StegBehandler {
         Fagsak fagsak = behandling.getFagsak();
 
         if (fagsak.getGsakSaksnummer() != null) {
-            throw new FunksjonellException("Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny sak: allerede knyttet til " + fagsak.getGsakSaksnummer());
+            throw new FunksjonellException("Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny arkivsak: allerede knyttet til " + fagsak.getGsakSaksnummer());
         }
 
         String aktørId = fagsak.hentBruker().getAktørId();

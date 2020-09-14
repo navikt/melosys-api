@@ -10,21 +10,21 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GjenbrukOppgaveTest {
+@ExtendWith(MockitoExtension.class)
+class GjenbrukOppgaveTest {
     @Mock
     private OppgaveService oppgaveService;
     @Captor
@@ -32,13 +32,13 @@ public class GjenbrukOppgaveTest {
 
     private GjenbrukOppgave gjenbrukOppgave;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         gjenbrukOppgave = new GjenbrukOppgave(oppgaveService);
     }
 
     @Test
-    public void gjenbrukOppgave_utfør_oppdatererOppgave() throws FunksjonellException, TekniskException {
+    void gjenbrukOppgave_utfør_oppdatererOppgave() throws FunksjonellException, TekniskException {
         final String oppgaveID = "1234";
         final String saksnummer = "MEL-123";
         final String oppgaveBeskrivelse = "jeg beskriver oppgave";
