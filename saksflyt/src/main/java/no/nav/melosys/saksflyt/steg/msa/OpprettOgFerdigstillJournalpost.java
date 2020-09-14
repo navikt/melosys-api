@@ -59,7 +59,7 @@ public class OpprettOgFerdigstillJournalpost implements StegBehandler {
 
         String journalpostID = joarkFasade.opprettJournalpost(opprettJournalpost, true);
 
-        behandling.setInitierendeDokumentId(journalpostID);
+        behandling.setInitierendeJournalpostId(journalpostID);
         behandlingService.lagre(behandling);
 
         prosessinstans.setSteg(ProsessSteg.MSA_HENT_REGISTEROPPLYSNINGER);

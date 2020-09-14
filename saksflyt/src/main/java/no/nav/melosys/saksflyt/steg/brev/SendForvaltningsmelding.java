@@ -47,15 +47,9 @@ public class SendForvaltningsmelding implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
-        // Henter ut behandling med saksopplysninger
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);
-
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
-        log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());
+        log.info("Sendt forvaltningsmelding for behandling {}", behandling.getId());
     }
 }

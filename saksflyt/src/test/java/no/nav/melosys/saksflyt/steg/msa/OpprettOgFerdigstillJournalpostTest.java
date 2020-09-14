@@ -14,9 +14,8 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
@@ -57,7 +56,7 @@ public class OpprettOgFerdigstillJournalpostTest {
     private ArgumentCaptor<OpprettJournalpost> captor;
 
     @Before
-    public void setup() throws IkkeFunnetException, TekniskException {
+    public void setup() throws FunksjonellException {
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadID);
 
         opprettOgFerdigstillJournalpost = new OpprettOgFerdigstillJournalpost(

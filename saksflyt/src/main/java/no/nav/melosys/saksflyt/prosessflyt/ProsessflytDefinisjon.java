@@ -22,6 +22,21 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(
+            ProsessType.FORVALTNINGSMELDING_SEND,
+            new ProsessFlyt(ProsessType.FORVALTNINGSMELDING_SEND,
+                SEND_FORVALTNINGSMELDING
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(
+            ProsessType.HENLEGG_SAK,
+            new ProsessFlyt(ProsessType.HENLEGG_SAK,
+                HS_SEND_BREV,
+                IV_STATUS_BEH_AVSL
+            )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.VIDERESEND_SOKNAD,
             new ProsessFlyt(ProsessType.VIDERESEND_SOKNAD,
                 VS_AVKLAR_MYNDIGHET,
