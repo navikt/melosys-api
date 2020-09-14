@@ -27,7 +27,7 @@ public class VurderGjenbrukOppgave implements StegBehandler {
         if (prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
             prosessinstans.setSteg(GJENBRUK_OPPGAVE);
         } else {
-            prosessinstans.setSteg(GSAK_OPPRETT_OPPGAVE);
+            prosessinstans.setSteg(OPPRETT_OPPGAVE);
         }
 
         log.debug("Vurdert gjenbruk av oppgave for prosessinstans {}", prosessinstans.getId());

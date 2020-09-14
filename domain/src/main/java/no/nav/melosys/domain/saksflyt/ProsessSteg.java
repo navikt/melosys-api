@@ -28,7 +28,7 @@ public enum ProsessSteg implements Kodeverk {
     // Oppgave
     VURDER_GJENBRUK_OPPGAVE("VURDER_GJENBRUK_OPPGAVE", "Vurder om eksisterende oppgave skal gjenbrukes"),
     GJENBRUK_OPPGAVE("GJENBRUK_OPPGAVE", "Gjenbruker eksisterende oppgave"),
-    GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i Oppgave"),
+    OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter behandlingsoppgave"),
 
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),

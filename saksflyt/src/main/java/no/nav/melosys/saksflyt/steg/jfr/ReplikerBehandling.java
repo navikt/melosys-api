@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OPPGAVE;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.REPLIKER_BEHANDLING;
 
 
@@ -72,7 +72,7 @@ public class ReplikerBehandling implements StegBehandler {
         fagsak.setStatus(Saksstatuser.OPPRETTET);
         fagsakService.lagre(fagsak);
 
-        prosessinstans.setSteg(GSAK_OPPRETT_OPPGAVE);
+        prosessinstans.setSteg(OPPRETT_OPPGAVE);
         log.info("Prosessinstans {} har replikert behandling for {}", prosessinstans.getId(), saksnummer);
     }
 }

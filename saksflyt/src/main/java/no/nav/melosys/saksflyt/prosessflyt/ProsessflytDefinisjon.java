@@ -36,7 +36,7 @@ public final class ProsessflytDefinisjon {
                 HENT_REGISTER_OPPL,
                 JFR_VURDER_INNGANGSVILKÅR,
                 //VURDER_GJENBRUK_OPPGAVE,
-                GSAK_OPPRETT_OPPGAVE,
+                OPPRETT_OPPGAVE,
                 SEND_FORVALTNINGSMELDING
             )
         );
@@ -48,7 +48,7 @@ public final class ProsessflytDefinisjon {
                 JFR_AKTØR_ID,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 REPLIKER_BEHANDLING,
-                GSAK_OPPRETT_OPPGAVE
+                OPPRETT_OPPGAVE
             )
         );
 

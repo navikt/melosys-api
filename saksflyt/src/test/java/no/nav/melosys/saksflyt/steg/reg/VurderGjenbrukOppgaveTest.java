@@ -19,7 +19,7 @@ public class VurderGjenbrukOppgaveTest {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         vurderGjenbrukOppgave.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.GSAK_OPPRETT_OPPGAVE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.OPPRETT_OPPGAVE);
     }
 
     @Test

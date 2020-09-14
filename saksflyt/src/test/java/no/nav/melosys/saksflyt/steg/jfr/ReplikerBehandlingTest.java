@@ -22,7 +22,7 @@ import org.junit.rules.ExpectedException;
 
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.OPPRETTET;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OPPGAVE;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -75,7 +75,7 @@ public class ReplikerBehandlingTest {
 
         verify(fagsakService).lagre(fagsak);
         assertThat(fagsak.getStatus()).isEqualTo(OPPRETTET);
-        assertThat(p.getSteg()).isEqualTo(GSAK_OPPRETT_OPPGAVE);
+        assertThat(p.getSteg()).isEqualTo(OPPRETT_OPPGAVE);
         assertThat(p.getBehandling()).isEqualTo(replikertBehandling);
     }
 }
