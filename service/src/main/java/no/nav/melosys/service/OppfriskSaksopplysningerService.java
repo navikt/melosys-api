@@ -1,7 +1,6 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -10,7 +9,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -89,15 +87,7 @@ public class OppfriskSaksopplysningerService {
 
         Fagsak fagsak = behandling.getFagsak();
         if (grunnlagData != null && behandling.kanResultereIVedtak() && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
-            var søknadsland = behandling.erNorgeUtpekt()
-                ? grunnlagData.hentUtenlandskeArbeidsstederLandkode()
-                : grunnlagData.soeknadsland.landkoder;
-
-            if (behandling.erNorgeUtpekt() && søknadsland.isEmpty()) {
-                søknadsland = List.of(Landkoder.NO.getKode());
-            }
-
-            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
+            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, behandling.finnSøknadsLand(), periode);
             fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);
         }
     }

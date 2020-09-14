@@ -1,10 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -15,6 +12,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -234,6 +232,23 @@ public class Behandling extends RegistreringsInfo {
         }
 
         return Optional.empty();
+    }
+
+    public Collection<String> finnSøknadsLand() {
+        if (!kanResultereIVedtak()) {
+            return Collections.emptyList();
+        }
+
+        Collection<String> søknadsland;
+        if (erNorgeUtpekt()) {
+            søknadsland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode();
+            if (søknadsland.isEmpty()){
+                søknadsland.add(Landkoder.NO.getKode());
+            }
+        } else {
+            søknadsland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder;
+        }
+        return søknadsland;
     }
 
     @Override

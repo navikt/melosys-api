@@ -1,6 +1,7 @@
 package no.nav.melosys.service.vilkaar;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,7 +44,7 @@ public class InngangsvilkaarService {
     }
 
     public boolean vurderOgLagreInngangsvilkår(long behandlingID,
-                                               List<String> søknadsland,
+                                               Collection<String> søknadsland,
                                                ErPeriode søknadsperiode) throws FunksjonellException {
         final InngangsvilkaarVurdering vurderingEF_883_2004 = vurderInngangsvilkår(behandlingID, søknadsland, søknadsperiode);
         final boolean erEF_883_2004 = vurderingEF_883_2004.isOppfylt();
@@ -53,7 +54,7 @@ public class InngangsvilkaarService {
         return erEF_883_2004;
     }
 
-    private InngangsvilkaarVurdering vurderInngangsvilkår(long behandlingID, List<String> søknadsland, ErPeriode søknadsperiode)
+    private InngangsvilkaarVurdering vurderInngangsvilkår(long behandlingID, Collection<String> søknadsland, ErPeriode søknadsperiode)
         throws FunksjonellException {
         Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
         if (statsborgerskap == null) {
