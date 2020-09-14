@@ -32,7 +32,6 @@ public final class ProsessflytDefinisjon {
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 HENT_REGISTER_OPPL,
                 JFR_VURDER_INNGANGSVILKÅR,
-                //VURDER_GJENBRUK_OPPGAVE,
                 OPPRETT_OPPGAVE,
                 SEND_FORVALTNINGSMELDING
             )
@@ -77,7 +76,6 @@ public final class ProsessflytDefinisjon {
                 STATUS_BEH_OPPR,
                 HENT_REGISTER_OPPL,
                 JFR_VURDER_INNGANGSVILKÅR,
-                VURDER_GJENBRUK_OPPGAVE,
                 GJENBRUK_OPPGAVE
             )
         );

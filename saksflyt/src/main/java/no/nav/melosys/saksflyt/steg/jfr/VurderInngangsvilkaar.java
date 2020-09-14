@@ -46,6 +46,6 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
         boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandling.getId(), søknadsland, periode);
         fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
-        prosessinstans.setSteg(ProsessSteg.VURDER_GJENBRUK_OPPGAVE);
+        log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandling.getId(), kvalifisererForEF_883_2004);
     }
 }
