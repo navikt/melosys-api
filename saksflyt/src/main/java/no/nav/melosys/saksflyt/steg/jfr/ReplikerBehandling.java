@@ -18,29 +18,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OPPGAVE;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.REPLIKER_BEHANDLING;
 
 
-/**
- * Ferdigstiller en journalpost i Joark.
- *
- * Transisjoner:
- *     REPLIKER_BEHANDLING -> EN NY FLOTT GREIE eller FEILET_MASKINELT hvis feil
- */
 @Component
 public class ReplikerBehandling implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(ReplikerBehandling.class);
 
-    private FagsakService fagsakService;
-    private BehandlingService behandlingService;
+    private final FagsakService fagsakService;
+    private final BehandlingService behandlingService;
 
     @Autowired
     public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        log.info("ReplikerBehandling initialisert");
     }
 
     @Override
@@ -50,8 +42,6 @@ public class ReplikerBehandling implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
@@ -72,7 +62,6 @@ public class ReplikerBehandling implements StegBehandler {
         fagsak.setStatus(Saksstatuser.OPPRETTET);
         fagsakService.lagre(fagsak);
 
-        prosessinstans.setSteg(OPPRETT_OPPGAVE);
         log.info("Prosessinstans {} har replikert behandling for {}", prosessinstans.getId(), saksnummer);
     }
 }
