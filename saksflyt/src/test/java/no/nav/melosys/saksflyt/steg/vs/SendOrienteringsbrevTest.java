@@ -19,7 +19,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_SOKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -60,11 +59,5 @@ public class SendOrienteringsbrevTest {
         assertThat(brevbestilling.getDokumentType()).isEqualTo(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD);
         assertThat(brevbestilling.getMottakere().stream().map(Mottaker::getRolle)).containsExactly(Aktoersroller.BRUKER);
         assertThat(brevbestilling.getBehandling()).isEqualTo(behandling);
-    }
-
-    @Test
-    public void utfør_setNesteSteg_erSendSøknad() throws FunksjonellException, TekniskException {
-        steg.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(VS_SEND_SOKNAD);
     }
 }

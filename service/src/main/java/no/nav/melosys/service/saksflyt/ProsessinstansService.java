@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -132,6 +131,7 @@ public class ProsessinstansService {
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
+        prosessinstans.setStatus(ProsessStatus.KLAR);
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
         }
@@ -164,15 +164,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansHenleggSak(Behandling behandling, Henleggelsesgrunner begrunnelseKode, String fritekst) {
+    public void opprettProsessinstansFagsakHenlagt(Behandling sistAktiveBehandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medBehandling(behandling)
+            .medBehandling(sistAktiveBehandling)
             .medType(ProsessType.HENLEGG_SAK)
-            .medSteg(ProsessSteg.HS_OPPDATER_RESULTAT)
-            .medBegrunnelseFritekst(fritekst)
             .build();
 
-        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, begrunnelseKode);
         lagre(prosessinstans);
     }
 
@@ -201,7 +198,6 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.MANGELBREV);
-        prosessinstans.setSteg(ProsessSteg.MANGELBREV);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker);
         prosessinstans.setData(ProsessDataKey.BREVDATA, brevData);
 
@@ -294,7 +290,6 @@ public class ProsessinstansService {
     public void opprettProsessinstansForvaltningsmelding(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.FORVALTNINGSMELDING_SEND);
-        prosessinstans.setSteg(ProsessSteg.SEND_FORVALTNINGSMELDING);
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);
     }
@@ -334,7 +329,6 @@ public class ProsessinstansService {
                                                       String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
-            .medSteg(ProsessSteg.VS_OPPDATER_RESULTAT)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjoner != null ? Set.of(mottakerInstitusjoner) : null)
             .medBegrunnelseFritekst(fritekstBrev)

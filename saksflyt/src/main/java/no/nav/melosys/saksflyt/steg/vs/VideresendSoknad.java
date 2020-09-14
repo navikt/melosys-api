@@ -18,7 +18,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
@@ -34,7 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.arkiv.DokumentVariant.lagArkivVariant;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_SOKNAD;
 
 /**
  * Sender et brev med søknad som vedlegg til utenlandsk myndighet
@@ -69,17 +68,14 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+        SendUtlandStatus sendtStatus = sendUtland(
+            BucType.LA_BUC_03,
+            prosessinstans,
+            hentSøknadSomVedlegg(prosessinstans.getBehandling())
+        );
 
-        SendUtlandStatus sendtStatus = sendUtland(BucType.LA_BUC_03, prosessinstans, hentSøknadSomVedlegg(prosessinstans.getBehandling()));
-
-        if (sendtStatus == SendUtlandStatus.SED_SENDT) {
-            prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
-        } else if (sendtStatus == SendUtlandStatus.BREV_SENDT) {
-            prosessinstans.setSteg(VS_DISTRIBUER_JOURNALPOST);
-        } else {
-            throw new TekniskException("Verken SED eller brev ble sendt for behandling " + prosessinstans.getBehandling().getId());
-        }
+        log.info("Status på sending av søknad til utenlandsk myndighet for behandling {}: {}",
+            prosessinstans.getBehandling().getId(), sendtStatus);
     }
 
     private Vedlegg hentSøknadSomVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
@@ -113,7 +109,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
         String journalpostID = sedSomBrevService
             .lagJournalpostForSendingAvSedSomBrev(SedType.A008, landkode, behandling, lagSøknadVedlegg(behandling));
 
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+        prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
     }
 
     private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {

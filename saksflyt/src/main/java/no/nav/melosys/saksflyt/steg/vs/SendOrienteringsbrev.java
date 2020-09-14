@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_ORIENTERINGSBREV;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_SOKNAD;
 
 /**
  * Sender orienteringsbrev til bruker
@@ -63,7 +62,5 @@ public class SendOrienteringsbrev implements StegBehandler {
         brevBestiller.bestill(brevbestilling);
 
         log.info("Sendt orienteringsbrev om videresending av søknad for prosessinstans {}", prosessinstans.getId());
-
-        prosessinstans.setSteg(VS_SEND_SOKNAD);
     }
 }
