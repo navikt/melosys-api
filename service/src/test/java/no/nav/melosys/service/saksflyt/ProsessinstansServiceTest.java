@@ -159,7 +159,6 @@ public class ProsessinstansServiceTest {
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.VIDERESEND_SOKNAD);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.VS_OPPDATER_RESULTAT);
         assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, List.class)).isNull();
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
         assertThat(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isNotBlank();

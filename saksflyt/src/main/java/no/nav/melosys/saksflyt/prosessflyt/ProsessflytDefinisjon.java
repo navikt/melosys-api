@@ -36,6 +36,16 @@ public final class ProsessflytDefinisjon {
                 IV_STATUS_BEH_AVSL
             )
         );
+
+        PROSESS_FLYT_MAP.put(ProsessType.VIDERESEND_SOKNAD,
+            new ProsessFlyt(ProsessType.VIDERESEND_SOKNAD,
+                VS_AVKLAR_MYNDIGHET,
+                VS_SEND_ORIENTERINGSBREV,
+                VS_SEND_SOKNAD,
+                VS_DISTRIBUER_JOURNALPOST,
+                IV_STATUS_BEH_AVSL
+            )
+        );
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {

@@ -107,20 +107,21 @@ public class VideresendSoknadTest {
 
         verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_03),
             eq(new Vedlegg(vedlegg, journalpost.getHoveddokument().getTittel())), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_STATUS_BEH_AVSL);
+        assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID)).isNull();
     }
 
     @Test
     public void utfør_skalSendesUtlandErIkkeEessiKlar_senderA008SomBrev() throws MelosysException {
         Prosessinstans prosessinstans = opprettProsessinstans();
         Behandling behandling = prosessinstans.getBehandling();
+        String opprettetJournalpostID = "532523";
 
         byte[] vedlegg = new byte[10];
         when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(journalpost.getHoveddokument().getDokumentId())))
             .thenReturn(vedlegg);
 
         when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(any(SedType.class), any(Landkoder.class), any(), any()))
-            .thenReturn("2");
+            .thenReturn(opprettetJournalpostID);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
@@ -133,7 +134,7 @@ public class VideresendSoknadTest {
 
         verify(sedSomBrevService)
             .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A008), any(Landkoder.class), eq(behandling), anyList());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.VS_DISTRIBUER_JOURNALPOST);
+        assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID)).isEqualTo(opprettetJournalpostID);
     }
 
     private Prosessinstans opprettProsessinstans() {
