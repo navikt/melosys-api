@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -38,6 +39,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
+import org.apache.commons.lang3.StringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,9 +47,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.xml.sax.SAXException;
 
+import static java.util.function.Predicate.not;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
+import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.MAKS_ANTALL_TEGN_PER_LINJE_5_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -210,26 +214,43 @@ public class A1MapperTest {
     }
 
     @Test
-    public void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() throws TekniskException {
-        StrukturertAdresse adresse = new StrukturertAdresse();
-        adresse.gatenavn = "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien";;
-        adresse.husnummer = "47";
-        adresse.postnummer = "0000";
-        adresse.poststed = "Poststed";
-        adresse.region = "Region";
-        adresse.landkode = "NO";
+    public void mapTilBrevXML_harKortAdressePåArbeidssted_brekkerIkkeAdresseOverFlereLinjer() throws TekniskException {
+        StrukturertAdresse adresse = lagStrukturertAdresse();
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("", "", adresse);
 
-        brevData.arbeidssteder = List.of(fysiskArbeidssted);
-        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
-        List<AdresseType> adresser = a1.getFysiskArbeidsstedAdresseListe().getAdresse();
+        assertThat(fysiskArbeidssted.lagAdresselinje().length()).isLessThan(MAKS_ANTALL_TEGN_PER_LINJE_5_2);
 
-        assertThat(adresser).extracting(AdresseType::getAdresselinje1)
-            .containsSequence(
-                adresse.gatenavn.substring(0, 67),
-                adresse.gatenavn.substring(68) + " " + adresse.husnummer + " " + adresse.postnummer,
-                adresse.poststed + " " + adresse.region + " " + adresse.landkode
-            );
+        brevData.arbeidssteder = List.of(fysiskArbeidssted);
+        brevData.arbeidsland = Collections.emptyList();
+
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
+            .map(AdresseType::getAdresselinje1)
+            .filter(not(StringUtils::isEmpty))
+            .collect(Collectors.toList());
+
+        assertThat(utfylteAdresselinjer.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() throws TekniskException {
+        StrukturertAdresse adresse = lagStrukturertAdresse();
+        adresse.gatenavn = "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien";
+        adresse.husnummer = "47";
+        Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("", "", adresse);
+
+        assertThat(fysiskArbeidssted.lagAdresselinje().length()).isGreaterThan(MAKS_ANTALL_TEGN_PER_LINJE_5_2);
+
+        brevData.arbeidssteder = List.of(fysiskArbeidssted);
+        brevData.arbeidsland = Collections.emptyList();
+
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
+            .map(AdresseType::getAdresselinje1)
+            .filter(not(StringUtils::isEmpty))
+            .collect(Collectors.toList());
+
+        assertThat(utfylteAdresselinjer.size()).isGreaterThan(1);
     }
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
