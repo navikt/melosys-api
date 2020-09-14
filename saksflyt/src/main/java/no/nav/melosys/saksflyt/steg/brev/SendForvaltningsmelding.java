@@ -1,7 +1,10 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -19,12 +22,6 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
-/**
- * Sender forvaltningsmelding til søker
- *
- * Transisjoner:
- * SEND_FORVALTNINGSMELDING -> null eller FEILET_MASKINELT hvis feil
- */
 @Component
 public class SendForvaltningsmelding implements StegBehandler {
 
@@ -47,15 +44,18 @@ public class SendForvaltningsmelding implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        // Henter ut behandling med saksopplysninger
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        boolean skalSendesForvaltningsmelding = Optional
+            .ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class))
+            .orElse(Boolean.FALSE);
 
-        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);
-
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
-        log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());
+        if (skalSendesForvaltningsmelding) {
+            Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+            String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+            brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);
+            log.info("Sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
+        } else {
+            log.info("Ikke sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
+        }
     }
 }
