@@ -2,24 +2,24 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OppdaterSaksrelasjonTest {
+@ExtendWith(MockitoExtension.class)
+class OppdaterSaksrelasjonTest {
 
     @Mock
     private EessiService eessiService;
@@ -30,13 +30,13 @@ public class OppdaterSaksrelasjonTest {
 
     private static final String JOURNALPOST_ID = "123";
 
-    @Before
+    @BeforeEach
     public void setup() {
         oppdaterSaksrelasjon = new OppdaterSaksrelasjon(joarkFasade, eessiService);
     }
 
     @Test
-    public void utfør_journalpostErFraEessi_verifiserOppdaterSaksrelasjon() throws MelosysException {
+    void utfør_journalpostErFraEessi_verifiserOppdaterSaksrelasjon() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
 

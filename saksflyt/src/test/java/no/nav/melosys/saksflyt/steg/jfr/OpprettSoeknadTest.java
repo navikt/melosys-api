@@ -2,45 +2,42 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OpprettSoeknadTest {
+@ExtendWith(MockitoExtension.class)
+class OpprettSoeknadTest {
 
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     private OpprettSoeknad opprettSoeknad;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         opprettSoeknad = new OpprettSoeknad(behandlingsgrunnlagService);
     }
 
     @Test
-    public void utfør() throws FunksjonellException {
-        Prosessinstans p = new Prosessinstans();
+    void utfør() throws FunksjonellException {
+        Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
-        p.setBehandling(behandling);
-        p.setType(ProsessType.JFR_NY_SAK);
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.JFR_NY_SAK);
 
-        opprettSoeknad.utfør(p);
+        opprettSoeknad.utfør(prosessinstans);
 
         verify(behandlingsgrunnlagService, times(1)).opprettSøknadGrunnlag(eq(behandling.getId()), any(SoeknadDokument.class));
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);
     }
 }

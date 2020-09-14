@@ -24,9 +24,9 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK,
             new ProsessFlyt(ProsessType.JFR_NY_SAK,
-                JFR_VALIDERING,
-                JFR_VURDER_JOURNALFOERINGSTYPE,
-                JFR_AKTØR_ID,
+                //JFR_VALIDERING,
+                //JFR_VURDER_JOURNALFOERINGSTYPE,
+                //JFR_AKTØR_ID,
                 JFR_OPPRETT_SAK_OG_BEH,
                 JFR_OPPRETT_SØKNAD,
                 JFR_OPPRETT_GSAK_SAK,
