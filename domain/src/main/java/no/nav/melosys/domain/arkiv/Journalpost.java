@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 
 /**
  * Journalpostopplysninger fra Joark. Transient for Melosys.
@@ -44,9 +44,9 @@ public class Journalpost {
             .findFirst();
     }
 
-    public ArkivDokument hentArkivDokument(String dokumentID) throws FunksjonellException {
+    public ArkivDokument hentArkivDokument(String dokumentID) throws IkkeFunnetException {
         return finnArkivDokument(dokumentID).orElseThrow(() ->
-            new FunksjonellException(String.format("Finner ikke dokument %s i journalpost %s", dokumentID, journalpostId)));
+            new IkkeFunnetException(String.format("Finner ikke dokument %s i journalpost %s", dokumentID, journalpostId)));
     }
 
     public String getJournalpostId() {
