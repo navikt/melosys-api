@@ -226,6 +226,16 @@ public class Behandling extends RegistreringsInfo {
             .findFirst().map(Saksopplysning::getDokument);
     }
 
+    public Optional<ErPeriode> finnPeriode() {
+        if (kanResultereIVedtak()) {
+            return Optional.of(behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode);
+        } else if (erBehandlingAvSed()) {
+            return finnSedDokument().map(SedDokument::getLovvalgsperiode);
+        }
+
+        return Optional.empty();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

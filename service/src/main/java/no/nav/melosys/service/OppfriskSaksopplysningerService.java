@@ -2,11 +2,14 @@ package no.nav.melosys.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.MelosysException;
@@ -61,19 +64,13 @@ public class OppfriskSaksopplysningerService {
         String aktørID = behandling.getFagsak().hentBruker().getAktørId();
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
 
-        BehandlingsgrunnlagData grunnlagData = null;
-        LocalDate fom = null;
-        LocalDate tom = null;
+        BehandlingsgrunnlagData grunnlagData = Optional.ofNullable(behandling.getBehandlingsgrunnlag())
+            .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata)
+            .orElse(null);
 
-        if (behandling.kanResultereIVedtak()) {
-            grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-            fom = grunnlagData.periode.getFom();
-            tom = grunnlagData.periode.getTom();
-        } else if (behandling.erBehandlingAvSed()) {
-            SedDokument sedDokument = behandling.hentSedDokument();
-            fom = sedDokument.getLovvalgsperiode().getFom();
-            tom = sedDokument.getLovvalgsperiode().getTom();
-        }
+        ErPeriode periode = behandling.finnPeriode().orElse(new Periode());
+        LocalDate fom = periode.getFom();
+        LocalDate tom = periode.getTom();
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
@@ -99,8 +96,6 @@ public class OppfriskSaksopplysningerService {
             if (behandling.erNorgeUtpekt() && søknadsland.isEmpty()) {
                 søknadsland = List.of(Landkoder.NO.getKode());
             }
-
-            var periode = grunnlagData.periode;
 
             boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
             fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);

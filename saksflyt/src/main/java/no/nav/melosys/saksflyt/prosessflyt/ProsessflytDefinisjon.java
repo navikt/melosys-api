@@ -33,7 +33,7 @@ public final class ProsessflytDefinisjon {
                 STATUS_BEH_OPPR,
                 JFR_OPPDATER_SAKSRELASJON,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
-                JFR_HENT_REGISTER_OPPL,
+                HENT_REGISTER_OPPL,
                 JFR_VURDER_INNGANGSVILKÅR,
                 //VURDER_GJENBRUK_OPPGAVE,
                 GSAK_OPPRETT_OPPGAVE,
@@ -84,7 +84,7 @@ public final class ProsessflytDefinisjon {
                 JFR_OPPRETT_SØKNAD,
                 JFR_OPPRETT_GSAK_SAK,
                 STATUS_BEH_OPPR,
-                JFR_HENT_REGISTER_OPPL,
+                HENT_REGISTER_OPPL,
                 JFR_VURDER_INNGANGSVILKÅR,
                 VURDER_GJENBRUK_OPPGAVE,
                 GJENBRUK_OPPGAVE

@@ -22,7 +22,7 @@ public enum ProsessSteg implements Kodeverk {
     OPPDATER_OG_FERDIGSTILL_JOURNALPOST("OPPDATER_OG_FERDIGSTILL_JOURNALPOST", "Oppdaterer og ferdigstiller journalposten i Joark"),
     JFR_SETT_VURDER_DOKUMENT("JFR_SETT_VURDER_DOKUMENT", "Setter status til VURDER_DOKUMENT"),
     JFR_TILDEL_BEHANDLINGSOPPGAVE("JFR_TILDEL_BEHANDLINGSOPPGAVE", "Tildeler behandlingsoppgave for gjeldende fagsak til en saksbehandler"),
-    JFR_HENT_REGISTER_OPPL("JFR_HENT_REGISTER_OPPL", "Hent registeropplysninger"),
+    HENT_REGISTER_OPPL("HENT_REGISTER_OPPL", "Henter registeropplysninger"),
     JFR_VURDER_INNGANGSVILKÅR("JFR_VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår"),
 
     // Oppgave
