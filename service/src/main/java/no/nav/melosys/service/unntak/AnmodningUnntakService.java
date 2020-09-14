@@ -7,14 +7,12 @@ import java.util.Set;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
@@ -68,16 +66,10 @@ public class AnmodningUnntakService {
 
         anmodningsperiodeService.validerAnmodningsperiodeForBehandling(behandlingID);
         validerHarBostedsadresse(behandling);
-        oppdaterBehandlingsresultat(behandlingID);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner, ytterligereInformasjonSed);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    private void oppdaterBehandlingsresultat(long behandlingID) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
-        behandlingsresultatService.lagre(behandlingsresultat);
     }
 
     private void validerHarBostedsadresse(Behandling behandling) throws FunksjonellException, TekniskException {
