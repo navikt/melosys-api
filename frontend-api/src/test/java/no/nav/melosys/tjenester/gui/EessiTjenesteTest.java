@@ -15,7 +15,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.DokumentVisningService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
@@ -51,7 +51,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private DokumentVisningService dokumentVisningService;
+    private DokumentHentingService dokumentHentingService;
 
     @Captor
     private ArgumentCaptor<List<Vedlegg>> vedleggCaptor;
@@ -68,9 +68,9 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(123L))).thenReturn(behandling);
         when(behandlingService.hentBehandling(eq(123L))).thenReturn(behandling);
-        when(dokumentVisningService.hentDokument(anyString(), anyString())).thenReturn(new byte[0]);
+        when(dokumentHentingService.hentDokument(anyString(), anyString())).thenReturn(new byte[0]);
 
-        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService, dokumentVisningService);
+        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService, dokumentHentingService);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
                     lagArkivDokument("1")
                 )));
 
-        when(dokumentVisningService.hentDokumenter(eq("321"))).thenReturn(journalposter);
+        when(dokumentHentingService.hentDokumenter(eq("321"))).thenReturn(journalposter);
 
         List<VedleggDto> vedleggDtoList = List.of(
             new VedleggDto("1", "1"),
@@ -140,9 +140,9 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         assertThat(opprettBucSvarDto).isNotNull()
             .extracting(OpprettBucSvarDto::getRinaUrl).isEqualTo(MOCK_RINA_URL);
 
-        verify(dokumentVisningService, times(3)).hentDokument(eq("1"), anyString());
-        verify(dokumentVisningService).hentDokument(eq("2"), anyString());
-        verify(dokumentVisningService).hentDokument(eq("3"), anyString());
+        verify(dokumentHentingService, times(3)).hentDokument(eq("1"), anyString());
+        verify(dokumentHentingService).hentDokument(eq("2"), anyString());
+        verify(dokumentHentingService).hentDokument(eq("3"), anyString());
 
         verify(eessiService).opprettBucOgSed(any(), eq(BucType.LA_BUC_01), anyList(), vedleggCaptor.capture());
 

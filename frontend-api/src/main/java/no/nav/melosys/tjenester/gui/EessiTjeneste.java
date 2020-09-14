@@ -16,7 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.DokumentVisningService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.*;
 import no.nav.security.token.support.core.api.Protected;
@@ -38,13 +38,13 @@ public class EessiTjeneste {
 
     private final EessiService eessiService;
     private final BehandlingService behandlingService;
-    private final DokumentVisningService dokumentVisningService;
+    private final DokumentHentingService dokumentHentingService;
 
     @Autowired
-    public EessiTjeneste(EessiService eessiService, BehandlingService behandlingService, DokumentVisningService dokumentVisningService) {
+    public EessiTjeneste(EessiService eessiService, BehandlingService behandlingService, DokumentHentingService dokumentHentingService) {
         this.eessiService = eessiService;
         this.behandlingService = behandlingService;
-        this.dokumentVisningService = dokumentVisningService;
+        this.dokumentHentingService = dokumentHentingService;
     }
 
     @GetMapping("/mottakerinstitusjoner/{bucType}")
@@ -79,7 +79,7 @@ public class EessiTjeneste {
     }
 
     private Collection<Vedlegg> lagVedlegg(String saksnummer, Collection<VedleggDto> vedleggDto) throws FunksjonellException, IntegrasjonException {
-        Collection<Journalpost> journalposter = dokumentVisningService.hentDokumenter(saksnummer);
+        Collection<Journalpost> journalposter = dokumentHentingService.hentDokumenter(saksnummer);
 
         Collection<Vedlegg> vedlegg = new ArrayList<>();
         for (VedleggDto dto : vedleggDto) {
@@ -100,7 +100,7 @@ public class EessiTjeneste {
 
     private Vedlegg lagVedlegg(Journalpost journalpost, String dokumentID) throws FunksjonellException {
         final ArkivDokument arkivDokument = journalpost.hentArkivDokument(dokumentID);
-        final byte[] pdf = dokumentVisningService.hentDokument(journalpost.getJournalpostId(), dokumentID);
+        final byte[] pdf = dokumentHentingService.hentDokument(journalpost.getJournalpostId(), dokumentID);
 
         return new Vedlegg(pdf, arkivDokument.getTittel());
     }
