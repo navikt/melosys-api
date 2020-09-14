@@ -10,8 +10,8 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentService;
-import no.nav.melosys.service.dokument.DokumentVisningService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
@@ -36,17 +36,17 @@ public class DokumentTjeneste {
     private static final String APPLICATION_JSON_UTF8 = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8";
 
     private final DokumentService dokumentService;
-    private final DokumentVisningService dokumentVisningService;
+    private final DokumentHentingService dokumentHentingService;
     private final EessiService eessiService;
     private final TilgangService tilgangService;
 
     @Autowired
     public DokumentTjeneste(DokumentService dokumentService,
-                            DokumentVisningService dokumentVisningService,
+                            DokumentHentingService dokumentHentingService,
                             EessiService eessiService,
                             TilgangService tilgangService) {
         this.dokumentService = dokumentService;
-        this.dokumentVisningService = dokumentVisningService;
+        this.dokumentHentingService = dokumentHentingService;
         this.eessiService = eessiService;
         this.tilgangService = tilgangService;
     }
@@ -57,7 +57,7 @@ public class DokumentTjeneste {
                                                @PathVariable("dokumentID") String dokumentID)
         throws SikkerhetsbegrensningException, IkkeFunnetException {
         byte[] dokument;
-        dokument = dokumentVisningService.hentDokument(journalpostID, dokumentID);
+        dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
         return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
@@ -65,7 +65,7 @@ public class DokumentTjeneste {
     @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
     public ResponseEntity<List<JournalpostInfoDto>> hentDokumenter(@PathVariable("saksnummer") String saksnummer)
         throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
-        List<JournalpostInfoDto> dokumentListe = dokumentVisningService.hentDokumenter(saksnummer)
+        List<JournalpostInfoDto> dokumentListe = dokumentHentingService.hentDokumenter(saksnummer)
             .stream()
             .map(JournalpostInfoDto::av)
             .sorted(Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())))
