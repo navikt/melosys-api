@@ -67,7 +67,6 @@ public class ProsessinstansService {
     public Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringDto journalfoeringDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(type);
-        prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
 
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getHoveddokument().getDokumentID());
@@ -218,7 +217,6 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = lagProsessinstansFraOpprettSakDto(opprettSakDto);
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
-        prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
 

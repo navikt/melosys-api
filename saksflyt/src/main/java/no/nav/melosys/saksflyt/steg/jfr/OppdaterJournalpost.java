@@ -6,9 +6,7 @@ import java.util.Map;
 
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -23,15 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
 
-/**
- * Oppdaterer en journalpost i Joark.
- *
- * Transisjoner:
- * JFR_OPPDATER_JOURNALPOST -> JFR_FERDIGSTILL_JOURNALPOST eller FEILET_MASKINELT hvis feil
- */
 @Component
 public class OppdaterJournalpost implements StegBehandler {
 
@@ -44,18 +35,16 @@ public class OppdaterJournalpost implements StegBehandler {
     public OppdaterJournalpost(JoarkFasade joarkFasade, FagsakService fagsakService) {
         this.joarkFasade = joarkFasade;
         this.fagsakService = fagsakService;
-        log.info("OppdaterJournalpost initialisert");
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_OPPDATER_JOURNALPOST;
+        return OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         boolean medDokumentkategori = false;
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
@@ -64,12 +53,11 @@ public class OppdaterJournalpost implements StegBehandler {
             medDokumentkategori = true;
         }
 
-        Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
-        Long arkivSakID = null;
-        if (prosessinstans.getType() == ProsessType.JFR_KNYTT || Behandlingstyper.ENDRET_PERIODE.equals(behandlingstype)) {
+        Long arkivSakID;
+        if (prosessinstans.getBehandling() == null) {
             arkivSakID = fagsakService.hentFagsak(prosessinstans.getData(SAKSNUMMER)).getGsakSaksnummer();
         } else {
-            arkivSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
+            arkivSakID = prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
         }
         if (arkivSakID == null) {
             throw new TekniskException("Prosessinstansen er ikke knyttet til en nav-sak");
@@ -100,9 +88,7 @@ public class OppdaterJournalpost implements StegBehandler {
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler).medDokumentkategori(medDokumentkategori).build();
-        joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, false);
-
-        prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);
-        log.info("Prosessinstans {} har oppdatert journalpost {}. SakId: {}", prosessinstans.getId(), journalpostID, arkivSakID);
+        joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, true);
+        log.info("Oppdatert og ferdigstilt journalpost {}. ArkivsakID: {}", journalpostID, arkivSakID);
     }
 }

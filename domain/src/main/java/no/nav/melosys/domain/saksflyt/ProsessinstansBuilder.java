@@ -20,6 +20,7 @@ public class ProsessinstansBuilder {
         return this;
     }
 
+    @Deprecated(forRemoval = true)
     public ProsessinstansBuilder medSteg(ProsessSteg steg) {
         this.steg = steg;
         return this;

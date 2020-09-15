@@ -1,10 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.Optional;
-
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -14,16 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDING;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OPPGAVE;
 
-/**
- * Oppretter en oppgave i GSAK.
- */
 @Component
 public class OpprettOppgave implements StegBehandler {
-
-    private static final String STØTTES_IKKE = " er ikke støttet";
 
     private final OppgaveService oppgaveService;
 
@@ -34,7 +24,7 @@ public class OpprettOppgave implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return GSAK_OPPRETT_OPPGAVE;
+        return OPPRETT_OPPGAVE;
     }
 
     @Override
@@ -42,24 +32,8 @@ public class OpprettOppgave implements StegBehandler {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             prosessinstans.getBehandling(),
             prosessinstans.hentJournalpostID(),
-            prosessinstans.getData(ProsessDataKey.AKTØR_ID),
+            prosessinstans.getBehandling().getFagsak().hentBruker().getAktørId(),
             prosessinstans.hentSaksbehandlerHvisTilordnes()
         );
-
-        if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
-            boolean skalSendesForvaltningsmelding =
-                Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).orElse(true);
-            if (skalSendesForvaltningsmelding) {
-                prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
-            } else {
-                prosessinstans.setSteg(ProsessSteg.FERDIG);
-            }
-        } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
-            prosessinstans.setSteg(ProsessSteg.FERDIG);
-        } else {
-            String feilmelding = prosessinstans.getId() + ":" + System.lineSeparator()
-                + "prosessType " + prosessinstans.getType() + STØTTES_IKKE;
-            throw new TekniskException(feilmelding);
-        }
     }
 }

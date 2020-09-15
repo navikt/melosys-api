@@ -1,15 +1,13 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.List;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
@@ -17,24 +15,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Kaller regelmodulen for å vurdere inngangsvilkår. Setter type på fagsak basert på resultatet.
- *
- * Transisjoner:
- * JFR_VURDER_INNGANGSVILKÅR → HENT_ARBF_OPPL (eller til FEILET_MASKINELT hvis feil)
- */
 @Component
 public class VurderInngangsvilkaar implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
 
     private final InngangsvilkaarService inngangsvilkaarService;
     private final FagsakService fagsakService;
+    private final BehandlingService behandlingService;
 
     @Autowired
     public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService,
-                                 FagsakService fagsakService) {
+                                 FagsakService fagsakService, BehandlingService behandlingService) {
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.fagsakService = fagsakService;
+        this.behandlingService = behandlingService;
     }
 
     @Override
@@ -44,15 +38,14 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        long behandlingID = prosessinstans.getBehandling().getId();
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
 
-        var søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
-        var periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
+        var søknadsland = behandling.finnSøknadsLand();
+        var periode = behandling.finnPeriode()
+            .orElseThrow(() -> new IkkeFunnetException("Finner ingen periode for inngangsvilkårsvurdering for behandling " + behandling.getId()));
 
+        boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandling.getId(), søknadsland, periode);
         fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
-
-        prosessinstans.setSteg(ProsessSteg.VURDER_GJENBRUK_OPPGAVE);
+        log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandling.getId(), kvalifisererForEF_883_2004);
     }
 }

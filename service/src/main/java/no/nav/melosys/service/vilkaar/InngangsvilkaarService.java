@@ -1,8 +1,10 @@
 package no.nav.melosys.service.vilkaar;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.ErPeriode;
@@ -43,7 +45,7 @@ public class InngangsvilkaarService {
     }
 
     public boolean vurderOgLagreInngangsvilkår(long behandlingID,
-                                               List<String> søknadsland,
+                                               Collection<String> søknadsland,
                                                ErPeriode søknadsperiode) throws FunksjonellException {
         final InngangsvilkaarVurdering vurderingEF_883_2004 = vurderInngangsvilkår(behandlingID, søknadsland, søknadsperiode);
         final boolean erEF_883_2004 = vurderingEF_883_2004.isOppfylt();
@@ -53,7 +55,7 @@ public class InngangsvilkaarService {
         return erEF_883_2004;
     }
 
-    private InngangsvilkaarVurdering vurderInngangsvilkår(long behandlingID, List<String> søknadsland, ErPeriode søknadsperiode)
+    private InngangsvilkaarVurdering vurderInngangsvilkår(long behandlingID, Collection<String> søknadsland, ErPeriode søknadsperiode)
         throws FunksjonellException {
         Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
         if (statsborgerskap == null) {
@@ -63,7 +65,7 @@ public class InngangsvilkaarService {
             søknadsperiode = new Periode(søknadsperiode.getFom(), søknadsperiode.getFom().plusYears(REGISTEROPPLYSNINGER_DEFAULT_SLUTTDATO_ANTALL_ÅR));
         }
 
-        var landkoderISO3 = tilIso3(søknadsland);
+        var landkoderISO3 = Set.copyOf(tilIso3(søknadsland));
         InngangsvilkarResponse res = inngangsvilkaarConsumer.vurderInngangsvilkår(statsborgerskap, landkoderISO3, søknadsperiode);
 
         List<String> feilmeldinger = res.getFeilmeldinger().stream().map(Feilmelding::getMelding).collect(Collectors.toList());

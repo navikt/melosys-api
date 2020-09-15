@@ -17,7 +17,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,9 +55,9 @@ public class TildelBehandlingsoppgaveTest {
 
     @Test
     public void utfør_finnerOppgave_forventTildelingAvOppgave() throws FunksjonellException, TekniskException {
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
         tildelBehandlingsoppgave.utfør(prosessinstans);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(oppgaveService).tildelOppgave(eq(OPPGAVE_ID), eq(SAKSBEHANDLER));
     }
 }

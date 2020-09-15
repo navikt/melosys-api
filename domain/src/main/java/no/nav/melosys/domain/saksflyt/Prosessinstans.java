@@ -134,6 +134,10 @@ public class Prosessinstans {
         }
     }
 
+    public <T> T getData(ProsessDataKey key, Class<T> type, T defaultVerdi) {
+        return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
+    }
+
     public void setData(ProsessDataKey key, String value) {
         this.data.setProperty(key.getKode(), value);
     }
@@ -146,7 +150,6 @@ public class Prosessinstans {
             String dataString = dataMapper.writeValueAsString(value);
             setData(key, dataString);
         } catch (JsonProcessingException e) {
-            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
             throw new IllegalStateException("Feil ved serialisering", e);
         }
     }
@@ -201,15 +204,14 @@ public class Prosessinstans {
             .orElse(Boolean.FALSE) ? getData(ProsessDataKey.SAKSBEHANDLER) : null;
     }
 
-    private void leggTilHendelse(ProsessinstansHendelse piHend) {
-        if (!this.equals(piHend.getProsessinstans())) {
-            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
+    private void leggTilHendelse(ProsessinstansHendelse prosessinstansHendelse) {
+        if (!this.equals(prosessinstansHendelse.getProsessinstans())) {
             throw new IllegalArgumentException("Forsøk på å legge til ProsessinstansHendelse på feil Prosessinstans");
         }
         if (hendelser == null) {
             hendelser = new ArrayList<>();
         }
-        hendelser.add(piHend);
+        hendelser.add(prosessinstansHendelse);
     }
 
     public void leggTilHendelse(ProsessSteg steg, Throwable t) {

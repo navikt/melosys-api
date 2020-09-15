@@ -58,6 +58,64 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK,
+            new ProsessFlyt(ProsessType.JFR_NY_SAK,
+                JFR_OPPRETT_SAK_OG_BEH,
+                JFR_OPPRETT_SØKNAD,
+                OPPRETT_ARKIVSAK,
+                STATUS_BEH_OPPR,
+                JFR_OPPDATER_SAKSRELASJON,
+                OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
+                HENT_REGISTER_OPPL,
+                JFR_VURDER_INNGANGSVILKÅR,
+                OPPRETT_OPPGAVE,
+                SEND_FORVALTNINGSMELDING
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_BEHANDLING,
+            new ProsessFlyt(ProsessType.JFR_NY_BEHANDLING,
+                OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
+                REPLIKER_BEHANDLING,
+                OPPRETT_OPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.JFR_KNYTT,
+            new ProsessFlyt(ProsessType.JFR_KNYTT,
+                OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
+                JFR_SETT_VURDER_DOKUMENT,
+                JFR_TILDEL_BEHANDLINGSOPPGAVE
+            )
+        );
+
+        /*PROSESS_FLYT_MAP.put(ProsessType.JFR_AOU_BREV, TODO
+            new ProsessFlyt(ProsessType.JFR_AOU_BREV,
+                JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING,
+                JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST,
+                JFR_AOU_BREV_OPPRETT_SEDDOKUMENT,
+                AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE,
+                AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET,
+                AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE,
+                AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER,
+                AOU_MOTTAK_REGISTERKONTROLL,
+                AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
+                AOU_MOTTAK_OPPRETT_OPPGAVE
+            )
+        );*/
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK,
+                JFR_OPPRETT_SAK_OG_BEH,
+                JFR_OPPRETT_SØKNAD,
+                OPPRETT_ARKIVSAK,
+                STATUS_BEH_OPPR,
+                HENT_REGISTER_OPPL,
+                JFR_VURDER_INNGANGSVILKÅR,
+                GJENBRUK_OPPGAVE
+            )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
                 AVKLAR_MYNDIGHET,

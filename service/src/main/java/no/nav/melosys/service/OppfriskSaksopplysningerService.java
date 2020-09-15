@@ -1,13 +1,11 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -61,19 +59,11 @@ public class OppfriskSaksopplysningerService {
         String aktørID = behandling.getFagsak().hentBruker().getAktørId();
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
 
-        BehandlingsgrunnlagData grunnlagData = null;
-        LocalDate fom = null;
-        LocalDate tom = null;
-
-        if (behandling.kanResultereIVedtak()) {
-            grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-            fom = grunnlagData.periode.getFom();
-            tom = grunnlagData.periode.getTom();
-        } else if (behandling.erBehandlingAvSed()) {
-            SedDokument sedDokument = behandling.hentSedDokument();
-            fom = sedDokument.getLovvalgsperiode().getFom();
-            tom = sedDokument.getLovvalgsperiode().getTom();
-        }
+        //OK om perioden er tom. Ikke alle behandlingstema krever periode.
+        //Implisitt at perioden eksisterer om behandling kan resultere i vedtak
+        ErPeriode periode = behandling.finnPeriode().orElse(new Periode());
+        LocalDate fom = periode.getFom();
+        LocalDate tom = periode.getTom();
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
@@ -91,18 +81,8 @@ public class OppfriskSaksopplysningerService {
         }
 
         Fagsak fagsak = behandling.getFagsak();
-        if (grunnlagData != null && behandling.kanResultereIVedtak() && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
-            var søknadsland = behandling.erNorgeUtpekt()
-                ? grunnlagData.hentUtenlandskeArbeidsstederLandkode()
-                : grunnlagData.soeknadsland.landkoder;
-
-            if (behandling.erNorgeUtpekt() && søknadsland.isEmpty()) {
-                søknadsland = List.of(Landkoder.NO.getKode());
-            }
-
-            var periode = grunnlagData.periode;
-
-            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
+        if (behandling.kanResultereIVedtak() && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
+            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, behandling.finnSøknadsLand(), periode);
             fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);
         }
     }

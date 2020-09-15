@@ -15,52 +15,50 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.OPPRETTET;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.FEILET_MASKINELT;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
-public class ReplikerBehandlingTest {
+@ExtendWith(MockitoExtension.class)
+class ReplikerBehandlingTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    private ReplikerBehandling agent;
-    private Prosessinstans p;
-    private Fagsak fagsak;
+    @Mock
     private FagsakService fagsakService;
+    @Mock
     private BehandlingService behandlingService;
 
-    @Before
+    private ReplikerBehandling replikerBehandling;
+
+    private final Fagsak fagsak = new Fagsak();
+    private final Prosessinstans prosessinstans = new Prosessinstans();
+
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
-        behandlingService = mock(BehandlingService.class);
-        fagsakService = mock(FagsakService.class);
-        agent = new ReplikerBehandling(fagsakService, behandlingService);
-        fagsak = new Fagsak();
+        replikerBehandling = new ReplikerBehandling(fagsakService, behandlingService);
         fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
         fagsak.setBehandlinger(new ArrayList<>());
-        p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, "MelTest-1");
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, "MelTest-1");
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         doReturn(fagsak).when(fagsakService).hentFagsak("MelTest-1");
-
     }
 
     @Test
-    public void utfør_manglendeInaktivBehandling_feiler() throws FunksjonellException, TekniskException {
-        expectedException.expect(FunksjonellException.class);
-        agent.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
+    void utfør_manglendeInaktivBehandling_feiler() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
+            .withMessageContaining("ingen avsluttet behandling");
     }
 
     @Test
-    public void utfør_eksisterendeInaktivBehandling_settStegOpprettOppgave() throws FunksjonellException, TekniskException {
+    void utfør_eksisterendeInaktivBehandling_settStegOpprettOppgave() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -71,11 +69,10 @@ public class ReplikerBehandlingTest {
         replikertBehandling.setId(11L);
         doReturn(replikertBehandling).when(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling,  Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
 
-        agent.utfør(p);
+        replikerBehandling.utfør(prosessinstans);
 
         verify(fagsakService).lagre(fagsak);
         assertThat(fagsak.getStatus()).isEqualTo(OPPRETTET);
-        assertThat(p.getSteg()).isEqualTo(GSAK_OPPRETT_OPPGAVE);
-        assertThat(p.getBehandling()).isEqualTo(replikertBehandling);
+        assertThat(prosessinstans.getBehandling()).isEqualTo(replikertBehandling);
     }
 }

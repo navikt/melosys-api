@@ -58,7 +58,6 @@ public class GjenbrukOppgave implements StegBehandler {
 
         final String opprettetOppgaveID = oppgaveService.opprettOppgave(nyOppgave);
 
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("PID {} har opprettet ny oppgave med ID {} til sak {}, med beskrivelse fra oppgave {}", prosessinstans.getId(), opprettetOppgaveID, saksnummer, oppgaveID);
     }
 }
