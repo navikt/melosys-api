@@ -86,7 +86,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
             sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
-            sendA1tilSkattOppkreverUtland(behandling, resultat, begrunnelseKode, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
@@ -175,21 +174,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             && !lovvalgsperiode.erArtikkel13()
             && !lovvalgsperiode.erArtikkel11_4()) {
             brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
-        }
-    }
-
-    private void sendA1tilSkattOppkreverUtland(Behandling behandling,
-                                               Behandlingsresultat resultat,
-                                               String begrunnelsekode,
-                                               String saksbehandler)
-        throws FunksjonellException, TekniskException {
-        if (skalSendesTilSkatteoppkreverUtland(behandling, resultat)) {
-            Brevbestilling a1SkatteoppkreverUtland = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-                .medAvsender(saksbehandler)
-                .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
-                .medBehandling(behandling)
-                .medBegrunnelseKode(begrunnelsekode).build();
-            brevBestiller.bestill(a1SkatteoppkreverUtland);
         }
     }
 
