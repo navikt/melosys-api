@@ -8,6 +8,7 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -42,8 +43,8 @@ class DataByggerStubs {
 
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.adresse = hentStrukturertAddresseStub();
-        foretakUtland.orgnr = "orgnr";
         foretakUtland.navn = "navn foretak";
+        foretakUtland.uuid = "uuid";
 
         SoeknadDokument søknadDokument = new SoeknadDokument();
         søknadDokument.selvstendigArbeid = new SelvstendigArbeid();
@@ -56,7 +57,7 @@ class DataByggerStubs {
         arbeidUtland.adresse = hentStrukturertAddresseStub();
         arbeidUtland.foretakNavn = "foretaknavn";
         arbeidUtland.foretakOrgnr = "32132133";
-        søknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
+        søknadDokument.arbeidUtland = Lists.newArrayList(arbeidUtland);
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
         utenlandskIdent.ident = "439205843";
         utenlandskIdent.landkode = "SE";
@@ -103,12 +104,27 @@ class DataByggerStubs {
         return behandling;
     }
 
+    static Behandling hentBehandlingMedManglendeAdressefelterStub() {
+        Behandling behandling = hentBehandlingStub();
+        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+
+        ArbeidUtland arbeidUtland = behandlingsgrunnlagData.arbeidUtland.remove(0);
+        arbeidUtland.adresse.poststed = null;
+        behandlingsgrunnlagData.arbeidUtland.add(arbeidUtland);
+
+        ForetakUtland foretakUtland = behandlingsgrunnlagData.foretakUtland.remove(0);
+        foretakUtland.adresse.postnummer = null;
+        foretakUtland.adresse.poststed = null;
+        behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
+
+        return behandling;
+    }
+
     private static StrukturertAdresse hentStrukturertAddresseStub() {
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
         strukturertAdresse.husnummer = "25";
         strukturertAdresse.gatenavn = "Gatenavn";
         strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
         strukturertAdresse.landkode = Landkoder.NO.getKode();
         return strukturertAdresse;
@@ -118,6 +134,7 @@ class DataByggerStubs {
         HashSet<OrganisasjonDokument> orgDokumentHashSet = new HashSet<>();
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.organisasjonDetaljer = mock(OrganisasjonsDetaljer.class);
+        organisasjonDokument.setOrgnummer("orgnr");
         when(organisasjonDokument.organisasjonDetaljer.hentStrukturertForretningsadresse()).thenReturn(hentStrukturertAddresseStub());
         orgDokumentHashSet.add(organisasjonDokument);
 

@@ -14,6 +14,7 @@ import no.nav.melosys.domain.dokument.soeknad.LuftfartBase;
 import no.nav.melosys.domain.eessi.sed.Adresse;
 import no.nav.melosys.domain.eessi.sed.Arbeidssted;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
+import no.nav.melosys.domain.eessi.sed.Virksomhet;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -34,13 +35,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.eessi.sed.Adresse.IKKE_TILGJENGELIG;
-import static no.nav.melosys.domain.eessi.sed.Adresse.INGEN_FAST_ADRESSE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static no.nav.melosys.domain.eessi.sed.Adresse.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SedDataByggerTest {
@@ -110,6 +108,11 @@ public class SedDataByggerTest {
 
     private SedDataGrunnlagUtenSoknad lagDokumentressurserUtenSøknad() throws TekniskException {
         return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService);
+    }
+
+    private SedDataGrunnlagMedSoknad lagDokumentressurserMedManglendeAdressefelter() throws TekniskException, IkkeFunnetException {
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        return new SedDataGrunnlagMedSoknad(DataByggerStubs.hentBehandlingMedManglendeAdressefelterStub(), kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test
@@ -387,6 +390,37 @@ public class SedDataByggerTest {
         assertThat(arbeidssted.getNavn()).isEqualTo(luftfartBase.hjemmebaseNavn);
         assertThat(arbeidssted.getAdresse().getGateadresse()).isEqualTo("N/A");
         assertThat(arbeidssted.getAdresse().getLand()).isEqualTo(luftfartBase.hjemmebaseLand);
+    }
+
+    @Test
+    public void lagArbeidssted_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidssteder())
+            .extracting(Arbeidssted::getAdresse)
+            .extracting(Adresse::getPoststed)
+            .contains(UKJENT);
+    }
+
+    @Test
+    public void lagVirksomhet_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidsgivendeVirksomheter())
+            .filteredOn(virksomhet -> UKJENT.equals(virksomhet.getOrgnr()))
+            .extracting(Virksomhet::getAdresse)
+            .extracting(Adresse::getPoststed)
+            .contains(UKJENT);
+    }
+
+    @Test
+    public void lagVirksomhet_harObligatoriskeFelter_blirSatt() throws TekniskException, FunksjonellException {
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidsgivendeVirksomheter())
+            .extracting(Virksomhet::getOrgnr)
+            .contains("orgnr");
     }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {

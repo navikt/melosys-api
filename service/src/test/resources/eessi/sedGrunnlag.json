@@ -25,8 +25,7 @@
         "region": null,
         "adressetype": null
       },
-      "orgnr": "923609016",
-      "type": null
+      "orgnr": "923609016"
     },
     {
       "navn": "adf",
@@ -38,8 +37,7 @@
         "region": null,
         "adressetype": null
       },
-      "orgnr": "123321",
-      "type": null
+      "orgnr": "123321"
     },
     {
       "navn": "swe",
@@ -51,8 +49,7 @@
         "region": null,
         "adressetype": null
       },
-      "orgnr": "123",
-      "type": null
+      "orgnr": "123"
     }
   ],
   "selvstendigeVirksomheter": [
@@ -66,8 +63,7 @@
         "region": "Testselvstendigregion",
         "adressetype": null
       },
-      "orgnr": "Testselvstendignummer",
-      "type": null
+      "orgnr": "Testselvstendignummer"
     }
   ],
   "arbeidssteder": [
@@ -125,8 +121,7 @@
         "region": null,
         "adressetype": null
       },
-      "orgnr": "115511",
-      "type": null
+      "orgnr": "115511"
     },
     {
       "navn": "annen norsk",
@@ -138,8 +133,7 @@
         "region": null,
         "adressetype": null
       },
-      "orgnr": "226622",
-      "type": null
+      "orgnr": "226622"
     },
     {
       "navn": "finner ikke orgnummer så vi sender uten",
@@ -151,8 +145,7 @@
         "region": null,
         "adressetype": null
       },
-      "orgnr": null,
-      "type": null
+      "orgnr": null
     }
   ]
 }
