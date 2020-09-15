@@ -44,17 +44,17 @@ public class HentRegisteropplysninger implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String brukerId = tpsFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
 
-        var requestBuilder = RegisteropplysningerRequest.builder()
+        var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
             .behandlingID(prosessinstans.getBehandling().getId())
             .fnr(brukerId)
             .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
 
         behandling.finnPeriode().ifPresent(periode -> {
-            requestBuilder.fom(periode.getFom());
-            requestBuilder.tom(periode.getTom());
+            registeropplysningerRequestBuilder.fom(periode.getFom());
+            registeropplysningerRequestBuilder.tom(periode.getTom());
         });
 
-        registeropplysningerService.hentOgLagreOpplysninger(requestBuilder.build());
+        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
         log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
     }
 }

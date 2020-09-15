@@ -35,8 +35,7 @@ public class TildelBehandlingsoppgave implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class))
-            .orElse(Boolean.FALSE);
+        boolean skalTilordnes = prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class, Boolean.FALSE);
 
         if (skalTilordnes) {
             String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);

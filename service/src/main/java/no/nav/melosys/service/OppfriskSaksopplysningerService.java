@@ -1,13 +1,10 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.MelosysException;
@@ -62,10 +59,8 @@ public class OppfriskSaksopplysningerService {
         String aktørID = behandling.getFagsak().hentBruker().getAktørId();
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
 
-        BehandlingsgrunnlagData grunnlagData = Optional.ofNullable(behandling.getBehandlingsgrunnlag())
-            .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata)
-            .orElse(null);
-
+        //OK om perioden er tom. Ikke alle behandlingstema krever periode.
+        //Implisitt at perioden eksisterer om behandling kan resultere i vedtak
         ErPeriode periode = behandling.finnPeriode().orElse(new Periode());
         LocalDate fom = periode.getFom();
         LocalDate tom = periode.getTom();
@@ -86,7 +81,7 @@ public class OppfriskSaksopplysningerService {
         }
 
         Fagsak fagsak = behandling.getFagsak();
-        if (grunnlagData != null && behandling.kanResultereIVedtak() && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
+        if (behandling.kanResultereIVedtak() && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
             boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, behandling.finnSøknadsLand(), periode);
             fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);
         }

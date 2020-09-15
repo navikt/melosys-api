@@ -1,10 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -20,6 +17,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
 @Component
@@ -44,9 +42,7 @@ public class SendForvaltningsmelding implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
-        boolean skalSendesForvaltningsmelding = Optional
-            .ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class))
-            .orElse(Boolean.FALSE);
+        boolean skalSendesForvaltningsmelding = prosessinstans.getData(SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class, Boolean.FALSE);
 
         if (skalSendesForvaltningsmelding) {
             Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());

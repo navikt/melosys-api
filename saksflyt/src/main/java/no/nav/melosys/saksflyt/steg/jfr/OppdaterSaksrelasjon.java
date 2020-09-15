@@ -33,9 +33,9 @@ public class OppdaterSaksrelasjon implements StegBehandler {
         String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
         if (journalpost.mottaksKanalErEessi()) {
-            Long gsakSaksnummer = prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
+            Long arkivsakID = prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
             MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpostID);
-            eessiService.lagreSaksrelasjon(gsakSaksnummer, melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getBucType());
+            eessiService.lagreSaksrelasjon(arkivsakID, melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getBucType());
         }
     }
 }
