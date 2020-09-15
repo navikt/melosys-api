@@ -66,7 +66,7 @@ public enum ProsessSteg implements Kodeverk {
     IV_OPPDATER_RESULTAT("IV_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
     AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AVKLAR_ARBEIDSGIVER("IV_AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
-    IV_OPPDATER_MEDL("IV_OPPDATER_MEDL", "Oppdatering av medlemskap"),
+    OPPDATER_MEDL_VEDTAK("OPPDATER_MEDL_VEDTAK","Oppdaterer MEDL etter vedtak"),
     IV_SEND_BREV("IV_SEND_BREV", "Send brev etter iverksett vedtak"),
     IV_SEND_SED("IV_SEND_SED", "Send SED etter iverksett vedtak"),
     IV_OPPRETT_AVGIFTSOPPGAVE("IV_OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),

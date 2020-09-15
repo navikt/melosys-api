@@ -16,45 +16,35 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_MEDL;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_SEND_BREV;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_MEDL_VEDTAK;
 
-/**
- * Oppdaterer medlemskap periode i MEDL.
- *
- * Transisjoner:
- * ProsessType.IVERKSETT_VEDTAK og ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE
- *  IV_OPPDATER_MEDL -> IV_SEND_BREV eller FEILET_MASKINELT hvis feil
- */
 @Component
-public class OppdaterMedl implements StegBehandler {
+public class OppdaterMedlVedtak implements StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
+    private static final Logger log = LoggerFactory.getLogger(OppdaterMedlVedtak.class);
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+    public OppdaterMedlVedtak(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_OPPDATER_MEDL;
+        return OPPDATER_MEDL_VEDTAK;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = prosessinstans.getBehandling();
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         if (behandlingsresultat.medlOppdateres()) {
             oppdaterMedl(behandlingsresultat);
         }
-        prosessinstans.setSteg(IV_SEND_BREV);
     }
 
     private void oppdaterMedl(Behandlingsresultat behandlingsresultat) throws FunksjonellException, TekniskException {

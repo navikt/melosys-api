@@ -62,7 +62,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
                 AVKLAR_MYNDIGHET,
                 AVKLAR_ARBEIDSGIVER,
-                IV_OPPDATER_MEDL,
+                OPPDATER_MEDL_VEDTAK,
                 IV_SEND_BREV,
                 IV_SEND_SED,
                 UL_DISTRIBUER_JOURNALPOST,
