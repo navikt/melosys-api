@@ -178,7 +178,6 @@ public class ProsessinstansService {
                                                      Vedtakstyper vedtakstype, String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
-            .medSteg(ProsessSteg.IV_VALIDERING)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
             .medEessiMottakere(mottakerinstitusjoner)
@@ -344,7 +343,6 @@ public class ProsessinstansService {
                                                     String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
-            .medSteg(ProsessSteg.IV_VALIDERING)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerinstitusjoner)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)

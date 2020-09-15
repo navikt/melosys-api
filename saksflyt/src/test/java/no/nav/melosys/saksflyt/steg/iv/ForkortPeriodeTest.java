@@ -32,7 +32,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_VALIDERING;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -88,7 +87,6 @@ public class ForkortPeriodeTest {
 
         verify(avklartefaktaService).leggTilBegrunnelse(behandlingId, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiodeKode.getKode());
         assertThat(p.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>(){})).isEqualTo(mottakerInstitusjoner);
-        assertThat(p.getSteg()).isEqualTo(IV_VALIDERING);
     }
 
     @Test
@@ -110,7 +108,6 @@ public class ForkortPeriodeTest {
 
         verify(avklartefaktaService).leggTilBegrunnelse(behandlingId, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiodeKode.getKode());
         assertThat(p.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>(){})).isEqualTo(mottakerInstitusjoner);
-        assertThat(p.getSteg()).isEqualTo(IV_VALIDERING);
     }
 
     @Test

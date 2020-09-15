@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_FORKORT_PERIODE;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_VALIDERING;
 
 /**
  * Legger til avklarte fakta med informasjon om endringsbegrunnelse.
@@ -71,7 +70,6 @@ public class ForkortPeriode implements StegBehandler {
         avklartefakteService.leggTilBegrunnelse(behandling.getId(), Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
         avklarMottakerInstitusjoner(prosessinstans, behandling);
 
-        prosessinstans.setSteg(IV_VALIDERING);
         log.info("Oppdatert avklarteFakta for prosessinstans {}.", prosessinstans.getId());
     }
 
