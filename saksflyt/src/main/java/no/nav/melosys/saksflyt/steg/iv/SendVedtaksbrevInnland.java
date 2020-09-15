@@ -31,7 +31,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 
 
@@ -72,17 +72,14 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         if (resultat.erAvslag()) {
             sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler, fritekst);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
             log.info("Sendt utpekingsbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(SEND_VEDTAK_UTLAND);
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
             sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
             sendA1tilSkattOppkreverUtland(behandling, resultat, begrunnelseKode, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(SEND_VEDTAK_UTLAND);
         } else {
             throw new FunksjonellException("Vedtaksbrev kan ikke sendes for behandling " + behandling.getId());
         }
