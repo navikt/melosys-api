@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -25,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
@@ -73,12 +71,6 @@ public class OppdaterMedlTest {
         prosessinstans.setBehandling(behandling);
         prosessinstans.getBehandling().setType(Behandlingstyper.SOEKNAD);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-    }
-
-    @Test
-    public void sjekkNestSteg() throws FunksjonellException, TekniskException {
-        oppdaterMedl.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_BREV);
     }
 
     @Test

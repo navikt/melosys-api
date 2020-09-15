@@ -102,14 +102,4 @@ public class AvklarMyndighetTest {
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_AVKLAR_ARBEIDSGIVER);
     }
-
-    @Test
-    public void utfør_anmodningUnntakSjekkSteg_forventAouOppdaterMedl() throws Exception {
-        Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
-        no.nav.melosys.saksflyt.steg.aou.ut.AvklarMyndighet steg =
-            new no.nav.melosys.saksflyt.steg.aou.ut.AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
-        steg.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_MEDL);
-    }
 }

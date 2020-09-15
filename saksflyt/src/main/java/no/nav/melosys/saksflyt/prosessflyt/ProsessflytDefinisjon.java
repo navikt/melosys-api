@@ -46,6 +46,17 @@ public final class ProsessflytDefinisjon {
                 IV_STATUS_BEH_AVSL
             )
         );
+
+        PROSESS_FLYT_MAP.put(
+            ProsessType.ANMODNING_OM_UNNTAK,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK,
+                AOU_AVKLAR_MYNDIGHET,
+                AOU_OPPDATER_MEDL,
+                AOU_SEND_BREV,
+                AOU_SEND_SED,
+                AOU_OPPDATER_OPPGAVE
+            )
+        );
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {

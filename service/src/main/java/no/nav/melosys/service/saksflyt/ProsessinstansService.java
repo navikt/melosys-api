@@ -146,7 +146,6 @@ public class ProsessinstansService {
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon, String ytterligereInformasjonSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
-            .medSteg(ProsessSteg.AOU_VALIDERING)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)

@@ -36,8 +36,6 @@ public enum ProsessSteg implements Kodeverk {
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
     //Anmodning om unntak
-    AOU_VALIDERING("AOU_VALIDERING", "Validering av data for anmodning om unntak"),
-    AOU_OPPDATER_RESULTAT("AOU_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat for anmodning om unntak"),
     AOU_AVKLAR_MYNDIGHET("AOU_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AOU_OPPDATER_MEDL("AOU_OPPDATER_MEDL", "Oppdatering av medlemskap med anmodning om unntak"),
     AOU_SEND_BREV("AOU_SEND_BREV", "Send orienteringsbrev og A001 for anmodning om unntak"),

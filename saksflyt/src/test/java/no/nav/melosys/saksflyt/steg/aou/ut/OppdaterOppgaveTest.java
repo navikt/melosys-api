@@ -17,7 +17,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.FERDIG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -34,13 +33,13 @@ public class OppdaterOppgaveTest {
     @Captor
     private ArgumentCaptor<OppgaveOppdatering> oppgaveCaptor;
 
-    private OppdaterOppgave agent;
+    private OppdaterOppgave oppdaterOppgave;
 
-    private Prosessinstans prosessinstans = new Prosessinstans();
+    private final Prosessinstans prosessinstans = new Prosessinstans();
 
     @Before
     public void setUp() {
-        agent = new OppdaterOppgave(oppgaveService);
+        oppdaterOppgave = new OppdaterOppgave(oppgaveService);
         Behandling behandling = new Behandling();
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
         behandling.setDokumentasjonSvarfristDato(Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault())));
@@ -61,13 +60,11 @@ public class OppdaterOppgaveTest {
 
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
 
-        agent.utfør(prosessinstans);
+        oppdaterOppgave.utfør(prosessinstans);
         verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(toMånederFremITid);
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);
-        assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);
-
     }
 
     @Test
@@ -78,12 +75,11 @@ public class OppdaterOppgaveTest {
         Oppgave oppgave = lagOppgave(treMånederFremITid, eksisterendeBeskrivelse);
         when(oppgaveService.hentOppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
 
-        agent.utfør(prosessinstans);
+        oppdaterOppgave.utfør(prosessinstans);
         verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isNull();
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(ANMODNING_UNNTAK_BESKRIVELSE);
-        assertThat(prosessinstans.getSteg()).isEqualTo(FERDIG);
     }
 
     private Oppgave lagOppgave(LocalDate fristFerdigstillelse, String beskrivelse) {
