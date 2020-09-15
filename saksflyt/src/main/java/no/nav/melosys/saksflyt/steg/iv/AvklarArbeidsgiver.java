@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AVKLAR_ARBEIDSGIVER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_MEDL;
 import static no.nav.melosys.domain.saksflyt.ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE;
 
 /**
@@ -83,8 +82,6 @@ public class AvklarArbeidsgiver implements StegBehandler {
                 log.info("Avklart arbeidsgivere lagt til for sak {}.", saksnummer);
             }
         }
-
-        prosessinstans.setSteg(IV_OPPDATER_MEDL);
     }
 
     // Ved forkortet periode har allerede arbeidsgiver blitt avklart
