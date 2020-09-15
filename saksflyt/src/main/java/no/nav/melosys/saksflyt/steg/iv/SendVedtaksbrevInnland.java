@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
@@ -85,7 +86,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
             sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
-            sendA1tilSkattOppkreverUtland(behandling, resultat, begrunnelseKode, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_SEND_SED);
         } else {
@@ -140,11 +140,16 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
+        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottaker.av(SKATT)));
+        if (skalSendesTilSkatteoppkreverUtland(behandling, resultat)) {
+            mottakerListe.add(FastMottaker.av(SKATTEOPPKREVER_UTLAND));
+        }
+
         Brevbestilling innvilgelseBrukerOgSkatt = new Brevbestilling.Builder().medDokumentType(innvilgelseType)
             .medAvsender(saksbehandler)
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)
-            .medMottakere(Mottaker.av(BRUKER), FastMottaker.av(SKATT))
+            .medMottakere(mottakerListe)
             .medFritekst(fritekst)
             .build();
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
@@ -172,35 +177,16 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private void sendA1tilSkattOppkreverUtland(Behandling behandling,
-                                               Behandlingsresultat resultat,
-                                               String begrunnelsekode,
-                                               String saksbehandler)
-        throws FunksjonellException, TekniskException {
-        final boolean erArtikkel13 = resultat.hentValidertLovvalgsperiode().erArtikkel13();
-        if (erArtikkel13) {
-            if (!behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.isEmpty()) {
-                Brevbestilling a1SkatteoppkreverUtland = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-                    .medAvsender(saksbehandler)
-                    .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
-                    .medBehandling(behandling)
-                    .medBegrunnelseKode(begrunnelsekode).build();
-                brevBestiller.bestill(a1SkatteoppkreverUtland);
-            }
-        } else {
-            if (harValgteUtenlandskeVirksomheter(behandling)) {
-                Brevbestilling a1SkatteoppkreverUtland = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-                    .medAvsender(saksbehandler)
-                    .medMottakere(FastMottaker.av(SKATTEOPPKREVER_UTLAND))
-                    .medBehandling(behandling)
-                    .medBegrunnelseKode(begrunnelsekode).build();
-                brevBestiller.bestill(a1SkatteoppkreverUtland);
-            }
-        }
-    }
-
     private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) {
         return !avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty();
+    }
+
+    private boolean skalSendesTilSkatteoppkreverUtland(Behandling behandling, Behandlingsresultat resultat) {
+        if (resultat.hentValidertLovvalgsperiode().erArtikkel13()) {
+            return !behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.isEmpty();
+        } else {
+            return harValgteUtenlandskeVirksomheter(behandling);
+        }
     }
 
     private String hentBegrunnelseKode(Prosessinstans prosessinstans) {
