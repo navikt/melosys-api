@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.inngangsvilkar;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -36,7 +36,7 @@ public class InngangsvilkaarConsumerTest {
     public void vurderInngangsvilkår() {
 
         final Land statsborgerskap = Land.av(Land.NORGE);
-        final List<String> arbeidsland = List.of(Land.SVERIGE);
+        final Set<String> arbeidsland = Set.of(Land.SVERIGE);
         final LocalDate nå = LocalDate.now();
 
         server.expect(requestTo(url + "/inngangsvilkaar"))

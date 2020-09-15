@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.sob;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -13,14 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSNUMMER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.STATUS_BEH_OPPR;
 
-/**
- * Steget sørger for å skrive til Sak og Behandling når behandling opprettes
- *
- */
 @Component
 public class OppdaterStatusBehandlingOpprettet implements StegBehandler {
 
@@ -40,19 +34,13 @@ public class OppdaterStatusBehandlingOpprettet implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
-        String aktørID = prosessinstans.getData(AKTØR_ID);
-        String saksnummer = prosessinstans.getData(SAKSNUMMER);
         Behandling behandling = prosessinstans.getBehandling();
+        Fagsak fagsak = behandling.getFagsak();
+
+        String aktørID = fagsak.hentBruker().getAktørId();
+        String saksnummer = fagsak.getSaksnummer();
 
         sobService.sakOgBehandlingOpprettet(saksnummer, behandling.getId(), aktørID);
-
-        if (prosessinstans.getType() == ProsessType.OPPRETT_NY_SAK) {
-            prosessinstans.setSteg(JFR_HENT_REGISTER_OPPL);
-        } else {
-            prosessinstans.setSteg(JFR_OPPDATER_SAKSRELASJON);
-        }
-        log.info("Oppdatert sob-status til opprettet for prosessinstans {}", prosessinstans.getId());
+        log.info("Oppdatert sob-status til opprettet for behandling {}", behandling.getId());
     }
 }

@@ -5,30 +5,22 @@ import no.nav.melosys.exception.TekniskException;
 
 public enum ProsessSteg implements Kodeverk {
 
-    // NB! Disse skal være i logisk rekkefølge
-    MOT_VURDER_AUTOMATISK_JFR("MOT_VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
-
     // Journalføring
-    JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
-    JFR_VURDER_JOURNALFOERINGSTYPE("JFR_VURDER_JOURNALFOERINGSTYPE", "Nytt innkommende dokument. Saksbehandler vurderer behov for opprettelse av ny behandling."),
-    JFR_AKTØR_ID("JFR_AKTØR_ID", "Henter aktørID"),
     JFR_OPPRETT_SAK_OG_BEH("JFR_OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
     REPLIKER_BEHANDLING("REPLIKER_BEHANDLING", "Replikerer den første, avsluttede behandlingen i Melosys og setter den til OPPRETTET"),
     JFR_OPPRETT_SØKNAD("JFR_OPPRETT_SØKNAD", "Oppretter ny søknad i Melosys"),
-    JFR_OPPRETT_GSAK_SAK("JFR_OPPRETT_GSAK_SAK", "Oppretter Sak i GSAK"),
+    OPPRETT_ARKIVSAK("OPPRETT_ARKIVSAK", "Oppretter arkivsak"),
     STATUS_BEH_OPPR("STATUS_BEH_OPPR", "Oppdater Sak og Behandling ved oppretting av behandling"),
     JFR_OPPDATER_SAKSRELASJON("JFR_OPPDATER_SAKSRELASJON", "Oppdaterer saksrelasjon hvis journalposten omhandler en SED"),
-    JFR_OPPDATER_JOURNALPOST("JFR_OPPDATER_JOURNALPOST", "Oppdaterer journalposten i Joark"),
-    JFR_FERDIGSTILL_JOURNALPOST("JFR_FERDIGSTILL_JOURNALPOST", "Ferdigstiller journalposten i Joark"),
+    OPPDATER_OG_FERDIGSTILL_JOURNALPOST("OPPDATER_OG_FERDIGSTILL_JOURNALPOST", "Oppdaterer og ferdigstiller journalposten i Joark"),
     JFR_SETT_VURDER_DOKUMENT("JFR_SETT_VURDER_DOKUMENT", "Setter status til VURDER_DOKUMENT"),
     JFR_TILDEL_BEHANDLINGSOPPGAVE("JFR_TILDEL_BEHANDLINGSOPPGAVE", "Tildeler behandlingsoppgave for gjeldende fagsak til en saksbehandler"),
-    JFR_HENT_REGISTER_OPPL("JFR_HENT_REGISTER_OPPL", "Hent registeropplysninger"),
+    HENT_REGISTER_OPPL("HENT_REGISTER_OPPL", "Henter registeropplysninger"),
     JFR_VURDER_INNGANGSVILKÅR("JFR_VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår"),
 
     // Oppgave
-    VURDER_GJENBRUK_OPPGAVE("VURDER_GJENBRUK_OPPGAVE", "Vurder om eksisterende oppgave skal gjenbrukes"),
     GJENBRUK_OPPGAVE("GJENBRUK_OPPGAVE", "Gjenbruker eksisterende oppgave"),
-    GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i Oppgave"),
+    OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter behandlingsoppgave"),
 
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),

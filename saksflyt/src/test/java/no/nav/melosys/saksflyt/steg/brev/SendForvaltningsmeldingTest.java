@@ -10,18 +10,17 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SendForvaltningsmeldingTest {
+@ExtendWith(MockitoExtension.class)
+class SendForvaltningsmeldingTest {
 
     @Mock
     private BrevBestiller brevBestiller;
@@ -30,25 +29,34 @@ public class SendForvaltningsmeldingTest {
 
     private SendForvaltningsmelding sendForvaltningsmelding;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         sendForvaltningsmelding = new SendForvaltningsmelding(brevBestiller, behandlingService);
     }
 
     @Test
-    public void utfør() throws TekniskException, FunksjonellException {
+    void utfør_skalSendesForvaltningsmelding_bestillerForvaltningsmelding() throws TekniskException, FunksjonellException {
+        final long behandlingID = 21432L;
         Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.TRUE);
         Behandling behandling = new Behandling();
-        long behandlingID = 1111L;
         behandling.setId(behandlingID);
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
 
         sendForvaltningsmelding.utfør(prosessinstans);
 
-        verify(behandlingService).hentBehandling(eq(behandlingID));
+        verify(behandlingService).hentBehandling(behandlingID);
         verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), anyString(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
+    }
+
+    @Test
+    void utfør_skalIkkeSendeForvaltningsmelding_senderIkke() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(new Behandling());
+        sendForvaltningsmelding.utfør(prosessinstans);
+        verify(brevBestiller, never()).bestill(any());
     }
 }

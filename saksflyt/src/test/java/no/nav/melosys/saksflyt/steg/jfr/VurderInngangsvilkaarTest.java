@@ -1,30 +1,27 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
-import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.dokument.felles.Land.av;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,47 +30,47 @@ public class VurderInngangsvilkaarTest {
     private InngangsvilkaarService inngangsvilkaarService;
     @Mock
     private FagsakService fagsakService;
+    @Mock
+    private BehandlingService behandlingService;
 
-    private VurderInngangsvilkaar agent;
+    private VurderInngangsvilkaar vurderInngangsvilkaar;
+
+    private final long behandlingID = 143;
+    private final String saksnummer = "MEL-432";
 
     @Before
     public void setUp() {
-        agent = new VurderInngangsvilkaar(inngangsvilkaarService, fagsakService);
+        vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, fagsakService, behandlingService);
     }
 
     @Test
     public void utfoerSteg_funker() throws FunksjonellException, TekniskException {
-        Prosessinstans p = lagProsessinstans();
-        when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), any(), any())).thenReturn(true);
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
+        behandlingsgrunnlagData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
 
-        agent.utfør(p);
-
-        verify(fagsakService).oppdaterType(eq(p.getBehandling().getFagsak()), eq(true));
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.VURDER_GJENBRUK_OPPGAVE);
-    }
-
-    public static Prosessinstans lagProsessinstans() {
-        Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        p.setBehandling(behandling);
+        behandling.setId(behandlingID);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MIN_SAK");
-        p.getBehandling().setFagsak(fagsak);
+        fagsak.setSaksnummer(saksnummer);
+        behandling.setFagsak(fagsak);
 
-        Saksopplysning sopp = new Saksopplysning();
-        sopp.setType(SaksopplysningType.PERSOPL);
-        sopp.setDokument(lagPersoppl());
-        p.getBehandling().setSaksopplysninger(Collections.singleton(sopp));
-        p.setData(ProsessDataKey.SØKNADSLAND, Collections.singletonList(Landkoder.PL.getKode()));
-        p.setData(ProsessDataKey.SØKNADSPERIODE, new PeriodeDto(LocalDate.now(), null));
-        p.setData(ProsessDataKey.SAKSNUMMER, "1234567");
-        return p;
-    }
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
 
-    private static PersonDokument lagPersoppl() {
-        PersonDokument pDok = new PersonDokument();
-        pDok.statsborgerskap = av("NOR");
-        return pDok;
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(
+            eq(behandlingID),
+            eq(behandlingsgrunnlagData.soeknadsland.landkoder),
+            eq(behandlingsgrunnlagData.periode)
+        )).thenReturn(true);
+
+        vurderInngangsvilkaar.utfør(prosessinstans);
+
+        verify(fagsakService).oppdaterType(eq(prosessinstans.getBehandling().getFagsak()), eq(true));
     }
 }

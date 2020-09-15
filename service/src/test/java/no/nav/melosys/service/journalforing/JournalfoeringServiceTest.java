@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -233,15 +235,41 @@ public class JournalfoeringServiceTest {
 
 
     @Test
-    public void tilordneSakOgJournalfør() throws MelosysException {
-        tilordneDto.setSaksnummer("MEL-0123");
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_KNYTT), any()))
+    public void tilordneSakOgJournalfør_ønskerNyBehandlingEndretPeriode_ingenAktiveBehandlingerProsessinstansOpprettet() throws MelosysException {
+        final String saksnummer = "MEL-0123";
+        tilordneDto.setSaksnummer(saksnummer);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        fagsak.getBehandlinger().add(behandling);
+
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_BEHANDLING), any()))
             .thenReturn(new Prosessinstans());
         journalfoeringService.tilordneSakOgJournalfør(tilordneDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
         verify(oppgaveService).ferdigstillOppgave(anyString());
+    }
 
+    @Test
+    public void tilordneSakOgJournalfør_ønskerNyBehandlingEndretPeriode_finnesEnAktivBehandlingKasterException() throws MelosysException {
+        final String saksnummer = "MEL-0123";
+        tilordneDto.setSaksnummer(saksnummer);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        fagsak.getBehandlinger().add(behandling);
+
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.tilordneSakOgJournalfør(tilordneDto))
+            .withMessageContaining("Det finnes allerede en aktiv behandling på fagsak");
     }
 
     @Test

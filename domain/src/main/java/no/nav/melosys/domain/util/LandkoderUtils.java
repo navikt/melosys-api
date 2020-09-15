@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.util;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -24,7 +24,7 @@ public final class LandkoderUtils {
         return map.get(iso2Kode);
     }
 
-    public static List<String> tilIso3(List<String> iso2Koder) {
+    public static Collection<String> tilIso3(Collection<String> iso2Koder) {
         return iso2Koder.stream().map(LandkoderUtils::tilIso3).collect(Collectors.toList());
     }
 

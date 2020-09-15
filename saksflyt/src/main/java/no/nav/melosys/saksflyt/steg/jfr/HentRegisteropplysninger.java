@@ -1,11 +1,12 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.slf4j.Logger;
@@ -13,46 +14,47 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BRUKER_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_HENT_REGISTER_OPPL;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTER_OPPL;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
-@Component("JFRHentRegisteropplysninger")
+@Component
 public class HentRegisteropplysninger implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentRegisteropplysninger.class);
 
     private final RegisteropplysningerService registeropplysningerService;
+    private final BehandlingService behandlingService;
+    private final TpsFasade tpsFasade;
 
     @Autowired
-    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService) {
+    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService, BehandlingService behandlingService, TpsFasade tpsFasade) {
         this.registeropplysningerService = registeropplysningerService;
+        this.behandlingService = behandlingService;
+        this.tpsFasade = tpsFasade;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_HENT_REGISTER_OPPL;
+        return HENT_REGISTER_OPPL;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        String brukerId = prosessinstans.getData(BRUKER_ID);
-        Periode søknadsperiode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        String brukerId = tpsFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
 
-        registeropplysningerService.hentOgLagreOpplysninger(
-            RegisteropplysningerRequest.builder()
-                .behandlingID(prosessinstans.getBehandling().getId())
-                .fnr(brukerId)
-                .fom(søknadsperiode.getFom())
-                .tom(søknadsperiode.getTom())
-                .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()))
-                .build());
+        var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
+            .behandlingID(prosessinstans.getBehandling().getId())
+            .fnr(brukerId)
+            .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
 
-        prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);
+        behandling.finnPeriode().ifPresent(periode -> {
+            registeropplysningerRequestBuilder.fom(periode.getFom());
+            registeropplysningerRequestBuilder.tom(periode.getTom());
+        });
 
-        log.info("Hentet registeropplysninger for prosessinstans {}", prosessinstans.getId());
+        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
+        log.info("Hentet registeropplysninger for behandling {}", behandling.getId());
     }
 }

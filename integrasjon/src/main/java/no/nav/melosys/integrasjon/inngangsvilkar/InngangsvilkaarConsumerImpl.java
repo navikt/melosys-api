@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.inngangsvilkar;
 
-import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -17,7 +17,7 @@ public class InngangsvilkaarConsumerImpl implements InngangsvilkaarConsumer {
         this.restTemplate = inngangsVilkaarRestTemplate;
     }
 
-    public InngangsvilkarResponse vurderInngangsvilkår(Land brukersStatsborgerskap, List<String> søknadsland, ErPeriode søknadsperiode) {
+    public InngangsvilkarResponse vurderInngangsvilkår(Land brukersStatsborgerskap, Set<String> søknadsland, ErPeriode søknadsperiode) {
         var request = new VurderInngangsvilkaarRequest(brukersStatsborgerskap.getKode(), søknadsland, søknadsperiode);
         return restTemplate.postForObject("/inngangsvilkaar", request, InngangsvilkarResponse.class);
     }

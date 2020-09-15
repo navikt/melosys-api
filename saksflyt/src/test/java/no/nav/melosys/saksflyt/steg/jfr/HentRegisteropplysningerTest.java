@@ -1,52 +1,91 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import java.time.LocalDate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HentRegisteropplysningerTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class HentRegisteropplysningerTest {
 
     @Mock
     private RegisteropplysningerService registeropplysningerService;
+    @Mock
+    private BehandlingService behandlingService;
+    @Mock
+    private TpsFasade tpsFasade;
 
-    private HentRegisteropplysninger agent;
+    private HentRegisteropplysninger hentRegisteropplysninger;
 
-    @Before
-    public void setUp() {
-        agent = new HentRegisteropplysninger(registeropplysningerService);
+    @Captor
+    private ArgumentCaptor<RegisteropplysningerRequest> requestCaptor;
+
+    private final Behandling behandling = new Behandling();
+    private final String aktørID = "34253";
+    private final String ident = "143545";
+
+    @BeforeEach
+    public void setUp() throws IkkeFunnetException {
+        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, tpsFasade);
+
+        behandling.setId(222L);
+
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        bruker.setAktørId(aktørID);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.getAktører().add(bruker);
+        behandling.setFagsak(fagsak);
+
+        when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
+        when(tpsFasade.hentIdentForAktørId(eq(aktørID))).thenReturn(ident);
     }
 
     @Test
-    public void utførSteg() throws MelosysException {
-        Behandling behandling = new Behandling();
-        behandling.setId(222L);
+    void utfør_behandlingstemaUtsendtArbeidstaker_henterPeriodeFraSøknad() throws MelosysException {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-        Prosessinstans p = new Prosessinstans();
-        p.setBehandling(behandling);
-        p.setData(ProsessDataKey.BRUKER_ID, "99999999991");
-        p.setData(ProsessDataKey.SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now()));
+        Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new SoeknadDokument());
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = periode;
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
-        agent.utfør(p);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
 
-        verify(registeropplysningerService).hentOgLagreOpplysninger(any());
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_VURDER_INNGANGSVILKÅR);
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+
+        assertThat(requestCaptor.getValue())
+            .extracting(RegisteropplysningerRequest::getBehandlingID, RegisteropplysningerRequest::getFnr, RegisteropplysningerRequest::getFom, RegisteropplysningerRequest::getTom)
+            .containsExactly(behandling.getId(), ident, periode.getFom(), periode.getTom());
     }
 }

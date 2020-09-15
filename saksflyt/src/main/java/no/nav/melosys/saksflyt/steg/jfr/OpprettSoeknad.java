@@ -15,15 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_SØKNAD;
 
-/**
- * Oppretter en søknad basert på opplysninger fra journalføring.
- *
- * Transisjoner:
- * JFR_OPPRETT_SOEKNAD -> JFR_OPPRETT_GSAK_SAK eller FEILET_MASKINELT hvis feil
- */
 @Component
 public class OpprettSoeknad implements StegBehandler {
 
@@ -34,7 +27,6 @@ public class OpprettSoeknad implements StegBehandler {
     @Autowired
     public OpprettSoeknad(BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        log.info("OpprettSoeknad initialisert");
     }
 
     @Override
@@ -44,7 +36,6 @@ public class OpprettSoeknad implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         long behandlingID = prosessinstans.getBehandling().getId();
 
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
@@ -53,8 +44,6 @@ public class OpprettSoeknad implements StegBehandler {
         soeknadDokument.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
 
         behandlingsgrunnlagService.opprettSøknadGrunnlag(prosessinstans.getBehandling().getId(), soeknadDokument);
-
-        prosessinstans.setSteg(JFR_OPPRETT_GSAK_SAK);
         log.info("Prosessinstans {} har opprettet søknad for behandling {}.", prosessinstans.getId(), behandlingID);
     }
 }

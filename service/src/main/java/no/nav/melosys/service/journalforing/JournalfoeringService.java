@@ -175,6 +175,7 @@ public class JournalfoeringService {
 
         final Journalpost journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
         final String saksnummer = journalfoeringDto.getSaksnummer();
+        final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
         if (journalpost.mottaksKanalErEessi()) {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
@@ -188,11 +189,22 @@ public class JournalfoeringService {
         valider(journalfoeringDto);
         if (StringUtils.isEmpty(journalfoeringDto.getSaksnummer())) {
             throw new FunksjonellException("Saksnummer mangler");
-        } else if (behandlingstype != null && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
-            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+        } else if (behandlingstype != null) {
+            if (behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
+                throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+            } else if (fagsak.hentAktivBehandling() != null) {
+                throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
+            }
         }
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
+        ProsessType prosessType;
+        if (behandlingstype != null) {
+            prosessType = ProsessType.JFR_NY_BEHANDLING;
+        } else {
+            prosessType = ProsessType.JFR_KNYTT;
+        }
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
