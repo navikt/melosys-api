@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -18,17 +17,16 @@ import no.nav.melosys.saksflyt.steg.iv.AvklarMyndighet;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvklarMyndighetTest {
+@ExtendWith(MockitoExtension.class)
+class AvklarMyndighetTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -36,23 +34,33 @@ public class AvklarMyndighetTest {
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
 
-    private AvklarMyndighet steg;
+    private AvklarMyndighet avklarMyndighet;
 
-    private Prosessinstans p;
+    private Prosessinstans prosessinstans;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
-        steg = new AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
+        avklarMyndighet = new AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
 
-        p = new Prosessinstans();
+        prosessinstans = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("saksnr");
 
         Behandling behandling = lagBehandling(fagsak);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        p.setBehandling(behandling);
-        p.setType(ProsessType.IVERKSETT_VEDTAK);
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
+    }
 
+    @Test
+    void utfør_utenMyndighet_myndighetOpprettes() throws FunksjonellException, TekniskException {
+
+        Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
+
+        avklarMyndighet.utfør(prosessinstans);
+
+        verify(utenlandskMyndighetService).avklarUtenlandskMyndighetSomAktørOgLagre(any(Behandling.class));
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
@@ -72,16 +80,6 @@ public class AvklarMyndighetTest {
         return behandling;
     }
 
-    @Test
-    public void utfør_utenMyndighet_myndighetOpprettes() throws FunksjonellException, TekniskException {
-
-        Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
-
-        steg.utfør(p);
-
-        verify(utenlandskMyndighetService).avklarUtenlandskMyndighetSomAktørOgLagre(any(Behandling.class));
-    }
 
     private static Behandlingsresultat lagBehandlingResultat() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -93,13 +91,5 @@ public class AvklarMyndighetTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         return behandlingsresultat;
-    }
-
-    @Test
-    public void utfør_iverksettVedtakSjekkSteg_forventAvklarArbeidsgiver() throws Exception {
-        Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
-        steg.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_AVKLAR_ARBEIDSGIVER);
     }
 }

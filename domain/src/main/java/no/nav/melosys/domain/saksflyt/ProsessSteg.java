@@ -36,7 +36,6 @@ public enum ProsessSteg implements Kodeverk {
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
     //Anmodning om unntak
-    AOU_AVKLAR_MYNDIGHET("AOU_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AOU_OPPDATER_MEDL("AOU_OPPDATER_MEDL", "Oppdatering av medlemskap med anmodning om unntak"),
     AOU_SEND_BREV("AOU_SEND_BREV", "Send orienteringsbrev og A001 for anmodning om unntak"),
     AOU_SEND_SED("AOU_SEND_SED","Send elektronisk SED A001"),
@@ -65,7 +64,7 @@ public enum ProsessSteg implements Kodeverk {
     //Iverksett Vedtak
     IV_FORKORT_PERIODE("IV_FORKORT_PERIODE", "Legger til endringsgrunn i AVKLARTEFAKTA for hvorfor perioden er forkortet"),
     IV_OPPDATER_RESULTAT("IV_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
-    IV_AVKLAR_MYNDIGHET("IV_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
+    AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     IV_AVKLAR_ARBEIDSGIVER("IV_AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
     IV_OPPDATER_MEDL("IV_OPPDATER_MEDL", "Oppdatering av medlemskap"),
     IV_SEND_BREV("IV_SEND_BREV", "Send brev etter iverksett vedtak"),
@@ -81,7 +80,6 @@ public enum ProsessSteg implements Kodeverk {
     HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
 
     // Videresend søknad
-    VS_AVKLAR_MYNDIGHET("VS_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     VS_SEND_ORIENTERINGSBREV("VS_SEND_ORIENTERINGSBREV", "Opprett orienteringsbrev og brev med vedlagt søknad"),
     VS_SEND_SOKNAD("VS_SEND_SOKNAD", "Opprett journalpost eller SED med søknad som vedlegg"),
     VS_DISTRIBUER_JOURNALPOST("VS_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),

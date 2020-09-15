@@ -39,7 +39,7 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(ProsessType.VIDERESEND_SOKNAD,
             new ProsessFlyt(ProsessType.VIDERESEND_SOKNAD,
-                VS_AVKLAR_MYNDIGHET,
+                AVKLAR_MYNDIGHET,
                 VS_SEND_ORIENTERINGSBREV,
                 VS_SEND_SOKNAD,
                 VS_DISTRIBUER_JOURNALPOST,
@@ -50,7 +50,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(
             ProsessType.ANMODNING_OM_UNNTAK,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK,
-                AOU_AVKLAR_MYNDIGHET,
+                AVKLAR_MYNDIGHET,
                 AOU_OPPDATER_MEDL,
                 AOU_SEND_BREV,
                 AOU_SEND_SED,
@@ -60,8 +60,7 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
-                //IV_VALIDERING,
-                IV_AVKLAR_MYNDIGHET,
+                AVKLAR_MYNDIGHET,
                 IV_AVKLAR_ARBEIDSGIVER,
                 IV_OPPDATER_MEDL,
                 IV_SEND_BREV,
