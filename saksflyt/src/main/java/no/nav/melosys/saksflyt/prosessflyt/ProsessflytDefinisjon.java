@@ -61,7 +61,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
                 AVKLAR_MYNDIGHET,
-                IV_AVKLAR_ARBEIDSGIVER,
+                AVKLAR_ARBEIDSGIVER,
                 IV_OPPDATER_MEDL,
                 IV_SEND_BREV,
                 IV_SEND_SED,

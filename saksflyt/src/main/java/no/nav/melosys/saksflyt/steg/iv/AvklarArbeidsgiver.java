@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_AVKLAR_ARBEIDSGIVER;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AVKLAR_ARBEIDSGIVER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_MEDL;
 import static no.nav.melosys.domain.saksflyt.ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE;
 
@@ -53,17 +53,14 @@ public class AvklarArbeidsgiver implements StegBehandler {
         this.avklarteVirksomheterSystemService = avklarteVirksomheterService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-
-        log.info("AvklarArbeidsgiver initialisert");
     }
 
     public ProsessSteg inngangsSteg() {
-        return IV_AVKLAR_ARBEIDSGIVER;
+        return AVKLAR_ARBEIDSGIVER;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
         ProsessType prosessType = prosessinstans.getType();
