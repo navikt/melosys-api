@@ -76,13 +76,13 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
             log.info("Sendt utpekingsbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(IV_SEND_SED);
+            prosessinstans.setSteg(SEND_VEDTAK_UTLAND);
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
             sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
             sendA1tilSkattOppkreverUtland(behandling, resultat, begrunnelseKode, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(IV_SEND_SED);
+            prosessinstans.setSteg(SEND_VEDTAK_UTLAND);
         } else {
             throw new FunksjonellException("Vedtaksbrev kan ikke sendes for behandling " + behandling.getId());
         }

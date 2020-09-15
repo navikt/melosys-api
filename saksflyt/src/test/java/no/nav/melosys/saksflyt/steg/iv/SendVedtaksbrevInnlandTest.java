@@ -339,7 +339,7 @@ public class SendVedtaksbrevInnlandTest {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SEND_VEDTAK_UTLAND);
     }
 
     @Test
@@ -351,7 +351,7 @@ public class SendVedtaksbrevInnlandTest {
 
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottaker.av(SKATT)), anyLong(), any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SEND_VEDTAK_UTLAND);
     }
 
     @Test
@@ -363,7 +363,7 @@ public class SendVedtaksbrevInnlandTest {
 
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
         verify(dokService, never()).produserDokument(eq(INNVILGELSE_ARBEIDSGIVER), any(), anyLong(), any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SEND_VEDTAK_UTLAND);
     }
 
     @Test
@@ -384,7 +384,7 @@ public class SendVedtaksbrevInnlandTest {
         instans.utfør(prosessinstans);
 
         verify(dokService).produserDokument(eq(ORIENTERING_UTPEKING_UTLAND), eq(Mottaker.av(BRUKER)), anyLong(), any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SEND_VEDTAK_UTLAND);
     }
 
     @Test
@@ -473,14 +473,14 @@ public class SendVedtaksbrevInnlandTest {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SEND_VEDTAK_UTLAND);
     }
 
     @Test
     public final void utfør_PåInnvilgelsesBrevBestemtAv16_1_tilSendSed() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
         lagStegbehandler(prosessinstans.getBehandling()).utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SEND_VEDTAK_UTLAND);
     }
 
     @Test
@@ -503,7 +503,7 @@ public class SendVedtaksbrevInnlandTest {
 
         verify(dokService, atLeastOnce()).produserDokument(any(Produserbaredokumenter.class), eq(Mottaker.av(BRUKER)), anyLong(), captor.capture());
         assertThat(captor.getValue().getBegrunnelseKode()).isEqualTo(Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SEND_VEDTAK_UTLAND);
     }
 
     private static Prosessinstans lagProsessinstans(long behandlingsid) {
