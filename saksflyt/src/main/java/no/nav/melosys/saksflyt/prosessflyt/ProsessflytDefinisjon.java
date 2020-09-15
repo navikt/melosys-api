@@ -42,7 +42,7 @@ public final class ProsessflytDefinisjon {
                 AVKLAR_MYNDIGHET,
                 VS_SEND_ORIENTERINGSBREV,
                 VS_SEND_SOKNAD,
-                VS_DISTRIBUER_JOURNALPOST,
+                DISTRIBUER_JOURNALPOST_UTLAND,
                 IV_STATUS_BEH_AVSL
             )
         );
@@ -65,7 +65,7 @@ public final class ProsessflytDefinisjon {
                 OPPDATER_MEDL_VEDTAK,
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
-                UL_DISTRIBUER_JOURNALPOST,
+                DISTRIBUER_JOURNALPOST_UTLAND,
                 IV_OPPDATER_RESULTAT,
                 IV_OPPRETT_AVGIFTSOPPGAVE,
                 IV_AVSLUTT_BEHANDLING,

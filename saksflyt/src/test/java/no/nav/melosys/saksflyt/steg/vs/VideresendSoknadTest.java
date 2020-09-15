@@ -135,6 +135,7 @@ public class VideresendSoknadTest {
         verify(sedSomBrevService)
             .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A008), any(Landkoder.class), eq(behandling), anyList());
         assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID)).isEqualTo(opprettetJournalpostID);
+        assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.class)).isEqualTo(Landkoder.SE);
     }
 
     private Prosessinstans opprettProsessinstans() {

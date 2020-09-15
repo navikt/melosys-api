@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_RESULTAT;
 
 
 @Component
@@ -67,19 +66,16 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         final var behandling = prosessinstans.getBehandling();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
-        if (behandling.erNorgeUtpekt()) {
-            sendSedA012(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
-        } else if (behandlingsresultat.erUtpeking()) {
-            SendUtlandStatus status = sendSedA003(prosessinstans);
-            if (status == SendUtlandStatus.BREV_SENDT) {
-                prosessinstans.setSteg(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
-                return;
+        if (!behandlingsresultat.erAvslag()) {
+            if (behandling.erNorgeUtpekt()) {
+                sendSedA012(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+            } else if (behandlingsresultat.erUtpeking()) {
+                SendUtlandStatus status = sendSedA003(prosessinstans);
+                log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
+            } else {
+                super.sendUtland(avklarBucType(behandling), prosessinstans);
             }
-        } else {
-            super.sendUtland(avklarBucType(behandling), prosessinstans);
         }
-
-        prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
     }
 
     private SendUtlandStatus sendSedA003(Prosessinstans prosessinstans) throws MelosysException {
@@ -115,7 +111,8 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
             String journalpostID = sedSomBrevService
                 .lagJournalpostForSendingAvSedSomBrev(SedType.A003, utpektLand, behandling);
-            prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+            prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
+            prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
             brevBestiller.bestill(lagBrevBestilling(prosessinstans));
         }

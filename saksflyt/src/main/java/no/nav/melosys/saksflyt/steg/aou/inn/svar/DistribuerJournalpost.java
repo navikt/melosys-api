@@ -13,6 +13,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+//TODO: slettes og erstattes med DistribuerJournalpostUtland.java
 @Component
 public class DistribuerJournalpost extends AbstraktDistribuerJournalpost {
     private final UtenlandskMyndighetService utenlandskMyndighetService;

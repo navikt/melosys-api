@@ -17,29 +17,27 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SendVedtakUtlandTest {
+@ExtendWith(MockitoExtension.class)
+class SendVedtakUtlandTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -52,8 +50,6 @@ public class SendVedtakUtlandTest {
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private SedSomBrevService sedSomBrevService;
-    @Mock
-    private LandvelgerService landvelgerService;
 
     private SendVedtakUtland sendVedtakUtland;
 
@@ -67,13 +63,12 @@ public class SendVedtakUtlandTest {
     private static final long BEHANDLING_ID = 1L;
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
 
         behandling.setId(BEHANDLING_ID);
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(BEHANDLING_ID);
@@ -91,15 +86,15 @@ public class SendVedtakUtlandTest {
     }
 
     @Test
-    public void utfør_artikkel12Suksessfull_statusErOppdaterResultat() throws Exception {
+    void utfør_artikkel12Suksessfull_statusErOppdaterResultat() throws Exception {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), isNull(), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
     }
 
     @Test
-    public void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
+    void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
         sendVedtakUtland.utfør(prosessinstans);
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
@@ -107,17 +102,16 @@ public class SendVedtakUtlandTest {
     }
 
     @Test
-    public void utfør_ForArtikkel11Suksessfull_statusErOppdaterResultat() throws Exception {
+    void utfør_ForArtikkel11Suksessfull_statusErOppdaterResultat() throws Exception {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B);
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), isNull(), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_RESULTAT);
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() throws MelosysException {
+    void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() throws MelosysException {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
 
         Aktoer myndighet = new Aktoer();
@@ -138,7 +132,7 @@ public class SendVedtakUtlandTest {
     }
 
     @Test
-    public void utfør_utpekAnnetLandUtenEessiMottakere_lagerBrev() throws MelosysException {
+    void utfør_utpekAnnetLandUtenEessiMottakere_lagerBrev() throws MelosysException {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
@@ -155,11 +149,10 @@ public class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans);
         verify(sedSomBrevService)
             .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), eq(Landkoder.AT), eq(behandling));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
     }
 
     @Test
-    public void utfør_norgeErUtpektElektronisk_senderA012() throws MelosysException {
+    void utfør_norgeErUtpektElektronisk_senderA012() throws MelosysException {
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         SedDokument sedDokument = new SedDokument();
