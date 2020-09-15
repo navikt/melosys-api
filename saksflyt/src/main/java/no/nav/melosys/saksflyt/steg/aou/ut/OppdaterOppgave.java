@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 
 @Component("AnmodningOmUnntakOppdaterOppgave")
 public class OppdaterOppgave implements StegBehandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OppdaterOppgave.class);
+    private static final Logger log = LoggerFactory.getLogger(OppdaterOppgave.class);
     private static final String ANMODNING_OM_UNNTAK_SENDT = "Anmodning om unntak er sendt utenlandsk trygdemyndighet.";
 
     private final OppgaveService oppgaveService;
@@ -36,7 +36,6 @@ public class OppdaterOppgave implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        LOGGER.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         LocalDate frist = LocalDate.from(prosessinstans.getBehandling().getDokumentasjonSvarfristDato().atZone(ZoneId.systemDefault()).toLocalDate());
 
@@ -50,7 +49,6 @@ public class OppdaterOppgave implements StegBehandler {
 
         oppgaveService.oppdaterOppgave(oppgave.getOppgaveId(), oppgaveOppdatering);
 
-        LOGGER.info("Oppdatert oppgave {} med beskrivelse, og frist som samsvarer med behandlingsfristen", oppgave.getOppgaveId());
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
+        log.info("Oppdatert oppgave {} med beskrivelse, og frist som samsvarer med behandlingsfristen", oppgave.getOppgaveId());
     }
 }

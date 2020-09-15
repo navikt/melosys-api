@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -66,11 +67,11 @@ public class SendUtland extends AbstraktSendUtland {
         Behandling behandling = prosessinstans.getBehandling();
         LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
         behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(TIME_ZONE_ID).toInstant());
+        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         behandlingService.lagre(behandling);
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
 
         sendUtland(BucType.LA_BUC_01, prosessinstans);
-        prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
     }
 
     private Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {

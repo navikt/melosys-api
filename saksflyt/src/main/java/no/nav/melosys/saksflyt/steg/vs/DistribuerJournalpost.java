@@ -39,10 +39,10 @@ public class DistribuerJournalpost extends AbstraktDistribuerJournalpost {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
-        bestillDistribuering(journalpostId, hentUtenlandskMyndighet(prosessinstans.getBehandling()));
-
-        prosessinstans.setSteg(ProsessSteg.IV_STATUS_BEH_AVSL);
+        String distribuerbarJournalpostID = prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID);
+        if (distribuerbarJournalpostID != null) {
+            bestillDistribuering(distribuerbarJournalpostID, hentUtenlandskMyndighet(prosessinstans.getBehandling()));
+        }
     }
 
     private UtenlandskMyndighet hentUtenlandskMyndighet(Behandling behandling) throws MelosysException {

@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -212,80 +211,6 @@ public class FagsakServiceTest {
         verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
             any(), eq("RepresentantOrgnr"), eq(null), eq("Kontaktperson")
         );
-    }
-
-    @Test
-    public void henleggFagsakMedToBehandlingerHenterSisteBehandling() throws TekniskException, FunksjonellException {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = "123456789";
-        Behandling førsteBehandling = new Behandling();
-        Behandling andreBehandling = new Behandling();
-        Fagsak andreBehandlingFagsak = new Fagsak();
-        andreBehandlingFagsak.setSaksnummer("987654321");
-        andreBehandling.setFagsak(andreBehandlingFagsak);
-        long førsteBehandlingId = 999L;
-        long andreBehandlingId = 234L;
-
-        initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId);
-
-        String fritekst = "Fri tale";
-        fagsakService.henleggFagsak(saksnummer, "ANNET", fritekst);
-
-        verify(prosessinstansService).opprettProsessinstansHenleggSak(andreBehandling, Henleggelsesgrunner.ANNET, fritekst);
-
-        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(førsteBehandling), any(), anyString());
-
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(andreBehandlingFagsak.getSaksnummer()));
-    }
-
-    @Test
-    public void henleggFagsakMedToBehandlingerHenterFørsteBehandlingHvisSisteErAvsluttet() throws TekniskException, FunksjonellException {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = "123456789";
-        Behandling førsteBehandling = new Behandling();
-        Fagsak førsteBehandlingFagsak = new Fagsak();
-        førsteBehandlingFagsak.setSaksnummer("987654321");
-        førsteBehandling.setFagsak(førsteBehandlingFagsak);
-        Behandling andreBehandling = new Behandling();
-        andreBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        long førsteBehandlingId = 999L;
-        long andreBehandlingId = 234L;
-
-        initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId);
-
-        String fritekst = "Fri tale";
-        fagsakService.henleggFagsak(saksnummer, "ANNET", fritekst);
-
-        verify(prosessinstansService).opprettProsessinstansHenleggSak(førsteBehandling, Henleggelsesgrunner.ANNET, fritekst);
-
-        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(andreBehandling), any(), anyString());
-
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(førsteBehandlingFagsak.getSaksnummer()));
-    }
-
-    @Test
-    public void henleggFagsakMedToBehandlingerKasterExceptionNårIkkeGyldigHenleggelsesgrunn() throws TekniskException, FunksjonellException {
-        String saksnummer = "123456789";
-        initierFagsakMedToBehandlinger(new Fagsak(), saksnummer, new Behandling(), new Behandling(), 999L, 234L);
-
-        expectedException.expect(TekniskException.class);
-
-        fagsakService.henleggFagsak(saksnummer, "UGYLDIGKODE", "Fri tale");
-
-        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(any(), any(), anyString());
-
-        verify(oppgaveService, never()).ferdigstillOppgaveMedSaksnummer(anyString());
-    }
-
-    private void initierFagsakMedToBehandlinger(Fagsak fagsak, String saksnummer, Behandling førsteBehandling, Behandling andreBehandling, long førsteBehandlingId, long andreBehandlingId) {
-        førsteBehandling.setRegistrertDato(Instant.parse("2000-10-10T10:12:35Z"));
-        førsteBehandling.setId(førsteBehandlingId);
-        Instant registrertDatoForSisteBehandling = Instant.parse("2010-11-11T10:12:35Z");
-        andreBehandling.setId(andreBehandlingId);
-        andreBehandling.setRegistrertDato(registrertDatoForSisteBehandling);
-        fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
-
-        when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(fagsak));
     }
 
     @Test
