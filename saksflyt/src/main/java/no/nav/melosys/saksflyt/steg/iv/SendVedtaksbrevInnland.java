@@ -35,9 +35,6 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 
 
-/**
- * Sender ulike brev basert på behandlingsresultat og lovvalgsbestemmelse.
- */
 @Component
 public class SendVedtaksbrevInnland implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(SendVedtaksbrevInnland.class);
@@ -60,13 +57,11 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_SEND_BREV;
+        return SEND_VEDTAKSBREV_INNLAND;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        // Henter ut behandling med saksopplysninger
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();

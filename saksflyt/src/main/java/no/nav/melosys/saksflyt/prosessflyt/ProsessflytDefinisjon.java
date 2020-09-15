@@ -63,7 +63,7 @@ public final class ProsessflytDefinisjon {
                 AVKLAR_MYNDIGHET,
                 AVKLAR_ARBEIDSGIVER,
                 OPPDATER_MEDL_VEDTAK,
-                IV_SEND_BREV,
+                SEND_VEDTAKSBREV_INNLAND,
                 IV_SEND_SED,
                 UL_DISTRIBUER_JOURNALPOST,
                 IV_OPPDATER_RESULTAT,
