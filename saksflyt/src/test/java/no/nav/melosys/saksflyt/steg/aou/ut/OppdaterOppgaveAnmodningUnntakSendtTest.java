@@ -9,19 +9,19 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OppdaterOppgaveTest {
+@ExtendWith(MockitoExtension.class)
+class OppdaterOppgaveAnmodningUnntakSendtTest {
 
     private static final String OPPGAVE_ID = "123";
     private static final String ANMODNING_UNNTAK_BESKRIVELSE = "Anmodning om unntak er sendt utenlandsk trygdemyndighet.";
@@ -33,13 +33,13 @@ public class OppdaterOppgaveTest {
     @Captor
     private ArgumentCaptor<OppgaveOppdatering> oppgaveCaptor;
 
-    private OppdaterOppgave oppdaterOppgave;
+    private OppdaterOppgaveAnmodningUnntakSendt oppdaterOppgaveAnmodningUnntakSendt;
 
     private final Prosessinstans prosessinstans = new Prosessinstans();
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        oppdaterOppgave = new OppdaterOppgave(oppgaveService);
+        oppdaterOppgaveAnmodningUnntakSendt = new OppdaterOppgaveAnmodningUnntakSendt(oppgaveService);
         Behandling behandling = new Behandling();
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
         behandling.setDokumentasjonSvarfristDato(Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault())));
@@ -52,7 +52,7 @@ public class OppdaterOppgaveTest {
     }
 
     @Test
-    public void oppdaterOppgaveBeskrivelseOgFrist_eksisterendeFristForKort_fristSettes() throws Exception {
+    void oppdaterOppgaveBeskrivelseOgFrist_eksisterendeFristForKort_fristSettes() throws Exception {
         LocalDate enMånedFremITid = LocalDate.now().plusMonths(1L);
 
         Oppgave oppgave = lagOppgave(enMånedFremITid, null);
@@ -60,7 +60,7 @@ public class OppdaterOppgaveTest {
 
         LocalDate toMånederFremITid = LocalDate.now().plusMonths(2L);
 
-        oppdaterOppgave.utfør(prosessinstans);
+        oppdaterOppgaveAnmodningUnntakSendt.utfør(prosessinstans);
         verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(toMånederFremITid);
@@ -68,14 +68,14 @@ public class OppdaterOppgaveTest {
     }
 
     @Test
-    public void oppdaterOppgaveBeskrivelseOgFrist_eksisterendeFristLangNok_fristBeholdes() throws Exception {
+    void oppdaterOppgaveBeskrivelseOgFrist_eksisterendeFristLangNok_fristBeholdes() throws Exception {
         String eksisterendeBeskrivelse = "Eksisterende beskrivelse";
         LocalDate treMånederFremITid = LocalDate.now().plusMonths(3L);
 
         Oppgave oppgave = lagOppgave(treMånederFremITid, eksisterendeBeskrivelse);
         when(oppgaveService.hentOppgaveMedFagsaksnummer(anyString())).thenReturn(oppgave);
 
-        oppdaterOppgave.utfør(prosessinstans);
+        oppdaterOppgaveAnmodningUnntakSendt.utfør(prosessinstans);
         verify(oppgaveService).hentOppgaveMedFagsaksnummer(SAKSNUMMER);
         verify(oppgaveService).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isNull();
@@ -89,5 +89,4 @@ public class OppdaterOppgaveTest {
         oppgaveBuilder.setBeskrivelse(beskrivelse);
         return oppgaveBuilder.build();
     }
-
 }
