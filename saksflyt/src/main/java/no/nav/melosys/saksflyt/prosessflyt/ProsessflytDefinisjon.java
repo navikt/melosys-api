@@ -125,7 +125,7 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 OPPRETT_AVGIFTSOPPGAVE,
-                IV_AVSLUTT_BEHANDLING,
+                AVSLUTT_SAK_OG_BEHANDLING,
                 IV_STATUS_BEH_AVSL
             )
         );
