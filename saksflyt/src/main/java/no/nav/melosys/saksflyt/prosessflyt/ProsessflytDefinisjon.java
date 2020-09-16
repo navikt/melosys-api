@@ -33,7 +33,7 @@ public final class ProsessflytDefinisjon {
             ProsessType.HENLEGG_SAK,
             new ProsessFlyt(ProsessType.HENLEGG_SAK,
                 HS_SEND_BREV,
-                IV_STATUS_BEH_AVSL
+                SOB_BEHANDLING_AVSLUTTET
             )
         );
 
@@ -43,7 +43,7 @@ public final class ProsessflytDefinisjon {
                 VS_SEND_ORIENTERINGSBREV,
                 VS_SEND_SOKNAD,
                 DISTRIBUER_JOURNALPOST_UTLAND,
-                IV_STATUS_BEH_AVSL
+                SOB_BEHANDLING_AVSLUTTET
             )
         );
 
@@ -126,7 +126,7 @@ public final class ProsessflytDefinisjon {
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 OPPRETT_AVGIFTSOPPGAVE,
                 AVSLUTT_SAK_OG_BEHANDLING,
-                IV_STATUS_BEH_AVSL
+                SOB_BEHANDLING_AVSLUTTET
             )
         );
     }
