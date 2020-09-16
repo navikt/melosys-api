@@ -81,7 +81,7 @@ public class AnmodningUnntakServiceTest {
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed);
 
-        verify(anmodningsperiodeService).validerAnmodningsperiodeForBehandling(behandlingID);
+        verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
@@ -101,7 +101,7 @@ public class AnmodningUnntakServiceTest {
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed);
 
-        verify(anmodningsperiodeService).validerAnmodningsperiodeForBehandling(behandlingID);
+        verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
