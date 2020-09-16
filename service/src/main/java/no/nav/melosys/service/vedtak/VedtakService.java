@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -23,6 +24,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -52,6 +54,7 @@ public class VedtakService {
     private final TpsFasade tpsFasade;
     private final RegisteropplysningerService registeropplysningerService;
     private final VedtakKontrollService vedtakKontrollService;
+    private final AvklartefaktaService avklartefaktaService;
 
     public static final int FRIST_KLAGE_UKER = 6;
 
@@ -60,7 +63,7 @@ public class VedtakService {
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
                          TpsFasade tpsFasade, RegisteropplysningerService registeropplysningerService,
-                         VedtakKontrollService vedtakKontrollService) {
+                         VedtakKontrollService vedtakKontrollService, AvklartefaktaService avklartefaktaService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -70,6 +73,7 @@ public class VedtakService {
         this.tpsFasade = tpsFasade;
         this.registeropplysningerService = registeropplysningerService;
         this.vedtakKontrollService = vedtakKontrollService;
+        this.avklartefaktaService = avklartefaktaService;
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
@@ -194,11 +198,12 @@ public class VedtakService {
     public void endreVedtak(Long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+        avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
 
         if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
         }
-        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode, fritekst, fritekstSed);
+        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, fritekst, fritekstSed);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

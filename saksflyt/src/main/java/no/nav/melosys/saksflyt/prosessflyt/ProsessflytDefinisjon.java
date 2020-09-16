@@ -129,6 +129,22 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_AVSLUTTET
             )
         );
+
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
+                HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE,
+                AVKLAR_MYNDIGHET,
+                AVKLAR_ARBEIDSGIVER,
+                OPPDATER_MEDL_VEDTAK,
+                SEND_VEDTAKSBREV_INNLAND,
+                SEND_VEDTAK_UTLAND,
+                DISTRIBUER_JOURNALPOST_UTLAND,
+                OPPRETT_AVGIFTSOPPGAVE,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
+
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {

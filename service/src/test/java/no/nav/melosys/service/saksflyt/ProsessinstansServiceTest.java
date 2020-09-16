@@ -15,7 +15,6 @@ import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -177,15 +176,13 @@ public class ProsessinstansServiceTest {
         String saksbehandler = settInnloggetSaksbehandler();
 
         Behandling behandling = lagBehandling();
-        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE, null, null);
+        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, null, null);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_FORKORT_PERIODE);
         assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
-        assertThat(lagretInstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class)).isEqualTo(Endretperiode.RETURNERT_NORGE);
     }
 
     @Test

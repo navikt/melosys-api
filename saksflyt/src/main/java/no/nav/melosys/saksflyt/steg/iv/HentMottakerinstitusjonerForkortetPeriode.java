@@ -9,9 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -19,7 +17,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
@@ -28,49 +25,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_FORKORT_PERIODE;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE;
 
-/**
- * Legger til avklarte fakta med informasjon om endringsbegrunnelse.
- *
- * Transisjoner:
- * IV_FORKORT_PERIODE -> IV_VALIDERING eller FEILET_MASKINELT hvis feil
- */
 @Component
-public class ForkortPeriode implements StegBehandler {
+public class HentMottakerinstitusjonerForkortetPeriode implements StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(ForkortPeriode.class);
+    private static final Logger log = LoggerFactory.getLogger(HentMottakerinstitusjonerForkortetPeriode.class);
 
-    private final AvklartefaktaService avklartefakteService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
 
     @Autowired
-    public ForkortPeriode(AvklartefaktaService avklartefaktaService, BehandlingsresultatService behandlingsresultatService, @Qualifier("system") EessiService eessiService, LandvelgerService landvelgerService) {
-        this.avklartefakteService = avklartefaktaService;
+    public HentMottakerinstitusjonerForkortetPeriode(BehandlingsresultatService behandlingsresultatService, @Qualifier("system") EessiService eessiService, LandvelgerService landvelgerService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
-        log.info("ForkortPeriode initialisert");
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_FORKORT_PERIODE;
+        return HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
-        Behandling behandling = prosessinstans.getBehandling();
-        Endretperiode endretperiode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);
-
-        avklartefakteService.leggTilBegrunnelse(behandling.getId(), Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
-        avklarMottakerInstitusjoner(prosessinstans, behandling);
-
-        log.info("Oppdatert avklarteFakta for prosessinstans {}.", prosessinstans.getId());
+        avklarMottakerInstitusjoner(prosessinstans, prosessinstans.getBehandling());
+        log.info("Avklarte mottakerinstitusjoner for prosessinstans {}.", prosessinstans.getId());
     }
 
     private void avklarMottakerInstitusjoner(Prosessinstans prosessinstans, Behandling behandling) throws MelosysException {

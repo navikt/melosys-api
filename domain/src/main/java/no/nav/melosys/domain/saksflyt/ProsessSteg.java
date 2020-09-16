@@ -54,7 +54,7 @@ public enum ProsessSteg implements Kodeverk {
     AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET("AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET","Oppdaterer status på sak i sob til avsluttet"),
 
     //Iverksett Vedtak
-    IV_FORKORT_PERIODE("IV_FORKORT_PERIODE", "Legger til endringsgrunn i AVKLARTEFAKTA for hvorfor perioden er forkortet"),
+    HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE("HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE", "Henter mottakerinstitusjon fra tidligere sendt BUC ved forkortet periode"),
     AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AVKLAR_ARBEIDSGIVER("IV_AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
     OPPDATER_MEDL_VEDTAK("OPPDATER_MEDL_VEDTAK","Oppdaterer MEDL etter vedtak"),

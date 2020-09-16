@@ -9,10 +9,7 @@ import java.util.function.Consumer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -26,6 +23,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -68,6 +66,8 @@ public class VedtakServiceTest {
     private RegisteropplysningerService registeropplysningerService;
     @Mock
     private VedtakKontrollService vedtakKontrollService;
+    @Mock
+    private AvklartefaktaService avklartefaktaService;
 
     private VedtakService vedtakService;
 
@@ -83,7 +83,7 @@ public class VedtakServiceTest {
     @Before
     public void setUp() throws Exception {
         vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService);
+            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -276,15 +276,17 @@ public class VedtakServiceTest {
 
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
+        final Endretperiode endretperiodeBegrunnelse = Endretperiode.ENDRINGER_ARBEIDSSITUASJON;
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
         myndighet.setInstitusjonId("SE:SE001");
         behandling.getFagsak().setAktører(Set.of(myndighet));
 
-        vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST", "FRITEKST_SED");
+        vedtakService.endreVedtak(behandlingID, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
 
+        verify(avklartefaktaService).leggTilBegrunnelse(eq(behandlingID), eq(Avklartefaktatyper.AARSAK_ENDRING_PERIODE), eq(endretperiodeBegrunnelse.getKode()));
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperiode.ENDRINGER_ARBEIDSSITUASJON), eq("FRITEKST"), eq("FRITEKST_SED"));
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq("FRITEKST"), eq("FRITEKST_SED"));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }
