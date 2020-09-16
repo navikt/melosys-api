@@ -1,5 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -36,6 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.kodeverk.Utfallregistreringunntak.GODKJENT;
+
 @Service
 public class VedtakService {
     private static final Logger log = LoggerFactory.getLogger(VedtakService.class);
@@ -49,6 +52,8 @@ public class VedtakService {
     private final TpsFasade tpsFasade;
     private final RegisteropplysningerService registeropplysningerService;
     private final VedtakKontrollService vedtakKontrollService;
+
+    public static final int FRIST_KLAGE_UKER = 6;
 
     @Autowired
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
@@ -77,9 +82,9 @@ public class VedtakService {
                            String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        validerBehandlingstypeFattVedtak(behandling);
+        validerKanFattesVedtakAvTema(behandling);
 
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, behandlingsresultatType);
+        oppdaterBehandlingsresultat(behandling, behandlingsresultatType, vedtakstype, fritekst, revurderBegrunnelse);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
@@ -97,6 +102,23 @@ public class VedtakService {
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType,
             fritekst, fritekstSed, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    private void oppdaterBehandlingsresultat(Behandling behandling,
+                                             Behandlingsresultattyper behandlingsresultattype,
+                                             Vedtakstyper vedtakstype,
+                                             String behandlingresultatBegrunnelseFritekst,
+                                             String revurderBegrunnelse) throws FunksjonellException {
+        if (behandling.erNorgeUtpekt()) {
+            behandlingsresultatService.oppdaterUtfallUtpeking(behandling.getId(), GODKJENT);
+        }
+
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        behandlingsresultat.setType(behandlingsresultattype);
+        behandlingsresultat.settVedtakMetadata(vedtakstype, revurderBegrunnelse, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.setBegrunnelseFritekst(behandlingresultatBegrunnelseFritekst);
+        behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        behandlingsresultatService.lagre(behandlingsresultat);
     }
 
     private void validerInnvilgelse(Vedtakstyper vedtakstype,
@@ -148,7 +170,7 @@ public class VedtakService {
         return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
     }
 
-    private void validerBehandlingstypeFattVedtak(Behandling behandling) throws FunksjonellException {
+    private void validerKanFattesVedtakAvTema(Behandling behandling) throws FunksjonellException {
         if (!behandling.kanResultereIVedtak()) {
             throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstema " + behandling.getTema().getBeskrivelse());
         }

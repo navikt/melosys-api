@@ -25,6 +25,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +51,8 @@ class SendVedtakUtlandTest {
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private SedSomBrevService sedSomBrevService;
+    @Mock
+    private UtpekingService utpekingService;
 
     private SendVedtakUtland sendVedtakUtland;
 
@@ -82,7 +85,7 @@ class SendVedtakUtlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService,
-            brevBestiller, saksopplysningerService, sedSomBrevService);
+            brevBestiller, saksopplysningerService, sedSomBrevService, utpekingService);
     }
 
     @Test

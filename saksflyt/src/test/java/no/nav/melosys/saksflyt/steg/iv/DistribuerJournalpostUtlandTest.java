@@ -7,7 +7,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,9 +33,8 @@ class DistribuerJournalpostUtlandTest {
     private DistribuerJournalpostUtland distribuerJournalpostUtland;
 
     @BeforeEach
-    public void settOpp() throws TekniskException {
+    public void settOpp() {
         distribuerJournalpostUtland = new DistribuerJournalpostUtland(doksysFasade, utenlandskMyndighetService);
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Landkoder.SE))).thenReturn(lagUtenlandskMyndighet());
     }
 
     @Test
@@ -45,6 +43,7 @@ class DistribuerJournalpostUtlandTest {
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "12345");
         prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.SE);
         prosessinstans.setBehandling(new Behandling());
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Landkoder.SE))).thenReturn(lagUtenlandskMyndighet());
 
         distribuerJournalpostUtland.utfør(prosessinstans);
 

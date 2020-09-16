@@ -50,7 +50,6 @@ public class DistribuerJournalpostUtland implements StegBehandler {
                 distribuerbarJournalpost, mottakerLand, prosessinstans.getBehandling().getId());
 
             bestillDistribuering(distribuerbarJournalpost, utenlandskMyndighet);
-            prosessinstans.setSteg(ProsessSteg.IV_OPPDATER_RESULTAT);
         }
     }
 

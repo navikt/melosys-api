@@ -23,6 +23,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final BrevBestiller brevBestiller;
     private final SaksopplysningerService saksopplysningerService;
     private final SedSomBrevService sedSomBrevService;
+    private final UtpekingService utpekingService;
 
     @Autowired
     public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
@@ -48,12 +50,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
                             SaksopplysningerService saksopplysningerService,
-                            SedSomBrevService sedSomBrevService) {
+                            SedSomBrevService sedSomBrevService, UtpekingService utpekingService) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
         this.saksopplysningerService = saksopplysningerService;
         this.sedSomBrevService = sedSomBrevService;
+        this.utpekingService = utpekingService;
     }
 
     @Override
@@ -70,6 +73,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             if (behandling.erNorgeUtpekt()) {
                 sendSedA012(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
             } else if (behandlingsresultat.erUtpeking()) {
+                utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
                 SendUtlandStatus status = sendSedA003(prosessinstans);
                 log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
             } else {

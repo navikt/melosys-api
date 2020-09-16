@@ -20,7 +20,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -44,6 +43,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.service.vedtak.VedtakService.FRIST_KLAGE_UKER;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -122,83 +122,103 @@ public class VedtakServiceTest {
     @Test
     public void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() throws MelosysException {
         var mottakerinstitusjoner = Set.of("AB:CDEF123");
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgaveId("1");
-        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
+        final Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
+        final String behandlingsresultatFritekst = "FRITEKST HEIHEI";
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        behandlingsresultat.setType(resultatType);
 
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
         when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_04.name()), eq(Landkoder.SE.getKode())))
             .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));
 
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", "FRITEKST_SED", mottakerinstitusjoner, vedtakstype, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, behandlingsresultatFritekst, "FRITEKST_SED", mottakerinstitusjoner, vedtakstype, null);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq("FRITEKST_SED"), eq(mottakerinstitusjoner), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq(behandlingsresultatFritekst), eq("FRITEKST_SED"), eq(mottakerinstitusjoner), eq(vedtakstype), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+
+        assertThat(behandlingsresultat)
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(resultatType, behandlingsresultatFritekst);
+        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(vedtakstype, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
     }
 
     @Test
     public void fattVedtak_utenMottakerLandErIkkeEessiReady_fatterVedtak() throws MelosysException {
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgaveId("1");
-        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
+        final Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
+        final String behandlingsresultatFritekst = "FRITEKST HEIHEI";
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        behandlingsresultat.setType(resultatType);
 
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", "FRITEKST_SED", null, vedtakstype, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, behandlingsresultatFritekst, "FRITEKST_SED", null, vedtakstype, null);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq("FRITEKST"), eq("FRITEKST_SED"), anySet(), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq(behandlingsresultatFritekst), eq("FRITEKST_SED"), anySet(), eq(vedtakstype), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+
+        assertThat(behandlingsresultat)
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(resultatType, behandlingsresultatFritekst);
+        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(vedtakstype, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
     }
 
     @Test
     public void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() throws MelosysException {
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgaveId("1");
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
+        final Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
+        final String behandlingsresultatFritekst = "FRITEKST HEIHEI";
+        final Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
-        behandlingsresultat.setType(resultatType);
 
-        vedtakService.fattVedtak(behandlingID, resultatType, "FRITEKST", "FRITEKST_SED", null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq("FRITEKST"), eq("FRITEKST_SED"), anySet(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+        vedtakService.fattVedtak(behandlingID, resultatType, behandlingsresultatFritekst, "FRITEKST_SED", null, vedtakstype, null);
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq(behandlingsresultatFritekst), eq("FRITEKST_SED"), anySet(), eq(vedtakstype), isNull());
+
+        assertThat(behandlingsresultat)
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(resultatType, behandlingsresultatFritekst);
+        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(vedtakstype, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
     }
 
     @Test
     public void fattVedtak_erAvslagManglendeOpplysninger_fatterVedtak() throws MelosysException {
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgaveId("1");
-        Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
-        behandlingsresultat.setType(resultatType);
+        final Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
+        final Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
 
-        vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, vedtakstype, null);
         verify(prosessinstansService)
-            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anySet(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anySet(), eq(vedtakstype), isNull());
+
+        assertThat(behandlingsresultat)
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(resultatType, null);
+        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(vedtakstype, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+
     }
 
     @Test
     public void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws MelosysException {
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgaveId("1");
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         behandlingsresultat.setType(resultatType);
